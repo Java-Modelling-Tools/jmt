@@ -389,8 +389,12 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			field.setEditable(false);
 			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));
 			label.setLabelFor(field);
+			// If measure is for a server type, use that for station name
+			String stationName = sd.getServerTypeStationName(sd.getMeasureServerTypeKey(sd.getMeasureKeys().get(measureIndex)));
+			if (stationName == null) {
+				stationName = md.getStationName(measureIndex);
+			}
 			// If station name is undefined, disables its fields
-			String stationName = md.getStationName(measureIndex);
 			if (stationName != null && !stationName.equals("")) {
 				if (sd.isFJMeasure(md.getMeasureType(measureIndex))) {
 					field.setText(stationName + " (Fork Join)");

@@ -77,7 +77,7 @@ import org.ejml.data.DMatrixRMaj;
  * Frame or Dialog and initial Distribution (can be null) and will collect
  * chosen distribution with <code>getResult()</code> method.
  * </p>
- * 
+ *
  * @author Bertoli Marco Date: 29-giu-2005 Time: 11.31.07
  */
 public class DistributionsEditor extends JMTDialog {
@@ -133,7 +133,7 @@ public class DistributionsEditor extends JMTDialog {
 	 * Returns a new instance of DistributionsEditor, given parent container
 	 * (used to find top level Dialog or Frame to create this dialog as modal).
 	 * The container is instantiated as not recursive
-	 * 
+	 *
 	 * @param parent
 	 *            any type of container contained in a Frame or Dialog
 	 * @param initial
@@ -141,14 +141,14 @@ public class DistributionsEditor extends JMTDialog {
 	 * @return new instance of DistributionsEditor
 	 */
 	public static DistributionsEditor getInstance(Container parent,
-			Distribution initial) {
+																								Distribution initial) {
 		return getInstance(parent, initial, false);
 	}
 
 	/**
 	 * Returns a new instance of DistributionsEditor, given parent container
 	 * (used to find top level Dialog or Frame to create this dialog as modal)
-	 * 
+	 *
 	 * @param parent
 	 *            any type of container contained in a Frame or Dialog
 	 * @param initial
@@ -159,7 +159,7 @@ public class DistributionsEditor extends JMTDialog {
 	 * @return new instance of DistributionsEditor
 	 */
 	public static DistributionsEditor getInstance(Container parent,
-			Distribution initial, boolean recursive) {
+																								Distribution initial, boolean recursive) {
 		// Finds top level Dialog or Frame to invoke correct constructor
 		while (!(parent instanceof Frame || parent instanceof Dialog)) {
 			parent = parent.getParent();
@@ -175,7 +175,7 @@ public class DistributionsEditor extends JMTDialog {
 	/**
 	 * Uses reflection to return a Map of distributions. Search's key is
 	 * distribution name and value is the Class of found distribution
-	 * 
+	 *
 	 * @return found distributions
 	 */
 	protected static Map<String, Class<? extends Distribution>> findDistributions() {
@@ -191,7 +191,7 @@ public class DistributionsEditor extends JMTDialog {
 	 * Uses reflection to return a Map of distributions which are allowed
 	 * to be nested. Search's key is distribution name and value is the Class of
 	 * found distribution
-	 * 
+	 *
 	 * @return found nested distributions
 	 */
 	protected static Map<String, Class<? extends Distribution>> findNestedDistributions() {
@@ -209,7 +209,7 @@ public class DistributionsEditor extends JMTDialog {
 	/**
 	 * Returns Distribution selected in this dialog or initial one if cancel
 	 * button was pressed
-	 * 
+	 *
 	 * @return Selected distribution if okay button was pressed, initial
 	 *         otherwise. If this dialog has not been shown yet, returns initial
 	 *         value too.
@@ -224,14 +224,14 @@ public class DistributionsEditor extends JMTDialog {
 	/**
 	 * Builds a new Distribution Editor Dialog. This dialog is designed to be
 	 * modal.
-	 * 
+	 *
 	 * @param owner
 	 *            owner Dialog for this dialog.
 	 * @param initial
 	 *            Reference to initial distribution to be shown
 	 */
 	public DistributionsEditor(Dialog owner, Distribution initial,
-			boolean recursive) {
+														 boolean recursive) {
 		super(owner, true);
 		this.recursive = recursive;
 		initData(initial);
@@ -241,14 +241,14 @@ public class DistributionsEditor extends JMTDialog {
 	/**
 	 * Builds a new Distribution Editor Dialog. This dialog is designed to be
 	 * modal.
-	 * 
+	 *
 	 * @param owner
 	 *            owner Frame for this dialog.
 	 * @param initial
 	 *            Reference to initial distribution to be shown
 	 */
 	public DistributionsEditor(Frame owner, Distribution initial,
-			boolean recursive) {
+														 boolean recursive) {
 		super(owner, true);
 		this.recursive = recursive;
 		initData(initial);
@@ -309,7 +309,7 @@ public class DistributionsEditor extends JMTDialog {
 	protected KeyFocusAdapter parameterListener = new KeyFocusAdapter() {
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * jmt.framework.gui.listeners.KeyFocusAdapter#updateValues(java.awt
 		 * .event.ComponentEvent)
@@ -331,7 +331,7 @@ public class DistributionsEditor extends JMTDialog {
 	protected KeyFocusAdapter cmListener = new KeyFocusAdapter() {
 		/*
 		 * (non-Javadoc)
-		 * 
+		 *
 		 * @see
 		 * jmt.framework.gui.listeners.KeyFocusAdapter#updateValues(java.awt
 		 * .event.ComponentEvent)
@@ -370,11 +370,11 @@ public class DistributionsEditor extends JMTDialog {
 				refreshView();
 			} catch (InstantiationException ex) {
 				System.out
-				.println("Error: Error instantiating selected Distribution");
+						.println("Error: Error instantiating selected Distribution");
 				ex.printStackTrace();
 			} catch (IllegalAccessException ex) {
 				System.out
-				.println("Error: Error accessing to selected Distribution");
+						.println("Error: Error accessing to selected Distribution");
 				ex.printStackTrace();
 			}
 		}
@@ -445,9 +445,9 @@ public class DistributionsEditor extends JMTDialog {
 	 * Action performed when user clicks on Edit-Button at a Distribution
 	 * Parameter Opens a new Distribution Editor to change and edit distribution
 	 * parameters
-	 * 
+	 *
 	 * @author Peter Parapatics
-	 * 
+	 *
 	 */
 	protected class EditButtonAction extends AbstractAction {
 
@@ -463,7 +463,7 @@ public class DistributionsEditor extends JMTDialog {
 		public void actionPerformed(ActionEvent e) {
 			DistributionsEditor editor = DistributionsEditor.getInstance(
 					getParent(), (Distribution) current.getParameter(key)
-					.getValue(), true);
+							.getValue(), true);
 			// Sets editor window title
 			editor.setTitle("Editing "
 					+ current.getParameter(key).getDescription());
@@ -481,7 +481,7 @@ public class DistributionsEditor extends JMTDialog {
 	// --- Initialize data structure and layout --------------------------------------------------------
 	/**
 	 * Initialize this dialog data structures
-	 * 
+	 *
 	 * @param initial
 	 *            Reference to initial distribution to be shown
 	 */
@@ -1001,7 +1001,7 @@ public class DistributionsEditor extends JMTDialog {
 	 * Helper method to extract the probability components the dialog's
 	 * components. These components are the probability labels and the
 	 * probability TextFields.
-	 * 
+	 *
 	 * @return a Vector of probability related components
 	 * @author Federico Dal Castello
 	 */
@@ -1101,7 +1101,7 @@ public class DistributionsEditor extends JMTDialog {
 							}
 							// fully disables the probability text field
 							((JTextField) probComp)
-							.setEditable(enableComponent);
+									.setEditable(enableComponent);
 						}
 					}
 				}
@@ -1126,10 +1126,10 @@ public class DistributionsEditor extends JMTDialog {
 
 	/**
 	 * Class encapsulation methods to render Burst parameters
-	 * 
+	 *
 	 * @author Peter Parapatics
 	 * @author Federico Dal Castello
-	 * 
+	 *
 	 */
 	protected class BurstRenderer {
 
@@ -1146,7 +1146,7 @@ public class DistributionsEditor extends JMTDialog {
 		/**
 		 * Renders the border and the position of the given panel and adds it to
 		 * the scrolled panel
-		 * 
+		 *
 		 * @param name
 		 *            The name of the Interval
 		 * @param panel
@@ -1161,7 +1161,7 @@ public class DistributionsEditor extends JMTDialog {
 			// Set black border around the interval.
 			// The name of the interval is displayed on the border
 			panel.setBorder(BorderFactory.createTitledBorder(BorderFactory
-					.createMatteBorder(1, 1, 1, 1, Color.BLACK), name,
+							.createMatteBorder(1, 1, 1, 1, Color.BLACK), name,
 					TitledBorder.DEFAULT_JUSTIFICATION,
 					TitledBorder.DEFAULT_POSITION, new Font("Dialog",
 							Font.BOLD, 12), Color.BLACK));
@@ -1171,7 +1171,7 @@ public class DistributionsEditor extends JMTDialog {
 
 		/**
 		 * Adds a distribution to the given panel
-		 * 
+		 *
 		 * @param name
 		 *            the name to be displayed on the label before the
 		 *            distribution
@@ -1182,7 +1182,7 @@ public class DistributionsEditor extends JMTDialog {
 		 *            the panel to which the distribution should be added
 		 */
 		protected void addDistribution(String name, int key,
-				JPanel intervalPanel) {
+																	 JPanel intervalPanel) {
 			JLabel distributionNameLabel = new JLabel(name);
 
 			// Add the name of the distribution on a single line
@@ -1237,7 +1237,7 @@ public class DistributionsEditor extends JMTDialog {
 		/**
 		 * Add a probability to an interval Panel If the probability is for
 		 * interval B the value is displayed as 1-probability
-		 * 
+		 *
 		 * @param intervalPanel
 		 *            the intervalPanel
 		 * @param intervalA
@@ -1278,7 +1278,7 @@ public class DistributionsEditor extends JMTDialog {
 
 		/**
 		 * Adds a Round-Robin checkbox to an interval panel
-		 * 
+		 *
 		 * @param intervalPanel
 		 *            the interval panel
 		 * @author Federico Dal Castello

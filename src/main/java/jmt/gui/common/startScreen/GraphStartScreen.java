@@ -65,7 +65,7 @@ import jmt.manual.PDFViewer;
  * <p>Title: Graph StartScreen</p>
  * <p>Description: A new StartScreen that displays a graph with all possible choices to help
  * user chosing the right application</p>
- * 
+ *
  * @author Bertoli Marco
  *         Date: 18-ott-2005
  *         Time: 12.34.22
@@ -105,20 +105,20 @@ public class GraphStartScreen extends JMTFrame {
 	private static final String	URL_DOCUMENTATION_ONLINE = "http://jmt.sf.net/Documentation.html";
 	// Content for logo panel
 	private static final String FONT_TYPE = "Arial";
-	public static final String HTML_CONTENT_TITLE = 
+	public static final String HTML_CONTENT_TITLE =
 			String.format("<html><body><b><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
-					"<font face='%s' size='-1'>Project Coordinators: G.Casale, G.Serazzi</font>" +
-					"</body></html>",
+							"<font face='%s' size='-1'>Project Coordinators: G.Casale, G.Serazzi</font>" +
+							"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
-	public static final String HTML_CONTENT_TITLE_HREF = 
+	public static final String HTML_CONTENT_TITLE_HREF =
 			String.format("<html><body><bIMG_SUITEICON><font face='%s' size='+2'>JMT - Java Modelling Tools v.%s</font></b><br>" +
-					"<font face='%s' size='-1'>Project Coordinators: G.Casale, G.Serazzi<br><br>" +
-					"<b>Home Page:</b> <a href=\"http://jmt.sf.net\">http://jmt.sf.net</a></font>" +
-					"</body></html>",
+							"<font face='%s' size='-1'>Project Coordinators: G.Casale, G.Serazzi<br><br>" +
+							"<b>Home Page:</b> <a href=\"http://jmt.sf.net\">http://jmt.sf.net</a></font>" +
+							"</body></html>",
 					FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
-	public static final String HTML_POLI = 
+	public static final String HTML_POLI =
 			String.format("<html><body><font face='%s' size='%s'><b>DEIB<br>" +
-					"Politecnico di Milano<br>Italy</b></font></body></html>", 
+							"Politecnico di Milano<br>Italy</b></font></body></html>",
 					FONT_TYPE, FONT_SIZE);
 
 	/**
@@ -343,7 +343,7 @@ public class GraphStartScreen extends JMTFrame {
 		about.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				AboutDialogFactory.showJMT(GraphStartScreen.this);	
+				AboutDialogFactory.showJMT(GraphStartScreen.this);
 			}
 		});
 	}

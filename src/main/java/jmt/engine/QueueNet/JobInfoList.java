@@ -20,22 +20,23 @@ package jmt.engine.QueueNet;
 import java.util.List;
 import java.util.Map;
 
+import jmt.engine.NodeSections.Server;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 
 /**
- * <p><b>Name:</b> JobInfoList</p> 
- * <p><b>Description:</b> 
+ * <p><b>Name:</b> JobInfoList</p>
+ * <p><b>Description:</b>
  * A JobInfoList is a list used to update raw sampled performance counters of a node or section.
  * </p>
  * <p><b>Date:</b> 18/giu/2009
  * <b>Time:</b> 17:00:44</p>
  * @author Bertoli Marco
  * @version 1.0
- * 
- * Modified by Ashanka (May 2010): 
- * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for capturing 
+ *
+ * Modified by Ashanka (May 2010):
+ * Patch: Multi-Sink Perf. Index
+ * Description: Added new Performance index for capturing
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -386,26 +387,54 @@ public interface JobInfoList {
 	 */
 	public abstract JobInfo removeLast(JobClass jobClass);
 
+
+	//Michalis
+
+	JobInfo getFirstJob();
+
+	JobInfo getLastJob();
+
+	/**
+	 * Returns ith job in queue
+	 * @param i - indec
+	 */
+	public JobInfo getJob(int i);
+
+	/**
+	 * Adds serverTypes used for a job
+	 * @param job_id
+	 * @param busyServers
+	 */
+	public void addUsedServersForJob(int job_id, List<Server.BusyServer> busyServers);
+
+	/**
+	 * Removes job when finished
+	 * @param job_id
+	 */
+	public void removeUsedServerForJob(int job_id);
+
+	//
+
 	/**
 	 * Analyzes the queue length for the specified job class.
 	 * jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeQueueLength(JobClass jobClass, Measure measurement);
+	public abstract void analyzeQueueLength(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the response time for the specified job class.
 	 * jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeResponseTime(JobClass jobClass, Measure measurement);
+	public abstract void analyzeResponseTime(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the residence time for the specified job class.
 	 * jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement);
+	public abstract void analyzeResidenceTime(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the arrival rate for the specified job class.
@@ -419,14 +448,14 @@ public interface JobInfoList {
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeThroughput(JobClass jobClass, InverseMeasure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the utilization for the specified job class.
 	 * jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeUtilization(JobClass jobClass, Measure measurement);
+	public abstract void analyzeUtilization(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the utilization of a join for the specified job class.
@@ -447,35 +476,35 @@ public interface JobInfoList {
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeDropRate(JobClass jobClass, InverseMeasure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the balking rate for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the reneging rate for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the retrial attempts rate for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated inverse measure.
 	 */
-	public abstract void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement);
+	public abstract void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the retrial orbit size for the specified job class.
 	 * @param jobClass Specified job class. If null, analysis will be job class independent.
 	 * @param measurement Reference to the associated measure.
 	 */
-	public abstract void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement);
+	public abstract void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId);
 
 	/**
 	 * Analyzes the retrial orbit time for the specified job class.
@@ -604,6 +633,12 @@ public interface JobInfoList {
 	public abstract void setNumberOfServers(int numberOfServers);
 
 	/**
+	 * Sets the number of servers required by a class. This parameter is used to scale utilization.
+	 * @param serverNumRequired Number of servers required by a specific class, getting by id.
+	 */
+	public void setServerNumRequired(int[] serverNumRequired);
+
+	/**
 	 * Sets the network system. This parameter is used to get simulation time.
 	 * @param netSystem Network system.
 	 */
@@ -619,7 +654,7 @@ public interface JobInfoList {
 
 	/**
 	 *  Methods to calculate cache performance measures
-         */
+	 */
 	public void analyzeCacheHitRate(JobClass jobClass, Measure measurement);
 	public int getJobsTotalCacheMissCount();
 	public int getJobsTotalCacheHitCount();

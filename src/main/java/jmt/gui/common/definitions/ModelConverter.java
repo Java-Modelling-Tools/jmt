@@ -111,11 +111,11 @@ public class ModelConverter {
 			classKeys[i] = key;
 		}
 
-		routerKey = output.addStation("Router", CommonConstants.STATION_TYPE_ROUTER);
+		routerKey = output.addStation("Router", CommonConstants.STATION_TYPE_ROUTER, 1, new ArrayList<ServerType>());
 
 		// Creates source, sink and router (if needed)
 		if (input.isClosed() || input.isMixed()) {
-			refRouterKey = output.addStation("RefStation", CommonConstants.STATION_TYPE_ROUTER);
+			refRouterKey = output.addStation("RefStation", CommonConstants.STATION_TYPE_ROUTER, 1, new ArrayList<ServerType>());
 			// Makes connection between refRouter and router
 			output.setConnected(refRouterKey, routerKey, true);
 			output.setConnected(routerKey, refRouterKey, true);
@@ -125,8 +125,8 @@ public class ModelConverter {
 		}
 
 		if (input.isOpen() || input.isMixed()) {
-			sourceKey = output.addStation("Source", CommonConstants.STATION_TYPE_SOURCE);
-			sinkKey = output.addStation("Sink", CommonConstants.STATION_TYPE_SINK);
+			sourceKey = output.addStation("Source", CommonConstants.STATION_TYPE_SOURCE, 1, new ArrayList<ServerType>());
+			sinkKey = output.addStation("Sink", CommonConstants.STATION_TYPE_SINK, 1, new ArrayList<ServerType>());
 			//Makes connections between source, sink and router
 			output.setConnected(sourceKey, routerKey, true);
 			output.setConnected(routerKey, sinkKey, true);
@@ -143,7 +143,7 @@ public class ModelConverter {
 			switch (type) {
 				case ExactConstants.STATION_DELAY:
 					// Delay
-					key = output.addStation(name, CommonConstants.STATION_TYPE_DELAY);
+					key = output.addStation(name, CommonConstants.STATION_TYPE_DELAY, 1, new ArrayList<ServerType>());
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
 						Exponential exp = new Exponential();
@@ -153,7 +153,7 @@ public class ModelConverter {
 					break;
 				case ExactConstants.STATION_LI:
 					// Load independent
-					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
+					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList<ServerType>());
 					output.setStationNumberOfServers(key, new Integer(servers));
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {
@@ -165,7 +165,7 @@ public class ModelConverter {
 				case ExactConstants.STATION_LD:
 					// Load dependent - this is single class only, but here
 					// we support multiclass too (future extensions).
-					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER);
+					key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList<ServerType>());
 					output.setStationNumberOfServers(key, new Integer(servers));
 					// Sets distribution for each class
 					for (int j = 0; j < classKeys.length; j++) {

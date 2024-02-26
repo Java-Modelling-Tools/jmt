@@ -51,7 +51,7 @@ import org.w3c.dom.Element;
  * @version 13-dic-2004 17.34.35
  * Modified by Bertoli Marco 01-jan-2006 --> BugFixed for linux
  * 8-mar-2006 Added support for global measures
- *       
+ *
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
  * Description: Added new Performance index for capturing 
@@ -162,7 +162,7 @@ public class XMLSimulationOutput extends SimulationOutput {
 			elem.setAttribute("nodeType", "");
 		} else {
 			NetNode node = measure.getNetwork().getNode(measure.getNodeName());
-			if (node.isBlockingRegionInputStation()) {
+			if (node != null && node.isBlockingRegionInputStation()) {
 				// region measure
 				elem.setAttribute("station", node.getBlockingRegionInputStation().getName());
 				elem.setAttribute("nodeType", SimConstants.NODE_TYPE_REGION);

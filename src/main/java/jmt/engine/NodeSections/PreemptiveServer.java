@@ -18,14 +18,21 @@
 
 package jmt.engine.NodeSections;
 
+import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 
 public class PreemptiveServer extends Server {
 
-	public PreemptiveServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-			QueuePutStrategy[] preemptiveStrategies) {
-	    super(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies);
-    }
+	public PreemptiveServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,  QueuePutStrategy[] preemptiveStrategies) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, null, null, null, null);
+	}
+
+	public PreemptiveServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies, QueuePutStrategy[] preemptiveStrategies, Integer[] serverNumRequired, String[] serverNames,
+													Integer[] serverNumOfServers,
+													Object[] serverCompatibilities,
+													String schedulingPolicy) throws NetException {
+		super(numberOfServers,numberOfVisitsPerClass,serviceStrategies,preemptiveStrategies,serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
+	}
 
 }

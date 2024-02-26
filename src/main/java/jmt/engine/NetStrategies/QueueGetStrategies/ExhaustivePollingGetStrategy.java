@@ -20,8 +20,6 @@ package jmt.engine.NetStrategies.QueueGetStrategies;
 
 import jmt.engine.QueueNet.*;
 
-import java.util.List;
-
 /**
  * Implements Exhaustive Polling Get Strategy
  * @author Ahmed Salem
@@ -49,6 +47,11 @@ public class ExhaustivePollingGetStrategy extends PollingGetStrategy {
 
 		currentQueue = (currentQueue + 1) % jobClassList.size();
 		jobClass = jobClassList.get(currentQueue);
+		return null;
+	}
+
+	@Override
+	public Job get(JobInfoList queue, NetNode ownerNode) {
 		return null;
 	}
 

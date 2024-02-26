@@ -208,6 +208,26 @@ public interface SimulationDefinition {
 	public void setMeasureClass(Object classKey, Object measureKey);
 
 	/**
+	 * Returns search key for server type this measure refers to.
+	 * @param measureKey search key for measure
+	 * @return server type key for class
+	 */
+	public Object getMeasureServerTypeKey(Object measureKey);
+
+	/**
+	 * Changes server type for specified measure, given its search key
+	 * @param serverTypeKey new server type key
+	 * @param measureKey measure search key
+	 */
+	public void setMeasureServerTypeKey(Object serverTypeKey, Object measureKey);
+
+	/**
+	 * This method returns a server type name with respect to its station
+	 * given its key
+	 */
+	public String getServerTypeStationName(Object serverTypeKey);
+
+	/**
 	 * Returns value for alpha parameter of a specific measure, given its search key.
 	 * @param measureKey search key for station
 	 * @return value of alpha parameter

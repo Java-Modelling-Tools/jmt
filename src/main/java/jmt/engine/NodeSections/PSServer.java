@@ -39,8 +39,8 @@ import jmt.engine.QueueNet.PSJobInfoList;
 import jmt.engine.simEngine.RemoveToken;
 
 /**
- * <p><b>Name:</b> PSServer</p> 
- * <p><b>Description:</b> 
+ * <p><b>Name:</b> PSServer</p>
+ * <p><b>Description:</b>
  * This class implements a multi-class processor sharing server.
  * </p>
  * <p><b>Date:</b> 04/ott/2009
@@ -72,12 +72,12 @@ public class PSServer extends ServiceSection {
 	private double messageSendTime;
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) {
-		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null);
+		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);
 	}
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-			PSStrategy[] psStrategies, Double[] serviceWeights) {
-		this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights);
+									PSStrategy[] psStrategies, Double[] serviceWeights) {
+		this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights, null, null, null, null, null);
 	}
 
 	/**
@@ -90,7 +90,12 @@ public class PSServer extends ServiceSection {
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
 	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
-			ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights) {
+									ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
+									Integer[] serverNumRequired,
+									String[] serverNames,
+									Integer[] serverNumOfServers,
+									Object[] serverCompatibilities,
+									String schedulingPolicy) {
 		super(false);
 		this.numberOfServers = numberOfServers.intValue();
 		if (maxRunningJobs == null) {
@@ -125,18 +130,18 @@ public class PSServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			double sum = 0.0;
-			for (int i = 0; i < jobClasses.size(); i++) {
-				JobClass jobClass = jobClasses.get(i);
-				sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
-			}
-			return sum;
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id);
+			case PROPERTY_ID_UTILIZATION:
+				double sum = 0.0;
+				for (int i = 0; i < jobClasses.size(); i++) {
+					JobClass jobClass = jobClasses.get(i);
+					sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+				}
+				return sum;
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: psJobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id);
 		}
 	}
 
@@ -144,13 +149,13 @@ public class PSServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: psJobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id, jobClass);
+			case PROPERTY_ID_UTILIZATION:
+				return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: psJobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id, jobClass);
 		}
 	}
 
@@ -165,7 +170,7 @@ public class PSServer extends ServiceSection {
 			maxRunningJobs = Math.min(maxRunningJobs, stationCapacity);
 		}
 		jobClasses = getJobClasses();
-		jobsList = psJobsList = new PSJobInfoList(jobClasses.size());
+		jobsList = psJobsList = new PSJobInfoList(jobClasses,getClassCompatibilities(),getOwnerNode().getName(), getServerTypes());
 		psJobsList.setNetSystem(node.getNetSystem());
 		psJobsList.setNumberOfServers(numberOfServers);
 		serviceFractions = new double[jobClasses.size()];
@@ -178,54 +183,54 @@ public class PSServer extends ServiceSection {
 
 		switch (message.getEvent()) {
 
-		case NetEvent.EVENT_START:
-			break;
+			case NetEvent.EVENT_START:
+				break;
 
-		case NetEvent.EVENT_JOB:
-			if (isMine(message)) {
-				performServiceTimes(messageSendTime);
-				handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
-				messageToken = null;
-				sendForward(job, 0.0);
-			} else {
-				if (maxRunningJobs > 0 && busyCounter >= maxRunningJobs) {
+			case NetEvent.EVENT_JOB:
+				if (isMine(message)) {
+					performServiceTimes(messageSendTime);
+					handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
+					messageToken = null;
+					sendForward(job, 0.0);
+				} else {
+					if (maxRunningJobs > 0 && busyCounter >= maxRunningJobs) {
+						return MSG_NOT_PROCESSED;
+					}
+					if (messageToken != null) {
+						removeMessage(messageToken);
+						performServiceTimes(messageSendTime);
+						messageToken = null;
+					}
+					// To support LD strategy, update jobInfoList before obtaining serviceTime
+					PSJobInfo jobInfo = new PSJobInfo(job);
+					handleJobInfoList(jobInfo, PSEvent.JOB_IN);
+					double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+					jobInfo.setServiceTime(serviceTime);
+					jobInfo.setResidualServiceTime(serviceTime);
+					busyCounter++;
+					if (maxRunningJobs <= 0 || busyCounter < maxRunningJobs) {
+						sendBackward(NetEvent.EVENT_ACK, job, 0.0);
+					}
+				}
+				updateServiceFractions();
+				serviceJobs();
+				break;
+
+			case NetEvent.EVENT_ACK:
+				if (busyCounter <= 0) {
 					return MSG_NOT_PROCESSED;
 				}
-				if (messageToken != null) {
-					removeMessage(messageToken);
-					performServiceTimes(messageSendTime);
-					messageToken = null;
-				}
-				// To support LD strategy, update jobInfoList before obtaining serviceTime
-				PSJobInfo jobInfo = new PSJobInfo(job);
-				handleJobInfoList(jobInfo, PSEvent.JOB_IN);
-				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
-				jobInfo.setServiceTime(serviceTime);
-				jobInfo.setResidualServiceTime(serviceTime);
-				busyCounter++;
-				if (maxRunningJobs <= 0 || busyCounter < maxRunningJobs) {
+				if (maxRunningJobs > 0 && busyCounter >= maxRunningJobs) {
 					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 				}
-			}
-			updateServiceFractions();
-			serviceJobs();
-			break;
+				busyCounter--;
+				break;
 
-		case NetEvent.EVENT_ACK:
-			if (busyCounter <= 0) {
+			case NetEvent.EVENT_STOP:
+				break;
+
+			default:
 				return MSG_NOT_PROCESSED;
-			}
-			if (maxRunningJobs > 0 && busyCounter >= maxRunningJobs) {
-				sendBackward(NetEvent.EVENT_ACK, job, 0.0);
-			}
-			busyCounter--;
-			break;
-
-		case NetEvent.EVENT_STOP:
-			break;
-
-		default:
-			return MSG_NOT_PROCESSED;
 		}
 
 		return MSG_PROCESSED;

@@ -54,8 +54,8 @@ import org.w3c.dom.Element;
 public class Measure {
 
 	/**This is the object which receives the collected samples, computes the mean value
-	and determines when the simulation must be stopped (confidence interval reached or
-	too many analyzed samples*/
+	 and determines when the simulation must be stopped (confidence interval reached or
+	 too many analyzed samples*/
 	protected DynamicDataAnalyzer analyzer;
 
 	/** name of the measure*/
@@ -341,6 +341,14 @@ public class Measure {
 	 */
 
 	public synchronized boolean update(double sample, double weight) {
+		return update(sample,weight,null, 0);
+	}
+
+	public synchronized boolean update(double sample, double weight, String nodeName){
+		return update(sample,weight,nodeName, 0);
+	}
+
+	public synchronized boolean update(double sample, double weight, String nodeName, int numOfVisits) {
 		/*
 		The old version has this problem:
 		Even if the confidence requirements have been reached, measure is updated until ALL
@@ -401,7 +409,7 @@ public class Measure {
 		}
 
 		if (measureType == SimConstants.RESIDENCE_TIME) {
-			scaleMeasureWithVisitRatio();
+			scaleMeasureWithVisitRatio(nodeName, numOfVisits);
 		}
 
 		return false;
@@ -499,9 +507,17 @@ public class Measure {
 	 * @param sampleJob sample job.
 	 */
 	public void updateSampleJob(Job sampleJob) {
+		updateSampleJob(sampleJob,null);
+	}
+
+	public void updateSampleJob(Job sampleJob, String nodeName) {
 		if (collectedPairs == null) {
 			collectedPairs = new HashSet<Pair<NetNode, JobClass>>();
 		}
+		if(nodeName == null){
+			nodeName = this.nodeName;
+		}
+
 		NetNode node = network.getNode(nodeName);
 		JobClass jobClass = network.getJobClass(jobClassName);
 		Pair<NetNode, JobClass> pair = null;
@@ -521,9 +537,12 @@ public class Measure {
 	 * the visit ratio = number of accesses to this station / number of
 	 * accesses to the reference station)
 	 */
-	private void scaleMeasureWithVisitRatio() {
+	private void scaleMeasureWithVisitRatio(String nodeName, int numOfVisits) {
 		scaleFactor = 1.0;
 		try {
+			if(nodeName == null){
+				nodeName = this.nodeName;
+			}
 			NetNode node = network.getNode(nodeName);
 			NodeSection inputSection = node.getSection(NodeSection.INPUT);
 			NodeSection outputSection = node.getSection(NodeSection.OUTPUT);
@@ -549,7 +568,11 @@ public class Measure {
 				}
 
 				if (globalVisits > 0) {
-					scaleFactor = (double) localVisits / globalVisits;
+					if(numOfVisits > 0){
+						scaleFactor = (double) numOfVisits / globalVisits;
+					}else {
+						scaleFactor = (double) localVisits / globalVisits;
+					}
 				}
 			} else {
 				int localVisitsSum = 0;
@@ -566,7 +589,11 @@ public class Measure {
 				globalVisitsSum = totalVisitCount.intValue();
 
 				if (globalVisitsSum > 0) {
-					scaleFactor = (double) localVisitsSum / globalVisitsSum;
+					if(numOfVisits > 0){
+						scaleFactor = (double) numOfVisits / globalVisitsSum;
+					}else {
+						scaleFactor = (double) localVisitsSum / globalVisitsSum;
+					}
 				}
 			}
 		} catch (NetException ne) {

@@ -57,7 +57,7 @@ public class NetSystem {
 
 	public NetSystem() {
 		simSystem = new SimSystem();
-		engine = new MersenneTwister(); 
+		engine = new MersenneTwister();
 		jobCounter = 0;
 	}
 
@@ -229,7 +229,7 @@ public class NetSystem {
 
 	/** Gets a node from its id. Searches the id between all the networks
 	 *
-	 * @param id the id of the node
+	 * @param Id the id of the node
 	 * @return searched node
 	 */
 	public final NetNode getNode(int Id) {
@@ -265,22 +265,22 @@ public class NetSystem {
 				}
 
 				switch (network.getBehaviour()) {
-				case QueueNetwork.BEHAVIOUR_ABORT:
-					abort();
-					break;
-				case QueueNetwork.BEHAVIOUR_STOP:
-					stop();
-					break;
-				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT:
-					if (count == num) {
-						abort(network);
-					}
-					break;
-				case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
-					if (count == num) {
-						stop(network);
-					}
-					break;
+					case QueueNetwork.BEHAVIOUR_ABORT:
+						abort();
+						break;
+					case QueueNetwork.BEHAVIOUR_STOP:
+						stop();
+						break;
+					case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_ABORT:
+						if (count == num) {
+							abort(network);
+						}
+						break;
+					case QueueNetwork.BEHAVIOUR_OBTAIN_ALL_MEASURES_THEN_STOP:
+						if (count == num) {
+							stop(network);
+						}
+						break;
 				}
 			}
 		}

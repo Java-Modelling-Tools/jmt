@@ -22,6 +22,7 @@ import jmt.common.AutoCheck;
 import jmt.engine.QueueNet.Job;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.NetNode;
 
 /**
  * Use this class to implement a specific queue get strategy. A queue get
@@ -36,6 +37,14 @@ public abstract class QueueGetStrategy implements AutoCheck {
 	 * @return Job selected and removed from the queue.
 	 */
 	public abstract Job get(JobInfoList queue);
+
+	/**
+	 * This method should be overridden to implement a specific job strategy.
+	 * @param queue Job queue.
+	 * @param ownerNode ownerNode
+	 * @return Job selected and removed from the queue.
+	 */
+	public abstract Job get(JobInfoList queue, NetNode ownerNode);
 
 	/**
 	 * This method should be overridden to implement a specific job strategy.

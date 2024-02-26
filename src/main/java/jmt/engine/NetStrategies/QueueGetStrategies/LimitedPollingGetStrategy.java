@@ -20,8 +20,6 @@ package jmt.engine.NetStrategies.QueueGetStrategies;
 
 import jmt.engine.QueueNet.*;
 
-import java.util.List;
-
 /**
  * Implements Limited Polling Get Strategy
  * @author Ahmed Salem
@@ -55,6 +53,11 @@ public class LimitedPollingGetStrategy extends PollingGetStrategy {
 		currentQueue = (currentQueue + 1) % jobClassList.size();
 		jobClass = jobClassList.get(currentQueue);
 		count = 0;
+		return null;
+	}
+
+	@Override
+	public Job get(JobInfoList queue, NetNode ownerNode) {
 		return null;
 	}
 

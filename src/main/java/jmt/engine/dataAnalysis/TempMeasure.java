@@ -91,7 +91,7 @@ public class TempMeasure {
 			nodeType = "";
 		} else {
 			NetNode node = measure.getNetwork().getNode(measure.getNodeName());
-			if (node.isBlockingRegionInputStation()) {
+			if (node != null && node.isBlockingRegionInputStation()) {
 				nodeName = node.getBlockingRegionInputStation().getName();
 				nodeType = SimConstants.NODE_TYPE_REGION;
 			} else {
@@ -224,5 +224,4 @@ public class TempMeasure {
 	public String getLogFileName() {
 		return logFileName;
 	}
-
 }

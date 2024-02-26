@@ -29,11 +29,11 @@ import jmt.framework.gui.graph.MeasureValue;
  * specified time intervals, and final results. It will not read simulator's generated XML
  * as it provides only final results but will rely on TempMeasure data structures provided
  * by <code>DispatcherJSIMschema</code>.</p>
- * 
+ *
  * @author Bertoli Marco
  *         Date: 23-set-2005
  *         Time: 15.57.43
- *         
+ *
  * Modified by Ashanka (May 2010): 
  * Patch: Multi-Sink Perf. Index 
  * Description: Added new Performance index for capturing 

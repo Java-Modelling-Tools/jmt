@@ -147,6 +147,8 @@ public class Mediator implements GuiInterface {
 
 	private AbstractJmodelAction downloadDefaultTemplates;
 
+	private AbstractJmodelAction serverCompatibilities;
+
 	private JmtJGraph graph;
 	private JSIMGraphMain mainWindow;
 
@@ -271,7 +273,7 @@ public class Mediator implements GuiInterface {
 		JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());
 		// Builds an array with all actions to be put in the toolbar
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
-				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, null,
+				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities, null,
 				switchToExactSolver, null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate};
 		toolbar.populateToolbar(actions);
 		return toolbar;
@@ -293,7 +295,7 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Define menu
-		action = new MenuAction("Define", new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, null, editDefaults });
+		action = new MenuAction("Define", new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities, null, editDefaults });
 		menu.addMenu(action);
 
 		// Solve menu
@@ -790,6 +792,8 @@ public class Mediator implements GuiInterface {
 		editSimParams.setEnabled(false);
 
 		useTemplate.setEnabled(false);
+
+		serverCompatibilities.setEnabled(false);
 
 		editPAParams.setEnabled(false);
 		takeScreenShot.setEnabled(false);
@@ -1576,19 +1580,19 @@ public class Mediator implements GuiInterface {
 		updateStationPositions();
 		int status = modelLoader.saveModel(model, mainWindow, openedArchive);
 		switch (status) {
-		case ModelLoader.SUCCESS:
-			model.resetSaveState();
-			mainWindow.updateTitle(openedArchive.getName());
-			if (resultsWindow instanceof ResultsWindow) {
-				((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-			}
-			if (resultsWindow instanceof PAResultsWindow) {
-				((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-			}
-			break;
-		case ModelLoader.FAILURE:
-			showErrorMessage(modelLoader.getFailureMotivation());
-			break;
+			case ModelLoader.SUCCESS:
+				model.resetSaveState();
+				mainWindow.updateTitle(openedArchive.getName());
+				if (resultsWindow instanceof ResultsWindow) {
+					((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+				}
+				if (resultsWindow instanceof PAResultsWindow) {
+					((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+				}
+				break;
+			case ModelLoader.FAILURE:
+				showErrorMessage(modelLoader.getFailureMotivation());
+				break;
 		}
 	}
 
@@ -1601,20 +1605,20 @@ public class Mediator implements GuiInterface {
 		updateStationPositions();
 		int status = modelLoader.saveModel(model, mainWindow, null);
 		switch (status) {
-		case ModelLoader.SUCCESS:
-			model.resetSaveState();
-			openedArchive = modelLoader.getSelectedFile();
-			mainWindow.updateTitle(openedArchive.getName());
-			if (resultsWindow instanceof ResultsWindow) {
-				((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-			}
-			if (resultsWindow instanceof PAResultsWindow) {
-				((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
-			}
-			break;
-		case ModelLoader.FAILURE:
-			showErrorMessage(modelLoader.getFailureMotivation());
-			break;
+			case ModelLoader.SUCCESS:
+				model.resetSaveState();
+				openedArchive = modelLoader.getSelectedFile();
+				mainWindow.updateTitle(openedArchive.getName());
+				if (resultsWindow instanceof ResultsWindow) {
+					((ResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+				}
+				if (resultsWindow instanceof PAResultsWindow) {
+					((PAResultsWindow) resultsWindow).updateTitle(openedArchive.getName());
+				}
+				break;
+			case ModelLoader.FAILURE:
+				showErrorMessage(modelLoader.getFailureMotivation());
+				break;
 		}
 	}
 
@@ -1811,7 +1815,7 @@ public class Mediator implements GuiInterface {
 
 				for (int j = 0; j < overlapping.length; j++) {
 					resetOverLapping++;
-					// resetOverLapping is inserted for an abnormal behavior, 
+					// resetOverLapping is inserted for an abnormal behavior,
 					// if you disable this variable you can see that the tool
 					// stops and "for cycle" will be repeated infinite times
 					if (resetOverLapping > 50) {
@@ -1849,7 +1853,7 @@ public class Mediator implements GuiInterface {
 							&& overlapping[j] != cell
 							&& !isInGroup(overlapping[j])
 							&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j], false),
-									GraphConstants.getBounds(cell.getAttributes()))
+							GraphConstants.getBounds(cell.getAttributes()))
 							&& ((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)
 							&& (!((JmtEdge) overlapping[j]).getIsBezier())) {
 						/** **/
@@ -1857,7 +1861,7 @@ public class Mediator implements GuiInterface {
 						boolean access2 = false;
 						if (cell instanceof SourceCell
 								&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j], false),
-										GraphConstants.getBounds(((SourceCell) cell).getAttributes()))) {
+								GraphConstants.getBounds(((SourceCell) cell).getAttributes()))) {
 							if (((JmtEdge) overlapping[j]).getSource() != cell.getChildAt(0)) {
 								ArrayList<Point2D> intersectionPoints = ((JmtEdge) overlapping[j]).getIntersectionVertexPoint();
 								Point2D tmp = (intersectionPoints.get(0));
@@ -1985,7 +1989,7 @@ public class Mediator implements GuiInterface {
 									&& ((JmtEdge) overlapping[j]).getTarget() != cell.getChildAt(0)
 									&& ((JmtEdge) overlapping[j]).getTarget() != cell.getChildAt(1)
 									&& ((JmtEdge) overlapping[j]).intersects((EdgeView) (graph.getGraphLayoutCache()).getMapping(overlapping[j],
-											false), GraphConstants.getBounds(cell.getAttributes()))) {
+									false), GraphConstants.getBounds(cell.getAttributes()))) {
 								access = access2 = false;
 								ArrayList<Point2D> intersectionPoints = ((JmtEdge) overlapping[j]).getIntersectionVertexPoint();
 								if ((intersectionPoints == null) || intersectionPoints.size() <= 0) {
@@ -2696,8 +2700,8 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_STRATEGIES_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
 			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, each FCFS server must have the same service\n"
-					+ "strategy for each class, but mixed service strategies (i.e. both the load dependent and\nindependent) are found at "
-					+ stationName + ".\nDo you want to edit the service strategies of " + stationName + "?\n\n", "Mixed service strategies found",
+							+ "strategy for each class, but mixed service strategies (i.e. both the load dependent and\nindependent) are found at "
+							+ stationName + ".\nDo you want to edit the service strategies of " + stationName + "?\n\n", "Mixed service strategies found",
 					JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
@@ -2717,8 +2721,8 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
 			int k = JOptionPane.showConfirmDialog(null, "According to BCMP theorem hypothesis, each FCFS server must have the same mean service\n"
-					+ "time for each class. If the service strategies are load dependent, the mean service time in each\nrange has to be the same "
-					+ "for each class.\nDo you want to edit the mean service times of " + stationName + "?\n\n", "Mixed mean service times found",
+							+ "time for each class. If the service strategies are load dependent, the mean service time in each\nrange has to be the same "
+							+ "for each class.\nDo you want to edit the mean service times of " + stationName + "?\n\n", "Mixed mean service times found",
 					JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				showStationParameterPanel(relatedStation, StationParameterPanel.SERVICE_SECTION, null);
@@ -2744,7 +2748,7 @@ public class Mediator implements GuiInterface {
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.PARAMETRIC_ANALYSIS_NOT_AVAILABLE_WARNING)) {
 			int k = JOptionPane.showConfirmDialog(null, "A parametric analysis model was defined, but no parametric analysis is currently available\n"
-					+ "since the simulation model is changed. It is only possible to execute normal simulation.\nDo you want to continue anyway?\n\n",
+							+ "since the simulation model is changed. It is only possible to execute normal simulation.\nDo you want to continue anyway?\n\n",
 					"Parametric analysis not available", JOptionPane.WARNING_MESSAGE);
 			if (k == JOptionPane.OK_OPTION) {
 				model.setParametricAnalysisEnabled(false);
@@ -2776,7 +2780,7 @@ public class Mediator implements GuiInterface {
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_BETWEEN_FORK_JOIN_WARNING)) {
 			String stationName = model.getStationName(relatedStation);
 			JOptionPane.showMessageDialog(null, stationName + " is located between fork/join. On any firing of a transition between fork/join,\n"
-					+ "the number of output tasks for each class should be equal to the number of input tasks for\nthat class.\n",
+							+ "the number of output tasks for each class should be equal to the number of input tasks for\nthat class.\n",
 					"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 		else if ((problemType == ModelChecker.WARNING_PROBLEM) && (problemSubType == ModelChecker.TRANSITION_CONSTANT_ENABLING_DEGREE_WARNING)) {

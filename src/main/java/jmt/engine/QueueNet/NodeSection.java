@@ -18,6 +18,8 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.engine.NodeSections.Server;
+import jmt.engine.simEngine.Simulation;
 import jmt.engine.NodeSections.Linkage;
 import jmt.engine.NodeSections.Queue;
 import org.apache.commons.math3.util.Pair;
@@ -28,6 +30,8 @@ import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.random.Parameter;
 import jmt.engine.simEngine.RemoveToken;
+
+import java.util.List;
 
 /**
  * This class implements a generic section of a NetNode.
@@ -162,6 +166,10 @@ public abstract class NodeSection {
 	}
 
 	//TODO: alternatively one can override particular components
+	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws NetException{
+		analyze(measureName, jobClass, measurement, false, 0);
+	}
+
 	/**
 	 * Analyzes a measure in the node section. Override this method to analyze a
 	 * measure depending on the node section implementation. Note that the first
@@ -171,34 +179,34 @@ public abstract class NodeSection {
 	 * @param measurement Set of measure to be activated.
 	 * @throws NetException
 	 */
-	public void analyze(int name, JobClass jobClass, Measure measurement) throws NetException {
+	public void analyze(int name, JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId) throws NetException {
 		switch (name) {
-		case SimConstants.LIST_NUMBER_OF_JOBS:
-			jobsList.analyzeUtilization(jobClass, measurement);
-			break;
-		case SimConstants.LIST_NUMBER_OF_JOBS_IN_SERVICE:
-			jobsList.analyzeEffectiveUtilization(jobClass, measurement);
-			break;
-		case SimConstants.LIST_RESIDENCE_TIME:
-			jobsList.analyzeResidenceTime(jobClass, measurement);
-			break;
-		case SimConstants.LIST_ARRIVAL_RATE:
-			jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);
-			break;
-		case SimConstants.LIST_THROUGHPUT:
-			jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement);
-			break;
-		case SimConstants.LIST_DROP_RATE:
-			jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement);
-			break;
-		case SimConstants.CACHE_HIT_RATE:
-			jobsList.analyzeCacheHitRate(jobClass, measurement);
-			break;
-		case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
-			jobsList.analyzeNumberOfServers(measurement);
-			break;
-		default:
-			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			case SimConstants.LIST_NUMBER_OF_JOBS:
+				jobsList.analyzeUtilization(jobClass, measurement, isServerType, serverTypeId);
+				break;
+			case SimConstants.LIST_NUMBER_OF_JOBS_IN_SERVICE:
+				jobsList.analyzeEffectiveUtilization(jobClass, measurement);
+				break;
+			case SimConstants.LIST_RESIDENCE_TIME:
+				jobsList.analyzeResidenceTime(jobClass, measurement, isServerType, serverTypeId);
+				break;
+			case SimConstants.LIST_ARRIVAL_RATE:
+				jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);
+				break;
+			case SimConstants.LIST_THROUGHPUT:
+				jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);
+				break;
+			case SimConstants.LIST_DROP_RATE:
+				jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);
+				break;
+			case SimConstants.CACHE_HIT_RATE:
+				jobsList.analyzeCacheHitRate(jobClass, measurement);
+				break;
+			case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
+				jobsList.analyzeNumberOfServers(measurement);
+				break;
+			default:
+				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 
@@ -208,8 +216,8 @@ public abstract class NodeSection {
 	 */
 	void setOwnerNode(NetNode ownerNode) throws NetException {
 		this.ownerNode = ownerNode;
-		jobsList = new LinkedJobInfoList(getJobClasses().size());
-		jobsList.setNetSystem(ownerNode.getNetSystem()); 
+		jobsList = new LinkedJobInfoList(getJobClasses(), getClassCompatibilities(), getOwnerNode().getName(), getServerTypes());
+		jobsList.setNetSystem(ownerNode.getNetSystem());
 		nodeLinked(ownerNode);
 	}
 
@@ -240,6 +248,18 @@ public abstract class NodeSection {
 		return ownerNode.getJobClasses();
 	}
 
+	/** Returns class compatibilities for specific node
+	 */
+	public Boolean[][] getClassCompatibilities(){
+		return ownerNode.getClassCompatibilities();
+	}
+
+	/** Returns server types for specific node
+	 */
+	public List<Server.ServerType> getServerTypes(){
+		return ownerNode.getServerTypes();
+	}
+
 	/**
 	 * Gets the job info list of this section.
 	 * @return Job info list.
@@ -257,14 +277,14 @@ public abstract class NodeSection {
 	 */
 	public int getIntSectionProperty(int id) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_ARRIVING_JOBS:
-			return jobsList.getJobsIn();
-		case PROPERTY_ID_DEPARTING_JOBS:
-			return jobsList.getJobsOut();
-		case PROPERTY_ID_RESIDENT_JOBS:
-			return jobsList.size();
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			case PROPERTY_ID_ARRIVING_JOBS:
+				return jobsList.getJobsIn();
+			case PROPERTY_ID_DEPARTING_JOBS:
+				return jobsList.getJobsOut();
+			case PROPERTY_ID_RESIDENT_JOBS:
+				return jobsList.size();
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -279,14 +299,14 @@ public abstract class NodeSection {
 	 */
 	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		case PROPERTY_ID_ARRIVING_JOBS:
-			return jobsList.getJobsInPerClass(jobClass);
-		case PROPERTY_ID_DEPARTING_JOBS:
-			return jobsList.getJobsOutPerClass(jobClass);
-		case PROPERTY_ID_RESIDENT_JOBS:
-			return jobsList.size(jobClass);
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			case PROPERTY_ID_ARRIVING_JOBS:
+				return jobsList.getJobsInPerClass(jobClass);
+			case PROPERTY_ID_DEPARTING_JOBS:
+				return jobsList.getJobsOutPerClass(jobClass);
+			case PROPERTY_ID_RESIDENT_JOBS:
+				return jobsList.size(jobClass);
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -300,15 +320,15 @@ public abstract class NodeSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		NetSystem netSystem = ownerNode.getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getLastJobSojournTime();
-		case PROPERTY_ID_UTILIZATION:
-			return jobsList.size();
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTime() / netSystem.getTime();
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			case PROPERTY_ID_RESIDENCE_TIME:
+				return jobsList.getLastJobSojournTime();
+			case PROPERTY_ID_UTILIZATION:
+				return jobsList.size();
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: jobsList.getTotalSojournTime() / netSystem.getTime();
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -324,15 +344,15 @@ public abstract class NodeSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		NetSystem netSystem = ownerNode.getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_RESIDENCE_TIME:
-			return jobsList.getLastJobSojournTimePerClass(jobClass);
-		case PROPERTY_ID_UTILIZATION:
-			return jobsList.size(jobClass);
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime();
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			case PROPERTY_ID_RESIDENCE_TIME:
+				return jobsList.getLastJobSojournTimePerClass(jobClass);
+			case PROPERTY_ID_UTILIZATION:
+				return jobsList.size(jobClass);
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime();
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -340,14 +360,13 @@ public abstract class NodeSection {
 	 * Gets a parameter type property of this node. Note that the first 256
 	 * identifiers are reserved by NodeSection class.
 	 * @param id Property identifier.
-	 * @param jobClass jobClass.
 	 * @return Property value.
 	 * @throws NetException if the requested property is not available.
 	 */
 	public Parameter getParameter(int id) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -362,8 +381,8 @@ public abstract class NodeSection {
 	 */
 	public Parameter getParameter(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -376,8 +395,8 @@ public abstract class NodeSection {
 	 */
 	public Object getObject(int id) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -392,8 +411,8 @@ public abstract class NodeSection {
 	 */
 	public Object getObject(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -406,8 +425,8 @@ public abstract class NodeSection {
 	 */
 	public boolean isEnabled(int id) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 
@@ -422,8 +441,8 @@ public abstract class NodeSection {
 	 */
 	public boolean isEnabled(int id, JobClass jobClass) throws NetException {
 		switch (id) {
-		default:
-			throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
+			default:
+				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, "required property is not available.");
 		}
 	}
 

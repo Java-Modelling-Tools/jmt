@@ -19,11 +19,13 @@
 package jmt.engine.QueueNet;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 
 import jmt.common.exception.CachePairClassNotMatchException;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
+import jmt.engine.simEngine.Simulation;
 
 /**
  * This class implements a queue network.

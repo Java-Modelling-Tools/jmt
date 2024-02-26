@@ -53,6 +53,85 @@ public interface StationDefinition {
 	 */
 	public Vector<Object> getStationKeys();
 
+	//Michalis
+
+	/**
+	 * This method returns server type key given name and its station
+	 */
+	public Object getServerTypeKey(Object stationKey, String name);
+
+	/**
+	 * This method sets scheduling policy of a station
+	 */
+	public void setStationSchedulingPolicy(Object stationKey, String schedulingPolicy);
+
+	/**
+	 * This method returns scheduling policy of a station
+	 */
+	public String getStationSchedulingPolicy(Object stationKey);
+
+	/**
+	 * This method returns the number of different server types
+	 */
+	public int getNumberOfDifferentServerTypes(Object stationKey);
+
+	/**
+	 * This method returns all server types of station
+	 */
+	public List<ServerType> getServerTypes(Object StationKey);
+
+	/**
+	 * This method returns a serverType given its station key
+	 * and its order amongst the server types of that station
+	 */
+	public ServerType getInfoForServerType(Object stationKey, int index);
+
+
+	/**
+	 * This method returns a server type name with respect to its station
+	 * given its key
+	 */
+	public String getServerTypeStationName(Object serverTypeKey);
+
+	/**
+	 * This method returns Server Type given its key
+	 */
+	public ServerType getServerType(Object serverTypeKey);
+
+
+	/**
+	 * This method returns true if it is a serverTypeKey
+	 */
+	public boolean isServerTypeKey(Object serverTypeKey);
+
+
+	/**
+	 * This method adds a server type
+	 */
+	public void addServerType(Object StationKey, int change);
+
+	/**
+	 * This method deletes a server type
+	 */
+	public void deleteServerType(Object StationKey, int index);
+
+	/**
+	 * This method updates number of servers of different server types in station
+	 */
+	public void updateNumOfServers(Object stationKey, int newTotal);
+
+	/**
+	 * This method returns the names of different server types
+	 */
+	public List<String> getServerTypeNames(Object stationKey);
+
+	///
+
+	/**
+	 * This method returns the key set of server Types.
+	 */
+	public Vector<Object> getServerTypeKeys();
+
 	/**
 	 * This method returns the key set of sources.
 	 */
@@ -293,7 +372,7 @@ public interface StationDefinition {
 	 * @param type type of the new station.
 	 * @return search key for the new new station.
 	 */
-	public Object addStation(String name, String type);
+	public Object addStation(String name, String type, int nextServerNum, List<ServerType> servers);
 
 	/**
 	 * Deletes a station from the model, given the search key.
@@ -388,7 +467,7 @@ public interface StationDefinition {
 	 * Sets impatience parameter associated with given station queue section.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param impatience parameter for station and class.
+	 * @param impatienceParameter parameter for station and class.
 	 */
 	void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter);
 
@@ -460,6 +539,26 @@ public interface StationDefinition {
 	 * @param distribution: distribution to be set for specified class and station.
 	 */
 	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution);
+
+	/**
+	 * Returns service time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return server number required for specified class and station.
+	 */
+	public Integer getServerNumRequired(Object stationKey, Object classKey);
+
+	/**
+	 * Sets service time distribution for class and station, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will
+	 * be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverNumRequired: server number required to be set for specified class and station.
+	 */
+	public void setServerNumRequired(Object stationKey, Object classKey, Integer serverNumRequired);
 
 	/**
 	 * Returns switchover period distribution for class and station, given their search keys.
@@ -586,13 +685,13 @@ public interface StationDefinition {
 
 	/**
 	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
-	 * @param selector: either "path", "delim", or "autoAppend" 
+	 * @param selector: either "path", "delim", or "autoAppend"
 	 */
 	public String getLoggingGlbParameter(String selector);
 
 	/**
 	 * Sets logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
-	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend" 
+	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend"
 	 * @param value: String to assign to variable named by selector.
 	 */
 	public void setLoggingGlbParameter(String selector, String value);

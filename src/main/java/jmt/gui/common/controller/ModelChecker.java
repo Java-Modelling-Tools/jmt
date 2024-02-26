@@ -302,7 +302,7 @@ public class ModelChecker implements CommonConstants {
 	 * @param isToJMVA true if model must be converted to jmva, false otherwise
 	 */
 	public ModelChecker(ClassDefinition class_def, StationDefinition station_def, SimulationDefinition simulation_def, BlockingRegionDefinition brd,
-			boolean isToJMVA) {
+											boolean isToJMVA) {
 		this.class_def = class_def;
 		this.station_def = station_def;
 		this.simulation_def = simulation_def;
@@ -1512,7 +1512,11 @@ public class ModelChecker implements CommonConstants {
 					thisMeasureStationName = station_def.getStationName(thisMeasureStation);
 				}
 			}
-			String thisMeasureDescription = thisMeasureType + "_" + thisMeasureClassName + "_" + thisMeasureStationName;
+			Object thisMeasureServerType = simulation_def.getMeasureServerTypeKey(thisMeasure);
+			if (thisMeasureServerType == null) {
+				thisMeasureServerType = "";
+			}
+			String thisMeasureDescription = thisMeasureType + "_" + thisMeasureClassName + "_" + thisMeasureStationName + "_" + thisMeasureServerType;
 			if (!measuresAlreadyChecked.contains(thisMeasureDescription)) {
 				measuresAlreadyChecked.add(thisMeasureDescription);
 			} else {
@@ -2535,7 +2539,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	private void searchForStationBetweenForkJoinAux(String type, Object start, Object source,
-			int nest, Map<Object, Boolean> reachable, Vector<Object> found) {
+																									int nest, Map<Object, Boolean> reachable, Vector<Object> found) {
 		Vector<Object> forwardStations = station_def.getForwardConnections(source);
 		if (station_def.getStationType(source).equals(STATION_TYPE_FORK)) {
 			nest++;

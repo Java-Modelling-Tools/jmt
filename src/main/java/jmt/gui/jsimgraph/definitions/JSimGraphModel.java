@@ -27,6 +27,7 @@ import org.jgraph.graph.GraphConstants;
 import jmt.engine.log.LoggerParameters;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.CombFork;
@@ -249,7 +250,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			num = objectNumber.get(type).intValue();
 		}
 		objectNumber.put(type, new Integer(++num));
-		return super.addStation(STATION_NAMES.get(type) + " " + num, type);
+		return super.addStation(STATION_NAMES.get(type) + " " + num, type, 1, new ArrayList<ServerType>());
 	}
 
 	/**
@@ -374,7 +375,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			boolean hasTimedModes = false;
 			boolean hasImmediateModes = false;
 			for (TransitionModeData tmd : sd.transitionModeList) {
-				if (tmd.firingTimeDistribution instanceof Distribution) { 
+				if (tmd.firingTimeDistribution instanceof Distribution) {
 					hasTimedModes = true;
 				} else {
 					hasImmediateModes = true;
@@ -488,7 +489,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 	@Override
 	public Object addStation(Object station) {
 		SerializedStation ss = (SerializedStation) station;
-		return addStation(ss.data.name, ss.data.type);
+		return addStation(ss.data.name, ss.data.type, ss.data.nextServerNum, ss.data.serverTypes);
 	}
 
 	/**
@@ -547,6 +548,7 @@ public class JSimGraphModel extends CommonModel implements JmodelClassDefinition
 			setQueueStrategy(key, oldClassKey, scd.queueStrategy);
 			setDropRule(key, oldClassKey, scd.dropRule);
 			setServiceWeight(key, oldClassKey, scd.serviceWeight);
+			setServerNumRequired(key, oldClassKey, scd.serverNumRequired);
 			if (scd.serviceDistribution != null) {
 				setServiceTimeDistribution(key, oldClassKey, ((ServiceStrategy) scd.serviceDistribution).clone());
 			}

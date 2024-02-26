@@ -20,16 +20,18 @@ package jmt.engine.QueueNet;
 
 import java.util.*;
 
+import jmt.engine.NodeSections.Server;
+import jmt.engine.NodeSections.Server.BusyServer;
 import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 
 /**
  * This class implements a linked job info list.
  * @author Francesco Radaelli, Stefano Omini
- * 
- * Modified by Ashanka (May 2010): 
- * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for capturing 
+ *
+ * Modified by Ashanka (May 2010):
+ * Patch: Multi-Sink Perf. Index
+ * Description: Added new Performance index for capturing
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -72,10 +74,20 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected double lastJobInTime;
 	protected double lastJobInTimePerClass[];
 
+	//Michalis
+	protected double lastJobOutTimePerServer[];
+	protected double lastJobOutTimePerServerPerClass[][];
+	//
+
 	// once a job is removed from this list -> call remove related method to update job Out Time.
 	// to calculate the 'throughput' and 'throughput per sink'
 	protected double lastJobOutTime;
 	protected double lastJobOutTimePerClass[];
+
+	//Michalis
+	protected double lastJobInTimePerServer[];
+	protected double lastJobInTimePerServerPerClass[][];
+	//
 
 	protected double lastJobStartTime;
 	protected double lastJobStartTimePerClass[];
@@ -86,20 +98,40 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected double lastJobDropTime;
 	protected double lastJobDropTimePerClass[];
 
+	//Michalis
+	protected double lastJobDropTimePerServer[];
+	//
+
 	protected double lastJobSwitchTime;
 	protected double lastJobSwitchTimePerClass[];
 
 	protected double lastJobBalkingTime;
 	protected double lastJobBalkingTimePerClass[];
 
+	//Michalis
+	protected double lastJobBalkingTimePerServer[];
+	//
+
 	protected double lastJobRenegingTime;
 	protected double lastJobRenegingTimePerClass[];
+
+	//Michalis
+	protected double lastJobRenegingTimePerServer[];
+	//
 
 	protected double lastJobRetrialAttemptTime;
 	protected double lastJobRetrialAttemptTimePerClass[];
 
+	//Michalis
+	protected double lastJobRetrialAttemptTimePerServer[];
+	//
+
 	protected double lastRetrialOrbitModifyTime;
 	protected double lastRetrialOrbitModifyTimePerClass[];
+
+	//Michalis
+	protected double lastRetrialOrbitModifyTimePerServer[];
+	//
 
 	// The difference between sojourn time and waiting time:
 	// Sojourn time is 'current time at job removal - jobInfo.enteringTime'
@@ -117,11 +149,32 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected Measure queueLength;
 	protected Measure queueLengthPerClass[];
 
+	//Michalis
+
+	protected Measure queueLengthPerServerType[];
+
+	protected Measure queueLengthPerServerTypePerClass[][];
+	//
+
 	protected Measure responseTime;
 	protected Measure responseTimePerClass[];
 
+	//Michalis
+
+	protected Measure responseTimePerServerType[];
+
+	protected Measure responseTimePerServerTypePerClass[][];
+	//
+
 	protected Measure residenceTime;
 	protected Measure residenceTimePerClass[];
+
+	//Michalis
+
+	protected Measure residenceTimePerServerType[];
+
+	protected Measure residenceTimePerServerTypePerClass[][];
+	//
 
 	protected InverseMeasure arrivalRate;
 	protected InverseMeasure arrivalRatePerClass[];
@@ -129,8 +182,22 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected InverseMeasure throughput;
 	protected InverseMeasure throughputPerClass[];
 
+	//Michalis
+
+	protected Measure throughputPerServerType[];
+
+	protected Measure throughputPerServerTypePerClass[][];
+	//
+
 	protected Measure utilization;
 	protected Measure utilizationPerClass[];
+
+	//Michalis
+
+	protected Measure utilizationPerServerType[];
+
+	protected Measure utilizationPerServerTypePerClass[][];
+	//
 
 	protected Measure utilizationJoin;
 	protected Measure utilizationPerClassJoin[];
@@ -144,17 +211,52 @@ public class LinkedJobInfoList implements JobInfoList {
 	protected InverseMeasure dropRate;
 	protected InverseMeasure dropRatePerClass[];
 
+	//Michalis
+
+	protected Measure dropRatePerServerType[];
+
+	protected Measure dropRatePerServerTypePerClass[][];
+	//
+
 	protected InverseMeasure balkingRate;
 	protected InverseMeasure balkingRatePerClass[];
+
+	//Michalis
+
+	protected Measure balkingRatePerServerType[];
+
+	protected Measure balkingRatePerServerTypePerClass[][];
+	//
 
 	protected InverseMeasure renegingRate;
 	protected InverseMeasure renegingRatePerClass[];
 
+	//Michalis
+
+	protected Measure renegingRatePerServerType[];
+
+	protected Measure renegingRatePerServerTypePerClass[][];
+	//
+
 	protected InverseMeasure retrialAttemptsRate;
 	protected InverseMeasure retrialAttemptsRatePerClass[];
 
+	//Michalis
+
+	protected Measure retrialAttemptsPerServerType[];
+
+	protected Measure retrialAttemptsPerServerTypePerClass[][];
+	//
+
 	protected Measure retrialOrbitSize;
 	protected Measure retrialOrbitSizePerClass[];
+
+	//Michalis
+
+	protected Measure retrialOrbitSizePerServerType[];
+
+	protected Measure retrialOrbitSizePerServerTypePerClass[][];
+	//
 
 	protected Measure retrialOrbitTime;
 	protected Measure retrialOrbitTimePerClass[];
@@ -174,17 +276,39 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* Only set if this joblist is for a blocking region input station */
 	protected double[] regionSoftDeadlinesByClass;
 
+	//Michalis
+
+	private Map<Integer,List<BusyServer>> usedServersPerJob;
+
+	private String stationName;
+
+	private List<Server.ServerType> serverTypes;
+
+	private JobClassList jobClasses;
+
+	private Boolean[][] classCompatibilities;
+
+	private int numberOfServerTypes;
+
+	private int[] numOfVisitsPerServer;
+
+	private int[][] numOfVisitsPerServerPerClass;
+
+	//
 
 	protected Measure numberOfActiveServers;
 
 	/** The number of servers to estimate Utilization measure on multiserver environments */
 	protected int numberOfServers = 1;
 
+	/** The number of servers required by a specific class to estimate Utilization measure on multiserver environments */
+	protected int[] serverNumRequired;
+
 	private NetSystem netSystem;
 
 	/**
 	 * Creates a new JobInfoList instance.
-	 * @param numberOfJobClasses number of job classes.
+	 * @param jobClasses job classes.
 	if (preemption) {
 	jobInService = job;
 	jobInService.setServingMessage(jobInServiceMessage);
@@ -192,8 +316,15 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 	 */
 	@SuppressWarnings("unchecked")
-	public LinkedJobInfoList(int numberOfJobClasses) {
-		this.numberOfJobClasses = numberOfJobClasses;
+	public LinkedJobInfoList(JobClassList jobClasses) {
+		this(jobClasses, null,null, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public LinkedJobInfoList(JobClassList jobClasses, Boolean[][] classCompatibilities, String stationName,
+													 List<Server.ServerType> serverTypes) {
+		this.jobClasses = jobClasses;
+		this.numberOfJobClasses = jobClasses.size();
 		list = new LinkedList<JobInfo>();
 		listPerClass = new LinkedList[numberOfJobClasses];
 		retrialOrbitPerClass = new HashMap[numberOfJobClasses];
@@ -216,11 +347,112 @@ public class LinkedJobInfoList implements JobInfoList {
 		lastRetrialOrbitModifyTimePerClass = new double[numberOfJobClasses];
 		totalSojournTimePerClass = new double[numberOfJobClasses];
 		lastJobSojournTimePerClass = new double[numberOfJobClasses];
-	}
+
+		//Michalis
+		usedServersPerJob = new HashMap<>();
+		if (serverTypes != null && !serverTypes.isEmpty()) {
+			numberOfServerTypes = serverTypes.size();
+		} else {
+			numberOfServerTypes = 1;
+		}
+		if (classCompatibilities == null) {
+			classCompatibilities = new Boolean[numberOfJobClasses][numberOfServerTypes];
+			for (int i = 0; i < numberOfJobClasses; i++) {
+				classCompatibilities[i][0] = true;
+			}
+		}
+		this.classCompatibilities = classCompatibilities;
+		this.stationName = stationName;
+		this.serverTypes = serverTypes;
+
+    lastRetrialOrbitModifyTimePerServer = new double[numberOfServerTypes];
+    lastJobRetrialAttemptTimePerServer = new double[numberOfServerTypes];
+    lastJobBalkingTimePerServer = new double[numberOfServerTypes];
+    lastJobRenegingTimePerServer = new double[numberOfServerTypes];
+    lastJobDropTimePerServer = new double[numberOfServerTypes];
+    lastJobOutTimePerServer = new double[numberOfServerTypes];
+    lastJobOutTimePerServerPerClass = new double[numberOfServerTypes][numberOfJobClasses];
+    lastJobInTimePerServer = new double[numberOfServerTypes];
+    lastJobInTimePerServerPerClass = new double[numberOfServerTypes][numberOfJobClasses];
+    numOfVisitsPerServer = new int[numberOfServerTypes];
+    numOfVisitsPerServerPerClass = new int[numberOfServerTypes][numberOfJobClasses];
+  }
 
 	/**---------------------------------------------------------------------
 	 *--------------------------- "GET" METHODS ----------------------------
 	 *---------------------------------------------------------------------*/
+
+	//Michalis
+	public void addUsedServersForJob(int job_id, List<BusyServer> busyServers){
+		usedServersPerJob.put(job_id, busyServers);
+	}
+
+	public void removeUsedServerForJob(int job_id){
+		usedServersPerJob.remove(job_id);
+	}
+
+	private LinkedList<JobInfo> getListPerServer(int s){
+
+		LinkedList<JobInfo> res = new LinkedList<>();
+
+		for(JobInfo jobInfo : list) {
+
+			List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+			if (usedServers != null) {
+				for (BusyServer server : usedServers) {
+					if(server.getId() == s){
+						res.add(jobInfo);
+						break;
+					}
+				}
+			} else if (classCompatibilities != null) {
+				int c = jobInfo.getJob().getJobClass().getId();
+				Boolean[] classComp = classCompatibilities[c];
+
+				if (classComp[s]){
+					res.add(jobInfo);
+				}
+
+			}
+
+		}
+
+		return res;
+	}
+
+	private LinkedList<JobInfo> getListPerServerPerClass(int s, int c){
+
+		LinkedList<JobInfo> res = new LinkedList<>();
+
+		for(JobInfo jobInfo : listPerClass[c]) {
+
+			List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+			if (usedServers != null) {
+				for (BusyServer server : usedServers) {
+					if(server.getId() == s){
+						res.add(jobInfo);
+						break;
+					}
+				}
+			} else if (classCompatibilities != null) {
+				Boolean[] classComp = classCompatibilities[c];
+
+				if (classComp[s]){
+					res.add(jobInfo);
+				}
+
+			}
+
+		}
+
+		return res;
+
+	}
+
+
+	//
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#size()
@@ -256,6 +488,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		retrialOrbitPerClass[classID].put(job.getId(), currList);
 		lastRetrialOrbitModifyTime = getTime();
 		lastRetrialOrbitModifyTimePerClass[classID] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[classID];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastRetrialOrbitModifyTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -270,6 +513,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		retrialOrbitPerClass[classID].remove(id);
 		lastRetrialOrbitModifyTime = getTime();
 		lastRetrialOrbitModifyTimePerClass[job.getJobClass().getId()] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[classID];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastRetrialOrbitModifyTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -465,6 +719,30 @@ public class LinkedJobInfoList implements JobInfoList {
 		return max;
 	}
 
+	public double getLastModifyTimePerServer(int s) {
+		if (lastJobOutTimePerServer[s] >= lastJobInTimePerServer[s] && lastJobOutTimePerServer[s] >=
+				lastJobDropTimePerServer[s]) {
+			return lastJobOutTimePerServer[s];
+		} else if (lastJobInTimePerServer[s] >= lastJobOutTimePerServer[s] && lastJobInTimePerServer[s] >=
+				lastJobDropTimePerServer[s]) {
+			return lastJobInTimePerServer[s];
+		} else {
+			return lastJobDropTimePerServer[s];
+		}
+	}
+
+	public double getLastModifyTimePerServerPerClass(int s, int c) {
+		if (lastJobOutTimePerServerPerClass[s][c] >= lastJobInTimePerServerPerClass[s][c] && lastJobOutTimePerServerPerClass[s][c] >=
+				lastJobDropTimePerClass[c]) {
+			return lastJobOutTimePerServerPerClass[s][c];
+		} else if (lastJobInTimePerServerPerClass[s][c] >= lastJobOutTimePerServerPerClass[s][c] && lastJobInTimePerServerPerClass[s][c] >=
+				lastJobDropTimePerClass[c]) {
+			return lastJobInTimePerServerPerClass[s][c];
+		} else {
+			return lastJobDropTimePerClass[c];
+		}
+	}
+
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#getLastServiceModifyTime()
 	 */
@@ -558,6 +836,19 @@ public class LinkedJobInfoList implements JobInfoList {
 		return listPerClass[jobClass.getId()];
 	}
 
+	@Override
+	public JobInfo getFirstJob() {
+		return list.getFirst();
+	}
+
+	@Override
+	public JobInfo getLastJob() {
+		return list.getLast();
+	}
+
+	public JobInfo getJob(int i){
+		return list.get(i);
+	}
 	/**---------------------------------------------------------------------
 	 *--------------------- "ADD" AND "REMOVE" METHODS ---------------------
 	 *---------------------------------------------------------------------*/
@@ -629,6 +920,27 @@ public class LinkedJobInfoList implements JobInfoList {
 		jobsInPerClass[c]++;
 		lastJobInTime = getTime();
 		lastJobInTimePerClass[c] = getTime();
+
+		//Michalis
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(usedServers != null) {
+			for (BusyServer server : usedServers) {
+				lastJobInTimePerServer[server.getId()] = getTime();
+				lastJobInTimePerServerPerClass[server.getId()][c] = getTime();
+			}
+		}else if(classCompatibilities != null){
+			Boolean[] classComp = classCompatibilities[c];
+
+			for(int s=0; s<classComp.length; s++){
+				if(classComp[s]){
+					lastJobInTimePerServer[s] = getTime();
+					lastJobInTimePerServerPerClass[s][c] = getTime();
+				}
+			}
+		}
+
+		//
 	}
 
 	protected void updateAfterRemoval(JobInfo jobInfo){
@@ -669,6 +981,27 @@ public class LinkedJobInfoList implements JobInfoList {
 		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
+
+		//Michalis
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if (usedServers != null) {
+			for (BusyServer server : usedServers) {
+				lastJobOutTimePerServer[server.getId()] = getTime();
+				lastJobOutTimePerServerPerClass[server.getId()][c] = getTime();
+			}
+		} else if(classCompatibilities != null){
+			Boolean[] classComp = classCompatibilities[c];
+
+			for(int s=0; s<classComp.length; s++){
+				if(classComp[s]){
+					lastJobOutTimePerServer[s] = getTime();
+					lastJobOutTimePerServerPerClass[s][c] = getTime();
+				}
+			}
+		}
+
+		//
 	}
 
 	public void removeWithoutUpdating(JobInfo jobInfo){
@@ -770,6 +1103,26 @@ public class LinkedJobInfoList implements JobInfoList {
 		totalSojournTimePerClass[c] += getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTime = getTime() - jobInfo.getEnteringTime();
 		lastJobSojournTimePerClass[c] = getTime() - jobInfo.getEnteringTime();
+
+		//Michalis
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if (usedServers != null) {
+			for (BusyServer server : usedServers) {
+				lastJobOutTimePerServer[server.getId()] = getTime();
+				lastJobOutTimePerServerPerClass[server.getId()][c] = getTime();
+			}
+		} else if (classCompatibilities != null) {
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s = 0; s < classComp.length; s++) {
+				if (classComp[s]) {
+					lastJobOutTimePerServer[s] = getTime();
+					lastJobOutTimePerServerPerClass[s][c] = getTime();
+				}
+			}
+		}
+		//
 	}
 
 	protected void finalRemove(JobInfo what, LinkedList<JobInfo> list, int position) {
@@ -793,42 +1146,85 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeQueueLength(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeQueueLength(JobClass jobClass, Measure measurement) {
-		if (jobClass != null) {
-			if (queueLengthPerClass == null) {
-				queueLengthPerClass = new Measure[numberOfJobClasses];
+	public void analyzeQueueLength(JobClass jobClass, Measure measurement, boolean isServerType,int serverTypeId) {
+		if(isServerType){
+			if(jobClass!= null){
+				if (queueLengthPerServerTypePerClass == null) {
+					queueLengthPerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				queueLengthPerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			}else{
+				if(queueLengthPerServerType == null){
+					queueLengthPerServerType = new Measure[numberOfServerTypes];
+				}
+				queueLengthPerServerType[serverTypeId] = measurement;
 			}
-			queueLengthPerClass[jobClass.getId()] = measurement;
-		} else {
-			queueLength = measurement;
+		}else {
+
+			if (jobClass != null) {
+				if (queueLengthPerClass == null) {
+					queueLengthPerClass = new Measure[numberOfJobClasses];
+				}
+				queueLengthPerClass[jobClass.getId()] = measurement;
+			} else {
+				queueLength = measurement;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResponseTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResponseTime(JobClass jobClass, Measure measurement) {
-		if (jobClass != null) {
-			if (responseTimePerClass == null) {
-				responseTimePerClass = new Measure[numberOfJobClasses];
+	public void analyzeResponseTime(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId) {
+		if(isServerType){
+			if(jobClass!= null){
+				if (responseTimePerServerTypePerClass == null) {
+					responseTimePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				responseTimePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			}else{
+				if(responseTimePerServerType == null){
+					responseTimePerServerType = new Measure[numberOfServerTypes];
+				}
+				responseTimePerServerType[serverTypeId] = measurement;
 			}
-			responseTimePerClass[jobClass.getId()] = measurement;
-		} else {
-			responseTime = measurement;
+		}else {
+			if (jobClass != null) {
+				if (responseTimePerClass == null) {
+					responseTimePerClass = new Measure[numberOfJobClasses];
+				}
+				responseTimePerClass[jobClass.getId()] = measurement;
+			} else {
+				responseTime = measurement;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeResidenceTime(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeResidenceTime(JobClass jobClass, Measure measurement) {
-		if (jobClass != null) {
-			if (residenceTimePerClass == null) {
-				residenceTimePerClass = new Measure[numberOfJobClasses];
+	public void analyzeResidenceTime(JobClass jobClass, Measure measurement,boolean isServerType, int serverTypeId) {
+		if(isServerType){
+			if(jobClass!= null){
+				if (residenceTimePerServerTypePerClass == null) {
+					residenceTimePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				residenceTimePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			}else{
+				if(residenceTimePerServerType == null){
+					residenceTimePerServerType = new Measure[numberOfServerTypes];
+				}
+				residenceTimePerServerType[serverTypeId] = measurement;
 			}
-			residenceTimePerClass[jobClass.getId()] = measurement;
-		} else {
-			residenceTime = measurement;
+		}else {
+			if (jobClass != null) {
+				if (residenceTimePerClass == null) {
+					residenceTimePerClass = new Measure[numberOfJobClasses];
+				}
+				residenceTimePerClass[jobClass.getId()] = measurement;
+			} else {
+				residenceTime = measurement;
+			}
 		}
 	}
 
@@ -849,28 +1245,57 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeThroughput(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeThroughput(JobClass jobClass, InverseMeasure measurement) {
-		if (jobClass != null) {
-			if (throughputPerClass == null) {
-				throughputPerClass = new InverseMeasure[numberOfJobClasses];
+	public void analyzeThroughput(JobClass jobClass, InverseMeasure measurement,
+																boolean isServerType, int serverTypeId) {
+		if(isServerType){
+			if(jobClass!= null){
+				if (throughputPerServerTypePerClass == null) {
+					throughputPerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				throughputPerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			}else{
+				if(throughputPerServerType == null){
+					throughputPerServerType = new Measure[numberOfServerTypes];
+				}
+				throughputPerServerType[serverTypeId] = measurement;
 			}
-			throughputPerClass[jobClass.getId()] = measurement;
-		} else {
-			throughput = measurement;
+		}else {
+			if (jobClass != null) {
+				if (throughputPerClass == null) {
+					throughputPerClass = new InverseMeasure[numberOfJobClasses];
+				}
+				throughputPerClass[jobClass.getId()] = measurement;
+			} else {
+				throughput = measurement;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeUtilization(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
-	public void analyzeUtilization(JobClass jobClass, Measure measurement) {
-		if (jobClass != null) {
-			if (utilizationPerClass == null) {
-				utilizationPerClass = new Measure[numberOfJobClasses];
+	public void analyzeUtilization(JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId) {
+		if(isServerType) {
+			if (jobClass != null) {
+				if (utilizationPerServerTypePerClass == null) {
+					utilizationPerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				utilizationPerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (utilizationPerServerType == null) {
+					utilizationPerServerType = new Measure[numberOfServerTypes];
+				}
+				utilizationPerServerType[serverTypeId] = measurement;
 			}
-			utilizationPerClass[jobClass.getId()] = measurement;
-		} else {
-			utilization = measurement;
+		}else {
+			if (jobClass != null) {
+				if (utilizationPerClass == null) {
+					utilizationPerClass = new Measure[numberOfJobClasses];
+				}
+				utilizationPerClass[jobClass.getId()] = measurement;
+			} else {
+				utilization = measurement;
+			}
 		}
 	}
 
@@ -905,42 +1330,85 @@ public class LinkedJobInfoList implements JobInfoList {
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeDropRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeDropRate(JobClass jobClass, InverseMeasure measurement) {
-		if (jobClass != null) {
-			if (dropRatePerClass == null) {
-				dropRatePerClass = new InverseMeasure[numberOfJobClasses];
+	public void analyzeDropRate(JobClass jobClass, InverseMeasure measurement,boolean isServerType, int serverTypeId) {
+		if(isServerType) {
+			if (jobClass != null) {
+				if (dropRatePerServerTypePerClass == null) {
+					dropRatePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				dropRatePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (dropRatePerServerType == null) {
+					dropRatePerServerType = new Measure[numberOfServerTypes];
+				}
+				dropRatePerServerType[serverTypeId] = measurement;
 			}
-			dropRatePerClass[jobClass.getId()] = measurement;
-		} else {
-			dropRate = measurement;
+		}else {
+			if (jobClass != null) {
+				if (dropRatePerClass == null) {
+					dropRatePerClass = new InverseMeasure[numberOfJobClasses];
+				}
+				dropRatePerClass[jobClass.getId()] = measurement;
+			} else {
+				dropRate = measurement;
+			}
 		}
+
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeBalkingRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement) {
-		if (jobClass != null) {
-			if (balkingRatePerClass == null) {
-				balkingRatePerClass = new InverseMeasure[numberOfJobClasses];
+	public void analyzeBalkingRate(JobClass jobClass, InverseMeasure measurement, boolean isServerType,  int serverTypeId) {
+		if(isServerType) {
+			if (jobClass != null) {
+				if (balkingRatePerServerTypePerClass == null) {
+					balkingRatePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				balkingRatePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (balkingRatePerServerType == null) {
+					balkingRatePerServerType = new Measure[numberOfServerTypes];
+				}
+				balkingRatePerServerType[serverTypeId] = measurement;
 			}
-			balkingRatePerClass[jobClass.getId()] = measurement;
-		} else {
-			balkingRate = measurement;
+		}else {
+			if (jobClass != null) {
+				if (balkingRatePerClass == null) {
+					balkingRatePerClass = new InverseMeasure[numberOfJobClasses];
+				}
+				balkingRatePerClass[jobClass.getId()] = measurement;
+			} else {
+				balkingRate = measurement;
+			}
 		}
 	}
 
 	/* (non-Javadoc)
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeRenegingRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
-	public void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement) {
-		if (jobClass != null) {
-			if (renegingRatePerClass == null) {
-				renegingRatePerClass = new InverseMeasure[numberOfJobClasses];
+	public void analyzeRenegingRate(JobClass jobClass, InverseMeasure measurement,boolean isServerType, int serverTypeId) {
+		if(isServerType) {
+			if (jobClass != null) {
+				if (renegingRatePerServerTypePerClass == null) {
+					renegingRatePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				renegingRatePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (renegingRatePerServerType == null) {
+					renegingRatePerServerType = new Measure[numberOfServerTypes];
+				}
+				renegingRatePerServerType[serverTypeId] = measurement;
 			}
-			renegingRatePerClass[jobClass.getId()] = measurement;
-		} else {
-			renegingRate = measurement;
+		}else {
+			if (jobClass != null) {
+				if (renegingRatePerClass == null) {
+					renegingRatePerClass = new InverseMeasure[numberOfJobClasses];
+				}
+				renegingRatePerClass[jobClass.getId()] = measurement;
+			} else {
+				renegingRate = measurement;
+			}
 		}
 	}
 
@@ -948,14 +1416,29 @@ public class LinkedJobInfoList implements JobInfoList {
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeRetrialAttemptsRate(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.InverseMeasure)
 	 */
 	@Override
-	public void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement) {
-		if (jobClass != null) {
-			if (retrialAttemptsRatePerClass == null) {
-				retrialAttemptsRatePerClass = new InverseMeasure[numberOfJobClasses];
+	public void analyzeRetrialAttemptsRate(JobClass jobClass, InverseMeasure measurement,boolean isServerType, int serverTypeId) {
+		if (isServerType) {
+			if (jobClass != null) {
+				if (retrialAttemptsPerServerTypePerClass == null) {
+					retrialAttemptsPerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				retrialAttemptsPerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (retrialAttemptsPerServerType == null) {
+					retrialAttemptsPerServerType = new Measure[numberOfServerTypes];
+				}
+				retrialAttemptsPerServerType[serverTypeId] = measurement;
 			}
-			retrialAttemptsRatePerClass[jobClass.getId()] = measurement;
 		} else {
-			retrialAttemptsRate = measurement;
+
+			if (jobClass != null) {
+				if (retrialAttemptsRatePerClass == null) {
+					retrialAttemptsRatePerClass = new InverseMeasure[numberOfJobClasses];
+				}
+				retrialAttemptsRatePerClass[jobClass.getId()] = measurement;
+			} else {
+				retrialAttemptsRate = measurement;
+			}
 		}
 	}
 
@@ -963,14 +1446,28 @@ public class LinkedJobInfoList implements JobInfoList {
 	 * @see jmt.engine.QueueNet.JobInfoList#analyzeRetrialOrbitSize(jmt.engine.QueueNet.JobClass, jmt.engine.dataAnalysis.Measure)
 	 */
 	@Override
-	public void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement) {
-		if (jobClass != null) {
-			if (retrialOrbitSizePerClass == null) {
-				retrialOrbitSizePerClass = new Measure[numberOfJobClasses];
+	public void analyzeRetrialOrbitSize(JobClass jobClass, Measure measurement,boolean isServerType, int serverTypeId) {
+		if (isServerType) {
+			if (jobClass != null) {
+				if (retrialOrbitSizePerServerTypePerClass == null) {
+					retrialOrbitSizePerServerTypePerClass = new Measure[numberOfServerTypes][numberOfJobClasses];
+				}
+				retrialOrbitSizePerServerTypePerClass[serverTypeId][jobClass.getId()] = measurement;
+			} else {
+				if (retrialOrbitSizePerServerType == null) {
+					retrialOrbitSizePerServerType = new Measure[numberOfServerTypes];
+				}
+				retrialOrbitSizePerServerType[serverTypeId] = measurement;
 			}
-			retrialOrbitSizePerClass[jobClass.getId()] = measurement;
 		} else {
-			retrialOrbitSize = measurement;
+			if (jobClass != null) {
+				if (retrialOrbitSizePerClass == null) {
+					retrialOrbitSizePerClass = new Measure[numberOfJobClasses];
+				}
+				retrialOrbitSizePerClass[jobClass.getId()] = measurement;
+			} else {
+				retrialOrbitSize = measurement;
+			}
 		}
 	}
 
@@ -1115,6 +1612,61 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateQueueLength(JobInfo jobInfo) {
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(queueLengthPerServerType != null) {
+			if(usedServers == null){
+				Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+				for (int s=0; s<classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = queueLengthPerServerType[s];
+						if (m != null) {
+							m.update(getListPerServer(s).size(),
+									getTime() - getLastModifyTimePerServer(s));
+						}
+					}
+				}
+			}
+			else {
+				for (BusyServer server : usedServers) {
+					Measure m = queueLengthPerServerType[server.getId()];
+					if (m != null) {
+						m.update(getListPerServer(server.getId()).size(),
+								getTime() - getLastModifyTimePerServer(server.getId()));
+					}
+				}
+			}
+		}
+
+		if(queueLengthPerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+
+			if (usedServers == null){
+				Boolean[] classComp = classCompatibilities[c];
+
+				for (int s=0; s<classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = queueLengthPerServerTypePerClass[s][c];
+						if (m != null) {
+							m.update(getListPerServerPerClass(s,c).size(),
+									getTime() - getLastModifyTimePerServerPerClass(s,c));
+						}
+					}
+				}
+
+			} else {
+
+				for (BusyServer server : usedServers) {
+					Measure m = queueLengthPerServerTypePerClass[server.getId()][c];
+					if (m != null) {
+						m.update(getListPerServerPerClass(server.getId(),c).size(),
+								getTime() - getLastModifyTimePerServerPerClass(server.getId(),c));
+					}
+				}
+			}
+		}
 		if (queueLengthPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1129,6 +1681,29 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateResponseTime(JobInfo jobInfo) {
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if (responseTimePerServerType != null) {
+			for (BusyServer server : usedServers) {
+				Measure m = responseTimePerServerType[server.getId()];
+				if (m != null) {
+					m.update(getTime() - jobInfo.getEnteringTime(), 1.0);
+				}
+			}
+		}
+
+		if (responseTimePerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+
+			for (BusyServer server : usedServers) {
+				Measure m = responseTimePerServerTypePerClass[server.getId()][c];
+				if (m != null) {
+					m.update(getTime() - jobInfo.getEnteringTime(), 1.0);
+				}
+			}
+		}
+
 		if (responseTimePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1143,6 +1718,63 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateResidenceTime(JobInfo jobInfo) {
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(residenceTimePerServerType != null) {
+			if (usedServers == null) {
+				Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+				for (int s = 0; s < classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = residenceTimePerServerType[s];
+						if (m != null) {
+							m.updateSampleJob(jobInfo.getJob(), stationName);
+							m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName);
+						}
+					}
+				}
+			} else {
+				for (BusyServer server : usedServers) {
+					Measure m = residenceTimePerServerType[server.getId()];
+					if (m != null) {
+						m.updateSampleJob(jobInfo.getJob());
+						numOfVisitsPerServer[server.getId()] ++;
+						m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName, numOfVisitsPerServer[server.getId()]);
+					}
+				}
+			}
+		}
+
+		if(residenceTimePerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+
+			if (usedServers == null) {
+				Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+				for (int s = 0; s < classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = residenceTimePerServerTypePerClass[s][c];
+						if (m != null) {
+							m.updateSampleJob(jobInfo.getJob(),stationName);
+							m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName);
+						}
+					}
+				}
+			} else {
+				for (BusyServer server : usedServers) {
+					Measure m = residenceTimePerServerTypePerClass[server.getId()][c];
+					if (m != null) {
+						m.updateSampleJob(jobInfo.getJob(),stationName);
+						numOfVisitsPerServerPerClass[server.getId()][c] ++;
+						m.update(getTime() - jobInfo.getEnteringTime(), 1.0,
+								stationName,
+								numOfVisitsPerServerPerClass[server.getId()][c]);
+					}
+				}
+			}
+		}
+
 		if (residenceTimePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1173,6 +1805,30 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateThroughput(JobInfo jobInfo) {
+
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(throughputPerServerType != null) {
+			for (BusyServer server : usedServers) {
+				Measure m = throughputPerServerType[server.getId()];
+				if (m != null) {
+					m.update(getTime() - lastJobOutTimePerServer[server.getId()], 1.0);
+				}
+			}
+		}
+
+		if(throughputPerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+
+			for (BusyServer server : usedServers) {
+				Measure m = throughputPerServerTypePerClass[server.getId()][c];
+				if (m != null) {
+					m.update(getTime() - lastJobOutTimePerServerPerClass[server.getId()][c], 1.0);
+				}
+			}
+		}
+
 		if (throughputPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1187,16 +1843,86 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateUtilization(JobInfo jobInfo) {
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(utilizationPerServerType != null) {
+			if (usedServers == null) {
+				Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+				for (int s=0; s<classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = utilizationPerServerType[s];
+						if (m != null) {
+							m.update((double) (getListPerServer(s).size() *
+											Math.min(serverTypes.get(s).getNumOfServers(),
+													serverNumRequired[jobInfo.getJob().getJobClass().getId()]))
+											/ serverTypes.get(s).getNumOfServers() ,
+									getTime() - getLastModifyTimePerServer(s));
+						}
+					}
+				}
+			} else {
+				for (BusyServer server : usedServers) {
+					Measure m = utilizationPerServerType[server.getId()];
+					if (m != null) {
+						m.update((double) (getListPerServer(server.getId()).size() *
+										server.getNumOfBusyServers()) / server.getTotalServers(),
+								getTime() - getLastModifyTimePerServer(server.getId()));
+					}
+				}
+			}
+		}
+
+		if(utilizationPerServerTypePerClass != null) {
+
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+
+			if (usedServers == null) {
+				Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+				for (int s=0; s<classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = utilizationPerServerTypePerClass[s][c];
+						if (m != null) {
+							m.update((double) (getListPerServerPerClass(s,c).size() *
+											Math.min(serverTypes.get(s).getNumOfServers(),
+													serverNumRequired[c]))
+											/ serverTypes.get(s).getNumOfServers() ,
+									getTime() - getLastModifyTimePerServerPerClass(s,c));
+						}
+					}
+				}
+			} else {
+				for (BusyServer server : usedServers) {
+					Measure m = utilizationPerServerTypePerClass[server.getId()][c];
+					if (m != null) {
+						m.update((double) (getListPerServerPerClass(server.getId(), c).size()
+										* server.getNumOfBusyServers()) / server.getTotalServers(),
+								getTime() - getLastModifyTimePerServerPerClass(server.getId(), c));
+					}
+				}
+			}
+		}
+
 		if (utilizationPerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
 			Measure m = utilizationPerClass[c];
 			if (m != null) {
-				m.update((double) listPerClass[c].size() / numberOfServers, getTime() - getLastModifyTimePerClass(jobClass));
+				int mult = 1;
+				if (serverNumRequired != null) {
+					mult = serverNumRequired[c];
+				}
+				m.update((double) (listPerClass[c].size() * mult) / numberOfServers, getTime() - getLastModifyTimePerClass(jobClass));
 			}
 		}
 		if (utilization != null) {
-			utilization.update((double) list.size() / numberOfServers, getTime() - getLastModifyTime());
+			int mult = 1;
+			if (serverNumRequired != null) {
+				mult = serverNumRequired[jobInfo.getJob().getJobClass().getId()];
+			}
+			utilization.update((double) (list.size() * mult) / numberOfServers, getTime() - getLastModifyTime());
 		}
 	}
 
@@ -1237,6 +1963,37 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateDropRate(JobInfo jobInfo) {
+
+
+		if(dropRatePerServerType != null) {
+
+			Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = dropRatePerServerType[s];
+					if (m != null) {
+						m.update(getTime() - lastJobDropTimePerServer[s], 1.0);
+					}
+				}
+			}
+		}
+
+		if(dropRatePerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = dropRatePerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(getTime() - getLastJobDropTimePerClass(jobClass), 1.0);
+					}
+				}
+			}
+		}
+
 		if (dropRatePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1251,6 +2008,37 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateBalkingRate(JobInfo jobInfo) {
+
+		if(balkingRatePerServerType != null) {
+
+			Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = balkingRatePerServerType[s];
+					if (m != null) {
+						m.update(getTime() - lastJobBalkingTimePerServer[s], 1.0);
+					}
+				}
+			}
+		}
+
+		if(balkingRatePerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = balkingRatePerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(getTime() - getLastJobBalkingTimePerClass(jobClass), 1.0);
+					}
+				}
+			}
+		}
+
+
 		if (balkingRatePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1265,6 +2053,36 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateRenegingRate(JobInfo jobInfo) {
+
+		if(renegingRatePerServerType != null) {
+
+			Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = renegingRatePerServerType[s];
+					if (m != null) {
+						m.update(getTime() - lastJobRenegingTimePerServer[s], 1.0);
+					}
+				}
+			}
+		}
+
+		if(renegingRatePerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = renegingRatePerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(getTime() - getLastJobRenegingTimePerClass(jobClass), 1.0);
+					}
+				}
+			}
+		}
+
 		if (renegingRatePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1279,6 +2097,37 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateRetrialAttemptsRate(JobInfo jobInfo) {
+
+		if(retrialAttemptsPerServerType != null) {
+
+			Boolean[] classComp = classCompatibilities[jobInfo.getJob().getJobClass().getId()];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = retrialAttemptsPerServerType[s];
+					if (m != null) {
+						m.update(getTime() - lastJobRetrialAttemptTimePerServer[s], 1.0);
+					}
+				}
+			}
+		}
+
+		if(retrialAttemptsPerServerTypePerClass != null) {
+			JobClass jobClass = jobInfo.getJob().getJobClass();
+			int c = jobClass.getId();
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = retrialAttemptsPerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(getTime() - getLastJobRetrialTimePerClass(jobClass), 1.0);
+					}
+				}
+			}
+		}
+
+
 		if (retrialAttemptsRatePerClass != null) {
 			JobClass jobClass = jobInfo.getJob().getJobClass();
 			int c = jobClass.getId();
@@ -1293,6 +2142,34 @@ public class LinkedJobInfoList implements JobInfoList {
 	}
 
 	protected void updateRetrialOrbitSize(Job job) {
+		if(retrialOrbitSizePerServerType != null) {
+
+			Boolean[] classComp = classCompatibilities[job.getJobClass().getId()];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = retrialOrbitSizePerServerType[s];
+					if (m != null) {
+						m.update(retrialOrbit.size(), getTime() - lastRetrialOrbitModifyTimePerServer[s]);
+					}
+				}
+			}
+		}
+
+		if(retrialOrbitSizePerServerTypePerClass != null) {
+			JobClass jobClass = job.getJobClass();
+			int c = jobClass.getId();
+			Boolean[] classComp = classCompatibilities[c];
+
+			for (int s=0; s<classComp.length; s++) {
+				if (classComp[s]) {
+					Measure m = retrialOrbitSizePerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(retrialOrbit.size(), getTime() - lastRetrialOrbitModifyTimePerClass[c]);
+					}
+				}
+			}
+		}
 		if (retrialOrbitSizePerClass != null) {
 			JobClass jobClass = job.getJobClass();
 			int c = jobClass.getId();
@@ -1369,6 +2246,28 @@ public class LinkedJobInfoList implements JobInfoList {
 		listPerClass[c].remove(jobInfo);
 		lastJobOutTime = getTime();
 		lastJobOutTimePerClass[c] = getTime();
+
+		//Michalis
+
+		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+
+		if(usedServers != null) {
+			for (BusyServer server : usedServers) {
+				lastJobOutTimePerServer[server.getId()] = getTime();
+				lastJobOutTimePerServerPerClass[server.getId()][c] = getTime();
+			}
+		}else if(classCompatibilities != null){
+			Boolean[] classComp = classCompatibilities[c];
+
+			for(int s=0; s<classComp.length; s++){
+				if(classComp[s]){
+					lastJobOutTimePerServer[s] = getTime();
+					lastJobOutTimePerServerPerClass[s][c] = getTime();
+				}
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -1417,6 +2316,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		listPerClass[c].remove(jobInfo);
 		lastJobDropTime = getTime();
 		lastJobDropTimePerClass[c] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[c];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastJobDropTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -1454,6 +2364,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		listPerClass[c].remove(jobInfo);
 		lastJobBalkingTime = getTime();
 		lastJobBalkingTimePerClass[c] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[c];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastJobBalkingTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -1467,6 +2388,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		listPerClass[c].remove(jobInfo);
 		lastJobRenegingTime = getTime();
 		lastJobRenegingTimePerClass[c] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[c];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastJobRenegingTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -1480,6 +2412,17 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 		lastJobRetrialAttemptTime = getTime();
 		lastJobRetrialAttemptTimePerClass[c] = getTime();
+
+		//Michalis
+		Boolean[] classComp = classCompatibilities[c];
+
+		for(int s=0; s<classComp.length; s++){
+			if(classComp[s]){
+				lastJobRetrialAttemptTimePerServer[s] = getTime();
+			}
+		}
+
+		//
 	}
 
 	/* (non-Javadoc)
@@ -1526,6 +2469,13 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected double getTime() {
 		return netSystem.getTime();
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.QueueNet.JobInfoList#setServerNumRequired(int)
+	 */
+	public void setServerNumRequired(int[] serverNumRequired){
+		this.serverNumRequired = serverNumRequired;
 	}
 
 	/***************************************

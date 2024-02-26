@@ -737,26 +737,26 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		/** Sets the default ImpatienceParameter for the StationClass depending on the ImpatienceType */
 		private void setDefaultImpatienceParameter(Object classKey, ImpatienceType impatienceType) {
 			switch (impatienceType) {
-			case RENEGING:
-				Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
-				data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
-				break;
-			case BALKING:
-				String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
-				data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy));
-				break;
-			default:
-				data.setImpatienceParameter(stationKey, classKey, null);
-				break;
+				case RENEGING:
+					Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
+					data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
+					break;
+				case BALKING:
+					String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
+					data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy));
+					break;
+				default:
+					data.setImpatienceParameter(stationKey, classKey, null);
+					break;
 			}
 		}
 	}
 
 	/**
-	 * <p><b>Name:</b> DisabledColumnRenderer</p> 
+	 * <p><b>Name:</b> DisabledColumnRenderer</p>
 	 * <p><b>Description: </b> A special renderer that will show disabled text when
-	 * queue capacity is infinite, otherwise will show a combobox. 
-	 * 
+	 * queue capacity is infinite, otherwise will show a combobox.
+	 *
 	 * </p>
 	 * <p><b>Date:</b> 21/ott/06
 	 * <b>Time:</b> 15:59:56</p>

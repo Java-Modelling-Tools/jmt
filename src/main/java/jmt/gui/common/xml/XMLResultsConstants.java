@@ -39,6 +39,7 @@ public interface XMLResultsConstants {
 
 	public static final String XML_E_MEASURE = "measure";
 	public static final String XML_A_MEASURE_NAME = "name";
+	public static final String XML_A_MEASURE_ISSERVERTYPE = "isServerType";
 	public static final String XML_A_MEASURE_TYPE = "type";
 	public static final String XML_A_MEASURE_CLASS = "referenceClass";
 	public static final String XML_A_MEASURE_STATION = "referenceStation";

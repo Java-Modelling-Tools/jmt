@@ -208,6 +208,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected HashMap<Object, Object> stationDataHM = new CachedHashMap<Object, Object>();
 
 	/**
+	 * Hashmap containing Server Types
+	 */
+	protected HashMap<Object, ServerType> serverTypesHM = new CachedHashMap<Object, ServerType>();
+
+	/**
 	 * Hashmap containing measure parameters
 	 */
 	protected HashMap<Object, MeasureData> measureDataHM = new CachedHashMap<Object, MeasureData>();
@@ -570,6 +575,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		addStationDetailsForClass(key);
 		addBlockingDetailsForClass(key);
 		save = true;
+		//Michalis - class initially compatible with all servers
+		for(Object stationKey : stationsKeyset){
+			StationData sd = (StationData) stationDataHM.get(stationKey);
+			for(ServerType server: sd.serverTypes){
+				server.addCompatibility(key);
+			}
+		}
+		//
+
 		return key;
 	}
 
@@ -587,6 +601,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			openClassesKeyset.remove(key);
 			closedClassesKeyset.remove(key);
 			save = true;
+
+			//Michalis - class initially compatible with all servers
+			for(Object stationKey : stationsKeyset){
+				StationData sd = (StationData) stationDataHM.get(stationKey);
+				for(ServerType server: sd.serverTypes){
+					server.removeCompatibility(key);
+				}
+			}
+			//
 		}
 	}
 
@@ -608,6 +631,23 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	@Override
 	public Vector<Object> getStationKeysSource() {
 		return sourcesKeyset;
+	}
+
+	/**
+	 * This method returns the key set of server Types.
+	 */
+	@Override
+	public Vector<Object> getServerTypeKeys(){
+		Vector<Object> res = new Vector<>();
+		for(Object stationKey: stationsKeyset){
+			StationData sd = (StationData) stationDataHM.get(stationKey);
+
+			for (ServerType server : sd.serverTypes) {
+				res.add(server.getServerKey());
+			}
+		}
+
+		return res;
 	}
 
 	/**
@@ -808,6 +848,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		StationData sd;
 		if (stationDataHM.containsKey(key)) {
 			sd = (StationData) stationDataHM.get(key);
+		} else if (serverTypesHM.containsKey(key)){
+			 return getServerTypeStationName(key);
 		} else {
 			return null;
 		}
@@ -1304,11 +1346,13 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @return search key for the new station.
 	 */
 	@Override
-	public Object addStation(String name, String type) {
+	public Object addStation(String name, String type, int nextServerNum, List<ServerType> servers) {
 		name = getUniqueStationName(name);
 		Object key = new Long(++incrementalKey);
 		stationsKeyset.add(key);
 		StationData sd = new StationData(name, type);
+		sd.nextServerNum = nextServerNum;
+		sd.serverTypes = servers;
 		stationDataHM.put(key, sd);
 		setDefaultsForStation(sd);
 		addStationDetails(key);
@@ -1375,6 +1419,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (sd.blockingRegion != null) {
 				removeRegionStation(sd.blockingRegion, key);
 			}
+
+			for(ServerType server : sd.serverTypes){
+				Object serverKey = server.getServerKey();
+				serverTypesHM.remove(serverKey);
+			}
+
 			deleteStationConnections(key);
 			deleteStationMeasures(key);
 			stationDataHM.remove(key);
@@ -1427,6 +1477,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.maxRunningJobs = Defaults.getAsInteger("stationRunningJobs");
 			sd.pollingKValue = Integer.valueOf(1);
 			sd.pollingServerType = STATION_QUEUE_STRATEGY_POLLING_LIMITED;
+			sd.schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;
 			sd.serverPolling = Boolean.valueOf(false);
 			sd.switchoverTimesEnabled = Boolean.valueOf(false);
 			sd.totalStationCapacity = sd.queueCapacity + sd.maxRunningJobs;
@@ -1650,7 +1701,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets impatience parameter associated with given station queue section.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @param impatience parameter for station and class.
+	 * @param impatienceParameter parameter for station and class.
 	 */
 	@Override
 	public void setImpatienceParameter(Object stationKey, Object classKey, ImpatienceParameter impatienceParameter) {
@@ -1875,6 +1926,40 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Returns number of servers required for a specific class, given the search key.
+	 * If specified station cannot accept this kind of parameter, null value is
+	 * returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @return num for specified class and station.
+	 */
+	@Override
+	public Integer getServerNumRequired(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return null;
+		}
+		return scd.serverNumRequired;
+	}
+
+	/**
+	 * Sets number of servers of the station, given the search key.
+	 */
+	@Override
+	public void setServerNumRequired(Object stationKey, Object classKey, Integer num) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null) {
+			return;
+		}
+		if (num == null)
+			num = new Integer(1);
+		if (scd.serverNumRequired == null || !scd.serverNumRequired.equals(num)) {
+			scd.serverNumRequired = num;
+			save = true;
+		}
+	}
+
+	/**
 	 * Returns routing strategy for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, null value is returned.
 	 * @param stationKey: search key for station.
@@ -2050,7 +2135,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
-	 * @param selector: either "path", "delim", or "autoAppend" 
+	 * @param selector: either "path", "delim", or "autoAppend"
 	 */
 	@Override
 	public String getLoggingGlbParameter(String selector) {
@@ -2070,7 +2155,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 	/**
 	 * Sets logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
-	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend" 
+	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend"
 	 * @param value: String to assign to variable named by selector.
 	 */
 	@Override
@@ -2707,8 +2792,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		//semaphore, scaler, place or transition and itself
 		if (sourceKey == targetKey
 				&& (source.type.equals(STATION_TYPE_ROUTER) || source.type.equals(STATION_TYPE_FORK) || source.type.equals(STATION_TYPE_JOIN)
-						|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_CLASSSWITCH) || source.type.equals(STATION_TYPE_SEMAPHORE)
-						|| source.type.equals(STATION_TYPE_SCALER))) {
+				|| source.type.equals(STATION_TYPE_LOGGER) || source.type.equals(STATION_TYPE_CLASSSWITCH) || source.type.equals(STATION_TYPE_SEMAPHORE)
+				|| source.type.equals(STATION_TYPE_SCALER))) {
 			return false;
 		}
 		//no connection among sources, sinks or terminals
@@ -2872,6 +2957,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			Object oldKey = measureDataHM.get(measureKey).classKey;
 			measureDataHM.get(measureKey).classKey = classKey;
 			if (oldKey != classKey) {
+				save = true;
+			}
+		}
+	}
+
+	@Override
+	public Object getMeasureServerTypeKey(Object measureKey) {
+		if (!measuresKeyset.contains(measureKey)) {
+			return null;
+		} else {
+			return measureDataHM.get(measureKey).serverTypeKey;
+		}
+	}
+
+	@Override
+	public void setMeasureServerTypeKey(Object serverTypeKey, Object measureKey) {
+		if (measuresKeyset.contains(measureKey)) {
+			Object oldKey = measureDataHM.get(measureKey).serverTypeKey;
+			measureDataHM.get(measureKey).serverTypeKey = serverTypeKey;
+			if (oldKey != serverTypeKey) {
 				save = true;
 			}
 		}
@@ -3676,7 +3781,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search's key for class
 	 * @return weight of each job for specified class
 	 */
-	@Override 
+	@Override
 	public Integer getRegionClassWeight(Object regionKey, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return null;
@@ -3708,7 +3813,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * @param classKey search's key for class
 	 * @return size of each job for specified class
 	 */
-	@Override 
+	@Override
 	public Integer getRegionClassSize(Object regionKey, Object classKey) {
 		if (!blockingRegionsKeyset.contains(regionKey) || !classesKeyset.contains(classKey)) {
 			return null;
@@ -4208,10 +4313,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		/** Reference to owner blocking region */
 		public Object blockingRegion;
 		public Integer totalStationCapacity;
+		public List<ServerType> serverTypes;
+		public int nextServerNum;
+		public String schedulingPolicy;
 
 		public StationData(String name, String type) {
 			this.name = name;
 			this.type = type;
+			this.nextServerNum = 1;
+			this.serverTypes = new ArrayList<>();
 		}
 
 		@Override
@@ -4223,6 +4333,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.maxRunningJobs = maxRunningJobs;
 			sd.pollingServerType = pollingServerType;
 			sd.serverPolling = serverPolling;
+			sd.nextServerNum = nextServerNum;
+			sd.serverTypes = serverTypes;
+			sd.schedulingPolicy = schedulingPolicy;
 			sd.switchoverTimesEnabled = switchoverTimesEnabled;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
@@ -4255,6 +4368,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object retrialDistribution;
 		public Double serviceWeight;
 		public Object serviceDistribution;
+		public Integer serverNumRequired;
 		public Object switchoverPeriod;
 		public Map<Object, Object> switchoverTimeDistributions;
 		public Object routingStrategy;
@@ -4277,6 +4391,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.dropRule = dropRule;
 			scd.serviceWeight = serviceWeight;
 			scd.softDeadline = softDeadline;
+			scd.serverNumRequired = serverNumRequired;
 			if (serviceDistribution != null) {
 				scd.serviceDistribution = ((ServiceStrategy) serviceDistribution).clone();
 			}
@@ -4418,6 +4533,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Double precision;
 		public Double alpha;
 		public boolean log;
+		public Object serverTypeKey;
 
 		public MeasureData(String type, Object stationKey, Object classKey, Double alpha, Double precision, boolean log) {
 			this.type = type;
@@ -4547,6 +4663,171 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		StationData sd = (StationData) stationDataHM.get(stationKey);
 		return sd.transitionModeList.size();
 	}
+
+	//Michalis
+
+	public Object getServerTypeKey(Object stationKey, String name){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+
+		for(ServerType server: sd.serverTypes){
+			if(server.getName().equals(name)){
+				return server.getServerKey();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public void setStationSchedulingPolicy(Object key, String schedulingPolicy) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+
+		if (sd.schedulingPolicy == null || !sd.schedulingPolicy.equals(schedulingPolicy)) {
+			sd.schedulingPolicy =schedulingPolicy;
+			save = true;
+		}
+	}
+
+	@Override
+	public String getStationSchedulingPolicy(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.schedulingPolicy;
+	}
+
+
+	public ServerType getServerType(Object serverKey){
+		return serverTypesHM.get(serverKey);
+	}
+
+	public boolean isServerTypeKey(Object serverKey){
+		return serverTypesHM.containsKey(serverKey);
+	}
+
+	public List<ServerType> getServerTypes(Object stationKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		return sd.serverTypes;
+	}
+
+	public void updateServerTypeIds(Object stationKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		for(int i = 0; i<sd.serverTypes.size(); i++){
+			ServerType server = getInfoForServerType(stationKey,i);
+			server.setId(i);
+		}
+	}
+	public int getNumberOfDifferentServerTypes(Object stationKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		return sd.serverTypes.size();
+	}
+
+	public ServerType getInfoForServerType(Object stationKey, int index){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		return sd.serverTypes.get(index);
+	}
+
+	public String getServerTypeStationName(Object serverKey){
+
+		if(!serverTypesHM.containsKey(serverKey)){
+			return null;
+		}
+
+		ServerType server = serverTypesHM.get(serverKey);
+
+		return getStationName(server.getStationKey()) + " - " + server.getName();
+	}
+
+
+	public void addServerType(Object stationKey, int change){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		addServerType(stationKey, "Server Type " + sd.nextServerNum, change, null, false);
+	}
+
+	public void addServerType(Object stationKey, String serverName, int serverNumOfServers, List<Boolean> serverCompatibilities, boolean trimName){
+
+		Object key = new Long(++incrementalKey);
+
+		if (trimName) {
+			serverName = serverName.replace(getStationName(stationKey) + " - ", "");
+		}
+
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		ServerType server = new ServerType(serverName, serverNumOfServers, key, stationKey, sd.serverTypes.size());
+		for(int i = 0; i < classesKeyset.size(); i++){
+			if (serverCompatibilities.get(i)) {
+				server.addCompatibility(classesKeyset.get(i));
+			}
+		}
+		serverTypesHM.put(key,server);
+
+		sd.serverTypes.add(server);
+		sd.nextServerNum += 1;
+	}
+
+	public void deleteServerType(Object stationKey, int index){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		ServerType server = sd.serverTypes.get(index);
+
+		Object serverKey = server.getServerKey();
+		serverTypesHM.remove(serverKey);
+
+		sd.serverTypes.remove(index);
+		updateServerTypeIds(stationKey);
+		deleteStationMeasures(serverKey);
+	}
+
+	public void updateNumOfServers(Object stationKey, int newTotal){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		int oldTotal = 0;
+		for(ServerType s: sd.serverTypes){
+			oldTotal += s.getNumOfServers();
+		}
+
+		int change = newTotal - oldTotal;
+
+		if(change > 0){
+			if(sd.serverTypes.size() == 0) {
+				addServerType(stationKey,change);
+			}else{
+				sd.serverTypes.get(sd.serverTypes.size() - 1).incrementNumOfServers(change);
+			}
+		}else{
+			change = -change;
+			while(change > 0 ) {
+				int lastServerTypeNum = sd.serverTypes.size() - 1;
+				ServerType lastServerType = sd.serverTypes.get(lastServerTypeNum);
+				if (lastServerType.getNumOfServers() > change) {
+					lastServerType.decrementNumOfServers(change);
+					change -= change;
+				} else {
+					change -= lastServerType.getNumOfServers();
+					sd.serverTypes.remove(lastServerTypeNum);
+				}
+			}
+		}
+	}
+
+	public List<String> getServerTypeNames(Object stationKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+
+		List<String> res = new ArrayList<>();
+
+		for(ServerType s: sd.serverTypes){
+			res.add(s.getName());
+		}
+
+		return res;
+	}
+
+	////////
 
 	/**
 	 * Adds a new mode for transition <code>stationKey</code>.

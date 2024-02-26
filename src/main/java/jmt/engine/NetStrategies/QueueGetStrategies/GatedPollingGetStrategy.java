@@ -63,6 +63,11 @@ public class GatedPollingGetStrategy extends PollingGetStrategy {
 		return null;
 	}
 
+	@Override
+	public Job get(JobInfoList queue, NetNode ownerNode) {
+		return null;
+	}
+
 	public Job get(JobInfoList queue, JobClass jobClass) {
 		return queue.removeFirst(jobClass).getJob();
 	}

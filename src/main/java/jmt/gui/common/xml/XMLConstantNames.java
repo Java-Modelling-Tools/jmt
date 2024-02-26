@@ -50,6 +50,8 @@ public interface XMLConstantNames {
 	public static final String XML_A_CLASS_REFSOURCE = "referenceSource";
 	public static final String XML_A_CLASS_CUSTOMERS = "customers";
 
+	public static final String XML_E_SERVER_TYPE = "serverTypes";
+
 	public static final String XML_E_STATION = "node";
 	public static final String XML_A_STATION_NAME = "name";
 	public static final String XML_E_STATION_SECTION = "section";
@@ -77,6 +79,12 @@ public interface XMLConstantNames {
 	public static final String XML_A_MEASURE_TYPE = "type";
 	public static final String XML_A_MEASURE_CLASS = "referenceUserClass";
 	public static final String XML_A_MEASURE_STATION = "referenceNode";
+	//Michalis
+	public static final String XML_A_MEASURE_ISSERVERTYPE = "isServerType";
+	public static final String XML_A_MEASURE_PARENTSTATION = "parentStation";
+	public static final String XML_A_MEASURE_NUMOFSERVERTYPES = "numberOfServerTypes";
+	public static final String XML_A_MEASURE_SERVERTYPE = "serverType";
+	//
 	public static final String XML_A_MEASURE_NODETYPE = "nodeType";
 	public static final String XML_A_MEASURE_LOG = "logFile";
 

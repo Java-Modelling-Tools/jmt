@@ -178,6 +178,10 @@ public interface CommonConstants {
 	public static final String STATION_QUEUE_STRATEGY_POLLING_LIMITED = "K-Limited";
 	public static final String STATION_QUEUE_STRATEGY_POLLING_GATED = "Gated";
 	public static final String STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE = "Exhaustive";
+	public static final String STATION_SCHEDULING_POLICY_ALIS =  "ALIS (Assign Longest Idle Server)";
+	public static final String STATION_SCHEDULING_POLICY_ORDER =  "Order (Assign according to order below)";
+	public static final String STATION_SCHEDULING_POLICY_FAIRNESS =  "Fairness (Move back server type when used)";
+	public static final String STATION_SCHEDULING_POLICY_RAIS = "RAIS (Random Assignment to Idle Servers)";
 
 	/**Constants for selection of queueing strategy*/
 	public static final String QUEUE_STRATEGY_PS = "PS";
@@ -282,6 +286,18 @@ public interface CommonConstants {
 
 	public static final String MEASURES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Performance Indices" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define performance indices to be collected and plotted by the simulation engine." + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String METRIC_CONFIGURATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Advanced Metric Configurations" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "View and Define advanced metric configurations: "
+			+ "<br/>" + "- Restrict metric to a specific Server Type (or all Server Types)"
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String COMPATIBILITIES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Server Type Compatibilities" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "View and Define server type compatibilities " + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String SERVER_SETTINGS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Server Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ "Delete and Add different <b>Server Types</b>"
+			+ "<br/>" + "Change <b>Server Types Compatibilities</b>" + HTML_FONT_NOR_END + HTML_END;
 
 	public static final String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Simulation Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define simulation parameters and initial customer locations." + HTML_FONT_NOR_END + HTML_END;

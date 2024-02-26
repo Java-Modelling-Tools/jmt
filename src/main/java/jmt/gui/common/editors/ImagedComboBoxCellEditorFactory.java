@@ -292,6 +292,10 @@ public class ImagedComboBoxCellEditorFactory {
 					setText(sd.getStationName(key));
 					setIcon(JMTImageLoader.loadImage(sd.getStationType(key) + "Cell", iconSize));
 				}
+				if(sd.getServerTypeStationName(key) != null){
+					setText(sd.getServerTypeStationName(key));
+					setIcon(JMTImageLoader.loadImage(CommonConstants.STATION_TYPE_SERVER + "Cell", iconSize));
+				}
 				if (sd instanceof BlockingRegionDefinition) {
 					BlockingRegionDefinition brd = (BlockingRegionDefinition) sd;
 					if (brd.getRegionName(key) != null && !brd.getRegionName(key).equals("")) {

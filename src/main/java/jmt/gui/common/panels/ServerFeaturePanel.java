@@ -30,6 +30,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.ServerTypesEditor;
 import jmt.gui.common.editors.SwitchoverTimesEditor;
 import jmt.gui.common.editors.DeadlineEditor;
 
@@ -45,6 +46,8 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 	private WizardPanel current;
 	private SwitchoverTimesEditor switchoverTimesEditor;
 	private DeadlineEditor deadlineEditor;
+
+	private ServerTypesEditor serverTypesEditor;
 
 	public ServerFeaturePanel() {
 		this.setLayout(new BorderLayout(5, 5));
@@ -79,6 +82,8 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 		if (sd.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
 			switchoverTimesEditor = new SwitchoverTimesEditor(sd, cd, stationKey);
 			mainPanel.add(switchoverTimesEditor, switchoverTimesEditor.getName());
+			serverTypesEditor = new ServerTypesEditor(sd, cd, stationKey);
+			mainPanel.add(serverTypesEditor, serverTypesEditor.getName());
 		}
 		mainPanel.setSelectedComponent(deadlineEditor);
 		current = deadlineEditor;

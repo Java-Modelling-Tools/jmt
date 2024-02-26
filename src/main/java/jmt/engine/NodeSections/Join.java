@@ -48,7 +48,7 @@ import jmt.engine.dataAnalysis.Measure;
  * @author Bertoli Marco
  *         Date: 13-mar-2006
  *         Time: 16.19.58
- * 
+ *
  * Modified by J. Shuai & M. Cazzoli, implemented join strategies
  */
 public class Join extends InputSection {
@@ -93,8 +93,8 @@ public class Join extends InputSection {
 		jobClasses = getJobClasses();
 		nodeJobsList = node.getJobInfoList();
 		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {
-			FJList = new LinkedJobInfoList(jobClasses.size());
-            FJList.setNetSystem(node.getNetSystem());
+			FJList = new LinkedJobInfoList(jobClasses, getClassCompatibilities(), getOwnerNode().getName(), getServerTypes());
+			FJList.setNetSystem(node.getNetSystem());
 			forkNode = new HashMap<Job, NetNode>();
 		}
 	}
@@ -112,135 +112,135 @@ public class Join extends InputSection {
 
 		switch (message.getEvent()) {
 
-		case NetEvent.EVENT_START:
-			break;
+			case NetEvent.EVENT_START:
+				break;
 
-		case NetEvent.EVENT_JOB:
-			job = message.getJob();
-			if (job instanceof ForkJob) {
-				ForkJob fJob = (ForkJob) job;
-				List<ForkJob> fJobs = forkJobs.get(fJob.getForkedJob());
-				boolean isFirst = false;
-				if (fJobs == null) {
-					fJobs = new ArrayList<ForkJob>();
-					forkJobs.put(fJob.getForkedJob(), fJobs);
-					JobInfo temp = new JobInfo(fJob);
-					jobsList.add(temp);
-					jobsList.remove(temp);
-					isFirst = true;
-				}
-				fJobs.add(fJob);
-
-				int forked = 0;
-				int needed = 0;
-				Integer[] neededPerClass = null;
-				boolean isFired = false;
-				if (isFirst) {
-					forked = fJob.getForkedNum();
-					needed = joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum();
-					if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof GuardJoin) {
-						neededPerClass = ((GuardJoin) joinStrategies[fJob.getForkedJob().getJobClass().getId()]).getRequiredPerClass();
-						needed = -1;
+			case NetEvent.EVENT_JOB:
+				job = message.getJob();
+				if (job instanceof ForkJob) {
+					ForkJob fJob = (ForkJob) job;
+					List<ForkJob> fJobs = forkJobs.get(fJob.getForkedJob());
+					boolean isFirst = false;
+					if (fJobs == null) {
+						fJobs = new ArrayList<ForkJob>();
+						forkJobs.put(fJob.getForkedJob(), fJobs);
+						JobInfo temp = new JobInfo(fJob);
+						jobsList.add(temp);
+						jobsList.remove(temp);
+						isFirst = true;
 					}
-					requiredPerClass.put(fJob.getForkedJob(), neededPerClass);
-					hasFired.put(fJob.getForkedJob(), false);
-				} else {
-					forked = total.get(fJob.getForkedJob());
-					needed = required.get(fJob.getForkedJob());
-					neededPerClass = requiredPerClass.get(fJob.getForkedJob());
-					isFired = hasFired.get(fJob.getForkedJob());
-				}
-				forked--;
+					fJobs.add(fJob);
 
-				if (isFired) {
-					JobInfo i = nodeJobsList.lookFor(fJob);
-					if (i != null) {
-						nodeJobsList.remove(i);
-					}
-				} else {
-					needed--;
-					required.put(fJob.getForkedJob(), needed);
-
-					boolean isGuardTrue = false;
-					if (neededPerClass != null) {
-						neededPerClass[fJob.getJobClass().getId()]--;
-						isGuardTrue = true;
-						for (Integer i: neededPerClass) {
-							isGuardTrue = isGuardTrue && (i <= 0);
+					int forked = 0;
+					int needed = 0;
+					Integer[] neededPerClass = null;
+					boolean isFired = false;
+					if (isFirst) {
+						forked = fJob.getForkedNum();
+						needed = joinStrategies[fJob.getForkedJob().getJobClass().getId()].getRequiredNum();
+						if (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof GuardJoin) {
+							neededPerClass = ((GuardJoin) joinStrategies[fJob.getForkedJob().getJobClass().getId()]).getRequiredPerClass();
+							needed = -1;
 						}
+						requiredPerClass.put(fJob.getForkedJob(), neededPerClass);
+						hasFired.put(fJob.getForkedJob(), false);
+					} else {
+						forked = total.get(fJob.getForkedJob());
+						needed = required.get(fJob.getForkedJob());
+						neededPerClass = requiredPerClass.get(fJob.getForkedJob());
+						isFired = hasFired.get(fJob.getForkedJob());
 					}
+					forked--;
 
-					boolean allArrived = (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin)
-							&& (forked == 0);
-					if (allArrived || needed == 0 || isGuardTrue) {
-						for (ForkJob j : forkJobs.get(fJob.getForkedJob())) {
-							JobInfo i = nodeJobsList.lookFor(j);
-							if (i != null) {
-								nodeJobsList.remove(i);
+					if (isFired) {
+						JobInfo i = nodeJobsList.lookFor(fJob);
+						if (i != null) {
+							nodeJobsList.remove(i);
+						}
+					} else {
+						needed--;
+						required.put(fJob.getForkedJob(), needed);
+
+						boolean isGuardTrue = false;
+						if (neededPerClass != null) {
+							neededPerClass[fJob.getJobClass().getId()]--;
+							isGuardTrue = true;
+							for (Integer i: neededPerClass) {
+								isGuardTrue = isGuardTrue && (i <= 0);
 							}
 						}
 
-						// Sends job forward
-						fJob.getForkedJob().setLastVisitedPair(fJob.getLastVisitedPair());
-						sendForward(fJob.getForkedJob(), 0.0);
-						hasFired.put(fJob.getForkedJob(), true);
+						boolean allArrived = (joinStrategies[fJob.getForkedJob().getJobClass().getId()] instanceof NormalJoin)
+								&& (forked == 0);
+						if (allArrived || needed == 0 || isGuardTrue) {
+							for (ForkJob j : forkJobs.get(fJob.getForkedJob())) {
+								JobInfo i = nodeJobsList.lookFor(j);
+								if (i != null) {
+									nodeJobsList.remove(i);
+								}
+							}
 
-						if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-							FJList.add(new JobInfo(fJob.getForkedJob()));
-							forkNode.put(fJob.getForkedJob(), fJob.getForkNode());
-						} else {
-							// Notifies fork that job has been fired
-							send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, NodeSection.OUTPUT, fJob.getForkNode());
+							// Sends job forward
+							fJob.getForkedJob().setLastVisitedPair(fJob.getLastVisitedPair());
+							sendForward(fJob.getForkedJob(), 0.0);
+							hasFired.put(fJob.getForkedJob(), true);
+
+							if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+								FJList.add(new JobInfo(fJob.getForkedJob()));
+								forkNode.put(fJob.getForkedJob(), fJob.getForkNode());
+							} else {
+								// Notifies fork that job has been fired
+								send(NetEvent.EVENT_JOIN, fJob.getForkedJob(), 0.0, NodeSection.OUTPUT, fJob.getForkNode());
+							}
 						}
 					}
-				}
 
-				if (forked > 0) {
-					total.put(fJob.getForkedJob(), forked);
+					if (forked > 0) {
+						total.put(fJob.getForkedJob(), forked);
+					} else {
+						forkJobs.remove(fJob.getForkedJob());
+						total.remove(fJob.getForkedJob());
+						required.remove(fJob.getForkedJob());
+						requiredPerClass.remove(fJob.getForkedJob());
+						hasFired.remove(fJob.getForkedJob());
+					}
 				} else {
-					forkJobs.remove(fJob.getForkedJob());
-					total.remove(fJob.getForkedJob());
-					required.remove(fJob.getForkedJob());
-					requiredPerClass.remove(fJob.getForkedJob());
-					hasFired.remove(fJob.getForkedJob());
+					// If this is not a fork job, sends it forward
+					sendForward(job, 0.0);
+					if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
+						FJList.add(new JobInfo(job));
+					}
 				}
-			} else {
-				// If this is not a fork job, sends it forward
-				sendForward(job, 0.0);
-				if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {
-					FJList.add(new JobInfo(job));
+				send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+				break;
+
+			case NetEvent.EVENT_ACK:
+				break;
+
+			case NetEvent.EVENT_JOIN:
+				job = message.getJob();
+				JobInfo jobInfo = FJList.lookFor(job);
+				if (jobInfo != null) {
+					FJList.remove(jobInfo);
 				}
-			}
-			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-			break;
+				NetNode fork = forkNode.get(job);
+				if (fork != null) {
+					forkNode.remove(job);
+					send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.OUTPUT, fork);
+				}
+				break;
 
-		case NetEvent.EVENT_ACK:
-			break;
+			case NetEvent.EVENT_JOB_RELEASE:
+				break;
 
-		case NetEvent.EVENT_JOIN:
-			job = message.getJob();
-			JobInfo jobInfo = FJList.lookFor(job);
-			if (jobInfo != null) {
-				FJList.remove(jobInfo);
-			}
-			NetNode fork = forkNode.get(job);
-			if (fork != null) {
-				forkNode.remove(job);
-				send(NetEvent.EVENT_JOIN, job, 0.0, NodeSection.OUTPUT, fork);
-			}
-			break;
+			case NetEvent.EVENT_JOB_FINISH:
+				break;
 
-		case NetEvent.EVENT_JOB_RELEASE:
-			break;
+			case NetEvent.EVENT_STOP:
+				break;
 
-		case NetEvent.EVENT_JOB_FINISH:
-			break;
-
-		case NetEvent.EVENT_STOP:
-			break;
-
-		default:
-			return MSG_NOT_PROCESSED;
+			default:
+				return MSG_NOT_PROCESSED;
 		}
 
 		// Everything is okay
@@ -261,14 +261,14 @@ public class Join extends InputSection {
 	@Override
 	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
 		switch (name) {
-		case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
-			FJList.analyzeQueueLength(jobClass, measurement);
-			break;
-		case SimConstants.FORK_JOIN_RESPONSE_TIME:
-			FJList.analyzeResponseTime(jobClass, measurement);
-			break;
-		default:
-			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
+			case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+				FJList.analyzeQueueLength(jobClass, measurement, false, 0);
+				break;
+			case SimConstants.FORK_JOIN_RESPONSE_TIME:
+				FJList.analyzeResponseTime(jobClass, measurement, false, 0);
+				break;
+			default:
+				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
 		}
 	}
 

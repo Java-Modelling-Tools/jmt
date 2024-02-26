@@ -18,7 +18,11 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.engine.NodeSections.Server;
 import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.simEngine.Simulation;
+
+import java.util.List;
 
 /**
  * This class implements a linked job info list used by processor-sharing.
@@ -28,10 +32,21 @@ public class PSJobInfoList extends LinkedJobInfoList {
 
 	/**
 	 * Creates a new JobInfoList instance.
-	 * @param numberOfJobClasses number of job classes.
+	 * @param jobClasses number of job classes.
 	 */
-	public PSJobInfoList(int numberOfJobClasses) {
-		super(numberOfJobClasses);
+	public PSJobInfoList(JobClassList jobClasses) {
+		super(jobClasses);
+	}
+
+	/**
+	 * Creates a new JobInfoList instance.
+	 * @param jobClasses job classes.
+	 * @param classCompatibilities classcompatibilities for station
+	 * @param stationName station name
+	 */
+	public PSJobInfoList(JobClassList jobClasses, Boolean[][] classCompatibilities, String stationName, List<Server.ServerType> serverTypes
+	) {
+		super(jobClasses,classCompatibilities,stationName, serverTypes);
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -52,6 +53,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.DisabledCellRenderer;
@@ -254,7 +256,8 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 
 	//adds a new class to the table and, simultaneously to the underlying model data structure
 	private void addStation() {
-		data.addStation(Defaults.get("stationName") + (++stationNameIndex), Defaults.get("stationType"));
+		data.addStation(Defaults.get("stationName") + (++stationNameIndex), Defaults.get("stationType"), 1,
+				new ArrayList<ServerType>());
 		refreshComponents();
 	}
 
@@ -492,15 +495,15 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object key = data.getStationKeys().get(rowIndex);
 			switch (columnIndex) {
-			case (0): {
-				return data.getStationName(key);
-			}
-			case (1): {
-				return data.getStationType(key);
-			}
-			default: {
-				return null;
-			}
+				case (0): {
+					return data.getStationName(key);
+				}
+				case (1): {
+					return data.getStationType(key);
+				}
+				default: {
+					return null;
+				}
 			}
 		}
 
@@ -509,14 +512,14 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object key = data.getStationKeys().get(rowIndex);
 			switch (columnIndex) {
-			case (0): {
-				data.setStationName(key, (String) aValue);
-				break;
-			}
-			case (1): {
-				data.setStationType(key, (String) aValue);
-				break;
-			}
+				case (0): {
+					data.setStationName(key, (String) aValue);
+					break;
+				}
+				case (1): {
+					data.setStationType(key, (String) aValue);
+					break;
+				}
 			}
 		}
 

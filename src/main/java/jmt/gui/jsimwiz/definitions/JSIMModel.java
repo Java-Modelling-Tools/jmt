@@ -19,6 +19,10 @@
 package jmt.gui.jsimwiz.definitions;
 
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.ServerType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -83,13 +87,13 @@ public class JSIMModel extends CommonModel {
 
 	//intercept each call for addition of a new station
 	@Override
-	public Object addStation(String name, String type) {
+	public Object addStation(String name, String type, int nextServerNum, List<ServerType> servers) {
 		if (type.equals(STATION_TYPE_SOURCE)) {
 			return src;
 		} else if (type.equals(STATION_TYPE_SINK)) {
 			return snk;
 		} else {
-			return super.addStation(name, type);
+			return super.addStation(name, type, nextServerNum, servers);
 		}
 	}
 
@@ -117,10 +121,10 @@ public class JSIMModel extends CommonModel {
 	//addition of source and sink
 	private void addSourceAndSink() {
 		if (src == null) {
-			src = super.addStation("Source", STATION_TYPE_SOURCE);
+			src = super.addStation("Source", STATION_TYPE_SOURCE, 1, new ArrayList<ServerType>());
 		}
 		if (snk == null) {
-			snk = super.addStation("Sink", STATION_TYPE_SINK);
+			snk = super.addStation("Sink", STATION_TYPE_SINK, 1, new ArrayList<ServerType>());
 		}
 		stationsKeyset.remove(src);
 		stationsKeyset.remove(snk);

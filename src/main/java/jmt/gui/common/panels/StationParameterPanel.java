@@ -435,50 +435,50 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	public void selectSectionPanel(int section, Object classKey) {
 		String type = stationData.getStationType(stationKey);
 		switch (section) {
-		case INPUT_SECTION:
-		{
-			if (hasInputSection(type)) {
-				mainPanel.setSelectedComponent(isPane);
-			} else if (hasJoinSection(type)) {
-				mainPanel.setSelectedComponent(jsPane);
-				jsPane.setSelectedClass(classKey);
-			} else if (hasSemaphoreSection(type)) {
-				mainPanel.setSelectedComponent(smPane);
-				smPane.setSelectedClass(classKey);
-			} else if (hasStorageSection(type)) {
-				mainPanel.setSelectedComponent(stPane);
-			} else if (hasEnablingSection(type)) {
-				mainPanel.setSelectedComponent(enPane);
+			case INPUT_SECTION:
+			{
+				if (hasInputSection(type)) {
+					mainPanel.setSelectedComponent(isPane);
+				} else if (hasJoinSection(type)) {
+					mainPanel.setSelectedComponent(jsPane);
+					jsPane.setSelectedClass(classKey);
+				} else if (hasSemaphoreSection(type)) {
+					mainPanel.setSelectedComponent(smPane);
+					smPane.setSelectedClass(classKey);
+				} else if (hasStorageSection(type)) {
+					mainPanel.setSelectedComponent(stPane);
+				} else if (hasEnablingSection(type)) {
+					mainPanel.setSelectedComponent(enPane);
+				}
+				break;
 			}
-			break;
-		}
-		case SERVICE_SECTION:
-		{
-			if (hasServiceSection(type)) {
-				mainPanel.setSelectedComponent(ssPane);
-			} else if (hasForkSection(type)) {
-				mainPanel.setSelectedComponent(fsPane);
-			} else if (hasLoggerSection(type)) {
-				mainPanel.setSelectedComponent(lsPane);
-			} else if (hasClassSwitchSection(type)) {
-				mainPanel.setSelectedComponent(csPane);
-			} else if (hasTimingSection(type)) {
-				mainPanel.setSelectedComponent(tiPane);
+			case SERVICE_SECTION:
+			{
+				if (hasServiceSection(type)) {
+					mainPanel.setSelectedComponent(ssPane);
+				} else if (hasForkSection(type)) {
+					mainPanel.setSelectedComponent(fsPane);
+				} else if (hasLoggerSection(type)) {
+					mainPanel.setSelectedComponent(lsPane);
+				} else if (hasClassSwitchSection(type)) {
+					mainPanel.setSelectedComponent(csPane);
+				} else if (hasTimingSection(type)) {
+					mainPanel.setSelectedComponent(tiPane);
+				}
+				break;
 			}
-			break;
-		}
-		case OUTPUT_SECTION:
-		{
-			if (hasRoutingSection(type)) {
-				mainPanel.setSelectedComponent(rsPane);
-				rsPane.setSelectedClass(classKey);
-			} else if (hasInGateWaySection(type)) {
-				mainPanel.setSelectedComponent(gsPane);
-			} else if (hasFiringSection(type)) {
-				mainPanel.setSelectedComponent(fiPane);
+			case OUTPUT_SECTION:
+			{
+				if (hasRoutingSection(type)) {
+					mainPanel.setSelectedComponent(rsPane);
+					rsPane.setSelectedClass(classKey);
+				} else if (hasInGateWaySection(type)) {
+					mainPanel.setSelectedComponent(gsPane);
+				} else if (hasFiringSection(type)) {
+					mainPanel.setSelectedComponent(fiPane);
+				}
+				break;
 			}
-			break;
-		}
 		}
 	}
 

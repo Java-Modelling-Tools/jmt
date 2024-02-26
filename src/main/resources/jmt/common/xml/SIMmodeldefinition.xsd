@@ -66,6 +66,7 @@
 						<xs:attribute name="referenceNode" type="xs:string" use="required"/>
 						<xs:attribute name="referenceUserClass" type="xs:string" use="required"/>
 						<xs:attribute name="nodeType" type="xs:string" use="optional"/>
+						<xs:attribute name="serverType" type="xs:string" use="optional"/>
 					</xs:complexType>
 				</xs:element>
 				<xs:element name="connection" maxOccurs="unbounded">

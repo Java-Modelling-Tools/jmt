@@ -21,6 +21,7 @@ package jmt.gui.common.panels;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
@@ -41,10 +42,12 @@ import javax.swing.table.TableCellRenderer;
 
 import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.framework.gui.table.editors.SpinnerCellEditor;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
@@ -123,6 +126,18 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 
 	};
 
+	private int getSpinnerMaxValue(Object classKey){
+		int maxValue=0;
+		for(int i = 0; i<data.getNumberOfDifferentServerTypes(stationKey); i++){
+			ServerType server = data.getInfoForServerType(stationKey,i);
+			if(server.isCompatible(classKey)){
+				maxValue+=server.getNumOfServers();
+			}
+		}
+
+		return maxValue;
+	}
+
 	protected AbstractAction editFeatures = new AbstractAction("Edit") {
 
 		private static final long serialVersionUID = 1L;
@@ -135,6 +150,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			DialogFactory factory = new DialogFactory(null);
 			factory.getDialog(serverFeaturePanel, "Editing Server Configuration",
 					MAX_GUI_WIDTH_SERVER_FEATURES, MAX_GUI_HEIGHT_SERVER_FEATURES, false, "", "");
+			updateServerPreferences();
+			updateSpinnersInTable();
 		}
 
 	};
@@ -197,16 +214,30 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			String queuePolicy = data.getStationQueueStrategy(stationKey);
 			//if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
 			//		|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
-				serverFeatureButton.setEnabled(true);
+			serverFeatureButton.setEnabled(true);
 			//} else {
 			//	serverFeatureButton.setEnabled(false);
 			//}
 		}
 	}
 
+	private void updateSpinnersInTable(){
+		ServiceTableModel stm = (ServiceTableModel) serviceTable.getModel();
+
+		for(int i=0; i<stm.getRowCount(); i++){
+			int maxValue = getSpinnerMaxValue(classData.getClassKeys().get(i));
+			if((Integer) stm.getValueAt(i,4) > maxValue){
+				stm.setValueAt(maxValue,i,4);
+			}
+		}
+
+		serviceTable.repaint();
+	}
+
 	private void addDataManagers() {
 		serverNumSpinner.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
+				lostFocus();
 				if (serverNumSpinner.getValue() instanceof Integer) {
 					Integer serverNum = (Integer) serverNumSpinner.getValue();
 					if (serverNum.intValue() < 1 && serverNumSpinner.isEnabled()) {
@@ -214,6 +245,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 						serverNumSpinner.setValue(serverNum);
 					}
 					data.setStationNumberOfServers(stationKey, serverNum);
+					data.updateNumOfServers(stationKey,serverNum);
+					updateSpinnersInTable();
 				}
 			}
 		});
@@ -274,7 +307,21 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			}
 		};
 
-		int[] columnSizes = new int[] { 90, 60, 150, 30 };
+		protected Integer serverNumRequired;
+
+		int[] columnSizes = new int[] { 80, 80, 150, 30, 30 };
+
+		private void initializeSpinners(){
+			ServiceTableModel stm = (ServiceTableModel) this.getModel();
+
+			for(int i=0; i<stm.getRowCount(); i++){
+				int serverNumRequired = 1;
+				if(data.getServerNumRequired(stationKey,classData.getClassKeys().get(i)) != null){
+					serverNumRequired = data.getServerNumRequired(stationKey,classData.getClassKeys().get(i));
+				}
+				stm.setValueAt(serverNumRequired,i,4);
+			}
+		}
 
 		public ServiceTable() {
 			setModel(new ServiceTableModel());
@@ -282,6 +329,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			setRowHeight(ROW_HEIGHT);
 			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			getTableHeader().setReorderingAllowed(false);
+			initializeSpinners();
 		}
 
 		@Override
@@ -292,6 +340,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				return ComboBoxCellEditor.getRendererInstance();
 			} else if (column == 3) {
 				return new DisabledButtonCellRenderer(editButton);
+			} else if (column == 4) {
+				return SpinnerCellEditor.getRendererInstance();
 			} else {
 				return super.getCellRenderer(row, column);
 			}
@@ -303,6 +353,18 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				return ComboBoxCellEditor.getEditorInstance(serviceType);
 			} else if (column == 3) {
 				return new ButtonCellEditor(new JButton(editDistribution));
+			} else if (column == 4) {
+				Object classKey = classData.getClassKeys().get(row);
+				serverNumRequired = data.getServerNumRequired(stationKey,classKey);
+				int maxValue = getSpinnerMaxValue(classKey);
+				SpinnerCellEditor instance =  SpinnerCellEditor.getEditorInstance(serverNumRequired, maxValue);
+				instance.addChangeListener(new ChangeListener() {
+					@Override
+					public void stateChanged(ChangeEvent e) {
+						ServiceSectionPanel.this.lostFocus();
+					}
+				});
+				return instance;
 			} else {
 				return super.getCellEditor(row, column);
 			}
@@ -319,8 +381,8 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 	protected class ServiceTableModel extends AbstractTableModel {
 
 		private static final long serialVersionUID = 1L;
-		private String[] columnNames = new String[] { "Class", "Strategy", "Service Time Distribution", "" };
-		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };
+		private String[] columnNames = new String[] { "Class", "Strategy", "Service Time Distribution","","Parallelism" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class, String.class };
 
 		public int getRowCount() {
 			return classData.getClassKeys().size();
@@ -359,21 +421,23 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Object classKey = classData.getClassKeys().get(rowIndex);
 			switch (columnIndex) {
-			case (0):
-				return classKey;
-			case (1):
-				// Checks if current service section is load dependent or independent
-				if (data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy) {
-					return SERVICE_LOAD_DEPENDENT;
-				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
-					return SERVICE_ZERO;
-				} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
-					return SERVICE_DISABLED;
-				} else {
-					return SERVICE_LOAD_INDEPENDENT;
-				}
-			case (2):
-				return data.getServiceTimeDistribution(stationKey, classKey);
+				case (0):
+					return classKey;
+				case (1):
+					// Checks if current service section is load dependent or independent
+					if (data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy) {
+						return SERVICE_LOAD_DEPENDENT;
+					} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy) {
+						return SERVICE_ZERO;
+					} else if (data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy) {
+						return SERVICE_DISABLED;
+					} else {
+						return SERVICE_LOAD_INDEPENDENT;
+					}
+				case (2):
+					return data.getServiceTimeDistribution(stationKey, classKey);
+				case (4):
+					return data.getServerNumRequired(stationKey,classKey);
 			}
 			return null;
 		}
@@ -383,31 +447,36 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
 			Object classKey = classData.getClassKeys().get(rowIndex);
 			switch (columnIndex) {
-			// Load dependency
-			case (1):
-				if (((String) aValue).equals(SERVICE_LOAD_DEPENDENT)) {
-					// Puts a Load Dependent Service Strategy only if previously it was different
-					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy)) {
-						data.setServiceTimeDistribution(stationKey, classKey, new LDStrategy());
+				// Load dependency
+				case (1):
+					if (((String) aValue).equals(SERVICE_LOAD_DEPENDENT)) {
+						// Puts a Load Dependent Service Strategy only if previously it was different
+						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof LDStrategy)) {
+							data.setServiceTimeDistribution(stationKey, classKey, new LDStrategy());
+						}
+					} else if (((String) aValue).equals(SERVICE_ZERO)) {
+						// Puts a Zero Service Time Strategy only if previously it was different
+						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
+							data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
+						}
+					} else if (((String) aValue).equals(SERVICE_DISABLED)) {
+						// Puts a Disabled Service Time Strategy only if previously it was different
+						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy)) {
+							data.setServiceTimeDistribution(stationKey, classKey, new DisabledStrategy());
+						}
+					} else {
+						// Puts the default service strategy only if previously it was different
+						if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof Distribution)) {
+							Object distribution = Defaults.getAsNewInstance("stationServiceStrategy");
+							data.setServiceTimeDistribution(stationKey, classKey, distribution);
+						}
 					}
-				} else if (((String) aValue).equals(SERVICE_ZERO)) {
-					// Puts a Zero Service Time Strategy only if previously it was different
-					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof ZeroStrategy)) {
-						data.setServiceTimeDistribution(stationKey, classKey, new ZeroStrategy());
+				case (4):
+					Pattern pattern = Pattern.compile("[0-9]*");
+					if(pattern.matcher(aValue.toString()).matches()) {
+						data.setServerNumRequired(stationKey, classKey, (Integer) aValue);
 					}
-				} else if (((String) aValue).equals(SERVICE_DISABLED)) {
-					// Puts a Disabled Service Time Strategy only if previously it was different
-					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof DisabledStrategy)) {
-						data.setServiceTimeDistribution(stationKey, classKey, new DisabledStrategy());
-					}
-				} else {
-					// Puts the default service strategy only if previously it was different
-					if (!(data.getServiceTimeDistribution(stationKey, classKey) instanceof Distribution)) {
-						Object distribution = Defaults.getAsNewInstance("stationServiceStrategy");
-						data.setServiceTimeDistribution(stationKey, classKey, distribution);
-					}
-				}
-			repaint();
+					repaint();
 			}
 		}
 

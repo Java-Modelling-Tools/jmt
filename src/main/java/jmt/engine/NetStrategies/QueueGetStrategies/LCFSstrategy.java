@@ -19,10 +19,7 @@
 package jmt.engine.NetStrategies.QueueGetStrategies;
 
 import jmt.engine.NetStrategies.QueueGetStrategy;
-import jmt.engine.QueueNet.Job;
-import jmt.engine.QueueNet.JobClass;
-import jmt.engine.QueueNet.JobInfo;
-import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.*;
 
 import java.util.List;
 
@@ -34,16 +31,28 @@ public class LCFSstrategy extends QueueGetStrategy {
 
 	/**
 	 * Implements the LCFS strategy.
-	 * @param Queue Job queue.
+	 * @param queue Job queue.
 	 * @return Last job in the queue.
 	 */
 	public Job get(JobInfoList queue) {
 		return queue.removeLast().getJob();
 	}
 
+	@Override
+	public Job get(JobInfoList queue, NetNode ownerNode) {
+		JobInfo job = ownerNode.getServer().findNextJobToProcessLCFS(queue);
+
+		if(ownerNode.getServer().getNumOfFreeServersForClass(job.getJob().getJobClass().getId()) > 0){
+			queue.remove(job);
+			return job.getJob();
+		}
+
+		return null;
+	}
+
 	/**
 	 * Implements the LCFS strategy.
-	 * @param Queue Job queue.
+	 * @param queue Job queue.
 	 * @param jobClass Job class.
 	 * @return Last job of specified class in the queue.
 	 */

@@ -22,9 +22,24 @@ import jmt.engine.NetStrategies.ServiceStrategy;
 
 public class LimitedPollingServer extends PollingServer {
 
-	public LimitedPollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-			ServiceStrategy[] switchoverStrategies) {
-		super(numberOfServers, numberOfVisits, serviceStrategies, switchoverStrategies);
-	}
+    public LimitedPollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                                ServiceStrategy[] switchoverStrategies) {
+        super(numberOfServers, numberOfVisits, serviceStrategies, switchoverStrategies);
+    }
+
+    public
+    LimitedPollingServer(Integer numberOfServers,
+                         Integer[] numberOfVisits,
+                         ServiceStrategy[] serviceStrategies,
+                         ServiceStrategy[] switchoverStrategies,
+                         Integer[] serverNumRequired,
+                         String[] serverNames,
+                         Integer[] serverNumOfServers,
+                         Object[] serverCompatibilities,
+                         String schedulingPolicy )
+    {
+        super(numberOfServers, numberOfVisits, serviceStrategies, switchoverStrategies,
+            serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
+    }
 
 }

@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jmt.gui.common.definitions.ServerType;
 import org.apache.xerces.parsers.DOMParser;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
@@ -87,15 +88,15 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 			HLAPIRootClass docApi = PNMLUtils.importPnmlDocument(file, false);
 			PNType type = PNMLUtils.determinePNType(docApi);
 			switch (type) {
-			case COREMODEL:
-				readCoreModel((fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI) docApi, model);
-				break;
-			case PTNET:
-				readPTNet((fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) docApi, model);
-				break;
-			default:
-				((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
-				return false;
+				case COREMODEL:
+					readCoreModel((fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI) docApi, model);
+					break;
+				case PTNET:
+					readPTNet((fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) docApi, model);
+					break;
+				default:
+					((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
+					return false;
 			}
 			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 			return true;
@@ -121,7 +122,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		Map<String, Object> nodeMap = new HashMap<String, Object>();
 		for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.PlaceHLAPI p : places) {
 			String name = (p.getName() != null) ? p.getName().getText() : p.getId();
-			Object key = model.addStation(name, STATION_TYPE_PLACE);
+			Object key = model.addStation(name, STATION_TYPE_PLACE, 1, new ArrayList<ServerType>());
 			nodeMap.put(p.getId(), key);
 
 			if (model instanceof JSimGraphModel) {
@@ -148,7 +149,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 
 		for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.TransitionHLAPI t : transitions) {
 			String name = (t.getName() != null) ? t.getName().getText() : t.getId();
-			Object key = model.addStation(name, STATION_TYPE_TRANSITION);
+			Object key = model.addStation(name, STATION_TYPE_TRANSITION, 1, new ArrayList<ServerType>());
 			nodeMap.put(t.getId(), key);
 
 			if (model instanceof JSimGraphModel) {
@@ -218,7 +219,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 		Map<String, Object> nodeMap = new HashMap<String, Object>();
 		for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {
 			String name = (p.getName() != null) ? p.getName().getText() : p.getId();
-			Object key = model.addStation(name, STATION_TYPE_PLACE);
+			Object key = model.addStation(name, STATION_TYPE_PLACE, 1, new ArrayList<ServerType>());
 			nodeMap.put(p.getId(), key);
 
 			int marking = (p.getInitialMarking() != null) ? p.getInitialMarking().getText().intValue() : 0;
@@ -251,7 +252,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 
 		for (fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI t : transitions) {
 			String name = (t.getName() != null) ? t.getName().getText() : t.getId();
-			Object key = model.addStation(name, STATION_TYPE_TRANSITION);
+			Object key = model.addStation(name, STATION_TYPE_TRANSITION, 1, new ArrayList<ServerType>());
 			nodeMap.put(t.getId(), key);
 
 			specifics = t.getToolspecificsHLAPI();
@@ -340,7 +341,7 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 
 	/**
 	 * Parses the specific graphics of a node from a root element
-	 * @param specific specific that the graphics are parsed from
+	 * @param elem specific that the graphics are parsed from
 	 * @param model data structure of the model
 	 * @param node search key for the node
 	 */

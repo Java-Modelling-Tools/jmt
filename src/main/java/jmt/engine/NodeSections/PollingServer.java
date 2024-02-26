@@ -29,6 +29,11 @@ public class PollingServer extends ServiceSection {
 	private int busyCounter;
 	private boolean needSwitchover;
 
+	public PollingServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies, ServiceStrategy[] switchOverStrategies){
+		this(numberOfServers,numberOfVisitsPerClass,serviceStrategies,switchOverStrategies,
+				null,null,null,null,null);
+	}
+
 	/**
 	 * Creates a new instance of PollingServer.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
@@ -37,7 +42,12 @@ public class PollingServer extends ServiceSection {
 	 * @param switchOverStrategies Array of switchover strategies, one per class
 	 */
 	public PollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-			ServiceStrategy[] switchOverStrategies) {
+											 ServiceStrategy[] switchOverStrategies,
+											 Integer[] serverNumRequired,
+											 String[] serverNames,
+											 Integer[] serverNumOfServers,
+											 Object[] serverCompatibilities,
+											 String schedulingPolicy ) {
 		this.numberOfServers = numberOfServers.intValue();
 		this.serviceStrategies = serviceStrategies;
 		this.switchOverStrategies = switchOverStrategies;
@@ -50,13 +60,13 @@ public class PollingServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id) throws NetException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			return jobsList.size() / numberOfServers;
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id);
+			case PROPERTY_ID_UTILIZATION:
+				return jobsList.size() / numberOfServers;
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: jobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id);
 		}
 	}
 
@@ -64,13 +74,13 @@ public class PollingServer extends ServiceSection {
 	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		switch (id) {
-		case PROPERTY_ID_UTILIZATION:
-			return jobsList.size(jobClass) / numberOfServers;
-		case PROPERTY_ID_AVERAGE_UTILIZATION:
-			return (netSystem.getTime() <= 0.0) ? 0.0
-					: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;
-		default:
-			return super.getDoubleSectionProperty(id, jobClass);
+			case PROPERTY_ID_UTILIZATION:
+				return jobsList.size(jobClass) / numberOfServers;
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+				return (netSystem.getTime() <= 0.0) ? 0.0
+						: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;
+			default:
+				return super.getDoubleSectionProperty(id, jobClass);
 		}
 	}
 
@@ -89,64 +99,64 @@ public class PollingServer extends ServiceSection {
 	protected int process(NetMessage message) throws NetException {
 		switch (message.getEvent()) {
 
-		case NetEvent.EVENT_START:
-			break;
+			case NetEvent.EVENT_START:
+				break;
 
-		case NetEvent.EVENT_JOB:
-			Job job = message.getJob();
-			if (isMine(message)) {
-				job.setServiceTime(-1.0);
-				sendForward(job, 0.0);
-			} else {
-				if (busyCounter >= maxRunningJobs) {
+			case NetEvent.EVENT_JOB:
+				Job job = message.getJob();
+				if (isMine(message)) {
+					job.setServiceTime(-1.0);
+					sendForward(job, 0.0);
+				} else {
+					if (busyCounter >= maxRunningJobs) {
+						return MSG_NOT_PROCESSED;
+					}
+
+					double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+					if (serviceTime < 0.0) {
+						serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+						job.setServiceTime(serviceTime);
+					}
+					classInService = job.getJobClass();
+					sendMe(job, serviceTime);
+
+					busyCounter++;
+					if (busyCounter < maxRunningJobs) {
+						sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
+					}
+				}
+				break;
+
+			case NetEvent.EVENT_POLLING_SERVER_NEXT:
+				if (busyCounter <= 0) {
+					waitSwitchover();
+					needSwitchover = false; // GC added
+				} else {
+					// GC: this could be a problem for an extension with multiple polling servers
+					needSwitchover = true;
+				}
+				break;
+
+			case NetEvent.EVENT_ACK:
+				if (busyCounter <= 0) {
 					return MSG_NOT_PROCESSED;
 				}
-
-				double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
-				if (serviceTime < 0.0) {
-					serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
-					job.setServiceTime(serviceTime);
-				}
-				classInService = job.getJobClass();
-				sendMe(job, serviceTime);
-
-				busyCounter++;
-				if (busyCounter < maxRunningJobs) {
+				if (busyCounter >= maxRunningJobs) {
 					sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 				}
-			}
-			break;
+				busyCounter--;
+				if (busyCounter <= 0 && needSwitchover) {
+					waitSwitchover();
+					needSwitchover = false;
+				}
+				break;
 
-		case NetEvent.EVENT_POLLING_SERVER_NEXT:
-			if (busyCounter <= 0) {
-				waitSwitchover();
-				needSwitchover = false; // GC added
-			} else {
-				// GC: this could be a problem for an extension with multiple polling servers
-				needSwitchover = true;
-			}
-			break;
 
-		case NetEvent.EVENT_ACK:
-			if (busyCounter <= 0) {
+			case NetEvent.EVENT_STOP:
+				break;
+
+			default:
 				return MSG_NOT_PROCESSED;
-			}
-			if (busyCounter >= maxRunningJobs) {
-				sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
-			}
-			busyCounter--;
-			if (busyCounter <= 0 && needSwitchover) {
-				waitSwitchover();
-				needSwitchover = false;
-			}
-			break;
-
-
-		case NetEvent.EVENT_STOP:
-			break;
-
-		default:
-			return MSG_NOT_PROCESSED;
 		}
 
 		return MSG_PROCESSED;
@@ -154,10 +164,10 @@ public class PollingServer extends ServiceSection {
 
 	private void waitSwitchover() throws NetException {
 		int walkClassID = (classInService.getId() + 1) % switchOverStrategies.length;
+		classInService = getJobClasses().get(walkClassID);
 		// the switchover time follows the distribution of the job class that is in service
 		// but it is accumulated by the next job
 		double waitTime = switchOverStrategies[classInService.getId()].wait(this, getJobClasses().get(walkClassID));
-		classInService = getJobClasses().get(walkClassID);
 		sendBackward(NetEvent.EVENT_POLLING_SERVER_READY, null, waitTime);
 	}
 

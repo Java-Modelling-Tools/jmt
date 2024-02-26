@@ -18,8 +18,7 @@
 
 package jmt.gui.common.panels;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -64,6 +63,7 @@ import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
 import jmt.gui.exact.table.BooleanCellRenderer;
 import jmt.gui.exact.table.DisabledCellRenderer;
 import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.jsimgraph.DialogFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -72,13 +72,13 @@ import jmt.gui.exact.table.ExactCellEditor;
  * Time: 16.08.15
  * Modified by Bertoli Marco 29/09/2005, 7-oct-2005
  *                           9-jan-2006  --> ComboBoxCellEditor
- *                           
+ *
  * Modified by Ashanka (May 2010):
  * Description: Resized some column's width and edited the column headings.
- * 
- * Modified by Ashanka (May 2010): 
- * Patch: Multi-Sink Perf. Index 
- * Description: Added new Performance index for capturing 
+ *
+ * Modified by Ashanka (May 2010):
+ * Patch: Multi-Sink Perf. Index
+ * Description: Added new Performance index for capturing
  * 				1. global response time (ResponseTime per Sink)
  *              2. global throughput (Throughput per Sink)
  *              each sink per class.
@@ -408,6 +408,17 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private JButton deleteButton = new JButton(deleteMeasure);
 
+		private Object measureKey;
+
+		JButton editButton = new JButton() {
+
+			private static final long serialVersionUID = 1L;
+
+			{
+				setText("Edit");
+			}
+		};
+
 		public MeasureTable() {
 			setModel(new MeasureTableModel());
 			setDefaultEditor(Double.class, new ExactCellEditor());
@@ -430,13 +441,38 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			}
 		}
 
+		protected AbstractAction advancedConfigurations = new AbstractAction("Edit") {
+
+			private static final long serialVersionUID = 1L;
+
+			{
+				putValue(Action.SHORT_DESCRIPTION, "Metric Advanced Configurations");
+			}
+
+			public void actionPerformed(ActionEvent e) {
+				Container parent = MeasurePanel.this;
+				while (!(parent instanceof Frame) ){
+					parent = parent.getParent();
+				}
+
+				new DialogFactory((Frame) parent).getDialog(new MetricConfigurationsPanel(simData,  stationData, measureKey), "Define Advanced Metric Configurations",
+						500,
+						275,
+						true, "JSIMMeasuresDefWindowWidth", "JSIMMeasuresDefWindowHeight");
+				repaint();
+			}
+		};
+
 		@Override
 		public TableCellEditor getCellEditor(int row, int column) {
 			Object key = simData.getMeasureKeys().get(row);
+			measureKey = key;
 			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
 					simData.getMeasureStation(key), simData.getMeasureClass(key));
-			if (column == 6) {
+			if (column == 7) {
 				return new ButtonCellEditor(deleteButton);
+			} else if(column == 6){
+				return new ButtonCellEditor(new JButton(advancedConfigurations));
 			} else if (column == 2) {
 				if (measure.type.equals(SimulationDefinition.MEASURE_RT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_BR)
@@ -468,12 +504,12 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					vector.removeAll(stationData.getStationKeysClassSwitch());
 					vector.removeAll(stationData.getStationKeysRouter());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_AR)) {  
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_AR)) {
 					Vector<Object> vector = new Vector<Object>();
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 					vector.removeAll(stationData.getFCRegionKeys());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_U)) {  
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_U)) {
 					Vector<Object> vector = new Vector<Object>();
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 					vector.removeAll(stationData.getStationKeysTransition());
@@ -484,7 +520,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					vector.removeAll(stationData.getFJKeys());
 					vector.removeAll(stationData.getStationKeysRouter());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_EU)) {  
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_EU)) {
 					Vector<Object> vector = new Vector<Object>();
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
 					vector.removeAll(stationData.getStationKeysTransition());
@@ -496,7 +532,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					vector.removeAll(stationData.getFJKeys());
 					vector.removeAll(stationData.getStationKeysRouter());
 					return stationsCombos.getEditor(vector);
-				} else if (measure.type.equals(SimulationDefinition.MEASURE_OT) 
+				} else if (measure.type.equals(SimulationDefinition.MEASURE_OT)
 						|| measure.type.equals(SimulationDefinition.MEASURE_OS)) {
 					Vector<Object> vector = new Vector<Object>();
 					vector.addAll(stationData.getStationRegionKeysNoSourceSink());
@@ -580,8 +616,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			Object key = simData.getMeasureKeys().get(row);
 			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
 					simData.getMeasureStation(key), simData.getMeasureClass(key));
-			if (column == 6) {
+			if (column == 7) {
 				return new ButtonCellEditor(deleteButton);
+			} else if (column == 6){
+				return new DisabledButtonCellRenderer(editButton);
 			} else if (column == 3) {
 				return new BooleanCellRenderer();
 			} else if (column == 2) {
@@ -591,7 +629,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 					return stationsCombos.getRenderer();
 				}
 			} else if (column == 1) {
-				if (measure.type.equals(SimulationDefinition.MEASURE_FX)) {
+				if (measure.type != null && measure.type.equals(SimulationDefinition.MEASURE_FX)) {
 					return modesCombos.getRenderer();
 				} else {
 					return classesCombos.getRenderer();
@@ -607,9 +645,9 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 		private static final long serialVersionUID = 1L;
 
-		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/System", "Save Stats", "Conf.Int.", "Max Rel.Err.", "" };
-		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class };
-		public int[] columnWidths = new int[] { 120, 80, 120, 30, 60, 60, 20 };
+		private String[] columnNames = new String[] { "Performance Index", "Class/Mode", "Station/Region/System", "Save Stats", "Conf.Int.", "Max Rel.Err.", "Config.", "" };
+		private Class<?>[] columnClasses = new Class[] { String.class, String.class, String.class, Boolean.class, Double.class, Double.class, Object.class, Object.class };
+		public int[] columnWidths = new int[] { 100, 80, 120, 30, 50, 50, 40, 20 };
 
 		public int getRowCount() {
 			return simData.getMeasureKeys().size();
@@ -635,8 +673,16 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			if (columnIndex == 0) {
 				return false;
 			}
-
 			Object key = simData.getMeasureKeys().get(rowIndex);
+
+			if(columnIndex == 6){
+				Object stationKey = simData.getMeasureStation(key);
+				if(stationData.isServerTypeKey(stationKey)){
+					return true;
+				}
+				return stationKey != null && stationData.getNumberOfDifferentServerTypes(stationKey) > 0;
+			}
+
 			if(columnIndex == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_NS)){
 				return false;
 			}
@@ -649,18 +695,22 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			Measure measure = getExplicitMeasure(simData.getMeasureType(key),
 					simData.getMeasureStation(key), simData.getMeasureClass(key));
 			switch (columnIndex) {
-			case 0: 
-				return measure.type;
-			case 1: 
-				return measure.classKey;
-			case 2: 
-				return measure.stationKey;
-			case 3: 
-				return simData.getMeasureLog(key);
-			case 4: 
-				return simData.getMeasureAlpha(key);
-			case 5: 
-				return simData.getMeasurePrecision(key);
+				case 0:
+					return measure.type;
+				case 1:
+					return measure.classKey;
+				case 2:
+					Object serverTypeKey = simData.getMeasureServerTypeKey(key);
+					if (serverTypeKey != null) {
+						return serverTypeKey;
+					}
+					return measure.stationKey;
+				case 3:
+					return simData.getMeasureLog(key);
+				case 4:
+					return simData.getMeasureAlpha(key);
+				case 5:
+					return simData.getMeasurePrecision(key);
 			}
 			return null;
 		}
@@ -670,45 +720,45 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 			Object key = simData.getMeasureKeys().get(rowIndex);
 			Measure measure = null;
 			switch (columnIndex) {
-			case 0: 
-				measure = getImplicitMeasure(key, (String) aValue, getValueAt(rowIndex, 2), getValueAt(rowIndex, 1));
-				simData.setMeasureType(measure.type, key);
-				simData.setMeasureStation(measure.stationKey, key);
-				simData.setMeasureClass(measure.classKey, key);
-				fireTableRowsUpdated(rowIndex, rowIndex);
-				break;
-			case 1: 
-				measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), getValueAt(rowIndex, 2), aValue);
-				simData.setMeasureType(measure.type, key);
-				simData.setMeasureStation(measure.stationKey, key);
-				simData.setMeasureClass(measure.classKey, key);
-				fireTableRowsUpdated(rowIndex, rowIndex);
-				break;
-			case 2: 
-				measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), aValue, getValueAt(rowIndex, 1));
-				simData.setMeasureType(measure.type, key);
-				simData.setMeasureStation(measure.stationKey, key);
-				simData.setMeasureClass(measure.classKey, key);
-				fireTableRowsUpdated(rowIndex, rowIndex);
-				break;
-			case 3: 
-				simData.setMeasureLog((Boolean) aValue, key);
-				break;
-			case 4: 
-				try {
-					String doubleVal = (String) aValue;
-					simData.setMeasureAlpha(Double.valueOf(doubleVal), key);
-				} catch (NumberFormatException e) {
+				case 0:
+					measure = getImplicitMeasure(key, (String) aValue, getValueAt(rowIndex, 2), getValueAt(rowIndex, 1));
+					simData.setMeasureType(measure.type, key);
+					simData.setMeasureStation(simData.getMeasureStation(key), key);
+					simData.setMeasureClass(measure.classKey, key);
+					fireTableRowsUpdated(rowIndex, rowIndex);
+					break;
+				case 1:
+					measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), getValueAt(rowIndex, 2), aValue);
+					simData.setMeasureType(measure.type, key);
+					simData.setMeasureStation(simData.getMeasureStation(key), key);
+					simData.setMeasureClass(measure.classKey, key);
+					fireTableRowsUpdated(rowIndex, rowIndex);
+					break;
+				case 2:
+					measure = getImplicitMeasure(key, (String) getValueAt(rowIndex, 0), aValue, getValueAt(rowIndex, 1));
+					simData.setMeasureType(measure.type, key);
+					simData.setMeasureStation(measure.stationKey, key);
+					simData.setMeasureClass(measure.classKey, key);
+					fireTableRowsUpdated(rowIndex, rowIndex);
+					break;
+				case 3:
+					simData.setMeasureLog((Boolean) aValue, key);
+					break;
+				case 4:
+					try {
+						String doubleVal = (String) aValue;
+						simData.setMeasureAlpha(Double.valueOf(doubleVal), key);
+					} catch (NumberFormatException e) {
+					}
+					break;
+				case 5:
+					try {
+						String doubleVal = (String) aValue;
+						simData.setMeasurePrecision(Double.valueOf(doubleVal), key);
+					} catch (NumberFormatException e) {
+					}
+					break;
 				}
-				break;
-			case 5: 
-				try {
-					String doubleVal = (String) aValue;
-					simData.setMeasurePrecision(Double.valueOf(doubleVal), key);
-				} catch (NumberFormatException e) {
-				}
-				break;
-			}
 		}
 
 	}
@@ -820,13 +870,36 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 	protected class Measure {
 
 		public String type;
-		public Object stationKey; 
+		public Object stationKey;
 		public Object classKey;
 
 		public Measure(String type, Object stationKey, Object classKey) {
 			this.type = type;
 			this.stationKey = stationKey;
 			this.classKey = classKey;
+		}
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+		public DisabledButtonCellRenderer(JButton jbutt) {
+			super(jbutt);
+			button = jbutt;
+		}
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+			if (table.isCellEditable(row, column)) {
+				button.setEnabled(true);
+			} else {
+				button.setEnabled(false);
+			}
+			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
 
 	}
