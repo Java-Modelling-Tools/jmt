@@ -4762,7 +4762,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		StationData sd = (StationData) stationDataHM.get(stationKey);
 		ServerType server = new ServerType(serverName, serverNumOfServers, key, stationKey, sd.serverTypes.size());
 		for(int i = 0; i < classesKeyset.size(); i++){
-			if (serverCompatibilities.get(i)) {
+			if (serverCompatibilities == null || serverCompatibilities.get(i)) {
 				server.addCompatibility(classesKeyset.get(i));
 			}
 		}
