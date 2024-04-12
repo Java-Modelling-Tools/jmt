@@ -167,7 +167,19 @@ public abstract class NodeSection {
 
 	//TODO: alternatively one can override particular components
 	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws NetException{
-		analyze(measureName, jobClass, measurement, false, 0);
+		String name = measurement.getName();
+		boolean isServerType = false;
+		int serverTypeId = 0;
+		if (getServerTypes() != null) {
+			for (Server.ServerType serverType : getServerTypes()) {
+				if (name.startsWith(serverType.getName())) {
+					isServerType = true;
+					serverTypeId = serverType.getId();
+					break;
+				}
+			}
+		}
+		analyze(measureName, jobClass, measurement, isServerType, serverTypeId);
 	}
 
 	/**

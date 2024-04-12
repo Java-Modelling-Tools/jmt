@@ -43,7 +43,7 @@ public class FCFSstrategy extends QueueGetStrategy {
 
 		JobInfo job = ownerNode.getServer().findNextJobToProcessFCFS(queue);
 
-		if(ownerNode.getServer().getNumOfFreeServersForClass(job.getJob().getJobClass().getId()) > 0){
+		if(job != null){
 			queue.remove(job);
 			return job.getJob();
 		}

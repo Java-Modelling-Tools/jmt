@@ -447,7 +447,7 @@ public class NetNode extends SimEntity {
 	/** Returns class compatibilities for specific node
 	 */
 	public Boolean[][] getClassCompatibilities(){
-		if (serviceSection != null && serviceSection.getClass() == Server.class) {
+		if (serviceSection != null && Server.class.isAssignableFrom(serviceSection.getClass())) {
 			return serviceSection.getClassCompatibilities();
 		}
 		return null;
@@ -456,7 +456,7 @@ public class NetNode extends SimEntity {
 	/** Returns server types for specific node
 	 */
 	public List<Server.ServerType> getServerTypes() {
-		if (serviceSection != null && serviceSection.getClass() == Server.class) {
+		if (serviceSection != null && Server.class.isAssignableFrom(serviceSection.getClass())) {
 			return serviceSection.getServerTypes();
 		}
 		return null;

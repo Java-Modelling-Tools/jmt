@@ -546,6 +546,15 @@ public class Queue extends InputSection {
 										isJobInQueue = false;
 									}
 								}
+							} else if (server != null && server.hasFreeServers()) {
+								if (jobsList.size() > 0) {
+									jobSent = getStrategy.get(jobsList, getOwnerNode());
+									if (jobSent != null) {
+										sendForward(jobSent, 0.0);
+									}
+								} else if (server.getNumOfFreeServersForClass(job.getJobClass().getId()) > 0) {
+									sendForward(job, 0.0);
+								}
 							}
 						}
 					}
@@ -740,7 +749,7 @@ public class Queue extends InputSection {
 						for(int j = 0; j < jobClasses.size(); j++){
 							int availableJobNumber = storageSituation.getEntry(nodeName, j);
 							int requiredJobNumber = inhibitingConditions[mode].getEntry(nodeName, j);
-							if(requiredJobNumber > 0 && availableJobNumber > requiredJobNumber){
+							if(requiredJobNumber > 0 && availableJobNumber >= requiredJobNumber){
 								enablingDegree = 0;
 								break OUTER_LOOP;
 							}

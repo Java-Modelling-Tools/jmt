@@ -95,7 +95,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("placeQueueStrategy", QUEUE_STRATEGY_FCFS);
 		def.setProperty("placeDropRule", FINITE_DROP);
 		def.setProperty("transitionModeName", "Mode");
-		def.setProperty("transitionModeNumberOfServers", "-1");
+		def.setProperty("transitionModeNumberOfServers", "1");
 		def.setProperty("transitionTimedModeFiringTimeDistribution", "jmt.gui.common.distributions.Exponential");
 		def.setProperty("transitionTimedModeFiringPriority", "-1");
 		def.setProperty("transitionTimedModeFiringWeight", "1.0");

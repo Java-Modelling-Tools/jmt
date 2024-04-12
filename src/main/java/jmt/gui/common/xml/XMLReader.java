@@ -2481,8 +2481,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			NodeList classSoftDeadlines = region.getElementsByTagName(XML_E_CLASSDUEDATE);
 			for (int j = 0; j < classSizes.getLength(); j++) {
 				Element classSoftDeadline = (Element) classSoftDeadlines.item(j);
-				model.setRegionClassSoftDeadline(key, classes.get(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_CLASS)),
-						Double.valueOf(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_DUEDATE)));
+				if (classSoftDeadline != null) {
+					model.setRegionClassSoftDeadline(key, classes.get(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_CLASS)),
+							Double.valueOf(classSoftDeadline.getAttribute(XML_A_CLASSDUEDATE_DUEDATE)));
+				}
 			}
 
 			// Now parses group constraints

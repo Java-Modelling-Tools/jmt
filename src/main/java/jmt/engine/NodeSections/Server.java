@@ -451,21 +451,20 @@ public class Server extends ServiceSection {
 			Job job = jobInfo.getJob();
 
 			int classId = job.getJobClass().getId();
-			if(classesId.contains(classId)){
+			if(classesId.contains(getJobClasses().get(classId))){
 				List<ServerType> compatibleServers = getCompatibleServers(availableServers, classId);
 				if(getNumOfFreeServersForClassFromCompatibleServers(compatibleServers, classId)
 						>= serverNumRequired[classId]){
 					return jobInfo;
 				}else{
-					availableServers.removeAll(compatibleServers);
 					classesId.remove(getJobClasses().get(classId));
 					if(classesId.size() == 0 || availableServers.size() == 0){
-						return queue.getFirstJob();
+						break;
 					}
 				}
 			}
 		}
-		return queue.getFirstJob();
+		return null;
 	}
 
 	public int getServerRequired(int class_id){
@@ -490,6 +489,15 @@ public class Server extends ServiceSection {
 				busyCounterPerClass[i] += change;
 			}
 		}
+	}
+
+	public boolean hasFreeServers() {
+		for (ServerType serverType : getServerTypes()) {
+			if (serverType.getNumberOfFreeServers() > 0) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 
@@ -598,10 +606,9 @@ public class Server extends ServiceSection {
 		//ALIS
 		if(schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS)) {
 			for (ServerType serverType : moveAtTheBack) {
-				serverTypes.remove(serverType);
-				if(serverType.getNumberOfFreeServers() > 0) {
-					serverTypes.add(0, new ServerType(serverType.getName(), serverType.getNumberOfFreeServers(),
-							serverType.getCompatibilities(), serverType.getId()));
+				if(serverType.getNumberOfFreeServers() == 0) {
+					serverTypes.remove(serverType);
+					serverTypes.add(serverType);
 				}
 			}
 		}
@@ -624,16 +631,10 @@ public class Server extends ServiceSection {
 
 		for(BusyServer busyServer: busyServers){
 			int numOfBusyServers = busyServer.getNumOfBusyServers();
-			//ALIS
-			if(schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS)) {
-				serverTypes.add(new ServerType(busyServer.getName(),
-						numOfBusyServers,busyServer.getCompatibilities(),busyServer.getId()));
-			}else {
-				for (ServerType serverType : serverTypes) {
-					if (serverType.getId() == busyServer.getId()) {
-						serverType.decrementBusyCounter(numOfBusyServers);
-						break;
-					}
+			for (ServerType serverType : serverTypes) {
+				if (serverType.getId() == busyServer.getId()) {
+					serverType.decrementBusyCounter(numOfBusyServers);
+					break;
 				}
 			}
 			changeBusyCounters(-numOfBusyServers, busyServer.getCompatibilities());
@@ -769,9 +770,7 @@ public class Server extends ServiceSection {
 						enterJob(job);
 					}
 
-					busyCounterForJob = getBusyCounterForClass(job.getJobClass().getId());
-					if (busyCounterForJob + num <= numberOfServersForJob
-							&& numberOfServersForJob - busyCounterForJob >= maxParalellism) {
+					if (hasFreeServers()) {
 						//sends an ack to the input section (remember not to propagate
 						//this ack again when computation is finished)
 						sendBackward(NetEvent.EVENT_ACK, job, 0.0);
@@ -813,16 +812,13 @@ public class Server extends ServiceSection {
 					if (busyCounterForJob2 <= 0) {
 						//it was not waiting for any job
 						return MSG_NOT_PROCESSED;
-					} else if ((busyCounterForJob2 == numberOfServersForJob2 || numberOfServersForJob2 - busyCounterForJob2 <= num2) /*&& numberOfServers - busyCounter >= maxParalellism*/) {
-						//busyCounter -= num2;
+					} else if (busyCounterForJob2 == numberOfServersForJob2 || numberOfServersForJob2 - busyCounterForJob2 <= num2) {
 						exitJob(job2);
-						busyCounterForJob2 = getBusyCounterForClass(job2.getJobClass().getId());
 						// Sends a request to the input section
-						if (numberOfServersForJob2 - busyCounterForJob2 >= maxParalellism)
+						if (hasFreeServers())
 							sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 					} else {
 						// Avoid ACK as we already sent ack
-						//busyCounter-=num2;
 						exitJob(job2);
 					}
 				} else {
@@ -830,15 +826,12 @@ public class Server extends ServiceSection {
 						//it was not waiting for any job
 						return MSG_NOT_PROCESSED;
 					} else if (numberOfServersForJob2 - busyCounterForJob2 > num2) {
-						//busyCounter -= num2;
 						exitJob(job2);
-						busyCounterForJob2 = getBusyCounterForClass(job2.getJobClass().getId());
 						// Sends a request to the input section
-						if(numberOfServersForJob2 - busyCounterForJob2 >= maxParalellism)
+						if(hasFreeServers())
 							sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);
 					} else {
 						// Avoid ACK as we already sent ack
-						//busyCounter-=num2;
 						exitJob(job2);
 					}
 				}
