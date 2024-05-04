@@ -18,8 +18,7 @@
 
 package jmt.engine.NodeSections;
 
-import java.util.Arrays;
-import java.util.Iterator;
+import java.util.*;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.PSStrategy;
@@ -38,6 +37,8 @@ import jmt.engine.QueueNet.PSJobInfo;
 import jmt.engine.QueueNet.PSJobInfoList;
 import jmt.engine.simEngine.RemoveToken;
 
+import static jmt.gui.common.CommonConstants.*;
+
 /**
  * <p><b>Name:</b> PSServer</p>
  * <p><b>Description:</b>
@@ -48,13 +49,16 @@ import jmt.engine.simEngine.RemoveToken;
  * @author Bertoli Marco
  * @version 1.0
  */
-public class PSServer extends ServiceSection {
+public class PSServer extends Server {
 
 	private int numberOfServers;
 	private int maxRunningJobs;
 	private ServiceStrategy[] serviceStrategies;
 	private PSStrategy[] psStrategies;
 	private double[] serviceWeights;
+
+	private int totalNumberOfServers;
+	private int[] compatibleServersForClass;
 
 	/** Tells which inner event we are processing */
 	private enum PSEvent {
@@ -66,17 +70,22 @@ public class PSServer extends ServiceSection {
 	private JobClassList jobClasses;
 	private PSJobInfoList psJobsList;
 	private double[] serviceFractions;
+	private double[][] serviceFractionsPerServerType;
+	private int[][] assignedJobs;
+	private final HashMap<Integer, Integer> jobAssignments = new HashMap<>();
+	private List<ServerType> orderedServerTypes;
+	private String schedulingPolicy;
 
 	private RemoveToken messageToken;
 	private PSJobInfo messageJobInfo;
 	private double messageSendTime;
 
-	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) {
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);
 	}
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-									PSStrategy[] psStrategies, Double[] serviceWeights) {
+									PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights, null, null, null, null, null);
 	}
 
@@ -95,8 +104,8 @@ public class PSServer extends ServiceSection {
 									String[] serverNames,
 									Integer[] serverNumOfServers,
 									Object[] serverCompatibilities,
-									String schedulingPolicy) {
-		super(false);
+									String schedulingPolicy) throws NetException {
+		super(numberOfServers,numberOfVisits,serviceStrategies,null,serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
 		this.numberOfServers = numberOfServers.intValue();
 		if (maxRunningJobs == null) {
 			this.maxRunningJobs = -1;
@@ -124,6 +133,27 @@ public class PSServer extends ServiceSection {
 			}
 		}
 		busyCounter = 0;
+		if (schedulingPolicy == null) {
+			schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;
+		}
+		this.schedulingPolicy = schedulingPolicy;
+	}
+
+	@Override
+	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serverNumOfServers, Object[] serverCompatibilities) throws NetException {
+		super.initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
+		totalNumberOfServers = 0;
+		compatibleServersForClass = new int[serverNumRequired.length];
+		for (ServerType serverType: getServerTypes()) {
+			totalNumberOfServers += serverType.getNumOfServers();
+			for (int i = 0; i < serverNumRequired.length; i++) {
+				if (serverType.getCompatibilities()[i]) {
+					compatibleServersForClass[i] += serverType.getNumOfServers();
+				}
+			}
+		}
+		assignedJobs = new int[serverNames.length][serverNumRequired.length];
+		orderedServerTypes = new ArrayList<>(getServerTypes());
 	}
 
 	@Override
@@ -161,6 +191,7 @@ public class PSServer extends ServiceSection {
 
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
+		super.nodeLinked(node);
 		int stationCapacity = ((Queue) getOwnerNode().getSection(NodeSection.INPUT)).getStationCapacity();
 		if (maxRunningJobs <= 0) {
 			maxRunningJobs = stationCapacity;
@@ -175,6 +206,7 @@ public class PSServer extends ServiceSection {
 		psJobsList.setNumberOfServers(numberOfServers);
 		serviceFractions = new double[jobClasses.size()];
 		Arrays.fill(serviceFractions, 0.0);
+		serviceFractionsPerServerType = new double[getServerTypes().size()][jobClasses.size()];
 	}
 
 	@Override
@@ -191,6 +223,7 @@ public class PSServer extends ServiceSection {
 					performServiceTimes(messageSendTime);
 					handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);
 					messageToken = null;
+					unassignJob(job);
 					sendForward(job, 0.0);
 				} else {
 					if (maxRunningJobs > 0 && busyCounter >= maxRunningJobs) {
@@ -207,6 +240,7 @@ public class PSServer extends ServiceSection {
 					double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
 					jobInfo.setServiceTime(serviceTime);
 					jobInfo.setResidualServiceTime(serviceTime);
+					assignJob(job);
 					busyCounter++;
 					if (maxRunningJobs <= 0 || busyCounter < maxRunningJobs) {
 						sendBackward(NetEvent.EVENT_ACK, job, 0.0);
@@ -236,6 +270,43 @@ public class PSServer extends ServiceSection {
 		return MSG_PROCESSED;
 	}
 
+	private void assignJob(Job job) {
+		double minJobs = psJobsList.size() + 1;
+		int minServer = 0;
+		int classId = job.getJobClass().getId();
+		for (ServerType serverType : orderedServerTypes) {
+			int serverId = serverType.getId();
+			if (serverType.getCompatibilities()[classId]) {
+				double jobsInServer = 0;
+				for (int i = 0; i < jobClasses.size(); i++) {
+					jobsInServer += assignedJobs[serverId][i];
+				}
+				jobsInServer /= serverType.getNumOfServers();
+				if (jobsInServer < minJobs) {
+					minJobs = jobsInServer;
+					minServer = serverId;
+					if (jobsInServer == 0) {
+						break;
+					}
+				}
+			}
+		}
+		assignedJobs[minServer][classId]++;
+		jobAssignments.put(job.getId(), minServer);
+		if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_RAIS)) {
+			Collections.shuffle(orderedServerTypes);
+		} else if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS) || schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FAIRNESS)) {
+			orderedServerTypes.remove(getServerTypes().get(minServer));
+			orderedServerTypes.add(getServerTypes().get(minServer));
+		}
+	}
+
+	private void unassignJob(Job job) {
+		int assignedServer = jobAssignments.get(job.getId());
+		jobAssignments.remove(job.getId());
+		assignedJobs[assignedServer][job.getJobClass().getId()]--;
+	}
+
 	private void performServiceTimes(double startTime) {
 		Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
 		NetSystem netSystem = getOwnerNode().getNetSystem();
@@ -244,7 +315,7 @@ public class PSServer extends ServiceSection {
 			int jobClassID = jobInfo.getJob().getJobClass().getId();
 			// Perform service for the job
 			double elapsedTime = netSystem.getTime() - startTime;
-			double serviceTime = elapsedTime * numberOfServers * serviceFractions[jobClassID];
+			double serviceTime = elapsedTime * compatibleServersForClass[jobClassID] * serviceFractions[jobClassID];
 			jobInfo.performServiceTime(serviceTime);
 		}
 	}
@@ -253,6 +324,7 @@ public class PSServer extends ServiceSection {
 		JobClass jobClass = jobInfo.getJob().getJobClass();
 		if (event == PSEvent.JOB_IN) {
 			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
+			psJobsList.psUpdateUtilizationPerServerType(serviceFractionsPerServerType, assignedJobs);
 			psJobsList.add(jobInfo);
 		} else {
 			NetSystem netSystem = getOwnerNode().getNetSystem();
@@ -265,43 +337,61 @@ public class PSServer extends ServiceSection {
 			psJobsList.psUpdateSojournTime(jobClass, sojournTime);
 			psJobsList.psUpdateQueueTime(jobClass, queueTime);
 			psJobsList.psUpdateUtilization(jobClass, serviceFractions);
+			psJobsList.psUpdateUtilizationPerServerType(serviceFractionsPerServerType, assignedJobs);
 			psJobsList.remove(jobInfo);
 		}
 	}
 
 	private void updateServiceFractions() {
-		if (psJobsList.size() <= numberOfServers) {
+		for (int i = 0; i < jobClasses.size(); i++) {
+			serviceFractions[i] = 0;
+		}
+		for (ServerType serverType : getServerTypes()) {
+			Boolean[] compatibilities = serverType.getCompatibilities();
+			double numOfServers = serverType.getNumOfServers();
+			int serverTypeId = serverType.getId();
+			int totalJobsInServer = 0;
+			double[] splits = new double[jobClasses.size()];
 			for (int i = 0; i < jobClasses.size(); i++) {
-				JobClass jobClass = jobClasses.get(i);
-				if (psJobsList.size(jobClass) <= 0) {
-					serviceFractions[i] = 0.0;
-				} else {
-					serviceFractions[i] = 1.0 / numberOfServers;
+				serviceFractionsPerServerType[serverTypeId][i] = 0;
+				if (assignedJobs[serverTypeId][i] > 0) {
+					totalJobsInServer += assignedJobs[serverTypeId][i];
+					splits[i] = (double) assignedJobs[serverTypeId][i] / psJobsList.size(jobClasses.get(i));
 				}
 			}
-		} else {
-			boolean[] serviceSaturated = new boolean[jobClasses.size()];
-			Arrays.fill(serviceSaturated, false);
-			double residualCapacity = numberOfServers;
-			boolean allocationComplete = false;
-			while (!allocationComplete) {
+			if (totalJobsInServer <= numOfServers) {
 				for (int i = 0; i < jobClasses.size(); i++) {
-					if (!serviceSaturated[i]) {
-						JobClass jobClass = jobClasses.get(i);
-						serviceFractions[i] = psStrategies[i].slice(psJobsList, jobClasses, serviceWeights, serviceSaturated, jobClass)
-								* (residualCapacity / numberOfServers);
+					if (assignedJobs[serverTypeId][i] > 0) {
+						serviceFractionsPerServerType[serverTypeId][i] = 1.0 / numOfServers;
 					}
 				}
-				allocationComplete = true;
-				for (int i = 0; i < jobClasses.size(); i++) {
-					if (serviceFractions[i] > 1.0 / numberOfServers) {
-						JobClass jobClass = jobClasses.get(i);
-						serviceFractions[i] = 1.0 / numberOfServers;
-						residualCapacity -= psJobsList.size(jobClass);
-						serviceSaturated[i] = true;
-						allocationComplete = false;
+			} else {
+				boolean[] serviceSaturated = new boolean[jobClasses.size()];
+				Arrays.fill(serviceSaturated, false);
+				double residualCapacity = numOfServers;
+				boolean allocationComplete = false;
+				while (!allocationComplete) {
+					for (int i = 0; i < jobClasses.size(); i++) {
+						if (!serviceSaturated[i] && splits[i] > 0) {
+							JobClass jobClass = jobClasses.get(i);
+							serviceFractionsPerServerType[serverTypeId][i] = psStrategies[i].slice(psJobsList, jobClasses, serviceWeights, serviceSaturated, jobClass, compatibilities, splits)
+									* (residualCapacity / numOfServers);
+						}
+					}
+					allocationComplete = true;
+					for (int i = 0; i < jobClasses.size(); i++) {
+						if (serviceFractionsPerServerType[serverTypeId][i] > 1.0 / numOfServers) {
+							JobClass jobClass = jobClasses.get(i);
+							serviceFractionsPerServerType[serverTypeId][i] = 1.0 / numOfServers;
+							residualCapacity -= psJobsList.size(jobClass);
+							serviceSaturated[i] = true;
+							allocationComplete = false;
+						}
 					}
 				}
+			}
+			for (int i = 0; i < jobClasses.size(); i++) {
+				serviceFractions[i] += serviceFractionsPerServerType[serverTypeId][i] * splits[i] * numOfServers / compatibleServersForClass[i];
 			}
 		}
 	}
@@ -313,7 +403,7 @@ public class PSServer extends ServiceSection {
 			while (it.hasNext()) {
 				PSJobInfo jobInfo = (PSJobInfo) it.next();
 				int jobClassID = jobInfo.getJob().getJobClass().getId();
-				double waitTime = jobInfo.getResidualServiceTime() / (numberOfServers * serviceFractions[jobClassID]);
+				double waitTime = jobInfo.getResidualServiceTime() / (compatibleServersForClass[jobClassID] * serviceFractions[jobClassID]);
 				if (waitTime < minWaitTime) {
 					messageJobInfo = jobInfo;
 					minWaitTime = waitTime;

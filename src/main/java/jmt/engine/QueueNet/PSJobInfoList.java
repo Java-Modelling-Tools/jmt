@@ -114,4 +114,30 @@ public class PSJobInfoList extends LinkedJobInfoList {
 		}
 	}
 
+	public void psUpdateUtilizationPerServerType(double[][] serviceFractionsPerServerType, int[][] assignedJobs) {
+		if (utilizationPerServerType != null) {
+			for (int s = 0; s < serviceFractionsPerServerType.length; s++) {
+				Measure m = utilizationPerServerType[s];
+				if (m != null) {
+					double sample = 0;
+					for (int c = 0; c < numberOfJobClasses; c++) {
+						sample += assignedJobs[s][c] * serviceFractionsPerServerType[s][c];
+					}
+					m.update(sample, getTime() - getLastModifyTime());
+				}
+			}
+		}
+
+		if (utilizationPerServerTypePerClass != null) {
+			for (int s = 0; s < serviceFractionsPerServerType.length; s++) {
+				for (int c = 0; c < numberOfJobClasses; c++) {
+					Measure m = utilizationPerServerTypePerClass[s][c];
+					if (m != null) {
+						m.update(assignedJobs[s][c] * serviceFractionsPerServerType[s][c], getTime() - getLastModifyTime());
+					}
+				}
+			}
+		}
+	}
+
 }

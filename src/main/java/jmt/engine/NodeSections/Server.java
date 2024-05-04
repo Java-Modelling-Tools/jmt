@@ -202,7 +202,25 @@ public class Server extends ServiceSection {
 			}
 			this.serverNumRequired[i] = val;
 			maxParalellism = Math.max(maxParalellism, this.serverNumRequired[i]);
-			//System.out.println(this.serverNumRequired[i]);
+		}
+
+		if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALFS)) {
+			Collections.sort(serverTypes, new Comparator<ServerType>() {
+				@Override
+				public int compare(ServerType o1, ServerType o2) {
+					Boolean[] c1 = o1.getCompatibilities();
+					Boolean[] c2 = o2.getCompatibilities();
+					int ctr = 0;
+					for (int i = 0; i < c1.length; i++) {
+						if (c1[i] && !c2[i]) {
+							ctr++;
+						} else if (!c1[i] && c2[i]) {
+							ctr--;
+						}
+					}
+					return ctr;
+				}
+			});
 		}
 
 		serverTypesInitialized = true;

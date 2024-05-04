@@ -182,6 +182,7 @@ public interface CommonConstants {
 	public static final String STATION_SCHEDULING_POLICY_ORDER =  "Order (Assign according to order below)";
 	public static final String STATION_SCHEDULING_POLICY_FAIRNESS =  "Fairness (Move back server type when used)";
 	public static final String STATION_SCHEDULING_POLICY_RAIS = "RAIS (Random Assignment to Idle Servers)";
+	public static final String STATION_SCHEDULING_POLICY_ALFS =  "ALFS (Assign Least Flexible Server)";
 
 	/**Constants for selection of queueing strategy*/
 	public static final String QUEUE_STRATEGY_PS = "PS";

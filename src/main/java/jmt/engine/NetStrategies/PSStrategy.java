@@ -41,6 +41,19 @@ public abstract class PSStrategy implements AutoCheck {
 	 */
 	public abstract double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass);
 
+	/**
+	 * This method should be overridden to implement a specific PS strategy.
+	 * @param list Job info list.
+	 * @param classes Job class list.
+	 * @param weights Service weights.
+	 * @param saturated Service saturated.
+	 * @param jobClass Job class.
+	 * @param compatibilities Compatibilities of server.
+	 * @param splits Fraction of jobs per class assigned to server.
+	 * @return Service fraction received by a job of the given class.
+	 */
+	public abstract double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass, Boolean[] compatibilities, double[] splits);
+
 	public boolean check() {
 		return true;
 	}
