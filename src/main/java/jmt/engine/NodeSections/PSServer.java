@@ -237,10 +237,10 @@ public class PSServer extends Server {
 					// To support LD strategy, update jobInfoList before obtaining serviceTime
 					PSJobInfo jobInfo = new PSJobInfo(job);
 					handleJobInfoList(jobInfo, PSEvent.JOB_IN);
-					double serviceTime = serviceStrategies[job.getJobClass().getId()].wait(this, job.getJobClass());
+					assignJob(job);
+					double serviceTime = getServiceStrategiesPerServerType()[jobAssignments.get(job.getId())][job.getJobClass().getId()].wait(this, job.getJobClass());
 					jobInfo.setServiceTime(serviceTime);
 					jobInfo.setResidualServiceTime(serviceTime);
-					assignJob(job);
 					busyCounter++;
 					if (maxRunningJobs <= 0 || busyCounter < maxRunningJobs) {
 						sendBackward(NetEvent.EVENT_ACK, job, 0.0);
@@ -270,8 +270,8 @@ public class PSServer extends Server {
 		return MSG_PROCESSED;
 	}
 
-	private void assignJob(Job job) {
-		double minJobs = psJobsList.size() + 1;
+	private void assignJob(Job job) throws NetException {
+		double minJobs = Double.MAX_VALUE;
 		int minServer = 0;
 		int classId = job.getJobClass().getId();
 		for (ServerType serverType : orderedServerTypes) {
@@ -282,6 +282,9 @@ public class PSServer extends Server {
 					jobsInServer += assignedJobs[serverId][i];
 				}
 				jobsInServer /= serverType.getNumOfServers();
+				if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FSF)) {
+					jobsInServer = (jobsInServer + 1) * getServiceStrategiesPerServerType()[serverId][classId].expect(this, job.getJobClass());
+				}
 				if (jobsInServer < minJobs) {
 					minJobs = jobsInServer;
 					minServer = serverId;

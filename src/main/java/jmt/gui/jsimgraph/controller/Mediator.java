@@ -39,7 +39,9 @@ import java.util.Vector;
 
 import javax.swing.*;
 
+import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
+import jmt.engine.log.LoggerStateManager;
 import jmt.framework.data.MacroReplacer;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
@@ -52,8 +54,10 @@ import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.controller.PADispatcherThread;
 import jmt.gui.common.definitions.*;
+import jmt.gui.common.definitions.convertors.JSIMtoJMVAConvertor;
 import jmt.gui.common.editors.DefaultsEditor;
 import jmt.gui.common.panels.*;
+import jmt.gui.common.panels.parametric.DebugSolverPanel;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
@@ -154,13 +158,14 @@ public class Mediator implements GuiInterface {
 
 	protected Object[] cells;
 	protected Map cellsAttr;
-
+//	protected JSimLogger logger = JSimLogger.getLogger(this.getClass());
 	private Cursor cursor;
 	private Cursor oldCursor;
 
 	private JSimGraphModel model;
 	private JFrame resultsWindow;
 	private JmtClipboard clipboard;
+//	private DebugSolverPanel debugPanel;
 	private DispatcherThread dispatcher = null;
 	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
 	private JMTToolBar componentBar;
@@ -170,6 +175,8 @@ public class Mediator implements GuiInterface {
 	private PADispatcherThread batchThread;
 	private PAProgressWindow progressWindow;
 	private AbstractJmodelAction editPAParams;
+
+	private AbstractJmodelAction debugSolverAction ;
 
 	private JmtOverlapping overlapping;
 
@@ -194,6 +201,9 @@ public class Mediator implements GuiInterface {
 				Defaults.save();
 			}
 		}
+
+		Defaults.set("debugEnabled", String.valueOf(false));
+		Defaults.save();
 
 		this.graph = graph;
 		closeModel = new CloseModel(this);
@@ -243,6 +253,12 @@ public class Mediator implements GuiInterface {
 		actionRotateLeft = new ActionRotateLeft(this);
 		actionRotateRight = new ActionRotateRight(this);
 		overlapping = new JmtOverlapping(this);
+
+		debugSolverAction = new DebugSolver(this);
+		JButton debugSolverButton = new JButton(debugSolverAction);
+		debugSolverButton.setToolTipText("Open Debug Solver");
+//		toolbar.add(debugSolverButton);
+//		debugPanel = new DebugSolverPanel(this);
 
 		actionSnapToGrid = new ActionSnapToGrid(this);
 
@@ -299,7 +315,7 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Solve menu
-		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults });
+		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null,debugSolverAction });
 		menu.addMenu(action);
 
 		// Help menu
@@ -652,7 +668,7 @@ public class Mediator implements GuiInterface {
 		saveModel.setEnabled(true);
 		saveModelAs.setEnabled(true);
 		editMeasures.setEnabled(true);
-
+		debugSolverAction.setEnabled(true);
 		useTemplate.setEnabled(true);
 
 		// Show only insert options on ComponentBar
@@ -689,6 +705,7 @@ public class Mediator implements GuiInterface {
 		switchToExactSolver.setEnabled(true);
 		// Enables the button to start simulation
 		simulate.setEnabled(true);
+		debugSolverAction.setEnabled(true);
 		editSimParams.setEnabled(true);
 		editPAParams.setEnabled(true);
 		takeScreenShot.setEnabled(true);
@@ -728,6 +745,7 @@ public class Mediator implements GuiInterface {
 			componentBar.clickButton(setSelect);
 			openedArchive = modelLoader.getSelectedFile();
 			mainWindow.updateTitle(openedArchive.getName());
+			debugSolverAction.setEnabled(true);
 			// Removes selection
 			graph.clearSelection();
 			// If model contains results, enable Results Window
@@ -782,6 +800,9 @@ public class Mediator implements GuiInterface {
 
 		setSelect.setEnabled(false);
 		simulate.setEnabled(false);
+		debugSolverAction.setEnabled(false);
+		toggleDebug(false);
+		LoggerStateManager.clearAllowedEvents();
 		solveAnalitic.setEnabled(false);
 		solveApp.setEnabled(false);
 		editUserClasses.setEnabled(false);
@@ -2287,6 +2308,8 @@ public class Mediator implements GuiInterface {
 	 */
 	public void stopSimulation() {
 		if (stopSimulation.isEnabled()) {
+			toggleDebug(false);
+			LoggerStateManager.clearAllowedEvents();
 			if (!model.isParametricAnalysisEnabled()) {
 				dispatcher.stopSimulation();
 			} else {
@@ -2457,7 +2480,7 @@ public class Mediator implements GuiInterface {
 				return;
 			}
 			ExactModel output = new ExactModel();
-			List<String> res = ModelConverter.convertJSIMtoJMVA(model, output);
+			List<String> res = JSIMtoJMVAConvertor.convert(model, output);
 			ExactWizard jmva = new ExactWizard(output);
 			// If problems are found, shows warnings
 			if (res.size() > 0) {
@@ -4037,4 +4060,21 @@ public class Mediator implements GuiInterface {
 		}
 	}
 
+	public void toggleDebug(boolean enable) {
+
+		// Toggle debug logging based on the enable flag
+		if (enable) {
+			JSimLogger.logCalenderOn(); // Enable debug logging
+		} else {
+			JSimLogger.logCalenderOff(); // Disable debug logging
+		}
+	}
+
+	public void editDebugParameter() {
+		DebugSolverPanel panel = new DebugSolverPanel(this);  // Assuming the constructor takes a model
+		dialogFactory.getDialog(panel, "Debug Solver",
+				350,
+				500,
+				true, "JSIMDebugSolverWindowWidth", "JSIMDebugSolverWindowHeight");
+	}
 }

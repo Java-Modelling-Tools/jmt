@@ -26,18 +26,17 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Map.Entry;
 import java.util.Properties;
 
 import jmt.framework.data.MacroReplacer;
 
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.log4j.*;
 
 /**
- * <p><b>Name:</b> JSimLogger</p> 
- * <p><b>Description:</b> 
+ * <p><b>Name:</b> JSimLogger</p>
+ * <p><b>Description:</b>
  * A wrapper aroung log4j API to provide logging capabilities.
  * </p>
  * <p><b>Date:</b> 11/dic/2009
@@ -62,7 +61,7 @@ public class JSimLogger implements Serializable {
 					InputStream is = propsUrl.openStream();
 					p.load(is);
 					is.close();
-					
+
 					// Replaces macros like work directory
 					Properties replaced = new Properties();
 					for (Entry<Object, Object> e : p.entrySet()) {
@@ -74,7 +73,7 @@ public class JSimLogger implements Serializable {
 					System.err.println("Error while initializing logger form URL: " + propsUrl);
 					ex.printStackTrace();
 				}
-			} 
+			}
 			if (!initialized) {
 				System.out.println("Cannot find logProperties, using defaults");
 				//set stdout defaults
@@ -88,6 +87,19 @@ public class JSimLogger implements Serializable {
 			}
 		}
 	}
+
+	public static void resetLoggerStorePath(String newPath) {
+		Enumeration<?> appenders = Logger.getRootLogger().getAllAppenders();
+		while (appenders.hasMoreElements()) {
+			Appender appender = (Appender) appenders.nextElement();
+			if (appender instanceof FileAppender) {
+				FileAppender fileAppender = (FileAppender) appender;
+				fileAppender.setFile(newPath + "\\JSIM.log");
+				fileAppender.activateOptions();
+			}
+		}
+	}
+
 
 	private JSimLogger() {
 		logger = Logger.getRootLogger();
@@ -151,6 +163,18 @@ public class JSimLogger implements Serializable {
 		logger.error(buffer);
 	}
 
+	public static void logCalenderOn() {
+		LoggerStateManager.getInstance().setLogCalenderOn(true);
+	}
+
+	public static void logCalenderOff() {
+		LoggerStateManager.getInstance().setLogCalenderOn(false);
+	}
+
+	public boolean isLogCalenderOn() {
+		return LoggerStateManager.getInstance().isLogCalenderOn();
+	}
+
 	public void error(String message, Throwable th) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);
@@ -172,7 +196,7 @@ public class JSimLogger implements Serializable {
 	public boolean isInfoEnabled() {
 		return logger.isInfoEnabled();
 	}
-	
+
 	// --- Following methods handles recreation of transient logger object after serialization ------------------
     private void writeObject(ObjectOutputStream out) throws IOException {
     	out.defaultWriteObject();
@@ -188,7 +212,7 @@ public class JSimLogger implements Serializable {
 			logger = Logger.getLogger(name);
 		}
     }
-// ----------------------------------------------------------------------------------------------------------    
+// ----------------------------------------------------------------------------------------------------------
 
 
 }

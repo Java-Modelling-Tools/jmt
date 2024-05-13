@@ -531,6 +531,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (type.equals(STATION_TYPE_ROUTER)) {
 				parseRouterSection((Element) sections.item(2), model, key);
 			} else if (type.equals(STATION_TYPE_DELAY)) {
+				parseQueueSectionDelay((Element) sections.item(0), model, key);
 				parseDelaySection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
 				parseClassStationSoftDeadlines(classSoftDeadlines, model, key);
@@ -854,6 +855,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 		}
 
+		extractTransitionConditions(key, enablingConditions, inhibitingConditions, resourceConditions);
+	}
+
+	private static void extractTransitionConditions(Object key, Vector<Node> enablingConditions, Vector<Node> inhibitingConditions, Vector<Node> resourceConditions) {
 		if (enablingConditions != null) {
 			for (int i = 0; i < enablingConditions.size(); i++) {
 				Node enablingCondition = enablingConditions.get(i);
@@ -864,7 +869,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 					Map<String, Node> enablingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
 					for (Entry<String, Node> enablingEntry : enablingEntries.entrySet()) {
-						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(enablingEntry.getKey()) };
+						Object[] quadkey = new Object[] {key, Integer.valueOf(i), stationName, classes.get(enablingEntry.getKey()) };
 						String value = findText(((Element) enablingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 						enablingConditionMap.put(quadkey, Integer.valueOf(value));
 					}
@@ -882,7 +887,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					String stationName = findText(((Element) vectorElements.get(0)).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 					Map<String, Node> inhibitingEntries = parseParameterRefclassArray((Element) vectorElements.get(1));
 					for (Entry<String, Node> inhibitingEntry : inhibitingEntries.entrySet()) {
-						Object[] quadkey = new Object[] { key, Integer.valueOf(i), stationName, classes.get(inhibitingEntry.getKey()) };
+						Object[] quadkey = new Object[] {key, Integer.valueOf(i), stationName, classes.get(inhibitingEntry.getKey()) };
 						String value = findText(((Element) inhibitingEntry.getValue()).getElementsByTagName(XML_E_PARAMETER_VALUE).item(0));
 						inhibitingConditionMap.put(quadkey, Integer.valueOf(value));
 					}
@@ -907,6 +912,39 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Parses all information regarding enabling, inhibiting and resource conditions
+	 * for a delay station
+	 * @param section input section of delay station
+	 * @param model link to data structure
+	 * @param key key of search for this delay station into data structure
+	 */
+	protected static void parseQueueSectionDelay(Element section, CommonModel model, Object key) {
+		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
+		Element curr;
+		String name, classpath;
+
+		Vector<Node> enablingConditions = null;
+		Vector<Node> inhibitingConditions = null;
+		Vector<Node> resourceConditions = null;
+
+		for (int i = 0; i < parameters.getLength(); i++) {
+			curr = (Element) parameters.item(i);
+			name = curr.getAttribute(XML_A_PARAMETER_NAME);
+			classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
+
+			if (name.equals("enablingConditions")) {
+				enablingConditions = parseParameterArray(curr);
+			} else if (name.equals("inhibitingConditions")) {
+				inhibitingConditions = parseParameterArray(curr);
+			}else if(name.equals("resourceConditions")){
+				resourceConditions = parseParameterArray(curr);
+			}
+		}
+
+		extractTransitionConditions(key, enablingConditions, inhibitingConditions, resourceConditions);
 	}
 
 	/**
@@ -953,6 +991,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		List<String> serverNames = new ArrayList<>();
 		List<Integer> serverNumOfServers = new ArrayList<>();
 		List<List<Boolean>> serverCompatibilities = new ArrayList<>();
+		List<Object> heterogeneousServiceStrategies = new ArrayList<>();
 
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
 		for (int i = 0; i < parameters.getLength(); i++) {
@@ -992,10 +1031,20 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			} else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
 				Map<String, Node> distributions = parseParameterRefclassArray(curr);
-				Object[] classNames = distributions.keySet().toArray();
-				// Sets service time distributions
-				for (Object className : classNames) {
-					model.setServiceTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+				if (distributions.isEmpty()) {
+					// Heterogeneous servers
+					NodeList childNodes = curr.getChildNodes();
+					for (int t = 0; t < childNodes.getLength(); t++) {
+						if (childNodes.item(t).getNodeName().equals(XML_E_SUBPARAMETER)) {
+							heterogeneousServiceStrategies.add(parseServiceStrategy((Element) childNodes.item(t)));
+						}
+					}
+				} else {
+					Object[] classNames = distributions.keySet().toArray();
+					// Sets service time distributions
+					for (Object className : classNames) {
+						model.setServiceTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) distributions.get(className)));
+					}
 				}
 			} else if (classpath.equals(psStrategy)) {
 				// Retrieves all PS strategies subParameters
@@ -1060,6 +1109,16 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 		for (int i = 0; i < serverNames.size(); i++) {
 			model.addServerType(key, serverNames.get(i), serverNumOfServers.get(i), serverCompatibilities.get(i), true);
+		}
+		if (!heterogeneousServiceStrategies.isEmpty()) {
+			model.setHeterogeneousServersEnabled(key, true);
+			Vector<Object> classKeys = model.getClassKeys();
+			Vector<Object> serverKeys = model.getServerTypeKeys();
+			for (int s = 0; s < serverNames.size(); s++) {
+				for (int c = 0; c < classKeys.size(); c++) {
+					model.setServiceTimeDistribution(key, classKeys.get(c), serverKeys.get(s), heterogeneousServiceStrategies.get(s * classKeys.size() + c));
+				}
+			}
 		}
 	}
 

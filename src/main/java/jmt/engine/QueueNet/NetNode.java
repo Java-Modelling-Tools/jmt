@@ -32,6 +32,7 @@ import jmt.engine.dataAnalysis.InverseMeasure;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.SimParameters;
 import jmt.engine.log.JSimLogger;
+import jmt.engine.log.LoggerStateManager;
 import jmt.engine.simEngine.*;
 
 /**
@@ -721,6 +722,20 @@ public class NetNode extends SimEntity {
 	 * @return a token to remove sent event.
 	 */
 	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination) {
+
+		if (logger.isLogCalenderOn()) {
+			String[] allowedEvents = LoggerStateManager.getAllowedEvents();
+			if (allowedEvents.length > 0) {
+				for (String allowedEvent : allowedEvents) {
+					if (NetEvent.getEventName(event).equals(allowedEvent)) {
+						logger.debug(sourceSection + " send a message with event: " + NetEvent.getEventName(event) + " to " + destination.getName()
+								+ " with destination time: " + destination.getNetSystem().getTime());
+						break;
+					}
+				}
+			}
+		}
+
 		//Look if message is a job message and if job is leaving this node
 		if (event == NetEvent.EVENT_JOB) {
 			if ((destination != this) || ((destination == this)

@@ -110,6 +110,7 @@ public class JMTToolBar extends JToolBar {
 		} else {
 			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
 		}
+
 		button.setIcon(imageLoader.loadIcon(iconName, iconSize));
 		button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER, iconSize));
 		button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED, iconSize));
@@ -165,6 +166,9 @@ public class JMTToolBar extends JToolBar {
 		} else {
 			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;
 		}
+		if (iconName.equals("debugSolver")){
+			button.setText("Debug");
+		}
 		button.setIcon(imageLoader.loadIcon(iconName, iconSize));
 		button.setRolloverIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_ROLLOVER, iconSize));
 		button.setPressedIcon(imageLoader.loadIcon(iconName, ImageLoader.MODIFIER_PRESSED, iconSize));
@@ -218,8 +222,6 @@ public class JMTToolBar extends JToolBar {
 	 * Adds a button deriving all properties from specified action
 	 * @param action action associated to the button
 	 * @return created button
-	 * @see AbstractJMTAction#setSelectable(boolean)
-	 * @see AbstractJMTAction#setGroup(int)
 	 */
 	public AbstractButton addGenericButton(AbstractJMTAction action) {
 		Boolean selectable = (Boolean) action.getValue(AbstractJMTAction.SELECTABLE);

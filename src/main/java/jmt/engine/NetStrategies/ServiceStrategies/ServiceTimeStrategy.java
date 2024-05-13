@@ -103,4 +103,12 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 		}
 	}
 
+	public Distribution getDistribution() {
+		return distribution;
+	}
+
+	public Parameter getParameter() {
+		return parameter;
+	}
+
 }

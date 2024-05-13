@@ -69,6 +69,7 @@ public class Server extends ServiceSection {
 	private LinkedList<JobInfo> jobsToFire;
 	private int savedNumberOfServers;
 	private Boolean[][] classCompatibilities;
+	private ServiceStrategy[][] serviceStrategiesPerServerType;
 	private boolean serverTypesInitialized = false;
 
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
@@ -132,10 +133,6 @@ public class Server extends ServiceSection {
 		busyServersPerJob = new HashMap<>();
 		serverTypes = new ArrayList<>();
 
-		if (serverCompatibilities != null) {
-			initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
-		}
-
 		//
 		this.numberOfServers = numberOfServers.intValue();
 		this.serviceStrategies = serviceStrategies;
@@ -157,6 +154,10 @@ public class Server extends ServiceSection {
 		}
 		busyCounter = 0;
 		lastCompletionTime = 0.0;
+
+		if (serverCompatibilities != null) {
+			initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
+		}
 	}
 
 	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serverNumOfServers,
@@ -166,6 +167,7 @@ public class Server extends ServiceSection {
 		busyCounterPerClass = new int[serverNumRequired.length];
 
 		classCompatibilities = new Boolean[((Boolean[]) serverCompatibilities[0]).length][serverCompatibilities.length];
+		serviceStrategiesPerServerType = new ServiceStrategy[serverCompatibilities.length][((Boolean[]) serverCompatibilities[0]).length];
 
 		for(int i=0;i<serverCompatibilities.length; i++){
 			String name = serverNames[i];
@@ -174,6 +176,7 @@ public class Server extends ServiceSection {
 
 			for(int j=0; j<compatibilities.length; j++){
 				classCompatibilities[j][i] = compatibilities[j];
+				serviceStrategiesPerServerType[i][j] = serviceStrategies[(i * compatibilities.length + j) % serviceStrategies.length];
 			}
 
 			ServerType serverType = new ServerType(name, numOfServers, compatibilities, i);
@@ -568,7 +571,41 @@ public class Server extends ServiceSection {
 				}
 			}
 
-		}else{
+		} else if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FSF)) {
+			while (serversRequired > 0) {
+				double minServiceTime = Double.MAX_VALUE;
+				ServerType minServer = serverTypes.get(0);
+				for (ServerType serverType : serverTypes) {
+					if (serverType.getCompatibilities()[class_id] && serverType.getNumberOfFreeServers() > 0) {
+						double expectedServiceTime = serviceStrategiesPerServerType[serverType.getId()][class_id].expect(this, job.getJobClass());
+						if (expectedServiceTime < minServiceTime) {
+							minServiceTime = expectedServiceTime;
+							minServer = serverType;
+						}
+					}
+				}
+				int serversUsed = Math.min(serversRequired, minServer.getNumberOfFreeServers());
+				minServer.incrementBusyCounter(serversUsed);
+				changeBusyCounters(serversUsed, minServer.getCompatibilities());
+				serversRequired -= serversUsed;
+
+				boolean addBusyServer = true;
+
+				for (BusyServer busyServer : busyServers) {
+					if (busyServer.getId() == minServer.getId()) {
+						busyServer.incrementBusyServers(serversUsed);
+						addBusyServer = false;
+						break;
+					}
+				}
+
+				if(addBusyServer) {
+					busyServers.add(new BusyServer(serversUsed, minServer.getId(),
+							minServer.getCompatibilities(), totalNumOfServers[minServer.getId()],
+							minServer.getName()));
+				}
+			}
+		} else {
 			while (serversRequired > 0) {
 				ServerType serverType = serverTypes.get(indx);
 				if (serverType.getCompatibilities()[class_id]) {
@@ -666,6 +703,9 @@ public class Server extends ServiceSection {
 		busyServersPerJob.remove(job_id);
 	}
 
+	public ServiceStrategy[][] getServiceStrategiesPerServerType() {
+		return serviceStrategiesPerServerType;
+	}
 
 	//
 
@@ -753,11 +793,6 @@ public class Server extends ServiceSection {
 					//sends the job with delay equal to "serviceTime"
 					//message received from another node section: if the server is not completely busy,
 					//it sends itself a message with this job
-					double serviceTime = job.getServiceTime();
-					if (serviceTime < 0.0) {
-						serviceTime = serviceStrategies[jobClassID].wait(this, job.getJobClass());
-						job.setServiceTime(serviceTime);
-					}
 					NetSystem netSystem = getOwnerNode().getNetSystem();
 					if (switchoverStrategies != null) {
 						ServerUnit serverUnit = idleServerQueue.poll();
@@ -765,11 +800,21 @@ public class Server extends ServiceSection {
 							serverUnit = new ServerUnit(busyCounter, jobClassID);
 						}
 						if (serverUnit.jobClassID == jobClassID) {
+							enterJob(job);
+							double serviceTime = job.getServiceTime();
+							if (serviceTime < 0.0) {
+								serviceTime = 0;
+								List<BusyServer> busyServers = busyServersPerJob.get(job.getId());
+								for (BusyServer server : busyServers) {
+									serviceTime += serviceStrategiesPerServerType[server.getId()][jobClassID].wait(this, job.getJobClass());
+								}
+								serviceTime /= busyServers.size();
+								job.setServiceTime(serviceTime);
+							}
 							RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);
 							job.setServiceStartTime(netSystem.getTime());
 							job.setServingMessage(jobServingMessage);
 							jobsList.startJob(jobInfo);
-							enterJob(job);
 						} else {
 							ServiceStrategy switchoverTimeStrategy = switchoverStrategies[serverUnit.jobClassID][jobClassID];
 							double switchoverTime = 0.0;
@@ -781,11 +826,21 @@ public class Server extends ServiceSection {
 						}
 						busyServerMap.put(job, serverUnit);
 					} else {
+						enterJob(job);
+						double serviceTime = job.getServiceTime();
+						if (serviceTime < 0.0) {
+							serviceTime = 0;
+							List<BusyServer> busyServers = busyServersPerJob.get(job.getId());
+							for (BusyServer server : busyServers) {
+								serviceTime += serviceStrategiesPerServerType[server.getId()][jobClassID].wait(this, job.getJobClass());
+							}
+							serviceTime /= busyServers.size();
+							job.setServiceTime(serviceTime);
+						}
 						RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);
 						job.setServiceStartTime(netSystem.getTime());
 						job.setServingMessage(jobServingMessage);
 						jobsList.startJob(jobInfo);
-						enterJob(job);
 					}
 
 					if (hasFreeServers()) {
@@ -840,7 +895,7 @@ public class Server extends ServiceSection {
 						exitJob(job2);
 					}
 				} else {
-					if (busyCounterForJob2 <= 1) {
+					if (busyCounterForJob2 <= -1) {
 						//it was not waiting for any job
 						return MSG_NOT_PROCESSED;
 					} else if (numberOfServersForJob2 - busyCounterForJob2 > num2) {

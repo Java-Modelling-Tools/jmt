@@ -51,6 +51,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.gui.common.panels.AboutDialogFactory.Company;
+import jmt.gui.common.panels.UpdatePanel;
 import jmt.gui.common.startScreen.sampleAnimation.SampleQNAnimation;
 import jmt.gui.jaba.JabaWizard;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
@@ -80,6 +81,7 @@ public class GraphStartScreen extends JMTFrame {
 	private JButton onlineDoc;
 	private JButton introEng;
 	private JButton about;
+	private JButton upgrade;
 
 	// Queue Animation
 	public static SampleQNAnimation sampleQNAni;
@@ -298,19 +300,25 @@ public class GraphStartScreen extends JMTFrame {
 		leftPanel.add(pivotPanel, BorderLayout.SOUTH);
 		// Adds intro buttons in the centre
 		JPanel introButtonArea = new JPanel(new GridLayout(-1, 1));
+
 		onlineDoc = new JButton("Online Documentation");
 		onlineDoc.addMouseListener(rollover);
 		introEng = new JButton("Introduction to JMT");
 		introEng.addMouseListener(rollover);
 		about = new JButton("Credits");
 		about.addMouseListener(rollover);
+		upgrade = new JButton("Upgrade");
+		upgrade.addMouseListener(rollover);
 
 		introButtonArea.add(introEng);
 		introButtonArea.add(new JPanel());
 		introButtonArea.add(onlineDoc);
 		introButtonArea.add(new JPanel());
 		introButtonArea.add(about);
+		introButtonArea.add(new JPanel());
+		introButtonArea.add(upgrade);
 		introButtonArea.setOpaque(false);
+
 		pivotPanel = new JPanel(new GridBagLayout());
 		pivotPanel.add(introButtonArea);
 		pivotPanel.setOpaque(false);
@@ -344,6 +352,11 @@ public class GraphStartScreen extends JMTFrame {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				AboutDialogFactory.showJMT(GraphStartScreen.this);
+			}
+		});
+		upgrade.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				UpdatePanel.checkForUpdates(GlobalSettings.getSetting(GlobalSettings.VERSION));
 			}
 		});
 	}

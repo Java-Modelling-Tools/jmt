@@ -58,8 +58,6 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
 
     private Object stationKey;
 
-    private boolean updateTotalServersSpinner;
-
     private JComboBox schedulingPolicyCombo;
 
     protected static final String[] schedulingPolicies =
@@ -68,12 +66,13 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
                     STATION_SCHEDULING_POLICY_ORDER,
                     STATION_SCHEDULING_POLICY_FAIRNESS,
                     STATION_SCHEDULING_POLICY_RAIS,
-                    STATION_SCHEDULING_POLICY_ALFS
+                    STATION_SCHEDULING_POLICY_ALFS,
+                    STATION_SCHEDULING_POLICY_FSF
             };
 
     protected WarningScrollTable warningPanel;
 
-    protected JSpinner totalNumOfServersSpinner;
+    protected JCheckBox heterogeneousServers;
 
     protected JButton addServerTypeButton;
 
@@ -142,15 +141,16 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
         JPanel upRightPanel = new JPanel(new BorderLayout());
         upRightPanel.add(addServerTypeButton, BorderLayout.NORTH);
 
-        //build spinner panel
-        JPanel spinnerPanel = new JPanel();
-        JLabel spinnerDescrLabel = new JLabel("Total number of Servers:");
-        spinnerPanel.add(spinnerDescrLabel);
-        totalNumOfServersSpinner.setPreferredSize(DIM_BUTTON_XS);
-        spinnerPanel.add(totalNumOfServersSpinner);
+        heterogeneousServers = new JCheckBox("Enable Heterogeneous Servers");
+        heterogeneousServers.setSelected(stationData.getHeterogeneousServersEnabled(stationKey));
+        heterogeneousServers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                stationData.setHeterogeneousServersEnabled(stationKey, heterogeneousServers.isSelected());
+            }
+        });
 
         //build ServerTypes scheduling panel
-
         JPanel serverScheduling = new JPanel();
         serverScheduling.setBorder(new TitledBorder(new EtchedBorder(), "Server Types Scheduling"));
         serverScheduling.add(Box.createRigidArea(new Dimension(5, 0)));
@@ -163,7 +163,7 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
         warningPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Types"));
 
         //add all panels to the mail panel
-        upRightPanel.add(spinnerPanel, BorderLayout.CENTER);
+        upRightPanel.add(heterogeneousServers, BorderLayout.CENTER);
         upperPanel.add(upRightPanel, BorderLayout.EAST);
         upperPanel.add(serverScheduling, BorderLayout.SOUTH);
         componentsPanel.add(upperPanel, BorderLayout.NORTH);
@@ -180,9 +180,7 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
      * Updates data contained in this panel's components
      */
     public void setData(ClassDefinition classes, StationDefinition stations, Object stKey) {
-        updateTotalServersSpinner = true;
         serverTypesTable = new ServerTypesTable();
-        totalNumOfServersSpinner = new JSpinner();
         addServerTypeButton = new JButton(addNewServerType);
         classData = classes;
         stationData = stations;
@@ -201,13 +199,6 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
     }
 
     private void updateServerPreferences() {
-        totalNumOfServersSpinner.setValue(stationData.getStationNumberOfServers(stationKey));
-        if (STATION_TYPE_DELAY.equals(stationData.getStationType(stationKey))) {
-            totalNumOfServersSpinner.setValue(Double.POSITIVE_INFINITY);
-            totalNumOfServersSpinner.setEnabled(false);
-        } else {
-            totalNumOfServersSpinner.setEnabled(true);
-        }
 
         String schedulingPolicy = stationData.getStationSchedulingPolicy(stationKey);
         int index = 0;
@@ -221,51 +212,7 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
         schedulingPolicyCombo.setSelectedIndex(index);
     }
 
-    private void updateSpinnersInTable(int change){
-        ServerTypesTableModel stm = (ServerTypesTableModel) serverTypesTable.getModel();
-
-        int lastRow= stm.getRowCount() - 1;
-        int valueOfLastRowSpinner = (Integer) stm.getValueAt(lastRow, 3);
-        if(change > 0) {
-            updateTotalServersSpinner = false;
-            stm.setValueAt(valueOfLastRowSpinner + change, lastRow, 3);
-        }else{
-            change = -change;
-            while(change > 0){
-                lastRow= stm.getRowCount() - 1;
-                valueOfLastRowSpinner = (Integer) stm.getValueAt(lastRow, 3);
-                if (valueOfLastRowSpinner > change) {
-                    updateTotalServersSpinner = false;
-                    stm.setValueAt(valueOfLastRowSpinner - change,lastRow,3);
-                    change -= change;
-                } else {
-                    change -= valueOfLastRowSpinner;
-                    updateTotalServersSpinner = false;
-                    serverTypesTable.deleteServerType(lastRow);
-                }
-            }
-        }
-    }
-
     private void addDataManagers() {
-        totalNumOfServersSpinner.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                lostFocus();
-                if (totalNumOfServersSpinner.getValue() instanceof Integer) {
-                    Integer serverNum = (Integer) totalNumOfServersSpinner.getValue();
-                    if (serverNum.intValue() < 1 && totalNumOfServersSpinner.isEnabled()) {
-                        serverNum = new Integer(1);
-                        totalNumOfServersSpinner.setValue(serverNum);
-                    }
-                    int oldNum = stationData.getStationNumberOfServers(stationKey);
-                    stationData.setStationNumberOfServers(stationKey, serverNum);
-                    int change = serverNum - oldNum;
-                    serverTypesTable.repaint();
-                    updateSpinnersInTable(change);
-                }
-            }
-        });
-
         schedulingPolicyCombo.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -282,7 +229,6 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
     @Override
     public void gotFocus() {
         refreshComponents();
-        totalNumOfServersSpinner.setValue(stationData.getStationNumberOfServers(stationKey));
     }
 
     @Override
@@ -407,11 +353,8 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
                 ServerType server = stationData.getInfoForServerType(stationKey, index);
 
                 stationData.deleteServerType(stationKey, index);
-                if (updateTotalServersSpinner) {
-                    stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) - server.getNumOfServers());
-                    updateServerPreferences();
-                }
-                updateTotalServersSpinner = true;
+                stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) - server.getNumOfServers());
+                updateServerPreferences();
                 refreshComponents();
             }else{
                 JOptionPane.showMessageDialog(
@@ -573,11 +516,8 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
                 if(pattern.matcher(aValue.toString()).matches()) {
                     change = (Integer) aValue - oldNum;
                     server.setNumOfServers((Integer) aValue);
-                    if(updateTotalServersSpinner) {
-                        stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) + change);
-                        updateServerPreferences();
-                    }
-                    updateTotalServersSpinner = true;
+                    stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) + change);
+                    updateServerPreferences();
                 }
                 repaint();
             }

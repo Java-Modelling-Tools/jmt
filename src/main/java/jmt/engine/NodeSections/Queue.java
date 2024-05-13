@@ -20,6 +20,7 @@ package jmt.engine.NodeSections;
 
 import java.util.*;
 
+import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ImpatienceStrategies.Balking;
 import jmt.engine.NetStrategies.ImpatienceStrategies.Impatience;
@@ -30,6 +31,7 @@ import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
+import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
 import jmt.engine.QueueNet.*;
@@ -37,6 +39,7 @@ import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.simEngine.RemoveToken;
+import jmt.gui.common.distributions.Distribution;
 
 /**
  * This class implements a generic finite/infinite queue. In finite queue, if
@@ -92,6 +95,7 @@ public class Queue extends InputSection {
 	private boolean[] block;
 	private boolean[] waiting;
 	private boolean[] retrial;
+	private boolean delayOffEnabled;
 
 	private JobClassList jobClasses;
 
@@ -114,6 +118,8 @@ public class Queue extends InputSection {
 	private QueuePutStrategy[] putStrategies;
 	// Class soft deadlines for the overall station
 	private double[] softDeadlines;
+	private ServiceTimeStrategy delayOffDistributions;
+	private ServiceTimeStrategy setUpDistributions;
 	private boolean workingAsTransition;
 	private TransitionMatrix[] enablingConditions;
 	private TransitionMatrix[] inhibitingConditions;
@@ -146,19 +152,19 @@ public class Queue extends InputSection {
 	}
 
 	public Queue(Integer capacity, String[] dropStrategies, ServiceStrategy[] retrialDistributions, QueueGetStrategy getStrategy,
-							 QueuePutStrategy[] putStrategies) {
+				 QueuePutStrategy[] putStrategies) {
 		this(capacity, dropStrategies, retrialDistributions, getStrategy, putStrategies, null,
 				false, null, null, null);
 	}
 
 	public Queue(Integer capacity, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies,
-							 Impatience[] impatienceStrategies) {
+				 Impatience[] impatienceStrategies) {
 		this(capacity, dropStrategies, null, getStrategy, putStrategies, impatienceStrategies,
 				false, null, null, null);
 	}
 
 	public Queue(Integer capacity, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies,
-							 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions){
+				 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions){
 		this(capacity, dropStrategies, null, getStrategy, putStrategies, null, true,
 				enablingConditions, inhibitingConditions, resourceConditions);
 	}
@@ -175,8 +181,8 @@ public class Queue extends InputSection {
 	 * @param impatienceStrategies Impatience strategy per class.
 	 */
 	public Queue(Integer capacity, String[] dropStrategies, ServiceStrategy[] retrialDistributions, QueueGetStrategy getStrategy,
-							 QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies, Boolean workingAsTransition,
-							 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions) {
+				 QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies, Boolean workingAsTransition,
+				 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions) {
 		//auto = false, otherwise when a JOB message is received,
 		//the corresponding Job object is automatically added to
 		//JobInfoList
@@ -971,4 +977,33 @@ public class Queue extends InputSection {
 	public void setSoftDeadlines(double[] softDeadlines) {
 		this.softDeadlines = softDeadlines;
 	}
+
+	public void setDelayOffEnabled(boolean delayOffEnabled) {
+		this.delayOffEnabled = delayOffEnabled;
+	}
+	public void setDelayOffDistributions(ServiceTimeStrategy delayOffDistributions){
+		this.delayOffDistributions = delayOffDistributions;
+	}
+
+	public void setSetUpDistributions(ServiceTimeStrategy setUpDistributions) {
+		this.setUpDistributions = setUpDistributions;
+	}
+
+	public double calculateDelayOff() throws IncorrectDistributionParameterException {
+		if (delayOffEnabled) {
+			double delayOff = delayOffDistributions.getDistribution().nextRand(delayOffDistributions.getParameter());
+			return delayOff;
+		}
+		return 0.0;
+	}
+
+	public double calculateSetUp() throws IncorrectDistributionParameterException {
+		if (setUpDistributions != null) {
+			double setUp = setUpDistributions.getDistribution().nextRand(setUpDistributions.getParameter());
+			return setUp;
+		}
+		return 0.0;
+	}
+
+
 }

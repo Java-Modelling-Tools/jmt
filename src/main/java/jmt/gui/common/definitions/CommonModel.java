@@ -213,6 +213,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	protected HashMap<Object, ServerType> serverTypesHM = new CachedHashMap<Object, ServerType>();
 
 	/**
+	 * BDMap containing service time distributions for each server type and class.
+	 * on X coordinate must be put class search keys, on Y server type ids.
+	 */
+	protected BDMap serverTypeDistributionsBDM = new BDMapImpl();
+
+	/**
 	 * Hashmap containing measure parameters
 	 */
 	protected HashMap<Object, MeasureData> measureDataHM = new CachedHashMap<Object, MeasureData>();
@@ -1264,6 +1270,43 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Gets whether delay off times are enabled, given the search key.
+	 */
+	@Override
+	public Boolean getDelayOffTimesEnabled(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return null;
+		}
+		return sd.delayOffTimesEnabled;
+	}
+
+	/**
+	 * Sets whether delay off times are enabled, given the search key.
+	 */
+	@Override
+	public void setDelayOffTimesEnabled(Object key, Boolean enabled) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.delayOffTimesEnabled == null || !sd.delayOffTimesEnabled.equals(enabled)) {
+			sd.delayOffTimesEnabled = enabled;
+			save = true;
+		}
+		//initiate the delay off times as exp(1)
+		if (enabled) {
+			setDelayOffTimeDistribution(key, Defaults.getAsNewInstance("delayOffTimeDistribution"));
+		} else {
+			setDelayOffTimeDistribution(key, null);
+		}
+	}
+
+	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
 	 * @param key: search's key for fork
@@ -1471,6 +1514,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
 		} else if (sd.type.equals(STATION_TYPE_SERVER)) {
+			sd.heterogeneousServersEnabled = Boolean.valueOf(false);
 			sd.queueCapacity = Defaults.getAsInteger("stationCapacity");
 			sd.queueStrategy = Defaults.get("stationStationQueueStrategy");
 			sd.numberOfServers = Defaults.getAsInteger("stationServers");
@@ -1480,6 +1524,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;
 			sd.serverPolling = Boolean.valueOf(false);
 			sd.switchoverTimesEnabled = Boolean.valueOf(false);
+			sd.delayOffTimesEnabled = Boolean.valueOf(false);
 			sd.totalStationCapacity = sd.queueCapacity + sd.maxRunningJobs;
 			sd.transitionModeList = new ArrayList<TransitionModeData>();
 			sd.transitionModeList.add(new TransitionModeData(Defaults.get("transitionModeName") + 1));
@@ -1832,6 +1877,27 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
+	 * Returns service time distribution for class, station and server type, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverTypeKey: search key for server type.
+	 * @return distribution for specified class and station.
+	 */
+	@Override
+	public Object getServiceTimeDistribution(Object stationKey, Object classKey, Object serverTypeKey) {
+		if (serverTypeKey == null) {
+			return getServiceTimeDistribution(stationKey, classKey);
+		}
+		Object dist = serverTypeDistributionsBDM.get(classKey, serverTypeKey);
+		if (dist == null) {
+			dist = Defaults.getAsNewInstance("stationServiceStrategy");
+			setServiceTimeDistribution(stationKey, classKey, serverTypeKey, dist);
+		}
+		return dist;
+	}
+
+	/**
 	 * Sets service time distribution for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
@@ -1847,6 +1913,26 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (scd.serviceDistribution == null || !scd.serviceDistribution.equals(distribution)) {
 			scd.serviceDistribution = distribution;
 			save = true;
+		}
+	}
+
+	/**
+	 * Sets service time distribution for class, station and server type, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverTypeKey: search key for server type.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	@Override
+	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object serverTypeKey, Object distribution) {
+		if (serverTypeKey == null) {
+			setServiceTimeDistribution(stationKey, classKey, distribution);
+			return;
+		}
+		Object oldDist = serverTypeDistributionsBDM.get(classKey, serverTypeKey);
+		if (oldDist == null || !oldDist.equals(distribution)) {
+			serverTypeDistributionsBDM.put(classKey, serverTypeKey, distribution);
 		}
 	}
 
@@ -1921,6 +2007,48 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		if (scd.switchoverTimeDistributions.get(toClassKey) == null || !scd.switchoverTimeDistributions.get(toClassKey).equals(distribution)) {
 			scd.switchoverTimeDistributions.put(toClassKey, distribution);
+			save = true;
+		}
+	}
+
+	@Override
+	public Object getDelayOffTimeDistribution(Object stationKey){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		if (sd == null) {
+			return null;
+		}
+		return sd.delayOffTimeDistribution;
+	}
+
+	@Override
+	public void setDelayOffTimeDistribution(Object stationKey, Object distribution){
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		if (sd == null) {
+			return;
+		}
+		if (sd.delayOffTimeDistribution == null || !sd.delayOffTimeDistribution.equals(distribution)) {
+			sd.delayOffTimeDistribution = distribution;
+			save = true;
+		}
+	}
+
+	@Override
+	public Object getSetupTimeDistribution(	Object stationKey) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		if (sd == null) {
+			return null;
+		}
+		return sd.setupTimeDistribution;
+	}
+
+	@Override
+	public void setSetupTimeDistribution(Object stationKey, Object distribution) {
+		StationData sd = (StationData) stationDataHM.get(stationKey);
+		if (sd == null) {
+			return;
+		}
+		if (sd.setupTimeDistribution == null || !sd.setupTimeDistribution.equals(distribution)) {
+			sd.setupTimeDistribution = distribution;
 			save = true;
 		}
 	}
@@ -2433,6 +2561,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				for (TransitionModeData tmd : sd.transitionModeList) {
 					tmd.enablingCondition.removeColumn(key);
 					tmd.inhibitingCondition.removeColumn(key);
+					tmd.resourceCondition.removeColumn(key);
 					tmd.firingOutcome.removeColumn(key);
 				}
 			}
@@ -2657,6 +2786,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 					for (TransitionModeData tmd : tsd.transitionModeList) {
 						tmd.enablingCondition.removeRow(sourceKey);
 						tmd.inhibitingCondition.removeRow(sourceKey);
+						tmd.resourceCondition.removeRow(sourceKey);
 					}
 				}
 				for (Object classKey : classesKeyset) {
@@ -2801,7 +2931,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				&& (target.type.equals(STATION_TYPE_SOURCE) || target.type.equals(STATION_TYPE_SINK) || target.type.equals(STATION_TYPE_TERMINAL))) {
 			return false;
 		}
-		//a place can only be connected to a transition, to a queue and to a delay station
+		//a place can only be connected to a transition, to a queue or to a delay station
 		//a transition can only be connected from a place
 		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION) || target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
@@ -4306,6 +4436,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Integer pollingKValue;
 		public Boolean serverPolling;
 		public Boolean switchoverTimesEnabled;
+		public Boolean delayOffTimesEnabled;
+		public Object delayOffTimeDistribution;
+		public Object setupTimeDistribution;
 		public Integer forkBlock;
 		public Boolean isSimplifiedFork;
 		public LoggerParameters loggerParameters;
@@ -4316,6 +4449,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public List<ServerType> serverTypes;
 		public int nextServerNum;
 		public String schedulingPolicy;
+		public Boolean heterogeneousServersEnabled;
 
 		public StationData(String name, String type) {
 			this.name = name;
@@ -4337,6 +4471,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.serverTypes = serverTypes;
 			sd.schedulingPolicy = schedulingPolicy;
 			sd.switchoverTimesEnabled = switchoverTimesEnabled;
+			sd.delayOffTimesEnabled = delayOffTimesEnabled;
+			sd.heterogeneousServersEnabled = heterogeneousServersEnabled;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
 			if (loggerParameters != null) {
@@ -4826,6 +4962,30 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 		return res;
 	}
+
+	public Boolean getHeterogeneousServersEnabled(Object stationKey) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+		} else {
+			return null;
+		}
+		return sd.heterogeneousServersEnabled;
+	}
+
+	public void setHeterogeneousServersEnabled(Object key, Boolean enabled) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.heterogeneousServersEnabled == null || !sd.heterogeneousServersEnabled.equals(enabled)) {
+			sd.heterogeneousServersEnabled = enabled;
+			save = true;
+		}
+	}
+
 
 	////////
 

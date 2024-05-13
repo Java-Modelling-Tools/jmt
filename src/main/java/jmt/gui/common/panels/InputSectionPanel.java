@@ -146,6 +146,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected StationDefinition data;
 	protected ClassDefinition classData;
 	protected Object stationKey;
+	protected boolean workingAsTransition;
 
 	/** References to columns **/
 	protected final int COLUMN_CLASS = 0;
@@ -166,6 +167,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		if (sd.getStationType(stationKey) == STATION_TYPE_SERVER) {
 			updatePolicyEditButton();
 		}
+		handlePlaceQueueAndDelayConnectionStrategyControl();
+
 		isInitComplete = true;
 	}
 
@@ -419,7 +422,12 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	public void gotFocus() {
 		classEditor.clearCache();
 		if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
-			queuePolicyCombo.setModel(new DefaultComboBoxModel(serverStationQueuePolicies));
+			if(workingAsTransition) {
+				queuePolicyCombo.setModel(new DefaultComboBoxModel(new Object[] {STATION_QUEUE_STRATEGY_NON_PREEMPTIVE}));
+				data.setStationQueueStrategy(stationKey, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
+			} else {
+				queuePolicyCombo.setModel(new DefaultComboBoxModel(serverStationQueuePolicies));
+			}
 		} else {
 			queuePolicyCombo.setModel(new DefaultComboBoxModel(otherStationQueuePolicies));
 		}
@@ -445,6 +453,15 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private boolean isOpenClassAtRow(int row) {
 		Object classKey = getClassKeyFromRow(row);
 		return ((CommonModel) data).getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN;
+	}
+
+	private void handlePlaceQueueAndDelayConnectionStrategyControl() {
+		workingAsTransition = !data.getBackwardConnectedPlaces(stationKey).isEmpty();
+		if (workingAsTransition) {
+			for(Object classKey : classData.getClassKeys()) {
+				data.setQueueStrategy(stationKey, classKey, QUEUE_STRATEGY_FCFS);
+			}
+		}
 	}
 
 	protected class QueueTable extends JTable {
@@ -474,15 +491,18 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			if (column == COLUMN_QUEUE_POLICY) {
 				if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
 					String queueStrategy = data.getStationQueueStrategy(stationKey);
-					switch (queueStrategy) {
-						case STATION_QUEUE_STRATEGY_PSSERVER:
+					if(workingAsTransition) {
+						data.setQueueStrategy(stationKey, getClassKeyFromRow(row), QUEUE_STRATEGY_FCFS);
+						return ComboBoxCellEditor.getEditorInstance(new Object[] {QUEUE_STRATEGY_FCFS});
+					}else {
+						if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 							return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
-						case STATION_QUEUE_STRATEGY_PREEMPTIVE:
+						} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+								|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 							return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePolicies);
-						case STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY:
-							return ComboBoxCellEditor.getEditorInstance(serverPreemptiveQueuePriorityPolicies);
-						default:
+						} else {
 							return ComboBoxCellEditor.getEditorInstance(serverNonPreemptiveQueuePolicies);
+						}
 					}
 				} else {
 					return ComboBoxCellEditor.getEditorInstance(otherNonPreemptiveQueuePolicies);
@@ -737,17 +757,17 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 		/** Sets the default ImpatienceParameter for the StationClass depending on the ImpatienceType */
 		private void setDefaultImpatienceParameter(Object classKey, ImpatienceType impatienceType) {
 			switch (impatienceType) {
-				case RENEGING:
-					Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
-					data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
-					break;
-				case BALKING:
-					String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
-					data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy));
-					break;
-				default:
-					data.setImpatienceParameter(stationKey, classKey, null);
-					break;
+			case RENEGING:
+				Distribution distribution = (Distribution) Defaults.getAsNewInstance("classDistribution");
+				data.setImpatienceParameter(stationKey, classKey, new RenegingParameter(distribution));
+				break;
+			case BALKING:
+				String serverStationQueuePolicy = (String) serverStationQueuePolicies[queuePolicyCombo.getSelectedIndex()];
+				data.setImpatienceParameter(stationKey, classKey, new BalkingParameter(serverStationQueuePolicy));
+				break;
+			default:
+				data.setImpatienceParameter(stationKey, classKey, null);
+				break;
 			}
 		}
 	}

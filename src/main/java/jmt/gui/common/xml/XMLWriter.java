@@ -352,6 +352,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 			if (STATION_TYPE_DELAY.equals(stationType) || STATION_TYPE_SERVER.equals(stationType)) {
 				writeStationSoftDeadlines(doc, elem, model, stationKey);
+				writeDelayOffDistribution(doc, elem, model, stationKey);
 			}
 
 			if (STATION_TYPE_SOURCE.equals(stationType)) {
@@ -374,6 +375,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_SERVER.equals(stationType)) {
 				writeQueueSection(doc, elem, model, stationKey, stationType);
+
 				writeServerSection(doc, elem, model, stationKey);
 				writeRouterSection(doc, elem, model, stationKey);
 			} else if (STATION_TYPE_FORK.equals(stationType)) {
@@ -413,6 +415,43 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		}
 	}
 
+	private static void writeDelayOffDistribution(Document doc, Node node, CommonModel model, Object stationKey) {
+		// Check if delay off is enabled for the station
+		Boolean isDelayOffEnabled = model.getDelayOffTimesEnabled(stationKey);
+		if (isDelayOffEnabled != null && isDelayOffEnabled) {
+			// Create a section element for delay off settings, conforming to expected schema
+			Element delayOffConfig = doc.createElement(XML_E_STATION_DELAY_OFF);
+
+			XMLParameter delayOffEnabled = new XMLParameter("delayOffEnabled", "java.lang.Boolean", null, isDelayOffEnabled.toString(), false);
+			delayOffEnabled.appendParameterElement(doc, delayOffConfig);
+
+			XMLParameter[] distrParams = new XMLParameter[1];
+
+			distrParams[0] = DistributionWriter
+					.getDistributionParameter((Distribution) model
+							.getDelayOffTimeDistribution(stationKey), model, stationKey, "delayOffTime", SERVICE_TIME_STRATEGY_PATH);
+
+
+			XMLParameter delayOffParameter = new XMLParameter("delayOffTime",
+					SERVICE_TIME_STRATEGY_PATH, null, distrParams, false);
+
+			delayOffParameter.appendParameterElement(doc, delayOffConfig);
+			node.appendChild(delayOffConfig);
+
+			Element setUpConfig = doc.createElement(XML_E_STATION_SET_UP);
+			XMLParameter[] distrParams2 = new XMLParameter[1];
+			distrParams2[0] = DistributionWriter
+					.getDistributionParameter((Distribution) model
+							.getSetupTimeDistribution(stationKey), model, stationKey, "setupTime", SERVICE_TIME_STRATEGY_PATH);
+
+			XMLParameter setupTimeParameter = new XMLParameter("setUpTime",
+					SERVICE_TIME_STRATEGY_PATH, null, distrParams2, false);
+
+			setupTimeParameter.appendParameterElement(doc, setUpConfig);
+			node.appendChild(setUpConfig);
+		}
+	}
+
 	private static void writeStationSoftDeadlines(Document doc, Node node, CommonModel model, Object stationKey) {
 		Element softDeadlines = doc.createElement(XML_E_STATION_DUE_DATES);
 		for (Object classKey : model.getClassKeys()) {
@@ -422,6 +461,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		}
 		node.appendChild(softDeadlines);
 	}
+
 
 	/**
 	 * Writes a Fork output section <br>
@@ -1193,13 +1233,23 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		public Object get(CommonModel model, Object stationKey, Object classKey);
 	}
 
-	protected static class ServiceStrategyWriter implements DistributionStrategyGetter {
+	protected interface HeterogeneousDistributionStrategyGetter {
+		public Object get(CommonModel model, Object stationKey, Object classKey, Object serverTypeKey);
+	}
+
+	protected static class ServiceStrategyWriter implements DistributionStrategyGetter, HeterogeneousDistributionStrategyGetter {
 		private static ServiceStrategyWriter INSTANCE = new ServiceStrategyWriter();
 
 		private ServiceStrategyWriter() {}
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
-			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, INSTANCE);
+			XMLParameter distrArrayParameter;
+			Boolean heterogeneousServersEnabled = model.getHeterogeneousServersEnabled(stationKey);
+			if (heterogeneousServersEnabled != null && heterogeneousServersEnabled) {
+				distrArrayParameter = XMLWriter.getServiceSectionHeterogeneous(model, stationKey, INSTANCE);
+			} else {
+				distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, INSTANCE);
+			}
 			distrArrayParameter.parameterName = "ServiceStrategy";
 			distrArrayParameter.isSubParameter = false;
 			return distrArrayParameter;
@@ -1207,6 +1257,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 		public Object get(CommonModel model, Object stationKey, Object classKey) {
 			return model.getServiceTimeDistribution(stationKey, classKey);
+		}
+
+		public Object get(CommonModel model, Object stationKey, Object classKey, Object serverTypeKey) {
+			return model.getServiceTimeDistribution(stationKey, classKey, serverTypeKey);
 		}
 	}
 
@@ -1286,6 +1340,58 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				// Creates service strategy
 				distrParams[i] = createLoadDependentStrategyParameter(LDParameter,
 						model.getClassName(currentClass));
+			}
+		}
+		XMLParameter globalDistr = new XMLParameter("ServiceStrategy",
+				strategiesClasspathBase + "ServiceStrategy", null, distrParams, false);
+		return globalDistr;
+	}
+
+	protected static XMLParameter getServiceSectionHeterogeneous(CommonModel model,
+																									Object stationKey, HeterogeneousDistributionStrategyGetter distributionGetter) {
+		Vector<Object> classes = model.getClassKeys();
+		List<ServerType> serverTypes = model.getServerTypes(stationKey);
+		// creating set of service time distributions
+		XMLParameter[] distrParams = new XMLParameter[classes.size() * serverTypes.size()];
+		Object currentClass;
+		for (int s = 0; s < serverTypes.size(); s++) {
+			for (int i = 0; i < classes.size(); i++) {
+				ServerType serverType = serverTypes.get(s);
+				currentClass = classes.get(i);
+				int index = s * classes.size() + i;
+				Object serviceDistribution = distributionGetter.get(model, stationKey, currentClass, serverType.getServerKey());
+				if (serviceDistribution == null) {
+					continue;
+				}
+				if (serviceDistribution instanceof Distribution) {
+					// Service time is a Distribution and not a LDService
+					distrParams[index] = DistributionWriter.getDistributionParameter(
+							(Distribution) serviceDistribution, model,
+							currentClass, "ServiceTimeStrategy", SERVICE_TIME_STRATEGY_PATH, serverType.getServerKey());
+				} else if (serviceDistribution instanceof ZeroStrategy) {
+					// Zero Service Time Strategy
+					distrParams[index] = new XMLParameter("ZeroServiceTimeStrategy",
+							ZeroStrategy.getEngineClassPath(),
+							null, (String) null, true);
+				} else if (serviceDistribution instanceof DisabledStrategy) {
+					// Disabled Service Time Strategy
+					distrParams[index] = new XMLParameter("DisabledServiceTimeStrategy",
+							DisabledStrategy.getEngineClassPath(),
+							null, (String) null, true);
+				} else {
+					// Load Dependent Service Strategy
+					LDStrategy strategy = (LDStrategy) serviceDistribution;
+					XMLParameter[] ranges;
+					// Creates "function" parameter (mean value of the
+					// distribution)
+					ranges = createRangeParameterArray(strategy);
+
+					// Creates LDParameter array
+					XMLParameter LDParameter = createLDParameterArray(ranges);
+					// Creates service strategy
+					distrParams[index] = createLoadDependentStrategyParameter(LDParameter,
+							null);
+				}
 			}
 		}
 		XMLParameter globalDistr = new XMLParameter("ServiceStrategy",
@@ -1755,7 +1861,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				elem.setAttribute(XML_A_MEASURE_STATION, stationName);
 				elem.setAttribute(XML_A_MEASURE_NODETYPE, nodeType);
 				Object serverTypeKey = model.getMeasureServerTypeKey(key);
-				if (serverTypeKey != null) {
+				if (serverTypeKey != null && model.getServerType(serverTypeKey) != null) {
 					name += model.getServerTypeStationName(serverTypeKey) + "_";
 					elem.setAttribute(XML_A_MEASURE_SERVERTYPE, model.getServerType(serverTypeKey).getName());
 				} else {
@@ -2112,11 +2218,26 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * other parameters.
 		 */
 		static XMLParameter getDistributionParameter(Distribution distr,
-																								 CommonModel model, Object classKey, String className, String classPath) {
+													 CommonModel model, Object classKey, String className, String classPath) {
 			XMLParameter[] distribution = getDistributionParameter(distr);
 			XMLParameter returnValue = new XMLParameter(className,
 					classPath,
 					model.getClassName(classKey), new XMLParameter[] {
+					distribution[0], distribution[1] }, true);
+			/*
+			 * although this parameter contains several others, array attribute
+			 * must be set to "false", as their type are not necessarily equal
+			 */
+			returnValue.parameterArray = "false";
+			return returnValue;
+		}
+
+		static XMLParameter getDistributionParameter(Distribution distr,
+																								 CommonModel model, Object classKey, String className, String classPath, Object serverTypeKey) {
+			XMLParameter[] distribution = getDistributionParameter(distr);
+			XMLParameter returnValue = new XMLParameter(className,
+					classPath,
+					null, new XMLParameter[] {
 					distribution[0], distribution[1] }, true);
 			/*
 			 * although this parameter contains several others, array attribute

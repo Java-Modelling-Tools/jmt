@@ -125,6 +125,10 @@ public interface StationDefinition {
 	 */
 	public List<String> getServerTypeNames(Object stationKey);
 
+	public Boolean getHeterogeneousServersEnabled(Object stationKey);
+
+	public void setHeterogeneousServersEnabled(Object stationKey, Boolean enabled);
+
 	///
 
 	/**
@@ -333,6 +337,16 @@ public interface StationDefinition {
 	public void setSwitchoverTimesEnabled(Object key, Boolean enabled);
 
 	/**
+	 * Gets whether delay off times are enabled, given the search key.
+	 */
+	public Boolean getDelayOffTimesEnabled(Object key);
+
+	/**
+	 * Sets whether delay off times are enabled, given the search key.
+	 */
+	public void setDelayOffTimesEnabled(Object key, Boolean enabled);
+
+	/**
 	 * Tells if a fork is blocking
 	 * <br>Author: Bertoli Marco
 	 * @param key: search's key for fork
@@ -532,6 +546,16 @@ public interface StationDefinition {
 	public Object getServiceTimeDistribution(Object stationKey, Object classKey);
 
 	/**
+	 * Returns service time distribution for class, station and server type, given their search keys.
+	 * If specified station cannot accept this kind of parameter, null value is returned.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverTypeKey: search key for server type.
+	 * @return distribution for specified class and station.
+	 */
+	public Object getServiceTimeDistribution(Object stationKey, Object classKey, Object serverTypeKey);
+
+	/**
 	 * Sets service time distribution for class and station, given their search keys.
 	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
@@ -539,6 +563,16 @@ public interface StationDefinition {
 	 * @param distribution: distribution to be set for specified class and station.
 	 */
 	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object distribution);
+
+	/**
+	 * Sets service time distribution for class, station and server type, given their search keys.
+	 * If specified station cannot accept this kind of parameter, no value will be set.
+	 * @param stationKey: search key for station.
+	 * @param classKey: search key for class.
+	 * @param serverTypeKey: search key for server type.
+	 * @param distribution: distribution to be set for specified class and station.
+	 */
+	public void setServiceTimeDistribution(Object stationKey, Object classKey, Object serverTypeKey, Object distribution);
 
 	/**
 	 * Returns service time distribution for class and station, given their search keys.
@@ -597,6 +631,14 @@ public interface StationDefinition {
 	 * @param distribution: distribution to be set for specified class and station.
 	 */
 	public void setSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution);
+
+	public Object getDelayOffTimeDistribution(Object stationKey);
+
+	public void setDelayOffTimeDistribution(Object stationKey, Object distribution);
+
+	public Object getSetupTimeDistribution(Object stationKey);
+
+	public void setSetupTimeDistribution(Object stationKey, Object distribution);
 
 	/**
 	 * Returns routing strategy for class and station, given their search keys.

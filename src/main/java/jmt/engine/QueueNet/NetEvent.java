@@ -80,4 +80,66 @@ public class NetEvent {
 	public static final int EVENT_JOB_REQUEST_FROM_SERVER = 0x0017;
 	/** Event ID: CoolStart variable reset event */
 	public static final int EVENT_RESET_COOLSTART = 0x0018;
+
+	/**
+	 * Returns the name of the event, used in debug.
+	 * @param eventId The event ID.
+	 * @return The name of the event.
+	 */
+	public static String getEventName(int eventId) {
+		switch (eventId) {
+			case EVENT_ABORT:
+				return "EVENT_ABORT";
+			case EVENT_STOP:
+				return "EVENT_STOP";
+			case EVENT_START:
+				return "EVENT_START";
+			case EVENT_JOB:
+				return "EVENT_JOB";
+			case EVENT_ACK:
+				return "EVENT_ACK";
+			case EVENT_PREEMPTED_JOB:
+				return "EVENT_PREEMPTED_JOB";
+			case EVENT_KEEP_AWAKE:
+				return "EVENT_KEEP_AWAKE";
+			case EVENT_JOIN:
+				return "EVENT_JOIN";
+			case EVENT_JOB_OUT_OF_REGION:
+				return "EVENT_JOB_OUT_OF_REGION";
+			case EVENT_DISTRIBUTION_CHANGE:
+				return "EVENT_DISTRIBUTION_CHANGE";
+			case EVENT_JOB_CHANGE:
+				return "EVENT_JOB_CHANGE";
+			case EVENT_ENABLING:
+				return "EVENT_ENABLING";
+			case EVENT_TIMING:
+				return "EVENT_TIMING";
+			case EVENT_FIRING:
+				return "EVENT_FIRING";
+			case EVENT_JOB_REQUEST:
+				return "EVENT_JOB_REQUEST";
+			case EVENT_JOB_RELEASE:
+				return "EVENT_JOB_RELEASE";
+			case EVENT_JOB_FINISH:
+				return "EVENT_JOB_FINISH";
+			case EVENT_POLLING_SERVER_NEXT:
+				return "EVENT_POLLING_SERVER_NEXT";
+			case EVENT_POLLING_SERVER_READY:
+				return "EVENT_POLLING_SERVER_READY";
+			case EVENT_RENEGE:
+				return "EVENT_RENEGE";
+			case EVENT_RETRIAL:
+				return "EVENT_RETRIAL";
+			case EVENT_RETRIAL_JOB:
+				return "EVENT_RETRIAL_JOB";
+			case EVENT_SETUP_JOB:
+				return "EVENT_SETUP_JOB";
+			case EVENT_JOB_REQUEST_FROM_SERVER:
+				return "EVENT_JOB_REQUEST_FROM_SERVER";
+			case EVENT_RESET_COOLSTART:
+				return "EVENT_RESET_COOLSTART";
+			default:
+				return "UNKNOWN_EVENT";
+		}
+	}
 }

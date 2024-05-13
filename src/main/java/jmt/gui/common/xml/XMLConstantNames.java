@@ -56,6 +56,10 @@ public interface XMLConstantNames {
 	public static final String XML_A_STATION_NAME = "name";
 	public static final String XML_E_STATION_SECTION = "section";
 	public static final String XML_E_STATION_DUE_DATES = "classSoftDeadlines";
+
+	public static final String XML_E_STATION_DELAY_OFF = "delayOff";
+
+	public static final String XML_E_STATION_SET_UP = "setUp";
 	public static final String XML_A_STATION_SECTION_CLASSNAME = "className";
 	public static final String XML_E_PARAMETER = "parameter";
 	public static final String XML_A_PARAMETER_NAME = "name";

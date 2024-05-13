@@ -34,7 +34,7 @@
 											<xs:enumeration value="Infinity"/>
 											<xs:enumeration value="-Infinity"/>
 										</xs:restriction>
-									</xs:simpleType>	
+									</xs:simpleType>
 								</xs:union>
 							</xs:simpleType>
 						</xs:attribute>
@@ -51,7 +51,7 @@
 											<xs:enumeration value="Infinity"/>
 											<xs:enumeration value="-Infinity"/>
 										</xs:restriction>
-									</xs:simpleType>	
+									</xs:simpleType>
 								</xs:union>
 							</xs:simpleType>
 						</xs:attribute>
@@ -224,6 +224,7 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="classSoftDeadlines" minOccurs="0"/>
+				<xs:element ref="delayOff" minOccurs="0"/>
 				<xs:element ref="section" minOccurs="0" maxOccurs="3"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
@@ -252,4 +253,13 @@
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>
+
+	<xs:element name="delayOff">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
 </xs:schema>

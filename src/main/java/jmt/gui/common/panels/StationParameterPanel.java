@@ -66,6 +66,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 	protected ClassSwitchSectionPanel csPane;
 	protected TimingSectionPanel tiPane;
 
+	protected DelayOffSectionPanel doPane;
 	protected RoutingSectionPanel rsPane;
 	protected InGateWaySectionPanel gsPane;
 	protected FiringSectionPanel fiPane;
@@ -260,6 +261,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 				mainPanel.setSelectedComponent(oldComponent);
 			}
 		}
+
 
 		if (hasRoutingSection(type)) {
 			if (rsPane == null) {

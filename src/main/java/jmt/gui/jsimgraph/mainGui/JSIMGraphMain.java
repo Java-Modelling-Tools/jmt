@@ -20,10 +20,13 @@ package jmt.gui.jsimgraph.mainGui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 
 import javax.swing.*;
 
+import jmt.engine.log.JSimLogger;
 import jmt.framework.gui.components.JMTFrame;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
@@ -34,6 +37,7 @@ import jmt.gui.common.panels.BezierConnectionHelperBar;
 import jmt.gui.jsimgraph.controller.GraphMouseListener;
 import jmt.gui.jsimgraph.controller.Mediator;
 
+import jmt.gui.jsimgraph.controller.actions.DebugSolver;
 import org.jgraph.JGraph;
 
 /**
@@ -94,7 +98,6 @@ public class JSIMGraphMain extends JMTFrame {
 
 		scroll = new JScrollPane();
 		mainPane.add(scroll, BorderLayout.CENTER);
-
 		centerWindow(Defaults.getAsInteger("JSIMWindowWidth").intValue(), Defaults.getAsInteger("JSIMWindowHeight").intValue());
 		setVisible(true);
 	}

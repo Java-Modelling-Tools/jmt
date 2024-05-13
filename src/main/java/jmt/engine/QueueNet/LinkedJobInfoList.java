@@ -1084,6 +1084,11 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected void doRemove(JobInfo jobInfo, int position, int perClassPosition) {
 		int c = jobInfo.getJob().getJobClass().getId();
+
+		//update total queue time when remove
+		double currentQueueTime = getTime() - jobInfo.getEnteringTime();
+		jobInfo.getJob().addQueueTime(currentQueueTime);
+
 		updateQueueLength(jobInfo);
 		updateResponseTime(jobInfo);
 		updateResidenceTime(jobInfo);
@@ -1719,6 +1724,8 @@ public class LinkedJobInfoList implements JobInfoList {
 
 	protected void updateResidenceTime(JobInfo jobInfo) {
 		List<BusyServer> usedServers = usedServersPerJob.get(jobInfo.getJob().getId());
+		double totalQueueTime = jobInfo.getJob().getTotalQueueTime();
+		boolean updated = false;
 
 		if(residenceTimePerServerType != null) {
 			if (usedServers == null) {
@@ -1729,7 +1736,8 @@ public class LinkedJobInfoList implements JobInfoList {
 						Measure m = residenceTimePerServerType[s];
 						if (m != null) {
 							m.updateSampleJob(jobInfo.getJob(), stationName);
-							m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName);
+							m.update(totalQueueTime, 1.0, stationName);
+							updated = true;
 						}
 					}
 				}
@@ -1739,7 +1747,8 @@ public class LinkedJobInfoList implements JobInfoList {
 					if (m != null) {
 						m.updateSampleJob(jobInfo.getJob());
 						numOfVisitsPerServer[server.getId()] ++;
-						m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName, numOfVisitsPerServer[server.getId()]);
+						m.update(totalQueueTime, 1.0, stationName, numOfVisitsPerServer[server.getId()]);
+						updated = true;
 					}
 				}
 			}
@@ -1757,7 +1766,8 @@ public class LinkedJobInfoList implements JobInfoList {
 						Measure m = residenceTimePerServerTypePerClass[s][c];
 						if (m != null) {
 							m.updateSampleJob(jobInfo.getJob(),stationName);
-							m.update(getTime() - jobInfo.getEnteringTime(), 1.0, stationName);
+							m.update(totalQueueTime, 1.0, stationName);
+							updated = true;
 						}
 					}
 				}
@@ -1767,9 +1777,10 @@ public class LinkedJobInfoList implements JobInfoList {
 					if (m != null) {
 						m.updateSampleJob(jobInfo.getJob(),stationName);
 						numOfVisitsPerServerPerClass[server.getId()][c] ++;
-						m.update(getTime() - jobInfo.getEnteringTime(), 1.0,
+						m.update(totalQueueTime, 1.0,
 								stationName,
 								numOfVisitsPerServerPerClass[server.getId()][c]);
+						updated = true;
 					}
 				}
 			}
@@ -1781,12 +1792,17 @@ public class LinkedJobInfoList implements JobInfoList {
 			Measure m = residenceTimePerClass[c];
 			if (m != null) {
 				m.updateSampleJob(jobInfo.getJob());
-				m.update(getTime() - jobInfo.getEnteringTime(), 1.0);
+				m.update(totalQueueTime, 1.0);
+				updated = true;
 			}
 		}
 		if (residenceTime != null) {
 			residenceTime.updateSampleJob(jobInfo.getJob());
-			residenceTime.update(getTime() - jobInfo.getEnteringTime(), 1.0);
+			residenceTime.update(totalQueueTime, 1.0);
+			updated = true;
+		}
+		if (updated) {
+			jobInfo.getJob().setTotalQueueTime(0.0);
 		}
 	}
 

@@ -634,6 +634,10 @@ public abstract class NodeSection {
 	 * @throws NetException
 	 */
 	int receive(NetMessage message) throws NetException {
+		if (logger.isLogCalenderOn()) {
+			logger.debug(message.getDestination().getName() + " Received a message with event: " + NetEvent.getEventName(message.getEvent()) + " from " + message.getSource().getName()
+			+ " with destination time: " + message.getDestination().getNetSystem().getTime());
+		}
 		if (message.getEvent() == NetEvent.EVENT_JOB) {
 			if ((message.getSource() != ownerNode) || (message.getSource() == ownerNode && message.getSourceSection() != sectionID)) {
 				if (auto) {
@@ -746,27 +750,5 @@ public abstract class NodeSection {
 
 	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
 		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, "required analyzer does not exist!");
-	}
-
-	private boolean isJobFromPlaceToServerOrDelay(NetMessage message){
-		NetNode sourceNode = message.getSource();
-		NetNode destinationNode = message.getDestination();
-		int sourceSection = message.getSourceSection();
-		int destinationSection = message.getDestinationSection();
-		boolean result = false;
-		try
-		{
-			result = sourceNode != null && destinationNode != null
-					&& sourceSection == 3
-					&& sourceNode.getSection(sourceSection) instanceof Linkage
-					&& destinationSection == 1
-					&& destinationNode.getSection(destinationSection) instanceof Queue
-			;
-		}
-		catch(NetException e)
-		{
-		}
-
-		return result;
 	}
 }

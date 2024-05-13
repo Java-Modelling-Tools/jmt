@@ -41,6 +41,8 @@ public class Job implements Cloneable {
 	//used to compute system response time
 	protected double systemEnteringTime;
 
+	private double totalQueueTime = 0.0;
+
 	/*
 	This field is used with blocking region.
 	The presence of an input station, in fact, modifies the route of some jobs:
@@ -269,6 +271,18 @@ public class Job implements Cloneable {
 	public void AddToVisitPath(Pair<NetNode, JobClass> pair) {
 		globalJobInfoList.updateChainGraph(lastVisitedPair, pair);
 		lastVisitedPair = pair;
+	}
+
+	public double getTotalQueueTime() {
+		return totalQueueTime;
+	}
+
+	public void addQueueTime(double time) {
+		totalQueueTime += time;
+	}
+
+	public void setTotalQueueTime(double time) {
+		totalQueueTime = time;
 	}
 
 	public NetSystem getNetSystem() {
