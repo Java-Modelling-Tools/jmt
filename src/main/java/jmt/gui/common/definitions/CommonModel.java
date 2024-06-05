@@ -4887,7 +4887,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		addServerType(stationKey, "Server Type " + sd.nextServerNum, change, null, false);
 	}
 
-	public void addServerType(Object stationKey, String serverName, int serverNumOfServers, List<Boolean> serverCompatibilities, boolean trimName){
+	public void addServerType(Object stationKey, String serverName, int serversPerServerType, List<Boolean> serverCompatibilities, boolean trimName){
 
 		Object key = new Long(++incrementalKey);
 
@@ -4896,7 +4896,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 
 		StationData sd = (StationData) stationDataHM.get(stationKey);
-		ServerType server = new ServerType(serverName, serverNumOfServers, key, stationKey, sd.serverTypes.size());
+		ServerType server = new ServerType(serverName, serversPerServerType, key, stationKey, sd.serverTypes.size());
 		for(int i = 0; i < classesKeyset.size(); i++){
 			if (serverCompatibilities == null || serverCompatibilities.get(i)) {
 				server.addCompatibility(classesKeyset.get(i));

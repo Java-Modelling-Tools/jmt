@@ -8,18 +8,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Vector;
 
-import javax.swing.ButtonGroup;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -52,11 +41,14 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
     private JSpinner steps;
     private JLabel stationChooserLabel;
     private JComboBox stationChooser;
+    private JLabel serverTypeChooserLabel;
+    private JComboBox serverTypeChooser;
     private JScrollPane scroll;
     private JTextArea description;
     private JScrollPane descrPane;
     private TitledBorder descriptionTitle;
     private ParametricAnalysisChecker checker;
+    private String DESCRIPTION_SERVER_TYPES;
 
     private NumberOfServersParametricAnalysis NSPA;
 
@@ -69,6 +61,10 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
         DESCRIPTION = "Repeat the simulation with different number of servers in a station.\n\n"
                 + "The 'From' value represents the initial number of servers in a station.\n\n"
                 + "The 'To' value represents the final number of servers in a station.\n\n";
+
+        DESCRIPTION_SERVER_TYPES = "Repeat the simulation with different number of servers for a server type in a station.\n\n"
+            + "The 'From' value represents the initial number of servers for the server type in the station.\n\n"
+            + "The 'To' value represents the final number of servers for the server type in the station.\n\n";
 
         cd = classDef;
         sd = stationDef;
@@ -123,7 +119,11 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
         NSPA.setNumberOfSteps((int)(NSPA.getFinalValue() - NSPA.getInitialValue() + 1));
         steps.setToolTipText("Sets the number of steps to be performed");
 
-        description.setText(DESCRIPTION);
+        if (NSPA.isSingleServerType()) {
+            description.setText(DESCRIPTION);
+        } else {
+            description.setText(DESCRIPTION_SERVER_TYPES);
+        }
 
         from.setBackground(Color.WHITE);
         stationChooserLabel = new JLabel("Station:");
@@ -141,6 +141,19 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
         editLables.add(stepsLabel);
         editLables.add(stationChooserLabel);
         editLables.setPreferredSize(new Dimension(100, 128));
+
+        if (!NSPA.isSingleServerType()) {
+            serverTypeChooser = new JComboBox(NSPA.getServerTypeNames());
+            if (NSPA.serverTypeInStation()) {
+                serverTypeChooser.setSelectedItem(sd.getServerType(NSPA.getServerTypeKey()).getName());
+            } else {
+                NSPA.setServerType((String) serverTypeChooser.getSelectedItem());
+            }
+            serverTypeChooserLabel = new JLabel("Server Type:");
+            edit.add(serverTypeChooser);
+            editLables.add(serverTypeChooserLabel);
+        }
+
         JPanel editPanel = new JPanel();
         editPanel.add(editLables);
         editPanel.add(edit);
@@ -310,6 +323,11 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
                 String stationName = (String) stationChooser.getSelectedItem();
                 NSPA.setReferenceStation(getStationKey(stationName));
 
+                if (serverTypeChooser != null) {
+                    serverTypeChooser.setModel(new DefaultComboBoxModel(NSPA.getServerTypeNames()));
+                    NSPA.setServerType((String) serverTypeChooser.getSelectedItem());
+                }
+
                 NSPA.setDefaultInitialValue();
                 NSPA.setDefaultFinalValue();
                 from.setModel(new SpinnerNumberModel(NSPA.getInitialValue(), 1, Double.MAX_VALUE, 1));
@@ -348,6 +366,54 @@ public class NumberOfServersPanel extends ParameterOptionPanel {
                 steps.setValue(NSPA.getNumberOfSteps());
             }
         });
+        if (serverTypeChooser != null) {
+            serverTypeChooser.addItemListener(new ItemListener() {
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+                    if (e.getStateChange() == ItemEvent.DESELECTED) {
+                        return;
+                    }
+                    NSPA.setServerType((String) serverTypeChooser.getSelectedItem());
+
+                    NSPA.setDefaultInitialValue();
+                    NSPA.setDefaultFinalValue();
+                    from.setModel(new SpinnerNumberModel(NSPA.getInitialValue(), 1, Double.MAX_VALUE, 1));
+                    from.setValue(new Double(NSPA.getInitialValue()));
+                    to.setModel(new SpinnerNumberModel(NSPA.getFinalValue(), 1, Double.MAX_VALUE, 1));
+                    to.setValue(new Double(NSPA.getFinalValue()));
+
+                    if (NSPA.getFinalValue() > NSPA.getInitialValue()) {
+                        if ((Integer) steps.getValue() >= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {
+                            NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));
+                        } else {
+                            NSPA.setNumberOfSteps((Integer) steps.getValue());
+                        }
+                    } else if (NSPA.getInitialValue() > NSPA.getFinalValue()) {
+                        if ((Integer) steps.getValue() >= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {
+                            NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));
+                        } else {
+                            NSPA.setNumberOfSteps((Integer) steps.getValue());
+                        }
+                        // convert "From" and "To"
+                        from.setValue(new Double(NSPA.getInitialValue()));
+                        to.setValue(new Double(NSPA.getFinalValue()));
+                        Object sub = from.getValue();
+                        from.setValue(new Double(NSPA.getFinalValue()));
+                        if (to.getValue() instanceof Integer) {
+                            to.setValue((Integer) sub);
+                        } else if (to.getValue() instanceof Double) {
+                            to.setValue((Double) sub);
+                        }
+                    } else {
+                        if (NSPA.getNumberOfSteps() >= 2) {
+                            NSPA.setNumberOfSteps(1);
+                            steps.setValue(new Integer(NSPA.getNumberOfSteps()));
+                        }
+                    }
+                    steps.setValue(NSPA.getNumberOfSteps());
+                }
+            });
+        }
     }
 
 }

@@ -297,9 +297,11 @@ public interface CommonConstants {
 	public static final String COMPATIBILITIES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Server Type Compatibilities" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "View and Define server type compatibilities " + HTML_FONT_NOR_END + HTML_END;
 
-	public static final String SERVER_SETTINGS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Server Characteristics" + HTML_FONT_TIT_END + HTML_FONT_NORM
-			+ "Delete and Add different <b>Server Types</b>"
-			+ "<br/>" + "Change <b>Server Types Compatibilities</b>" + HTML_FONT_NOR_END + HTML_END;
+	public static final String SERVER_SETTINGS_DESCRIPTION = HTML_START + "<p style='padding:5px; text-align:center;': 10px'>"
+			+ "Define server types which can be compatible with different job classes. "
+			+ "Scheduling policy determines which servers are assigned to jobs. "
+			+ "Heterogeneous service time distributions allow server types to have different service time distributions.</p>"
+			+ HTML_END;
 
 	public static final String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Simulation Parameters" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Define simulation parameters and initial customer locations." + HTML_FONT_NOR_END + HTML_END;

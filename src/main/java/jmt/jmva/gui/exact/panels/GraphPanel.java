@@ -269,7 +269,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 
 			currentIndex = current;
-			if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
+			if (currentIndex.equals(ExactConstants.INDICES_TYPES[5])) {
 				// If System Power is selected, removes the station column
 				table.showColumn(LinesTableColumn.CLASS);
 				table.hideColumn(LinesTableColumn.STATION);
@@ -304,7 +304,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				}
 				autosizeGraph();
 			} else {
-				if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
+				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
 					for (int i = 0; i < stations.length; i++) {
 						if (stations[i] == -1) {
 							stations[i] = -2;
@@ -371,7 +371,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 
 		// There is no station column for System Power
 		//if (classNum < -1 || statNum < -1) {
-		if (classNum < -1 || (statNum < -1 && !currentIndex.equals(ExactConstants.INDICES_TYPES[4]))) {
+		if (classNum < -1 || (statNum < -1 && !currentIndex.equals(ExactConstants.INDICES_TYPES[5]))) {
 			// Resets view
 			autosizeGraph();
 			return;
@@ -401,12 +401,24 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				graph.draw(rowNum, model.getGlobalQ(alg));
 			}
 		}
-		// Residence time
+		// Response time
 		if (currentIndex.equals(ExactConstants.INDICES_TYPES[2])) {
 			if (classNum >= 0 && statNum >= 0) {
-				graph.draw(rowNum, model.getResTimes(alg)[statNum][classNum]);
+				graph.draw(rowNum, model.getResidTimes(alg)[statNum][classNum]);
 			} else if (classNum < 0 && statNum >= 0) {
-				graph.draw(rowNum, model.getPerStationR(alg)[statNum]);
+				graph.draw(rowNum, model.getPerStationRespT(alg)[statNum]);
+			} else if (classNum >= 0 && statNum < 0) {
+				graph.draw(rowNum, model.getPerClassR(alg, true)[classNum]);
+			} else {
+				graph.draw(rowNum, model.getGlobalR(alg, true));
+			}
+		}
+		// Residence time
+		if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
+			if (classNum >= 0 && statNum >= 0) {
+				graph.draw(rowNum, model.getResidTimes(alg)[statNum][classNum]);
+			} else if (classNum < 0 && statNum >= 0) {
+				graph.draw(rowNum, model.getPerStationResidT(alg)[statNum]);
 			} else if (classNum >= 0 && statNum < 0) {
 				graph.draw(rowNum, model.getPerClassR(alg, true)[classNum]);
 			} else {
@@ -414,7 +426,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 		}
 		// Utilization
-		if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
+		if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
 			if (classNum >= 0 && statNum >= 0) {
 				graph.draw(rowNum, model.getUtilization(alg)[statNum][classNum]);
 			} else {
@@ -422,7 +434,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			}
 		}
 		// System power
-		if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
+		if (currentIndex.equals(ExactConstants.INDICES_TYPES[5])) {
 			if (classNum >= 0) {
 				graph.draw(rowNum, model.getPerClassSP(alg, true)[classNum]);
 			} else if (classNum == -1) {
@@ -583,7 +595,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 			case CLASS:
 				return classEditor;
 			case STATION:
-				if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {
+				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {
 					return uStationsEditor;
 				} else {
 					return stationsEditor;
@@ -891,7 +903,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 				classes[rowIndex] = ((Integer) aValue).intValue();
 				break;
 			case STATION:
-				if (currentIndex.equals(ExactConstants.INDICES_TYPES[3]) && ((Integer) aValue).intValue() < 0) {
+				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4]) && ((Integer) aValue).intValue() < 0) {
 					stations[rowIndex] = -2;
 				} else {
 					stations[rowIndex] = ((Integer) aValue).intValue();

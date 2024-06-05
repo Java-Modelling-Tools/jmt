@@ -189,7 +189,7 @@ public class ExactDocumentCreator {
 
         Map<SolverAlgorithm, double[][][]> queueLen = model.getQueueLen();
         Map<SolverAlgorithm, double[][][]> throughput = model.getThroughput();
-        Map<SolverAlgorithm, double[][][]> resTimes = model.getResTimes();
+        Map<SolverAlgorithm, double[][][]> resTimes = model.getResidTimes();
         Map<SolverAlgorithm, double[][][]> util = model.getUtilization();
 
         Map<SolverAlgorithm, Double> logNormConst = model.getLogNormConst();

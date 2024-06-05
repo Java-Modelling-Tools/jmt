@@ -18,7 +18,9 @@
 
 package jmt.engine.QueueNet;
 
+import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.NodeSections.Server;
+import jmt.engine.log.LoggerStateManager;
 import jmt.engine.simEngine.Simulation;
 import jmt.engine.NodeSections.Linkage;
 import jmt.engine.NodeSections.Queue;
@@ -464,7 +466,7 @@ public abstract class NodeSection {
 	 * @param message message to be processed.
 	 * @return message processing result.
 	 */
-	protected abstract int process(NetMessage message) throws NetException;
+	protected abstract int process(NetMessage message) throws NetException, IncorrectDistributionParameterException;
 
 	/**
 	 * Sends an event to a section of a node.
@@ -635,8 +637,20 @@ public abstract class NodeSection {
 	 */
 	int receive(NetMessage message) throws NetException {
 		if (logger.isLogCalenderOn()) {
-			logger.debug(message.getDestination().getName() + " Received a message with event: " + NetEvent.getEventName(message.getEvent()) + " from " + message.getSource().getName()
-			+ " with destination time: " + message.getDestination().getNetSystem().getTime());
+			String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();
+			if (allowedEvents.length > 0) {
+				for (String allowedEvent : allowedEvents) {
+					if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {
+						String sender = String.valueOf(message.getSource().getName());
+						String eventName = NetEvent.getEventName(message.getEvent());
+						String receiver = message.getDestination().getName();
+						String timestamp = String.valueOf(message.getDestination().getNetSystem().getTime())
+								.replace(".", JSimLogger.getDecimalSeparator());
+						JSimLogger.logCustomDebug("receive",sender, eventName, receiver, timestamp);
+						break;
+					}
+				}
+			}
 		}
 		if (message.getEvent() == NetEvent.EVENT_JOB) {
 			if ((message.getSource() != ownerNode) || (message.getSource() == ownerNode && message.getSourceSection() != sectionID)) {
@@ -645,7 +659,11 @@ public abstract class NodeSection {
 				}
 			}
 		}
-		return process(message);
+		try {
+			return process(message);
+		} catch (IncorrectDistributionParameterException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**

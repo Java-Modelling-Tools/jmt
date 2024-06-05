@@ -1113,14 +1113,14 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * @return residence times
 	 */
-	public Map<SolverAlgorithm, double[][][]> getResTimes() {
+	public Map<SolverAlgorithm, double[][][]> getResidTimes() {
 		return resTimes;
 	}
 
 	/**
-	 * @return residence times for the given algorithm
+	 * @return response times for the given algorithm
 	 */
-	public double[][][] getResTimes(SolverAlgorithm alg) {
+	public double[][][] getRespTimes(SolverAlgorithm alg) {
 		if (alg != null) {
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
 			for (int s = 0; s < stations; s++)
@@ -1129,6 +1129,17 @@ public class ExactModel implements ExactConstants  {
 						if (classTypes[c] == CLASS_CLOSED)
 							if (visits[referenceStation[c]][c] != 0)
 								res[s][c][i] /= (visits[referenceStation[c]][c]);
+			return res;
+		}
+		return null;
+	}
+
+	/**
+	 * @return residence times for the given algorithm
+	 */
+	public double[][][] getResidTimes(SolverAlgorithm alg) {
+		if (alg != null) {
+			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
 			return res;
 		}
 		return null;
@@ -2057,7 +2068,7 @@ public class ExactModel implements ExactConstants  {
 			return null;
 		}
 		double[][] retVal = new double[classes][iterations];
-		double[][][] resTimes = this.getResTimes(alg);
+		double[][][] resTimes = this.getResidTimes(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < classes; i++) {
@@ -2072,8 +2083,8 @@ public class ExactModel implements ExactConstants  {
 		return retVal;
 	}
 
-	/**Returns per-station aggregate for residence times*/
-	public double[][] getPerStationR(SolverAlgorithm alg) {
+	/**Returns per-station aggregate for response times*/
+	public double[][] getPerStationRespT(SolverAlgorithm alg) {
 		if (throughput == null) {
 			return null;
 		}
@@ -2082,7 +2093,40 @@ public class ExactModel implements ExactConstants  {
 		}
 		double[][] retVal = new double[stations][iterations];
 		double[][] xClassAggs = getPerClassX(alg);
-		double[][][] resTimes = this.getResTimes(alg);
+		double[][][] resTimes = this.getResidTimes(alg);
+		double[][] visits = this.getVisits();
+		// Scans for every iteration (what if analysis)
+		for (int k = 0; k < iterations; k++) {
+			for (int i = 0; i < stations; i++) {
+				retVal[i][k] = 0;
+				double dividend = 0;
+				for (int j = 0; j < classes; j++) {
+					if (visits[i][j] > 0.0) {
+						retVal[i][k] += xClassAggs[j][k] * resTimes[i][j][k] / visits[i][j];
+						dividend += xClassAggs[j][k];
+					}
+				}
+				if (dividend > 0) {
+					retVal[i][k] /= dividend;
+				} else {
+					retVal[i][k] = 0;
+				}
+			}
+		}
+		return retVal;
+	}
+
+	/**Returns per-station aggregate for residence times*/
+	public double[][] getPerStationResidT(SolverAlgorithm alg) {
+		if (throughput == null) {
+			return null;
+		}
+		if (resTimes == null) {
+			return null;
+		}
+		double[][] retVal = new double[stations][iterations];
+		double[][] xClassAggs = getPerClassX(alg);
+		double[][][] resTimes = this.getResidTimes(alg);
 		// Scans for every iteration (what if analysis)
 		for (int k = 0; k < iterations; k++) {
 			for (int i = 0; i < stations; i++) {

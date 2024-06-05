@@ -44,7 +44,7 @@ public class SystemPowerPanel extends SolutionPanel implements ExactConstants {
 	protected void sync() {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
-		resTimes = data.getResTimes(algorithm);
+		resTimes = data.getResidTimes(algorithm);
 		classAggs = data.getPerClassSP(algorithm, true);
 		classAggsWO = data.getPerClassSP(algorithm, false);
 		globalAgg = data.getGlobalSP(algorithm, true);

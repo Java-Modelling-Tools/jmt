@@ -59,38 +59,14 @@ public class MetricConfigurationsPanel extends WizardPanel implements CommonCons
 
 
     private void initComponents() {
-
-        //create margins for this panel.
-        Box vBox = Box.createVerticalBox();
-        Box hBox = Box.createHorizontalBox();
-        vBox.add(Box.createVerticalStrut(30));
-        vBox.add(hBox);
-        vBox.add(Box.createVerticalStrut(30));
-        hBox.add(Box.createHorizontalStrut(20));
-
-        //build central panel
-        JPanel componentsPanel = new JPanel(new BorderLayout());
-
-        //build upper part of central panel
-        JPanel upperPanel = new JPanel(new BorderLayout());
-        JLabel descrLabel = new JLabel(METRIC_CONFIGURATIONS_DESCRIPTION);
-        upperPanel.add(descrLabel, BorderLayout.CENTER);
-
-        //build ServerTypes scheduling panel
-
         JPanel serverTypesPanel = new JPanel();
         serverTypesPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Types for Metric"));
         serverTypesPanel.add(Box.createRigidArea(new Dimension(5, 0)));
         serverTypesPanel.add(new JLabel("Metric defined for:"));
         serverTypesPanel.add(serverTypesCombos);
 
-        //add all panels to the mail panel
-        componentsPanel.add(upperPanel, BorderLayout.NORTH);
-        componentsPanel.add(serverTypesPanel,BorderLayout.CENTER);
-        hBox.add(componentsPanel);
-        hBox.add(Box.createHorizontalStrut(20));
-        this.setLayout(new GridLayout(1, 1));
-        this.add(vBox);
+        this.setLayout(new BorderLayout());
+        this.add(serverTypesPanel, BorderLayout.CENTER);
     }
 
 

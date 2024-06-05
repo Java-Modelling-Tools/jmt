@@ -327,6 +327,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 
 			// Creates unique measure name
 			String Name = stationName + "_" + className + "_" + type;
+			if (current.hasAttribute(XML_AO_MEASURE_SERVER_TYPE)) {
+				Name = Name.replace(stationName, current.getAttribute(XML_AO_MEASURE_SERVER_TYPE));
+			}
 
 			// Adds loaded informations into model data structure
 			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, type, nodeType, fileName);

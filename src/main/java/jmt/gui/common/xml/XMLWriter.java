@@ -1212,9 +1212,9 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				"java.lang.String", null, serverTypesNames, false);
 		serverNames.appendParameterElement(doc, elem);
 
-		XMLParameter serverNumOfServers = new XMLParameter("serverNumOfServers",
+		XMLParameter serversPerServerType = new XMLParameter("serversPerServerType",
 				"java.lang.Integer", null, serverTypesNumOfServers, false);
-		serverNumOfServers.appendParameterElement(doc, elem);
+		serversPerServerType.appendParameterElement(doc, elem);
 
 		XMLParameter serverCompatibilities = new XMLParameter("serverCompatibilities",
 				"java.lang.Object", null, serverTypesCompatibilities, false);
@@ -2218,7 +2218,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * other parameters.
 		 */
 		static XMLParameter getDistributionParameter(Distribution distr,
-													 CommonModel model, Object classKey, String className, String classPath) {
+																								 CommonModel model, Object classKey, String className, String classPath) {
 			XMLParameter[] distribution = getDistributionParameter(distr);
 			XMLParameter returnValue = new XMLParameter(className,
 					classPath,

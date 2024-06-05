@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Objects;
 
 public class DebugSolverPanel extends JPanel {
     private Mediator mediator;
@@ -20,7 +21,10 @@ public class DebugSolverPanel extends JPanel {
     private DefaultListModel<CheckListItem> listModel;
     private boolean allSelected = false;
 
+    private JComboBox<String> delimiterComboBox, decimalSeparatorComboBox;
+
     private File file;
+
     public DebugSolverPanel(Mediator mediator) {
         this.mediator = mediator;
         initComponent();
@@ -90,6 +94,13 @@ public class DebugSolverPanel extends JPanel {
             }
         });
 
+        // New components for delimiter and decimal separator selection
+        delimiterComboBox = new JComboBox<>(new String[]{",", ";", "Tab", "Space"});
+        decimalSeparatorComboBox = new JComboBox<>(new String[]{".", ","});
+
+        delimiterComboBox.setPreferredSize(new Dimension(50, delimiterComboBox.getPreferredSize().height));
+        decimalSeparatorComboBox.setPreferredSize(new Dimension(50, decimalSeparatorComboBox.getPreferredSize().height));
+
         JPanel northPanel = new JPanel(new BorderLayout());
         northPanel.add(new JLabel("Log Path:"), BorderLayout.WEST);
         northPanel.add(logPathField, BorderLayout.CENTER);
@@ -99,11 +110,23 @@ public class DebugSolverPanel extends JPanel {
         southPanel.add(selectAllButton);
         southPanel.add(runSimulationButton);
 
+        // Panel for delimiter and decimal separator selection
+        JPanel delimiterPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+        delimiterPanel.setBorder(BorderFactory.createTitledBorder("CSV Configuration"));
+        delimiterPanel.add(new JLabel("Delimiter:"));
+        delimiterPanel.add(delimiterComboBox);
+        delimiterPanel.add(new JLabel("Decimal Separator:"));
+        delimiterPanel.add(decimalSeparatorComboBox);
+
+        JPanel centerPanel = new JPanel(new BorderLayout());
+        centerPanel.add(listScrollPane, BorderLayout.CENTER);
+        centerPanel.add(delimiterPanel, BorderLayout.SOUTH);
+
         add(northPanel, BorderLayout.NORTH);
-        add(listScrollPane, BorderLayout.CENTER);
+        add(centerPanel, BorderLayout.CENTER);
         add(southPanel, BorderLayout.SOUTH);
 
-        setBorder(BorderFactory.createTitledBorder("Log calender configuration"));
+        setBorder(BorderFactory.createTitledBorder("Log calendar configuration"));
     }
 
     private void browseForPath(ActionEvent e) {
@@ -122,19 +145,39 @@ public class DebugSolverPanel extends JPanel {
             return;
         }
         if (file != null) {
-            JSimLogger.resetLoggerStorePath(file.getAbsolutePath());
+            JSimLogger.resetDebugLoggerStorePath(file.getAbsolutePath());
+        } else {
+            JSimLogger.resetDebugLoggerStorePath(System.getProperty("user.home")+ System.getProperty("file.separator") + "JMT");
         }
+
+        // Set delimiter and decimal separator
+        String delimiter = resolveDelimiter((String) Objects.requireNonNull(delimiterComboBox.getSelectedItem()));
+        String decimalSeparator = (String) decimalSeparatorComboBox.getSelectedItem();
+        JSimLogger.setDelimiter(delimiter);
+        JSimLogger.setDecimalSeparator(decimalSeparator);
+
         mediator.toggleDebug(true);
         mediator.startSimulation();
+
         if (logPathField.getText().isEmpty()) {
-            //"log file generated at default position(user\JMT\JSIM.log) since no input of log path, Simulation started..."
-            JOptionPane.showMessageDialog(this, "log file generated at default position(user\\JMT\\JSIM.log) since" +
-                    " no input of log path, Simulation started...");
+            JOptionPane.showMessageDialog(this, "log file generated at default position(user\\JMT\\JSIM_debug.csv) since" +
+                    " no input of log path, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
         } else {
-            JOptionPane.showMessageDialog(this, "log file generated at " + logPathField.getText() + "\\JSIM.log, Simulation started...");
+            JOptionPane.showMessageDialog(this, "log file generated at " + logPathField.getText() + "\\JSIM_debug.csv, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
         }
         // Close the dialog/window if needed
         SwingUtilities.getWindowAncestor(this).dispose();
+    }
+
+    private String resolveDelimiter(String delimiter) {
+        switch (delimiter) {
+            case "Tab":
+                return "\t";
+            case "Space":
+                return " ";
+            default:
+                return delimiter;
+        }
     }
 
     private void selectAllEvents() {
@@ -149,7 +192,7 @@ public class DebugSolverPanel extends JPanel {
             }
         }
         eventList.repaint();
-        selectAllButton.setText(allSelected ? "Deselect All" : "Select All");
+        selectAllButton.setText(allSelected ? "Deselect All" : "Select All Events");
     }
 
     static class CheckListItem {

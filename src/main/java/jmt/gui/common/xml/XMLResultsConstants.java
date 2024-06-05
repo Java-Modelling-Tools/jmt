@@ -80,5 +80,6 @@ public interface XMLResultsConstants {
 	public static final String XML_AO_MEASURE_PRECISION = "precision";
 	public static final String XML_AO_MEASURE_MAXSAMPLES = "maxSamples";
 	public static final String XML_AO_MEASURE_NODETYPE = "nodeType";
+	public static final String XML_AO_MEASURE_SERVER_TYPE = "serverType";
 
 }

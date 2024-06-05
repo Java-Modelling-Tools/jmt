@@ -32,12 +32,12 @@ public class ExhaustivePollingServer extends PollingServer {
                             ServiceStrategy[] serviceStrategies,
                             ServiceStrategy[] switchoverStrategies,Integer[] serverNumRequired,
                             String[] serverNames,
-                            Integer[] serverNumOfServers,
+                            Integer[] serversPerServerType,
                             Object[] serverCompatibilities,
                             String schedulingPolicy)
     {
         super(numberOfServers, numberOfVisits, serviceStrategies, switchoverStrategies,
-            serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
+            serverNumRequired,serverNames,serversPerServerType,serverCompatibilities,schedulingPolicy);
     }
 
 }

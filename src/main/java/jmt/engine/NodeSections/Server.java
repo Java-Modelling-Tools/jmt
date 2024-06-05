@@ -122,7 +122,7 @@ public class Server extends ServiceSection {
 	 */
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
 								QueuePutStrategy[] preemptiveStrategies, Object[] switchoverStrategies, Integer[] serverNumRequired,
-								String[] serverNames, Integer[] serverNumOfServers, Object[] serverCompatibilities,
+								String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities,
 								String schedulingPolicy) throws NetException {
 		super(false);
 		//Michalis
@@ -156,11 +156,11 @@ public class Server extends ServiceSection {
 		lastCompletionTime = 0.0;
 
 		if (serverCompatibilities != null) {
-			initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
+			initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);
 		}
 	}
 
-	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serverNumOfServers,
+	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serversPerServerType,
 														 Object[] serverCompatibilities) throws NetException {
 		totalNumOfServers = new int[serverCompatibilities.length];
 		numberOfAvailableServersPerClass = new int[serverNumRequired.length];
@@ -171,7 +171,7 @@ public class Server extends ServiceSection {
 
 		for(int i=0;i<serverCompatibilities.length; i++){
 			String name = serverNames[i];
-			int numOfServers = serverNumOfServers[i];
+			int numOfServers = serversPerServerType[i];
 			Boolean[] compatibilities = (Boolean[]) serverCompatibilities[i];
 
 			for(int j=0; j<compatibilities.length; j++){
@@ -274,10 +274,10 @@ public class Server extends ServiceSection {
 			Integer[] serverNumRequired = new Integer[numClasses];
 			Arrays.fill(serverNumRequired, 1);
 			String[] serverNames = new String[]{"Server 1"};
-			Integer[] serverNumOfServers = new Integer[]{numberOfServers};
+			Integer[] serversPerServerType = new Integer[]{numberOfServers};
 			Object[] serverCompatibilities = new Object[]{new Boolean[numClasses]};
 			Arrays.fill((Boolean[]) serverCompatibilities[0], true);
-			initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
+			initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);
 		}
 		maxRunningJobs = numberOfServers;
 		int stationCapacity = ((Queue)getOwnerNode().getSection(NodeSection.INPUT)).getStationCapacity();

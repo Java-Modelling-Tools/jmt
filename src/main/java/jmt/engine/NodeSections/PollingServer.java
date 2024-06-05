@@ -45,7 +45,7 @@ public class PollingServer extends ServiceSection {
 											 ServiceStrategy[] switchOverStrategies,
 											 Integer[] serverNumRequired,
 											 String[] serverNames,
-											 Integer[] serverNumOfServers,
+											 Integer[] serversPerServerType,
 											 Object[] serverCompatibilities,
 											 String schedulingPolicy ) {
 		this.numberOfServers = numberOfServers.intValue();

@@ -64,7 +64,7 @@ public interface ExactConstants {
 	public static final int MAX_STATIONS = 100;
 
 	// Performance indices
-	public static final String[] INDICES_TYPES = { "Throughput", "Number of Customers", "Residence Times", "Utilization", "System Power" };
+	public static final String[] INDICES_TYPES = { "Throughput", "Number of Customers", "Response Times", "Residence Times", "Utilization", "System Power" };
 	// Aggregate performance indices
 	public static final String[] AGGREGATE_TYPES = { "System Response Time", "System Response Time (No Ref. Stat.)", "System Throughput", "System Number of Customers" };
 	public static final Set<String> AGGREGATE_TYPES_SET = new HashSet<String>(Arrays.asList(AGGREGATE_TYPES));
@@ -94,13 +94,15 @@ public interface ExactConstants {
 			+ "<font size=\"3\"><br>Average number of customers for each class at each station.</font></body></html>";
 	public static final String DESCRIPTION_THROUGHPUTS = "<html><body align=\"left\"><font size=\"4\"><b>Throughput</b></font>"
 			+ "<font size=\"3\"><br>Throughput of each class for each station. System Throughput is the completion rate at the <b>Reference Station</b>.</font></body></html>";
-	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System Response Time</b></font>"
+	public static final String DESCRIPTION_SYSRESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>System Response Time</b></font>"
 			+ "<font size=\"3\"><br>The global aggregate is the \"System Response Time\" and is obtained weighting the aggregated values by the relative per-class throughput.<br>"
 			+ "<b>A:</b> This value of System Response Time <b>includes</b> the Residence Time at the Reference Station.<br>"
 			+ "<b>B:</b> This value of System Response Time <b>does NOT include</b> the Residence Time at the Reference Station.<br>"
 			+ "Notice: For <b>open classes</b> the Reference Station always coincides with the arrival process. Thus the <b>B</b> values are not computed.</font></body></html>";
+	public static final String DESCRIPTION_RESPONSETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Response Times</b></font>"
+			+ "<font size=\"3\"><br>Average time spent by each customer class for a single visit to a station.</font></body></html>";
 	public static final String DESCRIPTION_RESIDENCETIMES = "<html><body align=\"left\"><font size=\"4\"><b>Residence Times</b></font>"
-			+ "<font size=\"3\"><br>Total time spent by each customer class summed across all visits to a station.</font></body></html>";
+			+ "<font size=\"3\"><br>Average time spent by each customer class summed across all visits to a station.</font></body></html>";
 	public static final String DESCRIPTION_UTILIZATIONS = "<html><body align=\"left\"><font size=\"4\"><b>Utilization</b></font>"
 			+ "<font size=\"3\"><br>Utilization of a customer class at the selected station. The utilization of a delay station is the average number of customers in the station (it may be greater than 1).</font></body></html>";
 	public static final String DESCRIPTION_WHATIF_NONE = "<html><body align=\"left\"><font size=\"4\"><b>What-if analysis</b></font>"

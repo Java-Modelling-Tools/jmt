@@ -626,7 +626,21 @@ public class NetNode extends SimEntity {
 		if(message.getEvent() == NetEvent.EVENT_JOB_FINISH && message.getSourceSection() == 3){
 			temp = 1;
 		}
-
+		if (logger.isLogCalenderOn()) {
+			String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();
+			if (allowedEvents.length > 0) {
+				for (String allowedEvent : allowedEvents) {
+					if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {
+						String sender = String.valueOf(message.getSource().getName());
+						String eventName = NetEvent.getEventName(message.getEvent());
+						String receiver = message.getDestination().getName();
+						String timestamp = String.valueOf(getNetSystem().getTime())
+								.replace(".", JSimLogger.getDecimalSeparator());
+						JSimLogger.logCustomDebug("dispatch", sender, eventName, receiver, timestamp);
+					}
+				}
+			}
+		}
 		//message goes through this switch depending on the destination section
 		//if the message is correctly processed by the appropriate node section
 		//then the processed variable contains a value different from the initial
@@ -722,20 +736,6 @@ public class NetNode extends SimEntity {
 	 * @return a token to remove sent event.
 	 */
 	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination) {
-
-		if (logger.isLogCalenderOn()) {
-			String[] allowedEvents = LoggerStateManager.getAllowedEvents();
-			if (allowedEvents.length > 0) {
-				for (String allowedEvent : allowedEvents) {
-					if (NetEvent.getEventName(event).equals(allowedEvent)) {
-						logger.debug(sourceSection + " send a message with event: " + NetEvent.getEventName(event) + " to " + destination.getName()
-								+ " with destination time: " + destination.getNetSystem().getTime());
-						break;
-					}
-				}
-			}
-		}
-
 		//Look if message is a job message and if job is leaving this node
 		if (event == NetEvent.EVENT_JOB) {
 			if ((destination != this) || ((destination == this)

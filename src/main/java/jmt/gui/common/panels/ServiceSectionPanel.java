@@ -89,7 +89,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 			// ---- Bertoli Marco ----
 			JTable table;
 			Object serverTypeKey = null;
-			if (data.getHeterogeneousServersEnabled(stationKey)) {
+			if (data.getHeterogeneousServersEnabled(stationKey) != null && data.getHeterogeneousServersEnabled(stationKey)) {
 				table = ((WarningScrollTable) heterogeneousServersTabbedPane.getSelectedComponent()).table;
 				serverTypeKey = ((ServiceTable) table).serverTypeKey;
 			} else {

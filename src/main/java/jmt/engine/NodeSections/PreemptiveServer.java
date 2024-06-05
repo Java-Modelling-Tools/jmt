@@ -29,10 +29,10 @@ public class PreemptiveServer extends Server {
 	}
 
 	public PreemptiveServer(Integer numberOfServers, Integer[] numberOfVisitsPerClass, ServiceStrategy[] serviceStrategies, QueuePutStrategy[] preemptiveStrategies, Integer[] serverNumRequired, String[] serverNames,
-													Integer[] serverNumOfServers,
+													Integer[] serversPerServerType,
 													Object[] serverCompatibilities,
 													String schedulingPolicy) throws NetException {
-		super(numberOfServers,numberOfVisitsPerClass,serviceStrategies,preemptiveStrategies,serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
+		super(numberOfServers,numberOfVisitsPerClass,serviceStrategies,preemptiveStrategies,serverNumRequired,serverNames,serversPerServerType,serverCompatibilities,schedulingPolicy);
 	}
 
 }

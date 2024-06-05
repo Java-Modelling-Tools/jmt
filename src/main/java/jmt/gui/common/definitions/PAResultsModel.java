@@ -86,6 +86,7 @@ public class PAResultsModel implements MeasureDefinition {
 	private Vector<Integer> numberOfActiveServers = new Vector<Integer>();
 
 	private HashMap<String, Measure> names = new HashMap<String, Measure>();
+	private HashMap<String, String> serverTypes = new HashMap<String, String>();
 
 	private String logDecimalSeparator;
 	private String logCsvDelimiter;
@@ -130,6 +131,13 @@ public class PAResultsModel implements MeasureDefinition {
 				className = (classKey == null) ? "All classes" : model.getClassName(classKey);
 			}
 			String measureName = stationName + "_" + className + "_" + measureType;
+			Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);
+			String serverTypeName = null;
+			if (serverTypeKey != null && model.getServerType(serverTypeKey) != null) {
+				serverTypeName = model.getServerTypeStationName(serverTypeKey);
+				measureName = measureName.replace(stationName, serverTypeName);
+			}
+			serverTypes.put(measureName, serverTypeName);
 			double alpha = model.getMeasureAlpha(measureKey).doubleValue();
 			double precision = model.getMeasurePrecision(measureKey).doubleValue();
 			if (measureType.equals(SimulationDefinition.MEASURE_QL)) {
@@ -590,6 +598,10 @@ public class PAResultsModel implements MeasureDefinition {
 
 	public int[] getNumberOfActiveServersMeasures(){
 		return getTmpArray(numberOfActiveServers);
+	}
+
+	public String getServerType(String measureName) {
+		return serverTypes.get(measureName);
 	}
 
 	// ------------------------- USELESS METHODS --------------------------------

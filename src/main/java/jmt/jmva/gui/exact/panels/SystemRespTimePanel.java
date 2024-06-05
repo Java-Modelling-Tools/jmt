@@ -47,7 +47,7 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 	protected void sync() {
 		super.sync();
 		/* EDITED by Abhimanyu Chugh */
-		resTimes = data.getResTimes(algorithm);
+		resTimes = data.getResidTimes(algorithm);
 		classAggs = data.getPerClassR(algorithm, true);
 		classAggsWO = data.getPerClassR(algorithm, false);
 		globalAgg = data.getGlobalR(algorithm, true);
@@ -62,7 +62,7 @@ public final class SystemRespTimePanel extends SolutionPanel implements ExactCon
 
 	@Override
 	protected String getDescriptionMessage() {
-		return ExactConstants.DESCRIPTION_RESPONSETIMES;
+		return ExactConstants.DESCRIPTION_SYSRESPONSETIMES;
 	}
 
 	/**

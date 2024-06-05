@@ -102,10 +102,10 @@ public class PSServer extends Server {
 									ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
 									Integer[] serverNumRequired,
 									String[] serverNames,
-									Integer[] serverNumOfServers,
+									Integer[] serversPerServerType,
 									Object[] serverCompatibilities,
 									String schedulingPolicy) throws NetException {
-		super(numberOfServers,numberOfVisits,serviceStrategies,null,serverNumRequired,serverNames,serverNumOfServers,serverCompatibilities,schedulingPolicy);
+		super(numberOfServers,numberOfVisits,serviceStrategies,null,serverNumRequired,serverNames,serversPerServerType,serverCompatibilities,schedulingPolicy);
 		this.numberOfServers = numberOfServers.intValue();
 		if (maxRunningJobs == null) {
 			this.maxRunningJobs = -1;
@@ -140,8 +140,8 @@ public class PSServer extends Server {
 	}
 
 	@Override
-	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serverNumOfServers, Object[] serverCompatibilities) throws NetException {
-		super.initializeServerTypes(serverNumRequired, serverNames, serverNumOfServers, serverCompatibilities);
+	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities) throws NetException {
+		super.initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);
 		totalNumberOfServers = 0;
 		compatibleServersForClass = new int[serverNumRequired.length];
 		for (ServerType serverType: getServerTypes()) {

@@ -18,15 +18,8 @@
 
 package jmt.engine.log;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
-import java.util.Enumeration;
 import java.util.Map.Entry;
 import java.util.Properties;
 
@@ -48,6 +41,9 @@ public class JSimLogger implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static final String STD_LOGGER = "jmt.engine";
 	public static final String LOG4J_CONF = "log4j.conf";
+	private static String delimiter = ",";
+	private static String decimalSeparator = ".";
+	private static String debugLogPath = "JSIM_debug.csv";
 
 	private transient org.apache.log4j.Logger logger;
 	static {
@@ -88,18 +84,54 @@ public class JSimLogger implements Serializable {
 		}
 	}
 
-	public static void resetLoggerStorePath(String newPath) {
-		Enumeration<?> appenders = Logger.getRootLogger().getAllAppenders();
-		while (appenders.hasMoreElements()) {
-			Appender appender = (Appender) appenders.nextElement();
-			if (appender instanceof FileAppender) {
-				FileAppender fileAppender = (FileAppender) appender;
-				fileAppender.setFile(newPath + "\\JSIM.log");
-				fileAppender.activateOptions();
+	public static void resetDebugLoggerStorePath(String newPath) {
+		String correctedPath = newPath.replace("\\", System.getProperty("file.separator"));
+		debugLogPath = correctedPath + System.getProperty("file.separator") + "JSIM_debug.csv";
+		File oldEventTraceFile = new File(debugLogPath);
+		if (oldEventTraceFile.exists()) {
+			oldEventTraceFile.delete();
+		}
+		writeCSVHeaderIfNotExists(debugLogPath);
+	}
+
+	private static void writeCSVHeaderIfNotExists(String filePath) {
+		File file = new File(filePath);
+		if (!file.exists()) {
+			try (FileWriter writer = new FileWriter(filePath, true)) {
+				writer.append("dispatchOrReceive")
+						.append("sender").append(delimiter)
+						.append("eventname").append(delimiter)
+						.append("receiver").append(delimiter)
+						.append("timestamp").append("\n");
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 	}
 
+	public static void setDelimiter(String newDelimiter) {
+		delimiter = newDelimiter;
+	}
+
+	public static void setDecimalSeparator(String newDecimalSeparator) {
+		decimalSeparator = newDecimalSeparator;
+	}
+
+	public static String getDecimalSeparator() {
+		return decimalSeparator;
+	}
+
+	public static void logCustomDebug(String sendOrReceive, String sender, String eventName, String receiver, String timeStamp) {
+		try (FileWriter writer = new FileWriter(debugLogPath, true)) {
+			writer.append(sendOrReceive).append(delimiter)
+					.append(sender).append(delimiter)
+					.append(eventName).append(delimiter)
+					.append(receiver).append(delimiter)
+					.append(timeStamp).append("\n");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private JSimLogger() {
 		logger = Logger.getRootLogger();
@@ -190,7 +222,6 @@ public class JSimLogger implements Serializable {
 
 	public boolean isDebugEnabled() {
 		return logger.isDebugEnabled();
-
 	}
 
 	public boolean isInfoEnabled() {
@@ -198,21 +229,20 @@ public class JSimLogger implements Serializable {
 	}
 
 	// --- Following methods handles recreation of transient logger object after serialization ------------------
-    private void writeObject(ObjectOutputStream out) throws IOException {
-    	out.defaultWriteObject();
-    	out.writeObject(logger.getName());
-    }
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.defaultWriteObject();
+		out.writeObject(logger.getName());
+	}
 
-    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-    	in.defaultReadObject();
-    	String name = (String) in.readObject();
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		in.defaultReadObject();
+		String name = (String) in.readObject();
 		if (name == null) {
 			logger = Logger.getRootLogger();
 		} else {
 			logger = Logger.getLogger(name);
 		}
-    }
-// ----------------------------------------------------------------------------------------------------------
-
+	}
+	// ----------------------------------------------------------------------------------------------------------
 
 }

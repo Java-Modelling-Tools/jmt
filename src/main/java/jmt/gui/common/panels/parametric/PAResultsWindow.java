@@ -387,7 +387,12 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			if (sd.isFJMeasure(rm.getMeasureType(measureIndex))) {
 				field.setText(stationName + " (Fork Join)");
 			} else {
-				field.setText(stationName);
+				String serverTypeName = rm.getServerType(rm.getName(measureIndex));
+				if (serverTypeName == null) {
+					field.setText(stationName);
+				} else {
+					field.setText(serverTypeName);
+				}
 			}
 			field.setToolTipText("Name of the station: " + field.getText());
 			mainPanel.add(label);

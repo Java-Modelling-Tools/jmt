@@ -989,7 +989,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		}
 
 		List<String> serverNames = new ArrayList<>();
-		List<Integer> serverNumOfServers = new ArrayList<>();
+		List<Integer> serversPerServerType = new ArrayList<>();
 		List<List<Boolean>> serverCompatibilities = new ArrayList<>();
 		List<Object> heterogeneousServiceStrategies = new ArrayList<>();
 
@@ -1086,11 +1086,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Element subParam = (Element) subParams.item(j);
 					serverNames.add(findText(subParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 				}
-			} else if (name.equals("serverNumOfServers")) {
+			} else if (name.equals("serversPerServerType")) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
 					Element subParam = (Element) subParams.item(j);
-					serverNumOfServers.add(Integer.valueOf(findText(subParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0))));
+					serversPerServerType.add(Integer.valueOf(findText(subParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0))));
 				}
 			} else if (name.equals("serverCompatibilities")) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
@@ -1108,7 +1108,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			}
 		}
 		for (int i = 0; i < serverNames.size(); i++) {
-			model.addServerType(key, serverNames.get(i), serverNumOfServers.get(i), serverCompatibilities.get(i), true);
+			model.addServerType(key, serverNames.get(i), serversPerServerType.get(i), serverCompatibilities.get(i), true);
 		}
 		if (!heterogeneousServiceStrategies.isEmpty()) {
 			model.setHeterogeneousServersEnabled(key, true);

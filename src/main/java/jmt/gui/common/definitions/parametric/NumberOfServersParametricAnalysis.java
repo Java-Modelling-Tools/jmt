@@ -28,6 +28,7 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
     private final int STEPS = 10;  //must be < than ParametricAnalysis.MAX_NUMBER_OF_STEPS
 
     private Object stationKey;
+    private Object serverTypeKey;
     private Object values;
 
     public NumberOfServersParametricAnalysis(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {
@@ -38,6 +39,10 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
         ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);
         stationKey = checker.checkForNumberOfServersParametricAnalysisAvailableStations().get(0);
         double mean = stationDef.getStationNumberOfServers(stationKey).doubleValue();
+        if (!isSingleServerType()) {
+            serverTypeKey = stationDef.getServerTypes(stationKey).get(0).getServerKey();
+            mean = stationDef.getServerType(serverTypeKey).getNumOfServers();
+        }
         initialValue = mean;
         finalValue = mean * INCREMENT_SINGLE;
     }
@@ -47,6 +52,12 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
      */
     public void setDefaultInitialValue() {
         double mean = stationDef.getStationNumberOfServers(stationKey).doubleValue();
+        if (!isSingleServerType()) {
+            if (serverTypeKey == null) {
+                serverTypeKey = stationDef.getServerTypes(stationKey).get(0).getServerKey();
+            }
+            mean = stationDef.getServerType(serverTypeKey).getNumOfServers();
+        }
         initialValue = mean;
     }
 
@@ -55,6 +66,12 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
      */
     public void setDefaultFinalValue() {
         double mean = stationDef.getStationNumberOfServers(stationKey).doubleValue();
+        if (!isSingleServerType()) {
+            if (serverTypeKey == null) {
+                serverTypeKey = stationDef.getServerTypes(stationKey).get(0).getServerKey();
+            }
+            mean = stationDef.getServerType(serverTypeKey).getNumOfServers();
+        }
         finalValue = mean * INCREMENT_SINGLE;
     }
 
@@ -92,6 +109,9 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
         properties.put(TO_PROPERTY, Double.toString(finalValue));
         properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));
         properties.put(REFERENCE_STATION_PROPERTY, stationDef.getStationName(stationKey));
+        if (serverTypeKey != null) {
+            properties.put(SERVER_TYPE_PROPERTY, stationDef.getServerType(serverTypeKey).getName());
+        }
         return properties;
     }
 
@@ -117,6 +137,8 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
             }
         } else if (propertyName.equals(REFERENCE_STATION_PROPERTY)) {
             stationKey = stationDef.getStationByName(value);
+        } else if (propertyName.equals(SERVER_TYPE_PROPERTY)) {
+            serverTypeKey = stationDef.getServerTypeKey(stationKey, value);
         }
     }
 
@@ -165,7 +187,12 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
         }
         if (values != null) {
             Double refST = (Double) ((Vector) values).get(step);
-            stationDef.setStationNumberOfServers(stationKey, refST.intValue());
+            if (serverTypeKey == null) {
+                serverTypeKey = stationDef.getServerTypes(stationKey).get(0).getServerKey();
+            }
+            int diff = refST.intValue() - stationDef.getServerType(serverTypeKey).getNumOfServers();
+            stationDef.getServerType(serverTypeKey).setNumOfServers(refST.intValue());
+            stationDef.setStationNumberOfServers(stationKey, stationDef.getStationNumberOfServers(stationKey) + diff);
         }
     }
 
@@ -207,7 +234,12 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
     public void restoreOriginalValues() {
         if (originalValues != null) {
             Double mean = (Double) originalValues;
-            stationDef.setStationNumberOfServers(stationKey, mean.intValue());
+            if (serverTypeKey == null) {
+                serverTypeKey = stationDef.getServerTypes(stationKey).get(0).getServerKey();
+            }
+            int diff = mean.intValue() - stationDef.getServerType(serverTypeKey).getNumOfServers();
+            stationDef.getServerType(serverTypeKey).setNumOfServers(mean.intValue());
+            stationDef.setStationNumberOfServers(stationKey, stationDef.getStationNumberOfServers(stationKey) + diff);
         }
     }
 
@@ -251,6 +283,26 @@ public class NumberOfServersParametricAnalysis extends ParametricAnalysisDefinit
     @Override
     public Vector<Number> getParameterValues() {
         return (Vector<Number>) values;
+    }
+
+    public Object getServerTypeKey() {
+        return serverTypeKey;
+    }
+
+    public Boolean isSingleServerType() {
+        return stationDef.getServerTypeKeys().size() <= 1;
+    }
+
+    public String[] getServerTypeNames() {
+        return stationDef.getServerTypeNames(stationKey).toArray(new String[0]);
+    }
+
+    public void setServerType(String serverTypeName) {
+        this.serverTypeKey = stationDef.getServerTypeKey(stationKey, serverTypeName);
+    }
+
+    public Boolean serverTypeInStation() {
+        return serverTypeKey != null && stationDef.getServerType(serverTypeKey).getStationKey() == stationKey;
     }
 }
 

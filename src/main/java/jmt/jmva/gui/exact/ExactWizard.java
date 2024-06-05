@@ -641,7 +641,7 @@ public class ExactWizard extends Wizard {
 				AlgorithmPanel algPanel = new AlgorithmPanel(this, algorithm);
 				algPanel.addSolutionPanel(new ThroughputPanel(this, algorithm));
 				algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));
-				algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
+				algPanel.addSolutionPanel(new ResidTimePanel(this, algorithm));
 				algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 				algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
 				algPanel.addSolutionPanel(new SystemPowerPanel(this, algorithm));
@@ -652,8 +652,9 @@ public class ExactWizard extends Wizard {
 			SolverAlgorithm algorithm = data.getAlgorithmType();
 			AlgorithmPanel algPanel = new AlgorithmPanel(this, algorithm);
 			algPanel.addSolutionPanel(new ThroughputPanel(this, algorithm));
-			algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));			
-			algPanel.addSolutionPanel(new ResTimePanel(this, algorithm));
+			algPanel.addSolutionPanel(new QueueLenPanel(this, algorithm));
+			algPanel.addSolutionPanel(new RespTimePanel(this, algorithm));
+			algPanel.addSolutionPanel(new ResidTimePanel(this, algorithm));
 			algPanel.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			algPanel.addSolutionPanel(new UtilizationPanel(this, algorithm));
 			algPanel.addSolutionPanel(new SystemPowerPanel(this, algorithm));
@@ -663,7 +664,8 @@ public class ExactWizard extends Wizard {
 			SolverAlgorithm algorithm = data.getAlgorithmType();
 			selector.addSolutionPanel(new ThroughputPanel(this, algorithm));
 			selector.addSolutionPanel(new QueueLenPanel(this, algorithm));
-			selector.addSolutionPanel(new ResTimePanel(this, algorithm));
+			selector.addSolutionPanel(new RespTimePanel(this, algorithm));
+			selector.addSolutionPanel(new ResidTimePanel(this, algorithm));
 			selector.addSolutionPanel(new SystemRespTimePanel(this, algorithm));
 			selector.addSolutionPanel(new UtilizationPanel(this, algorithm));
 			selector.addSolutionPanel(new SystemPowerPanel(this, algorithm));
@@ -672,7 +674,8 @@ public class ExactWizard extends Wizard {
 			SolverAlgorithm algorithm = data.getAlgorithmType();
 			jtp.add(new ThroughputPanel(this, algorithm));
 			jtp.add(new QueueLenPanel(this, algorithm));
-			jtp.add(new ResTimePanel(this, algorithm));
+			jtp.add(new RespTimePanel(this, algorithm));
+			jtp.add(new ResidTimePanel(this, algorithm));
 			jtp.add(new SystemRespTimePanel(this,algorithm));
 			jtp.add(new UtilizationPanel(this, algorithm));
 			jtp.add(new SystemPowerPanel(this, algorithm));

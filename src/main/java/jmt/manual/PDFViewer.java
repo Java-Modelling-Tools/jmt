@@ -31,6 +31,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
@@ -99,6 +100,7 @@ public class PDFViewer extends JMTFrame {
 			file = new File(Defaults.getWorkingPath(), MANUAL_PATH);
 		}
 		if (!file.isFile()) {
+			JOptionPane.showMessageDialog(null, "Cannot find manual. Please download https://jmt.sf.net/Papers/JMT_users_Manual.pdf to " + file.getParentFile().getAbsolutePath() + System.getProperty("file.separator") + "manual.pdf", "Manual error", JOptionPane.ERROR_MESSAGE);
 			throw new IOException("Cannot find JMT manual.pdf file. Please put it in "
 					+ file.getParentFile().getAbsolutePath() + ".");
 		}

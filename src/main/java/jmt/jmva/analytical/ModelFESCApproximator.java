@@ -134,13 +134,13 @@ public class ModelFESCApproximator {
 				for (int st = 0; st < inputModel.getStations(); st++) {
 					for (int cl = 0; cl < inputModel.getClasses(); cl++) {
 						q[st][cl] = outputModel.getQueueLen(alg)[st][cl][iteration];
-						r[st][cl] = outputModel.getResTimes(alg)[st][cl][iteration];
+						r[st][cl] = outputModel.getResidTimes(alg)[st][cl][iteration];
 						u[st][cl] = outputModel.getUtilization(alg)[st][cl][iteration] * inputModel.getStationServers()[st];
 						x[st][cl] = outputModel.getThroughput(alg)[st][cl][iteration];
 						int delay = multipleServerList[st];
 						if (delay > 0) {
 							q[st][cl] += outputModel.getQueueLen(alg)[delay][cl][iteration];
-							r[st][cl] += outputModel.getResTimes(alg)[delay][cl][iteration];
+							r[st][cl] += outputModel.getResidTimes(alg)[delay][cl][iteration];
 						}
 					}
 				}

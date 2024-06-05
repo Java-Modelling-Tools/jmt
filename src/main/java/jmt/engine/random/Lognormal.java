@@ -19,8 +19,8 @@
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.math.Probability;
 import jmt.engine.math.Normal;
-
 /**
  * 
  * This is the Lognormal distribution (see the constructor
@@ -32,6 +32,9 @@ import jmt.engine.math.Normal;
  * 
  */
 public class Lognormal extends AbstractDistribution implements Distribution {
+
+	private double cache; // cache for Box-Mueller algorithm
+	private boolean cacheFilled; // Box-Mueller
 
 	/**
 	 * This is the constructor. It creates a new lognormal distribution which is
@@ -129,15 +132,15 @@ public class Lognormal extends AbstractDistribution implements Distribution {
 	 */
 	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
 		if (p.check()) {
+			// Sample N(0,1) from polar Box-Muller transformation.
+			double x, y, r, z;
+			double U1=engine.raw();
+			double U2=engine.raw();
+			z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2*Math.PI*U2);
+			// If generated number is in the past, reruns this method
 			double mu = ((LognormalPar) p).getMu();
 			double sigma = ((LognormalPar) p).getSigma();
-			// Uses polar Box-Muller transformation.
-			double U1 = engine.raw();
-			double U2 = engine.raw();
-			double z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2 * Math.PI * U2);
-			double ret = mu + sigma * z;
-			// If generated number is in the past, reruns this method
-			return (ret > 0.0) ? Math.exp(ret) : nextRand(p);
+			return Math.exp(mu+sigma*z);
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: sigma must be gtz");
 		}

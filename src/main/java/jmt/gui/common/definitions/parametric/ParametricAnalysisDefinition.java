@@ -44,6 +44,7 @@ public abstract class ParametricAnalysisDefinition implements ParametricAnalysis
 	public static final String REFERENCE_CLASS_PROPERTY = "Class";
 	public static final String REFERENCE_STATION_PROPERTY = "Station";
 	public static final String REFERENCE_DEST_STATION_PROPERTY = "Destination station";
+	public static final String SERVER_TYPE_PROPERTY = "Server type";
 
 	protected String type; //The type of parametric analysis
 	protected double initialValue; //The initial value of the parameter to be varied

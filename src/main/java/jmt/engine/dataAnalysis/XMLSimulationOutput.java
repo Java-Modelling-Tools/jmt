@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import jmt.engine.NodeSections.Server;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.SimConstants;
 import jmt.engine.QueueNet.SimulationOutput;
@@ -170,6 +171,15 @@ public class XMLSimulationOutput extends SimulationOutput {
 				// station measure
 				elem.setAttribute("station", measure.getNodeName());
 				elem.setAttribute("nodeType", SimConstants.NODE_TYPE_STATION);
+				// Check if it is a server type measure
+				if (node != null && node.getServerTypes() != null) {
+					for (Server.ServerType serverType : node.getServerTypes()) {
+						if (measure.getName().startsWith(serverType.getName())) {
+							elem.setAttribute("serverType", serverType.getName());
+							break;
+						}
+					}
+				}
 			}
 		}
 		// Checks null values to avoid problems under linux

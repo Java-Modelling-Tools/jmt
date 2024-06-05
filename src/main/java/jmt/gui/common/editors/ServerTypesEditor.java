@@ -30,6 +30,7 @@ import jmt.gui.common.panels.WarningScrollTable;
 import jmt.gui.jsimgraph.DialogFactory;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
@@ -61,14 +62,14 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
     private JComboBox schedulingPolicyCombo;
 
     protected static final String[] schedulingPolicies =
-            {
-                    STATION_SCHEDULING_POLICY_ALIS,
-                    STATION_SCHEDULING_POLICY_ORDER,
-                    STATION_SCHEDULING_POLICY_FAIRNESS,
-                    STATION_SCHEDULING_POLICY_RAIS,
-                    STATION_SCHEDULING_POLICY_ALFS,
-                    STATION_SCHEDULING_POLICY_FSF
-            };
+        {
+            STATION_SCHEDULING_POLICY_ALIS,
+            STATION_SCHEDULING_POLICY_ALFS,
+            STATION_SCHEDULING_POLICY_FAIRNESS,
+            STATION_SCHEDULING_POLICY_FSF,
+            STATION_SCHEDULING_POLICY_ORDER,
+            STATION_SCHEDULING_POLICY_RAIS
+        };
 
     protected WarningScrollTable warningPanel;
 
@@ -121,34 +122,14 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
 
     private void initComponents() {
 
-        //create margins for this panel.
-        Box vBox = Box.createVerticalBox();
-        Box hBox = Box.createHorizontalBox();
-        vBox.add(Box.createVerticalStrut(30));
-        vBox.add(hBox);
-        vBox.add(Box.createVerticalStrut(30));
-        hBox.add(Box.createHorizontalStrut(20));
+        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        //build central panel
-        JPanel componentsPanel = new JPanel(new BorderLayout());
-
-        //build upper part of central panel
-        JPanel upperPanel = new JPanel(new BorderLayout());
-        JLabel descrLabel = new JLabel(SERVER_SETTINGS_DESCRIPTION);
-        upperPanel.add(descrLabel, BorderLayout.CENTER);
-
-        //build upper right corner of the main panel
-        JPanel upRightPanel = new JPanel(new BorderLayout());
-        upRightPanel.add(addServerTypeButton, BorderLayout.NORTH);
-
-        heterogeneousServers = new JCheckBox("Enable Heterogeneous Servers");
-        heterogeneousServers.setSelected(stationData.getHeterogeneousServersEnabled(stationKey));
-        heterogeneousServers.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                stationData.setHeterogeneousServersEnabled(stationKey, heterogeneousServers.isSelected());
-            }
-        });
+        JPanel descriptionPanel = new JPanel();
+        descriptionPanel.setLayout(new BorderLayout());
+        descriptionPanel.setBorder(new TitledBorder(new EtchedBorder(), "Description"));
+        JLabel serverTypesText = new JLabel(SERVER_SETTINGS_DESCRIPTION);
+        descriptionPanel.add(serverTypesText, BorderLayout.CENTER);
 
         //build ServerTypes scheduling panel
         JPanel serverScheduling = new JPanel();
@@ -158,20 +139,31 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
         serverScheduling.add(schedulingPolicyCombo);
 
         //build table panel
+        JPanel tablePanel = new JPanel();
+        tablePanel.setLayout(new BorderLayout(5, 5));
+        tablePanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Types"));
         warningPanel = new WarningScrollTable(serverTypesTable, WARNING_CLASS_STATION);
         warningPanel.addCheckVector(classData.getClassKeys());
-        warningPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Types"));
+        tablePanel.add(warningPanel, BorderLayout.CENTER);
 
-        //add all panels to the mail panel
-        upRightPanel.add(heterogeneousServers, BorderLayout.CENTER);
-        upperPanel.add(upRightPanel, BorderLayout.EAST);
-        upperPanel.add(serverScheduling, BorderLayout.SOUTH);
-        componentsPanel.add(upperPanel, BorderLayout.NORTH);
-        componentsPanel.add(warningPanel,BorderLayout.CENTER);
-        hBox.add(componentsPanel);
-        hBox.add(Box.createHorizontalStrut(20));
-        this.setLayout(new GridLayout(1, 1));
-        this.add(vBox);
+        //build upper section of the table panel
+        JPanel upperTablePanel = new JPanel(new BorderLayout());
+        upperTablePanel.add(addServerTypeButton, BorderLayout.EAST);
+
+        heterogeneousServers = new JCheckBox("Enable Heterogeneous Service Time Distributions");
+        heterogeneousServers.setSelected(stationData.getHeterogeneousServersEnabled(stationKey));
+        heterogeneousServers.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                stationData.setHeterogeneousServersEnabled(stationKey, heterogeneousServers.isSelected());
+            }
+        });
+        upperTablePanel.add(heterogeneousServers, BorderLayout.WEST);
+        tablePanel.add(upperTablePanel, BorderLayout.NORTH);
+
+        this.add(descriptionPanel);
+        this.add(serverScheduling);
+        this.add(tablePanel);
 
     }
 

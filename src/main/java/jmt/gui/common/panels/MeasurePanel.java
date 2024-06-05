@@ -24,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -680,7 +681,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 				if(stationData.isServerTypeKey(stationKey)){
 					return true;
 				}
-				return stationKey != null && stationData.getNumberOfDifferentServerTypes(stationKey) > 0;
+				if (Arrays.asList(SimulationDefinition.MEASURE_U, SimulationDefinition.MEASURE_EU, SimulationDefinition.MEASURE_X, SimulationDefinition.MEASURE_NS).contains(simData.getMeasureType(key))) {
+					return stationKey != null && stationData.getNumberOfDifferentServerTypes(stationKey) > 0;
+				}
+				return false;
 			}
 
 			if(columnIndex == 1 && simData.getMeasureType(key).equals(SimulationDefinition.MEASURE_NS)){

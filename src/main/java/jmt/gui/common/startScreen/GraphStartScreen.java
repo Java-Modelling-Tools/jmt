@@ -83,6 +83,9 @@ public class GraphStartScreen extends JMTFrame {
 	private JButton about;
 	private JButton upgrade;
 
+	private Color upgradeBackgroundColor = new Color(46, 181, 226, 186); //Color.RED;
+	private Color upgradeHoverColor = new Color(168, 233, 255);
+
 	// Queue Animation
 	public static SampleQNAnimation sampleQNAni;
 
@@ -309,6 +312,7 @@ public class GraphStartScreen extends JMTFrame {
 		about.addMouseListener(rollover);
 		upgrade = new JButton("Upgrade");
 		upgrade.addMouseListener(rollover);
+		upgrade.setBackground(upgradeBackgroundColor);
 
 		introButtonArea.add(introEng);
 		introButtonArea.add(new JPanel());
@@ -420,7 +424,12 @@ public class GraphStartScreen extends JMTFrame {
 		 */
 		@Override
 		public void mouseEntered(MouseEvent e) {
-			((Component) e.getSource()).setBackground(rollover);
+			Component source = (Component) e.getSource();
+			if (source == upgrade) {
+				source.setBackground(upgradeHoverColor);
+			} else {
+				source.setBackground(rollover);
+			}
 		}
 
 		/**
@@ -428,7 +437,12 @@ public class GraphStartScreen extends JMTFrame {
 		 */
 		@Override
 		public void mouseExited(MouseEvent e) {
-			((Component) e.getSource()).setBackground(normal);
+			Component source = (Component) e.getSource();
+			if (source == upgrade) {
+				source.setBackground(upgradeBackgroundColor);
+			} else {
+				source.setBackground(normal);
+			}
 		}
 
 	}

@@ -4073,7 +4073,7 @@ public class Mediator implements GuiInterface {
 	public void editDebugParameter() {
 		DebugSolverPanel panel = new DebugSolverPanel(this);  // Assuming the constructor takes a model
 		dialogFactory.getDialog(panel, "Debug Solver",
-				350,
+				400,
 				500,
 				true, "JSIMDebugSolverWindowWidth", "JSIMDebugSolverWindowHeight");
 	}
