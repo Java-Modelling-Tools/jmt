@@ -61,7 +61,7 @@ public class MetricConfigurationsPanel extends WizardPanel implements CommonCons
     private void initComponents() {
         JPanel serverTypesPanel = new JPanel();
         serverTypesPanel.setBorder(new TitledBorder(new EtchedBorder(), "Server Types for Metric"));
-        serverTypesPanel.add(Box.createRigidArea(new Dimension(5, 0)));
+        serverTypesPanel.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
         serverTypesPanel.add(new JLabel("Metric defined for:"));
         serverTypesPanel.add(serverTypesCombos);
 

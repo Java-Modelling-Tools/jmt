@@ -145,8 +145,8 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 
 		help = new HoverHelp();
 		help.getHelpLabel().setBorder(BorderFactory.createEtchedBorder());
-		help.getHelpLabel().setMinimumSize(new Dimension(585, 20));
-		help.getHelpLabel().setMaximumSize(new Dimension(695, 20));
+		help.getHelpLabel().setMinimumSize(new Dimension((int)(585 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
+		help.getHelpLabel().setMaximumSize(new Dimension((int)(695 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		this.add(help.getHelpLabel(), new GridBagConstraints(0, 1, 1, 1, 0.1, 0.0, GridBagConstraints.SOUTHWEST, GridBagConstraints.HORIZONTAL,
 				new Insets(0, 0, 0, 0), 0, 0));
 
@@ -249,10 +249,10 @@ public class LoggerSectionPanel extends WizardPanel implements CommonConstants {
 		loggerPanelBottom.add(labelFileStatus, FlowLayout.LEFT);
 
 		// Finishing up layout
-		loggerPanelTR.setMinimumSize(new Dimension(130, 130));
-		loggerPanelBottom.setMinimumSize(new Dimension(480, 50));
-		mainPanel.setMinimumSize(new Dimension(585, 150));
-		mainPanel.setMaximumSize(new Dimension(695, 350));
+		loggerPanelTR.setMinimumSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(130 * CommonConstants.heightScaling)));
+		loggerPanelBottom.setMinimumSize(new Dimension((int)(480 * CommonConstants.widthScaling), (int)(50 * CommonConstants.heightScaling)));
+		mainPanel.setMinimumSize(new Dimension((int)(585 * CommonConstants.widthScaling), (int)(150 * CommonConstants.heightScaling)));
+		mainPanel.setMaximumSize(new Dimension((int)(695 * CommonConstants.widthScaling), (int)(350 * CommonConstants.heightScaling)));
 		// Finally add the panels to main pane
 		gbc = new GridBagConstraints(0, 0, 1, 1, 0.3, 0.75, GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0);
 		mainPanel.add(loggerPanelTop, gbc);

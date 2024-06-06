@@ -146,13 +146,13 @@ public final class ServiceDemandsPanel extends WizardPanel implements JabaConsta
 		descrBox.add(new JLabel(DESCRIPTION_SERVICEDEMANDS));
 		descrBox.add(Box.createHorizontalStrut(10));
 		descrBox.add(new JButton(SWITCH_TO_ST_V));
-		descrBox.setPreferredSize(new Dimension(220, 1000));
-		descrBox.setMinimumSize(new Dimension(200, 200));
+		descrBox.setPreferredSize(new Dimension((int)(220 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
+		descrBox.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
 
 		hBox.add(descrBox);
 		hBox.add(Box.createHorizontalStrut(10));
 		JScrollPane visitTablePane = new JScrollPane(stTable);
-		visitTablePane.setPreferredSize(new Dimension(1000, 1000));
+		visitTablePane.setPreferredSize(new Dimension((int)(1000 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
 		visitTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		visitTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		hBox.add(visitTablePane);

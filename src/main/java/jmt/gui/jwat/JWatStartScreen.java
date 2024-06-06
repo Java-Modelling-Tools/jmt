@@ -165,7 +165,7 @@ public class JWatStartScreen extends JFrame {
 		}
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(400, 315)));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension((int)(400 * CommonConstants.widthScaling), (int)(315 * CommonConstants.heightScaling))));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		this.getContentPane().add(imageLabel, BorderLayout.CENTER);

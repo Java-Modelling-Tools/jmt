@@ -92,7 +92,7 @@ public class ClassSwitchSectionPanel extends WizardPanel implements CommonConsta
 
 		WarningScrollTable wST = new WarningScrollTable(csTable, WARNING_CLASS);
 		setBorder(new TitledBorder(new EtchedBorder(), "CS Strategies"));
-		setMinimumSize(new Dimension(180, 100));
+		setMinimumSize(new Dimension((int)(180 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		descriptionLabel = new JLabel(DESCRIPTION);
 		normalizationWarningLabel = new JLabel(NORMALIZATION_WARNING);
 		checkRowNotEqualToOne();

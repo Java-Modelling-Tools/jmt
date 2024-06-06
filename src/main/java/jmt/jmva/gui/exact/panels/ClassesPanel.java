@@ -250,14 +250,14 @@ public final class ClassesPanel extends WizardPanel implements ExactConstants, F
 
 		JPanel spinnerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		JLabel numberLabel = new JLabel("Number:");
-		classSpinner.setMaximumSize(new Dimension(600, 18));
+		classSpinner.setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 		spinnerPanel.add(numberLabel);
 		spinnerPanel.add(classSpinner);
 		numberBox.add(spinnerPanel);
 
 		numberBox.add(new JButton(addClass));
 
-		numberBox.setMaximumSize(new Dimension(300, 150));
+		numberBox.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(150 * CommonConstants.heightScaling)));
 
 		classSpinnerBox.add(numberBox);
 		//END  Federico Dall'Orso 9/3/2005

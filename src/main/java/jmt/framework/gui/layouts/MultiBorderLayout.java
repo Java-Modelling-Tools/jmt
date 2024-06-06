@@ -1,5 +1,7 @@
 package jmt.framework.gui.layouts;
 
+import jmt.gui.common.CommonConstants;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
@@ -73,7 +75,7 @@ public class MultiBorderLayout extends BorderLayout {
 	@Override
 	public Dimension minimumLayoutSize(Container target) {
 		synchronized (target.getTreeLock()) {
-			Dimension dim = new Dimension(0, 0);
+			Dimension dim = new Dimension((int)(0 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling));
 
 			Component c = null;
 
@@ -128,7 +130,7 @@ public class MultiBorderLayout extends BorderLayout {
 
 	public Dimension prefferedLayoutSize(Container target) {
 		synchronized (target.getTreeLock()) {
-			Dimension dim = new Dimension(0, 0);
+			Dimension dim = new Dimension((int)(0 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling));
 
 			Component c = null;
 

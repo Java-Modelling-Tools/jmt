@@ -134,7 +134,7 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
         //build ServerTypes scheduling panel
         JPanel serverScheduling = new JPanel();
         serverScheduling.setBorder(new TitledBorder(new EtchedBorder(), "Server Types Scheduling"));
-        serverScheduling.add(Box.createRigidArea(new Dimension(5, 0)));
+        serverScheduling.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
         serverScheduling.add(new JLabel("Scheduling Policy:"));
         serverScheduling.add(schedulingPolicyCombo);
 

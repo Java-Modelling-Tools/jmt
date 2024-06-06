@@ -19,6 +19,7 @@
 package jmt.jmva.gui.exact.panels;
 
 import jmt.framework.gui.help.HoverHelp;
+import jmt.gui.common.CommonConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
 import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
@@ -140,7 +141,7 @@ public final class AMVAPanel extends JPanel {
         String[] algoNameList = AlgorithmListNameCreator.createAlgoNameList(lastIsClosed, lastIsOpen, lastIsLD, lastIsPriority);
         algorithmList = new JComboBox<String>(algoNameList);
 
-        Dimension d = new Dimension(160, 30);
+        Dimension d = new Dimension((int)(160 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         algorithmList.setMaximumSize(d);
         algorithmList.setSelectedIndex(1);
         algorithmList.addActionListener(ACTION_CHANGE_ALGORITHM);
@@ -174,7 +175,7 @@ public final class AMVAPanel extends JPanel {
     }
 
     private JComponent tolLabel() {
-        Dimension d = new Dimension(70, 30);
+        Dimension d = new Dimension((int)(70 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         tolLabel = new JLabel("  Tolerance:");
         tolLabel.setMaximumSize(d);
         tolLabel.setFocusable(false);
@@ -183,7 +184,7 @@ public final class AMVAPanel extends JPanel {
     }
 
     private JComponent tolerance() {
-        Dimension d = new Dimension(80, 30);
+        Dimension d = new Dimension((int)(80 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         tolerance = new JTextField(10);
         tolerance.setText(numFormat.format(ew.getData().getTolerance()));
         tolerance.setMaximumSize(d);
@@ -196,7 +197,7 @@ public final class AMVAPanel extends JPanel {
     }
 
     private JComponent maxSampleLabel() {
-        Dimension d = new Dimension(70, 30);
+        Dimension d = new Dimension((int)(70 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         maxSamplesLabel = new JLabel("  Max Samples:");
         maxSamplesLabel.setMaximumSize(d);
         maxSamplesLabel.setFocusable(false);
@@ -205,7 +206,7 @@ public final class AMVAPanel extends JPanel {
     }
 
     private JComponent maxSamples() {
-        Dimension d = new Dimension(80, 30);
+        Dimension d = new Dimension((int)(80 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         maxSamples = new JTextField(10);
         maxSamples.setText(numFormat.format(ew.getData().getMaxSamples()));
         maxSamples.setMaximumSize(d);
@@ -357,7 +358,7 @@ public final class AMVAPanel extends JPanel {
 
 
     private JComponent algLabel() {
-        Dimension d = new Dimension(65, 30);
+        Dimension d = new Dimension((int)(65 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
         algLabel = new JLabel(status.algorithmLabel);
         algLabel.setMaximumSize(d);
         algLabel.setFocusable(false);

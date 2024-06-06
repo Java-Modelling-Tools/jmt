@@ -116,7 +116,7 @@ public final class VisitsPanel extends WizardPanel implements JabaConstants, For
 		//Horizontal box containing Description label and buttons
 		JLabel descrLabel = new JLabel(DESCRIPTION_VISITS);
 		JPanel descrBox = new JPanel(new BorderLayout());
-		descrBox.setPreferredSize(new Dimension(200, 1000));
+		descrBox.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
 		descrBox.add(descrLabel, BorderLayout.NORTH);
 
 		JScrollPane visitTablePane = new JScrollPane(visitTable);

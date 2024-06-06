@@ -44,6 +44,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
@@ -142,7 +143,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		descrPane = new JScrollPane(description);
 		descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
 		descrPane.setBorder(descriptionTitle);
-		descrPane.setMinimumSize(new Dimension(80, 0));
+		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 		//if the reference station of the STPA is still available
 		if (availableS.contains(STPA.getReferenceStation())) {
 			stationChooser.setSelectedItem(sd.getStationName(STPA.getReferenceStation()));
@@ -184,7 +185,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			fromLabel = new JLabel("From (%):");
 			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
 			from.setEnabled(true);  // changed to "true"
-			//from.setPreferredSize(new Dimension(130, 30));
+			//from.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling)));
 			from.setToolTipText("Sets the initial service time");
 			toLabel = new JLabel("To (%):");
 			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
@@ -209,14 +210,14 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		edit.add(classChooserLabel);
 		edit.add(stationChooser);
 		edit.add(classChooser);
-		edit.setPreferredSize(new Dimension(130, 128));
+		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));
 		JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));
 		editLables.add(fromLabel);
 		editLables.add(toLabel);
 		editLables.add(stepsLabel);
 		editLables.add(stationChooserLabel);
 		editLables.add(classChooserLabel);
-		editLables.setPreferredSize(new Dimension(100, 128));
+		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);
@@ -228,7 +229,7 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		title = new TitledBorder("Type of service time growth");
 		scroll.setBorder(title);
 		//description = new JTextArea(DESCRIPTION);
-		scroll.setMinimumSize(new Dimension(360, 0));
+		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 		setLeftComponent(scroll);
 		setRightComponent(descrPane);
 		this.setBorder(new EmptyBorder(5, 0, 5, 0));

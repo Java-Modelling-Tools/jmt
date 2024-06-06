@@ -18,6 +18,8 @@
 
 package jmt.framework.gui.components;
 
+import jmt.gui.common.CommonConstants;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -41,8 +43,8 @@ public class CustomSeparator extends JComponent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final Dimension Horizontal = new Dimension(9, 50);
-	private static final Dimension Vertical = new Dimension(50, 9);
+	private static final Dimension Horizontal = new Dimension((int)(9 * CommonConstants.widthScaling), (int)(50 * CommonConstants.heightScaling));
+	private static final Dimension Vertical = new Dimension((int)(50 * CommonConstants.widthScaling), (int)(9 * CommonConstants.heightScaling));
 	private int orientation;
 
 	/**

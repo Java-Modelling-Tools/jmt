@@ -42,6 +42,7 @@ import javax.swing.table.AbstractTableModel;
 
 import jmt.common.ConnectionCheck;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.xml.TemplateFileOperation;
 import jmt.gui.jsimgraph.template.TemplateConstants;
 import jmt.gui.jsimgraph.template.TemplateData;
@@ -83,9 +84,9 @@ public class TemplateUpdatePanel extends WizardPanel implements TemplateConstant
 		download = new JButton("Update");
 		cancel = new JButton("Cancel");
 
-		progress.setPreferredSize(new Dimension(200, 25));
-		download.setPreferredSize(new Dimension(110, 25));
-		cancel.setPreferredSize(new Dimension(110, 25));
+		progress.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		download.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		cancel.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

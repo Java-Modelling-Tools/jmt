@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
@@ -179,7 +180,7 @@ public class RoutingProbabilitiesPanel extends ParameterOptionPanel {
         descrPane = new JScrollPane(combinedPanel);
         descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
         descrPane.setBorder(descriptionTitle);
-        descrPane.setMinimumSize(new Dimension(80, 0));
+        descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 
         //if the reference station of the RPPA is still available
         if (availableSourceS.contains(RPPA.getReferenceStation())) {
@@ -248,7 +249,7 @@ public class RoutingProbabilitiesPanel extends ParameterOptionPanel {
         edit.add(sourceStationChooser);
         edit.add(destinationStationChooser);
         edit.add(classChooser);
-        edit.setPreferredSize(new Dimension(130, 160));
+        edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(160 * CommonConstants.heightScaling)));
         JPanel editLables = new JPanel(new GridLayout(6, 1, 0, 6));
         editLables.add(fromLabel);
         editLables.add(toLabel);
@@ -256,7 +257,7 @@ public class RoutingProbabilitiesPanel extends ParameterOptionPanel {
         editLables.add(sourceStationChooserLabel);
         editLables.add(destinationStationChooserLabel);
         editLables.add(classChooserLabel);
-        editLables.setPreferredSize(new Dimension(130,160));
+        editLables.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(160 * CommonConstants.heightScaling)));
         JPanel editPanel = new JPanel();
         editPanel.add(editLables);
         editPanel.add(edit);
@@ -267,7 +268,7 @@ public class RoutingProbabilitiesPanel extends ParameterOptionPanel {
         scroll = new JScrollPane(cont);
         title = new TitledBorder("Type of routing probability growth");
         scroll.setBorder(title);
-        scroll.setMinimumSize(new Dimension(360, 0));
+        scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         setLeftComponent(scroll);
         setRightComponent(descrPane);
         this.setBorder(new EmptyBorder(5, 0, 5, 0));

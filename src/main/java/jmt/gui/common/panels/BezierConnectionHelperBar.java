@@ -18,6 +18,7 @@
 
 package jmt.gui.common.panels;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
@@ -35,9 +36,9 @@ public class BezierConnectionHelperBar extends JPanel{
 		JLabel helperLabel2 = new JLabel("Press ESC to cancel the arc");
 		this.setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		this.add(helperLabel0);
-		this.add(Box.createRigidArea(new Dimension(20,0)));
+		this.add(Box.createRigidArea(new Dimension((int)(20 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
 		this.add(helperLabel1);
-		this.add(Box.createRigidArea(new Dimension(20,0)));
+		this.add(Box.createRigidArea(new Dimension((int)(20 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
 		this.add(helperLabel2);
 		this.setVisible(false);
 	}

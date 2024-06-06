@@ -36,6 +36,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
@@ -90,10 +91,10 @@ public class SeedPanel extends ParameterOptionPanel {
 		steps.setToolTipText("Sets the number of performed simulations");
 		edit.add(stepsLabel);
 		edit.add(steps);
-		edit.setPreferredSize(new Dimension(130, 101));
+		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(101 * CommonConstants.heightScaling)));
 		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));
 		editLables.add(stepsLabel);
-		editLables.setPreferredSize(new Dimension(100, 101));
+		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(101 * CommonConstants.heightScaling)));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);
@@ -111,8 +112,8 @@ public class SeedPanel extends ParameterOptionPanel {
 		descrPane = new JScrollPane(description);
 		descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
 		descrPane.setBorder(descriptionTitle);
-		descrPane.setMinimumSize(new Dimension(80, 0));
-		scroll.setMinimumSize(new Dimension(360, 0));
+		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
+		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 		setLeftComponent(scroll);
 		setRightComponent(descrPane);
 		setListeners();

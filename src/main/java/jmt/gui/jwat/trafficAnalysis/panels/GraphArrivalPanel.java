@@ -93,7 +93,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 	// Scrollpane used for table
 	private JScrollPane tableScrollPane;
 	// Dimension of bounds spinners
-	static final Dimension DIM_SPINNER = new Dimension(95, 20);
+	static final Dimension DIM_SPINNER = new Dimension((int)(95 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling));
 	// Current performance index
 	private String currentIndex = "Years";
 	private MainJwatWizard ew;

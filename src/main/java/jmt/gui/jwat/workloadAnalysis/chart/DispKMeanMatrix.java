@@ -28,6 +28,7 @@ import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
 import jmt.engine.jwat.workloadAnalysis.utils.JavaWatColor;
 import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 
+import jmt.gui.common.CommonConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
@@ -44,7 +45,7 @@ public class DispKMeanMatrix extends JScrollPane {
 
 	public DispKMeanMatrix() {
 		super(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		this.setPreferredSize(new Dimension(420, 420));
+		this.setPreferredSize(new Dimension((int)(420 * CommonConstants.widthScaling), (int)(420 * CommonConstants.heightScaling)));
 		panel = new DispersionPanel();
 		this.setViewportView(panel);
 	}
@@ -55,7 +56,7 @@ public class DispKMeanMatrix extends JScrollPane {
 		this.model = (ModelWorkloadAnalysis) session.getDataModel();
 		this.session = session;
 		/* Settaggio delle proprieta' del pannello di scroll */
-		this.setPreferredSize(new Dimension(420, 420));
+		this.setPreferredSize(new Dimension((int)(420 * CommonConstants.widthScaling), (int)(420 * CommonConstants.heightScaling)));
 		/* Creazione e aggiunta del Pannello di visualizzazione della matrice di dispersione */
 		panel = new DispersionPanel(model, clustering);
 		panel.setPreferredSize(new Dimension(DispersionPanel.WIDTH_TOT * model.getMatrix().getNumVariables(), DispersionPanel.HEIGHT_TOT

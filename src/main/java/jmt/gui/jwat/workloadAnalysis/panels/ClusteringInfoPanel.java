@@ -160,7 +160,7 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 		listsPanel.add(Box.createHorizontalStrut(10));
 
 		JPanel west = new JPanel(new GridLayout(2, 1, 0, 0));
-		west.setPreferredSize(new Dimension(200, 400));
+		west.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 
 		listsPanel.add(west);
 		listsPanel.add(Box.createHorizontalStrut(10));
@@ -178,21 +178,21 @@ public class ClusteringInfoPanel extends WizardPanel implements CommonConstants,
 
 		/*Set Tabbed for statistics*/
 		tabbed = new JTabbedPane();
-		tabbed.setPreferredSize(new Dimension(600, 400));
+		tabbed.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 		p1.add(tabbed, BorderLayout.CENTER);
 
 		clusingP = new JPanel(new GridLayout(1, 1));
 		clusingP.setName("Clustering Info");
-		clusingP.setPreferredSize(new Dimension(600, 400));
+		clusingP.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 		tabbed.add(clusingP);
 
 		clustP = new JPanel(new GridLayout(1, 1));
 		clustP.setName("Cluster Info");
-		clustP.setPreferredSize(new Dimension(600, 400));
+		clustP.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 		tabbed.add(clustP);
 
 		matrixPanel = new JPanel(new GridLayout(1, 1));
-		matrixPanel.setPreferredSize(new Dimension(600, 400));
+		matrixPanel.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 		matrixPanel.setName("Dispersion Matrix");
 		tabbed.add(matrixPanel);
 

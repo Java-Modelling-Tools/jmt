@@ -221,7 +221,7 @@ public class StationsPanel extends WizardPanel implements CommonConstants {
 		//build upper part of central panel
 		JPanel upperPanel = new JPanel(new BorderLayout());
 		JLabel descrLabel = new JLabel(STATIONS_DESCRIPTION);
-		//descrLabel.setMaximumSize(new Dimension(300, 1000));
+		//descrLabel.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
 		upperPanel.add(descrLabel, BorderLayout.CENTER);
 
 		//build upper right corner of the main panel

@@ -444,7 +444,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX, SPINNER_PRECISION));
 			}
 			xMin.setToolTipText("Sets the smallest x represented");
-			xMin.setMaximumSize(new Dimension(40, 18));
+			xMin.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(xMin);
 			mainPanel.add(label);
 			mainPanel.add(xMin);
@@ -452,7 +452,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			label = new JLabel("X max:");
 			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN, XMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			xMax.setToolTipText("Sets the largest x represented");
-			xMax.setMaximumSize(new Dimension(40, 18));
+			xMax.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(xMax);
 			mainPanel.add(label);
 			mainPanel.add(xMax);
@@ -464,7 +464,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX, SPINNER_PRECISION));
 			}
 			yMin.setToolTipText("Sets the smallest y represented");
-			yMin.setMaximumSize(new Dimension(40, 18));
+			yMin.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(yMin);
 			mainPanel.add(label);
 			mainPanel.add(yMin);
@@ -472,7 +472,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			label = new JLabel("Y max:");
 			yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			yMax.setToolTipText("Sets the largest y represented");
-			yMax.setMaximumSize(new Dimension(40, 18));
+			yMax.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(yMax);
 			mainPanel.add(label);
 			mainPanel.add(yMax);
@@ -525,7 +525,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			ValuesTable table = new ValuesTable(values, rm.getMeasureType(measureIndex));
 			JScrollPane tablePanel = new JScrollPane(table);
 			tablePanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-			tablePanel.setPreferredSize(new Dimension(0, 140));
+			tablePanel.setPreferredSize(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(140 * CommonConstants.heightScaling)));
 			JLabel tableNote = new JLabel("<html>The values in <font color=\"red\">red</font> were not computed with the requested precision</html>");
 			JPanel tableNotePanel = new JPanel();
 			tableNotePanel.add(tableNote);
@@ -936,7 +936,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				xMin = new JSpinner(new SpinnerNumberModel(XMIN, 0, XMAX, SPINNER_PRECISION));
 			}
 			xMin.setToolTipText("Sets the smallest x represented");
-			xMin.setMaximumSize(new Dimension(40, 18));
+			xMin.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(xMin);
 			mainPanel.add(label);
 			mainPanel.add(xMin);
@@ -944,7 +944,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			label = new JLabel("X max:");
 			xMax = new JSpinner(new SpinnerNumberModel(XMAX, XMIN, XMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			xMax.setToolTipText("Sets the largest x represented");
-			xMax.setMaximumSize(new Dimension(40, 18));
+			xMax.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(xMax);
 			mainPanel.add(label);
 			mainPanel.add(xMax);
@@ -956,7 +956,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 				yMin = new JSpinner(new SpinnerNumberModel(YMIN, 0, YMAX, SPINNER_PRECISION));
 			}
 			yMin.setToolTipText("Sets the smallest y represented");
-			yMin.setMaximumSize(new Dimension(40, 18));
+			yMin.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(yMin);
 			mainPanel.add(label);
 			mainPanel.add(yMin);
@@ -964,7 +964,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			label = new JLabel("Y max:");
 			yMax = new JSpinner(new SpinnerNumberModel(YMAX, YMIN, YMAX + SPINNER_PRECISION, SPINNER_PRECISION));
 			yMax.setToolTipText("Sets the largest y represented");
-			yMax.setMaximumSize(new Dimension(40, 18));
+			yMax.setMaximumSize(new Dimension((int)(40 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 			label.setLabelFor(yMax);
 			mainPanel.add(label);
 			mainPanel.add(yMax);
@@ -1017,7 +1017,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			ValuesTable table = new ValuesTable(values, md.getMeasureType(measureIndex));
 			JScrollPane tablePanel = new JScrollPane(table);
 			tablePanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-			tablePanel.setPreferredSize(new Dimension(0, 140));
+			tablePanel.setPreferredSize(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(140 * CommonConstants.heightScaling)));
 			JLabel tableNote = new JLabel("<html>The values in <font color=\"red\">red</font> were not computed with the requested precision</html>");
 			JPanel tableNotePanel = new JPanel();
 			tableNotePanel.add(tableNote);

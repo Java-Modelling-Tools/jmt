@@ -310,10 +310,10 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 		logPathPanel.setLayout(new BoxLayout(logPathPanel, BoxLayout.Y_AXIS));
 		logPanel.add(logPathPanel, BorderLayout.WEST);
 		logPath = new JLabel("CSV files path: " +  filePath);
-		logPathPanel.add(Box.createRigidArea(new Dimension(0, 3)));
+		logPathPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(3 * CommonConstants.heightScaling))));
 		logPathPanel.add(logPath);
 		final JButton filepathButton = new JButton("Browse");
-		logPathPanel.add(Box.createRigidArea(new Dimension(0, 6)));
+		logPathPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(6 * CommonConstants.heightScaling))));
 		logPathPanel.add(filepathButton);
 		filepathButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

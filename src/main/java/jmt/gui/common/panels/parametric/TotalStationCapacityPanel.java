@@ -26,6 +26,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
@@ -99,7 +100,7 @@ public class TotalStationCapacityPanel extends ParameterOptionPanel {
         descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
 
         descrPane.setBorder(descriptionTitle);
-        descrPane.setMinimumSize(new Dimension(80, 0));
+        descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 
         //if the reference station of the NSPA is still available
         if (availableS.contains(TSCPA.getReferenceStation())) {
@@ -134,13 +135,13 @@ public class TotalStationCapacityPanel extends ParameterOptionPanel {
         edit.add(stepsLabel);
         edit.add(steps);
         edit.add(stationChooser);
-        edit.setPreferredSize(new Dimension(130, 128));
+        edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));
         JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));
         editLables.add(fromLabel);
         editLables.add(toLabel);
         editLables.add(stepsLabel);
         editLables.add(stationChooserLabel);
-        editLables.setPreferredSize(new Dimension(100, 128));
+        editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));
         JPanel editPanel = new JPanel();
         editPanel.add(editLables);
         editPanel.add(edit);
@@ -150,7 +151,7 @@ public class TotalStationCapacityPanel extends ParameterOptionPanel {
         scroll = new JScrollPane(cont);
         title = new TitledBorder("Station total capacity variation");
         scroll.setBorder(title);
-        scroll.setMinimumSize(new Dimension(360, 0));
+        scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         setLeftComponent(scroll);
         setRightComponent(descrPane);
         this.setBorder(new EmptyBorder(5, 0, 5, 0));

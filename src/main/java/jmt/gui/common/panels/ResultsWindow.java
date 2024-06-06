@@ -601,8 +601,8 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 			pivotPanel2.add(textStatePanel2);
 
 			// Sets a minimal size for text area panel
-			pivotPanel2.setMinimumSize(new Dimension(320, 190));
-			pivotPanel2.setPreferredSize(new Dimension(360, 190));
+			pivotPanel2.setMinimumSize(new Dimension((int)(320 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));
+			pivotPanel2.setPreferredSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));
 
 			// Adds graph
 			graph = new FastGraph(values, md.getPollingInterval());
@@ -610,9 +610,9 @@ public class ResultsWindow extends JMTFrame implements ResultsConstants {
 					pivotPanel2, graph);
 			graphPanel.setOneTouchExpandable(true);
 			graphPanel.setDividerLocation(600);
-			graphPanel.setMinimumSize(new Dimension(320, 190));
-			graph.setMinimumSize(new Dimension(200, 190));
-			graph.setPreferredSize(new Dimension(300, 190));
+			graphPanel.setMinimumSize(new Dimension((int)(320 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));
+			graph.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));
+			graph.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));
 
 			add(graphPanel, BorderLayout.CENTER);
 			// Sets icon image and abort button state

@@ -99,9 +99,9 @@ public class JoinSectionPanel extends WizardPanel implements CommonConstants {
 		WarningScrollTable jsp = new WarningScrollTable(joinStrategies, WARNING_CLASS);
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Join Strategies"));
 		mainPanel.setResizeWeight(1.0);
-		jsp.setMinimumSize(new Dimension(200, 100));
+		jsp.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setLeftComponent(jsp);
-		joinEditor.setMinimumSize(new Dimension(225, 100));
+		joinEditor.setMinimumSize(new Dimension((int)(225 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setRightComponent(joinEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}

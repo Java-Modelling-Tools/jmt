@@ -482,8 +482,8 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 
 			varsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 			Font f = varsList.getFont();
-			//varsList.setPreferredSize(new Dimension(160, 400));
-			varsList.setMaximumSize(new Dimension(160, 400));
+			//varsList.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
+			varsList.setMaximumSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 			varsList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 			varsList.setBorder(BorderFactory.createLoweredBevelBorder());
 			varsList.addListSelectionListener(new ListSelectionListener() {
@@ -548,7 +548,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			samplingList.setSelectionForeground(Color.BLACK);
 
 			samplingList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			//samplingList.setPreferredSize(new Dimension(160, 400));
+			//samplingList.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 			Font f = samplingList.getFont();
 			samplingList.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));
 			samplingList.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -786,11 +786,11 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 		JTabbedPane graphsTabbed = new JTabbedPane();
 		JPanel graph = new JPanel();
 		plo = new SmallPlotDistGraph(model);
-		plo.setSize(new Dimension(330, 120));
+		plo.setSize(new Dimension((int)(330 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		graph.add(plo);
 		graphsTabbed.addTab("Frequencies", graph);
 		graph1 = new QQPlotPreviewPanel(model);
-		graph1.setSize(new Dimension(330, 120));
+		graph1.setSize(new Dimension((int)(330 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		graphsTabbed.addTab("QQ-Plot", graph1);
 		graphPanel.add(graphsTabbed);
 		//Blank panel
@@ -927,7 +927,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 
 			};
-			quantile.setPreferredSize(new Dimension(60, 20));
+			quantile.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 			centerCenter.add(quantile);
 
 			//UPDATE 10/11/06
@@ -954,7 +954,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 
 			};
-			quantileB.setPreferredSize(new Dimension(60, 20));
+			quantileB.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 			c.add(new JLabel("        Percentile: "));
 			c.add(quantileB);
 			quantileB.setEnabled(false);
@@ -999,7 +999,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			JPanel centerCenter = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			centerCenter.add(new JLabel("Number of random obs.: "));
 			random = new JSpinner(new SpinnerNumberModel(1, 1, model.getMatrix().getVariables()[0].Size(), 1));
-			random.setPreferredSize(new Dimension(60, 25));
+			random.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			centerCenter.add(random);
 			center.add(centerCenter, BorderLayout.CENTER);
 
@@ -1020,7 +1020,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 
 			JPanel centerP = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			JLabel lbl = new JLabel("From obs. number: ");
-			lbl.setPreferredSize(new Dimension(100, 25));
+			lbl.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			centerP.add(lbl);
 			fromO = new JSpinner(new SpinnerNumberModel(1, 1, model.getMatrix().getVariables()[0].Size() - 1, 1)) {
 
@@ -1032,10 +1032,10 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 
 			};
-			fromO.setPreferredSize(new Dimension(70, 25));
+			fromO.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			centerP.add(fromO);
 			JLabel lbl2 = new JLabel("To obs. number: ");
-			lbl2.setPreferredSize(new Dimension(100, 25));
+			lbl2.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			centerP.add(lbl2);
 			toO = new JSpinner(new SpinnerNumberModel(2, 2, model.getMatrix().getVariables()[0].Size(), 1)) {
 
@@ -1047,7 +1047,7 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 
 			};
-			toO.setPreferredSize(new Dimension(70, 25));
+			toO.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			centerP.add(toO);
 
 			center.add(centerP);
@@ -1083,17 +1083,17 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 			filterS = new JPanel(new FlowLayout());
 			JLabel l = new JLabel("Substring to be matched");
 			subs = new JTextField();
-			subs.setPreferredSize(new Dimension(120, 25));
+			subs.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			filterS.add(l);
 			filterS.add(subs);
 
 			//Pannello filtering on Data
 			filterD = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			JLabel lfrom = new JLabel("From date: ");
-			lfrom.setPreferredSize(new Dimension(60, 25));
+			lfrom.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			fromD = new JFormattedTextField(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss"));
 			JLabel lto = new JLabel("To date: ");
-			lto.setPreferredSize(new Dimension(60, 25));
+			lto.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			toD = new JFormattedTextField(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss"));
 			filterD.add(lfrom);
 			filterD.add(fromD);
@@ -1123,13 +1123,13 @@ public class StatsPanel extends WizardPanel implements CommonConstants, JWATCons
 
 			};
 			JLabel min = new JLabel("Minimum value: ");
-			min.setPreferredSize(new Dimension(90, 25));
-			minN.setMaximumSize(new Dimension(600, 25));
+			min.setPreferredSize(new Dimension((int)(90 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+			minN.setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			filterN.add(min);
 			filterN.add(minN);
 			JLabel max = new JLabel("Maximum value: ");
-			max.setPreferredSize(new Dimension(90, 25));
-			maxN.setMaximumSize(new Dimension(600, 25));
+			max.setPreferredSize(new Dimension((int)(90 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+			maxN.setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			filterN.add(max);
 			filterN.add(maxN);
 

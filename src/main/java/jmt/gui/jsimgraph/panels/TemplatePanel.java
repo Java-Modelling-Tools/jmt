@@ -55,6 +55,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
 
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.panels.CustomizableDialogFactory;
 import jmt.gui.common.xml.TemplateFileOperation;
@@ -108,11 +109,11 @@ public class TemplatePanel extends WizardPanel implements TemplateConstants {
 		JButton create = new JButton("Instantiate");
 		JButton close = new JButton("Close");
 
-		add.setPreferredSize(new Dimension(160, 25));
-		remove.setPreferredSize(new Dimension(160, 25));
-		update.setPreferredSize(new Dimension(160, 25));
-		create.setPreferredSize(new Dimension(120, 25));
-		close.setPreferredSize(new Dimension(120, 25));
+		add.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		remove.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		update.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		create.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		close.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 
 		// adding a new template from website
 		add.addActionListener(new ActionListener() {

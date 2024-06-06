@@ -100,7 +100,7 @@ public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWAT
 		JLabel testoSpinner = new JLabel("Select the error: ");
 		fuzzyError = new JSpinner(new SpinnerNumberModel(0.1, 0.01, 0.99, 0.01));
 		fuzzyError.setValue(new Double(infos.getError()));
-		fuzzyError.setPreferredSize(new Dimension(60, 25));
+		fuzzyError.setPreferredSize(new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 		selectErrore = new JButton("Apply error");
 		selectErrore.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {

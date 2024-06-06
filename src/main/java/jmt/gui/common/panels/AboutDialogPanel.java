@@ -29,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 
 import jmt.framework.gui.components.HtmlPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory.Contributors;
 import jmt.gui.common.startScreen.GraphStartScreen;
@@ -103,7 +104,7 @@ public class AboutDialogPanel extends JPanel {
 
 		JLabel legal = new JLabel(LEGAL);
 		panel.add(legal, BorderLayout.SOUTH);
-		panel.setPreferredSize(new Dimension(600,480));
+		panel.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(480 * CommonConstants.heightScaling)));
 		JScrollPane scroll = new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		this.add(scroll, BorderLayout.CENTER);
 	}
@@ -150,7 +151,7 @@ public class AboutDialogPanel extends JPanel {
 	 */
 	public void setTitles(String dialogTitle, String applicationName, String iconName) {
 		title.setText(TITLE_START + applicationName + TITLE_END);
-		title.setIcon(JMTImageLoader.loadImage(iconName, new Dimension(50, 50)));
+		title.setIcon(JMTImageLoader.loadImage(iconName, new Dimension((int)(50 * CommonConstants.widthScaling), (int)(50 * CommonConstants.heightScaling))));
 		this.dialogTitle = dialogTitle;
 	}
 	

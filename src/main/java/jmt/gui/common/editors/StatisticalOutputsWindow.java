@@ -522,15 +522,15 @@ public class StatisticalOutputsWindow extends JMTFrame {
 				2, 2);//xPad, yPad
 
 		pivotPanel.add(measuresPanel);
-		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(15 * CommonConstants.heightScaling))));
 		pivotPanel.add(momentsPanel);
-		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(15 * CommonConstants.heightScaling))));
 		pivotPanel.add(boundsPanel);
-		pivotPanel.add(Box.createRigidArea(new Dimension(0,15)));
+		pivotPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(15 * CommonConstants.heightScaling))));
 		pivotPanel.add(sampleChooser);
-		pivotPanel.add(Box.createRigidArea(new Dimension(0,30)));
+		pivotPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling))));
 		pivotPanel.add(graphOptionsPanel);
-		pivotPanel.add(Box.createRigidArea(new Dimension(0,30)));
+		pivotPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling))));
 
 		// Add warning that measure is inverse
 		JPanel leftPanel = new JPanel(new BorderLayout());
@@ -609,8 +609,8 @@ public class StatisticalOutputsWindow extends JMTFrame {
 		if (type != TYPE_NONE && statGraph != null && statGraph.isDistributionAvailable()) {
 			graph = new DistributionDensityGraph(type, statGraph);
 			graph.setToolTipText("Displays desired graph. Right click to 'Save As' and double click to enlarge.");
-			graph.setMinimumSize(new Dimension(200, 150));
-			graph.setPreferredSize(new Dimension(300, 250));
+			graph.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(150 * CommonConstants.heightScaling)));
+			graph.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(250 * CommonConstants.heightScaling)));
 			graphHolder.add(graph);
 			graphHolder.validate();
 			graphHolder.repaint();

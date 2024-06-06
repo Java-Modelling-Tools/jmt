@@ -18,13 +18,7 @@
 
 package jmt.gui.common.startScreen;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -144,7 +138,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMVA_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMVAICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -159,7 +153,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMCH_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMCHICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -174,7 +168,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JWAT_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JWATICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -189,7 +183,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JSIM_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JSIMICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -204,7 +198,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JMODEL_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JMODELICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -219,7 +213,7 @@ public class GraphStartScreen extends JMTFrame {
 
 		{
 			putValue(Action.SHORT_DESCRIPTION, JABA_SHORT_DESCRIPTION);
-			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension(40, 40)));
+			putValue(Action.LARGE_ICON_KEY, JMTImageLoader.loadImage(IMG_JABAICON, new Dimension((int)(40 * CommonConstants.widthScaling), (int)(40 * CommonConstants.heightScaling))));
 		}
 
 		public void actionPerformed(ActionEvent e) {
@@ -261,7 +255,7 @@ public class GraphStartScreen extends JMTFrame {
 		// Adds start screen image
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(440, 400)));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension((int)(440 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling))));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		mainPanel.add(imageLabel, BorderLayout.CENTER);
@@ -297,7 +291,7 @@ public class GraphStartScreen extends JMTFrame {
 		// Now Adds Sample Animation in the bottom
 		sampleQNAni = new SampleQNAnimation();
 		JPanel pivotPanel = new JPanel(new GridBagLayout());
-		sampleQNAni.setPreferredSize(new Dimension(200, 120));
+		sampleQNAni.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		//sampleQNAni.setBackground(new Color(151, 151, 151));
 		pivotPanel.add(sampleQNAni);
 		leftPanel.add(pivotPanel, BorderLayout.SOUTH);

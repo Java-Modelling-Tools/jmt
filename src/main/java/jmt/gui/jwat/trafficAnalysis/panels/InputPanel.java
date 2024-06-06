@@ -228,7 +228,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		private static final long serialVersionUID = 1L;
 
 		{
-			setMaximumSize(new Dimension(600, 25));
+			setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			setToolTipText(SPINNER_VARIABLE);
 			((DefaultFormatter) ((JSpinner.DefaultEditor) getEditor()).getTextField().getFormatter()).setAllowsInvalid(false);
 			registerKeyboardAction(new ActionListener() {
@@ -498,14 +498,14 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 		JPanel t = new JPanel(new BorderLayout());
 
 		JScrollPane inputTabSP = new JScrollPane(inputTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		inputTabSP.setPreferredSize(new Dimension(550, 400));
+		inputTabSP.setPreferredSize(new Dimension((int)(550 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 		t.add(inputTabSP, BorderLayout.CENTER);
 
 		componentsPanel.add(t, BorderLayout.CENTER);
 
 		JPanel rightPanel = new JPanel(new BorderLayout());
-		rightPanel.setMaximumSize(new Dimension(230, 800));
-		rightPanel.setPreferredSize(new Dimension(230, 800));
+		rightPanel.setMaximumSize(new Dimension((int)(230 * CommonConstants.widthScaling), (int)(800 * CommonConstants.heightScaling)));
+		rightPanel.setPreferredSize(new Dimension((int)(230 * CommonConstants.widthScaling), (int)(800 * CommonConstants.heightScaling)));
 
 		mainHorizontalBox.add(rightPanel);
 		/********** INPUT FILE PANEL **********/
@@ -943,7 +943,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 			// Creazione del pannello alla prima chiamata
 			randomOptionPanel = new JPanel();
 			randomNObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));
-			randomNObs.setPreferredSize(new Dimension(70, 25));
+			randomNObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			randomOptionPanel.add(new JLabel("Number of observations:"), BorderLayout.NORTH);
 			randomOptionPanel.add(randomNObs, BorderLayout.SOUTH);
 		} else {
@@ -979,17 +979,17 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 				}
 
 			});
-			intervalFromObs.setPreferredSize(new Dimension(70, 25));
+			intervalFromObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			JPanel fromPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			fromPan.add(intervalFromObs);
 			fromPanel.add(fromPan);
 
 			JPanel toPanel = new JPanel(new GridLayout(1, 2));
 			JLabel toLabel = new JLabel("To observation #: ", JLabel.RIGHT);
-			toLabel.setPreferredSize(new Dimension(70, 25));
+			toLabel.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			toPanel.add(toLabel);
 			intervalToObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));
-			intervalToObs.setPreferredSize(new Dimension(70, 25));
+			intervalToObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 			JPanel toPan = new JPanel(new FlowLayout(FlowLayout.LEFT));
 			toPan.add(intervalToObs);
 			toPanel.add(toPan);
@@ -1097,7 +1097,7 @@ public class InputPanel extends WizardPanel implements CommonConstants, JWATCons
 					final JDialog f = new JDialog();
 					f.setModal(true);
 					f.setTitle("Error log");
-					f.setSize(new Dimension(400, 400));
+					f.setSize(new Dimension((int)(400 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));
 					f.setContentPane(new LogVisualizer(f));
 					f.addWindowListener(new WindowAdapter() {
 						public void windowClosing(WindowEvent e) {

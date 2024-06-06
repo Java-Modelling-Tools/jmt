@@ -35,6 +35,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 
 /**
@@ -51,7 +52,7 @@ public class WarningScrollTable extends JRootPane {
 	private static final long serialVersionUID = 1L;
 
 	protected static final int BORDERSIZE = 3;
-	protected static final Dimension warningBoxSize = new Dimension(210, 95);
+	protected static final Dimension warningBoxSize = new Dimension((int)(210 * CommonConstants.widthScaling), (int)(95 * CommonConstants.heightScaling));
 	protected JTable table;
 	protected Vector<Vector<Object>> vectors;
 

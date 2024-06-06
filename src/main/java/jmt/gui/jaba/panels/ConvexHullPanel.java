@@ -23,6 +23,7 @@ import javax.swing.event.ChangeListener;
 
 import jmt.framework.gui.layouts.SpringUtilities;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.jaba.JabaConstants;
 import jmt.gui.jaba.JabaModel;
 import jmt.gui.jaba.JabaWizard;
@@ -67,7 +68,7 @@ public class ConvexHullPanel extends WizardPanel implements ActionListener,
 		initComponents();
 		this.mainWin = mainWin;
 
-		setPreferredSize(new Dimension(200, 200));
+		setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
 	}
 
 	public void setData(JabaModel data) {

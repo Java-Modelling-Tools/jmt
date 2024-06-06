@@ -138,7 +138,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 
 		WarningScrollTable jsp = new WarningScrollTable(forkStrategies, WARNING_CLASS);
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Advanced Fork Strategies"));
-		jsp.setMinimumSize(new Dimension(200, 100));
+		jsp.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 
 		descrTextPane = new JTextArea("");
 		descrTextPane.setOpaque(false);
@@ -151,7 +151,7 @@ public class InGateWaySectionPanel extends WizardPanel implements CommonConstant
 		leftPane.setLeftComponent(jsp);
 		leftPane.setRightComponent(descrPane);
 		forkStrategiesPane.setLeftComponent(leftPane);
-		forkProbEditor.setMinimumSize(new Dimension(225, 100));
+		forkProbEditor.setMinimumSize(new Dimension((int)(225 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		forkStrategiesPane.setRightComponent(forkProbEditor);
 
 		gPaneAdvanced.getContentPane().add(forkStrategiesPane);

@@ -2,6 +2,7 @@ package jmt.gui.common.panels;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.framework.gui.components.JMTToolBar;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.controller.actions.ActionDelete;
@@ -25,15 +26,15 @@ public class BezierModificationToolsPanel extends JPanel {
 
         toolBar = new JMTToolBar(JMTImageLoader.getImageLoader());
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeSelectControlPoint());
-        toolBar.addSeparator(new Dimension(5,0));
+        toolBar.addSeparator(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeAddControlPoint());
-        toolBar.addSeparator(new Dimension(5,0));
+        toolBar.addSeparator(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeRemoveControlPoint());
-        toolBar.addSeparator(new Dimension(5,0));
+        toolBar.addSeparator(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeAddTangents());
-        toolBar.addSeparator(new Dimension(5,0));
+        toolBar.addSeparator(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeUnlockTangents());
-        toolBar.addSeparator(new Dimension(5,0));
+        toolBar.addSeparator(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
         ((JMTToolBar) toolBar).addGenericButton(m.getBezierEdgeBreakEdge());
 
         dialog = new JMTDialog(mainWindow, false);

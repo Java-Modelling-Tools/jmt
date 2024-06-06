@@ -196,13 +196,13 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		edit.add(steps);
 		edit.add(classChooserLabel);
 		edit.add(classChooser);
-		edit.setPreferredSize(new Dimension(130, 100));
+		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));
 		editLables.add(fromLabel);
 		editLables.add(toLabel);
 		editLables.add(stepsLabel);
 		editLables.add(classChooserLabel);
-		editLables.setPreferredSize(new Dimension(100, 100));
+		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		JPanel editPanel = new JPanel();
 		editPanel.add(editLables);
 		editPanel.add(edit);
@@ -231,8 +231,8 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 		descrPane = new JScrollPane(description);
 		descriptionTitle = new TitledBorder(new EtchedBorder(), "Description");
 		descrPane.setBorder(descriptionTitle);
-		descrPane.setMinimumSize(new Dimension(80, 0));
-		scroll.setMinimumSize(new Dimension(360, 0));
+		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
+		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
 		setLeftComponent(scroll);
 		setRightComponent(descrPane);
 		setListeners();
@@ -465,7 +465,7 @@ public class NumberOfCustomersPanel extends ParameterOptionPanel {
 			table.setAutoscrolls(true);
 			jsp = new JScrollPane(table);
 			jsp.setBorder(new EmptyBorder(10, 10, 10, 10));
-			jsp.setPreferredSize(new Dimension(202, 122));
+			jsp.setPreferredSize(new Dimension((int)(202 * CommonConstants.widthScaling), (int)(122 * CommonConstants.heightScaling)));
 			title = new JLabel("<html><b>Population mix</b>");
 			titlePanel = new JPanel(new FlowLayout());
 			titlePanel.add(title);

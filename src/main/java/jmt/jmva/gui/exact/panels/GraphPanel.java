@@ -74,7 +74,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 	// Table used to select performance indices to be plotted
 	private LinesTable table;
 	// Dimension of bounds spinners
-	static final Dimension DIM_SPINNER = new Dimension(60, 20);
+	static final Dimension DIM_SPINNER = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling));
 	// Current performance index
 	private String currentIndex = "none";
 	// Selected performance indices
@@ -404,7 +404,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		// Response time
 		if (currentIndex.equals(ExactConstants.INDICES_TYPES[2])) {
 			if (classNum >= 0 && statNum >= 0) {
-				graph.draw(rowNum, model.getResidTimes(alg)[statNum][classNum]);
+				graph.draw(rowNum, model.getRespTimes(alg)[statNum][classNum]);
 			} else if (classNum < 0 && statNum >= 0) {
 				graph.draw(rowNum, model.getPerStationRespT(alg)[statNum]);
 			} else if (classNum >= 0 && statNum < 0) {

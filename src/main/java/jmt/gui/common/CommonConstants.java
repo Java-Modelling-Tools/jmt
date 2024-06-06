@@ -18,7 +18,7 @@
 
 package jmt.gui.common;
 
-import java.awt.Dimension;
+import java.awt.*;
 
 import jmt.framework.data.ConstMap;
 import jmt.gui.common.forkStrategies.*;
@@ -93,77 +93,81 @@ public interface CommonConstants {
 	};
 
 	/**Constants for GUI scaling*/
-	public static final int MAX_GUI_WIDTH_STARTSCREEN = 800;
-	public static final int MAX_GUI_HEIGHT_STARTSCREEN = 600;
-	public static final int MAX_GUI_WIDTH_ABOUT = 800;
-	public static final int MAX_GUI_HEIGHT_ABOUT = 600;
-	public static final int MAX_GUI_WIDTH_QUICKHTML = 800;
-	public static final int MAX_GUI_HEIGHT_QUICKHTML = 600;
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	public float heightScaling = 1.15F; //(float) (screenSize.height/768/2);
+	public float widthScaling = 1.15F; //(float) (screenSize.height/768/2);
 
-	public static final int MAX_GUI_WIDTH_DIALOG_DEFAULT = 780;
-	public static final int MAX_GUI_HEIGHT_DIALOG_DEFAULT = 520;
-	public static final int MAX_GUI_WIDTH_COMMON = 1024;
-	public static final int MAX_GUI_HEIGHT_COMMON = 768;
+	public int MAX_GUI_WIDTH_STARTSCREEN = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_STARTSCREEN = (int) (600 * heightScaling);
+	public int MAX_GUI_WIDTH_ABOUT = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_ABOUT = (int) (600 * heightScaling);
+	public int MAX_GUI_WIDTH_QUICKHTML = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_QUICKHTML = (int) (600 * heightScaling);
 
-	public static final int MAX_GUI_WIDTH_JSIM_DISTRIB = 480;
-	public static final int MAX_GUI_HEIGHT_JSIM_DISTRIB = 600;
-	public static final int MAX_GUI_WIDTH_JSIM_PROBLEMS = 450;
-	public static final int MAX_GUI_HEIGHT_JSIM_PROBLEMS = 435;
-	public static final int MAX_GUI_WIDTH_JSIM_RESULTS = 1024;
-	public static final int MAX_GUI_HEIGHT_JSIM_RESULTS = 768;
-	public static final int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = 1152;
-	public static final int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = 864;
+	public int MAX_GUI_WIDTH_DIALOG_DEFAULT = (int)(780 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_DIALOG_DEFAULT = (int)(520 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_COMMON = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_COMMON = (int)(768 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_JMVA = 1024;
-	public static final int MAX_GUI_HEIGHT_JMVA = 768;
+	public int MAX_GUI_WIDTH_JSIM_DISTRIB = (int)(480 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JSIM_DISTRIB = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_PROBLEMS = (int)(450 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JSIM_PROBLEMS = (int)(435 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_RESULTS = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JSIM_RESULTS = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = (int)(1152 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = (int)(864 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_JMCH = 800;
-	public static final int MAX_GUI_HEIGHT_JMCH = 600;
+	public int MAX_GUI_WIDTH_JMVA = (int) (1024 * widthScaling);
+	public int MAX_GUI_HEIGHT_JMVA = (int) (768 * heightScaling);
 
-	public static final int MAX_GUI_WIDTH_JABA = 1024;
-	public static final int MAX_GUI_HEIGHT_JABA = 768;
+	public int MAX_GUI_WIDTH_JMCH = (int)(800 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JMCH = (int)(600 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_JWAT = 1024;
-	public static final int MAX_GUI_HEIGHT_JWAT = 768;
-	public static final int MAX_GUI_WIDTH_JWAT_STARTSCREEN = 520;
-	public static final int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = 400;
-	public static final int MAX_GUI_WIDTH_JWAT_COLOR = 1024;
-	public static final int MAX_GUI_HEIGHT_JWAT_COLOR = 768;
+	public int MAX_GUI_WIDTH_JABA = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JABA = (int)(768 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_LDSTRATEGY = 800;
-	public static final int MAX_GUI_HEIGHT_LDSTRATEGY = 600;
-	public static final int MAX_GUI_WIDTH_LDHELP = 600;
-	public static final int MAX_GUI_HEIGHT_LDHELP = 400;
-	public static final int MAX_GUI_WIDTH_LDROUTING = 800;
-	public static final int MAX_GUI_HEIGHT_LDROUTING = 600;
-	public static final int MAX_GUI_WIDTH_LDEDITING = 400;
-	public static final int MAX_GUI_HEIGHT_LDEDITING = 400;
+	public int MAX_GUI_WIDTH_JWAT = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JWAT = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JWAT_STARTSCREEN = (int)(520 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = (int)(400 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JWAT_COLOR = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JWAT_COLOR = (int)(768 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_POLLING = 640;
-	public static final int MAX_GUI_HEIGHT_POLLING = 480;
-	public static final int MAX_GUI_WIDTH_PSSERVER = 640;
-	public static final int MAX_GUI_HEIGHT_PSSERVER = 180;
-	public static final int MAX_GUI_WIDTH_SERVER_FEATURES = 780;
-	public static final int MAX_GUI_HEIGHT_SERVER_FEATURES = 520;
+	public int MAX_GUI_WIDTH_LDSTRATEGY = (int)(800 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDSTRATEGY = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDHELP = (int)(600 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDHELP = (int)(400 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDROUTING = (int)(800 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDROUTING = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDEDITING = (int)(400 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDEDITING = (int)(400 * CommonConstants.heightScaling);
 
-	public static final int MAX_GUI_WIDTH_WHATIF_PROGRESS = 640;
-	public static final int MAX_GUI_HEIGHT_WHATIF_PROGRESS = 480;
-	public static final int MAX_GUI_WIDTH_WHATIF_RESULTS = 1024;
-	public static final int MAX_GUI_HEIGHT_WHATIF_RESULTS = 768;
+	public int MAX_GUI_WIDTH_POLLING = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_POLLING = (int)(480 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_PSSERVER = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_PSSERVER = (int)(180 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_SERVER_FEATURES = (int)(780 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_SERVER_FEATURES = (int)(520 * CommonConstants.heightScaling);
 
-	public static final Dimension DIM_BUTTON_XS = new Dimension(60, 25);
-	public static final Dimension DIM_BUTTON_S = new Dimension(80, 25);
-	public static final Dimension DIM_BUTTON_M = new Dimension(100, 25);
-	public static final Dimension DIM_BUTTON_L = new Dimension(120, 25);
-	public static final Dimension DIM_BUTTON_XL = new Dimension(140, 25);
+	public int MAX_GUI_WIDTH_WHATIF_PROGRESS = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_WHATIF_PROGRESS = (int)(480 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_WHATIF_RESULTS = (int)(1024 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_WHATIF_RESULTS = (int)(768 * CommonConstants.heightScaling);
 
-	public static final int MAX_SMALL_ICON_SCREEN_WIDTH = 1366;
-	public static final int MAX_SMALL_ICON_SCREEN_HEIGHT = 768;
+	public static final Dimension DIM_BUTTON_XS = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension DIM_BUTTON_S = new Dimension((int)(80 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension DIM_BUTTON_M = new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension DIM_BUTTON_L = new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension DIM_BUTTON_XL = new Dimension((int)(140 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
 
-	public static final Dimension SMALL_ICON_SIZE_MENU_BAR = new Dimension(25, 25);
-	public static final Dimension LARGE_ICON_SIZE_MENU_BAR = new Dimension(35, 35);
-	public static final Dimension SMALL_ICON_SIZE_TOOL_BAR = new Dimension(25, 25);
-	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension(35, 35);
+	public static final int MAX_SMALL_ICON_SCREEN_WIDTH = (int)(1366 * CommonConstants.widthScaling);
+	public static final int MAX_SMALL_ICON_SCREEN_HEIGHT = (int)(768 * CommonConstants.heightScaling);
+
+	public static final Dimension SMALL_ICON_SIZE_MENU_BAR = new Dimension((int)(25 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension LARGE_ICON_SIZE_MENU_BAR = new Dimension((int)(35 * CommonConstants.widthScaling), (int)(35 * CommonConstants.heightScaling));
+	public static final Dimension SMALL_ICON_SIZE_TOOL_BAR = new Dimension((int)(25 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
+	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension((int)(35 * CommonConstants.widthScaling), (int)(35 * CommonConstants.heightScaling));
 
 	/**Constants for selection of station queueing strategy*/
 	public static final String STATION_QUEUE_STRATEGY_PSSERVER = "Processor Sharing Scheduling";

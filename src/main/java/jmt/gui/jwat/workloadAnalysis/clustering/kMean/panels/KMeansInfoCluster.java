@@ -199,7 +199,7 @@ public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATCo
 
 		JScrollPane p = new JScrollPane(clustList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		p.setPreferredSize(new Dimension(120, 115));
+		p.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(115 * CommonConstants.heightScaling)));
 		return p;
 	}
 

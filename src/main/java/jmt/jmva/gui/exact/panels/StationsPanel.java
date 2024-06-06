@@ -255,21 +255,21 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		//@author Stefano
 		JLabel spinnerLabel = new JLabel(DESCRIPTION_STATIONS);
 
-		//spinnerLabel.setMaximumSize(new Dimension(300, 18));
+		//spinnerLabel.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 		stationSpinnerBox.add(spinnerLabel);
 		stationSpinnerBox.add(Box.createHorizontalStrut(10));
 		Box numberBox = Box.createVerticalBox();
 
 		JPanel spinnerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 		JLabel numberLabel = new JLabel("Number:");
-		stationSpinner.setMaximumSize(new Dimension(600, 18));
+		stationSpinner.setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 		spinnerPanel.add(numberLabel);
 		spinnerPanel.add(stationSpinner);
 		numberBox.add(spinnerPanel);
 
 		numberBox.add(new JButton(addStation));
 
-		numberBox.setMaximumSize(new Dimension(300, 150));
+		numberBox.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(150 * CommonConstants.heightScaling)));
 
 		stationSpinnerBox.add(numberBox);
 		//END
@@ -282,7 +282,7 @@ public final class StationsPanel extends WizardPanel implements ExactConstants, 
 		stationTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		stationTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		stationBox.add(stationTablePane);
-		stationBox.add(Box.createRigidArea(new Dimension(10, 20)));
+		stationBox.add(Box.createRigidArea(new Dimension((int)(10 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling))));
 
 		Box totalBox = Box.createHorizontalBox();
 		totalBox.add(Box.createHorizontalStrut(20));

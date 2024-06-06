@@ -79,7 +79,7 @@ public class StationParametersPanel extends WizardPanel implements CommonConstan
 		panelDescription = new JLabel(STATIONS_PAR_DESCRIPTION);
 		JScrollPane jsp = new JScrollPane(stationsList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setPreferredSize(new Dimension(140, 200));
+		jsp.setPreferredSize(new Dimension((int)(140 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
 		add(panelDescription, BorderLayout.NORTH);
 		add(jsp, BorderLayout.WEST);
 		stationsList.addListSelectionListener(new ListSelectionListener() {

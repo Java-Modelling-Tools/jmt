@@ -175,10 +175,10 @@ public class PAProgressWindow extends JMTDialog {
 		//animation = new SampleQNAnimation();
 		//animation.start();
 		pivotPanel = new JPanel(new GridBagLayout());
-		//animation.setPreferredSize(new Dimension(200,120));
+		//animation.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		//animation.setBackground(new Color(151,151,151));
 		stoppedAnimation = new JLabel(JMTImageLoader.loadImage("emptyAnimation"));
-		stoppedAnimation.setPreferredSize(new Dimension(200, 120));
+		stoppedAnimation.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		pivotPanel.add(stoppedAnimation);
 
 		//Creates and adds the description label
@@ -445,7 +445,7 @@ public class PAProgressWindow extends JMTDialog {
 		animation = new SampleQNAnimation();
 		animation.start();
 		pivotPanel = new JPanel(new GridBagLayout());
-		animation.setPreferredSize(new Dimension(200, 120));
+		animation.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		animation.setBackground(new Color(151, 151, 151));
 		pivotPanel.add(animation);
 		globalPanel.add(pivotPanel, BorderLayout.CENTER);

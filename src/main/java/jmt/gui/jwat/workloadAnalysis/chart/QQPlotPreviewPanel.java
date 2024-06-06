@@ -72,11 +72,11 @@ public class QQPlotPreviewPanel extends JPanel implements CommonConstants {
 		plot = new SmallQQPlot(model); //Add distribution against with to plot
 
 		JPanel empty = new JPanel();
-		empty.setPreferredSize(new Dimension(5, 123));
+		empty.setPreferredSize(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(123 * CommonConstants.heightScaling)));
 		mainBox.add(empty, BorderLayout.WEST);
 		mainBox.add(plot, BorderLayout.CENTER);
 		empty = new JPanel();
-		empty.setPreferredSize(new Dimension(200, 5));
+		empty.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(5 * CommonConstants.heightScaling)));
 		mainBox.add(empty, BorderLayout.NORTH);
 
 		JPanel northP = new JPanel(new GridLayout(2, 1));
@@ -86,7 +86,7 @@ public class QQPlotPreviewPanel extends JPanel implements CommonConstants {
 		northP.add(b);
 
 		JPanel ok = new JPanel(new BorderLayout());
-		//ok.setPreferredSize(new Dimension(120,123));
+		//ok.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(123 * CommonConstants.heightScaling)));
 		ok.add(distChoose, BorderLayout.NORTH);
 		//ok.add(northP,BorderLayout.NORTH);
 		ok.add(new JLabel(HTML_START + HTML_FONT_TITLE + "QQ-Plot" + HTML_FONT_TIT_END + HTML_FONT_NORM + "Actual quantile distribution<p>"

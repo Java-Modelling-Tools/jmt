@@ -1204,7 +1204,7 @@ public class DistributionsEditor extends JMTDialog {
 			// probability text fields are hidden
 			// TODO check if the specified values are compatible with all
 			// graphical systems
-			but.setPreferredSize(new Dimension(65, 24));
+			but.setPreferredSize(new Dimension((int)(65 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 
 			c.insets = new Insets(0, 0, 0, 0); // No space between Name of
 			// distribution and Edit button

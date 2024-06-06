@@ -152,13 +152,13 @@ public class FuzzyClusterDetails extends JPanel implements CommonConstants {
 			}
 
 		});
-		xVar.setPreferredSize(new Dimension(80, 18));
+		xVar.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 		JPanel uno = new JPanel();
 		uno.add(new JLabel("X: "));
 		uno.add(xVar);
 		JPanel due = new JPanel();
 		due.add(new JLabel("Y: "));
-		yVar.setPreferredSize(new Dimension(80, 18));
+		yVar.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));
 		due.add(yVar);
 		combos.add(uno);
 		combos.add(due);

@@ -126,7 +126,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		firingTable = new FiringOutcomeTable();
 		firingPane = new JScrollPane(firingTable);
 		firingPane.setBorder(firingBorder);
-		firingPane.setMinimumSize(new Dimension(300, 240));
+		firingPane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(240 * CommonConstants.heightScaling)));
 
 		leftPanel = new WarningScrollTable(firingPane, WARNING_CLASS_OUTGOING_ROUTING);
 		leftPanel.addCheckVector(stationOutKeys);
@@ -137,7 +137,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		modeTable = new ModeTable();
 		JPanel modePanel = new JPanel(new BorderLayout(5, 5));
 		modePanel.setBorder(new TitledBorder(new EtchedBorder(), "Modes"));
-		modePanel.setMinimumSize(new Dimension(200, 120));
+		modePanel.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 		modePanel.add(addModeButton, BorderLayout.NORTH);
 		modePanel.add(new JScrollPane(modeTable), BorderLayout.CENTER);
 
@@ -148,7 +148,7 @@ public class FiringSectionPanel extends WizardPanel implements CommonConstants {
 		noticeText.setWrapStyleWord(true);
 		JScrollPane noticePane = new JScrollPane(noticeText);
 		noticePane.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
-		noticePane.setMinimumSize(new Dimension(200, 120));
+		noticePane.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 
 		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));

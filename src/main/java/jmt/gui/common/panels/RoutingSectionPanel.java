@@ -114,9 +114,9 @@ public class RoutingSectionPanel extends WizardPanel implements CommonConstants 
 		WarningScrollTable jsp = new WarningScrollTable(routingStrategies, WARNING_CLASS);
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Routing Strategies"));
 		mainPanel.setResizeWeight(1.0);
-		jsp.setMinimumSize(new Dimension(200, 100));
+		jsp.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setLeftComponent(jsp);
-		routingProbEditor.setMinimumSize(new Dimension(225, 100));
+		routingProbEditor.setMinimumSize(new Dimension((int)(225 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setRightComponent(routingProbEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}

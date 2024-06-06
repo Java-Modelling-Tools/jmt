@@ -294,7 +294,7 @@ public class LDEditingWindow extends JMTDialog {
 		help.addHelp(copydown,"Copies the value in the focused cell down to all cells in the same column");
 		box.add(copydown);*/
 		help.addHelp(ldExpression, "Select cells, enter an expression and press ENTER or click \"Evaluate\".");
-		ldExpression.setMaximumSize(new Dimension(10000, 22));
+		ldExpression.setMaximumSize(new Dimension((int)(10000 * CommonConstants.widthScaling), (int)(22 * CommonConstants.heightScaling)));
 		box.add(ldExpression);
 		JButton evaluate = new JButton(EVALUATE);
 		help.addHelp(evaluate, "Click here to fill selected cells with evaluation results.");

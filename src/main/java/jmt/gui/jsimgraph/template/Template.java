@@ -104,9 +104,9 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants 
 		JButton editServer = new JButton("Edit Service Center");
 		JButton editJoin = new JButton("Edit Join");
 
-		editFork.setPreferredSize(new Dimension(150,25));
-		editServer.setPreferredSize(new Dimension(150,25));
-		editJoin.setPreferredSize(new Dimension(150,25));
+		editFork.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		editServer.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		editJoin.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 
 		editFork.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -138,7 +138,7 @@ public class Template extends WizardPanel implements ITemplate, CommonConstants 
 
 		JButton create = new JButton("Insert");
 
-		create.setPreferredSize(new Dimension(100,25));
+		create.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 
 		create.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

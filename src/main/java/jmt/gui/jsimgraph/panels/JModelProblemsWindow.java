@@ -115,7 +115,7 @@ public class JModelProblemsWindow extends JDialog {
 			this.setTitle("Simulation diagnostic");
 		}
 		setBounds(200, 200, 200, 200);
-		setMinimumSize(new Dimension(1000, 100));
+		setMinimumSize(new Dimension((int)(1000 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		title = new JLabel(CommonConstants.HTML_START + CommonConstants.HTML_FONT_TITLE + "Problems found" + CommonConstants.HTML_FONT_TIT_END
 				+ CommonConstants.HTML_FONT_NORM + "Click on an element to solve the problem" + CommonConstants.HTML_FONT_NOR_END
 				+ CommonConstants.HTML_END);
@@ -187,7 +187,7 @@ public class JModelProblemsWindow extends JDialog {
 		JScrollPane jsp = new JScrollPane(containerPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-		jsp.setPreferredSize(new Dimension(310, 230));
+		jsp.setPreferredSize(new Dimension((int)(310 * CommonConstants.widthScaling), (int)(230 * CommonConstants.heightScaling)));
 		gbconstants.insets.top = 10;
 		gbconstants.anchor = GridBagConstraints.LINE_START;
 		gbconstants.insets.left = 15;
@@ -196,11 +196,11 @@ public class JModelProblemsWindow extends JDialog {
 		gbconstants.insets.top = 20;
 		gbconstants.insets.left = -38;
 		typeButton = new JButton("Type");
-		typeButton.setPreferredSize(new Dimension(100, 20));
+		typeButton.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		typeButton.setFocusable(false);
 		this.addComponent(typeButton, gblayout, gbconstants, 1, 0, 1, 1);
 		descriptionButton = new JButton("Description");
-		descriptionButton.setPreferredSize(new Dimension(882, 20));
+		descriptionButton.setPreferredSize(new Dimension((int)(882 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		descriptionButton.setFocusable(false);
 		gbconstants.insets.left = -68;
 		this.addComponent(descriptionButton, gblayout, gbconstants, 1, 1, 1, 1);
@@ -214,10 +214,10 @@ public class JModelProblemsWindow extends JDialog {
 		this.addComponent(jsp, gblayout, gbconstants, 2, 0, 2, 1);
 		ButtonEventHandler beh = new ButtonEventHandler();
 		continueButton = new JButton("Continue");
-		continueButton.setPreferredSize(new Dimension(80, 25));
+		continueButton.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 		continueButton.addActionListener(beh);
 		cancelButton = new JButton("Cancel");
-		cancelButton.setPreferredSize(new Dimension(80, 25));
+		cancelButton.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 		cancelButton.setSelected(true);
 		cancelButton.addActionListener(beh);
 		if (isToJMVAConversion) {
@@ -689,7 +689,7 @@ public class JModelProblemsWindow extends JDialog {
 
 		public ProblemElementRenderer() {
 			for (int i = 0; i < iconNames.length; i++) {
-				icons[i] = JMTImageLoader.loadImage(iconNames[i], new Dimension(16, 16));
+				icons[i] = JMTImageLoader.loadImage(iconNames[i], new Dimension((int)(16 * CommonConstants.widthScaling), (int)(16 * CommonConstants.heightScaling)));
 			}
 		}
 
@@ -710,8 +710,8 @@ public class JModelProblemsWindow extends JDialog {
 				labelName = "<html><i>" + labelName + "</i></html>";
 			}
 			label = new JLabel(labelName, icons[((ProblemElement) value).getProblemType()], SwingConstants.CENTER);
-			label.setMinimumSize(new Dimension(111, 20));
-			label.setMaximumSize(new Dimension(111, 1000));
+			label.setMinimumSize(new Dimension((int)(111 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
+			label.setMaximumSize(new Dimension((int)(111 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
 			label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			label.setOpaque(true);
 			label.setBackground(isSelected ? list.getSelectionBackground() : Color.WHITE);
@@ -721,8 +721,8 @@ public class JModelProblemsWindow extends JDialog {
 			JLabel description = null;
 			String errorDescription = ((ProblemElement) value).getDescription();
 			description = new JLabel(errorDescription, SwingConstants.LEFT);
-			description.setMinimumSize(new Dimension(871, 20));
-			description.setMaximumSize(new Dimension(871, 1000));
+			description.setMinimumSize(new Dimension((int)(871 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
+			description.setMaximumSize(new Dimension((int)(871 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
 			description.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 			description.setOpaque(true);
 			description.setBackground(isSelected ? list.getSelectionBackground() : Color.WHITE);

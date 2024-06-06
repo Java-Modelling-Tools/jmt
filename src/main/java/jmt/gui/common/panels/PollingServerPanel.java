@@ -131,10 +131,10 @@ public class PollingServerPanel extends WizardPanel implements CommonConstants {
 		topPanel.setLayout(new BorderLayout(3, 3));
 		topPanel.setBorder(new TitledBorder(new EtchedBorder(), "Polling Server Preferences"));
 		JPanel pollingSettings = new JPanel();
-		pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
+		pollingSettings.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
 		pollingSettings.add(new JLabel("Polling Type:"));
 		pollingSettings.add(pollingTypeCombo);
-		pollingSettings.add(Box.createRigidArea(new Dimension(5, 0)));
+		pollingSettings.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));
 		pollingSettings.add(new JLabel("Limit Value K"));
 		pollingSettings.add(pollingKValue);
 		topPanel.add(pollingSettings, BorderLayout.NORTH);

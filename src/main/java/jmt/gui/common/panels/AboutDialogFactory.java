@@ -72,7 +72,7 @@ public class AboutDialogFactory {
 				logo.setHorizontalTextPosition(SwingConstants.TRAILING);
 				logo.setVerticalTextPosition(SwingConstants.CENTER);
 				logo.setIconTextGap(10);
-				logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension(70, 70)));
+				logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension((int)(70 * CommonConstants.widthScaling), (int)(70 * CommonConstants.heightScaling))));
 				return logo;
 			case ICL:
 				return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1, 40)));

@@ -186,7 +186,7 @@ public class BlockingRegionsPanel extends WizardPanel implements CommonConstants
 		regions = new RegionTable();
 		JScrollPane jsp = new JScrollPane(regions, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		jsp.setPreferredSize(new Dimension(500, 200));
+		jsp.setPreferredSize(new Dimension((int)(500 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
 		add(jsp, BorderLayout.WEST);
 		update();
 	}

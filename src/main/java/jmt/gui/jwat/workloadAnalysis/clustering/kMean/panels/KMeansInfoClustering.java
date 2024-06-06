@@ -198,7 +198,7 @@ public class KMeansInfoClustering extends JPanel implements JWATConstants, Commo
 
 		JScrollPane s = new JScrollPane(listVars, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		s.setPreferredSize(new Dimension(120, 90));
+		s.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(90 * CommonConstants.heightScaling)));
 		listVars.addListSelectionListener(new ListSelectionListener() {
 
 			public void valueChanged(ListSelectionEvent e) {

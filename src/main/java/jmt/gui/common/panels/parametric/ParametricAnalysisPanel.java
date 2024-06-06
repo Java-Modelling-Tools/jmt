@@ -134,7 +134,7 @@ public class ParametricAnalysisPanel extends WizardPanel implements CommonConsta
 
 		popupMenu = new JPopupMenu() {};
 		btnChoose = new JButton("Choose analysis");
-		btnChoose.setPreferredSize(new Dimension(173, 22));
+		btnChoose.setPreferredSize(new Dimension((int)(173 * CommonConstants.widthScaling), (int)(22 * CommonConstants.heightScaling)));
 		arrowButton = new JButton("▼");
 
 		enabler = new JCheckBox("Enable What-If analysis");

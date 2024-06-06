@@ -188,7 +188,7 @@ public class FittingPanel extends WizardPanel implements CommonConstants, JWATCo
 		componentsPanel.add(resultfittingScrollPane, BorderLayout.CENTER);
 
 		graphicspanel = new JPanel(new GridLayout(1,3));
-		graphicspanel.setSize(new Dimension(200,100));
+		graphicspanel.setSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 
 		panelqqplot = new JPanel(new BorderLayout());
 		panelqqplot.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), "QQ-plot"));
@@ -212,7 +212,7 @@ public class FittingPanel extends WizardPanel implements CommonConstants, JWATCo
 		graphicspanel.add(panelqqplot);
 		graphicspanel.add(panelcdf);
 		graphicspanel.add(panelpdf);
-		graphicspanel.setPreferredSize(new Dimension(300,240));
+		graphicspanel.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(240 * CommonConstants.heightScaling)));
 
 		componentsPanel.add(graphicspanel, BorderLayout.SOUTH);
 		centralBox.add(componentsPanel);

@@ -67,6 +67,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import javax.xml.transform.TransformerFactoryConfigurationError;
 
+import jmt.gui.common.CommonConstants;
 import org.jdesktop.swingx.JXTreeTable;
 import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
 import org.xml.sax.SAXException;
@@ -150,13 +151,13 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 		JLabel siteTag = new JLabel("Site:");
 		siteList = new JComboBox<String>(new SiteComboBoxModel());
 		siteList.setEditable(true);
-		siteList.setPreferredSize(new Dimension(580, 24));
+		siteList.setPreferredSize(new Dimension((int)(580 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 		siteTag.setLabelFor(siteList);
 
 		siteUpdate = new JButton("Update");
-		siteUpdate.setPreferredSize(new Dimension(70, 24));
+		siteUpdate.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 		siteAdd = new JButton("Add Site");
-		siteAdd.setPreferredSize(new Dimension(100, 24));
+		siteAdd.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 
 		JPanel upperPane = new JPanel();
 		upperPane.add(siteTag);
@@ -175,11 +176,11 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 		}
 
 		tempDownload = new JButton("Download");
-		tempDownload.setPreferredSize(new Dimension(100, 24));
+		tempDownload.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 		tempDownload.setBackground(Color.RED);
 		tempDownload.setEnabled(false);
 		close = new JButton("Close");
-		close.setPreferredSize(new Dimension(100, 24));
+		close.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));
 
 		// update the index.xml when user inputing a new site two situations:
 		// 1. the site is stored in the site list

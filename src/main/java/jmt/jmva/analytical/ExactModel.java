@@ -1120,7 +1120,7 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * @return response times for the given algorithm
 	 */
-	public double[][][] getRespTimes(SolverAlgorithm alg) {
+	public double[][][] getResidTimes(SolverAlgorithm alg) {
 		if (alg != null) {
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
 			for (int s = 0; s < stations; s++)
@@ -1137,9 +1137,20 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * @return residence times for the given algorithm
 	 */
-	public double[][][] getResidTimes(SolverAlgorithm alg) {
+	public double[][][] getRespTimes(SolverAlgorithm alg) {
 		if (alg != null) {
 			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));
+			for (int s = 0; s < stations; s++)
+				for (int c = 0; c < classes; c++)
+					for (int i = 0; i < iterations; i++)
+						if (classTypes[c] == CLASS_CLOSED) {
+							if (visits[referenceStation[c]][c] != 0) {
+								res[s][c][i] /= (visits[referenceStation[c]][c]);
+							}
+							if (visits[s][c] != 0) {
+								res[s][c][i] /= (visits[s][c]);
+							}
+						}
 			return res;
 		}
 		return null;

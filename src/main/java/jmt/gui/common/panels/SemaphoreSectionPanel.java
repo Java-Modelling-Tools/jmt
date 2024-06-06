@@ -103,9 +103,9 @@ public class SemaphoreSectionPanel extends WizardPanel implements CommonConstant
 		WarningScrollTable jsp = new WarningScrollTable(semaphoreStrategies, WARNING_CLASS);
 		jsp.setBorder(new TitledBorder(new EtchedBorder(), "Semaphore Strategies"));
 		mainPanel.setResizeWeight(1.0);
-		jsp.setMinimumSize(new Dimension(200, 100));
+		jsp.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setLeftComponent(jsp);
-		semaphoreEditor.setMinimumSize(new Dimension(225, 100));
+		semaphoreEditor.setMinimumSize(new Dimension((int)(225 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 		mainPanel.setRightComponent(semaphoreEditor);
 		add(mainPanel, BorderLayout.CENTER);
 	}

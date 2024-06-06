@@ -45,6 +45,7 @@ import javax.swing.table.TableCellRenderer;
 
 import jmt.common.ConnectionCheck;
 import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.xml.TemplateFileOperation;
 import jmt.gui.exact.table.BooleanCellRenderer;
@@ -89,10 +90,10 @@ public class AutoDownloadPanel extends WizardPanel implements TemplateConstants 
 		cancel = new JButton("Cancel");
 		retry = new JButton("Retry");
 
-		progress.setPreferredSize(new Dimension(200, 25));
-		download.setPreferredSize(new Dimension(110, 25));
-		cancel.setPreferredSize(new Dimension(110, 25));
-		retry.setPreferredSize(new Dimension(110, 25));
+		progress.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		download.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		cancel.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
+		retry.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));
 
 		download.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {

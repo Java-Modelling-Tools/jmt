@@ -97,19 +97,19 @@ public class EnablingSectionPanelForServer extends WizardPanel implements Common
         enablingTable = new ConditionTable(0);
         enablingPane = new JScrollPane(enablingTable);
         enablingPane.setBorder(enablingBorder);
-        enablingPane.setMinimumSize(new Dimension(300, 120));
+        enablingPane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 
         inhibitingBorder = new TitledBorder(new EtchedBorder(), "Inhibiting condition");
         inhibitingTable = new ConditionTable(1);
         inhibitingPane = new JScrollPane(inhibitingTable);
         inhibitingPane.setBorder(inhibitingBorder);
-        inhibitingPane.setMinimumSize(new Dimension(300, 120));
+        inhibitingPane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 
         resourceBorder = new TitledBorder(new EtchedBorder(), "Resource condition");
         resourceTable = new ConditionTable(2);
         resourcePane = new JScrollPane(resourceTable);
         resourcePane.setBorder(resourceBorder);
-        resourcePane.setMinimumSize(new Dimension(300, 120));
+        resourcePane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
 
         JPanel conditionPanel = new JPanel(new GridLayout(3, 1, 3, 3));
         conditionPanel.add(enablingPane);
@@ -131,7 +131,7 @@ public class EnablingSectionPanelForServer extends WizardPanel implements Common
 
         JScrollPane noticePanel = new JScrollPane(noticeText);
         noticePanel.setBorder(new TitledBorder(new EtchedBorder(), "Notice"));
-        noticePanel.setMinimumSize(new Dimension(200, 100));
+        noticePanel.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
 
         JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
