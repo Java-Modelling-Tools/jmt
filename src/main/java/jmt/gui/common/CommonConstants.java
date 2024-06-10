@@ -94,8 +94,8 @@ public interface CommonConstants {
 
 	/**Constants for GUI scaling*/
 	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-	public float heightScaling = 1.15F; //(float) (screenSize.height/768/2);
-	public float widthScaling = 1.15F; //(float) (screenSize.height/768/2);
+	public float heightScaling = 1.25F; //(float) (screenSize.height/768/2);
+	public float widthScaling = 1.25F; //(float) (screenSize.height/768/2);
 
 	public int MAX_GUI_WIDTH_STARTSCREEN = (int) (800 * widthScaling);
 	public int MAX_GUI_HEIGHT_STARTSCREEN = (int) (600 * heightScaling);
@@ -118,21 +118,21 @@ public interface CommonConstants {
 	public int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = (int)(1152 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = (int)(864 * CommonConstants.heightScaling);
 
-	public int MAX_GUI_WIDTH_JMVA = (int) (1024 * widthScaling);
-	public int MAX_GUI_HEIGHT_JMVA = (int) (768 * heightScaling);
+	public int MAX_GUI_WIDTH_JMVA = (int) (1024);
+	public int MAX_GUI_HEIGHT_JMVA = (int) (768);
 
-	public int MAX_GUI_WIDTH_JMCH = (int)(800 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JMCH = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JMCH = (int)(800);
+	public int MAX_GUI_HEIGHT_JMCH = (int)(600);
 
-	public int MAX_GUI_WIDTH_JABA = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JABA = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JABA = (int)(1152);
+	public int MAX_GUI_HEIGHT_JABA = (int)(768); // keep 1152x768 or graphical issues
 
-	public int MAX_GUI_WIDTH_JWAT = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JWAT = (int)(768 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_JWAT_STARTSCREEN = (int)(520 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = (int)(400 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_JWAT_COLOR = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JWAT_COLOR = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JWAT = (int)(1024);
+	public int MAX_GUI_HEIGHT_JWAT = (int)(768);
+	public int MAX_GUI_WIDTH_JWAT_STARTSCREEN = (int)(520);
+	public int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = (int)(400);
+	public int MAX_GUI_WIDTH_JWAT_COLOR = (int)(1024);
+	public int MAX_GUI_HEIGHT_JWAT_COLOR = (int)(768);
 
 	public int MAX_GUI_WIDTH_LDSTRATEGY = (int)(800 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_LDSTRATEGY = (int)(600 * CommonConstants.heightScaling);

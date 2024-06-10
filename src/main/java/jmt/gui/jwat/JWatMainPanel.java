@@ -30,7 +30,6 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.listeners.AbstractJMTAction;
 import jmt.framework.gui.listeners.MenuAction;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.manual.ChapterIdentifier;
@@ -188,12 +187,12 @@ public class JWatMainPanel extends WizardPanel {
 		this.setLayout(new BorderLayout());
 		JPanel upper = new JPanel(new FlowLayout());
 		JLabel upperLabel = new JLabel();
-		upperLabel.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(10 * CommonConstants.heightScaling)));
+		upperLabel.setPreferredSize(new Dimension(300, 10));
 		upper.add(upperLabel);
 
 		JPanel bottom = new JPanel(new FlowLayout());
 		JLabel bottomLabel = new JLabel();
-		bottomLabel.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(10 * CommonConstants.heightScaling)));
+		bottomLabel.setPreferredSize(new Dimension(300, 10));
 		bottom.add(bottomLabel);
 
 		this.add(upper, BorderLayout.NORTH);
@@ -208,7 +207,7 @@ public class JWatMainPanel extends WizardPanel {
 		}
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension((int)(400 * CommonConstants.widthScaling), (int)(315 * CommonConstants.heightScaling))));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(400, 315)));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 

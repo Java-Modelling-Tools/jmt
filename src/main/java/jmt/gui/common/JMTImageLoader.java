@@ -24,6 +24,7 @@ import java.awt.Image;
 import javax.swing.ImageIcon;
 
 import jmt.framework.gui.image.ImageLoader;
+import net.sf.saxon.exslt.Common;
 
 /**
  * <p><b>Name:</b> JMTImageLoader</p> 
@@ -40,6 +41,7 @@ public class JMTImageLoader {
 
 	protected static ImageLoader imageLoader = new ImageLoaderImpl();
 
+
 	/**
 	 * Loads the image from this directory. Please put all images in the class
 	 * package.
@@ -49,6 +51,10 @@ public class JMTImageLoader {
 	 */
 	public static ImageIcon loadImage(String imageName) {
 		return imageLoader.loadIcon(imageName);
+		//ImageIcon ico =  imageLoader.loadIcon(imageName);
+		//int standardIconHeight = (int)(ico.getIconHeight()* CommonConstants.heightScaling);
+		//int standardIconWidth = (int)(ico.getIconWidth()* CommonConstants.widthScaling);
+		//return resizeIcon(ico, new Dimension(standardIconWidth, standardIconHeight));
 	}
 
 	/**
@@ -61,6 +67,10 @@ public class JMTImageLoader {
 	 */
 	public static ImageIcon loadImage(String imageName, Dimension size) {
 		return imageLoader.loadIcon(imageName, size);
+		//ImageIcon ico =  imageLoader.loadIcon(imageName, size);
+		//int standardIconHeight = (int)(ico.getIconHeight()* CommonConstants.heightScaling);
+		//int standardIconWidth = (int)(ico.getIconWidth()* CommonConstants.widthScaling);
+		//return resizeIcon(ico, new Dimension(standardIconWidth, standardIconHeight));
 	}
 
 	/**
@@ -110,7 +120,11 @@ public class JMTImageLoader {
 	 * @see ImageLoader#loadIcon(String, String)
 	 */
 	public static ImageIcon loadImage(String imageName, String modifier, Double angle) {
-			return imageLoader.loadIcon(imageName, modifier, angle);
+		return imageLoader.loadIcon(imageName, modifier, angle);
+		//ImageIcon ico =  imageLoader.loadIcon(imageName, modifier, angle);
+		//int standardIconHeight = (int)(ico.getIconHeight()* CommonConstants.heightScaling);
+		//int standardIconWidth = (int)(ico.getIconWidth()* CommonConstants.widthScaling);
+		//return resizeIcon(ico, new Dimension(standardIconWidth, standardIconHeight));
 	}
 
 	/**
@@ -125,6 +139,23 @@ public class JMTImageLoader {
 	 */
 	public static ImageIcon loadImage(String imageName, String modifier, Dimension size) {
 		return imageLoader.loadIcon(imageName, modifier, size);
+		//ImageIcon ico =  imageLoader.loadIcon(imageName, modifier, size);
+		//int standardIconHeight = (int)(ico.getIconHeight()* CommonConstants.heightScaling);
+		//int standardIconWidth = (int)(ico.getIconWidth()* CommonConstants.widthScaling);
+		//return resizeIcon(ico, new Dimension(standardIconWidth, standardIconHeight));
+	}
+
+	/**
+	 * Resizes the given ImageIcon to the specified width and height.
+	 *
+	 * @param icon the ImageIcon to resize
+	 * @param size the new size for the ImageIcon
+	 * @return a new ImageIcon with the specified size
+	 */
+	private static ImageIcon resizeIcon(ImageIcon icon, Dimension size) {
+		Image img = icon.getImage();
+		Image resizedImage = img.getScaledInstance((int) (size.width * CommonConstants.widthScaling), (int) (size.height* CommonConstants.heightScaling), Image.SCALE_SMOOTH);
+		return new ImageIcon(resizedImage);
 	}
 
 }

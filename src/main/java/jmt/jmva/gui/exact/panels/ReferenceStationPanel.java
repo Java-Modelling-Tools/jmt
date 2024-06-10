@@ -131,7 +131,7 @@ public final class ReferenceStationPanel extends WizardPanel implements ForceUpd
 		JPanel totalBox = new JPanel(new BorderLayout(10, 10));
 		JLabel descrLabel = new JLabel(ExactConstants.DESCRIPTION_REFERENCESTATION);
 		JPanel descrBox = new JPanel(new BorderLayout());
-		descrBox.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
+		descrBox.setPreferredSize(new Dimension(200, 1000));
 		descrBox.add(descrLabel, BorderLayout.NORTH);
 
 		JScrollPane visitTablePane = new JScrollPane(stTable);

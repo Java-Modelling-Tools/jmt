@@ -56,6 +56,9 @@ import jmt.jmva.gui.exact.ExactWizard;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
 
+import static jmt.gui.common.CommonConstants.DIM_BUTTON_L;
+import static jmt.gui.common.CommonConstants.DIM_BUTTON_M;
+
 /**
  * <p>Title: Graph StartScreen</p>
  * <p>Description: A new StartScreen that displays a graph with all possible choices to help
@@ -255,7 +258,7 @@ public class GraphStartScreen extends JMTFrame {
 		// Adds start screen image
 		JLabel imageLabel = new JLabel();
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension((int)(440 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling))));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension((int)(440 * CommonConstants.widthScaling), (int)(420 * CommonConstants.heightScaling))));
 		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		mainPanel.add(imageLabel, BorderLayout.CENTER);
@@ -291,22 +294,27 @@ public class GraphStartScreen extends JMTFrame {
 		// Now Adds Sample Animation in the bottom
 		sampleQNAni = new SampleQNAnimation();
 		JPanel pivotPanel = new JPanel(new GridBagLayout());
-		sampleQNAni.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
+		sampleQNAni.setPreferredSize(new Dimension((int)(200), (int)(120)));
 		//sampleQNAni.setBackground(new Color(151, 151, 151));
 		pivotPanel.add(sampleQNAni);
 		leftPanel.add(pivotPanel, BorderLayout.SOUTH);
 		// Adds intro buttons in the centre
-		JPanel introButtonArea = new JPanel(new GridLayout(-1, 1));
+		GridLayout gl = new GridLayout(-1, 1);
+		JPanel introButtonArea = new JPanel(gl);
 
 		onlineDoc = new JButton("Online Documentation");
 		onlineDoc.addMouseListener(rollover);
+		onlineDoc.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		introEng = new JButton("Introduction to JMT");
 		introEng.addMouseListener(rollover);
+		introEng.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		about = new JButton("Credits");
 		about.addMouseListener(rollover);
+		about.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 		upgrade = new JButton("Upgrade");
 		upgrade.addMouseListener(rollover);
 		upgrade.setBackground(upgradeBackgroundColor);
+		upgrade.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
 
 		introButtonArea.add(introEng);
 		introButtonArea.add(new JPanel());
@@ -320,6 +328,7 @@ public class GraphStartScreen extends JMTFrame {
 		pivotPanel = new JPanel(new GridBagLayout());
 		pivotPanel.add(introButtonArea);
 		pivotPanel.setOpaque(false);
+		pivotPanel.add(new JPanel());
 		leftPanel.add(pivotPanel, BorderLayout.CENTER);
 	}
 
@@ -369,7 +378,7 @@ public class GraphStartScreen extends JMTFrame {
 		JButton button = new JButton(action);
 		button.setHorizontalTextPosition(SwingConstants.CENTER);
 		button.setVerticalTextPosition(SwingConstants.BOTTOM);
-		button.setPreferredSize(new Dimension((int) (BUTTONSIZE * 3.5), (BUTTONSIZE * 2)));
+		button.setPreferredSize(new Dimension((int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling), (int) (BUTTONSIZE * 2.0 * CommonConstants.heightScaling)));
 		button.addMouseListener(rollover);
 		panel.add(button);
 		return panel;

@@ -35,7 +35,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.common.CommonConstants;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 
@@ -60,7 +59,7 @@ public class IterationSelector extends WizardPanel {
 	// Data structure
 	private ExactModel model;
 	// Dimension of spinner
-	static final Dimension DIM_SPINNER = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling));
+	static final Dimension DIM_SPINNER = new Dimension(60, 20);
 
 	private JTabbedPane tabber = new JTabbedPane();
 	private JLabel description = new JLabel();

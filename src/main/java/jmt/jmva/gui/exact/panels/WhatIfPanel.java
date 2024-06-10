@@ -19,7 +19,6 @@ package jmt.jmva.gui.exact.panels;
 
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.common.CommonConstants;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
@@ -357,7 +356,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		// Description label
 		description = new JLabel(DESCRIPTION_WHATIF_NONE);
 		/* EDITED BY Abhimanyu Chugh */
-		description.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
+		description.setPreferredSize(new Dimension(300, 200));
 		/* END */
 		description.setVerticalAlignment(SwingConstants.NORTH);
 		//TODO: achugh
@@ -472,7 +471,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			SolverAlgorithm algo = SolverAlgorithm.closedValues()[i];
 			if (i == 0) {
 				JLabel label = new JLabel("--------- Exact ---------");
-				label.setMinimumSize(new Dimension((int)(250 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
+				label.setMinimumSize(new Dimension(250, 0));
 				algPanel.add(label, BorderLayout.CENTER);
 				label.setForeground(Color.DARK_GRAY);
 				label.setFocusable(false);
@@ -481,7 +480,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 				algPanel.add(placeHolder);
 			} else if (i == numClosedExactAlgorithms) {
 				JLabel label = new JLabel("----- Approximate -----");
-				label.setMinimumSize(new Dimension((int)(250 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
+				label.setMinimumSize(new Dimension(250, 0));
 				algPanel.add(label, BorderLayout.CENTER);
 				label.setForeground(Color.DARK_GRAY);
 				label.setFocusable(false);
@@ -508,7 +507,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 			if (algo.isIterative()) {
 				//boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO);
 				boolean isMonteCarloAlgo = algo.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC);
-				Dimension d = new Dimension((int)(90 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling));
+				Dimension d = new Dimension(90, 30);
 				JLabel paramLabel = new JLabel(isMonteCarloAlgo ? "Max Samples:" : "Tolerance:");
 				paramLabel.setMaximumSize(d);
 				paramLabel.setFocusable(false);
@@ -608,23 +607,23 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		algPanel.setBorder(BorderFactory.createEtchedBorder());
 		algPanel.setPreferredSize(new Dimension(275, 22*(2+SolverAlgorithm.closedValues().length)));
 		JPanel panel = new JPanel();
-		//panel.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling)));
+		//panel.setPreferredSize(new Dimension(200, 20));
 		panel.setLayout(new BorderLayout());
 		//panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 		compPanel = new JPanel();
-		//compPanel.setMinimumSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));
+		//compPanel.setMinimumSize(new Dimension(100, 100));
 		compPanel.setBorder(BorderFactory.createEtchedBorder());
 		compPanel.setLayout(new BoxLayout(compPanel, BoxLayout.Y_AXIS));
-		compPanel.setMinimumSize(new Dimension((int)(250 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));
+		compPanel.setMinimumSize(new Dimension(250, 0));
 		JPanel compMultiAlgPanel = new JPanel();
 		compMultiAlgPanel.setLayout(new BorderLayout());
 		compMultiAlg.setFont(compMultiAlg.getFont().deriveFont(Font.BOLD));
 		compMultiAlgPanel.add(compMultiAlg, BorderLayout.WEST);
 		compPanel.add(compMultiAlgPanel);
-		//compPanel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(2 * CommonConstants.heightScaling))));
+		//compPanel.add(Box.createRigidArea(new Dimension(0, 2)));
 		compPanel.add(algPanel, BorderLayout.LINE_START);
 		panel.add(description, BorderLayout.PAGE_START);
-		//panel.add(Box.createRigidArea(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(80 * CommonConstants.heightScaling))));
+		//panel.add(Box.createRigidArea(new Dimension(0, 80)));
 		panel.add(compPanel, BorderLayout.SOUTH);
 		add(panel, BorderLayout.WEST);
 		/* END */

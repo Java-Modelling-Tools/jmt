@@ -33,6 +33,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.tree.TreeNode;
 
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 
 import org.jgraph.JGraph;
@@ -83,20 +84,12 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public boolean seen = false;
 	public int in = 0;
 	public int out = 0;
-	public boolean okin = false;
-	public boolean okout = false;
 	public int sons = 1;
 	public String icon;
 	public int type;
 	private boolean leftInputCell = true;
 	private int standardIconWidth;
 	private int standardIconHeight;
-
-	/**
-	 * Tells if this component can be placed on JGraph or has been disabled. This is
-	 * useful to load old models with disabled components (like terminals)
-	 */
-	public static final boolean canBePlaced = true;
 
 	private boolean isFreeRotationAllowed = true;
 	private double rotationAngle = 0;
@@ -115,32 +108,13 @@ public abstract class JmtCell extends DefaultGraphCell {
 		super(userObject);
 		this.icon = icon;
 		ImageIcon ico = JMTImageLoader.loadImage(icon);
+
 		GraphConstants.setIcon(attributes, ico);
-		standardIconHeight = ico.getIconHeight();
-		standardIconWidth = ico.getIconWidth();
-		imageDimension = new Dimension(ico.getIconWidth(), ico.getIconHeight());
+		standardIconHeight = (int)(ico.getIconHeight());
+		standardIconWidth = (int)(ico.getIconWidth());
+		imageDimension = new Dimension(standardIconWidth, standardIconHeight);
 		GraphConstants.setSizeable(attributes, false);
 		GraphConstants.setSize(attributes, imageDimension);
-	}
-
-	// Giuseppe De Cicco & Fabio Granara
-	public void AddIn() {
-		in += 1;
-	}
-
-	// Giuseppe De Cicco & Fabio Granara
-	public void SubIn() {
-		in -= 1;
-	}
-
-	// Giuseppe De Cicco & Fabio Granara
-	public void AddOut() {
-		out += 1;
-	}
-
-	// Giuseppe De Cicco & Fabio Granara
-	public void SubOut() {
-		out -= 1;
 	}
 
 	/**
@@ -222,6 +196,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 	 */
 	public void updateCellSize(Icon icon, JGraph graph) {
 		imageDimension = new Dimension(icon.getIconWidth(), icon.getIconHeight());
+		//imageDimension = new Dimension((int)(icon.getIconWidth()* CommonConstants.widthScaling), (int)(icon.getIconHeight()* CommonConstants.heightScaling));
 		Map attr = this.getAttributes();
 
 		//Get old size

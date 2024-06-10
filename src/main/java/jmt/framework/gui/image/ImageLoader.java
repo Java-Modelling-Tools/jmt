@@ -18,6 +18,8 @@
 
 package jmt.framework.gui.image;
 
+import jmt.gui.common.CommonConstants;
+
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -185,6 +187,28 @@ public abstract class ImageLoader {
 				// Applies known modifiers
 				icon = applyModifier(base, modifier,angle);
 			}
+		}
+		if (icon != null) {
+			Image image = icon.getImage();
+			//System.out.println(iconName);
+			//switch (iconName) {
+			//	case "Source":
+			//	case "Sink":
+			//	case "Router":
+			//	case "Delay":
+			//	case "Server":
+			//	case "Fork":
+			//	case "Join":
+			//	case "Scaler":
+			//	case "Semaphore":
+			//	case "Logger":
+			//	case "ClassSwitch":
+				//case "Place":
+				//case "Transition":
+				//	image = image.getScaledInstance((int) (CommonConstants.widthScaling * image.getWidth(null)), (int) (CommonConstants.heightScaling * image.getHeight(null)), Image.SCALE_SMOOTH);
+			//		break;
+			//}
+			icon = new ImageIcon(image);
 		}
 
 		// Clears cache when it is bigger than maxCache. This is not needed but avoids memory leakages...

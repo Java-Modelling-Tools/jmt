@@ -150,7 +150,7 @@ public class ProgressWindow extends JDialog {
 		animation = new SampleQNAnimation();
 		animation.start();
 		JPanel pivotPanel = new JPanel(new GridBagLayout());
-		animation.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));
+		animation.setPreferredSize(new Dimension(200, 120));
 		animation.setBackground(new Color(151, 151, 151));
 		pivotPanel.add(animation);
 

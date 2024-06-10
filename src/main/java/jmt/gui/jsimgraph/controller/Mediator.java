@@ -726,9 +726,8 @@ public class Mediator implements GuiInterface {
 		if (checkForSave("<html>Save changes before opening a saved model?</html>")) {
 			return;
 		}
-		if (animationHolder != null) {
-			animationHolder.stop();
-		}
+		//if (animationHolder != null) animationHolder.stop();
+
 		JSimGraphModel tmpmodel = new JSimGraphModel(this);
 		int state = modelLoader.loadModel(tmpmodel, mainWindow, file);
 		if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
@@ -2197,9 +2196,7 @@ public class Mediator implements GuiInterface {
 	 * Modified by Michael Fercu (Logger,2008,0.7.4)
 	 */
 	public void startSimulation() {
-		if (animationHolder != null ) {
-			animationHolder.stop();
-		}
+		//if (animationHolder != null ) animationHolder.stop();
 		// If simulation is not in pause state
 		if (!stopSimulation.isEnabled()) {
 			// Asks for confirmation before overwriting previous simulation data
@@ -3088,7 +3085,7 @@ public class Mediator implements GuiInterface {
 	private boolean flag1 = false;
 	private boolean flag2 = false;
 	private boolean inRepositionSons = false;
-	private Thread animationHolder = null;
+	//private Thread animationHolder = null;
 
 	public void adjustGraph() {
 		Object[] cells;
@@ -3351,7 +3348,7 @@ public class Mediator implements GuiInterface {
 
 	@Override
 	public void setAnimationHolder(Thread thread) {
-		animationHolder = thread;
+	//	animationHolder = thread;
 	}
 
 	public JSimGraphModel getModel() {

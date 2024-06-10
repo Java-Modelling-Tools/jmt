@@ -142,13 +142,13 @@ public final class ServiceTimesPanel extends WizardPanel implements ExactConstan
 		descrBox.add(new JLabel(DESCRIPTION_SERVICETIMES));
 		descrBox.add(Box.createHorizontalStrut(10));
 		descrBox.add(new JButton(SWITCH_TO_SD));
-		descrBox.setPreferredSize(new Dimension((int)(220 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
-		descrBox.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling)));
+		descrBox.setPreferredSize(new Dimension(220, 1000));
+		descrBox.setMinimumSize(new Dimension(200, 200));
 
 		hBox.add(descrBox);
 		hBox.add(Box.createHorizontalStrut(10));
 		JScrollPane visitTablePane = new JScrollPane(stTable);
-		visitTablePane.setPreferredSize(new Dimension((int)(1000 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
+		visitTablePane.setPreferredSize(new Dimension(1000, 1000));
 		visitTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		visitTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		hBox.add(visitTablePane);
