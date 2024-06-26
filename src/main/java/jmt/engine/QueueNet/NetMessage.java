@@ -119,7 +119,9 @@ public class NetMessage implements Cloneable {
 				|| event == NetEvent.EVENT_RETRIAL
 				|| event == NetEvent.EVENT_RETRIAL_JOB
 				|| event == NetEvent.EVENT_RENEGE
-				|| event == NetEvent.EVENT_SETUP_JOB) {
+				|| event == NetEvent.EVENT_SETUP_JOB
+				|| event == NetEvent.EVENT_SET_UP_COMPLETE
+				|| event == NetEvent.EVENT_CHECK_DELAY_OFF){
 			return (Job) data;
 		} else {
 			return null;

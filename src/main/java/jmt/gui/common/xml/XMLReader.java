@@ -46,6 +46,7 @@ import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.ImpatienceStrategies.RenegingParameter;
+import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.MacroReplacer;
@@ -1028,7 +1029,25 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						}
 					}
 				}
-			} else if (classpath.equals(serviceStrategy)) {
+				}else if (name.equals("delayOffTime")){
+					model.setDelayOffTimesEnabled(key, Boolean.valueOf(true));
+					Map<String, Node> delayOffTime = parseParameterRefclassArray(curr);
+					Object[] classNames = delayOffTime.keySet().toArray();
+					for (Object className : classNames) {
+						Element subCurr = (Element) delayOffTime.get(className);
+						Map<String, Node> delayOffTimeDistribution = parseParameterRefclassArray(subCurr);
+						model.setDelayOffTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) delayOffTimeDistribution.get(className)));
+					}
+				}else if (name.equals("setUpTime")){
+					Map<String, Node> setUpTime = parseParameterRefclassArray(curr);
+					Object[] classNames = setUpTime.keySet().toArray();
+					for (Object className : classNames) {
+						Element subCurr = (Element) setUpTime.get(className);
+						Map<String, Node> setUpTimeDistribution = parseParameterRefclassArray(subCurr);
+						model.setSetupTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) setUpTimeDistribution.get(className)));
+					}
+
+			}else if (classpath.equals(serviceStrategy)) {
 				// Retrieves all distributions subParameters
 				Map<String, Node> distributions = parseParameterRefclassArray(curr);
 				if (distributions.isEmpty()) {

@@ -80,6 +80,9 @@ public class NetEvent {
 	public static final int EVENT_JOB_REQUEST_FROM_SERVER = 0x0017;
 	/** Event ID: CoolStart variable reset event */
 	public static final int EVENT_RESET_COOLSTART = 0x0018;
+	/** Event ID: Set up complete event */
+	public static final int EVENT_SET_UP_COMPLETE = 0x0019;
+	public static final int EVENT_CHECK_DELAY_OFF = 0x001A;
 
 	/**
 	 * Returns the name of the event, used in debug.

@@ -722,6 +722,22 @@ public class NetNode extends SimEntity {
 				job = " Attached job with id: " + message.getJob().getId() + " class: " + message.getJob().getJobClass().getName();
 			}
 			logger.warn(getNetSystem().getTime() + " - Message " + message.getEvent() + " from " + src + " to " + dst + " not processed." + job);
+			if (logger.isLogCalenderOn()) {
+				String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();
+				if (allowedEvents.length > 0) {
+					for (String allowedEvent : allowedEvents) {
+						if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {
+							String sender = String.valueOf(message.getSource().getName());
+							String eventName = NetEvent.getEventName(message.getEvent());
+							String receiver = message.getDestination().getName();
+							String timestamp = String.valueOf(message.getDestination().getNetSystem().getTime())
+									.replace(".", JSimLogger.getDecimalSeparator());
+							JSimLogger.logCustomDebug("NOT_PROCESSED",sender, eventName, receiver, timestamp);
+							break;
+						}
+					}
+				}
+			}
 		}
 	}
 

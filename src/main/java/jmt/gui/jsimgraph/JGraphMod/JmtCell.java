@@ -73,10 +73,11 @@ public abstract class JmtCell extends DefaultGraphCell {
 	public static final int JOIN = 7;
 	public static final int LOGGER = 8;
 	public static final int CLASSSWITCH = 9;
-	public static final int SEMAPHORE = 10;
-	public static final int SCALER = 11;
-	public static final int PLACE = 12;
-	public static final int TRANSITION = 13;
+	public static final int CACHE = 10;
+	public static final int SEMAPHORE = 11;
+	public static final int SCALER = 12;
+	public static final int PLACE = 13;
+	public static final int TRANSITION = 14;
 
 	private Port[] ports;
 

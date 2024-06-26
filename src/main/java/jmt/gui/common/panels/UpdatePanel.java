@@ -16,7 +16,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.charset.StandardCharsets;
 
 public class UpdatePanel {
 
@@ -38,6 +38,7 @@ public class UpdatePanel {
                     JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
     private static String getLatestVersionFromSourceForge() {
         String rssUrl = "https://sourceforge.net/projects/jmt/rss";
         try {
@@ -51,8 +52,8 @@ public class UpdatePanel {
             for (int i = 0; i < itemList.getLength(); i++) {
                 Element item = (Element) itemList.item(i);
                 String titleText = item.getElementsByTagName("title").item(0).getTextContent();
-                if (titleText.matches(".*\\d+\\.\\d+\\.\\d+.*")) {
-                    latestVersion = titleText.replaceAll(".*?(\\d+\\.\\d+\\.\\d+).*", "$1");
+                if (titleText.matches(".*\\d+\\.\\d+\\.\\d+(-BETA\\d+)?/.*")) {
+                    latestVersion = titleText.replaceAll(".*/JMT-(\\d+\\.\\d+\\.\\d+(-BETA\\d+)?)/.*", "$1");
                     break;
                 }
             }
@@ -68,22 +69,38 @@ public class UpdatePanel {
     }
 
     public static int compareVersions(String v1, String v2) {
-        // Remove non-numeric characters (like 'BETA') for a basic numeric comparisond
-        v1 = v1.replaceAll("[^0-9.]", "");
-        v2 = v2.replaceAll("[^0-9.]", "");
+        String[] parts1 = v1.split("-BETA");
+        String[] parts2 = v2.split("-BETA");
 
-        String[] parts1 = v1.split("\\.");
-        String[] parts2 = v2.split("\\.");
+        String numeric1 = parts1[0];
+        String numeric2 = parts2[0];
 
-        int length = Math.max(parts1.length, parts2.length);
+        String[] numParts1 = numeric1.split("\\.");
+        String[] numParts2 = numeric2.split("\\.");
+
+        int length = Math.max(numParts1.length, numParts2.length);
         for (int i = 0; i < length; i++) {
-            int num1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
-            int num2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
+            int num1 = i < numParts1.length ? Integer.parseInt(numParts1[i]) : 0;
+            int num2 = i < numParts2.length ? Integer.parseInt(numParts2[i]) : 0;
             if (num1 > num2) return 1; // v1 is newer
             if (num1 < num2) return -1; // v2 is newer
         }
-        return 0;
+
+        boolean isBeta1 = parts1.length > 1;
+        boolean isBeta2 = parts2.length > 1;
+
+        if (isBeta1 && !isBeta2) return -1; // v1 is beta, v2 is official version
+        if (!isBeta1 && isBeta2) return 1;  // v1 is official version, v2 is beta
+        if (isBeta1 && isBeta2) {
+            String beta1 = parts1[1];
+            String beta2 = parts2[1];
+            return beta1.compareTo(beta2); // Compare beta tags
+        }
+
+        return 0; // Both versions are identical
     }
+
+
 
     private static void promptUserToUpdate(String latestVersion) {
         int response = JOptionPane.showConfirmDialog(parentFrame,
@@ -98,7 +115,6 @@ public class UpdatePanel {
     }
 
     private static void downloadAndUpdate(final String latestVersion) {
-        // use thread to download the update without using lambda
         Thread downloadThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -112,7 +128,7 @@ public class UpdatePanel {
             String downloadUrl = "https://sourceforge.net/projects/jmt/files/jmt/JMT-" + latestVersion + "/JMT-singlejar-" + latestVersion + ".jar/download";
             String tempDir = System.getProperty("java.io.tmpdir");
             String tempDownloadPath = tempDir + File.separator + "JMT-new.jar";
-            String oldFilePath = System.getProperty("user.dir") + File.separator + "jmt.jar";
+            String oldFilePath = System.getProperty("user.dir") + File.separator + "JMT.jar";
 
             URL url = new URL(downloadUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -131,27 +147,22 @@ public class UpdatePanel {
                 connection.disconnect();
 
                 int response = JOptionPane.showConfirmDialog(null,
-                        "The update has been downloaded successfully. it will be installed now. the application will be restarted.",
+                        "The update has been downloaded successfully. It will be installed now. You might need to restart JMT.",
                         "Download Complete",
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.INFORMATION_MESSAGE);
 
                 if (response == JOptionPane.YES_OPTION) {
-                    String batchScript =
-                            "move /Y \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
-                            + "start javaw -jar \"" + oldFilePath + "\"\n"
-                            + "del \"%~f0\"";
-
-                    String batchFilePath = tempDir + File.separator + "update.bat";
-                    Files.write(Paths.get(batchFilePath), batchScript.getBytes(Charset.forName("GBK")));
-
-                    // Create a VBScript to elevate the batch execution
-                    String vbsPath = tempDir + File.separator + "elevate.vbs";
-                    String vbsScript = "Set UAC = CreateObject(\"Shell.Application\")\n"
-                            + "UAC.ShellExecute \"" + batchFilePath + "\", \"\", \"\", \"runas\", 1";
-                    Files.write(Paths.get(vbsPath), vbsScript.getBytes(Charset.forName("GBK")));
-
-                    Runtime.getRuntime().exec("wscript " + vbsPath);
+                    if (isWindows()) {
+                        executeWindowsUpdateScript(tempDownloadPath, oldFilePath, tempDir);
+                    } else if (isLinuxOrMac()) {
+                        executeLinuxUpdateScript(tempDownloadPath, oldFilePath, tempDir);
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "Unsupported operating system.",
+                                "Update Error",
+                                JOptionPane.ERROR_MESSAGE);
+                    }
                     System.exit(0);
                 }
             } else {
@@ -169,7 +180,65 @@ public class UpdatePanel {
         }
     }
 
+    private static void executeWindowsUpdateScript(String tempDownloadPath, String oldFilePath, String tempDir) throws IOException {
+        String batchScript =
+                "move /Y \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
+                        + "start javaw -jar \"" + oldFilePath + "\"\n"
+                        + "del \"%~f0\"";
+
+        String batchFilePath = tempDir + File.separator + "update.bat";
+        Files.write(Paths.get(batchFilePath), batchScript.getBytes(Charset.forName("GBK")));
+
+        // Create a VBScript to elevate the batch execution
+        String vbsPath = tempDir + File.separator + "elevate.vbs";
+        String vbsScript = "Set UAC = CreateObject(\"Shell.Application\")\n"
+                + "UAC.ShellExecute \"" + batchFilePath + "\", \"\", \"\", \"runas\", 1";
+        Files.write(Paths.get(vbsPath), vbsScript.getBytes(Charset.forName("GBK")));
+
+        Runtime.getRuntime().exec("wscript " + vbsPath);
+        System.exit(0);
+    }
+
+    private static void executeLinuxUpdateScript(String tempDownloadPath, String oldFilePath, String tempDir) throws IOException {
+        String bashScript =
+                "#!/bin/bash\n"
+                        + "echo \"Moving new JMT jar to the application directory\"\n"
+                        + "mv \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
+                        + "echo \"Starting the updated application\"\n"
+                        + "java -jar \"" + oldFilePath + "\"\n"
+                        + "echo \"Deleting the update script\"\n"
+                        + "rm -- \"$0\"";
+
+        String bashFilePath = tempDir + File.separator + "update.sh";
+        Files.write(Paths.get(bashFilePath), bashScript.getBytes(StandardCharsets.UTF_8));
+
+        new File(bashFilePath).setExecutable(true);
+
+        if (new File(bashFilePath).exists()) {
+            System.out.println("Bash script file written successfully: " + bashFilePath);
+        } else {
+            System.out.println("Failed to write bash script file: " + bashFilePath);
+        }
+
+        try {
+            ProcessBuilder pb = new ProcessBuilder("bash", "-c", "pkexec bash \"" + bashFilePath + "\"");
+            pb.inheritIO();
+            Process process = pb.start();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Failed to execute the update script.", "Update Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 
 
+    private static boolean isWindows() {
+        return System.getProperty("os.name").toLowerCase().contains("win");
+    }
 
+    private static boolean isLinuxOrMac() {
+        return System.getProperty("os.name").toLowerCase().contains("nix") ||
+                System.getProperty("os.name").toLowerCase().contains("nux") ||
+                System.getProperty("os.name").toLowerCase().contains("mac");
+    }
 }

@@ -118,8 +118,8 @@ public class Queue extends InputSection {
 	private QueuePutStrategy[] putStrategies;
 	// Class soft deadlines for the overall station
 	private double[] softDeadlines;
-	private ServiceTimeStrategy delayOffDistributions;
-	private ServiceTimeStrategy setUpDistributions;
+	private ServiceTimeStrategy[] delayOffDistributions;
+	private ServiceTimeStrategy[] setUpDistributions;
 	private boolean workingAsTransition;
 	private TransitionMatrix[] enablingConditions;
 	private TransitionMatrix[] inhibitingConditions;
@@ -349,7 +349,7 @@ public class Queue extends InputSection {
 	 * @throws NetException
 	 */
 	@Override
-	protected int process(NetMessage message) throws NetException {
+	protected int process(NetMessage message) throws NetException, IncorrectDistributionParameterException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		Job job = message.getJob();
 		JobInfo jobInfo = null;
@@ -725,7 +725,7 @@ public class Queue extends InputSection {
 				Object data = message.getData();
 				if(data != null){
 					TransitionVector storageVector = (TransitionVector) data;
-					for(int i = 0; i < jobClasses.size(); i++){
+					for(int i = 0; i < jobClasses.size(); i++) {
 						storageSituation.setEntry(storageVector.getKey(), i, storageVector.getEntry(i));
 					}
 				}
@@ -775,7 +775,7 @@ public class Queue extends InputSection {
 					int resourceJobNumberFromNode = resourceConditions[mode].getTotal(nodeName);
 					if(enablingJobNumberFromNode - resourceJobNumberFromNode > 0){
 						send(NetEvent.EVENT_JOB_REQUEST_FROM_SERVER, new RequestToPlace(
-										enablingConditions[mode].getVector(nodeName),
+								enablingConditions[mode].getVector(nodeName),
 										resourceConditions[mode].getVector(nodeName)),
 								0.0, NodeSection.OUTPUT, netSystem.getNode(nodeName)
 						);
@@ -787,7 +787,6 @@ public class Queue extends InputSection {
 				if(unfinishedRequestNumber == 0){
 					sendForward(NetEvent.EVENT_FIRING, null, 0.0);
 				}
-
 				break;
 			}
 
@@ -977,33 +976,5 @@ public class Queue extends InputSection {
 	public void setSoftDeadlines(double[] softDeadlines) {
 		this.softDeadlines = softDeadlines;
 	}
-
-	public void setDelayOffEnabled(boolean delayOffEnabled) {
-		this.delayOffEnabled = delayOffEnabled;
-	}
-	public void setDelayOffDistributions(ServiceTimeStrategy delayOffDistributions){
-		this.delayOffDistributions = delayOffDistributions;
-	}
-
-	public void setSetUpDistributions(ServiceTimeStrategy setUpDistributions) {
-		this.setUpDistributions = setUpDistributions;
-	}
-
-	public double calculateDelayOff() throws IncorrectDistributionParameterException {
-		if (delayOffEnabled) {
-			double delayOff = delayOffDistributions.getDistribution().nextRand(delayOffDistributions.getParameter());
-			return delayOff;
-		}
-		return 0.0;
-	}
-
-	public double calculateSetUp() throws IncorrectDistributionParameterException {
-		if (setUpDistributions != null) {
-			double setUp = setUpDistributions.getDistribution().nextRand(setUpDistributions.getParameter());
-			return setUp;
-		}
-		return 0.0;
-	}
-
 
 }

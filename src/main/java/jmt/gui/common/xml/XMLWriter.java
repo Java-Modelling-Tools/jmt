@@ -352,7 +352,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 			if (STATION_TYPE_DELAY.equals(stationType) || STATION_TYPE_SERVER.equals(stationType)) {
 				writeStationSoftDeadlines(doc, elem, model, stationKey);
-				writeDelayOffDistribution(doc, elem, model, stationKey);
 			}
 
 			if (STATION_TYPE_SOURCE.equals(stationType)) {
@@ -412,43 +411,6 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				writeFiringSection(doc, elem, model, stationKey);
 			}
 			simNode.appendChild(elem);
-		}
-	}
-
-	private static void writeDelayOffDistribution(Document doc, Node node, CommonModel model, Object stationKey) {
-		// Check if delay off is enabled for the station
-		Boolean isDelayOffEnabled = model.getDelayOffTimesEnabled(stationKey);
-		if (isDelayOffEnabled != null && isDelayOffEnabled) {
-			// Create a section element for delay off settings, conforming to expected schema
-			Element delayOffConfig = doc.createElement(XML_E_STATION_DELAY_OFF);
-
-			XMLParameter delayOffEnabled = new XMLParameter("delayOffEnabled", "java.lang.Boolean", null, isDelayOffEnabled.toString(), false);
-			delayOffEnabled.appendParameterElement(doc, delayOffConfig);
-
-			XMLParameter[] distrParams = new XMLParameter[1];
-
-			distrParams[0] = DistributionWriter
-					.getDistributionParameter((Distribution) model
-							.getDelayOffTimeDistribution(stationKey), model, stationKey, "delayOffTime", SERVICE_TIME_STRATEGY_PATH);
-
-
-			XMLParameter delayOffParameter = new XMLParameter("delayOffTime",
-					SERVICE_TIME_STRATEGY_PATH, null, distrParams, false);
-
-			delayOffParameter.appendParameterElement(doc, delayOffConfig);
-			node.appendChild(delayOffConfig);
-
-			Element setUpConfig = doc.createElement(XML_E_STATION_SET_UP);
-			XMLParameter[] distrParams2 = new XMLParameter[1];
-			distrParams2[0] = DistributionWriter
-					.getDistributionParameter((Distribution) model
-							.getSetupTimeDistribution(stationKey), model, stationKey, "setupTime", SERVICE_TIME_STRATEGY_PATH);
-
-			XMLParameter setupTimeParameter = new XMLParameter("setUpTime",
-					SERVICE_TIME_STRATEGY_PATH, null, distrParams2, false);
-
-			setupTimeParameter.appendParameterElement(doc, setUpConfig);
-			node.appendChild(setUpConfig);
 		}
 	}
 
@@ -715,6 +677,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
 					|| queueStrategy
 					.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY))
+					//|| queueStrategy
+					//.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)
 					? PRIORITY_QUEUE_PUT_MAPPING : QUEUE_PUT_MAPPING;
 			String strategyName = strategyMapping.get(strategy);
 			queuePutStrategy[i] = new XMLParameter(strategyName,
@@ -1138,6 +1102,29 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			}
 		}
 
+		Boolean isDelayOffEnabled = model.getDelayOffTimesEnabled(stationKey);
+		if (isDelayOffEnabled.booleanValue()) {
+			XMLParameter[] delayOffStrategy = new XMLParameter[classes.size()];
+			for (int i = 0; i < classes.size(); i++) {
+				Object classKey = classes.get(i);
+				delayOffStrategy[i] = delayOffStrategyWriter.getServiceSection(model, stationKey, classKey);
+			}
+			XMLParameter delayOffStrategies = new XMLParameter("delayOffTime",
+					Object.class.getName(), null, delayOffStrategy, false);
+			delayOffStrategies.appendParameterElement(doc, elem);
+
+			XMLParameter[] setupStrategy = new XMLParameter[classes.size()];
+			for (int i = 0; i < classes.size(); i++) {
+				Object classKey = classes.get(i);
+				setupStrategy[i] = setUpStrategyWriter.getServiceSection(model, stationKey, classKey);
+			}
+			XMLParameter delaySetupStrategies = new XMLParameter("setUpTime",
+					Object.class.getName(), null, setupStrategy, false);
+			delaySetupStrategies.appendParameterElement(doc, elem);
+		}
+
+
+
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
 			XMLParameter switchoverStrategies = SwitchoverStrategyWriter.getServiceSection(model, stationKey);
 			switchoverStrategies.appendParameterElement(doc, elem);
@@ -1297,6 +1284,40 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 		public Object get(CommonModel model, Object stationKey, Object classKey) {
 			return model.getSwitchoverTimeDistribution(stationKey, fromClassKey, classKey);
+		}
+	}
+
+	protected static class delayOffStrategyWriter implements DistributionStrategyGetter {
+		private delayOffStrategyWriter() {}
+
+		public static XMLParameter getServiceSection(CommonModel model, Object stationKey,Object classKey){
+			delayOffStrategyWriter instance = new delayOffStrategyWriter();
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
+			distrArrayParameter.parameterName = "delayOffTime";
+			distrArrayParameter.parameterRefClass = model.getClassName(classKey);
+			distrArrayParameter.isSubParameter = true;
+			return distrArrayParameter;
+		}
+
+		public Object get(CommonModel model, Object stationKey, Object classKey) {
+			return model.getDelayOffTimeDistribution(stationKey,classKey);
+		}
+	}
+
+	protected static class setUpStrategyWriter implements DistributionStrategyGetter {
+		private setUpStrategyWriter() {}
+
+		public static XMLParameter getServiceSection(CommonModel model, Object stationKey,Object classKey){
+			setUpStrategyWriter instance = new setUpStrategyWriter();
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
+			distrArrayParameter.parameterName = "setUpTime";
+			distrArrayParameter.parameterRefClass = model.getClassName(classKey);
+			distrArrayParameter.isSubParameter = true;
+			return distrArrayParameter;
+		}
+
+		public Object get(CommonModel model, Object stationKey, Object classKey) {
+			return model.getSetupTimeDistribution(stationKey,classKey);
 		}
 	}
 
@@ -2218,7 +2239,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		 * other parameters.
 		 */
 		static XMLParameter getDistributionParameter(Distribution distr,
-																								 CommonModel model, Object classKey, String className, String classPath) {
+													 CommonModel model, Object classKey, String className, String classPath) {
 			XMLParameter[] distribution = getDistributionParameter(distr);
 			XMLParameter returnValue = new XMLParameter(className,
 					classPath,

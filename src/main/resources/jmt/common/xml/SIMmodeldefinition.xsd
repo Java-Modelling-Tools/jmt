@@ -225,6 +225,7 @@
 			<xs:sequence>
 				<xs:element ref="classSoftDeadlines" minOccurs="0"/>
 				<xs:element ref="delayOff" minOccurs="0"/>
+				<xs:element ref="setUp" minOccurs="0"/>
 				<xs:element ref="section" minOccurs="0" maxOccurs="3"/>
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>

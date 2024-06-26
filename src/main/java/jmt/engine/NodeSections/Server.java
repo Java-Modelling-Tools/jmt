@@ -22,6 +22,7 @@ import java.util.*;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
@@ -29,7 +30,6 @@ import jmt.engine.NetStrategies.TransitionUtilities.TimingPacket;
 import jmt.engine.QueueNet.*;
 import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.simEngine.RemoveToken;
-import jmt.engine.simEngine.Simulation;
 
 import javax.swing.*;
 
@@ -54,6 +54,8 @@ public class Server extends ServiceSection {
 	private QueuePutStrategy[] putStrategies;
 	private ServiceStrategy[][] switchoverStrategies;
 	private ServiceStrategy[] serviceStrategies;
+	private ServiceStrategy[][] delayOffStrategies;
+	private ServiceStrategy[][] setUpStrategies;
 	private int[] serverNumRequired;
 
 	private List<ServerType> serverTypes;
@@ -66,52 +68,70 @@ public class Server extends ServiceSection {
 	private int maxParalellism = 1;
 	private HashMap<Job, ServerUnit> busyServerMap;
 	private PriorityQueue<ServerUnit> idleServerQueue;
+	private ArrayList<ServerSetupUnit> wakeServerQueue;
 	private LinkedList<JobInfo> jobsToFire;
 	private int savedNumberOfServers;
 	private Boolean[][] classCompatibilities;
 	private ServiceStrategy[][] serviceStrategiesPerServerType;
 	private boolean serverTypesInitialized = false;
 
+	private boolean delayOffEnabled;
+
+
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, null, null, null,
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, null,null,null, null,
 				null, null, null, null);
 	}
 
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								QueuePutStrategy[] preemptiveStrategies) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, null,
+				  QueuePutStrategy[] preemptiveStrategies) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null,null,null, null,
 				null, null, null, null);
 	}
 
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								Object[] switchoverStrategies) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, null,
+				  Object[] switchoverStrategies,Object[] delayOffStrategies,Object[] setUpStrategies) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, delayOffStrategies,setUpStrategies,null,
 				null, null, null, null);
 	}
 
-	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								Integer[] serverNumRequired, String[] serverTypesNames, Integer[] serverTypesNumOfServers,
-								Object[] serverTypesCompatibilities, String schedulingPolicy ) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, null, null, serverNumRequired,
+	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies, Object[] delayOffStrategies, Object[]	 setUpStrategies,
+				  Integer[] serverNumRequired, String[] serverTypesNames, Integer[] serverTypesNumOfServers,
+				  Object[] serverTypesCompatibilities, String schedulingPolicy ) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, null, delayOffStrategies,setUpStrategies,serverNumRequired,
 				serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
 	}
 
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								QueuePutStrategy[] preemptiveStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
-								Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+				  Integer[] serverNumRequired, String[] serverTypesNames, Integer[] serverTypesNumOfServers,
+				  Object[] serverTypesCompatibilities, String schedulingPolicy ) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, null, null,null,serverNumRequired,
+				serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+	}
+
+	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+				  QueuePutStrategy[] preemptiveStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
+				  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
 	) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, serverNumRequired,
+		this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, null,null,serverNumRequired,
 				serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
 	}
 
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								Object[] switchoverStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
-								Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+				  Object[] switchoverStrategies, Object[] delayOffStrategies, Object[] setUpStrategies,Integer[] serverNumRequired, String[] serverTypesNames,
+				  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
 	) throws NetException {
-		this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, serverNumRequired,
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, delayOffStrategies,setUpStrategies,serverNumRequired,
 				serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
 	}
 
+	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+				  Object[] switchoverStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
+				  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+	) throws NetException {
+		this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, null,null,serverNumRequired,
+				serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+	}
 	/**
 	 * Creates a new instance of Server.
 	 * @param numberOfServers Number of jobs which can be served simultaneously.
@@ -121,9 +141,9 @@ public class Server extends ServiceSection {
 	 * @param switchoverStrategies Matrix of setup strategies, one per class pair.
 	 */
 	public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
-								QueuePutStrategy[] preemptiveStrategies, Object[] switchoverStrategies, Integer[] serverNumRequired,
-								String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities,
-								String schedulingPolicy) throws NetException {
+				  QueuePutStrategy[] preemptiveStrategies, Object[] switchoverStrategies, Object[] delayOffStrategies, Object[] setUpStrategies,Integer[] serverNumRequired,
+				  String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities,
+				  String schedulingPolicy) throws NetException {
 		super(false);
 		//Michalis
 		if (schedulingPolicy == null) {
@@ -152,6 +172,24 @@ public class Server extends ServiceSection {
 				this.switchoverStrategies[i] = (ServiceStrategy[]) switchoverStrategies[i];
 			}
 		}
+		if (delayOffStrategies != null) {
+			this.delayOffStrategies = new ServiceStrategy[delayOffStrategies.length][];
+			for (int i = 0; i < delayOffStrategies.length; i++) {
+				this.delayOffStrategies[i] = (ServiceStrategy[]) delayOffStrategies[i];
+			}
+			this.delayOffEnabled = true;
+		}
+		else {
+			this.delayOffEnabled = false;
+		}
+
+		if (setUpStrategies != null) {
+			this.setUpStrategies = new ServiceStrategy[setUpStrategies.length][];
+			for (int i = 0; i < setUpStrategies.length; i++) {
+				this.setUpStrategies[i] = (ServiceStrategy[]) setUpStrategies[i];
+			}
+		}
+
 		busyCounter = 0;
 		lastCompletionTime = 0.0;
 
@@ -161,7 +199,7 @@ public class Server extends ServiceSection {
 	}
 
 	void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serversPerServerType,
-														 Object[] serverCompatibilities) throws NetException {
+							   Object[] serverCompatibilities) throws NetException {
 		totalNumOfServers = new int[serverCompatibilities.length];
 		numberOfAvailableServersPerClass = new int[serverNumRequired.length];
 		busyCounterPerClass = new int[serverNumRequired.length];
@@ -291,6 +329,9 @@ public class Server extends ServiceSection {
 			busyServerMap = new HashMap<Job, ServerUnit>();
 			idleServerQueue = new PriorityQueue<ServerUnit>();
 		}
+		if (setUpStrategies != null) {
+			wakeServerQueue = new ArrayList<ServerSetupUnit>();
+		}
 		jobsToFire = new LinkedList<JobInfo>();
 		savedNumberOfServers = 0;
 	}
@@ -354,7 +395,7 @@ public class Server extends ServiceSection {
 		private String name;
 
 		public BusyServer(int numOfBusyServers, int id, Boolean[] compatibilities, int totalServers,
-											String name){
+						  String name){
 			this.numOfBusyServers = numOfBusyServers;
 			this.id = id;
 			this.compatibilities = compatibilities;
@@ -787,6 +828,7 @@ public class Server extends ServiceSection {
 					if (busyCounterForJob + num > numberOfServersForJob) {
 						return MSG_NOT_PROCESSED;
 					}
+
 					putStrategies[jobClassID].put(job, jobsList, this);
 					jobInfo = jobsList.lookFor(job);
 
@@ -794,6 +836,26 @@ public class Server extends ServiceSection {
 					//message received from another node section: if the server is not completely busy,
 					//it sends itself a message with this job
 					NetSystem netSystem = getOwnerNode().getNetSystem();
+					if (delayOffEnabled){
+						double currentTime = netSystem.getTime();
+						if (wakeServerQueue.size() > 0) {
+							Iterator<ServerSetupUnit> iterator = wakeServerQueue.iterator();
+							while (iterator.hasNext()) {
+								ServerSetupUnit obj = iterator.next();
+								double delayOffDeadline = obj.lastIdleTime + obj.lastDelayOffTime;
+								if (currentTime>=delayOffDeadline) {
+									iterator.remove();
+//									System.out.println("delay off triggered");
+								}
+								else {
+									if (obj.isSettingUp) {
+										obj.checkSetUpComplete(currentTime);
+//										System.out.println("setup complete");
+									}
+								}
+							}
+						}
+					}
 					if (switchoverStrategies != null) {
 						ServerUnit serverUnit = idleServerQueue.poll();
 						if (serverUnit == null) {
@@ -835,6 +897,48 @@ public class Server extends ServiceSection {
 								serviceTime += serviceStrategiesPerServerType[server.getId()][jobClassID].wait(this, job.getJobClass());
 							}
 							serviceTime /= busyServers.size();
+							if (delayOffEnabled && delayOffStrategies.length > 0){
+								double setuptime = 0.0;
+								if (wakeServerQueue.size() > 0) {
+									ServerSetupUnit minIdleUnit = null;
+									for (ServerSetupUnit unit : wakeServerQueue) {
+										if (unit.isRunning && !unit.isSettingUp) {
+											if (minIdleUnit == null ||unit.lastIdleTime < minIdleUnit.lastIdleTime) {
+												minIdleUnit = unit;
+											}
+										}
+									}
+									if (minIdleUnit != null) {
+//										System.out.println("put to running server");
+										minIdleUnit.isRunning = true;
+										minIdleUnit.jobs.add(job);
+										minIdleUnit.lastIdleTime = netSystem.getTime();
+									}
+									else{
+										System.out.println("intermidiate setup triggered");
+										for (ServerSetupUnit unit : wakeServerQueue) {
+											if (unit.isSettingUp) {
+												if (minIdleUnit == null || unit.lastSettingUpTime < minIdleUnit.lastSettingUpTime) {
+													minIdleUnit = unit;
+												}
+											}
+										}
+										setuptime = minIdleUnit.lastSettingUpTime - netSystem.getTime();
+										serviceTime += setuptime;
+										minIdleUnit.jobs.add(job);
+										minIdleUnit.lastIdleTime = netSystem.getTime();
+									}
+								}
+								else{
+//									System.out.println("setup triggered");
+									setuptime = setUpStrategies[jobClassID][0].wait(this, job.getJobClass());
+									ServerSetupUnit serverSetupUnit = new ServerSetupUnit(job, jobClassID,setUpStrategies[jobClassID][0],delayOffStrategies[jobClassID][0]);
+									serverSetupUnit.isSettingUp = true;
+									serverSetupUnit.lastSettingUpTime = getOwnerNode().getNetSystem().getTime()+setuptime;
+									serviceTime += setuptime;
+									wakeServerQueue.add(serverSetupUnit);
+								}
+							}
 							job.setServiceTime(serviceTime);
 						}
 						RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);
@@ -842,12 +946,12 @@ public class Server extends ServiceSection {
 						job.setServingMessage(jobServingMessage);
 						jobsList.startJob(jobInfo);
 					}
+				}
 
-					if (hasFreeServers()) {
-						//sends an ack to the input section (remember not to propagate
-						//this ack again when computation is finished)
-						sendBackward(NetEvent.EVENT_ACK, job, 0.0);
-					}
+				if (hasFreeServers()) {
+					//sends an ack to the input section (remember not to propagate
+					//this ack again when computation is finished)
+					sendBackward(NetEvent.EVENT_ACK, job, 0.0);
 				}
 
 				break;
@@ -868,14 +972,15 @@ public class Server extends ServiceSection {
 				break;
 			}
 
-			case NetEvent.EVENT_ACK:
 
+			case NetEvent.EVENT_ACK:
 				//EVENT_ACK
 				//If there are no jobs in the service section, message is not processed.
 				//Otherwise an ack is sent backward to the input section and
 				//the counter of jobs in service is decreased.
 
 				Job job2 = message.getJob();
+				int jobClassID2 = job2.getJobClass().getId();
 
 				int num2 = serverNumRequired[job2.getJobClass().getId()];
 				int numberOfServersForJob2 = getNumberOfAvailableServersForClass(job2.getJobClass().getId());
@@ -908,9 +1013,22 @@ public class Server extends ServiceSection {
 						exitJob(job2);
 					}
 				}
-
+				if (delayOffEnabled && delayOffStrategies.length > 0) {
+					for (ServerSetupUnit unit : wakeServerQueue) {
+						if (unit.jobs.contains(job2)) {
+							unit.jobs.remove(job2);
+							unit.lastIdleTime = getOwnerNode().getNetSystem().getTime();
+							if (unit.jobs.size() == 0) {
+								double delayOffDuration = unit.delayOffTime.wait(this, job2.getJobClass());
+								if (delayOffDuration == 0) {
+									delayOffDuration = 0.0001;
+								}
+								unit.lastDelayOffTime = delayOffDuration;
+							}
+						}
+					}
+				}
 				break;
-
 
 			case NetEvent.EVENT_ENABLING:{
 				int enablingDegree = (int) message.getData();
@@ -1043,4 +1161,42 @@ public class Server extends ServiceSection {
 
 	}
 
+	private static class ServerSetupUnit implements Comparable<ServerSetupUnit>{
+		public ArrayList<Job> jobs;
+		public int jobClassID;
+		public ServiceStrategy setupTime;
+		public ServiceStrategy delayOffTime;
+
+		public boolean isRunning;
+		public boolean isSettingUp;
+		public double lastSettingUpTime;
+		public double lastIdleTime;
+		public double lastDelayOffTime;
+
+		public ServerSetupUnit(Job job,int jobClassID, ServiceStrategy setupTime, ServiceStrategy delayOffTime) {
+			this.jobs = new ArrayList<>();
+			this.jobs.add(job);
+			this.jobClassID = jobClassID;
+			this.setupTime = setupTime;
+			this.delayOffTime = delayOffTime;
+			this.isRunning = false;
+			this.isSettingUp = false;
+			this.lastSettingUpTime = 0.0;
+			this.lastIdleTime = 0.0;
+			this.lastDelayOffTime = 0.0;
+		}
+
+		public void checkSetUpComplete(double currentTime) {
+			double settingUpDeadline = lastSettingUpTime;
+			if (settingUpDeadline <= currentTime) {
+				isSettingUp = false;
+				isRunning = true;
+			}
+		}
+
+		@Override
+		public int compareTo(ServerSetupUnit o) {
+			return Double.compare(this.lastIdleTime, o.lastIdleTime);
+		}
+	}
 }

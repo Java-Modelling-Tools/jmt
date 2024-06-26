@@ -632,13 +632,13 @@ public interface StationDefinition {
 	 */
 	public void setSwitchoverTimeDistribution(Object stationKey, Object fromClassKey, Object toClassKey, Object distribution);
 
-	public Object getDelayOffTimeDistribution(Object stationKey);
+	public Object getDelayOffTimeDistribution(Object stationKey, Object classKey);
 
-	public void setDelayOffTimeDistribution(Object stationKey, Object distribution);
+	public void setDelayOffTimeDistribution(Object stationKey, Object classKey, Object distribution);
 
-	public Object getSetupTimeDistribution(Object stationKey);
+	public Object getSetupTimeDistribution(Object stationKey, Object classKey);
 
-	public void setSetupTimeDistribution(Object stationKey, Object distribution);
+	public void setSetupTimeDistribution(Object stationKey, Object classKey, Object distribution);
 
 	/**
 	 * Returns routing strategy for class and station, given their search keys.

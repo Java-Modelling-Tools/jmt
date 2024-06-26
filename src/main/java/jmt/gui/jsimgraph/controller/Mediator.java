@@ -57,7 +57,7 @@ import jmt.gui.common.definitions.*;
 import jmt.gui.common.definitions.convertors.JSIMtoJMVAConvertor;
 import jmt.gui.common.editors.DefaultsEditor;
 import jmt.gui.common.panels.*;
-import jmt.gui.common.panels.parametric.DebugSolverPanel;
+import jmt.gui.common.panels.DebugSolverPanel;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
@@ -165,7 +165,7 @@ public class Mediator implements GuiInterface {
 	private JSimGraphModel model;
 	private JFrame resultsWindow;
 	private JmtClipboard clipboard;
-//	private DebugSolverPanel debugPanel;
+	private DebugSolverPanel debugPanel;
 	private DispatcherThread dispatcher = null;
 	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
 	private JMTToolBar componentBar;
@@ -258,7 +258,7 @@ public class Mediator implements GuiInterface {
 		JButton debugSolverButton = new JButton(debugSolverAction);
 		debugSolverButton.setToolTipText("Open Debug Solver");
 //		toolbar.add(debugSolverButton);
-//		debugPanel = new DebugSolverPanel(this);
+		debugPanel = new DebugSolverPanel(this);
 
 		actionSnapToGrid = new ActionSnapToGrid(this);
 
@@ -289,7 +289,7 @@ public class Mediator implements GuiInterface {
 		JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());
 		// Builds an array with all actions to be put in the toolbar
 		AbstractJmodelAction[] actions = new AbstractJmodelAction[] { newModel, openModel, saveModel, null,
-				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities, null,
+				actionCut, actionCopy, actionPaste, actionDelete, null, editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities,
 				switchToExactSolver, null, simulate, pauseSimulation, stopSimulation, showResults, null, editDefaults, openHelp, null, useTemplate};
 		toolbar.populateToolbar(actions);
 		return toolbar;
@@ -311,11 +311,12 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Define menu
-		action = new MenuAction("Define", new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities, null, editDefaults });
+		action = new MenuAction("Define", new AbstractJmodelAction[] { editUserClasses, editMeasures, editSimParams, editPAParams, serverCompatibilities, editDefaults });
 		menu.addMenu(action);
 
 		// Solve menu
-		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null,debugSolverAction });
+		//action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null, debugSolverAction });
+		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults});
 		menu.addMenu(action);
 
 		// Help menu
@@ -4068,8 +4069,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	public void editDebugParameter() {
-		DebugSolverPanel panel = new DebugSolverPanel(this);  // Assuming the constructor takes a model
-		dialogFactory.getDialog(panel, "Debug Solver",
+		dialogFactory.getDialog(debugPanel, "Debug Solver",
 				400,
 				500,
 				true, "JSIMDebugSolverWindowWidth", "JSIMDebugSolverWindowHeight");

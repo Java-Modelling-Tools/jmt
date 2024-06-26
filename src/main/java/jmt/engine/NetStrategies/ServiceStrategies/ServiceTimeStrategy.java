@@ -111,4 +111,12 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 		return parameter;
 	}
 
+	public double getRand() {
+		try {
+			return distribution.nextRand(parameter);
+		} catch (IncorrectDistributionParameterException e) {
+			return 0;
+		}
+	}
+
 }

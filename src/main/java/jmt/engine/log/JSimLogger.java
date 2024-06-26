@@ -98,7 +98,7 @@ public class JSimLogger implements Serializable {
 		File file = new File(filePath);
 		if (!file.exists()) {
 			try (FileWriter writer = new FileWriter(filePath, true)) {
-				writer.append("dispatchOrReceive")
+				writer.append("dispatchOrReceive").append(delimiter)
 						.append("sender").append(delimiter)
 						.append("eventname").append(delimiter)
 						.append("receiver").append(delimiter)

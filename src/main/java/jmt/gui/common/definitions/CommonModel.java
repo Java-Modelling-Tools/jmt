@@ -1298,12 +1298,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.delayOffTimesEnabled = enabled;
 			save = true;
 		}
-		//initiate the delay off times as exp(1)
-		if (enabled) {
-			setDelayOffTimeDistribution(key, Defaults.getAsNewInstance("delayOffTimeDistribution"));
-		} else {
-			setDelayOffTimeDistribution(key, null);
-		}
 	}
 
 	/**
@@ -2012,43 +2006,43 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	@Override
-	public Object getDelayOffTimeDistribution(Object stationKey){
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		if (sd == null) {
+	public Object getDelayOffTimeDistribution(Object stationKey, Object classKey){
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null || scd.delayOffTimeDistributions == null) {
 			return null;
 		}
-		return sd.delayOffTimeDistribution;
+		return scd.delayOffTimeDistributions.get(classKey);
 	}
 
 	@Override
-	public void setDelayOffTimeDistribution(Object stationKey, Object distribution){
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		if (sd == null) {
+	public void setDelayOffTimeDistribution(Object stationKey, Object classKey, Object distribution){
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+			if (scd == null || scd.delayOffTimeDistributions == null) {
 			return;
 		}
-		if (sd.delayOffTimeDistribution == null || !sd.delayOffTimeDistribution.equals(distribution)) {
-			sd.delayOffTimeDistribution = distribution;
+			if (scd.delayOffTimeDistributions.get(classKey) == null || !scd.delayOffTimeDistributions.get(classKey).equals(distribution)) {
+			scd.delayOffTimeDistributions.put(classKey, distribution);
 			save = true;
 		}
 	}
 
 	@Override
-	public Object getSetupTimeDistribution(	Object stationKey) {
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		if (sd == null) {
+	public Object getSetupTimeDistribution(Object stationKey, Object classKey) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null || scd.setUpTimeDistributions == null) {
 			return null;
 		}
-		return sd.setupTimeDistribution;
+		return scd.setUpTimeDistributions.get(classKey);
 	}
 
 	@Override
-	public void setSetupTimeDistribution(Object stationKey, Object distribution) {
-		StationData sd = (StationData) stationDataHM.get(stationKey);
-		if (sd == null) {
+	public void setSetupTimeDistribution(Object stationKey, Object classKey, Object distribution) {
+		StationClassData scd = (StationClassData) stationDetailsBDM.get(classKey, stationKey);
+		if (scd == null || scd.setUpTimeDistributions == null) {
 			return;
 		}
-		if (sd.setupTimeDistribution == null || !sd.setupTimeDistribution.equals(distribution)) {
-			sd.setupTimeDistribution = distribution;
+		if (scd.setUpTimeDistributions.get(classKey) == null || !scd.setUpTimeDistributions.get(classKey).equals(distribution)) {
+			scd.setUpTimeDistributions.put(classKey, distribution);
 			save = true;
 		}
 	}
@@ -2933,7 +2927,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		//a place can only be connected to a transition, to a queue or to a delay station
 		//a transition can only be connected from a place
-		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION) || target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
+		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION))) //|| target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
 			return false;
 		}
@@ -4437,8 +4431,6 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Boolean serverPolling;
 		public Boolean switchoverTimesEnabled;
 		public Boolean delayOffTimesEnabled;
-		public Object delayOffTimeDistribution;
-		public Object setupTimeDistribution;
 		public Integer forkBlock;
 		public Boolean isSimplifiedFork;
 		public LoggerParameters loggerParameters;
@@ -4506,7 +4498,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public Object serviceDistribution;
 		public Integer serverNumRequired;
 		public Object switchoverPeriod;
+		public Object delayOffPeriod;
+		public Object setUpPeriod;
 		public Map<Object, Object> switchoverTimeDistributions;
+		public Map<Object, Object> delayOffTimeDistributions;
+		public Map<Object, Object> setUpTimeDistributions;
 		public Object routingStrategy;
 		public Object forkStrategy;
 		public Object joinStrategy;
@@ -4534,11 +4530,31 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			if (switchoverPeriod != null) {
 				scd.switchoverPeriod = ((ServiceStrategy) switchoverPeriod).clone();
 			}
+			if (delayOffPeriod != null) {
+				scd.delayOffPeriod = ((ServiceStrategy) delayOffPeriod).clone();
+			}
+			if (setUpPeriod != null) {
+				scd.setUpPeriod = ((ServiceStrategy) setUpPeriod).clone();
+			}
 			if (switchoverTimeDistributions != null) {
 				scd.switchoverTimeDistributions = new HashMap<>();
 				for (Object classKey : switchoverTimeDistributions.keySet()) {
 					Object distribution = switchoverTimeDistributions.get(classKey);
 					scd.switchoverTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
+				}
+			}
+			if (delayOffTimeDistributions != null) {
+				scd.delayOffTimeDistributions = new HashMap<>();
+				for (Object classKey : delayOffTimeDistributions.keySet()) {
+					Object distribution = delayOffTimeDistributions.get(classKey);
+					scd.delayOffTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
+				}
+			}
+			if (setUpTimeDistributions != null) {
+				scd.setUpTimeDistributions = new HashMap<>();
+				for (Object classKey : setUpTimeDistributions.keySet()) {
+					Object distribution = setUpTimeDistributions.get(classKey);
+					scd.setUpTimeDistributions.put(classKey, ((ServiceStrategy) distribution).clone());
 				}
 			}
 			if (routingStrategy != null) {

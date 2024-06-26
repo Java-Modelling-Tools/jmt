@@ -108,8 +108,17 @@ public class ServerTypesEditor extends WizardPanel implements CommonConstants {
 
 
     protected void addServerType() {
+        if (stationData.getStationNumberOfServers(stationKey) > stationData.getServerTypes(stationKey).size()) {
+            for (ServerType serverType : stationData.getServerTypes(stationKey)) {
+                if (serverType.getNumOfServers() > 1) {
+                    serverType.setNumOfServers(serverType.getNumOfServers() - 1);
+                    break;
+                }
+            }
+        } else {
+            stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) + 1);
+        }
         stationData.addServerType(stationKey, 1);
-        stationData.setStationNumberOfServers(stationKey, stationData.getStationNumberOfServers(stationKey) + 1);
         updateServerPreferences();
         refreshComponents();
     }

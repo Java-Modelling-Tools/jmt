@@ -43,10 +43,7 @@ import jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy;
 import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;
 import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
 import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
-import jmt.engine.NodeSections.InputSection;
-import jmt.engine.NodeSections.OutputSection;
-import jmt.engine.NodeSections.Queue;
-import jmt.engine.NodeSections.ServiceSection;
+import jmt.engine.NodeSections.*;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
@@ -87,7 +84,7 @@ import org.xml.sax.SAXNotSupportedException;
 public class SimLoader {
 
 	//used for debug purposes
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	//represents the entire XML document. it is the root
 	//of the document tree, and provides the primary access to the document's data
@@ -395,36 +392,6 @@ public class SimLoader {
 						}
 					}
 				}
-				//process delay off
-				boolean delayOffEnabled = false;
-				ServiceTimeStrategy delayOffDistributions[] = new ServiceTimeStrategy[1];
-				ServiceTimeStrategy setUpDistributions[] = new ServiceTimeStrategy[1];
-				if (node.getElementsByTagName("delayOff").getLength() != 0) {
-					Element delayOffConfig = (Element) node.getElementsByTagName("delayOff").item(0);
-					NodeList parameterList = delayOffConfig.getElementsByTagName("parameter");
-
-					for (int d = 0; d < parameterList.getLength(); d++) {
-						Object parameter = createParameter((Element) parameterList.item(d));
-						String paramName = ((Element) parameterList.item(d)).getAttribute("name");
-						if (paramName.equals("delayOffEnabled")) {
-							delayOffEnabled = (Boolean) parameter;
-						} else if (paramName.equals("delayOffTime")) {
-							delayOffDistributions = (ServiceTimeStrategy[]) parameter;
-						}
-					}
-				}
-
-				if (node.getElementsByTagName("setUp").getLength() != 0) {
-					Element setUpConfig = (Element) node.getElementsByTagName("setUp").item(0);
-					NodeList parameterList = setUpConfig.getElementsByTagName("parameter");
-					for (int d = 0; d < parameterList.getLength(); d++) {
-						Object parameter = createParameter((Element) parameterList.item(d));
-						String paramName = ((Element) parameterList.item(d)).getAttribute("name");
-						if (paramName.equals("setUpTime")) {
-							setUpDistributions = (ServiceTimeStrategy[]) parameter;
-						}
-					}
-				}
 
 				//gets list of sections
 				NodeList sectionList = node.getElementsByTagName("section");
@@ -441,15 +408,6 @@ public class SimLoader {
 					if (ns instanceof InputSection) {
 						if (ns instanceof Queue) {
 							((Queue) ns).setSoftDeadlines(softDeadlinesArr);
-							((Queue) ns).setDelayOffEnabled(delayOffEnabled);
-							((Queue) ns).setDelayOffDistributions((ServiceTimeStrategy) delayOffDistributions[0]);
-							((Queue) ns).setSetUpDistributions((ServiceTimeStrategy) setUpDistributions[0]);
-							if (DEBUG){
-								double delayoff = ((Queue) ns).calculateDelayOff();
-								//System.out.println("DelayOff time: " + delayoff);
-								double setup = ((Queue) ns).calculateSetUp();
-								//System.out.println("SetUp time: " + setup);
-							}
 
 						}
 						sections[0] = ns;
@@ -601,8 +559,6 @@ public class SimLoader {
 			x.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		} catch (IncorrectDistributionParameterException e) {
-			throw new RuntimeException(e);
 		}
 	}
 
