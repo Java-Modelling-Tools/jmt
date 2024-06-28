@@ -307,7 +307,7 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Edit menu
-		action = new MenuAction("Edit", new AbstractJmodelAction[] { actionCut, actionCopy, actionPaste, actionDelete, actionCancelEdgeDrawing, null, takeScreenShot});
+		action = new MenuAction("Edit", new AbstractJmodelAction[] { actionCut, actionCopy, actionPaste, actionDelete, actionCancelEdgeDrawing}); //, null, takeScreenShot});
 		menu.addMenu(action);
 
 		// Define menu
@@ -3361,7 +3361,7 @@ public class Mediator implements GuiInterface {
 	}
 
 	public void downloadDefaultTemplates() {
-		customizableDialogFactory.getDialog(520, 200, new AutoDownloadPanel(), "Downloading...");
+		customizableDialogFactory.getDialog((int)(520 * CommonConstants.widthScaling), (int)(200 * CommonConstants.heightScaling), new AutoDownloadPanel(), "Downloading...");
 	}
 
 	// used to find the bottom bound of canvas

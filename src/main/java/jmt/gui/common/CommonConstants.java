@@ -106,17 +106,17 @@ public interface CommonConstants {
 
 	public int MAX_GUI_WIDTH_DIALOG_DEFAULT = (int)(780 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_DIALOG_DEFAULT = (int)(520 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_COMMON = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_COMMON = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_COMMON = (int)(1024);
+	public int MAX_GUI_HEIGHT_COMMON = (int)(768);
 
-	public int MAX_GUI_WIDTH_JSIM_DISTRIB = (int)(480 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JSIM_DISTRIB = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_DISTRIB = (int)(480);
+	public int MAX_GUI_HEIGHT_JSIM_DISTRIB = (int)(600);
 	public int MAX_GUI_WIDTH_JSIM_PROBLEMS = (int)(450 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_JSIM_PROBLEMS = (int)(435 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_JSIM_RESULTS = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JSIM_RESULTS = (int)(768 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = (int)(1152 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = (int)(864 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_RESULTS = (int)(1024);
+	public int MAX_GUI_HEIGHT_JSIM_RESULTS = (int)(768);
+	public int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = (int)(1024);
+	public int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = (int)(768);
 
 	public int MAX_GUI_WIDTH_JMVA = (int) (1024);
 	public int MAX_GUI_HEIGHT_JMVA = (int) (768);
@@ -152,8 +152,8 @@ public interface CommonConstants {
 
 	public int MAX_GUI_WIDTH_WHATIF_PROGRESS = (int)(640 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_WHATIF_PROGRESS = (int)(480 * CommonConstants.heightScaling);
-	public int MAX_GUI_WIDTH_WHATIF_RESULTS = (int)(1024 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_WHATIF_RESULTS = (int)(768 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_WHATIF_RESULTS = (int)(1024);
+	public int MAX_GUI_HEIGHT_WHATIF_RESULTS = (int)(768);
 
 	public static final Dimension DIM_BUTTON_XS = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
 	public static final Dimension DIM_BUTTON_S = new Dimension((int)(80 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
@@ -171,6 +171,7 @@ public interface CommonConstants {
 
 	/**Constants for selection of station queueing strategy*/
 	public static final String STATION_QUEUE_STRATEGY_PSSERVER = "Processor Sharing Scheduling";
+	public static final String STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY = "Processor Sharing Scheduling (Priority)";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE = "Non-preemptive Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY = "Non-preemptive Scheduling (Priority)";
 	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = "Preemptive Scheduling";

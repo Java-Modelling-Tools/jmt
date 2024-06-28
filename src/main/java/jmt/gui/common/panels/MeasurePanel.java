@@ -458,7 +458,7 @@ public class MeasurePanel extends WizardPanel implements CommonConstants {
 
 				new DialogFactory((Frame) parent).getDialog(new MetricConfigurationsPanel(simData,  stationData, measureKey), "Define Advanced Metric Configurations",
 						500,
-						275,
+						125,
 						true, "JSIMMeasuresDefWindowWidth", "JSIMMeasuresDefWindowHeight");
 				repaint();
 			}

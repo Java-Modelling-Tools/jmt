@@ -1017,7 +1017,7 @@ public class PAResultsWindow extends JMTFrame implements ResultsConstants, Param
 			ValuesTable table = new ValuesTable(values, md.getMeasureType(measureIndex));
 			JScrollPane tablePanel = new JScrollPane(table);
 			tablePanel.setBorder(new EmptyBorder(10, 0, 0, 0));
-			tablePanel.setPreferredSize(new Dimension((int)(0 * CommonConstants.widthScaling), (int)(140 * CommonConstants.heightScaling)));
+			tablePanel.setPreferredSize(new Dimension((int)(0), (int)(140)));
 			JLabel tableNote = new JLabel("<html>The values in <font color=\"red\">red</font> were not computed with the requested precision</html>");
 			JPanel tableNotePanel = new JPanel();
 			tableNotePanel.add(tableNote);

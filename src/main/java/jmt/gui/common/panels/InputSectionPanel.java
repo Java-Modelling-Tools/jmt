@@ -74,6 +74,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			STATION_QUEUE_STRATEGY_PREEMPTIVE,
 			STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY,
 			STATION_QUEUE_STRATEGY_PSSERVER,
+			//STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY,
 			STATION_QUEUE_STRATEGY_POLLING
 	};
 
@@ -86,6 +87,12 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	 * Used to define queue policies
 	 */
 	protected static final Object[] serverPSQueuePolicies = {
+			QUEUE_STRATEGY_PS,
+			QUEUE_STRATEGY_DPS,
+			QUEUE_STRATEGY_GPS
+	};
+
+	protected static final Object[] serverPSQueuePriorityPolicies = {
 			QUEUE_STRATEGY_PS,
 			QUEUE_STRATEGY_DPS,
 			QUEUE_STRATEGY_GPS
@@ -308,7 +315,25 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					if (setupTimesEnabled != null) {
 						data.setSwitchoverTimesEnabled(stationKey, Boolean.valueOf(false));
 					}
-				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
+				}
+				else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)){
+					List<Object> policyList = Arrays.asList(serverPSQueuePriorityPolicies);
+					Vector<Object> classKeys = classData.getClassKeys();
+					if (classKeys.size() > 0 && !policyList.contains(data.getQueueStrategy(stationKey, classKeys.get(0)))) {
+						String policy = Defaults.get("stationQueueStrategy");
+						if (!policyList.contains(policy)) {
+							policy = QUEUE_STRATEGY_PS;
+						}
+						for (Object classKey : classKeys) {
+							data.setQueueStrategy(stationKey, classKey, policy);
+							data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));
+						}
+					}
+					Boolean setupTimesEnabled = data.getSwitchoverTimesEnabled(stationKey);
+					if (setupTimesEnabled != null) {
+						data.setSwitchoverTimesEnabled(stationKey, Boolean.valueOf(false));
+					}
+				}else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 						|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 					List<Object> policyList = queuePolicy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE) ?
 							Arrays.asList(serverPreemptiveQueuePolicies) :
@@ -378,7 +403,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 					DialogFactory factory = new DialogFactory(null);
 					factory.getDialog(serverPanel, "Editing Polling Server Preferences",
 							MAX_GUI_WIDTH_POLLING, MAX_GUI_HEIGHT_POLLING, false, "", "");
-				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+				} else if (queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER) || queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
 					ProcessorSharingServerPanel serverPanel = new ProcessorSharingServerPanel(data, stationKey);
 					DialogFactory factory = new DialogFactory(null);
 					factory.getDialog(serverPanel, "Editing Processor Sharing Server Preferences",
@@ -495,7 +520,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 						data.setQueueStrategy(stationKey, getClassKeyFromRow(row), QUEUE_STRATEGY_FCFS);
 						return ComboBoxCellEditor.getEditorInstance(new Object[] {QUEUE_STRATEGY_FCFS});
 					}else {
-						if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+						if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)
+						|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
 							return ComboBoxCellEditor.getEditorInstance(serverPSQueuePolicies);
 						} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 								|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {

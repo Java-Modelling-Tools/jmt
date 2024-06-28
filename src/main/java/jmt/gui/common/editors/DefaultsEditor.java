@@ -253,7 +253,8 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Sets default title, close operation and dimensions
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Editing Default Parameters...");
-		int width = 840, height = 600;
+		int width = (int)(640);
+		int height = (int)(480);
 
 		// Centers this dialog on the screen
 		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();
@@ -296,7 +297,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		bottom_panel.add(resetbutton);
 
 		// Creates param_panel
-		JPanel param_panel = new JPanel(new GridLayout(1, 4));
+		JPanel param_panel = new JPanel(new GridLayout(4, 1));
 		mainpanel.add(new JScrollPane(param_panel), BorderLayout.CENTER);
 
 		Map<String, String> tmpMap;
@@ -304,7 +305,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Class Parameters
 		JPanel class_panel = new JPanel(new SpringLayout());
 		int classpanelnum = 0; // Counts all inserted elements
-		class_panel.setBorder(new TitledBorder(new EtchedBorder(), "Class Parameters"));
+		class_panel.setBorder(new TitledBorder(new EtchedBorder(), "Default Class Parameters"));
 
 		// Name
 		addInputString("Name", "className", class_panel);
@@ -332,12 +333,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		SpringUtilities.makeCompactGrid(class_panel, classpanelnum, 2, //rows, cols
 				6, 6, //initX, initY
 				6, 6);//xPad, yPad
-		param_panel.add(class_panel);
 
 		// Station Parameters
 		JPanel station_panel = new JPanel(new SpringLayout());
 		int stationpanelnum = 0; // Counts all inserted elements
-		station_panel.setBorder(new TitledBorder(new EtchedBorder(), "Station Parameters"));
+		station_panel.setBorder(new TitledBorder(new EtchedBorder(), "Default Station Parameters"));
 
 		// Name (JSIM only)
 		if (target == JSIM) {
@@ -401,12 +401,11 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		SpringUtilities.makeCompactGrid(station_panel, stationpanelnum, 2, //rows, cols
 				6, 6, //initX, initY
 				6, 6);//xPad, yPad
-		param_panel.add(station_panel);
 
 		// Simulation Parameters
 		JPanel sim_panel = new JPanel(new SpringLayout());
 		int simpanelnum = 0; // Counts all inserted elements
-		sim_panel.setBorder(new TitledBorder(new EtchedBorder(), "Simulation Parameters"));
+		sim_panel.setBorder(new TitledBorder(new EtchedBorder(), "Default Simulation Parameters"));
 
 		// Measure Alpha
 		addInput01Spinner("Confidence Interval Measure (0-1)", "measureAlpha", sim_panel);
@@ -453,11 +452,13 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 				6, 6);//xPad, yPad
 
 		param_panel.add(sim_panel);
+		param_panel.add(class_panel);
+		param_panel.add(station_panel);
 
 		// Blocking region parameters
 		JPanel block_panel = new JPanel(new SpringLayout());
 		int blockpanelnum = 0; // Counts all inserted elements
-		block_panel.setBorder(new TitledBorder(new EtchedBorder(), "Finite Capacity Region Parameters"));
+		block_panel.setBorder(new TitledBorder(new EtchedBorder(), "Default Finite Capacity Region Parameters"));
 
 		// Blocking Region name
 		addInputString("Name", "blockingRegionName", block_panel);
@@ -973,7 +974,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		label = new JLabel(text + ":");
 		final JSpinner spinner = new JSpinner();
 		final JCheckBox no_auto_button = new JCheckBox();
-		no_auto_button.setText("No Auto");
+		no_auto_button.setText("No automatic stop");
 		JPanel internal = new JPanel(new BorderLayout(5, 0));
 		internal.add(no_auto_button, BorderLayout.EAST);
 		internal.add(spinner, BorderLayout.CENTER);

@@ -98,6 +98,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	 * strategies, e.g. FCFS = TailStrategy.
 	 */
 	protected static final Map<String, String> PS_STRATEGIES_MAPPING;
+	protected static final Map<String, String> PRIORITY_PS_STRATEGIES_MAPPING;
 	protected static final Map<String, String> QUEUE_PUT_MAPPING;
 	protected static final Map<String, String> PRIORITY_QUEUE_PUT_MAPPING;
 	protected static final Map<String, String> DROP_RULES_MAPPING;
@@ -111,6 +112,12 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(QUEUE_STRATEGY_GPS, "GPSStrategy");
 		temp.put(QUEUE_STRATEGY_DPS, "DPSStrategy");
 		PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(temp);
+
+		temp = new HashMap<String, String>();
+		temp.put(QUEUE_STRATEGY_PS, "EPSStrategyPriority");
+		temp.put(QUEUE_STRATEGY_GPS, "GPSStrategyPriority");
+		temp.put(QUEUE_STRATEGY_DPS, "DPSStrategyPriority");
+		PRIORITY_PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(temp);
 
 		temp = new HashMap<String, String>();
 		temp.put(QUEUE_STRATEGY_FCFS, "TailStrategy");
@@ -671,14 +678,13 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		for (int i = 0; i < queuePutStrategy.length; i++) {
 			String strategy = queueStrategy
 					.equals(STATION_QUEUE_STRATEGY_PSSERVER)
+					|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)
 					? QUEUE_STRATEGY_FCFS : model.getQueueStrategy(stationKey,
 					classes.get(i));
 			Map<String, String> strategyMapping = (queueStrategy
 					.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)
 					|| queueStrategy
 					.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY))
-					//|| queueStrategy
-					//.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)
 					? PRIORITY_QUEUE_PUT_MAPPING : QUEUE_PUT_MAPPING;
 			String strategyName = strategyMapping.get(strategy);
 			queuePutStrategy[i] = new XMLParameter(strategyName,
@@ -989,7 +995,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 																					 CommonModel model, Object stationKey) {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
-		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
 		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 				|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
@@ -1010,7 +1016,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				"java.lang.Integer", null, servers.toString(), false);
 		numberOfServers.appendParameterElement(doc, elem);
 
-		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
 			// creating max running jobs node element
 			Integer running = model.getStationMaxRunningJobs(stationKey);
 			XMLParameter maxRunningJobs = new XMLParameter("maxRunning",
@@ -1041,6 +1047,36 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				String strategy = model.getQueueStrategy(stationKey,
 						classes.get(i));
 				String strategyName = PS_STRATEGIES_MAPPING.get(strategy);
+				psStrategy[i] = new XMLParameter(strategyName,
+						strategiesClasspathBase + psStrategiesSuffix
+								+ strategyName, model.getClassName(classes.get(i)),
+						(String) null, true);
+			}
+			XMLParameter psStrategies = new XMLParameter("PSStrategy",
+					strategiesClasspathBase + "PSStrategy", null,
+					psStrategy, false);
+			psStrategies.appendParameterElement(doc, elem);
+			// creating service weights node element
+			XMLParameter[] serviceWeight = new XMLParameter[classes.size()];
+			for (int i = 0; i < serviceWeight.length; i++) {
+				Double weight = model.getServiceWeight(stationKey,
+						classes.get(i));
+				serviceWeight[i] = new XMLParameter("serviceWeight",
+						"java.lang.Double", model.getClassName(classes.get(i)),
+						weight.toString(), true);
+			}
+			XMLParameter serviceWeights = new XMLParameter("serviceWeights",
+					"java.lang.Double", null, serviceWeight, false);
+			serviceWeights.appendParameterElement(doc, elem);
+		}
+
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)){
+			// creating PS strategies node element
+			XMLParameter[] psStrategy = new XMLParameter[classes.size()];
+			for (int i = 0; i < psStrategy.length; i++) {
+				String strategy = model.getQueueStrategy(stationKey,
+						classes.get(i));
+				String strategyName = PRIORITY_PS_STRATEGIES_MAPPING.get(strategy);
 				psStrategy[i] = new XMLParameter(strategyName,
 						strategiesClasspathBase + psStrategiesSuffix
 								+ strategyName, model.getClassName(classes.get(i)),
