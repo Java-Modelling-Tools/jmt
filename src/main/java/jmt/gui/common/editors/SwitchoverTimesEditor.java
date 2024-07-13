@@ -115,7 +115,7 @@ public class SwitchoverTimesEditor extends WizardPanel implements CommonConstant
 		descriptionPanel.add(switchoverTimesText);
 
 		JPanel switchoverTimesPanel = new JPanel();
-		switchoverTimesPanel.setBorder(new TitledBorder(new EtchedBorder(), "Switchover times"));
+		switchoverTimesPanel.setBorder(new TitledBorder(new EtchedBorder(), "Switchover Times"));
 		switchoverTimesPanel.setLayout(new BorderLayout());
 		switchoverTimesPanel.add(useSwitchoverTimesCheckbox, BorderLayout.NORTH);
 

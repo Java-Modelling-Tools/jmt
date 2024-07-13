@@ -75,7 +75,7 @@ public class MultiBorderLayout extends BorderLayout {
 	@Override
 	public Dimension minimumLayoutSize(Container target) {
 		synchronized (target.getTreeLock()) {
-			Dimension dim = new Dimension((int)(0 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling));
+			Dimension dim = new Dimension(0, 0);
 
 			Component c = null;
 
@@ -130,7 +130,7 @@ public class MultiBorderLayout extends BorderLayout {
 
 	public Dimension prefferedLayoutSize(Container target) {
 		synchronized (target.getTreeLock()) {
-			Dimension dim = new Dimension((int)(0 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling));
+			Dimension dim = new Dimension(0, 0);
 
 			Component c = null;
 

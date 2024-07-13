@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 public class UpdatePanel {
 
     private static JFrame parentFrame;
+    private static JDialog progressDialog;
 
     public UpdatePanel(JFrame parentFrame) {
         this.parentFrame = parentFrame;
@@ -30,7 +31,7 @@ public class UpdatePanel {
         String latestVersion = getLatestVersionFromSourceForge();
         boolean isUpdateAvailable = isUpdateAvailable(currentVersion, latestVersion);
         if (isUpdateAvailable) {
-            promptUserToUpdate(latestVersion);
+            promptUserToUpdate(latestVersion,currentVersion);
         } else {
             JOptionPane.showMessageDialog(parentFrame,
                     "Your software is up to date.",
@@ -100,9 +101,7 @@ public class UpdatePanel {
         return 0; // Both versions are identical
     }
 
-
-
-    private static void promptUserToUpdate(String latestVersion) {
+    private static void promptUserToUpdate(String latestVersion,String currentVersion) {
         int response = JOptionPane.showConfirmDialog(parentFrame,
                 "An update is available. Would you like to download and install it now?",
                 "Update Available",
@@ -110,25 +109,50 @@ public class UpdatePanel {
                 JOptionPane.INFORMATION_MESSAGE);
 
         if (response == JOptionPane.YES_OPTION) {
-            downloadAndUpdate(latestVersion);
+            showProgressDialog();
+            downloadAndUpdate(latestVersion,currentVersion);
         }
     }
 
-    private static void downloadAndUpdate(final String latestVersion) {
+    private static void showProgressDialog() {
+        SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                JOptionPane optionPane = new JOptionPane("The update is being downloaded in the background, " +
+                        "this may take several minutes. You can now close this window.",
+                        JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}, null);
+                progressDialog = optionPane.createDialog(parentFrame, "Download in Progress");
+                progressDialog.setModal(false);
+                progressDialog.setVisible(true);
+                return null;
+            }
+        };
+        worker.execute();
+    }
+
+    private static void closeProgressDialog() {
+        if (progressDialog != null) {
+            progressDialog.dispose();
+        }
+    }
+
+    private static void downloadAndUpdate(final String latestVersion,final String currentVersion) {
         Thread downloadThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                downloadUpdate(latestVersion);
+                downloadUpdate(latestVersion,currentVersion);
             }
         });
         downloadThread.start();
     }
-    private static void downloadUpdate(String latestVersion) {
+    private static void downloadUpdate(String latestVersion,String currentVersion) {
         try {
             String downloadUrl = "https://sourceforge.net/projects/jmt/files/jmt/JMT-" + latestVersion + "/JMT-singlejar-" + latestVersion + ".jar/download";
             String tempDir = System.getProperty("java.io.tmpdir");
             String tempDownloadPath = tempDir + File.separator + "JMT-new.jar";
             String oldFilePath = System.getProperty("user.dir") + File.separator + "JMT.jar";
+            String oldFilePath2 = System.getProperty("user.dir") + File.separator + "JMT-singlejar-"+ currentVersion + ".jar";
+            String newFilePath = System.getProperty("user.dir") + File.separator + "JMT-singlejar-" + latestVersion + ".jar";
 
             URL url = new URL(downloadUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -146,6 +170,8 @@ public class UpdatePanel {
                 input.close();
                 connection.disconnect();
 
+                closeProgressDialog();
+
                 int response = JOptionPane.showConfirmDialog(null,
                         "The update has been downloaded successfully. It will be installed now. You might need to restart JMT.",
                         "Download Complete",
@@ -154,9 +180,9 @@ public class UpdatePanel {
 
                 if (response == JOptionPane.YES_OPTION) {
                     if (isWindows()) {
-                        executeWindowsUpdateScript(tempDownloadPath, oldFilePath, tempDir);
+                        executeWindowsUpdateScript(tempDownloadPath, oldFilePath, oldFilePath2,tempDir);
                     } else if (isLinuxOrMac()) {
-                        executeLinuxUpdateScript(tempDownloadPath, oldFilePath, tempDir);
+                        executeLinuxUpdateScript(tempDownloadPath, oldFilePath, oldFilePath2,newFilePath,tempDir);
                     } else {
                         JOptionPane.showMessageDialog(null,
                                 "Unsupported operating system.",
@@ -166,12 +192,14 @@ public class UpdatePanel {
                     System.exit(0);
                 }
             } else {
+                closeProgressDialog();
                 JOptionPane.showMessageDialog(null,
                         "An error occurred while downloading the update. Please try again later.",
                         "Download Error",
                         JOptionPane.ERROR_MESSAGE);
             }
         } catch (Exception e) {
+            closeProgressDialog();
             JOptionPane.showMessageDialog(null,
                     "An error occurred while downloading the update. Please try again later.",
                     "Download Error",
@@ -180,12 +208,22 @@ public class UpdatePanel {
         }
     }
 
-    private static void executeWindowsUpdateScript(String tempDownloadPath, String oldFilePath, String tempDir) throws IOException {
-        String batchScript =
-                "move /Y \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
-                        + "start javaw -jar \"" + oldFilePath + "\"\n"
-                        + "del \"%~f0\"";
+    private static void executeWindowsUpdateScript(String tempDownloadPath, String oldFilePath, String oldFilePath2,String tempDir) throws IOException {
+        String batchScript = null;
+        File nextFile = new File(oldFilePath);
+        if (nextFile.exists()) {
+            batchScript =
+                    "move /Y \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
+                            + "start javaw -jar \"" + oldFilePath + "\"\n"
+                            + "del \"%~f0\"";
 
+        }
+        else {
+            batchScript =
+                    "move /Y \"" + tempDownloadPath + "\" \"" + oldFilePath2 + "\"\n"
+                            + "start javaw -jar \"" + oldFilePath2 + "\"\n"
+                            + "del \"%~f0\"";
+        }
         String batchFilePath = tempDir + File.separator + "update.bat";
         Files.write(Paths.get(batchFilePath), batchScript.getBytes(Charset.forName("GBK")));
 
@@ -199,16 +237,30 @@ public class UpdatePanel {
         System.exit(0);
     }
 
-    private static void executeLinuxUpdateScript(String tempDownloadPath, String oldFilePath, String tempDir) throws IOException {
-        String bashScript =
-                "#!/bin/bash\n"
-                        + "echo \"Moving new JMT jar to the application directory\"\n"
-                        + "mv \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
-                        + "echo \"Starting the updated application\"\n"
-                        + "java -jar \"" + oldFilePath + "\"\n"
-                        + "echo \"Deleting the update script\"\n"
-                        + "rm -- \"$0\"";
+    private static void executeLinuxUpdateScript(String tempDownloadPath, String oldFilePath, String oldFilePath2,String newFilePath, String tempDir) throws IOException {
+        File nextFile = new File(oldFilePath);
+        String bashScript = null;
+        if (nextFile.exists()) {
+            bashScript =
+                    "#!/bin/bash\n"
+                            + "echo \"Moving new JMT jar to the application directory\"\n"
+                            + "mv \"" + tempDownloadPath + "\" \"" + oldFilePath + "\"\n"
+                            + "echo \"Please restart the application\"\n"
+                            + "echo \"Deleting the update script\"\n"
+                            + "rm -- \"$0\"";
 
+        }
+        else {
+            bashScript =
+                    "#!/bin/bash\n"
+                            + "echo \"Moving new JMT jar to the application directory\"\n"
+                            + "mv \"" + tempDownloadPath + "\" \"" + newFilePath + "\"\n"
+                            //delete old jar
+                            + "rm -- \"" + oldFilePath2 + "\"\n"
+                            + "echo \"Please restart the application\"\n"
+                            + "echo \"Deleting the update script\"\n"
+                            + "rm -- \"$0\"";
+        }
         String bashFilePath = tempDir + File.separator + "update.sh";
         Files.write(Paths.get(bashFilePath), bashScript.getBytes(StandardCharsets.UTF_8));
 

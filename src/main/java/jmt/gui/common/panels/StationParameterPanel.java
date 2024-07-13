@@ -197,7 +197,7 @@ public class StationParameterPanel extends WizardPanel implements CommonConstant
 			}else{
 				enPaneServer.setData(stationData, classData, stationKey);
 			}
-			//mainPanel.add(enPaneServer, enPaneServer.getName());
+			mainPanel.add(enPaneServer, enPaneServer.getName());
 
 			if(oldComponent == enPaneServer){
 				mainPanel.setSelectedComponent(oldComponent);

@@ -86,8 +86,8 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 		if (sd.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
 			switchoverTimesEditor = new SwitchoverTimesEditor(sd, cd, stationKey);
 			mainPanel.add(switchoverTimesEditor, switchoverTimesEditor.getName());
-		    //doPane = new DelayOffSectionPanel(sd, cd, stationKey);
-			//mainPanel.add(doPane, doPane.getName());
+		    doPane = new DelayOffSectionPanel(sd, cd, stationKey);
+			mainPanel.add(doPane, doPane.getName());
 			serverTypesEditor = new ServerTypesEditor(sd, cd, stationKey);
 			mainPanel.add(serverTypesEditor, serverTypesEditor.getName());
 			jobParallelismEditor = new JobParallelismEditor(sd, cd, stationKey);

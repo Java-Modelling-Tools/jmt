@@ -253,8 +253,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 		// Sets default title, close operation and dimensions
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle("Editing Default Parameters...");
-		int width = (int)(640);
-		int height = (int)(480);
+		int width = 840, height = 600;
 
 		// Centers this dialog on the screen
 		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();

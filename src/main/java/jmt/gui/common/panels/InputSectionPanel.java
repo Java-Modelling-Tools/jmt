@@ -74,7 +74,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			STATION_QUEUE_STRATEGY_PREEMPTIVE,
 			STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY,
 			STATION_QUEUE_STRATEGY_PSSERVER,
-			//STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY,
+			STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY,
 			STATION_QUEUE_STRATEGY_POLLING
 	};
 
@@ -429,7 +429,7 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	private void updatePolicyEditButton() {
 		String queuePolicy = data.getStationQueueStrategy(stationKey);
 		queuePolicyEditButton.setEnabled(queuePolicy.equals(STATION_QUEUE_STRATEGY_POLLING)
-				|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER));
+				|| queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER) || queuePolicy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY));
 	}
 
 	/**

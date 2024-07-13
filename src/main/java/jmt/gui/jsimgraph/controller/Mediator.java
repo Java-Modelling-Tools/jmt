@@ -315,8 +315,8 @@ public class Mediator implements GuiInterface {
 		menu.addMenu(action);
 
 		// Solve menu
-		//action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null, debugSolverAction });
-		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults});
+		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null, debugSolverAction });
+		//action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults});
 		menu.addMenu(action);
 
 		// Help menu

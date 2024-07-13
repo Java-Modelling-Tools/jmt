@@ -2584,6 +2584,12 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 				if (scd.switchoverTimeDistributions != null) {
 					scd.switchoverTimeDistributions.remove(key);
 				}
+				if (scd.delayOffTimeDistributions != null) {
+					scd.delayOffTimeDistributions.remove(key);
+				}
+				if (scd.setUpTimeDistributions != null) {
+					scd.setUpTimeDistributions.remove(key);
+				}
 			}
 		}
 	}
@@ -2657,6 +2663,10 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			scd.serviceDistribution = Defaults.getAsNewInstance("stationServiceStrategy");
 			scd.switchoverPeriod = new ZeroStrategy();
 			scd.switchoverTimeDistributions = new HashMap<>();
+			scd.delayOffPeriod = new ZeroStrategy();
+			scd.delayOffTimeDistributions = new HashMap<>();
+			scd.setUpPeriod = new ZeroStrategy();
+			scd.setUpTimeDistributions = new HashMap<>();
 			scd.routingStrategy = Defaults.getAsNewInstance("stationRoutingStrategy");
 		} else if (sd.type.equals(STATION_TYPE_FORK)) {
 			scd.queueStrategy = Defaults.get("stationQueueStrategy");
@@ -2927,7 +2937,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 		//a place can only be connected to a transition, to a queue or to a delay station
 		//a transition can only be connected from a place
-		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION))) //|| target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
+		if ((source.type.equals(STATION_TYPE_PLACE) && !(target.type.equals(STATION_TYPE_TRANSITION) || target.type.equals(STATION_TYPE_SERVER) || target.type.equals(STATION_TYPE_DELAY)))
 				|| (target.type.equals(STATION_TYPE_TRANSITION) && !source.type.equals(STATION_TYPE_PLACE))) {
 			return false;
 		}
@@ -4821,9 +4831,11 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	public Object getServerTypeKey(Object stationKey, String name){
 		StationData sd = (StationData) stationDataHM.get(stationKey);
 
-		for(ServerType server: sd.serverTypes){
-			if(server.getName().equals(name)){
-				return server.getServerKey();
+		if (sd != null) {
+			for (ServerType server : sd.serverTypes) {
+				if (server.getName().equals(name)) {
+					return server.getServerKey();
+				}
 			}
 		}
 		return null;
@@ -4878,6 +4890,9 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 	public int getNumberOfDifferentServerTypes(Object stationKey){
 		StationData sd = (StationData) stationDataHM.get(stationKey);
+		if (sd == null) {
+			return 0;
+		}
 		return sd.serverTypes.size();
 	}
 

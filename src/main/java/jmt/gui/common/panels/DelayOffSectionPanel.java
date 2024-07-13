@@ -15,6 +15,7 @@ import jmt.gui.common.serviceStrategies.ServiceStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -46,9 +47,9 @@ public class DelayOffSectionPanel extends WizardPanel implements CommonConstants
         // Description Panel
         JPanel descriptionPanel = new JPanel(new BorderLayout());
         descriptionPanel.setBorder(new TitledBorder("Description"));
-        JTextArea descriptionText = new JTextArea("Delay-off times are used to model scenarios where, if a queue remains " +
-                "idle for a specified duration, it will automatically shut down." +
-                "The setup time refers to the duration a queue requires to restart when a new job arrives after a shutdown.");
+        JTextArea descriptionText = new JTextArea("Delay off times are used to model scenarios where, if a queue remains " +
+                "idle for a specified duration, it will automatically shutdown." +
+                "Setup times model the time a queue requires to restart when a new job arrives after a shutdown.");
         descriptionText.setEditable(false);
         descriptionText.setLineWrap(true);
         descriptionText.setWrapStyleWord(true);
@@ -57,16 +58,17 @@ public class DelayOffSectionPanel extends WizardPanel implements CommonConstants
         add(descriptionPanel, BorderLayout.NORTH);
 
         // Enable Delay Off Checkbox
-        enableDelayOff = new JCheckBox("Enable Delay Off (you will start to specify the setup time and delay off time after enabling)");
-        JPanel enableDelayOffPanel = new JPanel(new BorderLayout());
-        enableDelayOffPanel.add(enableDelayOff, BorderLayout.CENTER);
+        enableDelayOff = new JCheckBox("Enable Setup and Delay Off Times");
+        JPanel enableDelayOffPanel = new JPanel();
+        enableDelayOffPanel.setBorder(new TitledBorder(new EtchedBorder(), "Setup and Delay Off Times"));
+        enableDelayOffPanel.setLayout(new BorderLayout());
+        enableDelayOffPanel.add(enableDelayOff, BorderLayout.NORTH);
         Boolean isEnabled = data.getDelayOffTimesEnabled(stationKey);
         enableDelayOff.setSelected(isEnabled);
-        add(enableDelayOffPanel, BorderLayout.CENTER);
 
         // Delay Off Configuration Panel
         delayOffConfigPanel = new JPanel(new BorderLayout(5, 5));
-        delayOffConfigPanel.setBorder(new TitledBorder("Delay Off and setup time configuration"));
+        delayOffConfigPanel.setBorder(new TitledBorder("Edit"));
 
         delayOffTableModel = new DelayOffTableModel();
         delayOffTable = new JTable(delayOffTableModel) {
@@ -129,16 +131,18 @@ public class DelayOffSectionPanel extends WizardPanel implements CommonConstants
         JScrollPane scrollPane = new JScrollPane(delayOffTable);
         scrollPane.setPreferredSize(new Dimension(400, 290));
         delayOffConfigPanel.add(scrollPane, BorderLayout.CENTER);
+        WarningScrollTable serviceSectionTable = new WarningScrollTable(delayOffTable, WARNING_CLASS);
 
         tablePane = new JRootPane();
         tablePane.getContentPane().setLayout(new BorderLayout());
         tablePane.getContentPane().add(delayOffConfigPanel, BorderLayout.CENTER);
-
+        tablePane.getContentPane().add(serviceSectionTable, BorderLayout.CENTER);
         GlassPane glassPane = new GlassPane();
         tablePane.setGlassPane(glassPane);
         glassPane.setVisible(!enableDelayOff.isSelected());
 
-        add(tablePane, BorderLayout.SOUTH);
+        enableDelayOffPanel.add(tablePane, BorderLayout.CENTER);
+        add(enableDelayOffPanel, BorderLayout.CENTER);
 
         // Set initial state
         setPanelEnabled(delayOffConfigPanel, enableDelayOff.isSelected());
@@ -157,7 +161,7 @@ public class DelayOffSectionPanel extends WizardPanel implements CommonConstants
     }
 
     private void initializeDefaultStrategies() {
-        if (data.getDelayOffTimeDistribution(stationKey, classData.getClassKeys().get(0)) == null) {
+        if (classData.getClassKeys().size()>0 && data.getDelayOffTimeDistribution(stationKey, classData.getClassKeys().get(0)) == null) {
             for (Object classKey : classData.getClassKeys()) {
                 ZeroStrategy zeroStrategy = new ZeroStrategy();
                 data.setDelayOffTimeDistribution(stationKey, classKey, zeroStrategy);

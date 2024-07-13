@@ -93,7 +93,7 @@ public interface CommonConstants {
 	};
 
 	/**Constants for GUI scaling*/
-	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	//Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 	public float heightScaling = 1.25F; //(float) (screenSize.height/768/2);
 	public float widthScaling = 1.25F; //(float) (screenSize.height/768/2);
 

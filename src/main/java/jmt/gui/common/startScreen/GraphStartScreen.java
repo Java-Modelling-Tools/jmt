@@ -322,7 +322,7 @@ public class GraphStartScreen extends JMTFrame {
 		introButtonArea.add(new JPanel());
 		introButtonArea.add(about);
 		introButtonArea.add(new JPanel());
-		//introButtonArea.add(upgrade);
+		introButtonArea.add(upgrade);
 		introButtonArea.setOpaque(false);
 
 		pivotPanel = new JPanel(new GridBagLayout());
