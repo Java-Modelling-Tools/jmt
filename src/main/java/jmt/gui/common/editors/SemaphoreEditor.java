@@ -42,8 +42,8 @@ import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.panels.WarningScrollTable;
 import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  *

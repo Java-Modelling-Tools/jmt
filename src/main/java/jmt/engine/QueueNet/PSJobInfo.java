@@ -28,6 +28,7 @@ public class PSJobInfo extends JobInfo {
 
 	private double serviceTime;
 	private double residualServiceTime;
+	private double aheadServiceTimeInLastQuantum;
 
 	/**
 	 * Creates a new instance of JobInfo object.
@@ -35,6 +36,7 @@ public class PSJobInfo extends JobInfo {
 	 */
 	public PSJobInfo(Job job) {
 		super(job);
+		aheadServiceTimeInLastQuantum = 0.0;
 	}
 
 	/**
@@ -77,4 +79,19 @@ public class PSJobInfo extends JobInfo {
 		residualServiceTime -= serviceTime;
 	}
 
+	/**
+	 * Gets the Ahead service time in last quantum.
+	 * @return Ahead service time in last quantum.
+	 */
+	public double getAheadServiceTimeInLastQuantum() {
+		return aheadServiceTimeInLastQuantum;
+	}
+
+	/**
+	 * Sets the ahead service time in last quantum.
+	 * @param aheadServiceTimeInLastQuantum ahead service time in last quantum.
+	 */
+	public void setAheadServiceTimeInLastQuantum(double aheadServiceTimeInLastQuantum) {
+		this.aheadServiceTimeInLastQuantum = aheadServiceTimeInLastQuantum;
+	}
 }

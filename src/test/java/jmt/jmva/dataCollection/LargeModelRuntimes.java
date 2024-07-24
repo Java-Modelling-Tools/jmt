@@ -1,7 +1,7 @@
 package jmt.jmva.dataCollection;
 
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
-import jmt.jmva.gui.exact.utilities.SolverAlgorithmCounter;
+import jmt.jmva.gui.utilities.SolverAlgorithmCounter;
 
 import java.util.Arrays;
 import java.util.HashMap;

@@ -11,14 +11,12 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.util.Vector;
 
 import jmt.framework.gui.wizard.WizardPanel;
-import jmt.gui.exact.table.ExactCellRenderer;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 public class EnablingSectionPanelForServer extends WizardPanel implements CommonConstants {

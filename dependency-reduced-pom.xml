@@ -223,7 +223,7 @@
                 <configuration>
                   <transformers>
                     <transformer>
-                      <mainClass>jmt.jmva.gui.exact.ExactWizard</mainClass>
+                      <mainClass>jmt.jmva.gui.JMVAWizard</mainClass>
                     </transformer>
                   </transformers>
                 </configuration>

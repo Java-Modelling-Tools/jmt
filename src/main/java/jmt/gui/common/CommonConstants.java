@@ -146,7 +146,7 @@ public interface CommonConstants {
 	public int MAX_GUI_WIDTH_POLLING = (int)(640 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_POLLING = (int)(480 * CommonConstants.heightScaling);
 	public int MAX_GUI_WIDTH_PSSERVER = (int)(640 * CommonConstants.widthScaling);
-	public int MAX_GUI_HEIGHT_PSSERVER = (int)(180 * CommonConstants.heightScaling);
+	public int MAX_GUI_HEIGHT_PSSERVER = (int)(200 * CommonConstants.heightScaling);
 	public int MAX_GUI_WIDTH_SERVER_FEATURES = (int)(780 * CommonConstants.widthScaling);
 	public int MAX_GUI_HEIGHT_SERVER_FEATURES = (int)(520 * CommonConstants.heightScaling);
 
@@ -192,6 +192,7 @@ public interface CommonConstants {
 
 	/**Constants for selection of queueing strategy*/
 	public static final String QUEUE_STRATEGY_PS = "PS";
+	public static final String QUEUE_STRATEGY_QBPS = "QBPS";
 	public static final String QUEUE_STRATEGY_GPS = "GPS";
 	public static final String QUEUE_STRATEGY_DPS = "DPS";
 	public static final String QUEUE_STRATEGY_FCFS = "FCFS";

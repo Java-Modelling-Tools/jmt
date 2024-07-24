@@ -36,9 +36,9 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 
 public class ClassSwitchSectionPanel extends WizardPanel implements CommonConstants {
 

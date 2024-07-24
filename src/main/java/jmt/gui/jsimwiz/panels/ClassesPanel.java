@@ -53,8 +53,8 @@ import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.

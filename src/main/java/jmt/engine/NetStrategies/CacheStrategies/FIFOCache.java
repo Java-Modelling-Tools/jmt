@@ -5,6 +5,7 @@ import jmt.engine.QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+// set removeItemMode = 1 for strict FIFO(m)
 public class FIFOCache extends CacheStrategy {
 
 	public FIFOCache(){}

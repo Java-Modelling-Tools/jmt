@@ -4,7 +4,7 @@ import jmt.gui.common.xml.ModelLoader;
 import jmt.jmva.analytical.CommandLineSolver;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.analytical.solvers.SolverAlgorithm;
-import jmt.jmva.gui.exact.utilities.SolverAlgorithmCounter;
+import jmt.jmva.gui.utilities.SolverAlgorithmCounter;
 
 import java.io.File;
 import java.util.Arrays;

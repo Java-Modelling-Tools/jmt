@@ -7,7 +7,9 @@ import java.util.LinkedList;
 
 public class LRUCache extends CacheStrategy{
 
-	public LRUCache(){}
+	public LRUCache(){
+		setRemoveItemMode(2);   // removeItemMode = 1 for LRU(m). removeItemMode = 2 for h-LRU(m)
+	}
 
 	/**
 	 * Cache item linked list has an access time list which record each request timestamp.

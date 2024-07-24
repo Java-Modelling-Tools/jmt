@@ -39,12 +39,12 @@ import jmt.framework.data.ArrayUtils;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 import jmt.gui.jaba.JabaConstants;
 import jmt.gui.jaba.JabaModel;
 import jmt.gui.jaba.JabaWizard;
-import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
+import jmt.jmva.gui.panels.ForceUpdatablePanel;
 
 /**
 

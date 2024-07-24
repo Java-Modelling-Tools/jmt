@@ -62,7 +62,7 @@ import jmt.gui.jaba.panels.ServiceDemandsPanel;
 import jmt.gui.jaba.panels.ServiceTimesPanel;
 import jmt.gui.jaba.panels.StationsPanel;
 import jmt.gui.jaba.panels.VisitsPanel;
-import jmt.jmva.gui.exact.panels.ForceUpdatablePanel;
+import jmt.jmva.gui.panels.ForceUpdatablePanel;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
 
@@ -153,7 +153,7 @@ public class JabaWizard extends Wizard {
 		this.setVisible(true);
 	}
 
-	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save...") {
+	private AbstractJMTAction FILE_SAVE = new AbstractJMTAction("Save as...") {
 
 		private static final long serialVersionUID = 1L;
 

@@ -30,7 +30,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.jmva.analytical.CommandLineSolver;
-import jmt.jmva.engine.simDispatcher.DispatcherJMVAschema;
+import jmt.jmva.engine.DispatcherJMVAschema;
 
 import org.apache.log4j.Logger;
 import org.apache.xerces.parsers.DOMParser;

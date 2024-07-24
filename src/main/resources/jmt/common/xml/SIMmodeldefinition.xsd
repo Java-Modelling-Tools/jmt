@@ -224,6 +224,8 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element ref="classSoftDeadlines" minOccurs="0"/>
+				<xs:element ref="quantumSize" minOccurs="0"/>
+				<xs:element ref="quantumSwitchoverTime" minOccurs="0"/>
 				<xs:element ref="delayOff" minOccurs="0"/>
 				<xs:element ref="setUp" minOccurs="0"/>
 				<xs:element ref="section" minOccurs="0" maxOccurs="3"/>
@@ -251,6 +253,22 @@
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="softDeadline" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="quantumSize">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="quantaSize" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:element name="quantumSwitchoverTime">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="quantumSwitchoverTime" type="xs:double" minOccurs="0" maxOccurs="unbounded"/>
 			</xs:sequence>
 		</xs:complexType>
 	</xs:element>

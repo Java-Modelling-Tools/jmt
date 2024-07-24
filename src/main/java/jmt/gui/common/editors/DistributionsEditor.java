@@ -62,9 +62,9 @@ import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.distributions.MAP;
 import jmt.gui.common.distributions.PhaseType;
 import jmt.gui.common.distributions.Replayer;
-import jmt.gui.exact.table.ExactCellRenderer;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 import org.ejml.data.DMatrixRMaj;
 
 /**

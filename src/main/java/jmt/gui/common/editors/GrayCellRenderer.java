@@ -23,7 +23,7 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 
-import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.table.DisabledCellRenderer;
 
 /**
  * <p>Title: Gray Cell Renderer</p>

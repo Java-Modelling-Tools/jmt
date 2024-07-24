@@ -21,6 +21,7 @@ package jmt.engine.NodeSections;
 import java.util.*;
 
 import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.PSStrategies.QBPSStrategy;
 import jmt.engine.NetStrategies.PSStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
@@ -53,6 +54,7 @@ public class PSServer extends Server {
 
 	private int numberOfServers;
 	private int maxRunningJobs;
+	private double quantumSize;
 	private ServiceStrategy[] serviceStrategies;
 	private PSStrategy[] psStrategies;
 	private double[] serviceWeights;
@@ -79,6 +81,8 @@ public class PSServer extends Server {
 	private RemoveToken messageToken;
 	private PSJobInfo messageJobInfo;
 	private double messageSendTime;
+	private boolean QBPS;
+	private double switchTime;
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);
@@ -120,6 +124,11 @@ public class PSServer extends Server {
 			}
 		} else {
 			this.psStrategies = psStrategies;
+			for (int i = 0; i < psStrategies.length; i++) {
+				if(psStrategies[i] instanceof QBPSStrategy) {
+					QBPS = true;
+				}
+			}
 		}
 		if (serviceWeights == null) {
 			this.serviceWeights = new double[serviceStrategies.length];
@@ -239,6 +248,12 @@ public class PSServer extends Server {
 					handleJobInfoList(jobInfo, PSEvent.JOB_IN);
 					assignJob(job);
 					double serviceTime = getServiceStrategiesPerServerType()[jobAssignments.get(job.getId())][job.getJobClass().getId()].wait(this, job.getJobClass());
+					if (QBPS){
+						int switchCount = (int) (serviceTime/quantumSize)+1;
+						if (serviceTime<=quantumSize)
+							switchCount =1;
+						serviceTime += switchTime*switchCount;
+					}
 					jobInfo.setServiceTime(serviceTime);
 					jobInfo.setResidualServiceTime(serviceTime);
 					busyCounter++;
@@ -311,15 +326,46 @@ public class PSServer extends Server {
 	}
 
 	private void performServiceTimes(double startTime) {
-		Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
 		NetSystem netSystem = getOwnerNode().getNetSystem();
-		while (it.hasNext()) {
-			PSJobInfo jobInfo = (PSJobInfo) it.next();
-			int jobClassID = jobInfo.getJob().getJobClass().getId();
-			// Perform service for the job
-			double elapsedTime = netSystem.getTime() - startTime;
-			double serviceTime = elapsedTime * compatibleServersForClass[jobClassID] * serviceFractions[jobClassID];
-			jobInfo.performServiceTime(serviceTime);
+		double elapsedTime = netSystem.getTime() - startTime;
+
+		if (QBPS) {
+			Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
+			while (it.hasNext()) {
+				PSJobInfo jobInfo = (PSJobInfo) it.next();
+				int jobClassID = jobInfo.getJob().getJobClass().getId();
+				double serviceTime = elapsedTime * compatibleServersForClass[jobClassID] * serviceFractions[jobClassID];
+				double totalServiceTime = serviceTime;
+				double timeSlice = quantumSize+switchTime;
+				while (serviceTime>=timeSlice){
+					if (jobInfo.getAheadServiceTimeInLastQuantum()>0){
+						double remainingServiceTimeInLastQuantum = timeSlice-jobInfo.getAheadServiceTimeInLastQuantum();
+						jobInfo.performServiceTime(remainingServiceTimeInLastQuantum);
+						serviceTime -= remainingServiceTimeInLastQuantum;
+						jobInfo.setAheadServiceTimeInLastQuantum(0);
+					}
+					else {
+						jobInfo.performServiceTime(timeSlice);
+						serviceTime -= timeSlice;
+					}
+				}
+				if(jobInfo.getResidualServiceTime()-totalServiceTime==0) {
+					jobInfo.performServiceTime(serviceTime);
+					jobInfo.setAheadServiceTimeInLastQuantum(0);
+				}
+				else{
+					jobInfo.performServiceTime(serviceTime);
+					jobInfo.setAheadServiceTimeInLastQuantum(serviceTime);
+				}
+			}
+		} else {
+			Iterator<JobInfo> it = psJobsList.getInternalJobInfoList().iterator();
+			while (it.hasNext()) {
+				PSJobInfo jobInfo = (PSJobInfo) it.next();
+				int jobClassID = jobInfo.getJob().getJobClass().getId();
+				double serviceTime = elapsedTime * compatibleServersForClass[jobClassID] * serviceFractions[jobClassID];
+				jobInfo.performServiceTime(serviceTime);
+			}
 		}
 	}
 
@@ -417,4 +463,11 @@ public class PSServer extends Server {
 		}
 	}
 
+	public void setQuantumSize(double quantumSize) {
+		this.quantumSize = quantumSize;
+	}
+
+	public void setSwitchTime(double switchTime) {
+		this.switchTime = switchTime;
+	}
 }

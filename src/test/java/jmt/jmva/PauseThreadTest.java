@@ -23,11 +23,7 @@ import static org.junit.Assert.fail;
 import java.io.File;
 import java.net.URISyntaxException;
 
-import jmt.common.exception.NetException;
-import jmt.engine.QueueNet.NetSystem;
-import jmt.engine.QueueNet.QueueNetwork;
-import jmt.jmva.BatchTest;
-import jmt.jmva.engine.simDispatcher.DispatcherJMVAschema;
+import jmt.jmva.engine.DispatcherJMVAschema;
 
 import org.junit.Test;
 

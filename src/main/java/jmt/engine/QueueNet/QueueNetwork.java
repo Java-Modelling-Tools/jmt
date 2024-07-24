@@ -19,13 +19,10 @@
 package jmt.engine.QueueNet;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.ListIterator;
 
-import jmt.common.exception.CachePairClassNotMatchException;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.dataAnalysis.TempMeasure;
-import jmt.engine.simEngine.Simulation;
 
 /**
  * This class implements a queue network.
@@ -136,25 +133,6 @@ public class QueueNetwork {
 	public void addJobClass(JobClass jobClass) {
 		jobClasses.add(jobClass);
 		jobClass.setId(jobClasses.indexOf(jobClass));
-	}
-
-	public void checkAndConnectJobClass() throws CachePairClassNotMatchException{
-		for(int i=0 ; i< jobClasses.size(); i++){
-			if(jobClasses.get(i).isHasCachePair()){
-				// Check whether the cache class has its pair.
-				String selfName = jobClasses.get(i).getName();
-				String pairName = jobClasses.get(i).getCachePairClassName();
-				if(!jobClasses.get(pairName).getCachePairClassName().equals(selfName)){
-					throw new CachePairClassNotMatchException("The Cache Pair Class Not Match in "+selfName+" and its pair class " + pairName );
-				}
-
-				// connect to its pair class.
-				if (jobClasses.get(selfName).getCachePairClass() == null){
-					jobClasses.get(selfName).setCachePairClass(jobClasses.get(pairName));
-					jobClasses.get(pairName).setCachePairClass(jobClasses.get(selfName));
-				}
-			}
-		}
 	}
 
 	/**

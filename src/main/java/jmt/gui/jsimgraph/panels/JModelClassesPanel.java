@@ -29,7 +29,7 @@ import jmt.framework.gui.table.editors.ButtonCellEditor;
 import jmt.framework.gui.table.editors.ColorCellEditor;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.DisabledCellRenderer;
+import jmt.gui.table.DisabledCellRenderer;
 import jmt.gui.jsimgraph.JSimGraphConstants;
 import jmt.gui.jsimgraph.definitions.JmodelClassDefinition;
 import jmt.gui.jsimgraph.definitions.JmodelStationDefinition;

@@ -47,9 +47,9 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.BooleanCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
-import jmt.gui.exact.table.ExactCellRenderer;
+import jmt.gui.table.BooleanCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+import jmt.gui.table.ExactCellRenderer;
 
 /**
  * <p>Title: Storage Section Panel</p>

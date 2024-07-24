@@ -3,13 +3,25 @@
   <!-- use mvn install to create JMT installer and mvn package for single JAR -->
   <modelVersion>4.0.0</modelVersion>
   <groupId>jmt</groupId>
-  <artifactId>java-modelling-tools</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <artifactId>jmt</artifactId>
+  <version>latest</version>
   <properties>
     <izpack.version>5.1.3</izpack.version>
     <izpack.staging>${project.build.directory}/staging</izpack.staging>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  <distributionManagement>
+    <repository>
+      <id>internal.repo</id>
+      <name>Temporary Staging Repository</name>
+      <url>file://${project.build.directory}/../maven/mvn-artifact</url>
+    </repository>
+    <site>
+      <id>site</id>
+      <name>Project Site</name>
+      <url>file://${project.build.directory}/../maven/site/</url>
+    </site>
+  </distributionManagement>
   <profiles>
     <profile>
       <id>full</id>
@@ -124,6 +136,7 @@
           </plugin>
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
             <executions>
               <execution>
                 <id>create-staging-area</id>
@@ -159,14 +172,7 @@
             <groupId>org.codehaus.izpack</groupId>
             <artifactId>izpack-maven-plugin</artifactId>
             <version>${izpack.version}</version>
-            <dependencies>
-              <dependency>
-                <groupId>org.codehaus.izpack</groupId>
-                <artifactId>izpack-panel</artifactId>
-                <version>${izpack.version}</version>
-              </dependency>
-            </dependencies>
-            <!-- mvn help:describe -DgroupId=org.codehaus.izpack -DartifactId=izpack-maven-plugin -Dversion=5.0.0-beta11 -Ddetail -->
+            <!-- Rest of your izpack plugin configuration -->
             <configuration>
               <installFile>${izpack.staging}/jmt_install.xml</installFile>
               <attach>false</attach>
@@ -180,7 +186,7 @@
             <executions>
               <execution>
                 <id>standard-installer</id>
-                <phase>install</phase>
+                <phase>deploy</phase>
                 <goals>
                   <goal>izpack</goal>
                 </goals>
@@ -193,7 +199,10 @@
             <artifactId>maven-deploy-plugin</artifactId>
             <version>2.8.2</version>
             <configuration>
-              <skip>true</skip>
+              <skip>false</skip>
+              <altDeploymentRepository>
+                internal.repo::default::file://${project.build.directory}/../maven/mvn-artifact
+              </altDeploymentRepository>
             </configuration>
           </plugin>
         </plugins>
@@ -253,7 +262,7 @@
                 <configuration>
                   <transformers>
                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                      <mainClass>jmt.jmva.gui.exact.ExactWizard</mainClass>
+                      <mainClass>jmt.jmva.gui.JMVAWizard</mainClass>
                     </transformer>
                   </transformers>
                   <filters>
@@ -391,7 +400,7 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.9.0</version>
+      <version>2.12.2</version>
     </dependency>
     <dependency>
       <groupId>org.easytesting</groupId>
@@ -406,7 +415,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.13.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -508,39 +517,6 @@
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>jbig2-imageio</artifactId>
       <version>3.0.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.graalvm.compiler</groupId>
-      <artifactId>compiler</artifactId>
-      <version>21.2.0</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.ejml/ejml-all -->
-    <dependency>
-      <groupId>org.ejml</groupId>
-      <artifactId>ejml-all</artifactId>
-      <version>0.41</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-math3</artifactId>
-      <version>3.6.1</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/de.xypron.jcobyla/jcobyla -->
-    <dependency>
-      <groupId>de.xypron.jcobyla</groupId>
-      <artifactId>jcobyla</artifactId>
-      <version>1.3</version>
-    </dependency>
-    <dependency>
-      <groupId>net.objecthunter</groupId>
-      <artifactId>exp4j</artifactId>
-      <version>0.4.8</version>
-    </dependency>
-    <dependency>
-      <groupId>net.jqwik</groupId>
-      <artifactId>jqwik</artifactId>
-      <version>1.5.4</version>
-      <scope>test</scope>
     </dependency>
       <dependency>
           <groupId>org.junit.jupiter</groupId>

@@ -56,6 +56,8 @@ public interface XMLConstantNames {
 	public static final String XML_A_STATION_NAME = "name";
 	public static final String XML_E_STATION_SECTION = "section";
 	public static final String XML_E_STATION_DUE_DATES = "classSoftDeadlines";
+	public static final String XML_E_STATION_QUANTUM_SIZE = "quantumSize";
+	public static final String XML_E_STATION_QUANTUM_SWITCHOVER_TIME = "quantumSwitchoverTime";
 
 	public static final String XML_E_STATION_DELAY_OFF = "delayOff";
 
@@ -163,6 +165,7 @@ public interface XMLConstantNames {
 	public static final String CLASSNAME_GATEDPSERVER = "GatedPollingServer";
 	public static final String CLASSNAME_EXHAUSTIVEPSERVER = "ExhaustivePollingServer";
 	public static final String CLASSNAME_PSSERVER = "PSServer";
+	public static final String CLASSNAME_PSSERVER_PRIORITY = "PSServerPriority";
 	public static final String CLASSNAME_DELAY = "Delay";
 	public static final String CLASSNAME_TUNNEL = "ServiceTunnel";
 	public static final String CLASSNAME_LOGGER = "LogTunnel"; /* MF08 0.7.4 - extends ServiceTunnel */

@@ -49,8 +49,8 @@ import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 import jmt.gui.jsimgraph.DialogFactory;
 
 /**
@@ -89,7 +89,8 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected static final Object[] serverPSQueuePolicies = {
 			QUEUE_STRATEGY_PS,
 			QUEUE_STRATEGY_DPS,
-			QUEUE_STRATEGY_GPS
+			QUEUE_STRATEGY_GPS,
+			QUEUE_STRATEGY_QBPS
 	};
 
 	protected static final Object[] serverPSQueuePriorityPolicies = {

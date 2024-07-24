@@ -50,9 +50,9 @@ import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.editors.DistributionsEditor;
 import jmt.gui.common.editors.GrayCellRenderer;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
-import jmt.gui.exact.table.BooleanCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
-import jmt.gui.exact.table.ExactCellRenderer;
+import jmt.gui.table.BooleanCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+import jmt.gui.table.ExactCellRenderer;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 
 /**

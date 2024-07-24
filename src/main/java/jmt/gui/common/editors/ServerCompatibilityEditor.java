@@ -24,7 +24,7 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.exact.table.BooleanCellRenderer;
+import jmt.gui.table.BooleanCellRenderer;
 
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;

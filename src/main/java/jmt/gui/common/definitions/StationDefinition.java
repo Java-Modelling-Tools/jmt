@@ -958,4 +958,12 @@ public interface StationDefinition {
 	 */
 	public void setFiringOutcome(Object stationKey, int modeIndex, Object stationOutKey, Object classKey, Integer value);
 
+	public void setQuantumSize(Object stationKey, Double quantaSize);
+
+	public Double getQuantumSize(Object stationKey);
+
+	public void setQuantumSwitchoverTime(Object stationKey, Double switchOverTime);
+
+	public Double getQuantumSwitchoverTime(Object stationKey);
+
 }

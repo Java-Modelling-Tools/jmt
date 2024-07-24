@@ -541,7 +541,7 @@ public class ModelLoader {
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
-	protected static class JmtFileFilter extends FileFilter {
+	public static class JmtFileFilter extends FileFilter {
 
 		public static final String SEP = ";";
 

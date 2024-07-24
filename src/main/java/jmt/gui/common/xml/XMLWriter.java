@@ -109,6 +109,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 		temp = new HashMap<String, String>();
 		temp.put(QUEUE_STRATEGY_PS, "EPSStrategy");
+		temp.put(QUEUE_STRATEGY_QBPS, "QBPSStrategy");
 		temp.put(QUEUE_STRATEGY_GPS, "GPSStrategy");
 		temp.put(QUEUE_STRATEGY_DPS, "DPSStrategy");
 		PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(temp);
@@ -357,7 +358,11 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			Object stationKey = stations.get(i);
 			String stationType = model.getStationType(stationKey);
 
-			if (STATION_TYPE_DELAY.equals(stationType) || STATION_TYPE_SERVER.equals(stationType)) {
+			if(STATION_TYPE_SERVER.equals(stationType)){
+				writeStationSoftDeadlines(doc, elem, model, stationKey);
+				writeStationQuantumSize(doc, elem, model, stationKey);
+				writeStationQuantumSwitchoverTime(doc, elem, model, stationKey);
+			} else if (STATION_TYPE_DELAY.equals(stationType)) {
 				writeStationSoftDeadlines(doc, elem, model, stationKey);
 			}
 
@@ -431,6 +436,21 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		node.appendChild(softDeadlines);
 	}
 
+	private static void writeStationQuantumSize(Document doc, Node node, CommonModel model, Object stationKey) {
+		Element quantaSizes = doc.createElement(XML_E_STATION_QUANTUM_SIZE);
+		Element quantaSize = doc.createElement("quantaSize");
+		quantaSize.setTextContent(model.getQuantumSize(stationKey).toString());
+		quantaSizes.appendChild(quantaSize);
+		node.appendChild(quantaSizes);
+	}
+
+	private static void writeStationQuantumSwitchoverTime(Document doc, Node node, CommonModel model, Object stationKey) {
+		Element quantumSwitchoverTimes = doc.createElement(XML_E_STATION_QUANTUM_SWITCHOVER_TIME);
+		Element quantumSwitchoverTime = doc.createElement("quantumSwitchoverTime");
+		quantumSwitchoverTime.setTextContent(model.getQuantumSwitchoverTime(stationKey).toString());
+		quantumSwitchoverTimes.appendChild(quantumSwitchoverTime);
+		node.appendChild(quantumSwitchoverTimes);
+	}
 
 	/**
 	 * Writes a Fork output section <br>
@@ -995,8 +1015,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 																					 CommonModel model, Object stationKey) {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
-		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
+		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
+		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
+			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER_PRIORITY);
 		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 				|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PREEMPTIVESERVER);

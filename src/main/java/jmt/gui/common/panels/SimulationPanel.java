@@ -41,9 +41,9 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.exact.table.ExactCellEditor;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactCellEditor;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 
 /**
  * <p>Title: Simulation & Preloading Panel</p>

@@ -56,8 +56,8 @@ import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.

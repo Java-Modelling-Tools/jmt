@@ -512,11 +512,15 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		String type, name;
 		NodeList sections;
 		NodeList classSoftDeadlines;
+		NodeList quantumSize;
+		NodeList quantumSwitchoverTime;
 		// For every station, identifies its type and parses its parameters
 		for (int i = 0; i < nodestations.getLength(); i++) {
 			station = (Element) nodestations.item(i);
 			sections = station.getElementsByTagName(XML_E_STATION_SECTION);
 			classSoftDeadlines = station.getElementsByTagName(XML_E_STATION_DUE_DATES);
+			quantumSize = station.getElementsByTagName(XML_E_STATION_QUANTUM_SIZE);
+			quantumSwitchoverTime = station.getElementsByTagName(XML_E_STATION_QUANTUM_SWITCHOVER_TIME);
 			type = getStationType(station);
 			name = station.getAttribute(XML_A_STATION_NAME);
 			// Puts station into data structure
@@ -541,6 +545,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				parseServerSection((Element) sections.item(1), model, key);
 				parseRouterSection((Element) sections.item(2), model, key);
 				parseClassStationSoftDeadlines(classSoftDeadlines, model, key);
+				parseQuantaSize(quantumSize, model, key);
+				parseQuantumSwitchoverTime(quantumSwitchoverTime, model, key);
 			} else if (type.equals(STATION_TYPE_FORK)) {
 				parseQueueSection((Element) sections.item(0), model, key);
 				parseForkSection((Element) sections.item(2), model, key);
@@ -592,6 +598,28 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		for (int i = 0; i < softDeadlines.size(); i++) {
 			Object classKey = classKeys.get(i);
 			model.setClassStationSoftDeadline(key, classKey, softDeadlines.get(i));
+		}
+	}
+
+	protected static void parseQuantaSize(NodeList quantaSize, CommonModel model, Object key) {
+		if (quantaSize.getLength() == 0) {
+			return;
+		}
+
+		Node quantaSizeNode = quantaSize.item(0);
+		if (quantaSizeNode.getNodeType() == Node.ELEMENT_NODE) {
+			model.setQuantumSize(key, Double.parseDouble(quantaSizeNode.getTextContent()));
+		}
+	}
+
+	protected static void parseQuantumSwitchoverTime(NodeList quantumSwitchoverTime, CommonModel model, Object key) {
+		if (quantumSwitchoverTime.getLength() == 0) {
+			return;
+		}
+
+		Node quantumSwitchoverTimeNode = quantumSwitchoverTime.item(0);
+		if (quantumSwitchoverTimeNode.getNodeType() == Node.ELEMENT_NODE) {
+			model.setQuantumSwitchoverTime(key, Double.parseDouble(quantumSwitchoverTimeNode.getTextContent()));
 		}
 	}
 
@@ -978,6 +1006,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			for (Object classKey : classes.values()) {
 				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_PS);
 			}
+		} else if(CLASSNAME_PSSERVER_PRIORITY.equals(sectionName)) {
+			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY);
+			for (Object classKey : classes.values()) {
+				model.setQueueStrategy(key, classKey, QUEUE_STRATEGY_PS);
+			}
 		} else if (CLASSNAME_LKPSERVER.equals(sectionName)) {
 			model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_POLLING);
 			model.setStationPollingServerType(key, STATION_QUEUE_STRATEGY_POLLING_LIMITED);
@@ -1079,6 +1112,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_GPS);
 					} else if (strategy.equals("DPSStrategy")) {
 						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_DPS);
+					} else if (strategy.equals("QBPSStrategy")){
+						model.setQueueStrategy(key, classes.get(className), QUEUE_STRATEGY_QBPS);
 					}
 				}
 			} else if (name.equals("serviceWeights")) {
@@ -2340,6 +2375,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				&& (sectionNames[1].equals(CLASSNAME_SERVER)
 				|| sectionNames[1].equals(CLASSNAME_PREEMPTIVESERVER)
 				|| sectionNames[1].equals(CLASSNAME_PSSERVER)
+				|| sectionNames[1].equals(CLASSNAME_PSSERVER_PRIORITY)
 				|| sectionNames[1].equals(CLASSNAME_EXHAUSTIVEPSERVER)
 				|| sectionNames[1].equals(CLASSNAME_LKPSERVER)
 				|| sectionNames[1].equals(CLASSNAME_GATEDPSERVER))

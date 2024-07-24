@@ -59,7 +59,7 @@ import jmt.gui.common.routingStrategies.PowerOfKRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.

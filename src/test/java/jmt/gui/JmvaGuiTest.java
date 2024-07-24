@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import jmt.framework.gui.components.JMTDialog;
 import jmt.gui.common.startScreen.GraphStartScreen;
-import jmt.jmva.gui.exact.ExactWizard;
+import jmt.jmva.gui.JMVAWizard;
 import jmt.manual.PDFViewer;
 import jmt.util.ShortDescriptionButtonMatcher;
 import jmt.util.TextButtonMatcher;
@@ -46,7 +46,7 @@ public class JmvaGuiTest {
 				}));
 		window.show();
 		window.button(new ShortDescriptionButtonMatcher(GraphStartScreen.JMVA_SHORT_DESCRIPTION)).click();
-		jmva = WindowFinder.findFrame(ExactWizard.class).using(window.robot);
+		jmva = WindowFinder.findFrame(JMVAWizard.class).using(window.robot);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class JmvaGuiTest {
 	@Test
 	public void JMVAopenNewModel() {
 		jmva.menuItem(new TextMenuItemMatcher("New...")).click();
-		FrameFixture newJmva = WindowFinder.findFrame(ExactWizard.class).using(jmva.robot);
+		FrameFixture newJmva = WindowFinder.findFrame(JMVAWizard.class).using(jmva.robot);
 		newJmva.close();
 	}
 	

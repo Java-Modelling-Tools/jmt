@@ -1145,6 +1145,62 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	@Override
+	public void setQuantumSize(Object key, Double quantaSize) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.quantaSize == null || !sd.quantaSize.equals(quantaSize)) {
+			sd.quantaSize = quantaSize;
+			save = true;
+		}
+	}
+
+	@Override
+	public Double getQuantumSize(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return 0.0;
+		}
+		if(sd.quantaSize == null)
+			return 0.0;
+		else
+			return sd.quantaSize;
+	}
+
+	@Override
+	public void setQuantumSwitchoverTime(Object key, Double quantumSwitchoverTime) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return;
+		}
+		if (sd.quantumSwitchoverTime == null || !sd.quantumSwitchoverTime.equals(quantumSwitchoverTime)) {
+			sd.quantumSwitchoverTime = quantumSwitchoverTime;
+			save = true;
+		}
+	}
+
+	@Override
+	public Double getQuantumSwitchoverTime(Object key) {
+		StationData sd;
+		if (stationDataHM.containsKey(key)) {
+			sd = (StationData) stationDataHM.get(key);
+		} else {
+			return 0.0;
+		}
+		if(sd.quantumSwitchoverTime == null)
+			return 0.0;
+		else
+			return sd.quantumSwitchoverTime;
+	}
+
 	/**
 	 * Returns total capacity of the station, given the search key.
 	 */
@@ -4436,6 +4492,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public String queueStrategy;
 		public Integer numberOfServers;
 		public Integer maxRunningJobs;
+		public Double quantaSize;
+		public Double quantumSwitchoverTime;
 		public String pollingServerType;
 		public Integer pollingKValue;
 		public Boolean serverPolling;
@@ -4467,6 +4525,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.queueStrategy = queueStrategy;
 			sd.numberOfServers = numberOfServers;
 			sd.maxRunningJobs = maxRunningJobs;
+			sd.quantaSize = quantaSize;
 			sd.pollingServerType = pollingServerType;
 			sd.serverPolling = serverPolling;
 			sd.nextServerNum = nextServerNum;

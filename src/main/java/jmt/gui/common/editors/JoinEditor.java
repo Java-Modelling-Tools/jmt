@@ -43,8 +43,8 @@ import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 
 public class JoinEditor extends JSplitPane implements CommonConstants {
 

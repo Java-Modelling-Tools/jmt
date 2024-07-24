@@ -48,7 +48,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.xml.TemplateFileOperation;
-import jmt.gui.exact.table.BooleanCellRenderer;
+import jmt.gui.table.BooleanCellRenderer;
 import jmt.gui.jsimgraph.template.TemplateConstants;
 import jmt.gui.jsimgraph.template.TemplateData;
 

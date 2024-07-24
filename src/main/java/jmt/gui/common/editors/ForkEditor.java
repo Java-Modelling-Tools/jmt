@@ -51,8 +51,8 @@ import jmt.gui.common.forkStrategies.ForkStrategy;
 import jmt.gui.common.forkStrategies.OutPath;
 import jmt.gui.common.forkStrategies.ProbabilitiesFork;
 import jmt.gui.common.panels.WarningScrollTable;
-import jmt.gui.exact.table.DisabledCellRenderer;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
 
 public class ForkEditor extends JSplitPane implements CommonConstants {
 

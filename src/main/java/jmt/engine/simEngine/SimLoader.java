@@ -347,16 +347,6 @@ public class SimLoader {
 
 				jobClasses[i].setSoftDeadline(softDeadline);
 
-				// if the jobClass connect to the cacheMiss class, set it as the cacheHit class
-				if(!cacheMissClass.equals("") & cacheHitClass.equals("")){
-					jobClasses[i].setCacheReferece(cacheMissClass, true);
-				}
-
-				// if the jobClass connect ot the cacheHit class, set it as the cacheMiss class
-				if(cacheMissClass.equals("") & !cacheHitClass.equals("")){
-					jobClasses[i].setCacheReferece(cacheHitClass, false);
-				}
-
 				if (DEBUG) {
 					System.out.println("Class " + jobClasses[i].getName() + " created");
 				}
@@ -392,6 +382,14 @@ public class SimLoader {
 						}
 					}
 				}
+				double quantaSize = 0.0;
+				if (node.getElementsByTagName("quantaSize").getLength() != 0) {
+					quantaSize = Double.parseDouble(node.getElementsByTagName("quantaSize").item(0).getTextContent());
+				}
+				double switchTime = 0.0;
+				if (node.getElementsByTagName("quantumSwitchoverTime").getLength() != 0) {
+					switchTime = Double.parseDouble(node.getElementsByTagName("quantumSwitchoverTime").item(0).getTextContent());
+				}
 
 				//gets list of sections
 				NodeList sectionList = node.getElementsByTagName("section");
@@ -412,6 +410,10 @@ public class SimLoader {
 						}
 						sections[0] = ns;
 					} else if (ns instanceof ServiceSection) {
+						if(ns instanceof PSServer){
+							((PSServer) ns).setQuantumSize(quantaSize);
+							((PSServer) ns).setSwitchTime(switchTime);
+						}
 						sections[1] = ns;
 					} else if (ns instanceof OutputSection) {
 						sections[2] = ns;
@@ -627,9 +629,8 @@ public class SimLoader {
 						}
 					}
 				}
-				//gets the right constructor
-				//System.out.println("    looking for constructor");
-				 Constructor<?> constr = getConstructor(c, parameterTypes);
+
+				Constructor<?> constr = getConstructor(c, parameterTypes);
 				if (DEBUG) {
 					System.out.println("    constructor found");
 				}

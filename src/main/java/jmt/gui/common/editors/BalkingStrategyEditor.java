@@ -57,7 +57,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.serviceStrategies.LDStrategy;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  * <p>Title: Load Dependent Service Time Strategy Editor</p>

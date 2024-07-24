@@ -52,7 +52,7 @@ import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.routingStrategies.LoadDependentRouting;
-import jmt.gui.exact.table.ExactCellEditor;
+import jmt.gui.table.ExactCellEditor;
 
 /**
  * Created by IntelliJ IDEA.

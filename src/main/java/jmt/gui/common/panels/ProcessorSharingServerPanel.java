@@ -60,6 +60,10 @@ public class ProcessorSharingServerPanel extends WizardPanel implements CommonCo
 	private JRadioButton processorLimitFiniteSelector;
 	private ButtonGroup processorLimitSelectors;
 	private JPanel processorLimitWarningPanel;
+	private JPanel quantumSizePanel;
+	private JSpinner quantumSizeSpinner;
+
+	private JSpinner switchoverTimeSpinner;
 
 	public ProcessorSharingServerPanel(StationDefinition stationData, Object stationKey) {
 		this.stationData = stationData;
@@ -78,9 +82,11 @@ public class ProcessorSharingServerPanel extends WizardPanel implements CommonCo
 		initProcessorLimitSelectors();
 		initProcessorLimitSpinner();
 		initProcessorLimitWarningPanel();
+		initQuantaSizePanel();
 
 		// Add the processor limit panel at the top
 		this.add(processorLimitPanel, BorderLayout.NORTH);
+		this.add(quantumSizePanel, BorderLayout.CENTER);
 	}
 
 	/**
@@ -157,6 +163,37 @@ public class ProcessorSharingServerPanel extends WizardPanel implements CommonCo
 	}
 
 	/**
+	 * Initialises the Quanta Size Panel
+	 */
+	private void initQuantaSizePanel() {
+		quantumSizePanel = new JPanel();
+		quantumSizePanel.setLayout(new BoxLayout(quantumSizePanel, BoxLayout.X_AXIS));
+		quantumSizePanel.setBorder(new TitledBorder(new EtchedBorder(), "Quantum-Based Processor Sharing (QBPS)"));
+
+		JPanel quantumSpinnerPanel = new JPanel();
+		quantumSizeSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, Double.MAX_VALUE, 0.1));
+		quantumSizeSpinner.setPreferredSize(DIM_BUTTON_XS);
+
+		JLabel quantaSpinnerLabel = new JLabel("<html> <b>Quantum size</b>:</html>");
+		quantumSpinnerPanel.add(quantaSpinnerLabel);
+		quantumSpinnerPanel.add(quantumSizeSpinner);
+
+		quantumSizePanel.add(quantumSpinnerPanel);
+
+		// Switchover time spinner panel
+		JPanel switchoverSpinnerPanel = new JPanel();
+		switchoverTimeSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, Double.MAX_VALUE, 0.01));
+		switchoverTimeSpinner.setPreferredSize(DIM_BUTTON_XS);
+
+		JLabel switchoverSpinnerLabel = new JLabel("<html> <b>Preemption overhead</b>:</html>");
+		switchoverSpinnerPanel.add(switchoverSpinnerLabel);
+		switchoverSpinnerPanel.add(switchoverTimeSpinner);
+
+		// Add switchover time panel to the main panel
+		quantumSizePanel.add(switchoverSpinnerPanel);
+	}
+
+	/**
 	 * Registers front-end component listeners for triggering station data updates
 	 */
 	private void registerPanelListeners() {
@@ -210,6 +247,24 @@ public class ProcessorSharingServerPanel extends WizardPanel implements CommonCo
 
 		processorLimitInfiniteSelector.addActionListener(processorLimitInfiniteSelectorListener);
 		processorLimitFiniteSelector.addActionListener(processorLimitFiniteSelectorListener);
+
+		// Change Listener for the quantum size spinner
+		quantumSizeSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent changeEvent) {
+				Double quantumSize = (Double) quantumSizeSpinner.getValue();
+				stationData.setQuantumSize(stationKey, quantumSize);
+			}
+		});
+
+		// Change Listener for the switchover time spinner
+		switchoverTimeSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent changeEvent) {
+				Double switchoverTime = (Double) switchoverTimeSpinner.getValue();
+				stationData.setQuantumSwitchoverTime(stationKey, switchoverTime);
+			}
+		});
 	}
 
 	/**
@@ -226,11 +281,22 @@ public class ProcessorSharingServerPanel extends WizardPanel implements CommonCo
 			processorLimitSpinner.setValue(maxRunningJobs);
 			processorLimitSpinner.setEnabled(true);
 		}
+
+		// Update quanta size spinner with the current value from stationData
+		Double quantumSize = stationData.getQuantumSize(stationKey);
+		if (quantumSize != null) {
+			quantumSizeSpinner.setValue(quantumSize);
+		}
+
+		// Update switchover time spinner with the current value from stationData
+		Double switchoverTime = stationData.getQuantumSwitchoverTime(stationKey);
+		if (switchoverTime != null) {
+			switchoverTimeSpinner.setValue(switchoverTime);
+		}
 	}
 
 	@Override
 	public String getName() {
 		return "Processor Sharing Server Properties Editor";
 	}
-
 }

@@ -82,8 +82,8 @@ import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
 import jmt.gui.common.definitions.parametric.NumberOfServersParametricAnalysis;
 import jmt.gui.common.definitions.parametric.TotalStationCapacityParametricAnalysis;
 import jmt.gui.common.definitions.parametric.RoutingProbabilitiesParametricAnalysis;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 
 /**
  * <p>Title: PAResultsWindow </p>

@@ -57,8 +57,8 @@ import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StationDefinition;
 import jmt.gui.common.definitions.parametric.NumberOfCustomerParametricAnalysis;
 import jmt.gui.common.definitions.parametric.ParametricAnalysis;
-import jmt.gui.exact.table.ExactTable;
-import jmt.gui.exact.table.ExactTableModel;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
 
 /**
  * <p>Title: NumberOfCustomersPanel</p>

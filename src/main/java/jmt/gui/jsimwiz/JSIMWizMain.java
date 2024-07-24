@@ -75,7 +75,7 @@ import jmt.gui.jsimwiz.panels.JSimProblemsWindow;
 import jmt.gui.jsimwiz.panels.RSPLPanel;
 import jmt.gui.jsimwiz.panels.StationsPanel;
 import jmt.jmva.analytical.ExactModel;
-import jmt.jmva.gui.exact.ExactWizard;
+import jmt.jmva.gui.JMVAWizard;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
 
@@ -511,7 +511,7 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 		// New Converter by Bertoli Marco
 		ExactModel output = new ExactModel();
 		List<String> res = ModelConverter.convertJSIMtoJMVA(model, output);
-		ExactWizard jmva = new ExactWizard(output);
+		JMVAWizard jmva = new JMVAWizard(output);
 		// If problems are found, shows warnings
 		if (res.size() > 0) {
 			new WarningWindow(res, jmva, CommonConstants.JSIM, CommonConstants.JMVA).show();

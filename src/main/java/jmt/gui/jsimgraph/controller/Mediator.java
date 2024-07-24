@@ -76,7 +76,7 @@ import jmt.gui.jsimgraph.panels.StationNamePanel;
 import jmt.gui.jsimgraph.panels.TemplatePanel;
 import jmt.gui.jsimgraph.panels.JModelClassesPanel;
 import jmt.jmva.analytical.ExactModel;
-import jmt.jmva.gui.exact.ExactWizard;
+import jmt.jmva.gui.JMVAWizard;
 
 import org.jgraph.JGraph;
 import org.jgraph.graph.*;
@@ -2479,7 +2479,7 @@ public class Mediator implements GuiInterface {
 			}
 			ExactModel output = new ExactModel();
 			List<String> res = JSIMtoJMVAConvertor.convert(model, output);
-			ExactWizard jmva = new ExactWizard(output);
+			JMVAWizard jmva = new JMVAWizard(output);
 			// If problems are found, shows warnings
 			if (res.size() > 0) {
 				new WarningWindow(res, jmva, CommonConstants.JSIM, CommonConstants.JMVA).show();

@@ -47,6 +47,7 @@ import jmt.gui.common.xml.XMLArchiver;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.gui.jsimwiz.JSIMWizMain;
 
+import jmt.jmva.gui.JMVAWizard;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -131,6 +132,8 @@ public class Jmt {
 			JSIMWizMain.main(new String[] { args[1] });
 		} else if (args[0].equals("jsimg")) {
 			JSIMGraphMain.main(new String[] { args[1] });
+		} else if (args[0].equals("jmva")) {
+			new JMVAWizard(args[1]);
 		} else {
 			help();
 		}
