@@ -1,0 +1,1034 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultsEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">DefaultsEditor.java</span></div><h1>DefaultsEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.text.ParseException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SpringLayout;
+import javax.swing.WindowConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+
+/**
+ * &lt;p&gt;Title: Defaults Editor&lt;/p&gt;
+ * &lt;p&gt;Description: A modal or non-modal editor used to setup default values for every
+ * parameter of the model.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 12-lug-2005
+ *         Time: 16.18.35
+ *         
+ * Modified by Ashanka (July 2010)
+ * Desc: Added new defaults control of a Random CheckBox.
+ */
+public class DefaultsEditor extends JDialog implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constants used to select which parameters should be shown
+	 */
+	public static final int JMODEL = 0;
+	public static final int JSIM = 1;
+
+	protected static final int BORDERSIZE = 20;
+	protected static final int MINIMUM_TIME = 5; // Minimum simulation duration
+
+	protected int target;
+
+	// --- Constructors --------------------------------------------------------------------------------
+	/**
+	 * Construct a new DefaultsEditor in a non-modal dialog
+	 * @param target Used to specify to show specific parameters for JMODEL or JSIM
+	 */
+	public DefaultsEditor(int target) {
+<span class="nc" id="L103">		super();</span>
+<span class="nc" id="L104">		initWindow(target);</span>
+<span class="nc" id="L105">	}</span>
+
+	/**
+	 * Construct a new DefaultsEditor in a modal dialog
+	 * @param owner owner Frame
+	 * @param target Used to specify to show specific parameters for JMODEL or JSIM
+	 */
+	public DefaultsEditor(Frame owner, int target) {
+<span class="nc" id="L113">		super(owner, true);</span>
+<span class="nc" id="L114">		initWindow(target);</span>
+<span class="nc" id="L115">	}</span>
+
+	/**
+	 * Construct a new DefaultsEditor in a modal dialog
+	 * @param owner owner Dialog
+	 * @param target Used to specify to show specific parameters for JMODEL or JSIM
+	 */
+	public DefaultsEditor(Dialog owner, int target) {
+<span class="nc" id="L123">		super(owner, true);</span>
+<span class="nc" id="L124">		initWindow(target);</span>
+<span class="nc" id="L125">	}</span>
+
+	/**
+	 * Returns a new instance of DefaultsEditor, given parent container (used to find
+	 * top level Dialog or Frame to create this dialog as modal)
+	 * @param parent any type of container contained in a Frame or Dialog
+	 * @param target Used to specify to show specific parameters for JMODEL or JSIM
+	 * @return new instance of DefaultsEditor
+	 */
+	public static DefaultsEditor getInstance(Container parent, int target) {
+		// Finds top level Dialog or Frame to invoke correct constructor
+<span class="nc bnc" id="L136" title="All 4 branches missed.">		while (!(parent instanceof Frame || parent instanceof Dialog)) {</span>
+<span class="nc" id="L137">			parent = parent.getParent();</span>
+		}
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if (parent instanceof Frame) {</span>
+<span class="nc" id="L141">			return new DefaultsEditor((Frame) parent, target);</span>
+		} else {
+<span class="nc" id="L143">			return new DefaultsEditor((Dialog) parent, target);</span>
+		}
+	}
+
+	// -------------------------------------------------------------------------------------------------
+
+	// --- Actions performed by buttons and EventListeners ---------------------------------------------
+	// When okay button is pressed
+<span class="nc" id="L151">	protected AbstractAction okayAction = new AbstractAction(&quot;OK&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L156">			putValue(Action.SHORT_DESCRIPTION, &quot;Closes this window and saves all changes&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L160">			Defaults.save();</span>
+<span class="nc" id="L161">			DefaultsEditor.this.dispose();</span>
+<span class="nc" id="L162">		}</span>
+	};
+
+	// When cancel button is pressed
+<span class="nc" id="L166">	protected AbstractAction cancelAction = new AbstractAction(&quot;Cancel&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L171">			putValue(Action.SHORT_DESCRIPTION, &quot;Closes this window discarding all changes&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L175">			Defaults.reload();</span>
+<span class="nc" id="L176">			DefaultsEditor.this.dispose();</span>
+<span class="nc" id="L177">		}</span>
+	};
+
+	// When reset button is pressed
+<span class="nc" id="L181">	protected AbstractAction resetAction = new AbstractAction(&quot;Reset&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L186">			putValue(Action.SHORT_DESCRIPTION, &quot;Reverts all values to original ones&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// Unregister all stringListener to avoid strange random things
+			JTextField tmp;
+<span class="nc bnc" id="L192" title="All 2 branches missed.">			while (!registeredStringListener.isEmpty()) {</span>
+<span class="nc" id="L193">				tmp = registeredStringListener.remove(0);</span>
+<span class="nc" id="L194">				tmp.removeFocusListener(stringListener);</span>
+<span class="nc" id="L195">				tmp.removeKeyListener(stringListener);</span>
+			}
+<span class="nc" id="L197">			Defaults.revertToDefaults();</span>
+<span class="nc" id="L198">			DefaultsEditor.this.getContentPane().removeAll();</span>
+<span class="nc" id="L199">			DefaultsEditor.this.initComponents(target);</span>
+<span class="nc" id="L200">			DefaultsEditor.this.show();</span>
+<span class="nc" id="L201">		}</span>
+	};
+
+	/**
+	 * Listener used to set parameters (associated to param_panel's JTextFields).
+	 * Parameters are set when JTextField loses focus or ENTER key is pressed.
+	 */
+<span class="nc" id="L208">	protected class inputListener implements KeyListener, FocusListener {</span>
+
+		/**
+		 * Update values of Defaults fields
+		 */
+		protected void updateValues(Object source) {
+<span class="nc" id="L214">			JTextField src = (JTextField) source;</span>
+<span class="nc" id="L215">			Defaults.set(src.getName(), src.getText());</span>
+<span class="nc" id="L216">		}</span>
+
+		public void focusLost(FocusEvent e) {
+<span class="nc" id="L219">			updateValues(e.getSource());</span>
+<span class="nc" id="L220">		}</span>
+
+		public void keyPressed(KeyEvent e) {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">			if (e.getKeyCode() == KeyEvent.VK_ENTER) {</span>
+<span class="nc" id="L224">				updateValues(e.getSource());</span>
+<span class="nc" id="L225">				e.consume();</span>
+			}
+<span class="nc" id="L227">		}</span>
+
+		public void focusGained(FocusEvent e) {
+<span class="nc" id="L230">		}</span>
+
+		public void keyReleased(KeyEvent e) {
+<span class="nc" id="L233">		}</span>
+
+		public void keyTyped(KeyEvent e) {
+<span class="nc" id="L236">		}</span>
+	}
+
+<span class="nc" id="L239">	protected inputListener stringListener = new inputListener();</span>
+	// Vector that contains every component in which a StringListener has been registered
+	// It is used as the focus listener can do &quot;random&quot; things while reverting values
+	// to original ones
+<span class="nc" id="L243">	protected Vector&lt;JTextField&gt; registeredStringListener = new Vector&lt;JTextField&gt;();</span>
+
+	// -------------------------------------------------------------------------------------------------
+
+	/**
+	 * Initialize parameters of the window (size, title)... Then calls &lt;code&gt;initComponents&lt;/code&gt;
+	 * @param target target application (JMODEL or JSIM)
+	 */
+	protected void initWindow(int target) {
+<span class="nc" id="L252">		this.target = target;</span>
+		// Sets default title, close operation and dimensions
+<span class="nc" id="L254">		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L255">		setTitle(&quot;Editing Default Parameters...&quot;);</span>
+<span class="nc" id="L256">		int width = 840, height = 600;</span>
+
+		// Centers this dialog on the screen
+<span class="nc" id="L259">		Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L260">		setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);</span>
+		// If user closes this window, act as cancel and reloads saved parameters
+<span class="nc" id="L262">		addWindowStateListener(new WindowAdapter() {</span>
+			@Override
+			public void windowClosing(WindowEvent e) {
+<span class="nc" id="L265">				Defaults.reload();</span>
+<span class="nc" id="L266">			}</span>
+		});
+<span class="nc" id="L268">		initComponents(target);</span>
+<span class="nc" id="L269">	}</span>
+
+	/**
+	 * Initialize all graphic objects
+	 * @param target target application (JMODEL or JSIM)
+	 */
+	protected void initComponents(int target) {
+		// Creates a main panel and adds margins to it
+<span class="nc" id="L277">		JPanel mainpanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L278">		mainpanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L279">		mainpanel.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));</span>
+<span class="nc" id="L280">		getContentPane().add(mainpanel, BorderLayout.CENTER);</span>
+
+		// Adds bottom_panel to contentpane
+<span class="nc" id="L283">		JPanel bottom_panel = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L284">		getContentPane().add((bottom_panel), BorderLayout.SOUTH);</span>
+
+		// Adds Okay button to bottom_panel
+<span class="nc" id="L287">		JButton okaybutton = new JButton(okayAction);</span>
+<span class="nc" id="L288">		bottom_panel.add(okaybutton);</span>
+
+		// Adds Cancel button to bottom_panel
+<span class="nc" id="L291">		JButton cancelbutton = new JButton(cancelAction);</span>
+<span class="nc" id="L292">		bottom_panel.add(cancelbutton);</span>
+
+		// Adds Cancel button to bottom_panel
+<span class="nc" id="L295">		JButton resetbutton = new JButton(resetAction);</span>
+<span class="nc" id="L296">		bottom_panel.add(resetbutton);</span>
+
+		// Creates param_panel
+<span class="nc" id="L299">		JPanel param_panel = new JPanel(new GridLayout(4, 1));</span>
+<span class="nc" id="L300">		mainpanel.add(new JScrollPane(param_panel), BorderLayout.CENTER);</span>
+
+		Map&lt;String, String&gt; tmpMap;
+
+		// Class Parameters
+<span class="nc" id="L305">		JPanel class_panel = new JPanel(new SpringLayout());</span>
+<span class="nc" id="L306">		int classpanelnum = 0; // Counts all inserted elements</span>
+<span class="nc" id="L307">		class_panel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Default Class Parameters&quot;));</span>
+
+		// Name
+<span class="nc" id="L310">		addInputString(&quot;Name&quot;, &quot;className&quot;, class_panel);</span>
+<span class="nc" id="L311">		classpanelnum++;</span>
+
+		// Type
+<span class="nc" id="L314">		tmpMap = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L315">		tmpMap.put(&quot;&quot; + CommonConstants.CLASS_TYPE_OPEN, &quot;Open&quot;);</span>
+<span class="nc" id="L316">		tmpMap.put(&quot;&quot; + CommonConstants.CLASS_TYPE_CLOSED, &quot;Closed&quot;);</span>
+<span class="nc" id="L317">		addInputCombo(&quot;Type&quot;, &quot;classType&quot;, class_panel, tmpMap);</span>
+<span class="nc" id="L318">		classpanelnum++;</span>
+
+		// Priority
+<span class="nc" id="L321">		addInputSpinner(&quot;Priority&quot;, &quot;classPriority&quot;, class_panel, 0);</span>
+<span class="nc" id="L322">		classpanelnum++;</span>
+
+		// Population
+<span class="nc" id="L325">		addInputSpinner(&quot;Population (closed classes)&quot;, &quot;classPopulation&quot;, class_panel, 1);</span>
+<span class="nc" id="L326">		classpanelnum++;</span>
+
+		// Distribution
+<span class="nc" id="L329">		addInputDistribution(&quot;Distribution (open classes)&quot;, &quot;classDistribution&quot;, class_panel);</span>
+<span class="nc" id="L330">		classpanelnum++;</span>
+
+<span class="nc" id="L332">		SpringUtilities.makeCompactGrid(class_panel, classpanelnum, 2, //rows, cols</span>
+				6, 6, //initX, initY
+				6, 6);//xPad, yPad
+
+		// Station Parameters
+<span class="nc" id="L337">		JPanel station_panel = new JPanel(new SpringLayout());</span>
+<span class="nc" id="L338">		int stationpanelnum = 0; // Counts all inserted elements</span>
+<span class="nc" id="L339">		station_panel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Default Station Parameters&quot;));</span>
+
+		// Name (JSIM only)
+<span class="nc bnc" id="L342" title="All 2 branches missed.">		if (target == JSIM) {</span>
+<span class="nc" id="L343">			addInputString(&quot;Name&quot;, &quot;stationName&quot;, station_panel);</span>
+<span class="nc" id="L344">			stationpanelnum++;</span>
+		}
+
+		// Station type (JSIM only)
+<span class="nc bnc" id="L348" title="All 2 branches missed.">		if (target == JSIM) {</span>
+<span class="nc" id="L349">			tmpMap = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L350">			Set&lt;String&gt; tmpSet = STATION_NAMES.keySet();</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">			for (String tmp : tmpSet) {</span>
+<span class="nc bnc" id="L352" title="All 4 branches missed.">				if (!tmp.equals(STATION_TYPE_SOURCE) &amp;&amp; !tmp.equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L353">					tmpMap.put(tmp, STATION_NAMES.get(tmp));</span>
+				}
+<span class="nc" id="L355">			}</span>
+<span class="nc" id="L356">			addInputCombo(&quot;Type&quot;, &quot;stationType&quot;, station_panel, tmpMap);</span>
+<span class="nc" id="L357">			stationpanelnum++;</span>
+		}
+
+		// Queue Capacity
+<span class="nc" id="L361">		addInputInfSpinner(&quot;Queue Capacity&quot;, &quot;stationCapacity&quot;, station_panel, 1, -1);</span>
+<span class="nc" id="L362">		stationpanelnum++;</span>
+
+		// Number of Servers
+<span class="nc" id="L365">		addInputSpinner(&quot;Number of Servers&quot;, &quot;stationServers&quot;, station_panel, 1);</span>
+<span class="nc" id="L366">		stationpanelnum++;</span>
+
+		// Station Queue Strategy
+<span class="nc" id="L369">		addInputStationQueueStrategy(&quot;Station Queue Strategy&quot;, &quot;stationStationQueueStrategy&quot;, station_panel);</span>
+<span class="nc" id="L370">		stationpanelnum++;</span>
+
+		// Queue Strategy
+<span class="nc" id="L373">		addInputQueueStrategy(&quot;Queue Strategy&quot;, &quot;stationQueueStrategy&quot;, station_panel);</span>
+<span class="nc" id="L374">		stationpanelnum++;</span>
+
+		// Drop rule
+<span class="nc" id="L377">		addInputDropRule(&quot;Drop Rule&quot;, &quot;dropRule&quot;, station_panel);</span>
+<span class="nc" id="L378">		stationpanelnum++;</span>
+
+		// Service strategy
+<span class="nc" id="L381">		addInputDistribution(&quot;Service Distribution&quot;, &quot;stationServiceStrategy&quot;, station_panel);</span>
+<span class="nc" id="L382">		stationpanelnum++;</span>
+
+		// Delay service strategy
+<span class="nc" id="L385">		addInputDistribution(&quot;Delay Service Distribution&quot;, &quot;stationDelayServiceStrategy&quot;, station_panel);</span>
+<span class="nc" id="L386">		stationpanelnum++;</span>
+
+		// Routing strategy
+<span class="nc" id="L389">		addInputRoutingStrategy(&quot;Routing Strategy&quot;, &quot;stationRoutingStrategy&quot;, station_panel);</span>
+<span class="nc" id="L390">		stationpanelnum++;</span>
+
+		// Fork Blocking
+<span class="nc" id="L393">		addInputInfSpinner(&quot;Fork Capacity&quot;, &quot;forkBlock&quot;, station_panel, 1, -1);</span>
+<span class="nc" id="L394">		stationpanelnum++;</span>
+
+		// Number of jobs created for each fork link
+<span class="nc" id="L397">		addInputSpinner(&quot;Fork Degree&quot;, &quot;forkJobsPerLink&quot;, station_panel, 1);</span>
+<span class="nc" id="L398">		stationpanelnum++;</span>
+
+<span class="nc" id="L400">		SpringUtilities.makeCompactGrid(station_panel, stationpanelnum, 2, //rows, cols</span>
+				6, 6, //initX, initY
+				6, 6);//xPad, yPad
+
+		// Simulation Parameters
+<span class="nc" id="L405">		JPanel sim_panel = new JPanel(new SpringLayout());</span>
+<span class="nc" id="L406">		int simpanelnum = 0; // Counts all inserted elements</span>
+<span class="nc" id="L407">		sim_panel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Default Simulation Parameters&quot;));</span>
+
+		// Measure Alpha
+<span class="nc" id="L410">		addInput01Spinner(&quot;Confidence Interval Measure (0-1)&quot;, &quot;measureAlpha&quot;, sim_panel);</span>
+<span class="nc" id="L411">		simpanelnum++;</span>
+
+		// Measure Precision
+<span class="nc" id="L414">		addInput01Spinner(&quot;Max Relative Error Measure (0-1)&quot;, &quot;measurePrecision&quot;, sim_panel);</span>
+<span class="nc" id="L415">		simpanelnum++;</span>
+
+		// Simulation Seed
+<span class="nc" id="L418">		addInputRandomSpinner(&quot;Simulation seed&quot;, &quot;isSimulationSeedRandom&quot;, &quot;simulationSeed&quot;, sim_panel, 1);</span>
+<span class="nc" id="L419">		simpanelnum++;</span>
+
+		// Maximum duration
+<span class="nc" id="L422">		addInputInfSpinner(&quot;Maximum duration (sec)&quot;, &quot;simulationMaxDuration&quot;, sim_panel, MINIMUM_TIME, -1);</span>
+<span class="nc" id="L423">		simpanelnum++;</span>
+
+		// Maximum simulated time
+<span class="nc" id="L426">		addInputInfSpinner(&quot;Maximum simulated time&quot;, &quot;maxSimulatedTime&quot;, sim_panel, MINIMUM_TIME, -1);</span>
+<span class="nc" id="L427">		simpanelnum++;</span>
+
+		// Maximum number of samples
+<span class="nc" id="L430">		addInputNoAutoSpinner(&quot;Maximum number of samples&quot;, &quot;isStatisticDisabled&quot;, &quot;maxSimulationSamples&quot;, sim_panel, 100000);</span>
+<span class="nc" id="L431">		simpanelnum++;</span>
+
+		// Maximum number of events
+<span class="nc" id="L434">		addInputInfSpinner(&quot;Maximum number of events&quot;, &quot;maxSimulationEvents&quot;, sim_panel, 10000, -1);</span>
+<span class="nc" id="L435">		simpanelnum++;</span>
+
+		//Polling interval
+<span class="nc" id="L438">		simpanelnum++;</span>
+<span class="nc" id="L439">		addInputSpinner(&quot;Animation update interval (sec)&quot;, &quot;simulationPolling&quot;, sim_panel, 1);</span>
+
+		// Animation enabled/disabled
+<span class="nc" id="L442">		simpanelnum++;</span>
+<span class="nc" id="L443">		addInputAnimationSpinner(&quot;Number of classes in queue animation&quot;, &quot;isWithAnimation&quot;, &quot;representableClasses&quot;, sim_panel, 1, 10);</span>
+
+		//What if parallelism
+<span class="nc" id="L446">		simpanelnum++;		</span>
+<span class="nc" id="L447">		addInputSpinner(&quot;What-if Analysis parallel threads&quot;, &quot;whatIfParallelism&quot;, sim_panel, 1);</span>
+
+<span class="nc" id="L449">		SpringUtilities.makeCompactGrid(sim_panel, simpanelnum, 2, //rows, cols</span>
+				6, 6, //initX, initY
+				6, 6);//xPad, yPad
+
+<span class="nc" id="L453">		param_panel.add(sim_panel);</span>
+<span class="nc" id="L454">		param_panel.add(class_panel);</span>
+<span class="nc" id="L455">		param_panel.add(station_panel);</span>
+
+		// Blocking region parameters
+<span class="nc" id="L458">		JPanel block_panel = new JPanel(new SpringLayout());</span>
+<span class="nc" id="L459">		int blockpanelnum = 0; // Counts all inserted elements</span>
+<span class="nc" id="L460">		block_panel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Default Finite Capacity Region Parameters&quot;));</span>
+
+		// Blocking Region name
+<span class="nc" id="L463">		addInputString(&quot;Name&quot;, &quot;blockingRegionName&quot;, block_panel);</span>
+<span class="nc" id="L464">		blockpanelnum++;</span>
+
+		// Region Capacity
+<span class="nc" id="L467">		addInputInfSpinner(&quot;Global Region Capacity&quot;, &quot;blockingMaxJobs&quot;, block_panel, 1, -1);</span>
+<span class="nc" id="L468">		blockpanelnum++;</span>
+
+		// Region Memory
+<span class="nc" id="L471">		addInputInfSpinner(&quot;Global Region Memory&quot;, &quot;blockingMaxMemory&quot;, block_panel, 1, -1);</span>
+<span class="nc" id="L472">		blockpanelnum++;</span>
+
+		// Region Capacity per Class
+<span class="nc" id="L475">		addInputInfSpinner(&quot;Region Capacity per Class&quot;, &quot;blockingMaxJobsPerClass&quot;, block_panel, 1, -1);</span>
+<span class="nc" id="L476">		blockpanelnum++;</span>
+
+		// Region Memory per Class
+<span class="nc" id="L479">		addInputInfSpinner(&quot;Region Memory per Class&quot;, &quot;blockingMaxMemoryPerClass&quot;, block_panel, 1, -1);</span>
+<span class="nc" id="L480">		blockpanelnum++;</span>
+
+		// Drop rule
+<span class="nc" id="L483">		addBooleanComboBox(&quot;Drop&quot;, &quot;blockingDropPerClass&quot;, block_panel);</span>
+<span class="nc" id="L484">		blockpanelnum++;</span>
+
+<span class="nc" id="L486">		SpringUtilities.makeCompactGrid(block_panel, blockpanelnum, 2, //rows, cols</span>
+				6, 6, //initX, initY
+				6, 6);//xPad, yPad
+<span class="nc" id="L489">		param_panel.add(block_panel);</span>
+<span class="nc" id="L490">	}</span>
+
+	/**
+	 * Adds an input field to insert a String
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputString(String text, String property, Container cont) {
+<span class="nc" id="L499">		JLabel label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L500">		JTextField field = new JTextField(10);</span>
+<span class="nc" id="L501">		field.setName(property);</span>
+<span class="nc" id="L502">		label.setLabelFor(field);</span>
+<span class="nc" id="L503">		field.setText(Defaults.get(property));</span>
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L505">		field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));</span>
+<span class="nc" id="L506">		field.addKeyListener(stringListener);</span>
+<span class="nc" id="L507">		field.addFocusListener(stringListener);</span>
+<span class="nc" id="L508">		registeredStringListener.add(field);</span>
+<span class="nc" id="L509">		cont.add(label);</span>
+<span class="nc" id="L510">		cont.add(field);</span>
+<span class="nc" id="L511">	}</span>
+
+	/**
+	 * Adds an input field to select from a ComboBox
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 * @param values Map with internal value &lt;-&gt; showed value relations
+	 */
+	protected void addInputCombo(String text, final String property, Container cont, final Map&lt;String, String&gt; values) {
+<span class="nc" id="L521">		JLabel label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L522">		JComboBox combo = new JComboBox(values.values().toArray());</span>
+<span class="nc" id="L523">		combo.setName(property);</span>
+<span class="nc" id="L524">		label.setLabelFor(combo);</span>
+<span class="nc" id="L525">		combo.setSelectedItem(values.get(Defaults.get(property)));</span>
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L527">		combo.setMaximumSize(new Dimension(combo.getMaximumSize().width, combo.getMinimumSize().height));</span>
+<span class="nc" id="L528">		combo.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L531">					return;</span>
+				}
+				// As Map does not allows reverse mapping, scans the entire keyset to
+				// find the key corresponding to a given object
+<span class="nc" id="L535">				Object[] keys = values.keySet().toArray();</span>
+<span class="nc bnc" id="L536" title="All 2 branches missed.">				for (Object key : keys) {</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">					if (values.get(key) == e.getItem()) {</span>
+<span class="nc" id="L538">						Defaults.set(property, (String) key);</span>
+					}
+				}
+<span class="nc" id="L541">			}</span>
+		});
+<span class="nc" id="L543">		cont.add(label);</span>
+<span class="nc" id="L544">		cont.add(combo);</span>
+<span class="nc" id="L545">	}</span>
+
+	/**
+	 * Adds an input field to choose a number from a Spinner
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 * @param minvalue minimum value allowed for this property
+	 */
+	protected void addInputSpinner(String text, final String property, Container cont, final int minvalue) {
+		JLabel label;
+<span class="nc" id="L556">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L557">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L558">		label.setLabelFor(spinner);</span>
+<span class="nc" id="L559">		spinner.setValue(Defaults.getAsInteger(property));</span>
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L561">		spinner.setMaximumSize(new Dimension(spinner.getMaximumSize().width, spinner.getMinimumSize().height));</span>
+<span class="nc" id="L562">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L566">					spinner.commitEdit();</span>
+<span class="nc" id="L567">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L569">					return;</span>
+<span class="nc" id="L570">				}</span>
+				//new number of classes
+<span class="nc" id="L572">				int x = minvalue;</span>
+				try {
+<span class="nc" id="L574">					x = ((Integer) spinner.getValue()).intValue();</span>
+<span class="nc" id="L575">				} catch (NumberFormatException nfe) {</span>
+					//null
+<span class="nc" id="L577">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L579">				}</span>
+<span class="nc bnc" id="L580" title="All 2 branches missed.">				if (x &lt; minvalue) {</span>
+<span class="nc" id="L581">					x = minvalue;</span>
+				}
+<span class="nc" id="L583">				spinner.setValue(new Integer(x));</span>
+<span class="nc" id="L584">				Defaults.set(property, Integer.toString(x));</span>
+<span class="nc" id="L585">			}</span>
+		});
+<span class="nc" id="L587">		cont.add(label);</span>
+<span class="nc" id="L588">		cont.add(spinner);</span>
+<span class="nc" id="L589">	}</span>
+
+	/**
+	 * Adds an input field to choose a number from a Spinner. Number is between 0 and 1
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInput01Spinner(String text, final String property, Container cont) {
+		JLabel label;
+<span class="nc" id="L599">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L600">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L601">		spinner.setModel(new SpinnerNumberModel(0.0, 0.0, 1.0, 0.01));</span>
+<span class="nc" id="L602">		label.setLabelFor(spinner);</span>
+<span class="nc" id="L603">		spinner.setValue(Defaults.getAsDouble(property));</span>
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L605">		spinner.setMaximumSize(new Dimension(spinner.getMaximumSize().width, spinner.getMinimumSize().height));</span>
+<span class="nc" id="L606">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L610">					spinner.commitEdit();</span>
+<span class="nc" id="L611">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L613">					return;</span>
+<span class="nc" id="L614">				}</span>
+				//new number of classes
+<span class="nc" id="L616">				double x = 0;</span>
+				try {
+<span class="nc" id="L618">					x = ((Double) spinner.getValue()).doubleValue();</span>
+<span class="nc" id="L619">				} catch (NumberFormatException nfe) {</span>
+					// null
+<span class="nc" id="L621">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L623">				}</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">				if (x &lt; 0) {</span>
+<span class="nc" id="L625">					x = 0;</span>
+				}
+<span class="nc bnc" id="L627" title="All 2 branches missed.">				if (x &gt; 1) {</span>
+<span class="nc" id="L628">					x = 1;</span>
+				}
+<span class="nc" id="L630">				spinner.setValue(new Double(x));</span>
+<span class="nc" id="L631">				Defaults.set(property, Double.toString(x));</span>
+<span class="nc" id="L632">			}</span>
+		});
+<span class="nc" id="L634">		cont.add(label);</span>
+<span class="nc" id="L635">		cont.add(spinner);</span>
+<span class="nc" id="L636">	}</span>
+
+	/**
+	 * Adds an input field to choose a distribution.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputDistribution(String text, final String property, Container cont) {
+		// Creates a Map with distribution names, then delegates addInputCombo to create
+		// graphical components
+<span class="nc" id="L647">		Map&lt;String, String&gt; distributions = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L648">		Distribution[] all = Distribution.findAll();</span>
+<span class="nc bnc" id="L649" title="All 2 branches missed.">		for (Distribution element : all) {</span>
+<span class="nc" id="L650">			distributions.put(element.getClass().getName(), element.getName());</span>
+		}
+<span class="nc" id="L652">		addInputCombo(text, property, cont, distributions);</span>
+<span class="nc" id="L653">	}</span>
+
+	/**
+	 * Adds an input field to choose a station Queue strategy.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputStationQueueStrategy(String text, final String property, Container cont) {
+		// Creates a Map with station Queue strategy names, then delegates addInputCombo to create
+		// graphical components
+<span class="nc" id="L664">		Map&lt;String, String&gt; stationQueueStrategies = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L665">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);</span>
+<span class="nc" id="L666">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);</span>
+<span class="nc" id="L667">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);</span>
+<span class="nc" id="L668">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);</span>
+<span class="nc" id="L669">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);</span>
+<span class="nc" id="L670">		stationQueueStrategies.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);</span>
+<span class="nc" id="L671">		addInputCombo(text, property, cont, stationQueueStrategies);</span>
+<span class="nc" id="L672">	}</span>
+
+	/**
+	 * Adds an input field to choose a Queue strategy.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputQueueStrategy(String text, final String property, Container cont) {
+		// Creates a Map with Queue strategy names, then delegates addInputCombo to create
+		// graphical components
+<span class="nc" id="L683">		Map&lt;String, String&gt; queueStrategies = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L684">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.QUEUE_STRATEGY_FCFS);</span>
+<span class="nc" id="L685">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.QUEUE_STRATEGY_LCFS);</span>
+<span class="nc" id="L686">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.QUEUE_STRATEGY_RAND);</span>
+<span class="nc" id="L687">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.QUEUE_STRATEGY_SJF);</span>
+<span class="nc" id="L688">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.QUEUE_STRATEGY_LJF);</span>
+<span class="nc" id="L689">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SEPT, CommonConstants.QUEUE_STRATEGY_SEPT);</span>
+<span class="nc" id="L690">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LEPT, CommonConstants.QUEUE_STRATEGY_LEPT);</span>
+<span class="nc" id="L691">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);</span>
+<span class="nc" id="L692">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.QUEUE_STRATEGY_LCFS_PR);</span>
+<span class="nc" id="L693">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_SRPT, CommonConstants.QUEUE_STRATEGY_SRPT);</span>
+<span class="nc" id="L694">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_PS, CommonConstants.QUEUE_STRATEGY_PS);</span>
+<span class="nc" id="L695">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_GPS, CommonConstants.QUEUE_STRATEGY_GPS);</span>
+<span class="nc" id="L696">		queueStrategies.put(CommonConstants.QUEUE_STRATEGY_DPS, CommonConstants.QUEUE_STRATEGY_DPS);</span>
+<span class="nc" id="L697">		addInputCombo(text, property, cont, queueStrategies);</span>
+<span class="nc" id="L698">	}</span>
+
+	/**
+	 * Adds an input field to choose a Drop rule.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputDropRule(String text, final String property, Container cont) {
+		// Creates a Map with Drop rule names, then delegates addInputCombo to create
+		// graphical components
+<span class="nc" id="L709">		Map&lt;String, String&gt; dropRules = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L710">		dropRules.put(CommonConstants.FINITE_DROP, CommonConstants.FINITE_DROP);</span>
+<span class="nc" id="L711">		dropRules.put(CommonConstants.FINITE_BLOCK, CommonConstants.FINITE_BLOCK);</span>
+<span class="nc" id="L712">		dropRules.put(CommonConstants.FINITE_WAITING, CommonConstants.FINITE_WAITING);</span>
+<span class="nc" id="L713">		dropRules.put(CommonConstants.FINITE_RETRIAL, CommonConstants.FINITE_RETRIAL);</span>
+<span class="nc" id="L714">		addInputCombo(text, property, cont, dropRules);</span>
+<span class="nc" id="L715">	}</span>
+
+	/**
+	 * Adds an input field to choose a Routing strategy.
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addInputRoutingStrategy(String text, final String property, Container cont) {
+		// Creates a Map with Routing strategy names, then delegates addInputCombo to create
+		// graphical components
+<span class="nc" id="L726">		Map&lt;String, String&gt; routingStrategies = new LinkedHashMap&lt;String, String&gt;();</span>
+<span class="nc" id="L727">		RoutingStrategy[] all = RoutingStrategy.findAll();</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">		for (RoutingStrategy element : all) {</span>
+<span class="nc" id="L729">			routingStrategies.put(element.getClass().getName(), element.toString());</span>
+		}
+<span class="nc" id="L731">		addInputCombo(text, property, cont, routingStrategies);</span>
+<span class="nc" id="L732">	}</span>
+
+	/**
+	 * Adds an input field to choose a number from a Spinner. A special infinite value can be chosen
+	 * with a checkbox
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 * @param minvalue minimum value allowed for this property
+	 * @param infvalue special value to be stored for infinite selection
+	 */
+	protected void addInputInfSpinner(String text, final String property, Container cont, final int minvalue, final int infvalue) {
+		// This one is a clone of addInputSpinner but adds a checkbox to select Infinity
+		JLabel label;
+<span class="nc" id="L746">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L747">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L748">		final JCheckBox inf_button = new JCheckBox();</span>
+<span class="nc" id="L749">		inf_button.setText(&quot;Infinite&quot;);</span>
+<span class="nc" id="L750">		JPanel internal = new JPanel(new BorderLayout(5, 0));</span>
+<span class="nc" id="L751">		internal.add(inf_button, BorderLayout.EAST);</span>
+<span class="nc" id="L752">		internal.add(spinner, BorderLayout.CENTER);</span>
+<span class="nc" id="L753">		label.setLabelFor(internal);</span>
+		// If current default is infinity hides spinner and selects inf_button
+<span class="nc bnc" id="L755" title="All 2 branches missed.">		if (Defaults.getAsInteger(property).intValue() == infvalue) {</span>
+<span class="nc" id="L756">			spinner.setValue(new Integer(minvalue));</span>
+<span class="nc" id="L757">			spinner.setEnabled(false);</span>
+<span class="nc" id="L758">			inf_button.setSelected(true);</span>
+		} else {
+<span class="nc" id="L760">			spinner.setValue(Defaults.getAsInteger(property));</span>
+		}
+		// Adds a listener to support inf_button change events
+<span class="nc" id="L763">		inf_button.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L765" title="All 2 branches missed.">				if (inf_button.isSelected()) {</span>
+<span class="nc" id="L766">					spinner.setEnabled(false);</span>
+<span class="nc" id="L767">					Defaults.set(property, Integer.toString(infvalue));</span>
+				} else {
+<span class="nc" id="L769">					spinner.setEnabled(true);</span>
+<span class="nc" id="L770">					Defaults.set(property, spinner.getValue().toString());</span>
+				}
+<span class="nc" id="L772">			}</span>
+		});
+
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L776">		internal.setMaximumSize(new Dimension(internal.getMaximumSize().width, internal.getMinimumSize().height));</span>
+
+<span class="nc" id="L778">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L782">					spinner.commitEdit();</span>
+<span class="nc" id="L783">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L785">					return;</span>
+<span class="nc" id="L786">				}</span>
+				//new number of classes
+<span class="nc" id="L788">				int x = minvalue;</span>
+				try {
+<span class="nc" id="L790">					x = ((Integer) spinner.getValue()).intValue();</span>
+<span class="nc" id="L791">				} catch (NumberFormatException nfe) {</span>
+					//null
+<span class="nc" id="L793">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L795">				}</span>
+<span class="nc bnc" id="L796" title="All 2 branches missed.">				if (x &lt; minvalue) {</span>
+<span class="nc" id="L797">					x = minvalue;</span>
+				}
+<span class="nc" id="L799">				spinner.setValue(new Integer(x));</span>
+<span class="nc" id="L800">				Defaults.set(property, Integer.toString(x));</span>
+<span class="nc" id="L801">			}</span>
+		});
+<span class="nc" id="L803">		cont.add(label);</span>
+<span class="nc" id="L804">		cont.add(internal);</span>
+<span class="nc" id="L805">	}</span>
+
+	/**
+	 * Adds a ComboBox to select a boolean property
+	 * @param text text to be shown on a label
+	 * @param property property to be changed in Defaults
+	 * @param cont container where input field must be added
+	 */
+	protected void addBooleanComboBox(String text, final String property, Container cont) {
+<span class="nc" id="L814">		JLabel label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L815">		JComboBox combo = new JComboBox(new Object[] { Boolean.TRUE.toString(), Boolean.FALSE.toString() });</span>
+<span class="nc" id="L816">		combo.setName(property);</span>
+<span class="nc" id="L817">		label.setLabelFor(combo);</span>
+<span class="nc" id="L818">		combo.setSelectedItem(Defaults.get(property));</span>
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L820">		combo.setMaximumSize(new Dimension(combo.getMaximumSize().width, combo.getMinimumSize().height));</span>
+<span class="nc" id="L821">		combo.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L823" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L824">					return;</span>
+				}
+<span class="nc" id="L826">				Defaults.set(property, (String) e.getItem());</span>
+<span class="nc" id="L827">			}</span>
+		});
+<span class="nc" id="L829">		cont.add(label);</span>
+<span class="nc" id="L830">		cont.add(combo);</span>
+<span class="nc" id="L831">	}</span>
+
+	protected void addInputAnimationSpinner(String text, final String booleanProperty, final String valueProperty, Container cont,
+			final int minvalue, final int maxvalue) {
+		// This one is a clone of addInputSpinner but adds a checkbox to select Infinity
+		JLabel label;
+<span class="nc" id="L837">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L838">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L839">		final JCheckBox animation_button = new JCheckBox();</span>
+<span class="nc" id="L840">		animation_button.setText(&quot;Animation&quot;);</span>
+<span class="nc" id="L841">		JPanel internal = new JPanel(new BorderLayout(5, 0));</span>
+<span class="nc" id="L842">		internal.add(animation_button, BorderLayout.EAST);</span>
+<span class="nc" id="L843">		internal.add(spinner, BorderLayout.CENTER);</span>
+<span class="nc" id="L844">		label.setLabelFor(internal);</span>
+		// If current default is !animation hides spinner and deselects animation_button
+<span class="nc bnc" id="L846" title="All 2 branches missed.">		if (Defaults.getAsBoolean(booleanProperty).booleanValue()) {</span>
+<span class="nc" id="L847">			spinner.setEnabled(true);</span>
+<span class="nc" id="L848">			animation_button.setSelected(true);</span>
+		} else {
+<span class="nc" id="L850">			spinner.setEnabled(false);</span>
+<span class="nc" id="L851">			animation_button.setSelected(false);</span>
+		}
+<span class="nc" id="L853">		spinner.setValue(Defaults.getAsInteger(valueProperty));</span>
+
+		// Adds a listener to support animation_button change events
+<span class="nc" id="L856">		animation_button.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L858" title="All 2 branches missed.">				if (animation_button.isSelected()) {</span>
+<span class="nc" id="L859">					spinner.setEnabled(true);</span>
+<span class="nc" id="L860">					Defaults.set(booleanProperty, &quot;true&quot;);</span>
+				} else {
+<span class="nc" id="L862">					spinner.setEnabled(false);</span>
+<span class="nc" id="L863">					Defaults.set(booleanProperty, &quot;false&quot;);</span>
+				}
+
+<span class="nc" id="L866">			}</span>
+		});
+
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L870">		internal.setMaximumSize(new Dimension(internal.getMaximumSize().width, internal.getMinimumSize().height));</span>
+
+<span class="nc" id="L872">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L876">					spinner.commitEdit();</span>
+<span class="nc" id="L877">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L879">					return;</span>
+<span class="nc" id="L880">				}</span>
+				//new number of represented classes
+<span class="nc" id="L882">				int x = 0;</span>
+				try {
+<span class="nc" id="L884">					x = ((Integer) spinner.getValue()).intValue();</span>
+<span class="nc" id="L885">				} catch (NumberFormatException nfe) {</span>
+					//null
+<span class="nc" id="L887">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L889">				}</span>
+<span class="nc bnc" id="L890" title="All 4 branches missed.">				if ((x &lt; minvalue) || (x &gt; maxvalue)) {</span>
+<span class="nc" id="L891">					x = Defaults.getAsInteger(valueProperty).intValue();</span>
+				}
+<span class="nc" id="L893">				spinner.setValue(new Integer(x));</span>
+<span class="nc" id="L894">				Defaults.set(valueProperty, Integer.toString(x));</span>
+<span class="nc" id="L895">			}</span>
+		});
+<span class="nc" id="L897">		cont.add(label);</span>
+<span class="nc" id="L898">		cont.add(internal);</span>
+<span class="nc" id="L899">	}</span>
+
+	//Added the Random Checkbox and a spinner.
+	protected void addInputRandomSpinner(String text, final String booleanProperty, final String valueProperty, Container cont,
+			final int minvalue) {
+		JLabel label;
+<span class="nc" id="L905">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L906">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L907">		final JCheckBox random_button = new JCheckBox();</span>
+<span class="nc" id="L908">		random_button.setText(&quot;Random&quot;);</span>
+<span class="nc" id="L909">		JPanel internal = new JPanel(new BorderLayout(5, 0));</span>
+<span class="nc" id="L910">		internal.add(random_button, BorderLayout.EAST);</span>
+<span class="nc" id="L911">		internal.add(spinner, BorderLayout.CENTER);</span>
+<span class="nc" id="L912">		label.setLabelFor(internal);</span>
+		// If current default is !random hides spinner and deselects random_button
+<span class="nc bnc" id="L914" title="All 2 branches missed.">		if (Defaults.getAsBoolean(booleanProperty).booleanValue()) {</span>
+<span class="nc" id="L915">			spinner.setEnabled(false);</span>
+<span class="nc" id="L916">			random_button.setSelected(true);</span>
+		} else {
+<span class="nc" id="L918">			spinner.setEnabled(true);</span>
+<span class="nc" id="L919">			random_button.setSelected(false);</span>
+		}
+<span class="nc" id="L921">		spinner.setValue(Defaults.getAsInteger(valueProperty));</span>
+
+		// Adds a listener to support random_button change events
+<span class="nc" id="L924">		random_button.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L926" title="All 2 branches missed.">				if (random_button.isSelected()) {</span>
+<span class="nc" id="L927">					spinner.setEnabled(false);</span>
+<span class="nc" id="L928">					Defaults.set(booleanProperty, &quot;true&quot;);</span>
+				} else {
+<span class="nc" id="L930">					spinner.setEnabled(true);</span>
+<span class="nc" id="L931">					Defaults.set(booleanProperty, &quot;false&quot;);</span>
+				}
+
+<span class="nc" id="L934">			}</span>
+		});
+
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L938">		internal.setMaximumSize(new Dimension(internal.getMaximumSize().width, internal.getMinimumSize().height));</span>
+
+<span class="nc" id="L940">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L944">					spinner.commitEdit();</span>
+<span class="nc" id="L945">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L947">					return;</span>
+<span class="nc" id="L948">				}</span>
+				//new number of classes
+<span class="nc" id="L950">				int x = 0;</span>
+				try {
+<span class="nc" id="L952">					x = ((Integer) spinner.getValue()).intValue();</span>
+<span class="nc" id="L953">				} catch (NumberFormatException nfe) {</span>
+					//null
+<span class="nc" id="L955">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L957">				}</span>
+<span class="nc bnc" id="L958" title="All 2 branches missed.">				if (x &lt; minvalue) {</span>
+<span class="nc" id="L959">					x = minvalue;</span>
+				}
+<span class="nc" id="L961">				spinner.setValue(new Integer(x));</span>
+<span class="nc" id="L962">				Defaults.set(valueProperty, Integer.toString(x));</span>
+<span class="nc" id="L963">			}</span>
+		});
+<span class="nc" id="L965">		cont.add(label);</span>
+<span class="nc" id="L966">		cont.add(internal);</span>
+<span class="nc" id="L967">	}</span>
+
+	//Added the No Auto Checkbox and a spinner.
+	protected void addInputNoAutoSpinner(String text, final String booleanProperty, final String valueProperty, Container cont,
+			final int minvalue) {
+		JLabel label;
+<span class="nc" id="L973">		label = new JLabel(text + &quot;:&quot;);</span>
+<span class="nc" id="L974">		final JSpinner spinner = new JSpinner();</span>
+<span class="nc" id="L975">		final JCheckBox no_auto_button = new JCheckBox();</span>
+<span class="nc" id="L976">		no_auto_button.setText(&quot;No automatic stop&quot;);</span>
+<span class="nc" id="L977">		JPanel internal = new JPanel(new BorderLayout(5, 0));</span>
+<span class="nc" id="L978">		internal.add(no_auto_button, BorderLayout.EAST);</span>
+<span class="nc" id="L979">		internal.add(spinner, BorderLayout.CENTER);</span>
+<span class="nc" id="L980">		label.setLabelFor(internal);</span>
+		// If current default is auto deselects no_auto_button
+<span class="nc bnc" id="L982" title="All 2 branches missed.">		if (Defaults.getAsBoolean(booleanProperty).booleanValue()) {</span>
+<span class="nc" id="L983">			no_auto_button.setSelected(true);</span>
+		} else {
+<span class="nc" id="L985">			no_auto_button.setSelected(false);</span>
+		}
+<span class="nc" id="L987">		spinner.setValue(Defaults.getAsInteger(valueProperty));</span>
+
+		// Adds a listener to support no_auto_button change events
+<span class="nc" id="L990">		no_auto_button.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L992" title="All 2 branches missed.">				if (no_auto_button.isSelected()) {</span>
+<span class="nc" id="L993">					Defaults.set(booleanProperty, &quot;true&quot;);</span>
+				} else {
+<span class="nc" id="L995">					Defaults.set(booleanProperty, &quot;false&quot;);</span>
+				}
+
+<span class="nc" id="L998">			}</span>
+		});
+
+		// Sets maximum size to minimal one, otherwise springLayout will stretch this
+<span class="nc" id="L1002">		internal.setMaximumSize(new Dimension(internal.getMaximumSize().width, internal.getMinimumSize().height));</span>
+
+<span class="nc" id="L1004">		spinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+				//stop editing text inside spinner
+				try {
+<span class="nc" id="L1008">					spinner.commitEdit();</span>
+<span class="nc" id="L1009">				} catch (ParseException pe) {</span>
+					//if string does not represent a number, return
+<span class="nc" id="L1011">					return;</span>
+<span class="nc" id="L1012">				}</span>
+				//new number of classes
+<span class="nc" id="L1014">				int x = 0;</span>
+				try {
+<span class="nc" id="L1016">					x = ((Integer) spinner.getValue()).intValue();</span>
+<span class="nc" id="L1017">				} catch (NumberFormatException nfe) {</span>
+					//null
+<span class="nc" id="L1019">				} catch (ClassCastException cce) {</span>
+					//null
+<span class="nc" id="L1021">				}</span>
+<span class="nc bnc" id="L1022" title="All 2 branches missed.">				if (x &lt; minvalue) {</span>
+<span class="nc" id="L1023">					x = minvalue;</span>
+				}
+<span class="nc" id="L1025">				spinner.setValue(new Integer(x));</span>
+<span class="nc" id="L1026">				Defaults.set(valueProperty, Integer.toString(x));</span>
+<span class="nc" id="L1027">			}</span>
+		});
+<span class="nc" id="L1029">		cont.add(label);</span>
+<span class="nc" id="L1030">		cont.add(internal);</span>
+<span class="nc" id="L1031">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

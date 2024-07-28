@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShiftedGeometric.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.distributions.discrete</a> &gt; <span class="el_source">ShiftedGeometric.java</span></div><h1>ShiftedGeometric.java</h1><pre class="source lang-java linenums">package jmt.gui.common.distributions.discrete;
+
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.distributions.Distribution;
+
+import javax.swing.*;
+
+public class ShiftedGeometric extends Distribution {
+    /**
+     * Constructs a new Shifted Geometric Distribution
+     */
+    public ShiftedGeometric() {
+<span class="fc" id="L13">        super(</span>
+                &quot;Shifted Geometric&quot;,
+                &quot;jmt.engine.random.discrete.ShiftedGeometric&quot;,
+                &quot;jmt.engine.random.discrete.ShiftedGeometricPar&quot;,
+                &quot;Shifted Geometric distribution&quot;
+        );
+<span class="fc" id="L19">        hasMean = true;</span>
+<span class="fc" id="L20">        hasC = false;</span>
+<span class="fc" id="L21">        isNestable = true;</span>
+<span class="fc" id="L22">    }</span>
+
+    @Override
+    public String toString() {
+<span class="nc" id="L26">        return &quot;Geo(&quot; + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + &quot;)&quot;;</span>
+    }
+
+    /**
+     * Used to set parameters of this distribution
+     *
+     * @return distribution parameters
+     */
+    @Override
+    protected Parameter[] setParameters() {
+        // Creates parameter array
+<span class="fc" id="L37">        Parameter[] parameters = new Parameter[1];</span>
+
+        // Sets parameter p
+<span class="fc" id="L40">        parameters[0] = new Parameter(&quot;p&quot;, &quot;p&quot;, Double.class, new Double(0.5));</span>
+        // Checks value of p must be between 0 and 1
+<span class="fc" id="L42">        parameters[0].setValueChecker(value -&gt; {</span>
+<span class="nc" id="L43">            Double d = (Double) value;</span>
+<span class="nc bnc" id="L44" title="All 4 branches missed.">            return d.doubleValue() &gt; 0.0 &amp;&amp; d.doubleValue() &lt;= 1.0;</span>
+        });
+
+<span class="fc" id="L47">        return parameters;</span>
+    }
+    @Override
+    protected ImageIcon setImage() {
+<span class="fc" id="L51">        return JMTImageLoader.loadImage(&quot;ShiftedGeometric&quot;);</span>
+    }
+
+    @Override
+    public void setMean(double value) {
+        // p = 1 / mean
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (getParameter(0).setValue(new Double(1 / value))) {</span>
+<span class="nc" id="L58">            mean = value;</span>
+        }
+<span class="nc" id="L60">    }</span>
+
+    @Override
+    public void updateCM() {
+        // mean = 1 / p
+<span class="fc" id="L65">        mean = 1 / ((Double) parameters[0].getValue()).doubleValue();</span>
+<span class="fc" id="L66">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

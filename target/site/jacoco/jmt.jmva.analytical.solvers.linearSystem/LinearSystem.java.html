@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LinearSystem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem</a> &gt; <span class="el_source">LinearSystem.java</span></div><h1>LinearSystem.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+
+/**
+ * This abstract class provides the interface for the Linear System which is used by the CoMoM algorithm.
+ * @author Jack Bradshaw
+ */
+public abstract class LinearSystem {
+
+	/**
+	 * Basis for the model
+	 */
+	protected  CoMoMBasis basis;
+
+	/**
+	 * The model under consideration.
+	 */
+	protected QNModel qnm;
+
+	/**
+	 * Constructor
+	 * @param qnm The model under consideration.
+	 * @param basis Basis for the model
+	 * @throws InternalErrorException
+	 */
+<span class="nc" id="L34">	public LinearSystem(QNModel qnm, CoMoMBasis basis) throws InternalErrorException {</span>
+<span class="nc" id="L35">		this.qnm = qnm;</span>
+<span class="nc" id="L36">		this.basis = basis;</span>
+<span class="nc" id="L37">		basis.initialiseBasis();	</span>
+<span class="nc" id="L38">	}</span>
+
+	public void computePerformanceMeasures() throws InternalErrorException {
+<span class="nc" id="L41">		basis.computePerformanceMeasures();		</span>
+<span class="nc" id="L42">	}</span>
+
+	/**
+	 * Updates the N_l values in the linear system
+	 * @param current_class_population The population in the current class under consideration
+	 */
+	public abstract void update(int current_class_population ); 
+
+	/**
+	 * Solve the linear system in its current configuration
+	 * @throws OperationNotSupportedException
+	 * @throws InconsistentLinearSystemException
+	 * @throws InternalErrorException
+	 * @throws BTFMatrixErrorException
+	 */
+	public abstract void solve() throws OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException, BTFMatrixErrorException;
+
+	/**
+	 * Initialises the linear system ready for iteration on current_class at the specified population
+	 * @param current_N The current population vector
+	 * @param current_class The current class under consideration
+	 * @throws InternalErrorException
+	 * @throws OperationNotSupportedException
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 */
+	public final void initialiseForClass(PopulationVector current_N, int current_class) 
+			throws InternalErrorException, OperationNotSupportedException, BTFMatrixErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L70">		basis.initialiseForClass(current_class);</span>
+<span class="nc" id="L71">		initialiseMatricesForClass(current_N, current_class);</span>
+<span class="nc" id="L72">	}</span>
+
+	/**
+	 * Initialises the matrices of the linear system ready for iteration on current_class at the specified population
+	 * @param current_N The current population vector
+	 * @param current_class The current class under consideration
+	 * @throws BTFMatrixErrorException
+	 * @throws InternalErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
+	 */
+	protected abstract void initialiseMatricesForClass(PopulationVector current_N, int current_class) 
+			throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException, OperationNotSupportedException;		
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

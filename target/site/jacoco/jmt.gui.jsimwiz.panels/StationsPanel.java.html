@@ -1,0 +1,537 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StationsPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimwiz.panels</a> &gt; <span class="el_source">StationsPanel.java</span></div><h1>StationsPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimwiz.panels;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.ServerType;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: OrsotronIII
+ * Date: 13-mag-2005
+ * Time: 14.43.32
+ * This panel provides functionality of editing and visualizing data about model's
+ * classes.
+ * Modified by Bertoli Marco 11-oct-2005, 10-apr-2006
+ */
+public class StationsPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	//Table containing class-set data
+	private StationTable stationTable;
+
+	//Button that allows to add classes one by one
+	private JButton addStation;
+
+	//ComboBox editor for station type
+	protected ImagedComboBoxCellEditorFactory comboEditor;
+
+	//Enabled types of stations for station editing
+	private Object[] stationTypes;
+
+	//Component responsible of setting global number of classes at once
+<span class="nc" id="L88">	private JSpinner stationNumSpinner = new JSpinner() {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L93">			addChangeListener(new ChangeListener() {</span>
+				public void stateChanged(ChangeEvent e) {
+					//stop editing text inside spinner
+					try {
+<span class="nc" id="L97">						stationNumSpinner.commitEdit();</span>
+<span class="nc" id="L98">					} catch (ParseException pe) {</span>
+						//if string does not represent a number, return
+<span class="nc" id="L100">						return;</span>
+<span class="nc" id="L101">					}</span>
+					//new number of stations
+<span class="nc" id="L103">					int x = -1;</span>
+					try {
+<span class="nc" id="L105">						x = ((Integer) stationNumSpinner.getValue()).intValue();</span>
+<span class="nc" id="L106">					} catch (NumberFormatException nfe) {</span>
+						// Nothing
+<span class="nc" id="L108">					} catch (ClassCastException cce) {</span>
+						// Nothing
+<span class="nc" id="L110">					}</span>
+					//if new number is valid, proceed updating number
+<span class="nc bnc" id="L112" title="All 2 branches missed.">					if (x != -1) {</span>
+<span class="nc" id="L113">						setNumberOfStations(x);</span>
+					} else {
+						//otherwise, reset to 0
+<span class="nc" id="L116">						stationNumSpinner.setValue(new Integer(0));</span>
+					}
+<span class="nc" id="L118">				}</span>
+			});
+		}
+
+	};
+
+	//Interface linking to underlying implementation layer
+	private StationDefinition data;
+
+	//Interface linking to underlying implementation layer
+	private ClassDefinition classData;
+
+	//Index for temporary station name assignment
+	private int stationNameIndex;
+
+	//deletion of one class
+<span class="nc" id="L134">	private AbstractAction deleteStation = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L139">			putValue(Action.SHORT_DESCRIPTION, &quot;Delete&quot;);</span>
+<span class="nc" id="L140">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L144">			int index = stationTable.getSelectedRow();</span>
+<span class="nc bnc" id="L145" title="All 4 branches missed.">			if (index &gt;= 0 &amp;&amp; index &lt; stationTable.getRowCount()) {</span>
+<span class="nc" id="L146">				deleteStation(index);</span>
+			}
+<span class="nc" id="L148">		}</span>
+
+	};
+
+	//addition of a class one by one
+<span class="nc" id="L153">	private AbstractAction addNewStation = new AbstractAction(&quot;Add Station&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L158">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, ActionEvent.ALT_MASK));</span>
+<span class="nc" id="L159">			putValue(Action.SHORT_DESCRIPTION, &quot;Adds a new station&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L163">			addStation();</span>
+<span class="nc" id="L164">		}</span>
+
+	};
+
+	/**Creates a new instance of &lt;code&gt;StationsPanel&lt;/code&gt; given a model definition.*/
+<span class="nc" id="L169">	public StationsPanel(StationDefinition sd, ClassDefinition cd) {</span>
+<span class="nc" id="L170">		Set&lt;String&gt; stationTypeSet = STATION_NAMES.keySet();</span>
+<span class="nc" id="L171">		stationTypes = new Object[stationTypeSet.size() - 2];</span>
+<span class="nc" id="L172">		Iterator&lt;String&gt; it = stationTypeSet.iterator();</span>
+<span class="nc" id="L173">		int i = 0;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		while (it.hasNext()) {</span>
+<span class="nc" id="L175">			String stationType = it.next();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			if (!stationType.equals(STATION_TYPE_SOURCE)</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">					&amp;&amp; !stationType.equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L178">				stationTypes[i] = stationType;</span>
+<span class="nc" id="L179">				i++;</span>
+			}
+<span class="nc" id="L181">		}</span>
+<span class="nc" id="L182">		stationTable = new StationTable();</span>
+<span class="nc" id="L183">		comboEditor = new ImagedComboBoxCellEditorFactory(null,</span>
+				ImagedComboBoxCellEditorFactory.OPTION_STATION_TYPES);
+<span class="nc" id="L185">		initComponents();</span>
+<span class="nc" id="L186">		setData(sd, cd);</span>
+<span class="nc" id="L187">	}</span>
+
+	/**Sets data model for this panel.
+	 * Instantly all of the panel components are assigned their specific value.
+	 * @param sd: data for station definition.*/
+	public void setData(StationDefinition sd, ClassDefinition cd) {
+<span class="nc" id="L193">		data = sd;</span>
+<span class="nc" id="L194">		classData = cd;</span>
+<span class="nc" id="L195">		stationTable.setModel(new StationTableModel());</span>
+<span class="nc" id="L196">		stationNumSpinner.setValue(new Integer(data.getStationKeys().size()));</span>
+<span class="nc" id="L197">		comboEditor.clearCache();</span>
+<span class="nc" id="L198">		stationNameIndex = sd.getStationKeysNoSourceSink().size();</span>
+<span class="nc" id="L199">	}</span>
+
+	/**Gets data model for this panel.
+	 * @return : data for class definition.*/
+	public StationDefinition getData() {
+<span class="nc" id="L204">		return data;</span>
+	}
+
+	//Builds internal structure of the panel. Sets up layout of components
+	private void initComponents() {
+		//create margins for this panel.
+<span class="nc" id="L210">		Box vBox = Box.createVerticalBox();</span>
+<span class="nc" id="L211">		Box hBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L212">		vBox.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L213">		vBox.add(hBox);</span>
+<span class="nc" id="L214">		vBox.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L215">		hBox.add(Box.createHorizontalStrut(20));</span>
+
+		//build central panel
+<span class="nc" id="L218">		JPanel componentsPanel = new JPanel(new BorderLayout());</span>
+		//new BoxLayout(componentsPanel, BoxLayout.Y_AXIS);
+
+		//build upper part of central panel
+<span class="nc" id="L222">		JPanel upperPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L223">		JLabel descrLabel = new JLabel(STATIONS_DESCRIPTION);</span>
+		//descrLabel.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(1000 * CommonConstants.heightScaling)));
+<span class="nc" id="L225">		upperPanel.add(descrLabel, BorderLayout.CENTER);</span>
+
+		//build upper right corner of the main panel
+<span class="nc" id="L228">		JPanel upRightPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L229">		addStation = new JButton(addNewStation);</span>
+<span class="nc" id="L230">		addStation.setMinimumSize(DIM_BUTTON_S);</span>
+<span class="nc" id="L231">		upRightPanel.add(addStation, BorderLayout.CENTER);</span>
+
+		//build spinner panel
+<span class="nc" id="L234">		JPanel spinnerPanel = new JPanel();</span>
+<span class="nc" id="L235">		JLabel spinnerDescrLabel = new JLabel(&quot;Stations:&quot;);</span>
+<span class="nc" id="L236">		stationNumSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L237">		spinnerPanel.add(spinnerDescrLabel);</span>
+<span class="nc" id="L238">		spinnerPanel.add(stationNumSpinner);</span>
+
+		//add all panels to the mail panel
+<span class="nc" id="L241">		upRightPanel.add(spinnerPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L242">		upperPanel.add(upRightPanel, BorderLayout.EAST);</span>
+<span class="nc" id="L243">		componentsPanel.add(upperPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L244">		componentsPanel.add(new JScrollPane(stationTable), BorderLayout.CENTER);</span>
+<span class="nc" id="L245">		hBox.add(componentsPanel);</span>
+<span class="nc" id="L246">		hBox.add(Box.createHorizontalStrut(20));</span>
+<span class="nc" id="L247">		this.setLayout(new GridLayout(1, 1));</span>
+<span class="nc" id="L248">		this.add(vBox);</span>
+<span class="nc" id="L249">	}</span>
+
+	//returns name to be displayed on the tab, when inserted in a wizard tabbed pane
+	@Override
+	public String getName() {
+<span class="nc" id="L254">		return &quot;Stations&quot;;</span>
+	}
+
+	//adds a new class to the table and, simultaneously to the underlying model data structure
+	private void addStation() {
+<span class="nc" id="L259">		data.addStation(Defaults.get(&quot;stationName&quot;) + (++stationNameIndex), Defaults.get(&quot;stationType&quot;), 1,</span>
+				new ArrayList&lt;ServerType&gt;());
+<span class="nc" id="L261">		refreshComponents();</span>
+<span class="nc" id="L262">	}</span>
+
+	//synchronizes components to display coherently global number of classes
+	private void refreshComponents() {
+<span class="nc" id="L266">		stationTable.tableChanged(new TableModelEvent(stationTable.getModel()));</span>
+		try {
+<span class="nc" id="L268">			stationNumSpinner.setValue(new Integer(data.getStationKeys().size()));</span>
+<span class="nc" id="L269">		} catch (NumberFormatException nfe) {</span>
+			// Nothing to be done
+<span class="nc" id="L271">		}</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (data.getStationKeys().size() &gt;= MAX_NUMBER_OF_STATIONS) {</span>
+<span class="nc" id="L273">			addStation.setEnabled(false);</span>
+		} else {
+<span class="nc" id="L275">			addStation.setEnabled(true);</span>
+		}
+<span class="nc" id="L277">	}</span>
+
+	@Override
+	public void repaint() {
+<span class="nc bnc" id="L281" title="All 2 branches missed.">		if (data != null) {</span>
+<span class="nc" id="L282">			refreshComponents();</span>
+		}
+<span class="nc" id="L284">		super.repaint();</span>
+<span class="nc" id="L285">	}</span>
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L292">		comboEditor.clearCache();</span>
+<span class="nc" id="L293">	}</span>
+
+	/**
+	 * Called when an other panel is selected. This method will set a default station as reference
+	 * station of any closed class without it.
+	 */
+	@Override
+	public void lostFocus() {
+		// Aborts editing of table
+<span class="nc" id="L302">		TableCellEditor editor = stationTable.getCellEditor();</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L304">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L306">	}</span>
+
+	/*delete a class from model given the index the class to be deleted is displayed at
+	inside the table.*/
+	private void deleteStation(int index) {
+<span class="nc" id="L311">		data.deleteStation(data.getStationKeys().get(index));</span>
+<span class="nc" id="L312">		refreshComponents();</span>
+<span class="nc" id="L313">	}</span>
+
+	/*Modify global number of classes for this model all at once.*/
+	private void setNumberOfStations(int newNumber) {
+		/*If new number is greater than a certain number, do not do anything and cancel
+		number modification inside spinner*/
+<span class="nc bnc" id="L319" title="All 2 branches missed.">		if (newNumber &gt; MAX_NUMBER_OF_STATIONS) {</span>
+<span class="nc" id="L320">			setNumberOfStations(MAX_NUMBER_OF_STATIONS);</span>
+<span class="nc" id="L321">			return;</span>
+		}
+		/*If new number is not valid, reset to 0*/
+<span class="nc bnc" id="L324" title="All 2 branches missed.">		if (newNumber &lt; 0) {</span>
+<span class="nc" id="L325">			setNumberOfStations(0);</span>
+<span class="nc" id="L326">			return;</span>
+		}
+<span class="nc" id="L328">		int oldNumber = data.getStationKeys().size();</span>
+		/*If new number is greater than former one, just add */
+<span class="nc bnc" id="L330" title="All 2 branches missed.">		if (newNumber &gt; oldNumber) {</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">			for (int i = oldNumber; i &lt; newNumber; i++) {</span>
+<span class="nc" id="L332">				addStation();</span>
+			}
+<span class="nc bnc" id="L334" title="All 2 branches missed.">		} else if (newNumber &lt; oldNumber) {</span>
+			/*otherwise, just delete*/
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			for (int i = oldNumber - 1; i &gt;= newNumber; i--) {</span>
+<span class="nc" id="L337">				deleteStation(i);</span>
+			}
+		}
+<span class="nc" id="L340">		refreshComponents();</span>
+<span class="nc" id="L341">	}</span>
+
+	//---------------------------- Table containing classes parameters --------------------------
+	/*Table that must display all of data about user classes. Customization of table settings is
+	obtained via inheritance of &lt;code&gt;JTable&lt;/code&gt; Class.*/
+
+<span class="nc" id="L347">	private class StationTable extends JTable {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		/*This button allow a single userclass to be deleted directly from the table.
+		Corresponding value contained into cell must be zero.*/
+<span class="nc" id="L353">		JButton deleteButton = new JButton() {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			{
+<span class="nc" id="L358">				setAction(deleteStation);</span>
+<span class="nc" id="L359">				setFocusable(false);</span>
+			}
+
+		};
+
+		/*Set of column dimensions*/
+<span class="nc" id="L365">		int[] columnSizes = new int[] { 120, 120, 18 };</span>
+
+		//Sets a table model for visualization and editing of data
+		public void setModel(StationTableModel tabMod) {
+<span class="nc" id="L369">			super.setModel(tabMod);</span>
+<span class="nc" id="L370">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L371">			setDefaultRenderer(String.class, new DisabledCellRenderer());</span>
+<span class="nc" id="L372">			sizeColumnsAndRows();</span>
+<span class="nc" id="L373">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L374">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L375">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L376">		}</span>
+
+		//returns a component to be contained inside a table column(or cell)
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L381" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L382">				return comboEditor.getRenderer();</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">			} else if (column == 2) {</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">				if (isCellEditable(row, column)) {</span>
+<span class="nc" id="L385">					return new ButtonCellEditor(deleteButton);</span>
+				} else {
+<span class="nc" id="L387">					return new DisabledCellRenderer();</span>
+				}
+			} else {
+<span class="nc" id="L390">				return getDefaultRenderer(getModel().getColumnClass(column));</span>
+			}
+		}
+
+		/*returns customized editor for table cells.*/
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L397" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L398">				return comboEditor.getEditor(stationTypes);</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">			} else if (column == 2) {</span>
+<span class="nc" id="L400">				return new ButtonCellEditor(new JButton(deleteStation));</span>
+			} else {
+<span class="nc" id="L402">				return getDefaultEditor(getModel().getColumnClass(column));</span>
+			}
+		}
+
+		//set sizes for columns and rows of this table.
+		private void sizeColumnsAndRows() {
+<span class="nc bnc" id="L408" title="All 4 branches missed.">			for (int i = 0; i &lt; columnSizes.length &amp;&amp; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L409">				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">				if (i == columnSizes.length - 1) {</span>
+					//delete button and containing table cells as well, must be square
+<span class="nc" id="L412">					this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);</span>
+<span class="nc" id="L413">					this.setRowHeight(columnSizes[i]);</span>
+				}
+			}
+<span class="nc" id="L416">		}</span>
+
+		@Override
+		public boolean isCellEditable(int row, int column) {
+			// Avoid deletion of sources and sinks
+<span class="nc" id="L421">			String stationType = data.getStationType(data.getStationKeys().get(row));</span>
+<span class="nc bnc" id="L422" title="All 8 branches missed.">			return !((column == 1 || column == 2) &amp;&amp; (stationType.equals(STATION_TYPE_SOURCE) || stationType.equals(STATION_TYPE_SINK)));</span>
+		}
+	}
+
+	//------------------------------------Table model for classes panel --------------------------
+	/*Table data model to implement customized data editing*/
+
+<span class="nc" id="L429">	private class StationTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		//Names of columns contained in table. Columns containing buttons have empty names
+<span class="nc" id="L434">		String[] columnNames = new String[] { &quot;Name&quot;, &quot;Type&quot;, &quot;&quot; };</span>
+
+		//Class declarations for this table's columns.
+<span class="nc" id="L437">		Class&lt;?&gt;[] colClasses = new Class[] { String.class, JComboBox.class, JButton.class };</span>
+
+		/**returns number of rows to be displayed in the table. In this case, global
+		 * number of classes*/
+		public int getRowCount() {
+<span class="nc bnc" id="L442" title="All 2 branches missed.">			if (data.getStationKeys() != null) {</span>
+<span class="nc" id="L443">				return data.getStationKeys().size();</span>
+			} else {
+<span class="nc" id="L445">				return 0;</span>
+			}
+		}
+
+		/**Returns total number of columns*/
+		public int getColumnCount() {
+<span class="nc" id="L451">			return columnNames.length;</span>
+		}
+
+		/**Returns name for each column (given its index) to be displayed
+		 * inside table header*/
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L458" title="All 2 branches missed.">			if (columnIndex &lt; columnNames.length) {</span>
+<span class="nc" id="L459">				return columnNames[columnIndex];</span>
+			} else {
+<span class="nc" id="L461">				return null;</span>
+			}
+		}
+
+		/**Returns class describing data contained in specific column.*/
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc bnc" id="L468" title="All 2 branches missed.">			if (columnIndex &lt; colClasses.length) {</span>
+<span class="nc" id="L469">				return colClasses[columnIndex];</span>
+			} else {
+<span class="nc" id="L471">				return Object.class;</span>
+			}
+		}
+
+		/**Tells whether data contained in a specific cell(given row and column index)
+		 * is editable or not. In this case distribution column is not editable, as
+		 * editing functionality is implemented via edit button*/
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			//can edit station type only if type is contained in combo box list
+<span class="nc bnc" id="L481" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+<span class="nc" id="L482">				String type = data.getStationType(data.getStationKeys().get(rowIndex));</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">				for (Object stationType : stationTypes) {</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">					if (stationType.equals(type)) {</span>
+<span class="nc" id="L485">						return true;</span>
+					}
+				}
+<span class="nc" id="L488">				return false;</span>
+			}
+<span class="nc" id="L490">			return true;</span>
+		}
+
+		/**retrieves value to be displayed in table cell from the underlying model
+		 * data structure implementation.*/
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L496">			Object key = data.getStationKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L497" title="All 3 branches missed.">			switch (columnIndex) {</span>
+				case (0): {
+<span class="nc" id="L499">					return data.getStationName(key);</span>
+				}
+				case (1): {
+<span class="nc" id="L502">					return data.getStationType(key);</span>
+				}
+				default: {
+<span class="nc" id="L505">					return null;</span>
+				}
+			}
+		}
+
+		/**Puts edited values to the underlying data structure for model implementation*/
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L513">			Object key = data.getStationKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L514" title="All 3 branches missed.">			switch (columnIndex) {</span>
+				case (0): {
+<span class="nc" id="L516">					data.setStationName(key, (String) aValue);</span>
+<span class="nc" id="L517">					break;</span>
+				}
+				case (1): {
+<span class="nc" id="L520">					data.setStationType(key, (String) aValue);</span>
+					break;
+				}
+			}
+<span class="nc" id="L524">		}</span>
+
+		@Override
+		public void addTableModelListener(TableModelListener l) {
+<span class="nc" id="L528">		}</span>
+
+		@Override
+		public void removeTableModelListener(TableModelListener l) {
+<span class="nc" id="L532">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>YMacroBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks</a> &gt; <span class="el_source">YMacroBlock.java</span></div><h1>YMacroBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks.MicroBlock;
+import jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks.YMicroBlock;
+
+/**
+ * @author Jack Bradshaw
+ */
+public class YMacroBlock extends MacroBlock {
+
+	public YMacroBlock(QNModel qnm, CoMoMBasis basis, Position position, int h) throws InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L17">		super(qnm, basis, position, h);</span>
+<span class="nc" id="L18">		selection_policy = new TypeOneBlocks(qnm, this); </span>
+<span class="nc" id="L19">	}</span>
+
+	public YMacroBlock(MacroBlock full_block, int current_class) {
+<span class="nc" id="L22">		super(full_block, current_class);</span>
+<span class="nc" id="L23">	}</span>
+
+	@Override
+	protected MacroBlock subBlockCopy(int current_class) {
+<span class="nc" id="L27">		return new YMacroBlock(this, current_class);</span>
+	}
+	
+	@Override
+	protected MicroBlock newMicroBlock(Position block_position, int h) throws InternalErrorException {
+<span class="nc" id="L32">		return new YMicroBlock(qnm, basis, block_position, h);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

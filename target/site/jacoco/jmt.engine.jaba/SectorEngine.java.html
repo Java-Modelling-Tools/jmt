@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SectorEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba</a> &gt; <span class="el_source">SectorEngine.java</span></div><h1>SectorEngine.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jaba;
+
+import java.util.Vector;
+
+import jmt.engine.jaba.Hull.ConvexHullException;
+import jmt.engine.jaba.Hull.Vertex;
+
+/**
+ * Created by IntelliJ IDEA. User: Andrea Zanzottera Date: 1-ago-2005 Time:
+ * 10.30.07
+ */
+<span class="nc" id="L30">public class SectorEngine {</span>
+
+// I instantiate the ViewResults class to print the results on the screen
+// ViewResults vres = new ViewResults();
+// I initialize the vector that will then be passed by the faces3d function
+<span class="nc" id="L35">Vector&lt;newFace&gt; faces = new Vector&lt;newFace&gt;();</span>
+// I initialize the vector of sides to join for the calcusideson
+<span class="nc" id="L37">Vector&lt;Object&gt; sides = new Vector&lt;Object&gt;();</span>
+// Initialize the array containing the sectors where 3 stations saturate
+// simultaneously
+<span class="nc" id="L40">Vector&lt;Object&gt; triangles = new Vector&lt;Object&gt;();</span>
+// Initialize the array containing the sectors where 2 stations saturate
+// simultaneously
+<span class="nc" id="L43">Vector&lt;Object&gt; sect2station = new Vector&lt;Object&gt;();</span>
+// Initialize the vector containing the sectors where saturates 1 station
+<span class="nc" id="L45">Vector&lt;Object&gt; sect1station = new Vector&lt;Object&gt;();</span>
+// I duplicate the vector of vertices to do some final checks
+<span class="nc" id="L47">Vector&lt;Vertex&gt; original3D = new Vector&lt;Vertex&gt;();</span>
+
+/**
+* Passing a vector of newPoints containing the D's of two classes to the method
+* returns a Sector2D Vector with mix information
+* Popusideson and stations saturating for that mix.
+*
+* @param vertices2D
+* @return a Vector of Sector2D
+	 */
+	public Vector&lt;Sector2D&gt; Calc2D(Vector&lt;newPoint&gt; vertices2D) {
+<span class="nc" id="L58">		Vector&lt;newPoint&gt; original2D = new Vector&lt;newPoint&gt;(vertices2D);</span>
+<span class="nc" id="L59">		Util2d util = new Util2d();</span>
+
+// Add the projections
+<span class="nc" id="L62">vertices2D = util.LExplode2D(vertices2D);</span>
+
+// I eliminate the redundant points (OTHERWISE GRAHAMSCAN CRASHA!!!)
+<span class="nc" id="L65">Vector&lt;newPoint&gt; verticesnew = new Vector&lt;newPoint&gt;();</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">for (int i = 0; i &lt; vertices2D.size(); i++) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">if (!util.VPresent(vertices2D.get(i), verticesnew)) {</span>
+<span class="nc" id="L68">verticesnew.addElement(vertices2D.get(i));</span>
+}
+}
+<span class="nc" id="L71">vertices2D = verticesnew;</span>
+
+// I remove the dominated points
+<span class="nc" id="L74">vertices2D = util.DomRemove2D(vertices2D);</span>
+
+// Add the origin to actually make the polygon convex
+// It's because the Graham Scan was designed for each case
+<span class="nc" id="L78">vertices2D.addElement(new newPoint(0, 0));</span>
+
+// Run the doGraham function which takes a vector of as a parameter
+// newPoint and returns the lines vector of newPoint
+<span class="nc" id="L82">grahamScan gra = new grahamScan();</span>
+<span class="nc" id="L83">vertices2D = gra.doGraham(vertices2D);</span>
+
+// todo better check the projections: case (10,4) - (10,0)
+// you have to make sure that a point is discarded anyway if it is collinear
+// I remove the projections  v1.5
+<span class="nc" id="L88">		Vector&lt;newPoint&gt; verticesnp = new Vector&lt;newPoint&gt;();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices2D.size(); i++) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">			if (util.VPresent(vertices2D.get(i), original2D)) {</span>
+<span class="nc" id="L91">				verticesnp.addElement(vertices2D.get(i));</span>
+
+			}
+		}
+// I eliminate the projections in case they are collinear to other points
+// For example (10.4) - (10.0) or (0.5) - (5.5)
+<span class="nc bnc" id="L97" title="All 2 branches missed.">if (verticesnp.size() &gt; 1) {</span>
+<span class="nc" id="L98">verticesnp = util.RemoveCollinear(verticesnp);</span>
+}
+
+// Map the remaining points
+<span class="nc" id="L102">Beta2D b2d = new Beta2D();</span>
+<span class="nc" id="L103">Vector&lt;Sector2D&gt; sector = new Vector&lt;Sector2D&gt;(); // is the array with the</span>
+// Beta
+<span class="nc" id="L105">		sector = b2d.BetaVector(verticesnp);</span>
+
+		// System.out.println(sector.size());
+
+		/*
+* //Add the &quot;diagonal&quot; collinear points by inserting them into the right
+* place if (verticesnp.size()&gt;1 &amp;&amp; original2D.size()&gt;1) { for (int
+* i=0;i&lt;(verticesnp.size()-1);i++) { for (int
+* j=0;j&lt;original2D.size();j++) { // a vertex is good when it isn't already
+* inclusive, // is collinear to the 2 of the sector // its x is greater than
+* first v of the sector // its x is less than the second v of the sector
+		 * 
+		 * if (verticesnp.contains(original2D.get(j))==false &amp;&amp;
+		 * util.Collinear((newPoint
+		 * )verticesnp.get(i),(newPoint)verticesnp.get(i+
+		 * 1),(newPoint)original2D.get(j)) &amp;&amp;
+		 * (((newPoint)verticesnp.get(i)).getX
+		 * ()&lt;((newPoint)original2D.get(j)).getX()) &amp;&amp;
+		 * (((newPoint)verticesnp.get
+		 * (i+1)).getX()&gt;((newPoint)original2D.get(j)).getX()) ) {
+		 * verticesnp.insertElementAt(original2D.get(j),i); //i--; } } } }
+		 */
+
+<span class="nc" id="L128">		Vector&lt;Sector2D&gt; res = new Vector&lt;Sector2D&gt;();</span>
+
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (verticesnp.size() &gt; 1) {</span>
+// I associate the stations to the sectors
+<span class="nc" id="L132">			res = b2d.StatAss(sector);</span>
+
+			/*
+			 * for (int i=0;i&lt;sector.size();i++)
+			 * System.out.println(sector.get(i));
+			 */
+
+// Adding collinear points
+<span class="nc bnc" id="L140" title="All 2 branches missed.">for (int i = 0; i &lt; res.size(); i++) // for all sectors</span>
+{
+<span class="nc bnc" id="L142" title="All 2 branches missed.">for (int j = 0; j &lt; original2D.size(); j++) // for all points</span>
+// originals
+{
+// Initial Horizontal Collinear
+<span class="nc bnc" id="L146" title="All 4 branches missed.">if (i == 0 &amp;&amp; (res.get(i).getP1()).getX() != 0) {</span>
+<span class="nc" id="L147">res.get(i).addCollinearFirst(res.get(i),</span>
+<span class="nc" id="L148">original2D.get(j));</span>
+}
+
+// Diagonal Collinear
+<span class="nc" id="L152">res.get(i).addCollinear(res.get(i), original2D.get(j));</span>
+
+// Collinear on the vertical side
+<span class="nc bnc" id="L155" title="All 4 branches missed.">					if (i == res.size() - 1 &amp;&amp; (res.get(i).getP1()).getY() != 0) {</span>
+<span class="nc" id="L156">						res.get(i).addCollinearLast(res.get(i),</span>
+<span class="nc" id="L157">								original2D.get(j));</span>
+					}
+
+				}
+			}
+		} else
+// If saturates only one station
+		{
+<span class="nc" id="L165">			res.addElement(new Sector2D(1, 0, 0, 1, verticesnp.get(0)));</span>
+		}
+
+<span class="nc" id="L168">		return res;</span>
+	}
+
+	public Vector&lt;Object&gt; Calc2D(Vector&lt;newPoint&gt; vertices2D,
+			String[] stationNames, String[] classNames) {
+<span class="nc" id="L173">		Vector&lt;newPoint&gt; original2D = new Vector&lt;newPoint&gt;(vertices2D);</span>
+<span class="nc" id="L174">		Util2d util = new Util2d();</span>
+
+// I create the vector with the stations, it is used to associate name to
+// coordinates
+<span class="nc" id="L178">Vector&lt;Station2D&gt; stations = new Vector&lt;Station2D&gt;();</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">for (int i = 0; i &lt; vertices2D.size(); i++) {</span>
+<span class="nc" id="L180">Station2D stat = new Station2D(vertices2D.get(i), stationNames[i]);</span>
+<span class="nc" id="L181">stations.addElement(stat);</span>
+}
+// Add the projections
+<span class="nc" id="L184">vertices2D = util.LExplode2D(vertices2D);</span>
+
+// I remove the redundant points (OTHERWISE GRAHAMSCAN CRASHES!!!)
+<span class="nc" id="L187">		Vector&lt;newPoint&gt; verticesnew = new Vector&lt;newPoint&gt;();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices2D.size(); i++) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">			if (!util.VPresent(vertices2D.get(i), verticesnew)) {</span>
+<span class="nc" id="L190">				verticesnew.addElement(vertices2D.get(i));</span>
+			}
+		}
+<span class="nc" id="L193">		vertices2D = verticesnew;</span>
+
+// I remove the dominated points
+<span class="nc" id="L196">vertices2D = util.DomRemove2D(vertices2D);</span>
+
+// Add the origin to actually make the polygon convex
+// It's because the Graham Scan was designed for each case
+<span class="nc" id="L200">vertices2D.addElement(new newPoint(0, 0));</span>
+
+// Run the doGraham function which takes a vector of as a parameter
+// newPoint and returns the lines vector of newPoint
+
+<span class="nc" id="L205">grahamScan gra = new grahamScan();</span>
+<span class="nc" id="L206">vertices2D = gra.doGraham(vertices2D);</span>
+
+// todo check is the new one (and it doesn't work!)
+/*
+* newGraham gra = new newGraham();
+* vertices2D=gra.GrahamScan(vertices2D);
+*/
+
+// todo better check the projections: case (10,4) - (10,0)
+// you have to make sure that a point is discarded anyway if it is collinear
+// I remove the projections v1.5
+<span class="nc" id="L217">		Vector&lt;newPoint&gt; verticesnp = new Vector&lt;newPoint&gt;();</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices2D.size(); i++) {</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">			if (util.VPresent(vertices2D.get(i), original2D)) {</span>
+<span class="nc" id="L220">				verticesnp.addElement(vertices2D.get(i));</span>
+
+			}
+		}
+// I eliminate the projections in case they are collinear to other points
+// For example (10.4) - (10.0) or (0.5) - (5.5)
+<span class="nc bnc" id="L226" title="All 2 branches missed.">if (verticesnp.size() &gt; 1) {</span>
+<span class="nc" id="L227">verticesnp = util.RemoveCollinear(verticesnp);</span>
+}
+
+// Map the remaining points
+<span class="nc" id="L231">Beta2D b2d = new Beta2D();</span>
+<span class="nc" id="L232">Vector&lt;Sector2D&gt; sector = new Vector&lt;Sector2D&gt;(); // is the array with the</span>
+// Beta
+<span class="nc" id="L234">		sector = b2d.BetaVector(verticesnp);</span>
+
+		// System.out.println(sector.size());
+
+		/*
+* //Add the &quot;diagonal&quot; collinear points by inserting them into the right
+* place if (verticesnp.size()&gt;1 &amp;&amp; original2D.size()&gt;1) { for (int
+* i=0;i&lt;(verticesnp.size()-1);i++) { for (int
+* j=0;j&lt;original2D.size();j++) { // a vertex is good when it isn't already
+* inclusive, // is collinear to the 2 of the sector // its x is greater than
+* first v of the sector // its x is less than the second v of the sector
+		 * 
+		 * if (verticesnp.contains(original2D.get(j))==false &amp;&amp;
+		 * util.Collinear((newPoint
+		 * )verticesnp.get(i),(newPoint)verticesnp.get(i+
+		 * 1),(newPoint)original2D.get(j)) &amp;&amp;
+		 * (((newPoint)verticesnp.get(i)).getX
+		 * ()&lt;((newPoint)original2D.get(j)).getX()) &amp;&amp;
+		 * (((newPoint)verticesnp.get
+		 * (i+1)).getX()&gt;((newPoint)original2D.get(j)).getX()) ) {
+		 * verticesnp.insertElementAt(original2D.get(j),i); //i--; } } } }
+		 */
+
+<span class="nc" id="L257">		Vector&lt;Sector2D&gt; res = new Vector&lt;Sector2D&gt;();</span>
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">		if (verticesnp.size() &gt; 1) {</span>
+// I associate the stations to the sectors
+<span class="nc" id="L261">res = b2d.StatAss(sector);</span>
+
+/*
+* for (int i=0;i&lt;sector.size();i++)
+* System.out.println(sector.get(i));
+*/
+
+// Adding collinear points
+<span class="nc bnc" id="L269" title="All 2 branches missed.">for (int i = 0; i &lt; res.size(); i++) // for all sectors</span>
+{
+<span class="nc bnc" id="L271" title="All 2 branches missed.">for (int j = 0; j &lt; original2D.size(); j++) // for all points</span>
+// originals
+{
+// Initial Horizontal Collinear
+<span class="nc bnc" id="L275" title="All 4 branches missed.">if (i == 0 &amp;&amp; (res.get(i).getP1()).getX() != 0) {</span>
+<span class="nc" id="L276">res.get(i).addCollinearFirst(res.get(i),</span>
+<span class="nc" id="L277">original2D.get(j));</span>
+}
+
+// Diagonal hills
+<span class="nc" id="L281">res.get(i).addCollinear(res.get(i), original2D.get(j));</span>
+
+// Collinear on the vertical side
+<span class="nc bnc" id="L284" title="All 4 branches missed.">if (i == res.size() - 1 &amp;&amp; (res.get(i).getP1()).getY() != 0) {</span>
+<span class="nc" id="L285">res.get(i).addCollinearLast(res.get(i),</span>
+<span class="nc" id="L286">original2D.get(j));</span>
+}
+
+}
+}
+} else
+// If saturates only one station
+		{
+<span class="nc" id="L294">			res.addElement(new Sector2D(1, 0, 0, 1, verticesnp.get(0)));</span>
+		}
+
+<span class="nc" id="L297">		Vector&lt;Object&gt; finalres = new Vector&lt;Object&gt;();</span>
+
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		for (int i = 0; i &lt; res.size(); i++) {</span>
+<span class="nc" id="L300">			FinalSect2D fs = new FinalSect2D(res.get(i), stations, classNames);</span>
+<span class="nc" id="L301">			finalres.addElement(fs);</span>
+		}
+
+<span class="nc" id="L304">		return finalres;</span>
+	}
+	
+	public DPoint calcEquiUtilizationPoint(Vector&lt;newPoint&gt; vertices2D) {
+		// NEW Spicuglia
+		// If there are two station we calculate the equiutilization point
+<span class="nc bnc" id="L310" title="All 2 branches missed.">		if (vertices2D.size() == 2) {</span>
+			double L11, L12, L21, L22;
+			double b1;
+			double b2;
+	
+<span class="nc" id="L315">			L11 =  vertices2D.get(0).x;</span>
+<span class="nc" id="L316">			L12 =  vertices2D.get(0).y;</span>
+<span class="nc" id="L317">			L21 =  vertices2D.get(1).x;</span>
+<span class="nc" id="L318">			L22 = vertices2D.get(1).y;</span>
+<span class="nc" id="L319">			b1 = Math.log(L22/L12) / Math.log((L11*L22)/(L12*L21));</span>
+<span class="nc" id="L320">			b2 = 1 - b1;</span>
+<span class="nc" id="L321">			return new DPoint(b1, b2);</span>
+		}
+<span class="nc" id="L323">		return null;</span>
+		// END Spicuglia
+	}
+
+	/**
+* 3 CLASS CASE
+*
+*/
+public Vector&lt;Object&gt; Calc3D(Vector&lt;Vertex&gt; vertices)
+throws ConvexHullException {
+<span class="nc" id="L333">Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+// The vertices are contained in vertices (modified with calcusidesons) e
+// original
+// The faces of the CHull are in faces
+// The triangular sectors in which 3 stations saturate are in triangles
+// The quad sectors where 2 stations saturate are in sect2station
+
+<span class="nc" id="L340">original3D = vertices;</span>
+
+<span class="nc" id="L342">Vector&lt;newPoint&gt; vertices2Dxy = new Vector&lt;newPoint&gt;();</span>
+<span class="nc" id="L343">Vector&lt;newPoint&gt; vertices2Dxz = new Vector&lt;newPoint&gt;();</span>
+<span class="nc" id="L344">Vector&lt;newPoint&gt; vertices2Dyz = new Vector&lt;newPoint&gt;();</span>
+
+<span class="nc" id="L346">Faces3D faces3d = new Faces3D();</span>
+
+// I instantiate the Beta3D class
+<span class="nc" id="L349">Beta3D b3d = new Beta3D();</span>
+
+// I instantiate the Segment3D class
+<span class="nc" id="L352">Segment3D seg = new Segment3D();</span>
+
+// Initialize the name of the pdf file that will be created
+<span class="nc" id="L355">		String name = &quot;noname&quot;;</span>
+
+		// ------------------------------------- START
+		// ----------------------------------------------------//
+
+// If there is only one station or only one is dominant it ends here
+<span class="nc" id="L361">		OneDominator od = new OneDominator();</span>
+<span class="nc" id="L362">		od.setVertices(vertices);</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">		if (od.IsOneDominator()) {</span>
+<span class="nc" id="L364">			Vertex dom = od.getDominator();</span>
+			// System.out.println(dom);
+<span class="nc" id="L366">			sect1station = b3d.OneDominator(od.getDominator());</span>
+
+<span class="nc" id="L368">			out.addElement(faces);</span>
+<span class="nc" id="L369">			out.addElement(original3D);</span>
+<span class="nc" id="L370">			out.addElement(triangles);</span>
+<span class="nc" id="L371">			out.addElement(sect2station);</span>
+<span class="nc" id="L372">			out.addElement(sect1station);</span>
+<span class="nc" id="L373">			out.addElement(name);</span>
+
+<span class="nc" id="L375">			return out;</span>
+		}
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">		if (vertices.size() == 1) {</span>
+<span class="nc" id="L379">			sect1station = b3d.OneDominator(vertices.get(0));</span>
+
+<span class="nc" id="L381">			out.addElement(faces);</span>
+<span class="nc" id="L382">			out.addElement(original3D);</span>
+<span class="nc" id="L383">			out.addElement(triangles);</span>
+<span class="nc" id="L384">			out.addElement(sect2station);</span>
+<span class="nc" id="L385">			out.addElement(sect1station);</span>
+<span class="nc" id="L386">			out.addElement(name);</span>
+
+<span class="nc" id="L388">			return out;</span>
+		}
+
+// ------------------------------------- PHASE 3D
+// -----------------------------------------------/ /
+
+// Check that there are at least 3 stations before doing the CHull
+<span class="nc bnc" id="L395" title="All 2 branches missed.">if (vertices.size() &gt; 2) {</span>
+
+// I explode the vector of the vertices also creating the projections
+<span class="nc" id="L398">vertices = faces3d.LExplode3D(vertices);</span>
+
+// I call the Hull3D method of the faces3d class which returns me
+// the faces of the polygon already marking the coplanar ones
+<span class="nc" id="L402">faces = faces3d.Hull3D(vertices);</span>
+
+// Check that there is at least one face
+<span class="nc bnc" id="L405" title="All 2 branches missed.">if (faces.size() &gt; 0) {</span>
+// I remove the faces containing projections
+<span class="nc" id="L407">faces = faces3d.RemoveP(faces, original3D);</span>
+
+// Association of Betas with triangular faces
+<span class="nc" id="L410">triangles = b3d. BetaTriangles(faces);</span>
+
+// I generate the sides to join
+<span class="nc" id="L413">sides = seg.CreateLt(triangles);</span>
+
+// Join of the triangles
+<span class="nc bnc" id="L416" title="All 2 branches missed.">if (triangles.size() &gt; 1) {</span>
+<span class="nc" id="L417">sect2station = b3d.JoinTriangles(triangles);</span>
+}
+
+// I remove the sides used by the join and add the created ones
+<span class="nc" id="L421">				sides = seg.FixLtFromJoin(sect2station, sides);</span>
+
+// ------------------------------------- PHASE 2D
+// ------------------------------------------------ ----//
+
+}// if (faces.size()&gt;0)
+}// if (vertices.size()&gt;2)
+// else System.out.println(&quot;there are not enough vertices&quot;);
+
+<span class="nc" id="L430">vertices2Dxy = faces3d.VertexRemoveZ(original3D);</span>
+<span class="nc" id="L431">vertices2Dxz = faces3d.VertexRemoveY(original3D);</span>
+<span class="nc" id="L432">vertices2Dyz = faces3d.VertexRemoveX(original3D);</span>
+
+<span class="nc" id="L434">Vector&lt;Sector2D&gt; resxy = new Vector&lt;Sector2D&gt;();</span>
+<span class="nc" id="L435">Vector&lt;Sector2D&gt; resxz = new Vector&lt;Sector2D&gt;();</span>
+<span class="nc" id="L436">Vector&lt;Sector2D&gt; resyz = new Vector&lt;Sector2D&gt;();</span>
+
+<span class="nc" id="L438">SectorEngine calculus2d = new SectorEngine();</span>
+
+// Generate the side of the triangle with beta3=0
+<span class="nc" id="L441">resxy = calculus2d.Calc2D(vertices2Dxy);</span>
+
+// Generate the side of the triangle with beta2=0
+<span class="nc" id="L444">resxz = calculus2d.Calc2D(vertices2Dxz);</span>
+
+// Generate the side of the triangle with beta1=0
+<span class="nc" id="L447">resyz = calculus2d.Calc2D(vertices2Dyz);</span>
+
+// I differentiate the procedure in case there is a sector with 3 stations
+// saturating at the same time
+// from which to start to join the segments to the side of the triangle or not.
+
+// XY SIDES
+<span class="nc" id="L454">		Vector&lt;Vector&lt;Object&gt;&gt; newresxy = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L455">		Vector&lt;Object&gt; sidesxy = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L456">		sidesxy = seg.FixLtFrom2Dxy(resxy);</span>
+
+// SIDES XZ
+<span class="nc" id="L459">Vector&lt;Vector&lt;Object&gt;&gt; newresxz = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L460">Vector&lt;Object&gt; sidesxz = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L461">sidesxz = seg.FixLtFrom2Dxz(resxz);</span>
+
+// SIDES YZ
+<span class="nc" id="L464">Vector&lt;Vector&lt;Object&gt;&gt; newresyz = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L465">Vector&lt;Object&gt; sidesyz = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L466">sidesyz = seg.FixLtFrom2Dyz(resyz);</span>
+
+<span class="nc bnc" id="L468" title="All 2 branches missed.">if (faces.size() &gt; 0) {</span>
+<span class="nc" id="L469">newresxy = b3d.Join2Statxy(sidesxy, sides, sect2station);</span>
+<span class="nc" id="L470">sect2station = newresxy.get(0);</span>
+<span class="nc" id="L471">sides = newresxy.get(1);</span>
+<span class="nc" id="L472">sidesxy = newresxy.get(2);</span>
+
+<span class="nc" id="L474">newresxz = b3d.Join2Statxz(sidesxz, sides, sect2station);</span>
+<span class="nc" id="L475">sect2station = newresxz.get(0);</span>
+<span class="nc" id="L476">sides = newresxz.get(1);</span>
+<span class="nc" id="L477">sidesxz = newresxz.get(2);</span>
+
+<span class="nc" id="L479">newresyz = b3d.Join2Statyz(sidesyz, sides, sect2station);</span>
+<span class="nc" id="L480">sect2station = newresyz.get(0);</span>
+<span class="nc" id="L481">sides = newresyz.get(1);</span>
+<span class="nc" id="L482">sidesyz = newresyz.get(2);</span>
+
+/*
+* // Print the sectors in which 2 stations are saturated
+* System.out.println
+* (&quot;Number of sectors in which 2 concurrent stations saturate: &quot;
+* +sect2station.size()); vres.ViewRes3D2Stat(sect2station,original3D);
+*/
+			// ------------------------------ 1 STAZIONE
+			// --------------------------------------------------------
+<span class="nc" id="L492">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+<span class="nc" id="L494">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+	// ------------------------------ COMPLANAR FACES
+// ------------------------------------------------ -
+
+// Check if there are coplanar faces
+<span class="nc bnc" id="L500" title="All 2 branches missed.">if (faces3d.ExistsComplanar(faces)) {</span>
+// System.out.println(&quot;COMPLANAR FACES EXIST&quot;);
+<span class="nc" id="L502">triangles = b3d.JoinComplanars(triangles);</span>
+// System.out.println(triangles.size());
+<span class="nc" id="L504">sect2station = b3d.DeleteFake(sect2station);</span>
+}
+// todo create method that adds more coplanar stations
+// (i.e. those which, despite being coplanar, are discarded by the
+// cHull)
+
+}// if faces.size()&gt;0
+
+// ------------------------------ IN CASE THERE ARE NO FACES
+// ------------------------------------
+
+else // (if faces.size==0)
+{
+<span class="nc" id="L517">Vector&lt;Vector&lt;Object&gt;&gt; resN31 = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+// System.out.println(&quot;There are no faces&quot;);
+
+// Search for sectors in which 2 stations are full
+<span class="nc" id="L521">resN31 = b3d.Join2StazN3(sidesxy, sidesxz, sidesyz, sect1station,</span>
+sect2station);
+
+// System.out.println(&quot;resN31.size(): &quot;+resN31.size());
+
+<span class="nc" id="L526">			sides = resN31.get(0);</span>
+<span class="nc" id="L527">			sidesxy = resN31.get(1);</span>
+<span class="nc" id="L528">			sidesxz = resN31.get(2);</span>
+<span class="nc" id="L529">			sidesyz = resN31.get(3);</span>
+<span class="nc" id="L530">			sect1station = resN31.get(4);</span>
+<span class="nc" id="L531">			sect2station = resN31.get(5);</span>
+
+<span class="nc" id="L533">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+<span class="nc" id="L534">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+		}
+
+		/*
+* //Generation of results out.addElement(faces);
+		 * out.addElement(original3D); out.addElement(triangles);
+		 * out.addElement(sect2station); out.addElement(sect1station);
+		 * out.addElement(name);
+		 */
+
+<span class="nc" id="L545">		Mapping3D map = new Mapping3D();</span>
+<span class="nc" id="L546">		map.RemapAllSectors(triangles);</span>
+<span class="nc" id="L547">		map.RemapAllSectors(sect2station);</span>
+<span class="nc" id="L548">		map.RemapAllSectors(sect1station);</span>
+
+<span class="nc" id="L550">		Vector&lt;Object&gt; allres = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">		for (int i = 0; i &lt; sect1station.size(); i++) {</span>
+<span class="nc" id="L552">			allres.addElement(sect1station.get(i));</span>
+		}
+<span class="nc bnc" id="L554" title="All 2 branches missed.">		for (int i = 0; i &lt; sect2station.size(); i++) {</span>
+<span class="nc" id="L555">			allres.addElement(sect2station.get(i));</span>
+		}
+<span class="nc bnc" id="L557" title="All 2 branches missed.">		for (int i = 0; i &lt; triangles.size(); i++) {</span>
+<span class="nc" id="L558">			allres.addElement(triangles.get(i));</span>
+		}
+
+<span class="nc" id="L561">		return allres;</span>
+		// return out;
+	}
+
+	public Vector&lt;Object&gt; Calc3D(Vector&lt;Vertex&gt; vertices,
+			String[] stationNames, String[] classNames)
+			throws ConvexHullException {
+<span class="nc" id="L568">		Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+// The vertices are contained in vertices (modified with calcusidesons) e
+// original
+// The faces of the CHull are in faces
+// The triangular sectors in which 3 stations saturate are in triangles
+// Quad sectors where 2 stations saturate are in sect2station
+
+<span class="nc" id="L575">Vector&lt;Station3D&gt; stations = new Vector&lt;Station3D&gt;();</span>
+
+// Create an array with the stations associated with their names
+<span class="nc bnc" id="L578" title="All 2 branches missed.">for (int i = 0; i &lt; vertices.size(); i++) {</span>
+<span class="nc" id="L579">stations.add(new Station3D(stationNames[i], vertices.get(i)));</span>
+}
+
+<span class="nc" id="L582">original3D = vertices;</span>
+
+<span class="nc" id="L584">Vector&lt;newPoint&gt; vertices2Dxy = new Vector&lt;newPoint&gt;();</span>
+<span class="nc" id="L585">Vector&lt;newPoint&gt; vertices2Dxz = new Vector&lt;newPoint&gt;();</span>
+<span class="nc" id="L586">Vector&lt;newPoint&gt; vertices2Dyz = new Vector&lt;newPoint&gt;();</span>
+
+<span class="nc" id="L588">Faces3D faces3d = new Faces3D();</span>
+
+// I instantiate the Beta3D class
+<span class="nc" id="L591">Beta3D b3d = new Beta3D();</span>
+
+// I instantiate the Segment3D class
+<span class="nc" id="L594">Segment3D seg = new Segment3D();</span>
+
+// I initialize the name of the pdf file which will be?? created
+<span class="nc" id="L597">		String name = &quot;noname&quot;;</span>
+
+		// ------------------------------------- START
+		// ----------------------------------------------------//
+
+// If there?? only one station or only one ?? dominant ends here
+<span class="nc" id="L603">		OneDominator od = new OneDominator();</span>
+<span class="nc" id="L604">		od.setVertices(vertices);</span>
+<span class="nc bnc" id="L605" title="All 2 branches missed.">		if (od.IsOneDominator()) {</span>
+<span class="nc" id="L606">			Vertex dom = od.getDominator();</span>
+			// System.out.println(dom);
+<span class="nc" id="L608">			sect1station = b3d.OneDominator(od.getDominator());</span>
+
+			// out.addElement(faces);
+<span class="nc" id="L611">			out.addElement(original3D);</span>
+			// out.addElement(triangles);
+			// out.addElement(sect2station);
+<span class="nc" id="L614">			out.addElement(sect1station);</span>
+			// out.addElement(name);
+<span class="nc" id="L616">			Mapping3D map = new Mapping3D();</span>
+			// map.RemapAllSectors(triangles);
+			// map.RemapAllSectors(sect2station);
+<span class="nc" id="L619">			map.RemapAllSectors(sect1station);</span>
+
+<span class="nc" id="L621">			Vector&lt;Object&gt; allres = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L622" title="All 2 branches missed.">			for (int i = 0; i &lt; sect1station.size(); i++) {</span>
+<span class="nc" id="L623">				allres.addElement(sect1station.get(i));</span>
+			}
+			/*
+			 * for (int i = 0; i&lt;sect2station.size();i++) {
+			 * allres.addElement((Sector3D) sect2station.get(i)); } for (int i = 0;
+			 * i&lt;triangles.size();i++) {
+			 * allres.addElement((Sector3D) triangles.get(i)); }
+			 */
+
+			// System.out.println(&quot;allres.size() = &quot;+allres.size());
+<span class="nc bnc" id="L633" title="All 2 branches missed.">			for (int i = 0; i &lt; allres.size(); i++) {</span>
+<span class="nc" id="L634">				((Sector3D) allres.get(i)).givename(stations);</span>
+<span class="nc" id="L635">				((Sector3D) allres.get(i)).setClassNames(classNames);</span>
+			}
+
+<span class="nc" id="L638">			return allres;</span>
+// todo the name and all!
+			// return out;
+		}
+
+<span class="nc bnc" id="L643" title="All 2 branches missed.">		if (vertices.size() == 1) {</span>
+<span class="nc" id="L644">			sect1station = b3d.OneDominator(vertices.get(0));</span>
+
+<span class="nc" id="L646">			out.addElement(faces);</span>
+<span class="nc" id="L647">			out.addElement(original3D);</span>
+<span class="nc" id="L648">			out.addElement(triangles);</span>
+<span class="nc" id="L649">			out.addElement(sect2station);</span>
+<span class="nc" id="L650">			out.addElement(sect1station);</span>
+<span class="nc" id="L651">			out.addElement(name);</span>
+
+<span class="nc" id="L653">			return out;</span>
+		}
+
+// ------------------------------------- PHASE 3D
+// -----------------------------------------------/ /
+
+// Check that there are at least 3 stations before doing the CHull
+<span class="nc bnc" id="L660" title="All 2 branches missed.">if (vertices.size() &gt; 2) {</span>
+
+// I explode the vector of the vertices also creating the projections
+<span class="nc" id="L663">vertices = faces3d.LExplode3D(vertices);</span>
+
+// I call the Hull3D method of the faces3d class which returns me
+// the faces of the polygon already?? marking the coplanar ones
+<span class="nc" id="L667">faces = faces3d.Hull3D(vertices);</span>
+
+// Check that there is at least one face
+<span class="nc bnc" id="L670" title="All 2 branches missed.">if (faces.size() &gt; 0) {</span>
+// I remove the faces containing projections
+<span class="nc" id="L672">faces = faces3d.RemoveP(faces, original3D);</span>
+
+// Association of Betas with triangular faces
+<span class="nc" id="L675">triangles = b3d. BetaTriangles(faces);</span>
+
+// I generate the sides to join
+<span class="nc" id="L678">sides = seg.CreateLt(triangles);</span>
+
+// Join of the triangles
+<span class="nc bnc" id="L681" title="All 2 branches missed.">if (triangles.size() &gt; 1) {</span>
+<span class="nc" id="L682">sect2station = b3d.JoinTriangles(triangles);</span>
+}
+
+// I remove the sides used by the join and add the created ones
+<span class="nc" id="L686">sides = seg.FixLtFromJoin(sect2station, sides);</span>
+
+// ------------------------------------- PHASE 2D
+// ------------------------------------------------ ----//
+
+}// if (faces.size()&gt;0)
+}// if (vertices.size()&gt;2)
+// else System.out.println(&quot;there are not enough vertices&quot;);
+
+<span class="nc" id="L695">vertices2Dxy = faces3d.VertexRemoveZ(original3D);</span>
+<span class="nc" id="L696">vertices2Dxz = faces3d.VertexRemoveY(original3D);</span>
+<span class="nc" id="L697">vertices2Dyz = faces3d.VertexRemoveX(original3D);</span>
+
+<span class="nc" id="L699">Vector&lt;Sector2D&gt; resxy = new Vector&lt;Sector2D&gt;();</span>
+<span class="nc" id="L700">Vector&lt;Sector2D&gt; resxz = new Vector&lt;Sector2D&gt;();</span>
+<span class="nc" id="L701">Vector&lt;Sector2D&gt; resyz = new Vector&lt;Sector2D&gt;();</span>
+
+<span class="nc" id="L703">SectorEngine calculus2d = new SectorEngine();</span>
+
+// Generate the side of the triangle with beta3=0
+<span class="nc" id="L706">resxy = calculus2d.Calc2D(vertices2Dxy);</span>
+
+// Generate the side of the triangle with beta2=0
+<span class="nc" id="L709">resxz = calculus2d.Calc2D(vertices2Dxz);</span>
+
+// Generate the side of the triangle with beta1=0
+<span class="nc" id="L712">resyz = calculus2d.Calc2D(vertices2Dyz);</span>
+
+// I differentiate the procedure in case there is a sector with 3 stations
+// saturating at the same time
+// from which to start to join the segments to the side of the triangle or not.
+
+// XY SIDES
+<span class="nc" id="L719">Vector&lt;Vector&lt;Object&gt;&gt; newresxy = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L720">Vector&lt;Object&gt; sidesxy = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L721">sidesxy = seg.FixLtFrom2Dxy(resxy);</span>
+
+// SIDES XZ
+<span class="nc" id="L724">Vector&lt;Vector&lt;Object&gt;&gt; newresxz = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L725">Vector&lt;Object&gt; sidesxz = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L726">sidesxz = seg.FixLtFrom2Dxz(resxz);</span>
+
+// SIDES YZ
+<span class="nc" id="L729">		Vector&lt;Vector&lt;Object&gt;&gt; newresyz = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+<span class="nc" id="L730">		Vector&lt;Object&gt; sidesyz = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L731">		sidesyz = seg.FixLtFrom2Dyz(resyz);</span>
+
+<span class="nc bnc" id="L733" title="All 2 branches missed.">		if (faces.size() &gt; 0) {</span>
+<span class="nc" id="L734">			newresxy = b3d.Join2Statxy(sidesxy, sides, sect2station);</span>
+<span class="nc" id="L735">			sect2station = newresxy.get(0);</span>
+<span class="nc" id="L736">			sides = newresxy.get(1);</span>
+<span class="nc" id="L737">			sidesxy = newresxy.get(2);</span>
+
+<span class="nc" id="L739">			newresxz = b3d.Join2Statxz(sidesxz, sides, sect2station);</span>
+<span class="nc" id="L740">			sect2station = newresxz.get(0);</span>
+<span class="nc" id="L741">			sides = newresxz.get(1);</span>
+<span class="nc" id="L742">			sidesxz = newresxz.get(2);</span>
+
+<span class="nc" id="L744">			newresyz = b3d.Join2Statyz(sidesyz, sides, sect2station);</span>
+<span class="nc" id="L745">			sect2station = newresyz.get(0);</span>
+<span class="nc" id="L746">			sides = newresyz.get(1);</span>
+<span class="nc" id="L747">			sidesyz = newresyz.get(2);</span>
+
+/*
+* // Print the sectors in which 2 stations are saturated
+* System.out.println
+* (&quot;Number of sectors in which 2 concurrent stations saturate: &quot;
+* +sect2station.size()); vres.ViewRes3D2Stat(sect2station,original3D);
+*/
+
+// ------------------------------ 1 STATION
+// ------------------------------------------------ --------
+<span class="nc" id="L758">sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+<span class="nc" id="L760">sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+// ------------------------------ COMPLANAR FACES
+// ------------------------------------------------ -
+
+// Check if there are coplanar faces
+<span class="nc bnc" id="L766" title="All 2 branches missed.">if (faces3d.ExistsComplanar(faces)) {</span>
+// System.out.println(&quot;COMPLANAR FACES EXIST&quot;);
+<span class="nc" id="L768">triangles = b3d.JoinComplanars(triangles);</span>
+// System.out.println(triangles.size());
+<span class="nc" id="L770">sect2station = b3d.DeleteFake(sect2station);</span>
+}
+// todo create method that adds more coplanar stations
+// (i.e. those which, despite being coplanar, are discarded by the
+// cHull)
+
+}// if faces.size()&gt;0
+
+// ------------------------------ IN CASE THERE ARE NO FACES
+// ------------------------------------
+
+else // (if faces.size==0)
+{
+<span class="nc" id="L783">Vector&lt;Vector&lt;Object&gt;&gt; resN31 = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+// System.out.println(&quot;There are no faces&quot;);
+
+// Search for sectors in which 2 stations are saturated
+<span class="nc" id="L787">			resN31 = b3d.Join2StazN3(sidesxy, sidesxz, sidesyz, sect1station,</span>
+					sect2station);
+
+			// System.out.println(&quot;resN31.size(): &quot;+resN31.size());
+
+<span class="nc" id="L792">			sides = resN31.get(0);</span>
+<span class="nc" id="L793">			sidesxy = resN31.get(1);</span>
+<span class="nc" id="L794">			sidesxz = resN31.get(2);</span>
+<span class="nc" id="L795">			sidesyz = resN31.get(3);</span>
+<span class="nc" id="L796">			sect1station = resN31.get(4);</span>
+<span class="nc" id="L797">			sect2station = resN31.get(5);</span>
+
+<span class="nc" id="L799">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+<span class="nc" id="L800">			sect1station = b3d.Join1Staz(sidesxy, sidesxz, sidesyz, sides, sect1station);</span>
+
+		}
+
+// ------------------------------ MAPPING IN THE 2 DIMENSIONS OF THE
+// BETA SPACE -------------------
+
+<span class="nc" id="L807">		Mapping3D map = new Mapping3D();</span>
+<span class="nc bnc" id="L808" title="All 2 branches missed.">		if (faces.size() &gt; 0) {</span>
+<span class="nc" id="L809">			map.RemapAllSectors(triangles);</span>
+		}
+<span class="nc" id="L811">		map.RemapAllSectors(sect2station);</span>
+<span class="nc" id="L812">		map.RemapAllSectors(sect1station);</span>
+
+<span class="nc" id="L814">		Vector&lt;Object&gt; allres = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L815" title="All 2 branches missed.">		for (int i = 0; i &lt; sect1station.size(); i++) {</span>
+<span class="nc" id="L816">			allres.addElement(sect1station.get(i));</span>
+		}
+<span class="nc bnc" id="L818" title="All 2 branches missed.">		for (int i = 0; i &lt; sect2station.size(); i++) {</span>
+<span class="nc" id="L819">			allres.addElement(sect2station.get(i));</span>
+		}
+<span class="nc bnc" id="L821" title="All 2 branches missed.">		if (faces.size() &gt; 0) {</span>
+<span class="nc bnc" id="L822" title="All 2 branches missed.">			for (int i = 0; i &lt; triangles.size(); i++) {</span>
+<span class="nc" id="L823">				allres.addElement(triangles.get(i));</span>
+			}
+		}
+
+		// System.out.println(&quot;allres.size() = &quot;+allres.size());
+<span class="nc bnc" id="L828" title="All 2 branches missed.">		for (int i = 0; i &lt; allres.size(); i++) {</span>
+<span class="nc" id="L829">			((Sector3D) allres.get(i)).givename(stations);</span>
+<span class="nc" id="L830">			((Sector3D) allres.get(i)).setClassNames(classNames);</span>
+		}
+
+<span class="nc" id="L833">		return allres;</span>
+		// return out;
+	}
+
+// Methods for getting the results
+	public Vector&lt;newFace&gt; getFaces() {
+<span class="nc" id="L839">		return faces;</span>
+	}
+
+	public Vector&lt;Object&gt; gettriangles() {
+<span class="nc" id="L843">		return triangles;</span>
+	}
+
+	public Vector&lt;Object&gt; getsect1station() {
+<span class="nc" id="L847">		return sect1station;</span>
+	}
+
+	public Vector&lt;Object&gt; getsect2station() {
+<span class="nc" id="L851">		return sect2station;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

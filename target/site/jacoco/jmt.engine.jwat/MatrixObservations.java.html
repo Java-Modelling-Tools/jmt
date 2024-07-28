@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MatrixObservations.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat</a> &gt; <span class="el_source">MatrixObservations.java</span></div><h1>MatrixObservations.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.engine.jwat;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import jmt.engine.jwat.filters.FilterOnVariable;
+import jmt.engine.jwat.input.VariableMapping;
+import jmt.engine.jwat.workloadAnalysis.exceptions.TrasformException;
+import jmt.gui.jwat.JWATConstants;
+
+/**
+ * This class stores all information about observations, variables and bivariate statistics
+ * @author Brambilla Davide, Fumagalli Claudio
+ * @version 1.1
+ */
+public class MatrixObservations {
+	/* Array of observations */
+	private Observation[] VectObs;
+	/* Array of variables */
+	private VariableNumber[] VectVar;
+
+	/**
+	 * Constructor, instantiates a Matrix of observations passing an array of observations, an array of
+	 * variable's names, an array of variable's types and an array of mapping class for each variable.
+	 * @param Matrix Array of observations.
+	 * @param Vname Varaible's names
+	 * @param TipoVar Variable's types
+	 * @param map array of mapping class for each variable
+	 */
+<span class="nc" id="L47">	public MatrixObservations(Observation[] Matrix, String[] Vname, int[] TipoVar, VariableMapping[] map) throws OutOfMemoryError {</span>
+		/* Number of variables and observationss*/
+<span class="nc" id="L49">		int VarDim = Vname.length;</span>
+<span class="nc" id="L50">		int ObsDim = Matrix.length;</span>
+<span class="nc" id="L51">		VectObs = Matrix;</span>
+		/* Temporary array used for sorting by single variable */
+<span class="nc" id="L53">		Observation[] VectObsTemp = new Observation[ObsDim];</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		for (int i = 0; i &lt; ObsDim; i++) {</span>
+<span class="nc" id="L55">			VectObsTemp[i] = VectObs[i];</span>
+		}
+		/* Array of variables */
+<span class="nc" id="L58">		VectVar = new VariableNumber[VarDim];</span>
+		/* Creation of each variable */
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		for (int i = 0; i &lt; VarDim; i++) {</span>
+			/* Sets up current varaible sorting information */
+<span class="nc" id="L62">			VectObsTemp[0].setSorter(i);</span>
+<span class="nc" id="L63">			Arrays.sort(VectObsTemp);</span>
+<span class="nc bnc" id="L64" title="All 4 branches missed.">			switch (TipoVar[i]) {</span>
+				case 0:
+<span class="nc" id="L66">					VectVar[i] = new VariableNumber(VectObsTemp, Vname[i], i, JWATConstants.NUMERIC, null);</span>
+<span class="nc" id="L67">					break;</span>
+				case 1:
+<span class="nc" id="L69">					VectVar[i] = new VariableString(VectObsTemp, Vname[i], i, JWATConstants.STRING, map[i]);</span>
+<span class="nc" id="L70">					break;</span>
+				case 2:
+<span class="nc" id="L72">					VectVar[i] = new VariableDate(VectObsTemp, Vname[i], i, JWATConstants.DATE, map[i]);</span>
+<span class="nc" id="L73">					break;</span>
+				default:
+			}
+
+		}
+<span class="nc" id="L78">		calcBivStats();</span>
+<span class="nc" id="L79">	}</span>
+
+	/**
+	 * Returns the array of variables.
+	 * @return Array of variables.
+	 */
+	public VariableNumber[] getVariables() {
+<span class="nc" id="L86">		return VectVar;</span>
+	}
+
+	/**
+	 * Returns the number of variables.
+	 * @return number of variables.
+	 */
+	public int getNumVariables() {
+<span class="nc" id="L94">		return VectVar.length;</span>
+	}
+
+	/**
+	 * Returns the object of bivariate statistics.
+	 * @return object of bivariate statistics.
+	 */
+	public StatBivariate getBivStatObj() {
+<span class="nc" id="L102">		return listOfStatsBiv.get(listOfStatsBiv.size() - 1);</span>
+	}
+
+	/**
+	 * Returns the array of original observations.
+	 * @return array of original observations.
+	 */
+	public Observation[] getListObs() {
+<span class="nc" id="L110">		return VectObs;</span>
+	}
+
+	/**
+	 * Returns the array of variable's names.
+	 * @return variable's names.
+	 */
+	public String[] getVariableNames() {
+<span class="nc" id="L118">		String[] n = new String[VectVar.length];</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		for (int i = 0; i &lt; n.length; i++) {</span>
+<span class="nc" id="L120">			n[i] = VectVar[i].getName();</span>
+		}
+<span class="nc" id="L122">		return n;</span>
+	}
+
+	/**
+	 * Returns the number of observations currently used.
+	 * @return number of observations currently used.
+	 */
+	public int getNumOfObs() {
+<span class="nc bnc" id="L130" title="All 4 branches missed.">		if (VectVar != null &amp;&amp; VectVar.length &gt; 0) {</span>
+<span class="nc" id="L131">			return VectVar[0].Size();</span>
+		} else {
+<span class="nc" id="L133">			return -1;</span>
+		}
+	}
+
+	/**
+	 * Returns the number of observations.
+	 * @return number of observations.
+	 */
+	public int getNumOfOriginalObs() {
+<span class="nc bnc" id="L142" title="All 4 branches missed.">		if (VectVar != null &amp;&amp; VectVar.length &gt; 0) {</span>
+<span class="nc" id="L143">			return VectObs.length;</span>
+		} else {
+<span class="nc" id="L145">			return -1;</span>
+		}
+	}
+
+	private void calcBivStats() {
+<span class="nc" id="L150">		listOfStatsBiv.add(new StatBivariate(VectVar));</span>
+<span class="nc" id="L151">	}</span>
+
+	private void undoBivStats(int size) {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L155">			listOfStatsBiv.remove(listOfStatsBiv.size() - 1);</span>
+		}
+<span class="nc" id="L157">	}</span>
+
+//UPDATE 28/10/2006 + Moving transformation operations from modelWorkloadAnalysis to MatrixObservations
+// + Array insertion of bivariate statistics to avoid recalculation in case of undo
+
+<span class="nc" id="L162">	private ArrayList&lt;StatBivariate&gt; listOfStatsBiv = new ArrayList&lt;StatBivariate&gt;(); //&lt;StatBivariate&gt;</span>
+
+	public void applyTransformation(int varSel, short type) throws TrasformException {
+<span class="nc" id="L165">		VectVar[varSel].doTransformation(type);</span>
+<span class="nc" id="L166">		calcBivStats();</span>
+<span class="nc" id="L167">	}</span>
+
+	public boolean undoTransformation(int varSel) {
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		if (VectVar[varSel].undoLastTrasf()) {</span>
+// Sampling had to be canceled
+<span class="nc bnc" id="L172" title="All 2 branches missed.">			for (int i = 0; i &lt; VectVar.length; i++) {</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">				if (i != varSel) {</span>
+<span class="nc" id="L174">					VectVar[i].resetSampling();</span>
+				}
+			}
+		//Reset validity and ID observations
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			for (int i = 0; i &lt; VectObs.length; i++) {</span>
+<span class="nc" id="L179">				VectObs[i].setValid(true);</span>
+<span class="nc" id="L180">				VectObs[i].setID(i + 1);</span>
+			}
+<span class="nc" id="L182">			return true;</span>
+		}
+<span class="nc" id="L184">		undoBivStats(listOfStatsBiv.size() - VectVar[varSel].getNumOfTransf() - 1);</span>
+<span class="nc" id="L185">		return false;</span>
+	}
+
+	public void doSampling(int varSel, FilterOnVariable filter) {
+<span class="nc" id="L189">		int size = VectVar[varSel].applySampling(filter);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">		for (int i = 0; i &lt; VectVar.length; i++) {</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			if (i != varSel) {</span>
+<span class="nc" id="L192">				VectVar[i].updateOnSampling(size);</span>
+			}
+		}
+<span class="nc" id="L195">		calcBivStats();</span>
+<span class="nc" id="L196">	}</span>
+
+	public void undoSampling(int varSel) {
+<span class="nc" id="L199">		VectVar[varSel].undoSampling();</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">		for (int i = 0; i &lt; VectVar.length; i++) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (i != varSel) {</span>
+<span class="nc" id="L202">				VectVar[i].resetSampling();</span>
+			}
+		}
+<span class="nc" id="L205">		undoBivStats(listOfStatsBiv.size() - VectVar[varSel].getNumOfTransf() - 1);</span>
+		//Reset validity and ID observations
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		for (int i = 0; i &lt; VectObs.length; i++) {</span>
+<span class="nc" id="L208">			VectObs[i].setValid(true);</span>
+<span class="nc" id="L209">			VectObs[i].setID(i + 1);</span>
+		}
+
+<span class="nc" id="L212">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLArchiver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">XMLArchiver.java</span></div><h1>XMLArchiver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.xml;
+
+import java.io.File;
+import java.util.Date;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import jmt.common.xml.XSDSchemaLoader;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.PAResultsModel;
+import jmt.gui.common.definitions.StoredResultsModel;
+
+import jmt.gui.common.xml.sim.XMLSimReader;
+import jmt.gui.common.xml.sim.XMLSimWriter;
+import jmt.gui.common.xml.gui.GuiXMLReader;
+import jmt.gui.common.xml.gui.GuiXMLWriter;
+import jmt.gui.common.xml.results.XMLResultsReader;
+import jmt.gui.common.xml.results.XMLResultsWriter;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+/**
+ * &lt;p&gt;Title: XML Archiver&lt;/p&gt;
+ * &lt;p&gt;Description: Used to save and load model information to be used for the simulation and
+ * for the save/load capability.&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 22-lug-2005
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
+ */
+<span class="nc" id="L60">public class XMLArchiver implements GuiXMLConstants {</span>
+
+	/**
+	 * Saves JMT Archive storing informations for simulator and for the gui
+	 * @param archiveName Handler to the archive to be created
+	 * @param model data structure
+	 */
+	public static void saveModel(File archiveName, CommonModel model) {
+<span class="fc" id="L68">		Document modelDoc = getDocument(model, archiveName.getName());</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">		if (modelDoc == null) {</span>
+<span class="nc" id="L70">			return;</span>
+		}
+		try {
+<span class="fc" id="L73">			Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="fc" id="L74">			transformer.setOutputProperty(OutputKeys.ENCODING, &quot;ISO-8859-1&quot;);</span>
+<span class="fc" id="L75">			transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</span>
+<span class="fc" id="L76">			transformer.transform(new DOMSource(modelDoc), new StreamResult(archiveName));</span>
+<span class="nc" id="L77">		} catch (TransformerConfigurationException e) {</span>
+<span class="nc" id="L78">			e.printStackTrace();</span>
+<span class="nc" id="L79">		} catch (TransformerFactoryConfigurationError e) {</span>
+<span class="nc" id="L80">			e.printStackTrace();</span>
+<span class="nc" id="L81">		} catch (TransformerException e) {</span>
+<span class="nc" id="L82">			e.printStackTrace();</span>
+<span class="pc" id="L83">		}</span>
+<span class="fc" id="L84">	}</span>
+
+	/**
+	 * Loads an archive into specified CommonModel. If CommonModel is a JMODELModel,
+	 * loads gui informations too.
+	 * @param archiveName name of the archive to be opened
+	 * @param model CommonModel where all loaded informations should be stored
+	 *
+	 * Modified by Francesco D'Aquino
+	 */
+	public static void loadModel(File archiveName, CommonModel model) {
+<span class="fc" id="L95">		Document doc = XMLLoader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMT_ARCHIVE));</span>
+		// If document is simulation file, loads it only, if it is an archive loads everything
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">		if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() == 0) {</span>
+<span class="nc" id="L98">			XMLSimReader.parseXML(doc, model);</span>
+		} else {
+<span class="fc" id="L100">            XMLSimReader.parseXML(getSimFromArchiveDocument(doc), model);</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">			if (containsGUI(doc)) {</span>
+<span class="fc" id="L102">				GuiXMLReader.parseXML(getGuiFromArchiveDocument(doc), model);</span>
+			}
+<span class="fc bfc" id="L104" title="All 2 branches covered.">			if (containsResults(doc)) {</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">				if (model.isParametricAnalysisEnabled()) {</span>
+<span class="fc" id="L106">					PAResultsModel results = new PAResultsModel(model, true);</span>
+<span class="fc" id="L107">					XMLResultsReader.parseXML(getResultsFromArchiveDocument(doc), results);</span>
+<span class="fc" id="L108">					model.setSimulationResults(results);</span>
+<span class="fc" id="L109">				} else {</span>
+<span class="fc" id="L110">					StoredResultsModel results = new StoredResultsModel();</span>
+<span class="fc" id="L111">					XMLResultsReader.parseXML(getResultsFromArchiveDocument(doc), results);</span>
+<span class="fc" id="L112">					model.setSimulationResults(results);</span>
+				}
+			}
+		}
+<span class="fc" id="L116">	}</span>
+
+	/**
+	 * Returns a new Archive XML Document used to store simulation and GUI data
+	 * @param model data structure
+	 * @param documentName name of created document (to be set into root element)
+	 * @return created Document
+	 */
+	public static Document getDocument(CommonModel model, String documentName) {
+<span class="fc" id="L125">		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span>
+<span class="fc" id="L126">		DocumentBuilder docBuilder = null;</span>
+		try {
+<span class="fc" id="L128">			docBuilder = dbf.newDocumentBuilder();</span>
+<span class="nc" id="L129">		} catch (ParserConfigurationException e) {</span>
+<span class="nc" id="L130">			e.printStackTrace();</span>
+<span class="nc" id="L131">			return null;</span>
+<span class="fc" id="L132">		}</span>
+<span class="fc" id="L133">		Document archiveDoc = docBuilder.newDocument();</span>
+		// Retrieves documents from XMLWriter and GuiXMLWriter
+<span class="fc" id="L135">		Document sim = XMLSimWriter.getDocument(model, documentName);</span>
+		Document jmodel;
+<span class="fc" id="L137">		Document results = null;</span>
+		// Stores gui information
+<span class="fc" id="L139">		jmodel = GuiXMLWriter.getDocument(model);</span>
+		// If results are present, store them. Do not store results if parametric
+		// analysis is enabled but results are from normal simulation, or if parametric
+		// is not enabled but results come from a parametric simulation
+<span class="fc bfc" id="L143" title="All 2 branches covered.">		if (model.containsSimulationResults()) {</span>
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">			if (model.isParametricAnalysisEnabled() &amp;&amp; (model.getSimulationResults() instanceof PAResultsModel)) {</span>
+<span class="fc" id="L145">				results = XMLResultsWriter.getDocument(model.getSimulationResults());</span>
+<span class="pc bpc" id="L146" title="2 of 4 branches missed.">			} else if (!model.isParametricAnalysisEnabled() &amp;&amp; (!(model.getSimulationResults() instanceof PAResultsModel))) {</span>
+<span class="fc" id="L147">				results = XMLResultsWriter.getDocument(model.getSimulationResults());</span>
+			}
+		}
+
+<span class="fc" id="L151">		Element root = archiveDoc.createElement(XML_ARCHIVE_DOCUMENT_ROOT);</span>
+<span class="fc" id="L152">		archiveDoc.appendChild(root);</span>
+
+		// Adds sim and jmodel root elements to Archive root
+<span class="fc" id="L155">		root.appendChild(archiveDoc.importNode(sim.getElementsByTagName(XMLConstantNames.XML_DOCUMENT_ROOT).item(0), true));</span>
+<span class="pc bpc" id="L156" title="1 of 2 branches missed.">		if (jmodel != null) {</span>
+<span class="fc" id="L157">			root.appendChild(archiveDoc.importNode(jmodel.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), true));</span>
+		}
+		// Adds simulation results idf present
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		if (results != null) {</span>
+<span class="fc" id="L161">			root.appendChild(archiveDoc.importNode(results.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).item(0), true));</span>
+		}
+
+		// Adds root attributes
+<span class="fc" id="L165">		root.setAttribute(&quot;xsi:noNamespaceSchemaLocation&quot;, XML_ARCHIVE_DOCUMENT_XSD);</span>
+<span class="fc" id="L166">		root.setAttribute(&quot;xmlns:xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);</span>
+<span class="fc" id="L167">		root.setAttribute(XML_ARCHIVE_A_NAME, documentName);</span>
+<span class="fc" id="L168">		root.setAttribute(XML_ARCHIVE_A_TIMESTAMP, new Date().toString());</span>
+
+<span class="fc" id="L170">		return archiveDoc;</span>
+	}
+
+	/**
+	 * Returns a simulation data Element, given an input archive in Document format.
+	 * @param archive Document of an archive
+	 * @return Element of corresponding simulation data
+	 */
+	public static Element getSimFromArchiveDocument(Document archive) {
+<span class="fc" id="L179">		return ((Element) archive.getElementsByTagName(XMLConstantNames.XML_DOCUMENT_ROOT).item(0));</span>
+	}
+
+	/**
+	 * Returns a Gui information data Element, given an input archive in Document format.
+	 * @param archive Document of an archive
+	 * @return Element of corresponding gui informations
+	 */
+	public static Element getGuiFromArchiveDocument(Document archive) {
+<span class="fc" id="L188">		return ((Element) archive.getElementsByTagName(GuiXMLConstants.XML_DOCUMENT_ROOT).item(0));</span>
+	}
+
+	/**
+	 * Returns Results information data Element, given an input archive in Document format.
+	 * @param archive Document of an archive
+	 * @return Element of corresponding results informations
+	 */
+	public static Element getResultsFromArchiveDocument(Document archive) {
+		// Retrieves &quot;results&quot; node and returns it
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">		if (archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).getLength() &gt; 0) {</span>
+<span class="fc" id="L199">			return (Element) archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).item(0);</span>
+		} else {
+<span class="nc" id="L201">			return (Element) archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_O_ROOT).item(0);</span>
+		}
+	}
+
+	/**
+	 * Tells if specified archive document holds gui informations
+	 * @param archive archive document
+	 * @return true iff gui informations are found
+	 */
+	private static boolean containsGUI(Document archive) {
+<span class="fc bfc" id="L211" title="All 2 branches covered.">		if (archive.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() &gt; 0) {</span>
+<span class="fc" id="L212">			return true;</span>
+		}
+<span class="fc" id="L214">		return false;</span>
+	}
+
+	/**
+	 * Tells if specified archive document holds results informations
+	 * @param archive archive document
+	 * @return true iff results informations are found
+	 */
+	private static boolean containsResults(Document archive) {
+<span class="fc bfc" id="L223" title="All 2 branches covered.">		if (archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_ROOT).getLength() &gt; 0) {</span>
+<span class="fc" id="L224">			return true;</span>
+		}
+<span class="pc bpc" id="L226" title="1 of 2 branches missed.">		if (archive.getElementsByTagName(XMLResultsConstants.XML_DOCUMENT_O_ROOT).getLength() &gt; 0) {</span>
+<span class="nc" id="L227">			return true;</span>
+		}
+<span class="fc" id="L229">		return false;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

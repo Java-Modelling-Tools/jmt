@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CircleStation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.animation</a> &gt; <span class="el_source">CircleStation.java</span></div><h1>CircleStation.java</h1><pre class="source lang-java linenums">package jmt.jmch.animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.geom.Arc2D;
+
+import javax.swing.JComponent;
+
+/**
+ * Class for the server in the station
+ *
+ * @author Lorenzo Torri
+ * Date: 25-mar-2024
+ * Time: 15.35
+ */
+public class CircleStation extends JComponent implements JobContainer{	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//information about the station
+	private Station station;
+	private Point sPos; 
+	private int sHeight;
+	private int sLength;
+	private float position;
+	
+	//information about the job currently processed it is all in arrays
+<span class="nc" id="L31">	private Color color = Color.RED;</span>
+	private float progression; //value from 0 to 1 to know how much we have completed the job duration
+	private Job currentJob;
+	private long entranceTime;
+	private boolean isWorking; //to know if it is processing a job or not
+	private long passedTime;
+	
+	private long pauseTime; //this variable is important if we are processing a job and then the animator is paused, we need to know how much time the job remained paused and remove this value from the passedTime
+	//then set this value = 0 when the job gets out from this class
+<span class="nc" id="L40">	private int velocityFactor = 1; //to increase the velocity of the simulation</span>
+<span class="nc" id="L41">	private double processorSpeed = 1; //only for processorsharing</span>
+	
+	/**
+	 * Constructor
+	 * @param st, Station that has this circle
+	 * @param position, set it = 0.0f if it is a single server station. Otherwise set it equal to the correct position for multiple servers
+	 */
+<span class="nc" id="L48">	public CircleStation(Station st, float position) {</span>
+<span class="nc" id="L49">		station = st;</span>
+<span class="nc" id="L50">		sPos = st.getPosition();</span>
+<span class="nc" id="L51">		sHeight = st.getHeight();</span>
+<span class="nc" id="L52">		sLength = st.getLength();</span>
+<span class="nc" id="L53">		isWorking = false;</span>
+<span class="nc" id="L54">		this.progression = 0.0f;</span>
+<span class="nc" id="L55">		this.position = position;</span>
+<span class="nc" id="L56">		pauseTime = 0;</span>
+<span class="nc" id="L57">	}</span>
+	
+	
+	@Override
+	public void paint(Graphics g) {
+<span class="nc" id="L62">		super.paint(g);</span>
+		
+<span class="nc" id="L64">		g.setColor(color);</span>
+<span class="nc" id="L65">        Graphics2D g2d = (Graphics2D) g.create();</span>
+        //int radius = sHeight/2;
+        
+<span class="nc" id="L68">        Arc2D arc = new Arc2D.Double((sPos.x + sLength+1), sPos.y + position, sHeight, sHeight, 90, 360*progression, Arc2D.PIE); //paint the circle</span>
+<span class="nc" id="L69">    	g2d.fill(arc);    </span>
+<span class="nc" id="L70">	}</span>
+	
+	@Override
+	public void refresh() {
+<span class="nc" id="L74">		this.velocityFactor = station.getAnimationClass().getVelocityFactor();</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if(isWorking) {</span>
+<span class="nc" id="L77">			long now = System.currentTimeMillis();</span>
+<span class="nc" id="L78">			long duration = (long) (currentJob.getDuration() * Math.pow(10, 3));</span>
+<span class="nc" id="L79">			passedTime += (now - entranceTime - pauseTime)* (velocityFactor * processorSpeed); //both the factor for the step and the one of processor sharing</span>
+<span class="nc" id="L80">			entranceTime = now;</span>
+<span class="nc" id="L81">			pauseTime = 0;</span>
+			
+<span class="nc" id="L83">			long diff =  duration - passedTime;</span>
+<span class="nc" id="L84">			progression = (float) diff/duration;</span>
+			
+<span class="nc bnc" id="L86" title="All 2 branches missed.">			if(progression &lt; 0) {</span>
+				//System.out.println(System.currentTimeMillis() + &quot; leaving the circle&quot;);
+<span class="nc" id="L88">				isWorking = false;</span>
+<span class="nc" id="L89">				progression = 0; //to avoid printing another cycle of the circle</span>
+<span class="nc" id="L90">				pauseTime = 0;</span>
+<span class="nc" id="L91">				passedTime = 0;</span>
+				
+<span class="nc" id="L93">				Job routeJob = currentJob;</span>
+<span class="nc" id="L94">				currentJob = null; //this is needed otherwise the currentJob is still in this circle until a new one arrives</span>
+<span class="nc" id="L95">				station.routeJob(routeJob);</span>
+			}
+		}	
+<span class="nc" id="L98">	}</span>
+	
+	@Override
+	public void addJob(JobContainer prec, Job newJob) {
+<span class="nc" id="L102">		currentJob = newJob;</span>
+<span class="nc" id="L103">		entranceTime = System.currentTimeMillis();</span>
+<span class="nc" id="L104">		isWorking = true;</span>
+<span class="nc" id="L105">		color = newJob.getColor();</span>
+<span class="nc" id="L106">	}</span>
+	
+	/**
+	 * To know if the station is currently processing a job or not
+	 * @return true if it is processing a job, false otherwise
+	 */
+	public boolean isWorking() {
+<span class="nc" id="L113">		return isWorking;</span>
+	}
+	
+	/**
+	 * To know for how long the animator has stopped
+	 * @param value the time of pausing
+	 */
+	public void setPauseTime(long value) {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		if(isWorking) { //only if the circle is working it is important to set the pauseTime, otherwise not.</span>
+<span class="nc" id="L122">			pauseTime += value;</span>
+		}	
+<span class="nc" id="L124">	}</span>
+	
+	public void setPosition(Point pos) {
+<span class="nc" id="L127">		sPos = pos;</span>
+<span class="nc" id="L128">	}</span>
+
+	public void setVelocityFactor(int value) {
+<span class="nc" id="L131">		velocityFactor = value;</span>
+<span class="nc" id="L132">	}</span>
+
+	public void setProcessorSpeed(double velocity) {
+<span class="nc" id="L135">		processorSpeed = velocity;</span>
+<span class="nc" id="L136">	}</span>
+
+	//used by PSSolver. see Station
+	public void updateCumulativeService(double speed, double value){
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if(currentJob != null){</span>
+<span class="nc" id="L141">			currentJob.updateCumulatedService(speed, value);</span>
+		}
+<span class="nc" id="L143">	}</span>
+
+	public Job getJob(){
+<span class="nc" id="L146">		return currentJob;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

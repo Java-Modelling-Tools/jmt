@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtGraphLayoutCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">JmtGraphLayoutCache.java</span></div><h1>JmtGraphLayoutCache.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.JGraphMod;
+
+import java.awt.Rectangle;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+
+import org.jgraph.graph.CellView;
+import org.jgraph.graph.CellViewFactory;
+import org.jgraph.graph.GraphLayoutCache;
+import org.jgraph.graph.GraphModel;
+
+/**
+ * An object that defines the view of a graphmodel. This object
+ * maps between model cells and views and provides a set of methods
+ * to change these views.
+ * The view may also contain its own set of attributes and is therefore
+ * an extension of an Observable, which may be observed by the GraphUI.
+ * It uses the model to send its changes to the command history.
+ *
+
+ * @author Federico Granata
+ * Date: 14-lug-2003
+ * Time: 14.18.17
+
+ * Modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
+ 
+ */
+public class JmtGraphLayoutCache extends GraphLayoutCache {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Constructs a view for the specified model that uses
+	 * &lt;code&gt;factory&lt;/code&gt; to create its views.
+	 *
+	 * @param model the model that constitues the data source
+	 */
+	public JmtGraphLayoutCache(GraphModel model, CellViewFactory factory) {
+<span class="nc" id="L60">		super(model, factory);</span>
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * Return all cells that intersect the given rectangle.
+	 */
+	public CellView[] getRoots(Rectangle clip) {
+<span class="nc" id="L67">		java.util.List&lt;CellView&gt; result = new ArrayList&lt;CellView&gt;();</span>
+<span class="nc" id="L68">		CellView[] views = getRoots();</span>
+		Rectangle2D bounds;
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		for (CellView view : views) {</span>
+<span class="nc" id="L71">			bounds = view.getBounds();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (bounds != null) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">				if (bounds.intersects(clip)) {</span>
+<span class="nc" id="L74">					result.add(view);</span>
+				}
+			}
+		}
+<span class="nc" id="L78">		views = new CellView[result.size()];</span>
+<span class="nc" id="L79">		result.toArray(views);</span>
+<span class="nc" id="L80">		return views;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

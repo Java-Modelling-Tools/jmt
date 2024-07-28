@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BoxStation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.animation</a> &gt; <span class="el_source">BoxStation.java</span></div><h1>BoxStation.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmch.animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
+
+import javax.swing.JComponent;
+
+/**
+ * Class for a single space inside the queue of the station
+ *
+ * @author Lorenzo Torri
+ * Date: 25-mar-2024
+ * Time: 15.03
+ */
+public class BoxStation extends JComponent implements JobContainer{	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//information about the station
+	private Station station;
+	private int index; //this is the index of this box inside the array of boxes of the Station
+	private Point sPos; 
+	private int sLength;
+	private int sHeight;
+	private int queueSize;
+	
+	//information about the current Job inside the BoxStation
+<span class="nc" id="L48">	private Job currentJob = null;</span>
+	private Color color;
+	private double mapDuration;
+
+	//information about the current Job for processor sharing
+	private long entranceTime;
+<span class="nc" id="L54">	private long pausedTime = 0;</span>
+<span class="nc" id="L55">	private double velocityFactor = 1;</span>
+<span class="nc" id="L56">	private double processorSpeed = 1;</span>
+	
+<span class="nc" id="L58">	private boolean isWorking = false; //to know if there is a job in this BoxStation or not to print the circle above</span>
+<span class="nc" id="L59">	private int sizeCircle = 10; //circle above the box if there is a job </span>
+	
+	/**
+	 * Constructor
+	 * @param st, station of this boxstation
+	 * @param i, index in the list of boxstations
+	 */
+<span class="nc" id="L66">	public BoxStation(Station st, int i) {</span>
+<span class="nc" id="L67">		this.station = st;</span>
+<span class="nc" id="L68">		this.index = i;</span>
+<span class="nc" id="L69">		sPos = st.getPosition();</span>
+<span class="nc" id="L70">		sLength = st.getLength();</span>
+<span class="nc" id="L71">		sHeight = st.getHeight();</span>
+<span class="nc" id="L72">		queueSize = st.getsizeQueue();</span>
+<span class="nc" id="L73">	}</span>
+	
+	@Override
+	public void paint(Graphics g) {
+<span class="nc" id="L77">		super.paint(g);</span>
+		
+<span class="nc" id="L79">		int size = sLength/queueSize;</span>
+		
+<span class="nc" id="L81">		g.setColor(color); //set the color of the job</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		int result = (int) Math.round(mapDuration == 1.0 ? sHeight - 1: mapDuration*sHeight);</span>
+<span class="nc" id="L83">		g.fillRect(sPos.x + (queueSize-index-1)*size + 1, sPos.y + (sHeight-result), size - 1, result); //+1 - 1 values are used to avoid clipping with other figures</span>
+		
+		//paint the circle above
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if(isWorking) {</span>
+<span class="nc" id="L87">			g.setColor(color);</span>
+<span class="nc" id="L88">			g.fillOval(sPos.x + (queueSize-index-1)*size + (sLength/queueSize)/2 - sizeCircle/2, sPos.y - sizeCircle - 10, sizeCircle, sizeCircle); </span>
+		}
+<span class="nc" id="L90">	}</span>
+
+	@Override
+	public void refresh() { //in general refresh does nothing, but if processor sharing is active, then the job is processed even if is in the queue
+<span class="nc" id="L94">		this.velocityFactor = station.getAnimationClass().getVelocityFactor();</span>
+		
+<span class="nc bnc" id="L96" title="All 4 branches missed.">		if(station.isProcessorSharing() &amp;&amp; isWorking) {</span>
+<span class="nc" id="L97">			long jobDuration = (long) (currentJob.getDuration() * Math.pow(10, 3));</span>
+			//System.out.println((System.currentTimeMillis() - entranceTime - pausedTime)*velocityFactor);
+<span class="nc" id="L99">			double newDuration = (jobDuration - (System.currentTimeMillis() - entranceTime - pausedTime)* (velocityFactor * processorSpeed)) / (Math.pow(10,3));</span>
+<span class="nc" id="L100">			currentJob.setDuration(newDuration);</span>
+<span class="nc" id="L101">			entranceTime = System.currentTimeMillis();</span>
+<span class="nc" id="L102">			pausedTime = 0;</span>
+			
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			if(currentJob.getDuration() &lt; 0) {</span>
+<span class="nc" id="L105">				isWorking = false;</span>
+<span class="nc" id="L106">				pausedTime = 0;</span>
+				
+<span class="nc" id="L108">				Job routeJob = currentJob;</span>
+<span class="nc" id="L109">				currentJob = null;</span>
+<span class="nc" id="L110">				station.removeJob(routeJob);</span>
+<span class="nc" id="L111">				station.routeJob(routeJob);</span>
+			}
+		}
+		
+<span class="nc" id="L115">	}</span>
+	
+	@Override
+	public void addJob(JobContainer prec, Job newJob) {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if(!newJob.equals(currentJob)) { //need to update only if the newJob is different than the one that the box already has</span>
+<span class="nc" id="L120">			entranceTime = System.currentTimeMillis();</span>
+		}
+<span class="nc" id="L122">		currentJob = newJob;		</span>
+<span class="nc" id="L123">		color = newJob.getColor();</span>
+<span class="nc" id="L124">		mapDuration = newJob.getMapDuration();</span>
+<span class="nc" id="L125">		isWorking = true;</span>
+<span class="nc" id="L126">	}</span>
+	
+	/**
+	 * Paint the box white, since we do not have any job to display
+	 */
+	public void clear() {
+<span class="nc" id="L132">		mapDuration = 0;</span>
+<span class="nc" id="L133">		isWorking = false;</span>
+<span class="nc" id="L134">		currentJob = null;</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * To know for how long the animator has stopped
+	 * @param value the time of pausing
+	 */
+	public void setPauseTime(long value) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		if(isWorking) {</span>
+<span class="nc" id="L143">			pausedTime += value;</span>
+		}	
+<span class="nc" id="L145">	}</span>
+
+	public void setProcessorSpeed(double velocity) {
+<span class="nc" id="L148">		processorSpeed = velocity;</span>
+<span class="nc" id="L149">	}</span>
+	
+	public void setVelocityFactor(int value) {
+<span class="nc" id="L152">		velocityFactor = value;</span>
+<span class="nc" id="L153">	}</span>
+	
+	public void setPosition(Point pos) {
+<span class="nc" id="L156">		sPos = pos;</span>
+<span class="nc" id="L157">	}</span>
+
+	//used by PSSolver. see Station
+	public void updateCumulativeService(double speed, double value){
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		if(currentJob != null){</span>
+<span class="nc" id="L162">			currentJob.updateCumulatedService(speed, value);</span>
+		}
+<span class="nc" id="L164">	}</span>
+
+	public Job getJob(){
+<span class="nc" id="L167">		return currentJob;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

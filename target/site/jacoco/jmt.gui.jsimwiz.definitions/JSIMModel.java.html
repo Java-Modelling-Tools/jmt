@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JSIMModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimwiz.definitions</a> &gt; <span class="el_source">JSIMModel.java</span></div><h1>JSIMModel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimwiz.definitions;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.ServerType;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 25-lug-2005
+ * Time: 14.31.58
+ * This is a variant of CommonModel that automatically add source and sink stations to model
+ * as the first open class (if defined) is added to the model. If last open class is
+ * deleted, source and sink stations are deleted as well. This class is designed for a
+ * single-source and -sink model. Reference source for all open classes is this only source.
+ * Modified by Bertoli Marco 4-oct-2005 / Fixed bugs while loading from file
+ */
+<span class="nc" id="L38">public class JSIMModel extends CommonModel {</span>
+
+	//keys for source and sink
+	Object src;
+	Object snk;
+
+	//intercept each call for addition of a new class
+	@Override
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
+<span class="nc" id="L47">		Object key = super.addClass(name, type, priority, softDeadline, population, distribution);</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">		if (type == CLASS_TYPE_OPEN) {</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if (getOpenClassKeys().size() == 1) {</span>
+<span class="nc" id="L50">				addSourceAndSink();</span>
+			}
+<span class="nc" id="L52">			setClassRefStation(key, src);</span>
+		}
+<span class="nc" id="L54">		return key;</span>
+	}
+
+	//Intercept each call to the deletion of a class
+	@Override
+	public void deleteClass(Object key) {
+<span class="nc" id="L60">		int type = getClassType(key);</span>
+<span class="nc" id="L61">		super.deleteClass(key);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if (type == CLASS_TYPE_OPEN) {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			if (getOpenClassKeys().size() == 0) {</span>
+<span class="nc" id="L64">				deleteSourceAndSink();</span>
+			}
+		}
+<span class="nc" id="L67">	}</span>
+
+	//intercept each call for change of class type
+	@Override
+	public void setClassType(Object key, int type) {
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if (getClassType(key) == type) {</span>
+<span class="nc" id="L73">			return;</span>
+		}
+<span class="nc" id="L75">		super.setClassType(key, type);</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (type == CLASS_TYPE_OPEN) {</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if (getOpenClassKeys().size() == 1) {</span>
+<span class="nc" id="L78">				addSourceAndSink();</span>
+			}
+<span class="nc" id="L80">			setClassRefStation(key, src);</span>
+		} else {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if (getOpenClassKeys().size() == 0) {</span>
+<span class="nc" id="L83">				deleteSourceAndSink();</span>
+			}
+		}
+<span class="nc" id="L86">	}</span>
+
+	//intercept each call for addition of a new station
+	@Override
+	public Object addStation(String name, String type, int nextServerNum, List&lt;ServerType&gt; servers) {
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		if (type.equals(STATION_TYPE_SOURCE)) {</span>
+<span class="nc" id="L92">			return src;</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		} else if (type.equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L94">			return snk;</span>
+		} else {
+<span class="nc" id="L96">			return super.addStation(name, type, nextServerNum, servers);</span>
+		}
+	}
+
+	//intercept each call for deletion of a station
+	@Override
+	public void deleteStation(Object key) {
+<span class="nc" id="L103">		String type = getStationType(key);</span>
+<span class="nc bnc" id="L104" title="All 4 branches missed.">		if (type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L105">			return;</span>
+		}
+<span class="nc" id="L107">		super.deleteStation(key);</span>
+<span class="nc" id="L108">	}</span>
+
+	//intercept each calls for change of station type
+	@Override
+	public void setStationType(Object key, String type) {
+<span class="nc" id="L113">		String oldType = getStationType(key);</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">		if (oldType.equals(STATION_TYPE_SOURCE) || oldType.equals(STATION_TYPE_SINK)</span>
+<span class="nc bnc" id="L115" title="All 4 branches missed.">				|| type.equals(STATION_TYPE_SOURCE) || type.equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L116">			return;</span>
+		}
+<span class="nc" id="L118">		super.setStationType(key, type);</span>
+<span class="nc" id="L119">	}</span>
+
+	//addition of source and sink
+	private void addSourceAndSink() {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if (src == null) {</span>
+<span class="nc" id="L124">			src = super.addStation(&quot;Source&quot;, STATION_TYPE_SOURCE, 1, new ArrayList&lt;ServerType&gt;());</span>
+		}
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if (snk == null) {</span>
+<span class="nc" id="L127">			snk = super.addStation(&quot;Sink&quot;, STATION_TYPE_SINK, 1, new ArrayList&lt;ServerType&gt;());</span>
+		}
+<span class="nc" id="L129">		stationsKeyset.remove(src);</span>
+<span class="nc" id="L130">		stationsKeyset.remove(snk);</span>
+<span class="nc" id="L131">		stationsKeyset.add(0, src);</span>
+<span class="nc" id="L132">		stationsKeyset.add(1, snk);</span>
+<span class="nc" id="L133">	}</span>
+
+	//deletion of source and sink
+	private void deleteSourceAndSink() {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		if (src != null) {</span>
+<span class="nc" id="L138">			super.deleteStation(src);</span>
+<span class="nc" id="L139">			src = null;</span>
+		}
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		if (snk != null) {</span>
+<span class="nc" id="L142">			super.deleteStation(snk);</span>
+<span class="nc" id="L143">			snk = null;</span>
+		}
+<span class="nc" id="L145">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

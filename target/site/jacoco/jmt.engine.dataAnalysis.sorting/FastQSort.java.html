@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FastQSort.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis.sorting</a> &gt; <span class="el_source">FastQSort.java</span></div><h1>FastQSort.java</h1><pre class="source lang-java linenums">package jmt.engine.dataAnalysis.sorting;
+
+/**
+ * A quick sort algorithm.
+ *
+ */
+<span class="nc" id="L7">public class FastQSort implements SortAlgorithm {</span>
+	/** This is a generic version of C.A.R Hoare's Quick Sort
+	 * algorithm.  This will handle arrays that are already
+	 * sorted, and arrays with duplicate keys.&lt;BR&gt;
+	 *
+	 * If you think of a one dimensional array as going from
+	 * the lowest index on the left to the highest index on the right
+	 * then the parameters to this function are lowest index or
+	 * left and highest index or right.  The first time you call
+	 * this function it will be with the parameters 0, a.length - 1.
+	 *
+	 * @param a         an integer array
+	 * @param l     left boundary of array partition
+	 * @param r     right boundary of array partition
+	 */
+	private void quickSort(double a[], int l, int r) {
+		int i, j;
+		double pivot, temp;
+
+<span class="nc bnc" id="L26" title="All 2 branches missed.">		if (r &gt; l) {</span>
+<span class="nc" id="L27">			pivot = a[r];</span>
+<span class="nc" id="L28">			i = l - 1;</span>
+<span class="nc" id="L29">			j = r;</span>
+			for (;;) {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">				while (a[++i] &lt; pivot) {</span>
+					;
+				}
+<span class="nc bnc" id="L34" title="All 2 branches missed.">				while (a[--j] &gt; pivot) {</span>
+					;
+				}
+<span class="nc bnc" id="L37" title="All 2 branches missed.">				if (i &gt;= j) {</span>
+<span class="nc" id="L38">					break;</span>
+				}
+				//swap
+<span class="nc" id="L41">				temp = a[i];</span>
+<span class="nc" id="L42">				a[i] = a[j];</span>
+<span class="nc" id="L43">				a[j] = temp;</span>
+			}
+<span class="nc" id="L45">			temp = a[i];</span>
+<span class="nc" id="L46">			a[i] = a[r];</span>
+<span class="nc" id="L47">			a[r] = temp;</span>
+<span class="nc" id="L48">			quickSort(a, l, i - 1);</span>
+<span class="nc" id="L49">			quickSort(a, i + 1, r);</span>
+		}
+
+<span class="nc" id="L52">	}</span>
+
+	public void sort(double a[]) {
+<span class="nc" id="L55">		quickSort(a, 0, a.length - 1);</span>
+<span class="nc" id="L56">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

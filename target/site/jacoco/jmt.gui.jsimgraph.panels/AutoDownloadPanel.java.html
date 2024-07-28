@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AutoDownloadPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.panels</a> &gt; <span class="el_source">AutoDownloadPanel.java</span></div><h1>AutoDownloadPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.common.ConnectionCheck;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.xml.TemplateFileOperation;
+import jmt.gui.table.BooleanCellRenderer;
+import jmt.gui.jsimgraph.template.TemplateConstants;
+import jmt.gui.jsimgraph.template.TemplateData;
+
+/**
+ * @author S Jiang
+ * 
+ */
+public class AutoDownloadPanel extends WizardPanel implements TemplateConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private String indexFile;
+	private JProgressBar progress;
+	private JButton download;
+	private JButton cancel;
+	private JButton retry;
+<span class="nc" id="L68">	private JLabel errorLabel = new JLabel(&quot;Connection error&quot;);</span>
+<span class="nc" id="L69">	private JLabel progLabel = new JLabel(&quot;PROGRESS:&quot;);</span>
+	private JPanel bottomPane;
+	private List&lt;TemplateData&gt; data;
+	private DefaultPackageTable defaultPackageTable;
+	private JPanel parent;
+	private TemplatePanel panel;
+	private boolean error;
+
+<span class="nc" id="L77">	public AutoDownloadPanel() {</span>
+<span class="nc" id="L78">		parent = this;</span>
+<span class="nc" id="L79">		this.panel = null;</span>
+<span class="nc" id="L80">		initComponents();</span>
+<span class="nc" id="L81">	}</span>
+
+	public void initComponents() {
+<span class="nc" id="L84">		downloadIndex();</span>
+
+<span class="nc" id="L86">		progress = new JProgressBar();</span>
+<span class="nc" id="L87">		progress.setStringPainted(true);</span>
+<span class="nc" id="L88">		progress.setString(&quot;0%&quot;);</span>
+<span class="nc" id="L89">		download = new JButton(&quot;Download&quot;);</span>
+<span class="nc" id="L90">		cancel = new JButton(&quot;Cancel&quot;);</span>
+<span class="nc" id="L91">		retry = new JButton(&quot;Retry&quot;);</span>
+
+<span class="nc" id="L93">		progress.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L94">		download.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L95">		cancel.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L96">		retry.setPreferredSize(new Dimension((int)(110 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L98">		download.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L100">				File folder = new File(TEMPLATE_FOLDER);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">				if (!folder.exists()) {</span>
+<span class="nc" id="L102">					folder.mkdir();</span>
+				}
+<span class="nc" id="L104">				progress.setValue(0);</span>
+<span class="nc" id="L105">				progress.setString(&quot;0%&quot;);</span>
+<span class="nc" id="L106">				download.setEnabled(false);</span>
+<span class="nc" id="L107">				cancel.setEnabled(false);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">				if (ConnectionCheck.netCheck(CONN_TEST_ADDRESSES)) {</span>
+<span class="nc" id="L109">					new Downloader().execute();</span>
+				} else {
+<span class="nc" id="L111">					download.setEnabled(true);</span>
+<span class="nc" id="L112">					cancel.setEnabled(true);</span>
+<span class="nc" id="L113">					JOptionPane.showMessageDialog(parent, &quot;Connection error&quot;);</span>
+				}
+<span class="nc" id="L115">			}</span>
+		});
+
+<span class="nc" id="L118">		cancel.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L120">				SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+<span class="nc" id="L121">			}</span>
+		});
+
+<span class="nc" id="L124">		retry.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L126">				downloadIndex();</span>
+<span class="nc" id="L127">				((DefaultPackageTableModel) defaultPackageTable.getModel()).fireDataChanged();</span>
+<span class="nc" id="L128">				((DefaultPackageTableModel) defaultPackageTable.getModel()).setFlags(data.size());</span>
+<span class="nc" id="L129">				createBottom();</span>
+<span class="nc" id="L130">				AutoDownloadPanel.this.revalidate();</span>
+<span class="nc" id="L131">				AutoDownloadPanel.this.repaint();</span>
+<span class="nc" id="L132">			}</span>
+		});
+
+<span class="nc" id="L135">		defaultPackageTable = new DefaultPackageTable();</span>
+<span class="nc" id="L136">		JScrollPane fileListPane = new JScrollPane();</span>
+<span class="nc" id="L137">		fileListPane.getViewport().add(defaultPackageTable);</span>
+
+<span class="nc" id="L139">		JLabel label = new JLabel(&quot;Select the templates that you want to download: &quot;);</span>
+<span class="nc" id="L140">		label.setLabelFor(fileListPane);</span>
+
+<span class="nc" id="L142">		JLabel progLabel = new JLabel(&quot;PROGRESS:&quot;);</span>
+<span class="nc" id="L143">		progLabel.setLabelFor(progress);</span>
+
+<span class="nc" id="L145">		this.setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L147">		JPanel upperPane = new JPanel();</span>
+<span class="nc" id="L148">		upperPane.setLayout(new FlowLayout(FlowLayout.LEADING));</span>
+
+<span class="nc" id="L150">		JPanel bottomPane = new JPanel();</span>
+<span class="nc" id="L151">		bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));</span>
+<span class="nc" id="L152">		createBottom();</span>
+<span class="nc" id="L153">		upperPane.add(label);</span>
+<span class="nc" id="L154">		this.add(upperPane, BorderLayout.NORTH);</span>
+<span class="nc" id="L155">		this.add(fileListPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L156">	}</span>
+
+	private void downloadIndex() {
+		try {
+<span class="nc" id="L160">			File index = File.createTempFile(F_NAME_INDEX, &quot;&quot;);</span>
+<span class="nc" id="L161">			index.deleteOnExit();</span>
+<span class="nc" id="L162">			indexFile = index.getAbsolutePath();</span>
+<span class="nc" id="L163">			TemplateFileOperation.download(DEFAULT_SITE + &quot;/&quot; + F_NAME_INDEX, indexFile, CONN_TIMEOUT, READ_TIMEOUT);</span>
+<span class="nc" id="L164">			data = TemplateFileOperation.getDefaultTemplatesFromIndex(indexFile);</span>
+<span class="nc" id="L165">			error = false;</span>
+<span class="nc" id="L166">		} catch (Exception e) {</span>
+<span class="nc" id="L167">			data = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L168">			error = true;</span>
+<span class="nc" id="L169">		}</span>
+<span class="nc" id="L170">	}</span>
+
+	private void createBottom() {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		if (bottomPane != null) {</span>
+<span class="nc" id="L174">			this.remove(bottomPane);</span>
+		}
+<span class="nc" id="L176">		bottomPane = new JPanel();</span>
+<span class="nc" id="L177">		bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		if (error) {</span>
+<span class="nc" id="L179">			bottomPane.setLayout(new BorderLayout());</span>
+<span class="nc" id="L180">			bottomPane.add(errorLabel, BorderLayout.WEST);</span>
+<span class="nc" id="L181">			JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEADING));</span>
+<span class="nc" id="L182">			buttons.add(retry);</span>
+<span class="nc" id="L183">			buttons.add(cancel);</span>
+<span class="nc" id="L184">			bottomPane.add(buttons, BorderLayout.EAST);</span>
+<span class="nc" id="L185">		} else {</span>
+<span class="nc" id="L186">			bottomPane.setLayout(new FlowLayout(FlowLayout.LEADING));</span>
+<span class="nc" id="L187">			bottomPane.add(progLabel);</span>
+<span class="nc" id="L188">			bottomPane.add(progress);</span>
+<span class="nc" id="L189">			bottomPane.add(download);</span>
+<span class="nc" id="L190">			bottomPane.add(cancel);</span>
+		}
+<span class="nc" id="L192">		this.add(bottomPane, BorderLayout.SOUTH);</span>
+<span class="nc" id="L193">	}</span>
+
+	public class DefaultPackageTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L199">		public DefaultPackageTable() {</span>
+<span class="nc" id="L200">			setModel(new DefaultPackageTableModel());</span>
+<span class="nc" id="L201">			sizeColumns();</span>
+<span class="nc" id="L202">			setRowHeight(CELL_HEIGHT);</span>
+<span class="nc" id="L203">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L204">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L205">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L208" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L209">				getColumnModel().getColumn(i).setPreferredWidth(((DefaultPackageTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L211">		}</span>
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L216">				return new BooleanCellRenderer();</span>
+			} else {
+<span class="nc" id="L218">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+		@Override
+		public String getToolTipText(MouseEvent e) {
+<span class="nc" id="L224">			String tip = null;</span>
+<span class="nc" id="L225">			Point p = e.getPoint();</span>
+<span class="nc" id="L226">			int rowIndex = rowAtPoint(p);</span>
+			try {
+<span class="nc" id="L228">				tip = data.get(rowIndex).getToolTip();</span>
+<span class="nc" id="L229">			} catch (Exception e1) {</span>
+<span class="nc" id="L230">				e1.printStackTrace();</span>
+<span class="nc" id="L231">			}</span>
+<span class="nc" id="L232">			return tip;</span>
+		}
+
+	}
+
+	public class DefaultPackageTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L241">		String[] columnNames = { &quot;Template&quot;, &quot;Download&quot; };</span>
+<span class="nc" id="L242">		Class&lt;?&gt;[] columnClass = { String.class, Boolean.class };</span>
+<span class="nc" id="L243">		public int[] columnSizes = new int[] { 420,100 };</span>
+<span class="nc" id="L244">		boolean[] flags = new boolean[data.size()];</span>
+
+<span class="nc" id="L246">		public DefaultPackageTableModel() {</span>
+<span class="nc" id="L247">			Arrays.fill(flags, true);</span>
+<span class="nc" id="L248">		}</span>
+
+		public void setFlags(int size) {
+<span class="nc" id="L251">			flags = new boolean[data.size()];</span>
+<span class="nc" id="L252">			Arrays.fill(flags, true);</span>
+<span class="nc" id="L253">		}</span>
+
+		public void fireDataChanged() {
+<span class="nc" id="L256">			super.fireTableDataChanged();</span>
+<span class="nc" id="L257">		}</span>
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int colIndex) {
+<span class="nc" id="L261">			return (columnClass[colIndex]);</span>
+		}
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L266">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int colIndex) {
+<span class="nc" id="L271">			return columnNames[colIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int row, int column) {
+<span class="nc bnc" id="L276" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L277">				return true;</span>
+			} else {
+<span class="nc" id="L279">				return false;</span>
+			}
+		}
+
+		@Override
+		public int getRowCount() {
+<span class="nc" id="L285">			return data.size();</span>
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L290" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L291">				return data.get(rowIndex).getName();</span>
+			} else {
+<span class="nc" id="L293">				return flags[rowIndex];</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object value, int row, int col) {
+<span class="nc" id="L299">			flags[row] = (Boolean) value;</span>
+<span class="nc" id="L300">		}</span>
+
+	}
+
+	public class Downloader extends SwingWorker&lt;Boolean, Integer&gt; {
+
+		List&lt;TemplateData&gt; toDownload;
+
+<span class="nc" id="L308">		public Downloader() {</span>
+<span class="nc" id="L309">		}</span>
+
+		@Override
+		protected Boolean doInBackground() throws Exception {
+<span class="nc" id="L313">			toDownload = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">			for (int i = 0; i &lt; data.size(); i++) {</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">				if ((Boolean) defaultPackageTable.getValueAt(i, 1)) {</span>
+<span class="nc" id="L316">					toDownload.add(data.get(i));</span>
+				}
+			}
+<span class="nc bnc" id="L319" title="All 2 branches missed.">			for (int i = 0; i &lt; toDownload.size(); i++) {</span>
+<span class="nc" id="L320">				String file = toDownload.get(i).getUpdateAddress();</span>
+<span class="nc" id="L321">				String fileName = toDownload.get(i).getFileName();</span>
+				try {
+<span class="nc bnc" id="L323" title="All 2 branches missed.">					if (fileName != null) {</span>
+<span class="nc" id="L324">						fileName = TEMPLATE_FOLDER + fileName;</span>
+<span class="nc" id="L325">						TemplateFileOperation.download(file, fileName, CONN_TIMEOUT, READ_TIMEOUT);</span>
+					} else {
+<span class="nc" id="L327">						throw new Exception();</span>
+					}
+<span class="nc" id="L329">				} catch (Exception e) {</span>
+<span class="nc" id="L330">					JOptionPane.showMessageDialog(parent, &quot;&lt;html&gt; Error: Unable to download &lt;br&gt;\n&quot; + file);</span>
+<span class="nc" id="L331">				}</span>
+<span class="nc" id="L332">				publish(i + 1);</span>
+			}
+<span class="nc" id="L334">			Thread.sleep(300);</span>
+<span class="nc" id="L335">			publish(-1);</span>
+<span class="nc" id="L336">			return null;</span>
+		}
+
+		protected void process(final List&lt;Integer&gt; chunks) {
+<span class="nc bnc" id="L340" title="All 2 branches missed.">			for (final Integer task : chunks) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">				if (task &gt; -1) {</span>
+<span class="nc" id="L342">					int value = task * 100 / toDownload.size();</span>
+<span class="nc" id="L343">					progress.setValue(value);</span>
+<span class="nc" id="L344">					progress.setString(value + &quot;%&quot;);</span>
+				}
+<span class="nc bnc" id="L346" title="All 2 branches missed.">				if (task == -1) {</span>
+<span class="nc" id="L347">					download.setEnabled(true);</span>
+<span class="nc" id="L348">					cancel.setEnabled(true);</span>
+<span class="nc" id="L349">					Defaults.set(&quot;showDefaultTemplates&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L350">					Defaults.save();</span>
+<span class="nc" id="L351">					SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">					if (panel != null) {</span>
+<span class="nc" id="L353">						panel.updateTemplates();</span>
+					}
+				}
+<span class="nc" id="L356">			}</span>
+<span class="nc" id="L357">		}</span>
+
+	}
+
+	@Override
+	public String getName() {
+<span class="nc" id="L363">		return &quot;Downloading&quot;;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RoutingStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.routingStrategies</a> &gt; <span class="el_source">RoutingStrategy.java</span></div><h1>RoutingStrategy.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.routingStrategies;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 6-lug-2005
+ * Time: 16.29.02
+ * To change this template use Options | File Templates.
+ * Modified by Bertoli Marco
+ * Modified by Francesco D'Aquino
+ */
+<span class="fc" id="L33">public abstract class RoutingStrategy {</span>
+
+<span class="fc" id="L35">	protected static RoutingStrategy[] all = null; // Used to store all strategies</span>
+<span class="fc" id="L36">	protected static RoutingStrategy[] allForSource = null; // Used to store all valid strategies for a source</span>
+
+	protected String description;
+
+	public abstract String getName();
+
+	public String getDescription() {
+<span class="nc" id="L43">		return description;</span>
+	}
+
+	@Override
+	public String toString() {
+<span class="nc" id="L48">		return getName();</span>
+	}
+
+	@Override
+	public abstract RoutingStrategy clone();
+
+	@Override
+	public boolean equals(Object o) {
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">		if (o instanceof RoutingStrategy) {</span>
+<span class="fc" id="L57">			return this.getName().equals(((RoutingStrategy) o).getName());</span>
+		} else {
+<span class="nc" id="L59">			return false;</span>
+		}
+	}
+
+	public abstract String getClassPath();
+
+	/**
+	 * Return an array with an instance of every allowed Routing Strategy. Uses Reflection on
+	 * &lt;code&gt;JMODELConstants&lt;/code&gt; field to find all strategies and uses internal
+	 * caching to search for strategies only the first time that this method is called.
+	 * &lt;br&gt;
+	 * Author: Bertoli Marco
+	 *
+	 * @return an array with an instance of every allowed RoutingStrategy
+	 */
+	public static RoutingStrategy[] findAll() {
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">		if (all != null) {</span>
+<span class="nc" id="L76">			return all;</span>
+		}
+<span class="fc" id="L78">		ArrayList&lt;RoutingStrategy&gt; strategies = new ArrayList&lt;RoutingStrategy&gt;();</span>
+<span class="fc" id="L79">		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();</span>
+		try {
+<span class="fc bfc" id="L81" title="All 2 branches covered.">			for (Field field : fields) {</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">				if (field.getName().startsWith(&quot;ROUTING_&quot;)) {</span>
+<span class="fc" id="L83">					strategies.add((RoutingStrategy) field.get(null));</span>
+				}
+			}
+<span class="nc" id="L86">		} catch (IllegalAccessException ex) {</span>
+<span class="nc" id="L87">			System.err.println(&quot;A security manager has blocked reflection&quot;);</span>
+<span class="nc" id="L88">			ex.printStackTrace();</span>
+<span class="fc" id="L89">		}</span>
+<span class="fc" id="L90">		all = new RoutingStrategy[strategies.size()];</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">		for (int i = 0; i &lt; strategies.size(); i++) {</span>
+<span class="fc" id="L92">			all[i] = strategies.get(i);</span>
+		}
+<span class="fc" id="L94">		return all;</span>
+	}
+
+	public static RoutingStrategy[] findAllForSource() {
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		if (allForSource != null) {</span>
+<span class="nc" id="L99">			return allForSource;</span>
+		}
+<span class="nc" id="L101">		ArrayList&lt;RoutingStrategy&gt; strategies = new ArrayList&lt;RoutingStrategy&gt;();</span>
+<span class="nc" id="L102">		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();</span>
+		try {
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			for (Field field : fields) {</span>
+<span class="nc bnc" id="L105" title="All 4 branches missed.">				if (field.getName().startsWith(&quot;ROUTING_&quot;) &amp;&amp; !field.getName().endsWith(&quot;LOADDEPENDENT&quot;) ) {</span>
+<span class="nc" id="L106">					strategies.add((RoutingStrategy) field.get(null));</span>
+				}
+			}
+<span class="nc" id="L109">		} catch (IllegalAccessException ex) {</span>
+<span class="nc" id="L110">			System.err.println(&quot;A security manager has blocked reflection&quot;);</span>
+<span class="nc" id="L111">			ex.printStackTrace();</span>
+<span class="nc" id="L112">		}</span>
+<span class="nc" id="L113">		allForSource = new RoutingStrategy[strategies.size()];</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		for (int i = 0; i &lt; strategies.size(); i++) {</span>
+<span class="nc" id="L115">			allForSource[i] = strategies.get(i);</span>
+		}
+<span class="nc" id="L117">		return allForSource;</span>
+	}
+
+	/**
+	 * Returns true if the routing strategy is dependent on the state of
+	 * the model
+	 * @return true if the routing strategy is dependent on the state of
+	 * the model
+	 *
+	 * Author: Francesco D'Aquino
+	 */
+	public abstract boolean isModelStateDependent();
+
+	public abstract void addStation(Object stationKey);
+
+	public abstract void removeStation(Object stationKey);
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

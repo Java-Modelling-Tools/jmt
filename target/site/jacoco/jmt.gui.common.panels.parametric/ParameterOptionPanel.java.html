@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParameterOptionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">ParameterOptionPanel.java</span></div><h1>ParameterOptionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels.parametric;
+
+import java.awt.Color;
+import java.util.Vector;
+
+import javax.swing.JSplitPane;
+import javax.swing.border.TitledBorder;
+
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+
+/**
+ * &lt;p&gt;Title: ParameterOptionPanel&lt;/p&gt;
+ * &lt;p&gt;Description: This is the superclass of all types of parameter option panel&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 9-mar-2006
+ *         Time: 16.12.06
+ */
+<span class="nc" id="L39">public abstract class ParameterOptionPanel extends JSplitPane {</span>
+
+	private static final long serialVersionUID = 1L;
+<span class="nc" id="L42">	Color DEFAULT_TITLE_COLOR = new TitledBorder(&quot;&quot;).getTitleColor();</span>
+<span class="nc" id="L43">	TitledBorder title = new TitledBorder(&quot;Parameter options&quot;);</span>
+	String DESCRIPTION;
+	protected ClassDefinition cd;
+	protected StationDefinition sd;
+	protected SimulationDefinition simd;
+
+	@Override
+	public void setEnabled(boolean enabled) {
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (enabled) {</span>
+<span class="nc" id="L52">			title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+		} else {
+<span class="nc" id="L54">			title.setTitleColor(Color.LIGHT_GRAY);</span>
+		}
+<span class="nc" id="L56">	}</span>
+
+	public Object getClassKey(String name) {
+<span class="nc" id="L59">		Object key = null;</span>
+<span class="nc" id="L60">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			if (cd.getClassName(classes.get(i)).equals(name)) {</span>
+<span class="nc" id="L63">				key = classes.get(i);</span>
+			}
+		}
+<span class="nc" id="L66">		return key;</span>
+	}
+
+	public Object getStationKey(String name) {
+<span class="nc" id="L70">		Object key = null;</span>
+<span class="nc" id="L71">		Vector&lt;Object&gt; stations = sd.getStationKeys();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			if (sd.getStationName(stations.get(i)).equals(name)) {</span>
+<span class="nc" id="L74">				key = stations.get(i);</span>
+			}
+		}
+<span class="nc" id="L77">		return key;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CMicroBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks</a> &gt; <span class="el_source">CMicroBlock.java</span></div><h1>CMicroBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationChangeVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class implements the Micro Blocks of the Carry Forward Equations componet of the Linear System.
+ * 
+ * @author Jack Bradshaw
+ */
+public class CMicroBlock extends MicroBlock {
+
+	private int[][] array;
+	
+	//class for which this pattern has right-most non-zero
+	private int _class;
+	
+	public CMicroBlock(QNModel qnm, CoMoMBasis basis, Position position, int h) throws InternalErrorException {
+<span class="nc" id="L25">		super(qnm, basis, position, h);	</span>
+<span class="nc" id="L26">		computeDimensions();</span>
+<span class="nc" id="L27">	}</span>
+	
+	public CMicroBlock(CMicroBlock full_block, int current_class) {
+<span class="nc" id="L30">		super(full_block, current_class);</span>
+<span class="nc" id="L31">		this.array = full_block.array;</span>
+<span class="nc" id="L32">		this._class = full_block._class;</span>
+<span class="nc" id="L33">	}</span>
+	
+	@Override
+	protected MicroBlock subBlockCopy(int current_class) {
+<span class="nc" id="L37">		return new CMicroBlock(this, current_class);</span>
+	}
+
+	protected void initialiseDataStructures() throws InternalErrorException {
+		
+<span class="nc" id="L42">		array = new int[size.row][2]; </span>
+		
+		//current_class = 1;
+		//The next row to write to
+<span class="nc" id="L46">		int row = 0; </span>
+		
+<span class="nc" id="L48">		int vector_index = position.row / (qnm.M + 1);</span>
+		
+<span class="nc" id="L50">		PopulationChangeVector n = basis.getPopulationChangeVector(vector_index); </span>
+		
+<span class="nc" id="L52">		_class = n.RightMostNonZero() + 1;</span>
+		
+<span class="nc" id="L54">		int number_of_ns = MiscMathsFunctions.binomialCoefficient(qnm.M, h);</span>
+		
+		
+		//Loop over all n's contained in this microblock
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		for (int i = 0; i &lt; number_of_ns; i++) {</span>
+<span class="nc" id="L59">			n = basis.getPopulationChangeVector(vector_index++); </span>
+			
+			//Loop over all queues (including no queue)
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			for (int k = 0; k &lt;= qnm.M; k++) {</span>
+<span class="nc" id="L63">				array[row][0] = basis.indexOf(n, k);</span>
+<span class="nc" id="L64">				n.minusOne(_class);</span>
+<span class="nc" id="L65">				array[row][1] = basis.indexOf(n, k);</span>
+<span class="nc" id="L66">				n.restore();</span>
+<span class="nc" id="L67">				row++;</span>
+			}			
+		}
+<span class="nc" id="L70">	}</span>
+
+	@Override
+	protected void computeDimensions() {
+		//Need to consider queues 1,..,M and no queue for each n (i.e. M + 1)
+<span class="nc" id="L75">		size.row = MiscMathsFunctions.binomialCoefficient(qnm.M, h) * (qnm.M + 1);</span>
+<span class="nc" id="L76">		size.col = 0;</span>
+<span class="nc" id="L77">	}</span>
+
+	@Override
+	public void printRow2(int row) {
+		// TODO Auto-generated method stub
+
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	public int addCE(int position, PopulationChangeVector n, int queue)
+			throws BTFMatrixErrorException, InternalErrorException {
+<span class="nc" id="L88">		return position;</span>
+	}
+
+	@Override
+	public int addPC(int position, PopulationChangeVector n, int _class)
+			throws BTFMatrixErrorException, InternalErrorException {
+<span class="nc" id="L94">		return position;</span>
+	}
+	
+	
+	private BigRational carryForwardValue(int index) {
+<span class="nc" id="L99">		return basis.getOldValue(array[index][1]).copy();		</span>
+	}
+	
+	@Override
+	public void multiply(BigRational[] result)
+			throws BTFMatrixErrorException {
+		//negative population, constant is zero
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if (_class &gt; current_class) {</span>
+<span class="nc" id="L107">			System.out.println(&quot;inserting zero&quot;);</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			for (int i = 0; i &lt; size.row; i++) {</span>
+<span class="nc" id="L109">				result[array[i][0]] = BigRational.ZERO;</span>
+			}
+		//carry forward
+		} else {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			for (int i = 0; i &lt; size.row; i++) {				</span>
+<span class="nc" id="L114">				result[array[i][0]] = carryForwardValue(i);</span>
+			}
+		}
+<span class="nc" id="L117">	}</span>
+	
+	@Override
+	public void solve(BigRational[] rhs) {
+		//negative population, constant is zero
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (_class &gt; current_class) {</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			for (int i = 0; i &lt; size.row; i++) {</span>
+<span class="nc" id="L124">				basis.setValue(BigRational.ZERO, array[i][0]);</span>
+			}
+		//carry forward
+		} else {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			for (int i = 0; i &lt; size.row; i++) {	</span>
+<span class="nc" id="L129">				basis.setValue(  carryForwardValue(i), array[i][0]);			</span>
+			}
+		}
+<span class="nc" id="L132">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CSVMeasureOutput.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis.measureOutputs</a> &gt; <span class="el_source">CSVMeasureOutput.java</span></div><h1>CSVMeasureOutput.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.dataAnalysis.measureOutputs;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.MeasureOutput;
+
+/**
+ * This class implements a csv output for measure class. &lt;br&gt;
+ * File output: &lt;br&gt;
+ * &lt;table border=&quot;1&quot;&gt; &lt;tr&gt;
+ * &lt;td&gt;Mean Value&lt;/td&gt;
+ * &lt;td&gt;Mean Value Lower Limit&lt;/td&gt;
+ * &lt;td&gt;Mean Value Upper Limit&lt;/td&gt;
+ * &lt;td&gt;Discarded Samples&lt;/td&gt;
+ * &lt;td&gt;Analyzed Samples&lt;/td&gt;
+ * &lt;td&gt;Max Samples&lt;/td&gt;
+ * &lt;/tr&gt;&lt;/table&gt;
+ * @author Francesco Radaelli
+ */
+public class CSVMeasureOutput extends MeasureOutput {
+
+	private Writer outputWriter;
+	private File file;
+
+	private boolean StdOutput;
+
+	/**
+	 * Constructor of a CSVMeasureOutput object.
+	 * @param measure the measure to be sent in output
+	 * @param append true to write at the end of the file (of course
+	 * it is useful only if a file is used)
+	 * @param fileName the name of the file; if null the output will be sent
+	 * on the standard output
+	 * @throws java.io.IOException
+	 */
+	public CSVMeasureOutput(Measure measure, boolean append, String fileName) throws IOException {
+<span class="nc" id="L61">		super(measure);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if (fileName == null) {</span>
+<span class="nc" id="L63">			outputWriter = new OutputStreamWriter(System.out);</span>
+<span class="nc" id="L64">			StdOutput = true;</span>
+		} else {
+<span class="nc" id="L66">			this.file = new File(fileName + &quot;.csv&quot;);</span>
+<span class="nc" id="L67">			outputWriter = new BufferedWriter(new FileWriter(this.file, append));</span>
+<span class="nc" id="L68">			StdOutput = false;</span>
+		}
+<span class="nc" id="L70">	}</span>
+
+	/**
+	 * Constructor of a CSVMeasureOutput object, using a file.
+	 * @param Measure the measure to be sent in output
+	 * @param Append true to write at the end of the file (of course
+	 * it is useful only if a file is used)
+	 * @throws java.io.IOException
+	 */
+	public CSVMeasureOutput(Measure Measure, boolean Append) throws IOException {
+<span class="nc" id="L80">		super(Measure);</span>
+<span class="nc" id="L81">		outputWriter = new BufferedWriter(new FileWriter(Measure.getName() + &quot;.csv&quot;, Append));</span>
+<span class="nc" id="L82">		StdOutput = false;</span>
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	public void write(double Sample, double Weight) {
+		try {
+<span class="nc" id="L88">			outputWriter.write(Sample + &quot;; &quot; + Weight + &quot;;\n&quot;);</span>
+<span class="nc" id="L89">		} catch (IOException e) {</span>
+<span class="nc" id="L90">			e.printStackTrace();</span>
+<span class="nc" id="L91">		}</span>
+<span class="nc" id="L92">	}</span>
+
+	@Override
+	public void finalizeMeasure() {
+		try {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">			if (measure.getSuccess()) {</span>
+<span class="nc" id="L98">				outputWriter.write(&quot;\nMeasure name; &quot; + measure.getName() + &quot;;\n&quot; + &quot;Measure value; &quot; + measure.getMeanValue() + &quot;;\n&quot; + &quot;Lower limit; &quot;</span>
+<span class="nc" id="L99">						+ measure.getLowerLimit() + &quot;;\n&quot; + &quot;Upper Limit; &quot; + measure.getUpperLimit() + &quot;;\n&quot; + &quot;Discarded samples; &quot;</span>
+<span class="nc" id="L100">						+ measure.getDiscardedSamples() + &quot;;\n&quot; + &quot;Analyzed samples; &quot; + measure.getAnalyzedSamples() + &quot;;\n&quot; + &quot;Max samples; &quot;</span>
+<span class="nc" id="L101">						+ measure.getMaxSamples() + &quot;;\n&quot; + &quot;Measure was successful; &quot; + measure.getSuccess() + &quot;;&quot;);</span>
+			} else {
+<span class="nc" id="L103">				outputWriter.write(&quot;\nMeasure name; &quot; + measure.getName() + &quot;;\n&quot; + &quot;Estimated mean; &quot; + measure.getEstimatedMeanValue() + &quot;;\n&quot;</span>
+<span class="nc" id="L104">						+ &quot;Discarded samples; &quot; + measure.getDiscardedSamples() + &quot;;\n&quot; + &quot;Analyzed samples; &quot; + measure.getAnalyzedSamples() + &quot;;\n&quot;</span>
+<span class="nc" id="L105">						+ &quot;Max samples; &quot; + measure.getMaxSamples() + &quot;;\n&quot; + &quot;Measure was successful; &quot; + measure.getSuccess() + &quot;;&quot;);</span>
+			}
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (!StdOutput) {</span>
+<span class="nc" id="L109">				outputWriter.close();</span>
+			}
+<span class="nc" id="L111">		} catch (IOException e) {</span>
+<span class="nc" id="L112">			e.printStackTrace();</span>
+<span class="nc" id="L113">		}</span>
+<span class="nc" id="L114">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.dataAnalysis.MeasureOutput#getOutputFile()
+	 */
+	@Override
+	public File getOutputFile() {
+<span class="nc" id="L121">		return file;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

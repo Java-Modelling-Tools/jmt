@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PopulationMixPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">PopulationMixPanel.java</span></div><h1>PopulationMixPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.common.panels.parametric;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Vector;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysis;
+import jmt.gui.common.definitions.parametric.PopulationMixParametricAnalysis;
+
+/**
+ * &lt;p&gt;Title: PopulationMixPanel&lt;/p&gt;
+ * &lt;p&gt;Description: this is the panel for the parametric analysis where
+ * the proportion between two closed classes is modified while global
+ * number of jobs is kept constant.&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 9-mar-2006
+ *         Time: 16.18.40
+ */
+public class PopulationMixPanel extends ParameterOptionPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JLabel fromLabel;
+	private JSpinner from;
+	private JLabel toLabel;
+	private JSpinner to;
+	private JLabel stepsLabel;
+	private JSpinner steps;
+	private JLabel classChooserLabel;
+	private JComboBox classChooser;
+	private JScrollPane scroll;
+	private JTextArea description;
+	private JScrollPane descrPane;
+	private TitledBorder descriptionTitle;
+	private PopulationMixParametricAnalysis PMPA;
+
+	public PopulationMixPanel(PopulationMixParametricAnalysis pmpa, ClassDefinition classDef, StationDefinition stationDef,
+			SimulationDefinition simDef) {
+<span class="nc" id="L81">		super();</span>
+<span class="nc" id="L82">		PMPA = pmpa;</span>
+<span class="nc" id="L83">		super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L84">		super.setDividerSize(3);</span>
+<span class="nc" id="L85">		DESCRIPTION = &quot;This type of analysis is available for closed models with two classes only &quot;</span>
+				+ &quot;(and possibly other open classes) and it applies only to the closed classes.\n\n&quot;
+				+ &quot;Repeat the simulation changing the proportion of jobs &quot;
+				+ &quot;between the two closed classes, keeping constant the total number of jobs.\n\n&quot;
+				+ &quot;The 'From' and 'To' values represent the initial and final values of &quot; + &quot;population mix (ßi = Ni / N) for the chosen class.\n\n&quot;
+				+ &quot;Since only integer values are allowed &quot; + &quot;the number of steps that can be practically executed may be very small.&quot;;
+
+<span class="nc" id="L92">		sd = stationDef;</span>
+<span class="nc" id="L93">		cd = classDef;</span>
+<span class="nc" id="L94">		simd = simDef;</span>
+<span class="nc" id="L95">		initialize();</span>
+<span class="nc" id="L96">	}</span>
+
+	public void initialize() {
+<span class="nc" id="L99">		JPanel edit = new JPanel(new GridLayout(4, 1, 0, 5));</span>
+<span class="nc" id="L100">		fromLabel = new JLabel(&quot;Initial ß: &quot;);</span>
+<span class="nc" id="L101">		from = new JSpinner(new SpinnerNumberModel(PMPA.getInitialValue(), 0.000, 1.000, 0.001));</span>
+<span class="nc" id="L102">		from.setToolTipText(&quot;Sets the initial proportion of jobs&quot;);</span>
+<span class="nc" id="L103">		toLabel = new JLabel(&quot;Final ß: &quot;);</span>
+<span class="nc" id="L104">		to = new JSpinner(new SpinnerNumberModel(PMPA.getFinalValue(), 0.000, 1.000, 0.001));</span>
+<span class="nc" id="L105">		to.setToolTipText(&quot;Sets the final proportion of jobs&quot;);</span>
+<span class="nc" id="L106">		stepsLabel = new JLabel(&quot;Steps (n. of exec.): &quot;);</span>
+<span class="nc" id="L107">		int maxSteps = PMPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		if (maxSteps &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L109">			maxSteps = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+		}
+<span class="nc" id="L111">		steps = new JSpinner(new SpinnerNumberModel(PMPA.getNumberOfSteps(), 2, maxSteps, 1));</span>
+<span class="nc" id="L112">		steps.setToolTipText(&quot;Sets the number of steps to be performed&quot;);</span>
+<span class="nc" id="L113">		Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L114">		String[] classNames = new String[classes.size()];</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc" id="L116">			classNames[i] = cd.getClassName(classes.get(i));</span>
+		}
+<span class="nc" id="L118">		classChooserLabel = new JLabel(&quot;Class: &quot;);</span>
+<span class="nc" id="L119">		classChooser = new JComboBox(classNames);</span>
+<span class="nc" id="L120">		classChooser.setToolTipText(&quot;Sets the class the inserted values will refer to&quot;);</span>
+<span class="nc" id="L121">		classChooser.setSelectedItem(cd.getClassName(PMPA.getReferenceClass()));</span>
+<span class="nc" id="L122">		edit.add(fromLabel);</span>
+<span class="nc" id="L123">		edit.add(from);</span>
+<span class="nc" id="L124">		edit.add(toLabel);</span>
+<span class="nc" id="L125">		edit.add(to);</span>
+<span class="nc" id="L126">		edit.add(stepsLabel);</span>
+<span class="nc" id="L127">		edit.add(steps);</span>
+<span class="nc" id="L128">		edit.add(classChooserLabel);</span>
+<span class="nc" id="L129">		edit.add(classChooser);</span>
+<span class="nc" id="L130">		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L131">		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));</span>
+<span class="nc" id="L132">		editLables.add(fromLabel);</span>
+<span class="nc" id="L133">		editLables.add(toLabel);</span>
+<span class="nc" id="L134">		editLables.add(stepsLabel);</span>
+<span class="nc" id="L135">		editLables.add(classChooserLabel);</span>
+<span class="nc" id="L136">		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L137">		JPanel editPanel = new JPanel();</span>
+<span class="nc" id="L138">		editPanel.add(editLables);</span>
+<span class="nc" id="L139">		editPanel.add(edit);</span>
+<span class="nc" id="L140">		editPanel.setBorder(new EmptyBorder(15, 20, 0, 20));</span>
+<span class="nc" id="L141">		JPanel cont = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L142">		cont.add(editPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L143">		scroll = new JScrollPane(cont);</span>
+<span class="nc" id="L144">		title = new TitledBorder(&quot;Type of population mix&quot;);</span>
+<span class="nc" id="L145">		scroll.setBorder(title);</span>
+<span class="nc" id="L146">		description = new JTextArea(DESCRIPTION);</span>
+<span class="nc" id="L147">		description.setOpaque(false);</span>
+<span class="nc" id="L148">		description.setEditable(false);</span>
+<span class="nc" id="L149">		description.setLineWrap(true);</span>
+<span class="nc" id="L150">		description.setWrapStyleWord(true);</span>
+<span class="nc" id="L151">		descrPane = new JScrollPane(description);</span>
+<span class="nc" id="L152">		descriptionTitle = new TitledBorder(new EtchedBorder(), &quot;Description&quot;);</span>
+<span class="nc" id="L153">		descrPane.setBorder(descriptionTitle);</span>
+<span class="nc" id="L154">		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L155">		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L156">		setLeftComponent(scroll);</span>
+<span class="nc" id="L157">		setRightComponent(descrPane);</span>
+<span class="nc" id="L158">		setListeners();</span>
+<span class="nc" id="L159">		this.setBorder(new EmptyBorder(5, 0, 5, 0));</span>
+<span class="nc" id="L160">	}</span>
+
+	@Override
+	public void setEnabled(boolean enabled) {
+<span class="nc" id="L164">		fromLabel.setEnabled(enabled);</span>
+<span class="nc" id="L165">		from.setEnabled(enabled);</span>
+<span class="nc" id="L166">		toLabel.setEnabled(enabled);</span>
+<span class="nc" id="L167">		to.setEnabled(enabled);</span>
+<span class="nc" id="L168">		stepsLabel.setEnabled(enabled);</span>
+<span class="nc" id="L169">		steps.setEnabled(enabled);</span>
+<span class="nc" id="L170">		classChooserLabel.setEnabled(enabled);</span>
+<span class="nc" id="L171">		classChooser.setEnabled(enabled);</span>
+<span class="nc" id="L172">		description.setEnabled(enabled);</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L174">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L175">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+		} else {
+<span class="nc" id="L177">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L178">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+		}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L181">			title.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L182">			descriptionTitle.setTitleColor(Color.LIGHT_GRAY);</span>
+		} else {
+<span class="nc" id="L184">			title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L185">			descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+		}
+<span class="nc" id="L187">	}</span>
+
+	private void setListeners() {
+<span class="nc" id="L190">		from.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L192" title="All 2 branches missed.">				if (from.getValue() instanceof Double) {</span>
+<span class="nc" id="L193">					Double fValue = (Double) from.getValue();</span>
+<span class="nc" id="L194">					Double tValue = (Double) to.getValue();</span>
+<span class="nc" id="L195">					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc" id="L196">					double oldValue = PMPA.getInitialValue();</span>
+<span class="nc" id="L197">					PMPA.setInitialValue(fValue.doubleValue());</span>
+<span class="nc" id="L198">					int newMaxSteps = PMPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">					if (newMaxSteps &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L200">						newMaxSteps = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+					}
+<span class="nc bnc" id="L202" title="All 4 branches missed.">					if ((fValue.doubleValue() != tValue.doubleValue()) &amp;&amp; (newMaxSteps &gt;= ((Integer) snm.getMinimum()).intValue())) {</span>
+<span class="nc" id="L203">						int oldSteps = ((Integer) snm.getValue()).intValue();</span>
+<span class="nc" id="L204">						snm.setMaximum(new Integer(newMaxSteps));</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">						if (newMaxSteps &lt; oldSteps) {</span>
+<span class="nc" id="L206">							PMPA.setNumberOfSteps(newMaxSteps);</span>
+<span class="nc" id="L207">							steps.setValue(new Integer(newMaxSteps));</span>
+						}
+<span class="nc" id="L209">					} else {</span>
+<span class="nc" id="L210">						PMPA.setInitialValue(oldValue);</span>
+					}
+				}
+<span class="nc" id="L213">				from.setValue(new Double(PMPA.getInitialValue()));</span>
+<span class="nc" id="L214">			}</span>
+		});
+<span class="nc" id="L216">		to.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L218" title="All 2 branches missed.">				if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L219">					Double fValue = (Double) from.getValue();</span>
+<span class="nc" id="L220">					Double tValue = (Double) to.getValue();</span>
+<span class="nc" id="L221">					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc" id="L222">					double oldValue = PMPA.getFinalValue();</span>
+<span class="nc" id="L223">					PMPA.setFinalValue(tValue.doubleValue());</span>
+<span class="nc" id="L224">					int newMaxSteps = PMPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">					if (newMaxSteps &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L226">						newMaxSteps = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+					}
+<span class="nc bnc" id="L228" title="All 4 branches missed.">					if ((fValue.doubleValue() != tValue.doubleValue()) &amp;&amp; (newMaxSteps &gt;= ((Integer) snm.getMinimum()).intValue())) {</span>
+<span class="nc" id="L229">						int oldSteps = ((Integer) snm.getValue()).intValue();</span>
+<span class="nc" id="L230">						snm.setMaximum(new Integer(newMaxSteps));</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">						if (newMaxSteps &lt; oldSteps) {</span>
+<span class="nc" id="L232">							PMPA.setNumberOfSteps(newMaxSteps);</span>
+<span class="nc" id="L233">							steps.setValue(new Integer(newMaxSteps));</span>
+						}
+<span class="nc" id="L235">					} else {</span>
+<span class="nc" id="L236">						PMPA.setFinalValue(oldValue);</span>
+					}
+				}
+<span class="nc" id="L239">				to.setValue(new Double(PMPA.getFinalValue()));</span>
+<span class="nc" id="L240">			}</span>
+		});
+<span class="nc" id="L242">		steps.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L244" title="All 2 branches missed.">				if (steps.getValue() instanceof Integer) {</span>
+<span class="nc" id="L245">					int sValue = ((Integer) steps.getValue()).intValue();</span>
+<span class="nc" id="L246">					int sMax = ((Integer) ((SpinnerNumberModel) steps.getModel()).getMaximum()).intValue();</span>
+<span class="nc" id="L247">					int sMin = ((Integer) ((SpinnerNumberModel) steps.getModel()).getMinimum()).intValue();</span>
+<span class="nc bnc" id="L248" title="All 4 branches missed.">					if ((sValue &gt;= sMin) &amp;&amp; (sValue &lt;= sMax)) {</span>
+<span class="nc" id="L249">						PMPA.setNumberOfSteps(sValue);</span>
+					}
+				}
+<span class="nc" id="L252">				steps.setValue(new Integer(PMPA.getNumberOfSteps()));</span>
+<span class="nc" id="L253">			}</span>
+		});
+<span class="nc" id="L255">		classChooser.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L257" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L258">					return;</span>
+				}
+<span class="nc" id="L260">				String className = (String) classChooser.getSelectedItem();</span>
+<span class="nc" id="L261">				Object classKey = null;</span>
+<span class="nc" id="L262">				Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+				//for cycle used to get the key of the selected class
+<span class="nc bnc" id="L264" title="All 2 branches missed.">				for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">					if (cd.getClassName(classes.get(i)).equals(className)) {</span>
+<span class="nc" id="L266">						classKey = classes.get(i);</span>
+<span class="nc" id="L267">						break;</span>
+					}
+				}
+<span class="nc" id="L270">				PMPA.setReferenceClass(classKey);</span>
+<span class="nc" id="L271">				PMPA.setDefaultInitialValue();</span>
+<span class="nc" id="L272">				from.setValue(new Double(PMPA.getInitialValue()));</span>
+<span class="nc" id="L273">			}</span>
+		});
+<span class="nc" id="L275">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConvexHull.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba.Hull</a> &gt; <span class="el_source">ConvexHull.java</span></div><h1>ConvexHull.java</h1><pre class="source lang-java linenums">// Copyright (C) Chris Pudney, The University of Western Australia, 1998.
+// All rights reserved.
+//  
+// Permission to use, copy, modify and distribute this software and its
+// documentation only for the purposes of teaching and research is hereby
+// granted without fee, provided that the above copyright notice and this
+// permission notice appear in all copies of this software/documentation
+// and that you do not sell the software.  No commercial use or
+// distribution of the software is permitted without the consent of the
+// copyright owners.  Commercial licensing is available by contacting the
+// author(s).
+// 
+// THIS SOFTWARE/DOCUMENTATION IS PROVIDED WITH NO WARRANTY, EXPRESS OR
+// IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTY OF MERCHANTABILITY OR
+// FITNESS FOR A PARTICULAR PURPOSE.
+
+package jmt.engine.jaba.Hull;
+
+import java.util.Enumeration;
+import java.util.Vector;
+
+/**
+ * A class representing the convex hull of a set of points.
+ *
+ * @author - Chris Pudney &lt;mailto:cpudney@alphapharm.pharm.uwa.edu.au&gt;
+ * @version - 1.1
+ */
+public class ConvexHull extends DSurface {
+	/**
+	 * Acceptable range of coordinates.
+	 */
+	private static final int COORD_RANGE = 1000000;
+
+	// private static final int COORD_RANGE = 512;   Use with Volume6()
+
+	/**
+	 * Constructs a convex hull initialised to a null surface.
+	 */
+	public ConvexHull() {
+<span class="nc" id="L40">		super();</span>
+<span class="nc" id="L41">	}</span>
+
+	/**
+	 * Constructs the convex hull of a set of vertices.
+	 *
+	 * @param - vertices  the set of vertices
+	 * @exception - ConvexHullException
+	 *              if hull construction fails
+	 */
+	public ConvexHull(Vector&lt;Vertex&gt; vertices) throws ConvexHullException {
+<span class="nc" id="L51">		super();</span>
+
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		if (vertices.size() &lt; 4) {</span>
+<span class="nc" id="L54">			throw new ConvexHullException(&quot;Too few (&quot; + vertices.size() + &quot;) vertices to form hull&quot;);</span>
+		}
+<span class="nc" id="L56">		Enumeration&lt;Vertex&gt; e = vertices.elements();</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (e.hasMoreElements()) {</span>
+<span class="nc" id="L58">			Vertex v1 = e.nextElement();</span>
+<span class="nc" id="L59">			Vertex v2 = null;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			for (; e.hasMoreElements();) {</span>
+<span class="nc" id="L61">				v2 = e.nextElement();</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">				if (!Vertex.sameVertex(v1, v2)) {</span>
+<span class="nc" id="L63">					break;</span>
+				}
+			}
+
+<span class="nc" id="L67">			Vertex v3 = null;</span>
+<span class="nc" id="L68">			Triangle t = null;</span>
+<span class="nc" id="L69">			Vector&lt;Vertex&gt; coVerts = new Vector&lt;Vertex&gt;();</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">			for (; e.hasMoreElements();) {</span>
+<span class="nc" id="L71">				v3 = e.nextElement();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">				if (Vertex.collinear(v1, v2, v3)) {</span>
+<span class="nc" id="L73">					coVerts.addElement(v3);</span>
+				} else {
+<span class="nc" id="L75">					t = new Triangle(v1, v2, v3);</span>
+<span class="nc" id="L76">					break;</span>
+				}
+			}
+
+<span class="nc" id="L80">			Vertex v4 = null;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			for (; e.hasMoreElements();) {</span>
+<span class="nc" id="L82">				v4 = e.nextElement();</span>
+<span class="nc" id="L83">				int volSign = t.volumeSign(v4);</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">				if (volSign == 0) {</span>
+<span class="nc" id="L85">					coVerts.addElement(v4);</span>
+				} else {
+<span class="nc" id="L87">					addFace(t);</span>
+<span class="nc" id="L88">					triToTet(t, v4, volSign);</span>
+<span class="nc" id="L89">					break;</span>
+				}
+<span class="nc" id="L91">			}</span>
+
+			// Check vertex coords
+<span class="nc" id="L94">			checkVertex(v1);</span>
+<span class="nc" id="L95">			checkVertex(v2);</span>
+<span class="nc" id="L96">			checkVertex(v3);</span>
+<span class="nc" id="L97">			checkVertex(v4);</span>
+
+			// Add vertices to the hull one at a time
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			for (; e.hasMoreElements();) {</span>
+<span class="nc" id="L101">				addVertex(e.nextElement());</span>
+			}
+
+			// Reprocess the previously found co-linear/planar vertices
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			if (getFaces().size() &gt; 0) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">				for (e = coVerts.elements(); e.hasMoreElements();) {</span>
+<span class="nc" id="L107">					addVertex(e.nextElement());</span>
+				}
+
+			} else {
+<span class="nc" id="L111">				throw new ConvexHullException(&quot;Vertices coplanar&quot;);</span>
+			}
+		}
+<span class="nc" id="L114">	}</span>
+
+	/**
+	 * Determine the hull faces that have vertices in each of two sets
+	 *
+	 * @param - s1, s2  the vertex sets
+	 * @return - returns a vector of triangles that lie on the hull
+	 */
+	public Vector&lt;Triangle&gt; interSetFaces(Vector s1, Vector s2) {
+<span class="nc" id="L123">		Vector&lt;Polygon&gt; faces = getFaces();</span>
+<span class="nc" id="L124">		Vector&lt;Triangle&gt; xFaces = new Vector&lt;Triangle&gt;();</span>
+
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		for (Polygon polygon : faces) {</span>
+<span class="nc" id="L127">			Triangle t = (Triangle) polygon;</span>
+<span class="nc" id="L128">			Vector&lt;Vertex&gt; v = t.getVertices();</span>
+<span class="nc" id="L129">			Vertex v1 = v.firstElement();</span>
+<span class="nc" id="L130">			Vertex v2 = v.elementAt(1);</span>
+<span class="nc" id="L131">			Vertex v3 = v.lastElement();</span>
+<span class="nc bnc" id="L132" title="All 12 branches missed.">			if ((s1.contains(v1) || s1.contains(v2) || s1.contains(v3)) &amp;&amp; (s2.contains(v1) || s2.contains(v2) || s2.contains(v3))) {</span>
+<span class="nc" id="L133">				xFaces.addElement(t);</span>
+			}
+<span class="nc" id="L135">		}</span>
+<span class="nc" id="L136">		return xFaces;</span>
+	}
+
+	/**
+	 * Check that the vertex coordinates are within bounds 
+	 *
+	 * @param - vertex  the vertex to check
+	 * @return - True/false if the vertex is inside/outside the legal
+	 *           bounds
+	 * @see - COORD_RANGE
+	 */
+	private static boolean checkVertex(Vertex vertex) {
+<span class="nc" id="L148">		int[] c = vertex.getCoords();</span>
+<span class="nc bnc" id="L149" title="All 6 branches missed.">		if (Math.abs(c[0]) &gt; COORD_RANGE || Math.abs(c[1]) &gt; COORD_RANGE || Math.abs(c[2]) &gt; COORD_RANGE) { /*</span>
+																											System.out.println
+																											(&quot;Warning: vertex coordinates &gt; &quot; + COORD_RANGE + &quot; or &lt; &quot; +
+																											-COORD_RANGE + &quot; may create problems&quot;); */
+<span class="nc" id="L153">			return false;</span>
+		}
+<span class="nc" id="L155">		return true;</span>
+	}
+
+	/**
+	 * Form a tetrahedron from vertex and the existing triangular hull.
+	 *
+	 * @param face - a triangular face of the tetrahedron
+	 * @param vertex - the fourth point of the tetrahedron
+	 * @param vol - indicates on which side of face vertex lies
+	 */
+	private void triToTet(Polygon face, Vertex vertex, int vol) {
+<span class="nc" id="L166">		Vector&lt;Vertex&gt; v = face.getVertices();</span>
+<span class="nc" id="L167">		Vertex v1 = v.elementAt(0);</span>
+<span class="nc" id="L168">		Vertex v2 = v.elementAt(1);</span>
+<span class="nc" id="L169">		Vertex v3 = v.elementAt(2);</span>
+
+		// Store the vertices in CCW order
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		if (vol &lt; 0) {</span>
+<span class="nc" id="L173">			v.setElementAt(v3, 0);</span>
+<span class="nc" id="L174">			v.setElementAt(v1, 2);</span>
+<span class="nc" id="L175">			Vertex tv = v1;</span>
+<span class="nc" id="L176">			v1 = v3;</span>
+<span class="nc" id="L177">			v3 = tv;</span>
+		}
+<span class="nc" id="L179">		addFace(new Triangle(v3, v2, vertex));</span>
+<span class="nc" id="L180">		addFace(new Triangle(v2, v1, vertex));</span>
+<span class="nc" id="L181">		addFace(new Triangle(v1, v3, vertex));</span>
+<span class="nc" id="L182">	}</span>
+
+	/**
+	 * Add a vertex to a convex hull.  Determine all faces visible from
+	 * the vertex.  If none are visible then the point is marked as
+	 * inside the hull.  Delete the visible faces and construct faces
+	 * between the vertex and the edges that border the visible
+	 * faces. 
+	 *
+	 * @param vertex - the vertex to add to the convex hull.
+	 */
+	private void addVertex(Vertex vertex) {
+<span class="nc" id="L194">		Vector&lt;Edge&gt; visEdges = new Vector&lt;Edge&gt;();</span>
+<span class="nc" id="L195">		Vector&lt;Triangle&gt; visFaces = new Vector&lt;Triangle&gt;();</span>
+
+		// Check vertex coordinates
+<span class="nc" id="L198">		checkVertex(vertex);</span>
+
+		// Delete visible faces
+<span class="nc bnc" id="L201" title="All 2 branches missed.">		for (Polygon polygon : getFaces()) {</span>
+<span class="nc" id="L202">			Triangle face = (Triangle) polygon;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			if (face.volumeSign(vertex) &lt; 0) {</span>
+<span class="nc" id="L204">				visFaces.addElement(face);</span>
+				// System.out.println(vertex + &quot; visible from &quot; + face);
+			}
+			// else
+			// {
+			// System.out.println(vertex + &quot; NOT visible from &quot; + face);
+			// }
+<span class="nc" id="L211">		}</span>
+		// Delete visible faces and construct visible edges list
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		for (Enumeration&lt;Triangle&gt; e = visFaces.elements(); e.hasMoreElements();) {</span>
+<span class="nc" id="L214">			Polygon face = e.nextElement();</span>
+<span class="nc" id="L215">			deleteVisibleFace(face, visEdges);</span>
+<span class="nc" id="L216">		}</span>
+
+		// System.out.println(&quot;Visible edges: &quot; + visEdges);
+
+		// Construct new faces using visible edges
+<span class="nc bnc" id="L221" title="All 2 branches missed.">		for (Edge edge : visEdges) {</span>
+<span class="nc" id="L222">			Vertex ends[] = edge.getVertices();</span>
+<span class="nc" id="L223">			addFace(new Triangle(ends[0], ends[1], vertex));</span>
+<span class="nc" id="L224">		}</span>
+<span class="nc" id="L225">	}</span>
+
+	/**
+	 * Delete a visible face from the convex hull.  Adjust the list
+	 * of visible edges accordingly.
+	 *
+	 * @param face -  a face visible from a vertex to be deleted
+	 * @param visibleEdges - the list of hull edges visible from a vertex
+	 */
+	private void deleteVisibleFace(Polygon face, Vector&lt;Edge&gt; visibleEdges) {
+<span class="nc" id="L235">		Vector&lt;Vertex&gt; v = face.getVertices();</span>
+<span class="nc" id="L236">		Vertex v1 = v.elementAt(0);</span>
+<span class="nc" id="L237">		Vertex v2 = v.elementAt(1);</span>
+<span class="nc" id="L238">		Vertex v3 = v.elementAt(2);</span>
+<span class="nc" id="L239">		Edge e1 = new Edge(v1, v2);</span>
+<span class="nc" id="L240">		Edge e2 = new Edge(v2, v3);</span>
+<span class="nc" id="L241">		Edge e3 = new Edge(v3, v1);</span>
+<span class="nc" id="L242">		updateVisibleEdges(e1, visibleEdges);</span>
+<span class="nc" id="L243">		updateVisibleEdges(e2, visibleEdges);</span>
+<span class="nc" id="L244">		updateVisibleEdges(e3, visibleEdges);</span>
+<span class="nc" id="L245">		deleteFace(face);</span>
+<span class="nc" id="L246">	}</span>
+
+	/**
+	 * Update the visible edge list.  If e is not in the list then add
+	 * it if it is then delete it from the list 
+	 *
+	 * @param e - a visible edge
+	 * @param visibleEdges - a list of edges visible from a vertex
+	 */
+	private void updateVisibleEdges(Edge e, Vector&lt;Edge&gt; visibleEdges) {
+		Enumeration&lt;Edge&gt; f;
+<span class="nc" id="L257">		boolean same = false;</span>
+
+<span class="nc bnc" id="L259" title="All 2 branches missed.">		for (f = visibleEdges.elements(); f.hasMoreElements();) {</span>
+<span class="nc" id="L260">			Edge edge = f.nextElement();</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">			if (Edge.sameEdge(e, edge)) {</span>
+<span class="nc" id="L262">				same = true;</span>
+<span class="nc" id="L263">				e = edge;</span>
+<span class="nc" id="L264">				break;</span>
+			}
+<span class="nc" id="L266">		}</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">		if (same) {</span>
+<span class="nc" id="L268">			visibleEdges.removeElement(e);</span>
+		} else {
+<span class="nc" id="L270">			visibleEdges.addElement(e);</span>
+		}
+<span class="nc" id="L272">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

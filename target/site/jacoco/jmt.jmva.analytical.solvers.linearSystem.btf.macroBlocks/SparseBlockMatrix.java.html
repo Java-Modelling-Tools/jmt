@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SparseBlockMatrix.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks</a> &gt; <span class="el_source">SparseBlockMatrix.java</span></div><h1>SparseBlockMatrix.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+
+/**
+ * This class implements the underlying data structure of the Secondary Macro Blocks.
+ * It is a block matrix, composed of SparseBlocks.
+ * 
+ * @author Jack Bradshaw
+ */
+public class SparseBlockMatrix {
+
+	protected CoMoMBasis basis;
+	
+	protected SparseBlock[][] matrix;
+	
+	protected Position position;
+	
+	protected int rows;
+
+	public int cols;
+	protected int block_rows, block_cols;
+		
+	protected int rows_in_blocks;
+	protected int cols_in_blocks;
+
+<span class="nc" id="L30">	public SparseBlockMatrix(CoMoMBasis basis, Position position, Position size, Position divisions) throws BTFMatrixErrorException {</span>
+<span class="nc" id="L31">		this.basis = basis;</span>
+<span class="nc" id="L32">		this.position = position;</span>
+<span class="nc" id="L33">		this.rows = size.row;</span>
+<span class="nc" id="L34">		this.cols = size.col;</span>
+<span class="nc" id="L35">		block_rows = divisions.row;</span>
+<span class="nc" id="L36">		block_cols = divisions.col;		</span>
+		
+<span class="nc" id="L38">		initialise();</span>
+<span class="nc" id="L39">	}</span>
+
+<span class="nc" id="L41">	public SparseBlockMatrix(SparseBlockMatrix block_matrix, Position divisions) {</span>
+<span class="nc" id="L42">		this.basis = block_matrix.basis;</span>
+<span class="nc" id="L43">		this.position = block_matrix.position;</span>
+		
+<span class="nc" id="L45">		this.rows_in_blocks = block_matrix.rows_in_blocks;</span>
+<span class="nc" id="L46">		this.cols_in_blocks = block_matrix.cols_in_blocks;</span>
+		
+<span class="nc" id="L48">		this.block_rows = divisions.row;</span>
+<span class="nc" id="L49">		this.block_cols = divisions.col;</span>
+		
+<span class="nc" id="L51">		matrix = new SparseBlock[block_rows][block_cols];</span>
+		
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		for (int x = 0; x &lt; block_rows; x++) {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">			for (int y = 0; y &lt; block_cols; y++) {</span>
+<span class="nc" id="L55">				this.matrix[x][y] = block_matrix.matrix[x][y];</span>
+			}
+		}
+<span class="nc" id="L58">		this.rows = matrix.length * rows_in_blocks;</span>
+<span class="nc" id="L59">		this.cols = matrix[0].length * cols_in_blocks;</span>
+<span class="nc" id="L60">	}</span>
+
+	private void initialise() throws BTFMatrixErrorException {
+		
+<span class="nc bnc" id="L64" title="All 4 branches missed.">		if (rows % block_rows != 0 || cols %  block_cols != 0) {			</span>
+<span class="nc" id="L65">			throw new BTFMatrixErrorException(&quot;Block matrix of size &quot; + rows + &quot; x &quot; + cols + &quot; cannot be divided into &quot; +  block_rows + &quot;rows and &quot; + block_cols + &quot;columns&quot;);</span>
+		}
+		
+<span class="nc" id="L68">		rows_in_blocks = rows /  block_rows;</span>
+<span class="nc" id="L69">		cols_in_blocks = cols /  block_cols;</span>
+		
+<span class="nc" id="L71">		int block_starting_col = 0;</span>
+<span class="nc" id="L72">		int block_starting_row = 0;</span>
+		
+<span class="nc" id="L74">		matrix = new SparseBlock[block_rows][block_cols];</span>
+		
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		for (int i = 0; i &lt;  block_rows; i++) {</span>
+<span class="nc" id="L77">			block_starting_row = i * rows_in_blocks;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			for (int j = 0; j &lt;  block_cols; j++) {</span>
+<span class="nc" id="L79">				block_starting_col = j * cols_in_blocks;</span>
+<span class="nc" id="L80">				matrix[i][j] = new SparseBlock(basis, new Position(position.row + block_starting_row, position.col + block_starting_col), rows_in_blocks, cols_in_blocks);</span>
+			}
+		}
+		
+		//Fill with zeros
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		for (int x = 0; x &lt; rows; x++) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">			for (int y = 0; y &lt; cols; y++) {</span>
+<span class="nc" id="L87">				 write(x, y, BigRational.ZERO);</span>
+			}
+		}
+<span class="nc" id="L90">	}</span>
+	
+	public void write(int row, int col, BigRational value) {
+<span class="nc" id="L93">		int block_row    = row / rows_in_blocks;</span>
+<span class="nc" id="L94">		int row_in_block = row %  rows_in_blocks;</span>
+		
+<span class="nc" id="L96">		int block_col    = col / cols_in_blocks;</span>
+<span class="nc" id="L97">		int col_in_block = col %  cols_in_blocks;</span>
+		
+<span class="nc" id="L99">		matrix[block_row][block_col].write(row_in_block, col_in_block, value); //TODO copy?</span>
+<span class="nc" id="L100">	}</span>
+	
+	/**	 * 
+	 * @param row
+	 * @param col
+	 * @return returns the value at (row, col) of the block matrix (not a copy)
+	 */
+	
+	public BigRational get(int row, int col) {
+<span class="nc" id="L109">		int block_row    = row / rows_in_blocks;</span>
+<span class="nc" id="L110">		int row_in_block = row %  rows_in_blocks;</span>
+		
+<span class="nc" id="L112">		int block_col    = col / cols_in_blocks;</span>
+<span class="nc" id="L113">		int col_in_block = col %  cols_in_blocks;</span>
+		
+<span class="nc" id="L115">		return matrix[block_row][block_col].get(row_in_block, col_in_block); </span>
+	}
+	
+	public void printRow(int row) {
+<span class="nc" id="L119">		int row_to_write = row - position.row;</span>
+<span class="nc bnc" id="L120" title="All 4 branches missed.">		if (row_to_write &gt;= 0 &amp;&amp; row_to_write &lt; rows) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">			for (int y = 0; y &lt; cols; y++) {</span>
+<span class="nc" id="L122">				 System.out.format(&quot;%2s &quot;, get(row_to_write, y).toString());</span>
+			}			
+		}
+<span class="nc" id="L125">	}</span>
+	
+	public Position getSize() {
+<span class="nc" id="L128">		return new Position(rows, cols);</span>
+	}
+	
+	public void multiply(BigRational[] result) throws BTFMatrixErrorException {
+		
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		if (cols + position.col &gt; basis.getSize()) throw new BTFMatrixErrorException(&quot;Matrix exceeds end of vector when multiplying&quot;);		</span>
+		
+<span class="nc bnc" id="L135" title="All 2 branches missed.">		for (int i = 0; i &lt; block_rows; i++) {  		</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">            for (int j = 0; j &lt; block_cols; j++) {</span>
+<span class="nc" id="L137">                matrix[i][j].multiply(result);</span>
+            }
+		}		
+<span class="nc" id="L140">	}		</span>
+	
+	public void solve(BigRational[] rhs) throws BTFMatrixErrorException {
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		if (cols + position.col &gt; basis.getSize()) throw new BTFMatrixErrorException(&quot;Matrix exceeds end of vector when solving&quot;);		</span>
+		
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		for (int i = 0; i &lt; block_rows; i++) {  		</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">            for (int j = 0; j &lt; block_cols; j++) {</span>
+<span class="nc" id="L147">            	matrix[i][j].solve(rhs);</span>
+            }
+		}			
+<span class="nc" id="L150">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

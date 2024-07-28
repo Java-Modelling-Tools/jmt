@@ -1,0 +1,1759 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DistributionsEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">DistributionsEditor.java</span></div><h1>DistributionsEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.gui.common.distributions.*;
+import jmt.gui.common.distributions.MAP;
+import jmt.gui.common.distributions.discrete.Bernoulli;
+import org.jdesktop.swingx.VerticalLayout;
+import org.qore.KPC.*;
+import jmt.framework.gui.components.JMTDialog;
+import jmt.framework.gui.image.ImagePanel;
+import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.framework.gui.listeners.KeyFocusAdapter;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.distributions.Distribution.Parameter;
+import jmt.gui.common.distributions.Distribution.ValueChecker;
+import jmt.gui.table.ExactCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import org.ejml.data.DMatrixRMaj;
+
+/**
+ * &lt;p&gt;
+ * Title: Distributions' Editor
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * Description: A modal dialog used to choose a specific distribution for a
+ * class or station service and to enter its parameters. Users will enter owner
+ * Frame or Dialog and initial Distribution (can be null) and will collect
+ * chosen distribution with &lt;code&gt;getResult()&lt;/code&gt; method.
+ * &lt;/p&gt;
+ *
+ * @author Bertoli Marco Date: 29-giu-2005 Time: 11.31.07
+ */
+public class DistributionsEditor extends JMTDialog {
+
+    private static final long serialVersionUID = 1L;
+
+    // Internal data structure
+    protected Distribution initial;
+
+    protected Distribution current;
+
+    protected Distribution target;
+
+    protected boolean recursive;
+
+    protected boolean discrete;
+
+    /**
+     * This variable will be initialized only once. It will contains every
+     * distribution that can be inserted
+     */
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; distributions;
+
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; nestedDistributions;
+
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; discreteDistributions;
+
+    // Constants
+    protected static final int BORDERSIZE = 20;
+
+    // Components
+<span class="nc" id="L110">    protected JComboBox chooser = new JComboBox();</span>
+<span class="nc" id="L111">    protected ImagePanel iconpanel = new ImagePanel();</span>
+<span class="nc" id="L112">    protected JPanel param_panel = new JPanel(new SpringLayout());</span>
+<span class="nc" id="L113">    protected JPanel mean_c_panel = new JPanel(new SpringLayout());</span>
+
+    protected JPanel scrollPanel;
+
+    // Names and display keys for labels
+    protected static final String PROBABILITY = &quot;Probability:&quot;;
+    protected static final String PROBABILITY_INTERVAL_A = &quot;probability_interval_A&quot;;
+    protected static final String PROBABILITY_INTERVAL_B = &quot;probability_interval_B&quot;;
+    protected static final String VALUE_DISTRIBUTION = &quot;Value Distribution:&quot;;
+    protected static final String INTERVAL_LENGTH_DISTRIBUTION = &quot;Interval-Length Distribution:&quot;;
+    protected static final String INTERVAL_A_LABEL = &quot;Interval type A&quot;;
+    protected static final String INTERVAL_B_LABEL = &quot;Interval type B&quot;;
+    protected static final String ROUND_ROBIN = &quot;Round-Robin&quot;;
+    protected static final String TRACEFILE = &quot;Trace File&quot;;
+    protected static final String BASE_DISTRIBUTION = &quot;Base Distribution:&quot;;
+    protected static final String BATCH_SIZE_DISTRIBUTION = &quot;Batch Size Distribution:&quot;;
+
+    protected JPanel[] intervalPanels;
+
+    protected JSpinner phaseNumSpinner;
+    protected ParameterTable[] parameterTables;
+
+
+	// -- New attributes for JMCH --
+	protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; distributionMapJMCH;
+
+	static{
+<span class="nc" id="L140">     	distributionMapJMCH = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L141">		distributionMapJMCH.put(&quot;Exponential&quot;, new Exponential().getClass());</span>
+<span class="nc" id="L142">        distributionMapJMCH.put(&quot;Uniform&quot;, new Uniform().getClass());</span>
+<span class="nc" id="L143">        distributionMapJMCH.put(&quot;Deterministic&quot;, new Deterministic().getClass());</span>
+<span class="nc" id="L144">		distributionMapJMCH.put(&quot;Hyperexponential&quot;, new Hyperexponential().getClass());</span>
+<span class="nc" id="L145">	}</span>
+
+	public void setJMCH(){
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if(distributions != distributionMapJMCH){</span>
+<span class="nc" id="L149">			distributions = distributionMapJMCH;</span>
+<span class="nc" id="L150">			initComponents();</span>
+		}
+<span class="nc" id="L152">	}</span>
+
+	public void unsetJMCH(){
+<span class="nc" id="L155">		distributions = findDistributions();</span>
+<span class="nc" id="L156">		initComponents();</span>
+<span class="nc" id="L157">	}</span>
+
+
+    // --- Static methods ------------------------------------------------------------------------------
+
+    /**
+     * Returns a new instance of DistributionsEditor, given parent container
+     * (used to find top level Dialog or Frame to create this dialog as modal).
+     * The container is instantiated as not recursive and not discrete
+     *
+     * @param parent
+     *            any type of container contained in a Frame or Dialog
+     * @param initial
+     *            initial distribution to be set
+     * @return new instance of DistributionsEditor
+     */
+    public static DistributionsEditor getInstance(Container parent,
+                                                  Distribution initial) {
+<span class="nc" id="L175">        return getInstance(parent, initial, false);</span>
+    }
+
+    /**
+     * Returns a new instance of DistributionsEditor, given parent container
+     * (used to find top level Dialog or Frame to create this dialog as modal)
+     * The container is instantiated as not discrete
+     *
+     * @param parent
+     *            any type of container contained in a Frame or Dialog
+     * @param initial
+     *            initial distribution to be set
+     * @param recursive
+     *            indicated if the DistributionEditor is used to select a nested
+     *            distribution
+     * @return new instance of DistributionsEditor
+     */
+    public static DistributionsEditor getInstance(Container parent,
+                                                  Distribution initial, boolean recursive) {
+<span class="nc" id="L194">        return getInstance(parent, initial, false, false);</span>
+    }
+
+    /**
+     * Returns a new instance of DistributionsEditor, given parent container
+     * (used to find top level Dialog or Frame to create this dialog as modal)
+     *
+     * @param parent
+     *            any type of container contained in a Frame or Dialog
+     * @param initial
+     *            initial distribution to be set
+     * @param recursive
+     *            indicated if the DistributionEditor is used to select a nested
+     *            distribution
+     * @param discrete
+     *            indicated if the DistributionEditor is used to select a discrete
+     *            distribution
+     * @return new instance of DistributionsEditor
+     */
+    public static DistributionsEditor getInstance(Container parent,
+                                                  Distribution initial,
+                                                  boolean recursive,
+                                                  boolean discrete) {
+        // Finds top level Dialog or Frame to invoke correct constructor
+<span class="nc bnc" id="L218" title="All 4 branches missed.">        while (!(parent instanceof Frame || parent instanceof Dialog)) {</span>
+<span class="nc" id="L219">            parent = parent.getParent();</span>
+        }
+
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        if (parent instanceof Frame) {</span>
+<span class="nc" id="L223">            return new DistributionsEditor((Frame) parent, initial, recursive, discrete);</span>
+        } else {
+<span class="nc" id="L225">            return new DistributionsEditor((Dialog) parent, initial, recursive, discrete);</span>
+        }
+    }
+
+    /**
+     * Uses reflection to return a Map of distributions. Search's key is
+     * distribution name and value is the Class of found distribution
+     *
+     * @return found distributions
+     */
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; findDistributions() {
+<span class="nc" id="L236">        Distribution[] all = Distribution.findAll();</span>
+<span class="nc" id="L237">        Map&lt;String, Class&lt;? extends Distribution&gt;&gt; tmp = new LinkedHashMap&lt;String, Class&lt;? extends Distribution&gt;&gt;();</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        for (Distribution element : all) {</span>
+<span class="nc" id="L239">            tmp.put(element.getName(), element.getClass());</span>
+        }
+<span class="nc" id="L241">        return tmp;</span>
+    }
+
+    /**
+     * Uses reflection to return a Map of distributions which are allowed
+     * to be nested. Search's key is distribution name and value is the Class of
+     * found distribution
+     *
+     * @return found nested distributions
+     */
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; findNestedDistributions() {
+<span class="nc" id="L252">        Distribution[] all = Distribution.findNestableDistributions();</span>
+<span class="nc" id="L253">        Map&lt;String, Class&lt;? extends Distribution&gt;&gt; tmp = new LinkedHashMap&lt;String, Class&lt;? extends Distribution&gt;&gt;();</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">        for (Distribution element : all) {</span>
+<span class="nc" id="L255">            tmp.put(element.getName(), element.getClass());</span>
+        }
+<span class="nc" id="L257">        return tmp;</span>
+    }
+
+    /**
+     * Uses reflection to return a Map of discrete distributions. Search's key is
+     * distribution name and value is the Class of found distribution
+     *
+     * @return found discrete distributions
+     */
+    protected static Map&lt;String, Class&lt;? extends Distribution&gt;&gt; findDiscreteDistributions() {
+<span class="nc" id="L267">        Distribution[] all = Distribution.findAllDiscrete();</span>
+<span class="nc" id="L268">        Map&lt;String, Class&lt;? extends Distribution&gt;&gt; tmp = new LinkedHashMap&lt;String, Class&lt;? extends Distribution&gt;&gt;();</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">        for (Distribution element : all) {</span>
+<span class="nc" id="L270">            tmp.put(element.getName(), element.getClass());</span>
+        }
+<span class="nc" id="L272">        return tmp;</span>
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    // --- Method to collect results -------------------------------------------------------------------
+
+    /**
+     * Returns Distribution selected in this dialog or initial one if cancel
+     * button was pressed
+     *
+     * @return Selected distribution if okay button was pressed, initial
+     *         otherwise. If this dialog has not been shown yet, returns initial
+     *         value too.
+     */
+    public Distribution getResult() {
+<span class="nc" id="L288">        return target;</span>
+    }
+
+    // -------------------------------------------------------------------------------------------------
+
+    // --- Constructors to create modal dialog ---------------------------------------------------------
+
+    /**
+     * Builds a new Distribution Editor Dialog. This dialog is designed to be
+     * modal.
+     *
+     * @param owner
+     *            owner Dialog for this dialog.
+     * @param initial
+     *            Reference to initial distribution to be shown
+     */
+    public DistributionsEditor(Dialog owner, Distribution initial,
+                               boolean recursive) {
+<span class="nc" id="L306">        super(owner, true);</span>
+<span class="nc" id="L307">        this.recursive = recursive;</span>
+<span class="nc" id="L308">        initData(initial);</span>
+<span class="nc" id="L309">        initComponents();</span>
+<span class="nc" id="L310">    }</span>
+
+    public DistributionsEditor(Dialog owner, Distribution initial,
+                               boolean recursive, boolean discrete) {
+<span class="nc" id="L314">        super(owner, true);</span>
+<span class="nc" id="L315">        this.recursive = recursive;</span>
+<span class="nc" id="L316">        this.discrete = discrete;</span>
+<span class="nc" id="L317">        initData(initial);</span>
+<span class="nc" id="L318">        initComponents();</span>
+<span class="nc" id="L319">    }</span>
+
+    /**
+     * Builds a new Distribution Editor Dialog. This dialog is designed to be
+     * modal.
+     *
+     * @param owner
+     *            owner Frame for this dialog.
+     * @param initial
+     *            Reference to initial distribution to be shown
+     */
+    public DistributionsEditor(Frame owner, Distribution initial,
+                               boolean recursive) {
+<span class="nc" id="L332">        super(owner, true);</span>
+<span class="nc" id="L333">        this.recursive = recursive;</span>
+<span class="nc" id="L334">        initData(initial);</span>
+<span class="nc" id="L335">        initComponents();</span>
+<span class="nc" id="L336">    }</span>
+
+    public DistributionsEditor(Frame owner, Distribution initial,
+                               boolean recursive, boolean discrete) {
+<span class="nc" id="L340">        super(owner, true);</span>
+<span class="nc" id="L341">        this.recursive = recursive;</span>
+<span class="nc" id="L342">        this.discrete = discrete;</span>
+<span class="nc" id="L343">        initData(initial);</span>
+<span class="nc" id="L344">        initComponents();</span>
+<span class="nc" id="L345">    }</span>
+
+    // -------------------------------------------------------------------------------------------------
+
+    // --- Actions performed by buttons and EventListeners ---------------------------------------------
+    // When okay button is pressed
+<span class="nc" id="L351">    protected AbstractAction okayAction = new AbstractAction(&quot;OK&quot;) {</span>
+
+        private static final long serialVersionUID = 1L;
+
+        {
+<span class="nc" id="L356">            putValue(Action.SHORT_DESCRIPTION,</span>
+                    &quot;Closes this window and apply changes&quot;);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            // Checks if distribution parameters are correct
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            if (current.checkValue()) {</span>
+<span class="nc" id="L363">                target = current;</span>
+<span class="nc" id="L364">                DistributionsEditor.this.dispose();</span>
+            } else {
+<span class="nc" id="L366">                JOptionPane.showMessageDialog(</span>
+                        DistributionsEditor.this,
+<span class="nc" id="L368">                        current.getPrecondition(),</span>
+                        &quot;Parameter Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L370">                DistributionsEditor.this.repaint();</span>
+            }
+<span class="nc" id="L372">        }</span>
+
+    };
+
+    // When cancel button is pressed
+<span class="nc" id="L377">    protected AbstractAction cancelAction = new AbstractAction(&quot;Cancel&quot;) {</span>
+
+        private static final long serialVersionUID = 1L;
+
+        {
+<span class="nc" id="L382">            putValue(Action.SHORT_DESCRIPTION,</span>
+                    &quot;Closes this window discarding all changes&quot;);
+        }
+
+        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L387">            target = initial;</span>
+<span class="nc" id="L388">            DistributionsEditor.this.dispose();</span>
+<span class="nc" id="L389">        }</span>
+
+    };
+
+    /**
+     * Listener used to set parameters (associated to param_panel's
+     * JTextFields). Parameters are set when JTextField loses focus or ENTER key
+     * is pressed.
+     */
+<span class="nc" id="L398">    protected KeyFocusAdapter parameterListener = new KeyFocusAdapter() {</span>
+        /*
+         * (non-Javadoc)
+         *
+         * @see
+         * jmt.framework.gui.listeners.KeyFocusAdapter#updateValues(java.awt
+         * .event.ComponentEvent)
+         */
+        @Override
+        protected void updateValues(ComponentEvent e) {
+            // Finds parameter number
+<span class="nc" id="L409">            JTextField sourcefield = (JTextField) e.getSource();</span>
+<span class="nc" id="L410">            int num = Integer.parseInt(sourcefield.getName());</span>
+<span class="nc" id="L411">            current.getParameter(num).setValue(sourcefield.getText());</span>
+<span class="nc" id="L412">            current.updateCM();</span>
+<span class="nc" id="L413">            refreshValues();</span>
+<span class="nc" id="L414">        }</span>
+    };
+
+    /**
+     * Listener that listens on Mean and C variations and updates parameters
+     */
+<span class="nc" id="L420">    protected KeyFocusAdapter cmListener = new KeyFocusAdapter() {</span>
+        /*
+         * (non-Javadoc)
+         *
+         * @see
+         * jmt.framework.gui.listeners.KeyFocusAdapter#updateValues(java.awt
+         * .event.ComponentEvent)
+         */
+        @Override
+        protected void updateValues(ComponentEvent e) {
+            // Finds parameter number
+<span class="nc" id="L431">            JTextField sourcefield = (JTextField) e.getSource();</span>
+            try {
+<span class="nc bnc" id="L433" title="All 2 branches missed.">                if (sourcefield.getName().equals(&quot;mean&quot;)) {</span>
+<span class="nc" id="L434">                    current.setMean(Double.parseDouble(sourcefield.getText()));</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">                } else if (sourcefield.getName().equals(&quot;c&quot;)) {</span>
+<span class="nc" id="L436">                    current.setC(Double.parseDouble(sourcefield.getText()));</span>
+                }
+<span class="nc" id="L438">            } catch (NumberFormatException ex) { // Do nothing</span>
+<span class="nc" id="L439">            }</span>
+<span class="nc" id="L440">            refreshValues();</span>
+<span class="nc" id="L441">        }</span>
+    };
+
+    /**
+     * Listener for chooser ComboBox to instantiate a new distributions data
+     * object when current distribution type is changed.
+     */
+<span class="nc" id="L448">    protected ItemListener change_listener = new ItemListener() {</span>
+        public void itemStateChanged(ItemEvent e) {
+            try {
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L452">                    return;</span>
+                }
+<span class="nc bnc" id="L454" title="All 2 branches missed.">                if (discrete) {</span>
+<span class="nc" id="L455">                    current = discreteDistributions.get(e.getItem()).newInstance();</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">                } else if (recursive) {</span>
+<span class="nc" id="L457">                    current = nestedDistributions.get(e.getItem()).newInstance();</span>
+                } else {
+<span class="nc" id="L459">                    current = distributions.get(e.getItem()).newInstance();</span>
+                }
+<span class="nc" id="L461">                refreshView();</span>
+<span class="nc" id="L462">            } catch (InstantiationException ex) {</span>
+<span class="nc" id="L463">                System.out</span>
+<span class="nc" id="L464">                        .println(&quot;Error: Error instantiating selected Distribution&quot;);</span>
+<span class="nc" id="L465">                ex.printStackTrace();</span>
+<span class="nc" id="L466">            } catch (IllegalAccessException ex) {</span>
+<span class="nc" id="L467">                System.out</span>
+<span class="nc" id="L468">                        .println(&quot;Error: Error accessing to selected Distribution&quot;);</span>
+<span class="nc" id="L469">                ex.printStackTrace();</span>
+<span class="nc" id="L470">            }</span>
+<span class="nc" id="L471">        }</span>
+    };
+
+    private JTextField replayerTextField;
+
+    private JButton chooseReplayerFileButton;
+
+<span class="nc" id="L478">    private JFileChooser replayerFileDialog = new JFileChooser(Defaults.getWorkingPath());</span>
+
+    /**
+     * Listener used for Burst-Distribution only. Updates the Round-Robin
+     * parameter. Parameter is set when the Round-Robin checkbox is checked or
+     * it is unchecked.
+     */
+<span class="nc" id="L485">    protected class RoundRobinAdapter implements ActionListener {</span>
+        public void actionPerformed(ActionEvent e) {
+            // Get the checkbox and its value
+<span class="nc" id="L488">            JCheckBox sourcefield = (JCheckBox) e.getSource();</span>
+<span class="nc" id="L489">            Boolean isRoundRobinChecked = new Boolean(sourcefield.isSelected());</span>
+            // Set the Round-Robin parameter
+<span class="nc" id="L491">            current.getParameter(5).setValue(isRoundRobinChecked);</span>
+
+<span class="nc" id="L493">            refreshValues();</span>
+<span class="nc" id="L494">        }</span>
+    }
+
+    /**
+     * Listener used for Burst-Distribution only. Updates the two probability
+     * parameters seen by the user Parameters are set when one of the parameter
+     * JTextField loses focus or ENTER key is pressed.
+     */
+<span class="nc" id="L502">    protected class ProbabilityAdapter extends KeyFocusAdapter {</span>
+        @Override
+        protected void updateValues(ComponentEvent e) {
+            // Get the textfield
+<span class="nc" id="L506">            JTextField sourcefield = (JTextField) e.getSource();</span>
+            try {
+                // Get the probability entered in the textfield
+<span class="nc" id="L509">                Double probability = new Double(Double.parseDouble(sourcefield</span>
+<span class="nc" id="L510">                        .getText()));</span>
+                // Probability has to be between 0 and 1 (otherwise do not
+                // update value)
+<span class="nc bnc" id="L513" title="All 4 branches missed.">                if (probability.doubleValue() &gt;= 0.0 &amp;&amp; probability.doubleValue() &lt;= 1.0) {</span>
+                    // If the probability was entered into the probability field
+                    // of interval B
+                    // then the probability parameter in the distribution has to
+                    // be set to 1-enteredProbability
+<span class="nc bnc" id="L518" title="All 2 branches missed.">                    if (sourcefield.getName().equals(PROBABILITY_INTERVAL_B)) {</span>
+<span class="nc" id="L519">                        probability = new Double(1 - probability.doubleValue());</span>
+                    }
+                    // set the parameter
+<span class="nc" id="L522">                    current.getParameter(0).setValue(probability);</span>
+                }
+<span class="nc" id="L524">            } catch (NumberFormatException ex) {</span>
+                // If user enters a value that is not a number -&gt; reset value
+                // back to the value before
+<span class="nc" id="L527">            }</span>
+
+<span class="nc" id="L529">            refreshValues();</span>
+<span class="nc" id="L530">        }</span>
+    }
+
+    /**
+     * This class is currently only used for Burst distributions since the other
+     * distributions do not contain any nested distributions as parameters
+     * Action performed when user clicks on Edit-Button at a Distribution
+     * Parameter Opens a new Distribution Editor to change and edit distribution
+     * parameters
+     *
+     * @author Peter Parapatics
+     *
+     */
+    protected class EditButtonAction extends AbstractAction {
+
+        private static final long serialVersionUID = 1L;
+
+        private int key;
+        private boolean isDiscreteEditor;
+
+<span class="nc" id="L550">        public EditButtonAction(int key) {</span>
+<span class="nc" id="L551">            super(&quot;Edit&quot;);</span>
+<span class="nc" id="L552">            this.key = key;</span>
+<span class="nc" id="L553">            this.isDiscreteEditor = false;</span>
+<span class="nc" id="L554">        }</span>
+
+        public void switchToDiscreteEditor() {
+<span class="nc" id="L557">            this.isDiscreteEditor = true;</span>
+<span class="nc" id="L558">        }</span>
+
+        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L561">            DistributionsEditor editor = DistributionsEditor.getInstance(</span>
+<span class="nc" id="L562">                    getParent(), (Distribution) current.getParameter(key)</span>
+<span class="nc" id="L563">                            .getValue(), true, isDiscreteEditor);</span>
+            // Sets editor window title
+<span class="nc" id="L565">            editor.setTitle(&quot;Editing &quot;</span>
+<span class="nc" id="L566">                    + current.getParameter(key).getDescription());</span>
+            // Shows editor window
+<span class="nc" id="L568">            editor.show();</span>
+            // Sets new Distribution to selected class
+<span class="nc" id="L570">            current.getParameter(key).setValue(editor.getResult());</span>
+<span class="nc" id="L571">            refreshValues();</span>
+<span class="nc" id="L572">        }</span>
+
+    }
+
+    ;
+
+    // -------------------------------------------------------------------------------------------------
+
+    // --- Initialize data structure and layout --------------------------------------------------------
+
+    /**
+     * Initialize this dialog data structures
+     *
+     * @param initial
+     *            Reference to initial distribution to be shown
+     */
+    protected void initData(Distribution initial) {
+<span class="nc" id="L589">        this.initial = initial;</span>
+<span class="nc" id="L590">        this.target = initial;</span>
+<span class="nc bnc" id="L591" title="All 2 branches missed.">        if (initial != null) {</span>
+<span class="nc" id="L592">            this.current = initial.clone();</span>
+        } else {
+            // Default distribution if nothing is selected
+<span class="nc bnc" id="L595" title="All 2 branches missed.">            if (discrete) {</span>
+<span class="nc" id="L596">                this.current = new Bernoulli();</span>
+            } else {
+<span class="nc" id="L598">                this.current = new Exponential();</span>
+            }
+        }
+
+        // If distributions is not already set, sets it!
+<span class="nc bnc" id="L603" title="All 2 branches missed.">        if (distributions == null) {</span>
+<span class="nc" id="L604">            distributions = findDistributions();</span>
+        }
+
+<span class="nc bnc" id="L607" title="All 4 branches missed.">        if (nestedDistributions == null &amp;&amp; recursive) {</span>
+<span class="nc" id="L608">            nestedDistributions = findNestedDistributions();</span>
+        }
+
+<span class="nc bnc" id="L611" title="All 4 branches missed.">        if (discreteDistributions == null &amp;&amp; discrete) {</span>
+<span class="nc" id="L612">            discreteDistributions = findDiscreteDistributions();</span>
+        }
+<span class="nc" id="L614">    }</span>
+
+    /**
+     * Initialize this dialod's components and default dialog property
+     */
+    protected void initComponents() {
+        // Sets default title, close operation and dimensions
+<span class="nc" id="L621">        this.setTitle(&quot;Editing Distribution...&quot;);</span>
+        // Centers this dialog on the screen
+<span class="nc bnc" id="L623" title="All 4 branches missed.">        if (recursive || discrete) {</span>
+<span class="nc" id="L624">            this.centerWindowWithOffset(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB,</span>
+                    CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB, 50, 50);
+        } else {
+<span class="nc" id="L627">            this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_DISTRIB,</span>
+                    CommonConstants.MAX_GUI_HEIGHT_JSIM_DISTRIB);
+        }
+
+        // Creates a main panel and adds margins to it
+<span class="nc" id="L632">        JPanel mainpanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L633">        mainpanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L634">        mainpanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.NORTH);</span>
+<span class="nc" id="L635">        mainpanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.SOUTH);</span>
+<span class="nc" id="L636">        mainpanel.add(Box.createHorizontalStrut(BORDERSIZE), BorderLayout.WEST);</span>
+<span class="nc" id="L637">        mainpanel.add(Box.createHorizontalStrut(BORDERSIZE), BorderLayout.EAST);</span>
+<span class="nc" id="L638">        this.getContentPane().add(mainpanel, BorderLayout.CENTER);</span>
+
+        // Creates a subpanel that holds scrollpanel and distr_panel and adds
+        // it to mainpanel
+<span class="nc" id="L642">        JPanel subpanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L643">        mainpanel.add(subpanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L644">        JPanel distr_panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L645">        subpanel.add(distr_panel, BorderLayout.NORTH);</span>
+
+        // Creates scrollpanel that holds param_panel and mean_c_panel
+<span class="nc" id="L648">        scrollPanel = new JPanel(new GridLayout(2, 1));</span>
+<span class="nc" id="L649">        subpanel.add(scrollPanel, BorderLayout.CENTER);</span>
+
+        // Adds bottom_panel to contentpane
+<span class="nc" id="L652">        JPanel bottom_panel = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L653">        this.getContentPane().add((bottom_panel), BorderLayout.SOUTH);</span>
+
+        // Adds Okay button to bottom_panel
+<span class="nc" id="L656">        JButton okaybutton = new JButton(okayAction);</span>
+<span class="nc" id="L657">        bottom_panel.add(okaybutton);</span>
+
+        // Adds Cancel button to bottom_panel
+<span class="nc" id="L660">        JButton cancelbutton = new JButton(cancelAction);</span>
+<span class="nc" id="L661">        bottom_panel.add(cancelbutton);</span>
+
+        // Adds distribution chooser
+<span class="nc" id="L664">        distr_panel.add(new JLabel(&quot;Selected Distribution: &quot;),</span>
+                BorderLayout.WEST);
+
+        Object[] distributionNames;
+<span class="nc bnc" id="L668" title="All 2 branches missed.">        if (discrete) {</span>
+<span class="nc" id="L669">            distributionNames = discreteDistributions.keySet().toArray();</span>
+<span class="nc bnc" id="L670" title="All 2 branches missed.">        } else if (recursive) {</span>
+<span class="nc" id="L671">            distributionNames = nestedDistributions.keySet().toArray();</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">        } else if (disableBatch) {</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">            distributionNames = distributions.keySet().stream().filter(key -&gt; !key.equals(&quot;Batch&quot;)).toArray();</span>
+        } else {
+<span class="nc" id="L675">            distributionNames = distributions.keySet().toArray();</span>
+        }
+
+        // names
+<span class="nc" id="L679">        chooser = new JComboBox(distributionNames);</span>
+        //ARIF: show all elements in ComboBox
+<span class="nc" id="L681">        chooser.setMaximumRowCount(distributionNames.length);</span>
+<span class="nc" id="L682">        chooser.setToolTipText(&quot;Choose distribution type&quot;);</span>
+        // Select correct distribution
+<span class="nc bnc" id="L684" title="All 2 branches missed.">        if (current != null) {</span>
+<span class="nc" id="L685">            chooser.setSelectedItem(current.getName());</span>
+<span class="nc" id="L686">            refreshView();</span>
+        }
+<span class="nc" id="L688">        chooser.addItemListener(change_listener);</span>
+<span class="nc" id="L689">        distr_panel.add(chooser, BorderLayout.CENTER);</span>
+
+        // Adds image viewer with a couple of borders
+<span class="nc" id="L692">        JPanel image_panel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L693">        distr_panel.add(image_panel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L694">        image_panel.add(Box.createVerticalStrut(BORDERSIZE / 2),</span>
+                BorderLayout.NORTH);
+<span class="nc" id="L696">        image_panel.add(Box.createVerticalStrut(BORDERSIZE / 2),</span>
+                BorderLayout.SOUTH);
+<span class="nc" id="L698">        image_panel.add(iconpanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L699">    }</span>
+
+    // ------------------------------------------------------------------
+    // --- Shows current distribution
+    // ------------------------------------------------------------------
+    protected void refreshView() {
+<span class="nc bnc" id="L705" title="All 2 branches missed.">        if (current != null) {</span>
+            // Flushes param_panel
+<span class="nc" id="L707">            param_panel.removeAll();</span>
+<span class="nc" id="L708">            mean_c_panel.removeAll();</span>
+<span class="nc" id="L709">            scrollPanel.removeAll();</span>
+<span class="nc" id="L710">            intervalPanels = null;</span>
+            // Shows image
+<span class="nc" id="L712">            iconpanel.setImage(current.getImage());</span>
+
+<span class="nc bnc" id="L714" title="All 2 branches missed.">            if (current instanceof Burst) {</span>
+<span class="nc" id="L715">                ((GridLayout) scrollPanel.getLayout()).setRows(1);</span>
+
+                // Flushes param_panel
+<span class="nc" id="L718">                intervalPanels = new JPanel[3];</span>
+<span class="nc" id="L719">                intervalPanels[0] = new JPanel();</span>
+<span class="nc" id="L720">                intervalPanels[1] = new JPanel();</span>
+<span class="nc" id="L721">                intervalPanels[2] = new JPanel();</span>
+
+<span class="nc" id="L723">                BurstRenderer rend = new BurstRenderer();</span>
+
+<span class="nc" id="L725">                rend.addInterval(ROUND_ROBIN, intervalPanels[0]);</span>
+<span class="nc" id="L726">                rend.addRoundRobin(intervalPanels[0]);</span>
+
+<span class="nc" id="L728">                rend.addInterval(INTERVAL_A_LABEL, intervalPanels[1]);</span>
+<span class="nc" id="L729">                rend.addProbability(intervalPanels[1], true);</span>
+<span class="nc" id="L730">                rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 1,</span>
+                        intervalPanels[1]);
+<span class="nc" id="L732">                rend.addDistribution(VALUE_DISTRIBUTION, 2, intervalPanels[1]);</span>
+
+<span class="nc" id="L734">                rend.addInterval(INTERVAL_B_LABEL, intervalPanels[2]);</span>
+<span class="nc" id="L735">                rend.addProbability(intervalPanels[2], false);</span>
+<span class="nc" id="L736">                rend.addDistribution(INTERVAL_LENGTH_DISTRIBUTION, 3,</span>
+                        intervalPanels[2]);
+<span class="nc" id="L738">                rend.addDistribution(VALUE_DISTRIBUTION, 4, intervalPanels[2]);</span>
+<span class="nc bnc" id="L739" title="All 2 branches missed.">            } else if (current instanceof Batch) {</span>
+<span class="nc" id="L740">                ((GridLayout) scrollPanel.getLayout()).setRows(1);</span>
+<span class="nc" id="L741">                BatchedRenderer rend = new BatchedRenderer();</span>
+<span class="nc bnc" id="L742" title="All 4 branches missed.">            } else if (current instanceof PhaseType || current instanceof MAP) {</span>
+<span class="nc" id="L743">                ((GridLayout) scrollPanel.getLayout()).setRows(1);</span>
+<span class="nc" id="L744">                JPanel compositePanel = new JPanel();</span>
+<span class="nc" id="L745">                compositePanel.setLayout(new BorderLayout());</span>
+
+<span class="nc bnc" id="L747" title="All 2 branches missed.">                if (current instanceof MAP) {</span>
+<span class="nc" id="L748">                    final JPanel autoFitPanel = new JPanel();</span>
+<span class="nc" id="L749">                    autoFitPanel.setBorder(new TitledBorder(new EtchedBorder(),</span>
+                            &quot;Fitting from Empirical Trace&quot;));
+<span class="nc" id="L751">                    JButton traceButton = new JButton(&quot;Choose File&quot;);</span>
+<span class="nc" id="L752">                    final JFileChooser traceChooser = new JFileChooser(Defaults.getWorkingPath());</span>
+<span class="nc" id="L753">                    final JTextField traceTextField = new JTextField();</span>
+<span class="nc" id="L754">                    final JTextField traceFileView = new JTextField(&quot;no file selected&quot;);</span>
+<span class="nc" id="L755">                    final JLabel progressLabel = new JLabel(&quot;&quot;);</span>
+<span class="nc" id="L756">                    traceFileView.setFont(new Font(&quot;&quot;, Font.ITALIC, 12));</span>
+<span class="nc" id="L757">                    traceFileView.setEditable(false);</span>
+
+<span class="nc" id="L759">                    traceTextField.setName(TRACEFILE);</span>
+<span class="nc" id="L760">                    traceButton.addActionListener(new ActionListener() {</span>
+                        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L762">                            int status = traceChooser.showOpenDialog(DistributionsEditor.this);</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">                            if (status == JFileChooser.CANCEL_OPTION) {</span>
+<span class="nc" id="L764">                                return;</span>
+<span class="nc bnc" id="L765" title="All 2 branches missed.">                            } else if (status == JFileChooser.ERROR_OPTION) {</span>
+<span class="nc" id="L766">                                return;</span>
+                            }
+<span class="nc" id="L768">                            traceTextField.setText(traceChooser.getSelectedFile().getAbsolutePath());</span>
+<span class="nc" id="L769">                            traceFileView.setText(traceChooser.getSelectedFile().getName());</span>
+<span class="nc" id="L770">                            refreshValues();</span>
+<span class="nc" id="L771">                        }</span>
+                    });
+<span class="nc" id="L773">                    param_panel.add(traceTextField);</span>
+<span class="nc" id="L774">                    param_panel.add(traceButton);</span>
+                    // KPC Parameters
+<span class="nc" id="L776">                    Defaults.set(&quot;autoOrder&quot;, &quot;Yes&quot;);</span>
+<span class="nc" id="L777">                    Defaults.set(&quot;numStates&quot;, &quot;2&quot;);</span>
+<span class="nc" id="L778">                    Defaults.set(&quot;fitSyle&quot;, &quot;fast&quot;);</span>
+
+<span class="nc" id="L780">                    final FittingOptions options = new FittingOptions();</span>
+<span class="nc" id="L781">                    options.setVerbose(false);</span>
+<span class="nc" id="L782">                    JButton preferencesButton = new JButton(&quot;Options&quot;);</span>
+<span class="nc" id="L783">                    final JSpinner orderSpinner = new JSpinner();</span>
+<span class="nc" id="L784">                    preferencesButton.addActionListener(new ActionListener() {</span>
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L787">                            JPanel panel = new JPanel(new GridLayout(4, 2));</span>
+
+<span class="nc" id="L789">                            panel.add(new JLabel(&quot;Fit Bicorrelations:\t&quot;));</span>
+<span class="nc" id="L790">                            JCheckBox bcBox = new JCheckBox();</span>
+<span class="nc" id="L791">                            bcBox.setSelected(false);</span>
+<span class="nc" id="L792">                            panel.add(bcBox);</span>
+
+<span class="nc" id="L794">                            panel.add(new JLabel(&quot;Automatically Determine Order:\t&quot;));</span>
+<span class="nc" id="L795">                            JCheckBox autoOrderBox = new JCheckBox();</span>
+<span class="nc bnc" id="L796" title="All 2 branches missed.">                            if (Defaults.get(&quot;autoOrder&quot;).equals(&quot;Yes&quot;)) {</span>
+<span class="nc" id="L797">                                autoOrderBox.setSelected(true);</span>
+                            } else {
+<span class="nc" id="L799">                                autoOrderBox.setSelected(false);</span>
+                            }
+<span class="nc" id="L801">                            panel.add(autoOrderBox);</span>
+
+<span class="nc" id="L803">                            panel.add(new JLabel(&quot;Maximum Number of States (if manual):\t&quot;));</span>
+<span class="nc" id="L804">                            int nStates = Integer.parseInt(Defaults.get(&quot;numStates&quot;));</span>
+<span class="nc" id="L805">                            orderSpinner.setModel(new SpinnerNumberModel(nStates, 2, 128, 1) {</span>
+                                @Override
+                                public Object getNextValue() {
+<span class="nc" id="L808">                                    Object nextValue = super.getValue();</span>
+<span class="nc" id="L809">                                    int x = Integer.parseInt(nextValue.toString()) * 2;</span>
+                                    //Object o = x;
+<span class="nc" id="L811">                                    return x;</span>
+                                }
+
+                                @Override
+                                public Object getPreviousValue() {
+<span class="nc" id="L816">                                    Object nextValue = super.getValue();</span>
+<span class="nc" id="L817">                                    int x = Integer.parseInt(nextValue.toString());</span>
+<span class="nc bnc" id="L818" title="All 2 branches missed.">                                    if (x &gt; 2) {</span>
+<span class="nc" id="L819">                                        return x / 2;</span>
+                                    }
+                                    //Object o = x;
+<span class="nc" id="L822">                                    return x;</span>
+                                }
+                            });
+<span class="nc" id="L825">                            panel.add(orderSpinner);</span>
+
+<span class="nc" id="L827">                            panel.add(new JLabel(&quot;Optimization Options:\t&quot;));</span>
+<span class="nc" id="L828">                            JComboBox optimCB = new JComboBox(new String[]{&quot;Fast Fit&quot;, &quot;Accurate Fit&quot;});</span>
+<span class="nc" id="L829">                            int selectedStyle = 0;</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">                            if (Defaults.get(&quot;fitStyle&quot;).equals(&quot;accurate&quot;)) {</span>
+<span class="nc" id="L831">                                selectedStyle = 1;</span>
+                            }
+<span class="nc" id="L833">                            optimCB.setSelectedIndex(selectedStyle);</span>
+<span class="nc" id="L834">                            panel.add(optimCB);</span>
+
+							/*
+							panel.add(new JLabel(&quot;Allow SMP:\t&quot;));
+							JCheckBox smpBox = new JCheckBox();
+							smpBox.setSelected(false);
+							panel.add(smpBox);
+							 */
+
+<span class="nc" id="L843">                            int option = JOptionPane.showConfirmDialog(null, panel, &quot;Fitting Options&quot;, JOptionPane.OK_CANCEL_OPTION);</span>
+<span class="nc bnc" id="L844" title="All 2 branches missed.">                            if (option == JOptionPane.OK_OPTION) {</span>
+<span class="nc bnc" id="L845" title="All 2 branches missed.">                                if (autoOrderBox.isSelected()) {</span>
+<span class="nc" id="L846">                                    Defaults.set(&quot;autoOrder&quot;, &quot;Yes&quot;);</span>
+<span class="nc" id="L847">                                    options.setNumMAPs(0);</span>
+<span class="nc" id="L848">                                    options.setPossibleOrders(6);</span>
+                                } else {
+<span class="nc" id="L850">                                    int nMaps = (int) (Math.log((Integer) orderSpinner.getValue()) / Math.log(2));</span>
+<span class="nc" id="L851">                                    Defaults.set(&quot;autoOrder&quot;, &quot;No&quot;);</span>
+<span class="nc" id="L852">                                    Defaults.set(&quot;numStates&quot;, orderSpinner.getValue().toString());</span>
+<span class="nc" id="L853">                                    options.setNumMAPs(nMaps);</span>
+                                }
+<span class="nc" id="L855">                                options.setAllowSM(false); // smpBox.isSelected()</span>
+<span class="nc bnc" id="L856" title="All 2 branches missed.">                                options.setOnlyAc(!bcBox.isSelected());</span>
+<span class="nc bnc" id="L857" title="All 2 branches missed.">                                if (optimCB.getSelectedIndex() == 0) {</span>
+<span class="nc" id="L858">                                    Defaults.set(&quot;fitStyle&quot;, &quot;fast&quot;);</span>
+<span class="nc" id="L859">                                    options.setMaxRunsAC(25);</span>
+<span class="nc" id="L860">                                    options.setMaxEvalsAC(2000);</span>
+<span class="nc" id="L861">                                    options.setMaxIterAC(250);</span>
+<span class="nc" id="L862">                                    options.setMaxResAC(5);</span>
+<span class="nc" id="L863">                                    options.setMaxIterBC(30);</span>
+<span class="nc" id="L864">                                    options.setMaxRunsBC(5);</span>
+                                } else {
+<span class="nc" id="L866">                                    Defaults.set(&quot;fitStyle&quot;, &quot;accurate&quot;);</span>
+<span class="nc" id="L867">                                    options.setMaxRunsAC(50);</span>
+<span class="nc" id="L868">                                    options.setMaxEvalsAC(3000);</span>
+<span class="nc" id="L869">                                    options.setMaxIterAC(250);</span>
+<span class="nc" id="L870">                                    options.setMaxResAC(10);</span>
+<span class="nc" id="L871">                                    options.setMaxIterBC(30);</span>
+<span class="nc" id="L872">                                    options.setMaxRunsBC(10);</span>
+                                }
+                            }
+<span class="nc" id="L875">                        }</span>
+                    });
+<span class="nc" id="L877">                    autoFitPanel.add(traceButton);</span>
+<span class="nc" id="L878">                    autoFitPanel.add(traceFileView);</span>
+<span class="nc" id="L879">                    autoFitPanel.add(preferencesButton);</span>
+<span class="nc" id="L880">                    JButton fitButton = new JButton(&quot;Fit&quot;);</span>
+<span class="nc" id="L881">                    autoFitPanel.add(fitButton);</span>
+<span class="nc" id="L882">                    autoFitPanel.add(progressLabel);</span>
+
+<span class="nc" id="L884">                    fitButton.addActionListener(new ActionListener() {</span>
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L887">                            final SwingWorker&lt;org.qore.KPC.MAP, String&gt; sw = new SwingWorker&lt;org.qore.KPC.MAP, String&gt;() {</span>
+                                org.qore.KPC.MAP map;
+                                org.qore.KPC.TraceFitter fitter;
+
+                                @Override
+                                protected org.qore.KPC.MAP doInBackground() throws Exception {
+                                    try {
+<span class="nc" id="L894">                                        publish(&quot;Reading Trace file...&quot;);</span>
+<span class="nc" id="L895">                                        String str = traceTextField.getText();</span>
+<span class="nc" id="L896">                                        Trace trace = new Trace(str);</span>
+<span class="nc" id="L897">                                        publish(&quot;Fitting MAP...&quot;);</span>
+<span class="nc" id="L898">                                        fitter = new TraceFitter(trace, options);</span>
+<span class="nc" id="L899">                                        List&lt;org.qore.KPC.MAP&gt; maps = fitter.fit();</span>
+<span class="nc" id="L900">                                        map = maps.get(0);</span>
+<span class="nc" id="L901">                                    } catch (IOException ioException) {</span>
+<span class="nc" id="L902">                                        JOptionPane.showMessageDialog(null, &quot;Error: Trace File Invalid&quot;);</span>
+<span class="nc" id="L903">                                        ioException.printStackTrace();</span>
+<span class="nc" id="L904">                                    }</span>
+<span class="nc" id="L905">                                    return map;</span>
+                                }
+
+                                @Override
+                                protected void process(List&lt;String&gt; chunks) {
+<span class="nc bnc" id="L910" title="All 2 branches missed.">                                    for (String s : chunks) {</span>
+<span class="nc" id="L911">                                        progressLabel.setText(s);</span>
+<span class="nc" id="L912">                                    }</span>
+<span class="nc" id="L913">                                }</span>
+
+                                @Override
+                                protected void done() {
+<span class="nc" id="L917">                                    int order = map.numStates;</span>
+<span class="nc" id="L918">                                    orderSpinner.setValue(Integer.valueOf(order));</span>
+<span class="nc bnc" id="L919" title="All 2 branches missed.">                                    for (int i = 0; i &lt; current.getNumberOfParameters(); i++) {</span>
+<span class="nc" id="L920">                                        Object[][] newMatrix = new Object[order][order];</span>
+<span class="nc bnc" id="L921" title="All 2 branches missed.">                                        for (int j = 0; j &lt; newMatrix.length; j++) {</span>
+<span class="nc bnc" id="L922" title="All 2 branches missed.">                                            for (int k = 0; k &lt; newMatrix[j].length; k++) {</span>
+<span class="nc bnc" id="L923" title="All 2 branches missed.">                                                DMatrixRMaj mat = i == 0 ? map.D0 : map.D1;</span>
+<span class="nc" id="L924">                                                newMatrix[j][k] = mat.get(j, k);</span>
+                                            }
+                                        }
+<span class="nc" id="L927">                                        current.getParameter(i).setValue(newMatrix);</span>
+<span class="nc" id="L928">                                        parameterTables[i].updateStructure();</span>
+                                    }
+<span class="nc" id="L930">                                    progressLabel.setText(&quot;Finished!&quot;);</span>
+<span class="nc" id="L931">                                }</span>
+                            };
+
+<span class="nc" id="L934">                            sw.execute();</span>
+<span class="nc" id="L935">                        }</span>
+                    });
+
+<span class="nc" id="L938">                    compositePanel.add(autoFitPanel, BorderLayout.NORTH);</span>
+                }
+
+<span class="nc" id="L941">                int phaseNum = ((Object[][]) current.getParameter(0).getValue())[0].length;</span>
+<span class="nc" id="L942">                phaseNumSpinner = new JSpinner();</span>
+<span class="nc" id="L943">                phaseNumSpinner.setPreferredSize(CommonConstants.DIM_BUTTON_XS);</span>
+<span class="nc" id="L944">                phaseNumSpinner.setModel(new SpinnerNumberModel(phaseNum, 1,</span>
+                        CommonConstants.MAX_NUMBER_OF_PHASES, 1));
+<span class="nc" id="L946">                phaseNumSpinner.addChangeListener(new ChangeListener() {</span>
+                    public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L948">                        int phaseNum = ((Integer) phaseNumSpinner.getValue()).intValue();</span>
+<span class="nc bnc" id="L949" title="All 2 branches missed.">                        for (int i = 0; i &lt; current.getNumberOfParameters(); i++) {</span>
+<span class="nc" id="L950">                            Object[][] oldMatrix = (Object[][]) current.getParameter(i).getValue();</span>
+<span class="nc" id="L951">                            Object[][] newMatrix = null;</span>
+<span class="nc bnc" id="L952" title="All 4 branches missed.">                            if (current instanceof PhaseType &amp;&amp; i == 0) {</span>
+<span class="nc" id="L953">                                newMatrix = new Object[1][phaseNum];</span>
+                            } else {
+<span class="nc" id="L955">                                newMatrix = new Object[phaseNum][phaseNum];</span>
+                            }
+<span class="nc bnc" id="L957" title="All 2 branches missed.">                            for (int j = 0; j &lt; newMatrix.length; j++) {</span>
+<span class="nc bnc" id="L958" title="All 2 branches missed.">                                for (int k = 0; k &lt; newMatrix[j].length; k++) {</span>
+<span class="nc bnc" id="L959" title="All 4 branches missed.">                                    if (j &lt; oldMatrix.length &amp;&amp; k &lt; oldMatrix[j].length) {</span>
+<span class="nc" id="L960">                                        newMatrix[j][k] = oldMatrix[j][k];</span>
+                                    } else {
+<span class="nc" id="L962">                                        newMatrix[j][k] = current.getParameter(i).parseValue(&quot;0&quot;);</span>
+                                    }
+                                }
+                            }
+<span class="nc" id="L966">                            current.getParameter(i).setValue(newMatrix);</span>
+<span class="nc" id="L967">                            parameterTables[i].updateStructure();</span>
+                        }
+<span class="nc" id="L969">                    }</span>
+                });
+
+<span class="nc" id="L972">                JPanel phaseNumPanel = new JPanel();</span>
+<span class="nc" id="L973">                phaseNumPanel.setBorder(new TitledBorder(new EtchedBorder(),</span>
+<span class="nc bnc" id="L974" title="All 2 branches missed.">                        (current instanceof PhaseType) ? &quot;Number of Phases&quot; : &quot;Number of States&quot;));</span>
+<span class="nc" id="L975">                phaseNumPanel.add(new JLabel(&quot;Number: &quot;));</span>
+<span class="nc" id="L976">                phaseNumPanel.add(phaseNumSpinner);</span>
+
+<span class="nc" id="L978">                int parameterNum = current.getNumberOfParameters();</span>
+<span class="nc" id="L979">                parameterTables = new ParameterTable[parameterNum];</span>
+<span class="nc" id="L980">                JPanel parametersPanel = new JPanel(new GridLayout(parameterNum, 1));</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">                for (int i = 0; i &lt; parameterNum; i++) {</span>
+<span class="nc" id="L982">                    parameterTables[i] = new ParameterTable(current.getParameter(i));</span>
+<span class="nc" id="L983">                    JScrollPane parameterPane = new JScrollPane(parameterTables[i]);</span>
+<span class="nc" id="L984">                    parameterPane.setBorder(new TitledBorder(new EtchedBorder(),</span>
+<span class="nc" id="L985">                            current.getParameter(i).getDescription()));</span>
+<span class="nc" id="L986">                    parametersPanel.add(parameterPane);</span>
+                }
+
+<span class="nc" id="L989">                compositePanel.add(phaseNumPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L990">                compositePanel.add(parametersPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L991">                scrollPanel.add(compositePanel);</span>
+<span class="nc" id="L992">            } else {</span>
+<span class="nc" id="L993">                ((GridLayout) scrollPanel.getLayout()).setRows(1);</span>
+
+                // Maximum width (used to line up elements of both panels)
+<span class="nc" id="L996">                int maxwidth = new JLabel(&quot;mean:&quot;, SwingConstants.TRAILING)</span>
+<span class="nc" id="L997">                        .getMinimumSize().width;</span>
+
+                // Shows this distribution's parameters on param_panel
+<span class="nc" id="L1000">                scrollPanel.add(new JScrollPane(param_panel));</span>
+<span class="nc bnc" id="L1001" title="All 2 branches missed.">                for (int i = 0; i &lt; current.getNumberOfParameters(); i++) {</span>
+                    // Creates the label
+<span class="nc" id="L1003">                    JLabel label = new JLabel(current.getParameter(i).getDescription()</span>
+                            + &quot;:&quot;, SwingConstants.TRAILING);
+                    // Corrects maxwidth if needed
+<span class="nc bnc" id="L1006" title="All 2 branches missed.">                    if (maxwidth &lt; label.getMinimumSize().width) {</span>
+<span class="nc" id="L1007">                        maxwidth = label.getMinimumSize().width;</span>
+                    }
+                    // Creates the textfield used to input values
+<span class="nc" id="L1010">                    JTextField textfield = new JTextField(5);</span>
+<span class="nc" id="L1011">                    textfield.setMaximumSize(new Dimension(</span>
+<span class="nc" id="L1012">                            textfield.getMaximumSize().width,</span>
+<span class="nc" id="L1013">                            textfield.getMinimumSize().height));</span>
+<span class="nc" id="L1014">                    label.setLabelFor(textfield);</span>
+<span class="nc" id="L1015">                    textfield.setName(Integer.toString(i));</span>
+<span class="nc" id="L1016">                    textfield.addFocusListener(parameterListener);</span>
+<span class="nc" id="L1017">                    textfield.addKeyListener(parameterListener);</span>
+                    // The Replayer has a fileName parameter.
+                    // So with this simple patch we add a FileDialog to select
+                    // the file. Notice that the constant Replayer.FILE_NAME_PARAMETER
+                    // makes this patch as less as possible error prone.
+<span class="nc bnc" id="L1022" title="All 2 branches missed.">                    if (current instanceof Replayer</span>
+<span class="nc" id="L1023">                            &amp;&amp; current.getParameter(i).getName()</span>
+<span class="nc bnc" id="L1024" title="All 2 branches missed.">                            .equals(Replayer.FILE_NAME_PARAMETER)) {</span>
+<span class="nc" id="L1025">                        replayerTextField = textfield;</span>
+<span class="nc" id="L1026">                        chooseReplayerFileButton = new JButton(&quot;Choose the file&quot;);</span>
+<span class="nc" id="L1027">                        chooseReplayerFileButton.addActionListener(new ActionListener() {</span>
+                            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L1029">                                int status = replayerFileDialog.showOpenDialog(DistributionsEditor.this);</span>
+<span class="nc bnc" id="L1030" title="All 2 branches missed.">                                if (status == JFileChooser.CANCEL_OPTION) {</span>
+<span class="nc" id="L1031">                                    return;</span>
+<span class="nc bnc" id="L1032" title="All 2 branches missed.">                                } else if (status == JFileChooser.ERROR_OPTION) {</span>
+<span class="nc" id="L1033">                                    return;</span>
+                                }
+<span class="nc" id="L1035">                                replayerTextField.setText(replayerFileDialog.getSelectedFile().getAbsolutePath());</span>
+<span class="nc" id="L1036">                                int num = Integer.parseInt(replayerTextField.getName());</span>
+<span class="nc" id="L1037">                                current.getParameter(num).setValue(replayerTextField.getText());</span>
+<span class="nc" id="L1038">                                refreshValues();</span>
+<span class="nc" id="L1039">                            }</span>
+                        });
+<span class="nc" id="L1041">                        param_panel.add(replayerTextField);</span>
+<span class="nc" id="L1042">                        param_panel.add(chooseReplayerFileButton);</span>
+                    } else {
+<span class="nc" id="L1044">                        param_panel.add(label, new SpringLayout.Constraints(</span>
+<span class="nc" id="L1045">                                Spring.constant(0), Spring.constant(0),</span>
+<span class="nc" id="L1046">                                Spring.constant(maxwidth),</span>
+<span class="nc" id="L1047">                                Spring.constant(label.getMinimumSize().height)));</span>
+<span class="nc" id="L1048">                        param_panel.add(textfield);</span>
+                    }
+                }
+<span class="nc" id="L1051">                SpringUtilities.makeCompactGrid(param_panel,</span>
+<span class="nc" id="L1052">                        current.getNumberOfParameters(), 2, // rows, cols</span>
+                        6, 6, // initX, initY
+                        6, 6); // xPad, yPad
+
+                // Now shows mean and c (if applicable) on mean_c_panel
+<span class="nc bnc" id="L1057" title="All 4 branches missed.">                if (current.hasC() || current.hasMean()) {</span>
+<span class="nc" id="L1058">                    ((GridLayout) scrollPanel.getLayout()).setRows(2);</span>
+
+<span class="nc" id="L1060">                    scrollPanel.add(new JScrollPane(mean_c_panel));</span>
+<span class="nc" id="L1061">                    int rows = 0;</span>
+<span class="nc" id="L1062">                    mean_c_panel.setVisible(true);</span>
+                    // Builds mean section
+<span class="nc bnc" id="L1064" title="All 2 branches missed.">                    if (current.hasMean()) {</span>
+<span class="nc" id="L1065">                        rows++;</span>
+                        // Creates the label
+<span class="nc" id="L1067">                        JLabel label = new JLabel(&quot;mean:&quot;, SwingConstants.TRAILING);</span>
+<span class="nc" id="L1068">                        mean_c_panel.add(label, new SpringLayout.Constraints(</span>
+<span class="nc" id="L1069">                                Spring.constant(0), Spring.constant(0),</span>
+<span class="nc" id="L1070">                                Spring.constant(maxwidth),</span>
+<span class="nc" id="L1071">                                Spring.constant(label.getMinimumSize().height)));</span>
+                        // Creates the textfield used to input mean values
+<span class="nc" id="L1073">                        JTextField textfield = new JTextField(5);</span>
+<span class="nc" id="L1074">                        textfield.setMaximumSize(new Dimension(</span>
+<span class="nc" id="L1075">                                textfield.getMaximumSize().width,</span>
+<span class="nc" id="L1076">                                textfield.getMinimumSize().height));</span>
+<span class="nc" id="L1077">                        label.setLabelFor(textfield);</span>
+<span class="nc" id="L1078">                        textfield.setName(&quot;mean&quot;);</span>
+<span class="nc" id="L1079">                        textfield.addFocusListener(cmListener);</span>
+<span class="nc" id="L1080">                        textfield.addKeyListener(cmListener);</span>
+<span class="nc" id="L1081">                        mean_c_panel.add(textfield);</span>
+                    }
+
+                    // Builds c section
+<span class="nc bnc" id="L1085" title="All 2 branches missed.">                    if (current.hasC()) {</span>
+<span class="nc" id="L1086">                        rows++;</span>
+                        // Creates the label
+<span class="nc" id="L1088">                        JLabel label = new JLabel(&quot;c:&quot;, SwingConstants.TRAILING);</span>
+<span class="nc" id="L1089">                        mean_c_panel.add(label, new SpringLayout.Constraints(</span>
+<span class="nc" id="L1090">                                Spring.constant(0), Spring.constant(0),</span>
+<span class="nc" id="L1091">                                Spring.constant(maxwidth),</span>
+<span class="nc" id="L1092">                                Spring.constant(label.getMinimumSize().height)));</span>
+                        // Creates the textfield used to input mean values
+<span class="nc" id="L1094">                        JTextField textfield = new JTextField(5);</span>
+<span class="nc" id="L1095">                        textfield.setMaximumSize(new Dimension(</span>
+<span class="nc" id="L1096">                                textfield.getMaximumSize().width,</span>
+<span class="nc" id="L1097">                                textfield.getMinimumSize().height));</span>
+<span class="nc" id="L1098">                        label.setLabelFor(textfield);</span>
+<span class="nc" id="L1099">                        textfield.setName(&quot;c&quot;);</span>
+<span class="nc" id="L1100">                        textfield.addFocusListener(cmListener);</span>
+<span class="nc" id="L1101">                        textfield.addKeyListener(cmListener);</span>
+<span class="nc" id="L1102">                        mean_c_panel.add(textfield);</span>
+                    }
+<span class="nc" id="L1104">                    SpringUtilities.makeCompactGrid(mean_c_panel, rows, 2, // rows, cols</span>
+                            6, 6, // initX, initY
+                            6, 6); // xPad, yPad
+                }
+            }
+
+<span class="nc" id="L1110">            refreshValues();</span>
+<span class="nc" id="L1111">            scrollPanel.revalidate();</span>
+<span class="nc" id="L1112">            scrollPanel.repaint();</span>
+        }
+<span class="nc" id="L1114">    }</span>
+
+    /**
+     * Helper method to extract the probability components the dialog's
+     * components. These components are the probability labels and the
+     * probability TextFields.
+     *
+     * @return a Vector of probability related components
+     * @author Federico Dal Castello
+     */
+    private Vector&lt;Component&gt; getProbabilityComponents() {
+<span class="nc" id="L1125">        Vector&lt;Component&gt; probabilityComponents = new Vector&lt;Component&gt;();</span>
+
+<span class="nc" id="L1127">        Vector&lt;Component&gt; components = new Vector&lt;Component&gt;();</span>
+<span class="nc" id="L1128">        components.addAll(Arrays.asList(intervalPanels[1].getComponents()));</span>
+<span class="nc" id="L1129">        components.addAll(Arrays.asList(intervalPanels[2].getComponents()));</span>
+
+<span class="nc" id="L1131">        Iterator&lt;Component&gt; it = components.iterator();</span>
+
+<span class="nc bnc" id="L1133" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+<span class="nc" id="L1134">            Component comp = it.next();</span>
+
+<span class="nc bnc" id="L1136" title="All 2 branches missed.">            if (comp instanceof JTextField) {</span>
+<span class="nc bnc" id="L1137" title="All 2 branches missed.">                if (comp.getName().equals(PROBABILITY_INTERVAL_A)</span>
+<span class="nc bnc" id="L1138" title="All 2 branches missed.">                        || comp.getName().equals(PROBABILITY_INTERVAL_B)) {</span>
+<span class="nc" id="L1139">                    probabilityComponents.add(comp);</span>
+                }
+            }
+
+<span class="nc bnc" id="L1143" title="All 2 branches missed.">            if (comp instanceof JLabel</span>
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">                    &amp;&amp; ((JLabel) comp).getText().equals(PROBABILITY)) {</span>
+<span class="nc" id="L1145">                probabilityComponents.add(comp);</span>
+            }
+<span class="nc" id="L1147">        }</span>
+
+<span class="nc" id="L1149">        return probabilityComponents;</span>
+    }
+
+    protected void refreshValues() {
+<span class="nc" id="L1153">        DecimalFormat df = new DecimalFormat(&quot;#.############&quot;);</span>
+<span class="nc" id="L1154">        df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));</span>
+
+<span class="nc" id="L1156">        Vector&lt;Component&gt; components = new Vector&lt;Component&gt;();</span>
+
+<span class="nc bnc" id="L1158" title="All 2 branches missed.">        if (intervalPanels != null) {</span>
+<span class="nc bnc" id="L1159" title="All 2 branches missed.">            for (JPanel intervalPanel : intervalPanels) {</span>
+<span class="nc" id="L1160">                components.addAll(Arrays.asList(intervalPanel.getComponents()));</span>
+            }
+        } else {
+<span class="nc" id="L1163">            components.addAll(Arrays.asList(param_panel.getComponents()));</span>
+        }
+
+<span class="nc" id="L1166">        expandComponents(components);</span>
+
+<span class="nc" id="L1168">        Iterator&lt;Component&gt; it = components.iterator();</span>
+
+<span class="nc bnc" id="L1170" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+<span class="nc" id="L1171">            Component comp = it.next();</span>
+
+<span class="nc bnc" id="L1173" title="All 2 branches missed.">            if (comp instanceof JTextField) {</span>
+<span class="nc" id="L1174">                Object value = null;</span>
+<span class="nc bnc" id="L1175" title="All 2 branches missed.">                if (comp.getName().equals(PROBABILITY_INTERVAL_B)) {</span>
+<span class="nc" id="L1176">                    Double prob = (Double) current.getParameter(0).getValue();</span>
+<span class="nc" id="L1177">                    value = new Double(1 - prob.doubleValue());</span>
+<span class="nc bnc" id="L1178" title="All 2 branches missed.">                } else if (comp.getName().equals(PROBABILITY_INTERVAL_A)) {</span>
+<span class="nc" id="L1179">                    value = current.getParameter(0).getValue();</span>
+<span class="nc bnc" id="L1180" title="All 2 branches missed.">                } else if (!comp.getName().equals(TRACEFILE)) {</span>
+<span class="nc" id="L1181">                    int num = Integer.parseInt(comp.getName());</span>
+<span class="nc" id="L1182">                    value = current.getParameter(num).getValue();</span>
+                }
+<span class="nc bnc" id="L1184" title="All 2 branches missed.">                if (value != null) {</span>
+<span class="nc bnc" id="L1185" title="All 2 branches missed.">                    if (value instanceof Double) {</span>
+<span class="nc" id="L1186">                        double val = ((Double) value).doubleValue();</span>
+<span class="nc" id="L1187">                        ((JTextField) comp).setText(df.format(val));</span>
+<span class="nc" id="L1188">                    } else {</span>
+<span class="nc" id="L1189">                        ((JTextField) comp).setText(value.toString());</span>
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L1194" title="All 2 branches missed.">            if (comp instanceof JCheckBox) {</span>
+                // enables or disables the probability components
+<span class="nc bnc" id="L1196" title="All 2 branches missed.">                if (comp.getName().equals(ROUND_ROBIN)) {</span>
+
+<span class="nc" id="L1198">                    Boolean isRoundRobinChecked = new Boolean(</span>
+<span class="nc" id="L1199">                            ((JCheckBox) comp).isSelected());</span>
+                    // if checked, disable; if not checked, enable
+<span class="nc" id="L1201">                    boolean enableComponent = !isRoundRobinChecked</span>
+<span class="nc bnc" id="L1202" title="All 2 branches missed.">                            .booleanValue();</span>
+
+<span class="nc" id="L1204">                    Vector&lt;Component&gt; probabilityComponents = getProbabilityComponents();</span>
+<span class="nc" id="L1205">                    Iterator&lt;Component&gt; probIt = probabilityComponents</span>
+<span class="nc" id="L1206">                            .iterator();</span>
+
+<span class="nc bnc" id="L1208" title="All 2 branches missed.">                    while (probIt.hasNext()) {</span>
+<span class="nc" id="L1209">                        Component probComp = probIt.next();</span>
+
+<span class="nc" id="L1211">                        probComp.setEnabled(enableComponent);</span>
+
+<span class="nc bnc" id="L1213" title="All 2 branches missed.">                        if (probComp instanceof JTextField) {</span>
+                            // reset the probability value only if the component
+                            // is disabled
+<span class="nc bnc" id="L1216" title="All 2 branches missed.">                            if (!enableComponent) {</span>
+<span class="nc" id="L1217">                                current.getParameter(0).setValue(</span>
+                                        new Double(0.5));
+                            }
+                            // fully disables the probability text field
+<span class="nc" id="L1221">                            ((JTextField) probComp)</span>
+<span class="nc" id="L1222">                                    .setEditable(enableComponent);</span>
+                        }
+<span class="nc" id="L1224">                    }</span>
+                }
+            }
+<span class="nc" id="L1227">        }</span>
+
+        // refresh all values into mean_c_panel
+<span class="nc" id="L1230">        Component[] componentArray = mean_c_panel.getComponents();</span>
+<span class="nc bnc" id="L1231" title="All 2 branches missed.">        for (Component element : componentArray) {</span>
+            // Shows only first 10 decimal digits
+<span class="nc bnc" id="L1233" title="All 2 branches missed.">            if (element instanceof JTextField</span>
+<span class="nc bnc" id="L1234" title="All 2 branches missed.">                    &amp;&amp; element.getName().equals(&quot;mean&quot;)) {</span>
+<span class="nc" id="L1235">                ((JTextField) element).setText(df.format(current.getMean()));</span>
+<span class="nc bnc" id="L1236" title="All 2 branches missed.">            } else if (element instanceof JTextField</span>
+<span class="nc bnc" id="L1237" title="All 2 branches missed.">                    &amp;&amp; element.getName().equals(&quot;c&quot;)) {</span>
+<span class="nc" id="L1238">                ((JTextField) element).setText(df.format(current.getC()));</span>
+            }
+        }
+
+<span class="nc" id="L1242">        scrollPanel.repaint();</span>
+<span class="nc" id="L1243">    }</span>
+
+    private void expandComponents(Vector&lt;Component&gt; components) {
+        while (true) {
+<span class="nc" id="L1247">            Iterator&lt;Component&gt; it = components.iterator();</span>
+<span class="nc" id="L1248">            List&lt;Component&gt; newComponents = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L1249" title="All 2 branches missed.">            while (it.hasNext()) {</span>
+<span class="nc" id="L1250">                Component comp = it.next();</span>
+<span class="nc bnc" id="L1251" title="All 2 branches missed.">                if (comp instanceof JPanel) {</span>
+<span class="nc" id="L1252">                    newComponents.addAll(Arrays.asList(((JPanel) comp).getComponents()));</span>
+<span class="nc" id="L1253">                    it.remove();</span>
+                }
+<span class="nc" id="L1255">            }</span>
+<span class="nc bnc" id="L1256" title="All 2 branches missed.">            if (newComponents.isEmpty()) {</span>
+<span class="nc" id="L1257">                break;</span>
+            } else {
+<span class="nc" id="L1259">                components.addAll(newComponents);</span>
+            }
+<span class="nc" id="L1261">        }</span>
+<span class="nc" id="L1262">    }</span>
+
+    /**
+     * Class encapsulation methods to render Burst parameters
+     *
+     * @author Peter Parapatics
+     * @author Federico Dal Castello
+     *
+     */
+    protected class BurstRenderer {
+
+<span class="nc" id="L1273">        JPanel burstContentPanel = new JPanel();</span>
+
+<span class="nc" id="L1275">        public BurstRenderer() {</span>
+            // added elements will be appended to the bottom row (vertically)
+<span class="nc" id="L1277">            BoxLayout verticalBoxLayout = new BoxLayout(burstContentPanel,</span>
+                    BoxLayout.Y_AXIS);
+<span class="nc" id="L1279">            burstContentPanel.setLayout(verticalBoxLayout);</span>
+<span class="nc" id="L1280">            scrollPanel.add(new JScrollPane(burstContentPanel));</span>
+<span class="nc" id="L1281">        }</span>
+
+        /**
+         * Renders the border and the position of the given panel and adds it to
+         * the scrolled panel
+         *
+         * @param name
+         *            The name of the Interval
+         * @param panel
+         *            The panel which will contain the interval
+         */
+        protected void addInterval(String name, JPanel panel) {
+<span class="nc" id="L1293">            GridBagLayout gridbag = new GridBagLayout();</span>
+
+            // Use gridbag layout
+<span class="nc" id="L1296">            panel.setLayout(gridbag);</span>
+
+            // Set black border around the interval.
+            // The name of the interval is displayed on the border
+<span class="nc" id="L1300">            panel.setBorder(BorderFactory.createTitledBorder(BorderFactory</span>
+<span class="nc" id="L1301">                            .createMatteBorder(1, 1, 1, 1, Color.BLACK), name,</span>
+                    TitledBorder.DEFAULT_JUSTIFICATION,
+                    TitledBorder.DEFAULT_POSITION, new Font(&quot;Dialog&quot;,
+                            Font.BOLD, 12), Color.BLACK));
+
+<span class="nc" id="L1306">            burstContentPanel.add(panel);</span>
+<span class="nc" id="L1307">        }</span>
+
+        /**
+         * Adds a distribution to the given panel
+         *
+         * @param name
+         *            the name to be displayed on the label before the
+         *            distribution
+         * @param key
+         *            to which parameter number in the Burst Distribution this
+         *            nested distribution corresponds
+         * @param intervalPanel
+         *            the panel to which the distribution should be added
+         */
+        protected void addDistribution(String name, int key,
+                                       JPanel intervalPanel) {
+<span class="nc" id="L1323">            JLabel distributionNameLabel = new JLabel(name);</span>
+
+            // Add the name of the distribution on a single line
+<span class="nc" id="L1326">            GridBagConstraints c = new GridBagConstraints();</span>
+<span class="nc" id="L1327">            c.insets = new Insets(10, 0, 0, 0); // top padding</span>
+<span class="nc" id="L1328">            c.gridwidth = GridBagConstraints.REMAINDER; // end row after this</span>
+            // entry
+<span class="nc" id="L1330">            c.fill = GridBagConstraints.HORIZONTAL;</span>
+            // how to fill space when enlarging window vertically
+<span class="nc" id="L1332">            c.weightx = 1.0;</span>
+<span class="nc" id="L1333">            c.weighty = 0.0;</span>
+            // Add the distribution
+<span class="nc" id="L1335">            intervalPanel.add(distributionNameLabel, c);</span>
+
+            // Add the edit button
+<span class="nc" id="L1338">            JButton but = new JButton(&quot;Edit&quot;);</span>
+<span class="nc" id="L1339">            but.setAction(new EditButtonAction(key));</span>
+            // Specifies the button size to maintain its width in the case that
+            // probability text fields are hidden
+            // TODO check if the specified values are compatible with all
+            // graphical systems
+<span class="nc" id="L1344">            but.setPreferredSize(new Dimension((int) (65 * CommonConstants.widthScaling), (int) (24 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L1346">            c.insets = new Insets(0, 0, 0, 0); // No space between Name of</span>
+            // distribution and Edit button
+            // do not finish row because also the label for the distribution has
+            // to be added
+<span class="nc" id="L1350">            c.gridwidth = GridBagConstraints.RELATIVE;</span>
+<span class="nc" id="L1351">            c.fill = GridBagConstraints.HORIZONTAL; // reset to default</span>
+<span class="nc" id="L1352">            c.weightx = 0.0; // reset to default</span>
+<span class="nc" id="L1353">            c.weighty = 0.0;</span>
+            // Add the button
+<span class="nc" id="L1355">            intervalPanel.add(but, c);</span>
+
+<span class="nc" id="L1357">            JTextField distributionValueTextField = new JTextField();</span>
+            // The name of the field is the parameter number
+<span class="nc" id="L1359">            distributionValueTextField.setName(&quot;&quot; + key);</span>
+            // If the distribution != null display
+<span class="nc bnc" id="L1361" title="All 2 branches missed.">            if (current.getParameter(key).getValue() != null) {</span>
+<span class="nc" id="L1362">                distributionValueTextField.setText(current.getParameter(key)</span>
+<span class="nc" id="L1363">                        .getValue().toString());</span>
+            }
+            // The value is not editable directly
+<span class="nc" id="L1366">            distributionValueTextField.setEditable(false);</span>
+<span class="nc" id="L1367">            c.gridwidth = GridBagConstraints.REMAINDER; // end row</span>
+<span class="nc" id="L1368">            c.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L1369">            c.weightx = 1.0;</span>
+<span class="nc" id="L1370">            c.weighty = 1.0;</span>
+<span class="nc" id="L1371">            intervalPanel.add(distributionValueTextField, c);</span>
+<span class="nc" id="L1372">        }</span>
+
+        /**
+         * Add a probability to an interval Panel If the probability is for
+         * interval B the value is displayed as 1-probability
+         *
+         * @param intervalPanel
+         *            the intervalPanel
+         * @param intervalA
+         *            if the probability is for interval A or B
+         */
+        protected void addProbability(Container intervalPanel, boolean intervalA) {
+<span class="nc" id="L1384">            JLabel probLabel = new JLabel(PROBABILITY);</span>
+<span class="nc" id="L1385">            JTextField probValue = new JTextField();</span>
+<span class="nc" id="L1386">            Double probability = (Double) current.getParameter(0).getValue();</span>
+
+            // If the interval is interval A display value directly
+            // Otherwise display 1-probability
+<span class="nc bnc" id="L1390" title="All 2 branches missed.">            if (intervalA) {</span>
+<span class="nc" id="L1391">                probValue.setName(PROBABILITY_INTERVAL_A);</span>
+            } else {
+<span class="nc" id="L1393">                probability = new Double(1 - probability.doubleValue());</span>
+<span class="nc" id="L1394">                probValue.setName(PROBABILITY_INTERVAL_B);</span>
+            }
+<span class="nc" id="L1396">            probValue.setText(probability.toString());</span>
+<span class="nc" id="L1397">            probLabel.setLabelFor(probValue);</span>
+
+<span class="nc" id="L1399">            probValue.addFocusListener(new ProbabilityAdapter());</span>
+<span class="nc" id="L1400">            probValue.addKeyListener(new ProbabilityAdapter());</span>
+
+<span class="nc" id="L1402">            GridBagConstraints c = new GridBagConstraints();</span>
+<span class="nc" id="L1403">            c.gridwidth = GridBagConstraints.RELATIVE; // next-to-last</span>
+<span class="nc" id="L1404">            c.fill = GridBagConstraints.NONE; // reset to default</span>
+<span class="nc" id="L1405">            c.weightx = 0.0; // reset to default</span>
+<span class="nc" id="L1406">            c.weighty = 1.0;</span>
+<span class="nc" id="L1407">            intervalPanel.add(probLabel, c);</span>
+
+<span class="nc" id="L1409">            c.gridwidth = GridBagConstraints.REMAINDER; // end row</span>
+<span class="nc" id="L1410">            c.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L1411">            c.weightx = 1.0;</span>
+<span class="nc" id="L1412">            c.weighty = 1.0;</span>
+<span class="nc" id="L1413">            intervalPanel.add(probValue, c);</span>
+<span class="nc" id="L1414">        }</span>
+
+        /**
+         * Adds a Round-Robin checkbox to an interval panel
+         *
+         * @param intervalPanel
+         *            the interval panel
+         * @author Federico Dal Castello
+         */
+        protected void addRoundRobin(Container intervalPanel) {
+<span class="nc" id="L1424">            JCheckBox roundRobinCheckBox = new JCheckBox();</span>
+<span class="nc" id="L1425">            roundRobinCheckBox.setText(ROUND_ROBIN + &quot; (A-B-A-B-A-B-A-B...)&quot;);</span>
+<span class="nc" id="L1426">            roundRobinCheckBox.setName(ROUND_ROBIN);</span>
+
+<span class="nc" id="L1428">            Boolean isChecked = (Boolean) current.getParameter(5).getValue();</span>
+<span class="nc" id="L1429">            roundRobinCheckBox.setSelected(isChecked.booleanValue());</span>
+<span class="nc" id="L1430">            roundRobinCheckBox.addActionListener(new RoundRobinAdapter());</span>
+
+            // the checkbox will be aligned to the left
+<span class="nc" id="L1433">            GridBagConstraints c = new GridBagConstraints();</span>
+<span class="nc" id="L1434">            c.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L1435">            c.weightx = 1.0;</span>
+<span class="nc" id="L1436">            c.weighty = 0.0;</span>
+
+            // Add the distribution
+<span class="nc" id="L1439">            intervalPanel.add(roundRobinCheckBox, c);</span>
+<span class="nc" id="L1440">        }</span>
+
+    }
+
+    /**
+     * Class encapsulation methods to render Batched parameters
+     *
+     * @author Jerry Zhu
+     */
+    protected class BatchedRenderer {
+<span class="nc" id="L1450">        final int BATCH_SIZE_DIST_KEY = 1;</span>
+<span class="nc" id="L1451">        final int FIXED_BATCH_SIZE_KEY = 2;</span>
+<span class="nc" id="L1452">        final int IS_FIXED_SIZE_KEY = 3;</span>
+
+<span class="nc" id="L1454">        JPanel batchedContentPanel = new JPanel();</span>
+
+<span class="nc" id="L1456">        public BatchedRenderer() {</span>
+            // added elements will be appended to the bottom row (vertically)
+<span class="nc" id="L1458">            BoxLayout verticalBoxLayout = new BoxLayout(batchedContentPanel,</span>
+                    BoxLayout.Y_AXIS);
+<span class="nc" id="L1460">            batchedContentPanel.setLayout(verticalBoxLayout);</span>
+<span class="nc" id="L1461">            scrollPanel.add(new JScrollPane(batchedContentPanel));</span>
+<span class="nc" id="L1462">            intervalPanels = new JPanel[1];</span>
+<span class="nc" id="L1463">            intervalPanels[0] = batchedContentPanel;</span>
+
+            // Set padding around the panel using an empty border
+<span class="nc" id="L1466">            batchedContentPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));</span>
+
+<span class="nc" id="L1468">            addDistribution(BASE_DISTRIBUTION, 0, batchedContentPanel, false);</span>
+
+<span class="nc" id="L1470">            JPanel batchSizePanel = new JPanel();</span>
+<span class="nc" id="L1471">            batchSizePanel.setLayout(new VerticalLayout());</span>
+<span class="nc" id="L1472">            batchSizePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory</span>
+<span class="nc" id="L1473">                            .createMatteBorder(1, 1, 1, 1, Color.BLACK), &quot;Batch Size Settings&quot;,</span>
+                    TitledBorder.DEFAULT_JUSTIFICATION,
+                    TitledBorder.DEFAULT_POSITION, new Font(&quot;Dialog&quot;,
+                            Font.BOLD, 12), Color.BLACK));
+<span class="nc" id="L1477">            batchedContentPanel.add(batchSizePanel);</span>
+
+<span class="nc" id="L1479">            JRadioButton fixedSizeButton = new JRadioButton(&quot;Fixed Batch Size&quot;);</span>
+<span class="nc" id="L1480">            JRadioButton batchDistButton = new JRadioButton(&quot;Batch Size Distribution&quot;);</span>
+<span class="nc" id="L1481">            ButtonGroup buttonGroup = new ButtonGroup();</span>
+<span class="nc" id="L1482">            buttonGroup.add(fixedSizeButton);</span>
+<span class="nc" id="L1483">            buttonGroup.add(batchDistButton);</span>
+
+<span class="nc" id="L1485">            batchSizePanel.add(fixedSizeButton);</span>
+<span class="nc" id="L1486">            JPanel fixedSizePanel = new JPanel();</span>
+<span class="nc" id="L1487">            batchSizePanel.add(fixedSizePanel);</span>
+
+<span class="nc" id="L1489">            fixedSizePanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L1490">            JLabel batchSizeLabel = new JLabel(&quot;Batch Size:&quot;);</span>
+<span class="nc" id="L1491">            batchSizeLabel.setPreferredSize(new Dimension((int) (65 * CommonConstants.widthScaling), (int) (24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L1492">            fixedSizePanel.add(batchSizeLabel, BorderLayout.WEST);</span>
+<span class="nc" id="L1493">            JTextField batchSizeField = new JTextField(10);</span>
+<span class="nc" id="L1494">            batchSizeField.setName(FIXED_BATCH_SIZE_KEY + &quot;&quot;);</span>
+<span class="nc" id="L1495">            fixedSizePanel.add(batchSizeField, BorderLayout.CENTER);</span>
+<span class="nc" id="L1496">            batchSizeField.setText(current.getParameter(FIXED_BATCH_SIZE_KEY).getValue().toString());</span>
+<span class="nc" id="L1497">            batchSizeField.addFocusListener(new FixedBatchSizeAdapter());</span>
+<span class="nc" id="L1498">            batchSizeField.addKeyListener(new FixedBatchSizeAdapter());</span>
+
+<span class="nc" id="L1500">            batchSizePanel.add(batchDistButton);</span>
+<span class="nc" id="L1501">            JPanel batchDistPanel = new JPanel();</span>
+<span class="nc" id="L1502">            batchSizePanel.add(batchDistPanel);</span>
+
+<span class="nc" id="L1504">            batchDistPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L1505">            addDistributionHelper(BATCH_SIZE_DIST_KEY, batchDistPanel, true);</span>
+
+<span class="nc bnc" id="L1507" title="All 2 branches missed.">            if (current.getParameter(IS_FIXED_SIZE_KEY).getValue().equals(true)) {</span>
+<span class="nc" id="L1508">                fixedSizeButton.setSelected(true);</span>
+<span class="nc" id="L1509">                batchSizeLabel.setEnabled(true);</span>
+<span class="nc" id="L1510">                batchSizeField.setEnabled(true);</span>
+<span class="nc" id="L1511">                setAllSubComponentsEnabled(batchDistPanel, false);</span>
+<span class="nc" id="L1512">                batchSizeField.setText(current.getParameter(FIXED_BATCH_SIZE_KEY).getValue().toString());</span>
+            } else {
+<span class="nc" id="L1514">                batchDistButton.setSelected(true);</span>
+<span class="nc" id="L1515">                batchSizeLabel.setEnabled(false);</span>
+<span class="nc" id="L1516">                batchSizeField.setEnabled(false);</span>
+<span class="nc" id="L1517">                setAllSubComponentsEnabled(batchDistPanel, true);</span>
+            }
+
+            // Action Listeners to toggle inputs
+<span class="nc" id="L1521">            fixedSizeButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L1522">                current.getParameter(IS_FIXED_SIZE_KEY).setValue(true);</span>
+<span class="nc" id="L1523">                batchSizeLabel.setEnabled(true);</span>
+<span class="nc" id="L1524">                batchSizeField.setEnabled(true);</span>
+<span class="nc" id="L1525">                setAllSubComponentsEnabled(batchDistPanel, false);</span>
+<span class="nc" id="L1526">                batchSizePanel.revalidate();</span>
+<span class="nc" id="L1527">                batchSizePanel.repaint();</span>
+<span class="nc" id="L1528">            });</span>
+
+<span class="nc" id="L1530">            batchDistButton.addActionListener(e -&gt; {</span>
+<span class="nc" id="L1531">                current.getParameter(IS_FIXED_SIZE_KEY).setValue(false);</span>
+<span class="nc" id="L1532">                batchSizeLabel.setEnabled(false);</span>
+<span class="nc" id="L1533">                batchSizeField.setEnabled(false);</span>
+<span class="nc" id="L1534">                setAllSubComponentsEnabled(batchDistPanel, true);</span>
+<span class="nc" id="L1535">                batchSizePanel.revalidate();</span>
+<span class="nc" id="L1536">                batchSizePanel.repaint();</span>
+<span class="nc" id="L1537">            });</span>
+<span class="nc" id="L1538">        }</span>
+
+        protected void addDistribution(String name, int key, JPanel onPanel, boolean isDiscrete) {
+<span class="nc" id="L1541">            JPanel distributionPanel = new JPanel();</span>
+<span class="nc" id="L1542">            distributionPanel.setLayout(new VerticalLayout());</span>
+<span class="nc" id="L1543">            onPanel.add(distributionPanel);</span>
+
+            // Add the name of the distribution on a single line
+<span class="nc" id="L1546">            JLabel distributionNameLabel = new JLabel(name);</span>
+<span class="nc" id="L1547">            distributionPanel.add(distributionNameLabel);</span>
+<span class="nc" id="L1548">            distributionPanel.add(Box.createVerticalStrut(5));</span>
+
+            // Add the edit button and the distribution value text field on the next line
+<span class="nc" id="L1551">            JPanel distributionValuePanel = new JPanel();</span>
+<span class="nc" id="L1552">            distributionValuePanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L1553">            distributionPanel.add(distributionValuePanel);</span>
+
+<span class="nc" id="L1555">            addDistributionHelper(key, distributionValuePanel, isDiscrete);</span>
+<span class="nc" id="L1556">        }</span>
+
+        private void addDistributionHelper(int key, JPanel onPanel, boolean isDiscrete) {
+            // Add the edit button with a fixed size
+<span class="nc" id="L1560">            JButton but = new JButton(&quot;Edit&quot;);</span>
+<span class="nc" id="L1561">            EditButtonAction action = new EditButtonAction(key);</span>
+<span class="nc bnc" id="L1562" title="All 2 branches missed.">            if (isDiscrete) {</span>
+<span class="nc" id="L1563">                action.switchToDiscreteEditor();</span>
+            }
+<span class="nc" id="L1565">            but.setAction(action);</span>
+<span class="nc" id="L1566">            but.setPreferredSize(new Dimension((int) (65 * CommonConstants.widthScaling), (int) (24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L1567">            onPanel.add(but, BorderLayout.WEST);</span>
+
+            // Add the distribution value text field that expands to fill the remaining line
+<span class="nc" id="L1570">            JTextField distributionValueTextField = new JTextField();</span>
+            // The name of the field is the parameter number
+<span class="nc" id="L1572">            distributionValueTextField.setName(&quot;&quot; + key);</span>
+            // If the distribution != null display
+<span class="nc bnc" id="L1574" title="All 2 branches missed.">            if (current.getParameter(key).getValue() != null) {</span>
+<span class="nc" id="L1575">                distributionValueTextField.setText(current.getParameter(key)</span>
+<span class="nc" id="L1576">                        .getValue().toString());</span>
+            }
+<span class="nc" id="L1578">            distributionValueTextField.setEditable(false);</span>
+<span class="nc" id="L1579">            onPanel.add(distributionValueTextField, BorderLayout.CENTER);</span>
+<span class="nc" id="L1580">        }</span>
+
+        private void setAllSubComponentsEnabled(JPanel panel, boolean enabled) {
+<span class="nc bnc" id="L1583" title="All 2 branches missed.">            for (Component component : panel.getComponents()) {</span>
+<span class="nc" id="L1584">                component.setEnabled(enabled);</span>
+<span class="nc bnc" id="L1585" title="All 2 branches missed.">                if (component instanceof JPanel) {</span>
+<span class="nc" id="L1586">                    setAllSubComponentsEnabled((JPanel) component, enabled); // Recursively disable nested components</span>
+                }
+            }
+<span class="nc" id="L1589">        }</span>
+
+<span class="nc" id="L1591">        protected class FixedBatchSizeAdapter extends KeyFocusAdapter {</span>
+            @Override
+            protected void updateValues(ComponentEvent e) {
+                // Get the textfield
+<span class="nc" id="L1595">                JTextField sourcefield = (JTextField) e.getSource();</span>
+                try {
+                    // Get the value entered in the textfield
+<span class="nc" id="L1598">                    Integer batchSize = Integer.parseInt(sourcefield.getText());</span>
+                    // Batch size must be bigger than 0 (otherwise do not update value and pop up warning)
+<span class="nc bnc" id="L1600" title="All 2 branches missed.">                    if (batchSize &gt; 0) {</span>
+                        // set the parameter
+<span class="nc" id="L1602">                        current.getParameter(FIXED_BATCH_SIZE_KEY).setValue(batchSize);</span>
+                    } else {
+<span class="nc" id="L1604">                        JOptionPane.showMessageDialog(null, &quot;Please enter a batch size greater than 0.&quot;, &quot;Invalid Input&quot;, JOptionPane.WARNING_MESSAGE);</span>
+                    }
+<span class="nc" id="L1606">                } catch (NumberFormatException ex) {</span>
+                    // If user enters a value that is not a number -&gt; pop up a warning and reset
+                    // back to the value before
+<span class="nc" id="L1609">                    JOptionPane.showMessageDialog(null, &quot;Please enter a valid batch size.&quot;, &quot;Invalid Input&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L1610">                }</span>
+
+<span class="nc" id="L1612">                refreshValues();</span>
+<span class="nc" id="L1613">            }</span>
+        }
+    }
+
+    /**
+     * Table for showing and editing a matrix parameter
+     */
+    private class ParameterTable extends ExactTable {
+
+        private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L1624">        public ParameterTable(Parameter parameter) {</span>
+<span class="nc" id="L1625">            super(new ParameterTableModel(parameter));</span>
+<span class="nc" id="L1626">            setDefaultRenderer(Object.class, new ParameterCellRenderer());</span>
+<span class="nc" id="L1627">            setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L1628">            setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L1629">            setRowSelectionAllowed(true);</span>
+<span class="nc" id="L1630">            setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L1631">            setBatchEditingEnabled(true);</span>
+<span class="nc" id="L1632">        }</span>
+
+    }
+
+    /**
+     * Model backing the parameter table
+     */
+    private class ParameterTableModel extends ExactTableModel {
+
+        private static final long serialVersionUID = 1L;
+
+        private Parameter parameter;
+
+<span class="nc" id="L1645">        public ParameterTableModel(Parameter parameter) {</span>
+<span class="nc" id="L1646">            rowHeaderPrototype = &quot;0000.0000&quot;;</span>
+<span class="nc" id="L1647">            prototype = &quot;0000.0000&quot;;</span>
+<span class="nc" id="L1648">            this.parameter = parameter;</span>
+<span class="nc" id="L1649">        }</span>
+
+        @Override
+        public int getRowCount() {
+<span class="nc" id="L1653">            return ((Object[][]) parameter.getValue()).length;</span>
+        }
+
+        @Override
+        public int getColumnCount() {
+<span class="nc" id="L1658">            return ((Object[][]) parameter.getValue())[0].length;</span>
+        }
+
+        @Override
+        protected Object getRowName(int rowIndex) {
+<span class="nc bnc" id="L1663" title="All 2 branches missed.">            if (((Object[][]) parameter.getValue()).length &lt;= 1) {</span>
+<span class="nc" id="L1664">                return &quot;--&quot;;</span>
+            } else {
+<span class="nc" id="L1666">                return String.valueOf(rowIndex + 1);</span>
+            }
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+<span class="nc" id="L1672">            return String.valueOf(columnIndex + 1);</span>
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L1677">            return true;</span>
+        }
+
+        @Override
+        protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc" id="L1682">            return ((Object[][]) parameter.getValue())[rowIndex][columnIndex];</span>
+        }
+
+        @Override
+        public void setValueAt(Object value, int rowIndex, int columnIndex) {
+<span class="nc" id="L1687">            Object newVal = parameter.parseValue((String) value);</span>
+<span class="nc bnc" id="L1688" title="All 2 branches missed.">            if (newVal == null) {</span>
+<span class="nc" id="L1689">                return;</span>
+            }
+<span class="nc" id="L1691">            Object[][] matrix = (Object[][]) parameter.getValue();</span>
+<span class="nc" id="L1692">            ValueChecker checker = parameter.getValueChecker();</span>
+<span class="nc" id="L1693">            Object oldVal = matrix[rowIndex][columnIndex];</span>
+<span class="nc" id="L1694">            matrix[rowIndex][columnIndex] = newVal;</span>
+<span class="nc bnc" id="L1695" title="All 4 branches missed.">            if (checker != null &amp;&amp; !checker.checkValue(matrix)) {</span>
+<span class="nc" id="L1696">                matrix[rowIndex][columnIndex] = oldVal;</span>
+            }
+<span class="nc" id="L1698">        }</span>
+
+        @Override
+        public void clear(int row, int col) {
+<span class="nc" id="L1702">            Object[][] matrix = (Object[][]) parameter.getValue();</span>
+<span class="nc" id="L1703">            matrix[row][col] = parameter.parseValue(&quot;0&quot;);</span>
+<span class="nc" id="L1704">        }</span>
+
+    }
+
+    /**
+     * Renderer displaying cells of the parameter table
+     */
+<span class="nc" id="L1711">    private class ParameterCellRenderer extends ExactCellRenderer {</span>
+
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        protected String formatNumber(double d) {
+<span class="nc" id="L1717">            return current.formatNumber(d);</span>
+        }
+
+    }
+
+    /**
+     * Disable 'Batch distribution'
+     */
+
+    public static DistributionsEditor getInstanceWithoutBatch(Container parent, Distribution initial) {
+<span class="nc bnc" id="L1727" title="All 4 branches missed.">        while (!(parent instanceof Frame || parent instanceof Dialog)) {</span>
+<span class="nc" id="L1728">            parent = parent.getParent();</span>
+        }
+
+<span class="nc bnc" id="L1731" title="All 2 branches missed.">        if (parent instanceof Frame) {</span>
+<span class="nc" id="L1732">            return new DistributionsEditor((Frame) parent, initial, false, false, true);</span>
+        } else {
+<span class="nc" id="L1734">            return new DistributionsEditor((Dialog) parent, initial, false, false, true);</span>
+        }
+    }
+
+    boolean disableBatch;
+
+    public DistributionsEditor(Frame owner, Distribution initial,
+                               boolean recursive, boolean discrete, boolean disableBatch) {
+<span class="nc" id="L1742">        super(owner, true);</span>
+<span class="nc" id="L1743">        this.recursive = recursive;</span>
+<span class="nc" id="L1744">        this.discrete = discrete;</span>
+<span class="nc" id="L1745">        this.disableBatch = disableBatch;</span>
+<span class="nc" id="L1746">        initData(initial);</span>
+<span class="nc" id="L1747">        initComponents();</span>
+<span class="nc" id="L1748">    }</span>
+    public DistributionsEditor(Dialog owner, Distribution initial,
+                               boolean recursive, boolean discrete, boolean disableBatch) {
+<span class="nc" id="L1751">        super(owner, true);</span>
+<span class="nc" id="L1752">        this.recursive = recursive;</span>
+<span class="nc" id="L1753">        this.discrete = discrete;</span>
+<span class="nc" id="L1754">        this.disableBatch = disableBatch;</span>
+<span class="nc" id="L1755">        initData(initial);</span>
+<span class="nc" id="L1756">        initComponents();</span>
+<span class="nc" id="L1757">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PNMLWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">PNMLWriter.java</span></div><h1>PNMLWriter.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.xml;
+
+import java.io.File;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.Vector;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.InputSource;
+
+import ch.qos.logback.classic.LoggerContext;
+import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
+import fr.lip6.move.pnml.framework.utils.ModelRepository;
+import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
+import fr.lip6.move.pnml.framework.utils.exception.VoidRepositoryException;
+import jmt.common.GlobalSettings;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Distribution.Parameter;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+
+/**
+ * &lt;p&gt;Title: PNML Writer&lt;/p&gt;
+ * &lt;p&gt;Description: Writes model information to a PNML file. This class provides
+ * methods for model export.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 25-01-2017
+ * Time: 12.00.00
+ */
+<span class="nc" id="L64">public class PNMLWriter implements PNMLConstants, CommonConstants {</span>
+
+	public static final int ALL_RIGHT = 0;
+	public static final int MULTIPLE_CLASSES = 1;
+	public static final int NON_PETRI_NET_STATIONS = 2;
+
+	private static DocumentBuilder docBuilder;
+	private static Document elemCreator;
+	private static Transformer transformer;
+
+	/**
+	 * Checks if an internal model can be exported to a PNML file
+	 * @param model data structure of the model
+	 * @return integer indicating the result of the check
+	 */
+	public static int checkModel(CommonModel model) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if (model.getClassKeys().size() &gt; 1) {</span>
+<span class="nc" id="L81">			return MULTIPLE_CLASSES;</span>
+		}
+<span class="nc" id="L83">		Vector&lt;Object&gt; stationKeys = model.getStationKeys();</span>
+<span class="nc" id="L84">		Vector&lt;Object&gt; placeKeys = model.getStationKeysPlace();</span>
+<span class="nc" id="L85">		Vector&lt;Object&gt; transitionKeys = model.getStationKeysTransition();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		if (stationKeys.size() &gt; placeKeys.size() + transitionKeys.size()) {</span>
+<span class="nc" id="L87">			return NON_PETRI_NET_STATIONS;</span>
+		}
+<span class="nc" id="L89">		return ALL_RIGHT;</span>
+	}
+
+	/**
+	 * Exports an internal model to a PNML file
+	 * @param file file that the model is exported to
+	 * @param model data structure of the model
+	 * @return true if the model was exported, false otherwise
+	 */
+	public static boolean exportModel(File file, CommonModel model) throws Exception {
+		try {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			if (docBuilder == null) {</span>
+<span class="nc" id="L101">				docBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();</span>
+			}
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			if (elemCreator == null) {</span>
+<span class="nc" id="L104">				elemCreator = docBuilder.newDocument();</span>
+			}
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			if (transformer == null) {</span>
+<span class="nc" id="L107">				transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L108">				transformer.setOutputProperty(OutputKeys.ENCODING, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L109">				transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, &quot;yes&quot;);</span>
+<span class="nc" id="L110">				transformer.setOutputProperty(&quot;{http://xml.apache.org/xslt}indent-amount&quot;, &quot;2&quot;);</span>
+			}
+
+<span class="nc" id="L113">			ModelRepository.getInstance().createDocumentWorkspace(&quot;w-&quot; + UUID.randomUUID().toString());</span>
+<span class="nc" id="L114">			transformer.setOutputProperty(OutputKeys.INDENT, &quot;no&quot;);</span>
+<span class="nc" id="L115">			HLAPIRootClass docApi = null;</span>
+<span class="nc" id="L116">			String modelName = file.getName().substring(0, file.getName().lastIndexOf(&quot;.pnml&quot;));</span>
+<span class="nc" id="L117">			int numberOfClasses = model.getClassKeys().size();</span>
+<span class="nc bnc" id="L118" title="All 3 branches missed.">			switch (numberOfClasses) {</span>
+			case 0:
+			{
+<span class="nc" id="L121">				docApi = new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI();</span>
+<span class="nc" id="L122">				writeCoreModel((fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI) docApi, modelName, model);</span>
+<span class="nc" id="L123">				break;</span>
+			}
+			case 1:
+			{
+<span class="nc" id="L127">				docApi = new fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI();</span>
+<span class="nc" id="L128">				writePTNet((fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) docApi, modelName, model);</span>
+<span class="nc" id="L129">				break;</span>
+			}
+			default:
+			{
+<span class="nc" id="L133">				ModelRepository.getInstance().destroyCurrentWorkspace();</span>
+<span class="nc" id="L134">				((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L135">				return false;</span>
+			}
+			}
+
+<span class="nc" id="L139">			String pnml = docApi.toPNML();</span>
+<span class="nc" id="L140">			Document pnmlDoc = docBuilder.parse(new InputSource(new StringReader(pnml)));</span>
+<span class="nc" id="L141">			transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</span>
+<span class="nc" id="L142">			transformer.transform(new DOMSource(pnmlDoc), new StreamResult(file));</span>
+<span class="nc" id="L143">			ModelRepository.getInstance().destroyCurrentWorkspace();</span>
+<span class="nc" id="L144">			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L145">			return true;</span>
+<span class="nc" id="L146">		} catch (Exception e) {</span>
+<span class="nc" id="L147">			ModelRepository.getInstance().destroyCurrentWorkspace();</span>
+<span class="nc" id="L148">			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L149">			throw e;</span>
+		}
+	}
+
+	/**
+	 * Writes an internal model to a PNML core model document
+	 * @param doc PNML document that the model is written to
+	 * @param modelName name of the model
+	 * @param model data structure of the model
+	 */
+	private static void writeCoreModel(fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI doc,
+			String modelName, CommonModel model)
+					throws InvalidIDException, VoidRepositoryException, TransformerException {
+<span class="nc" id="L162">		fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetHLAPI net =</span>
+				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetHLAPI(
+<span class="nc" id="L164">						&quot;n-&quot; + UUID.randomUUID().toString(),</span>
+						fr.lip6.move.pnml.pnmlcoremodel.hlapi.PNTypeHLAPI.COREMODEL, doc);
+<span class="nc" id="L166">		new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NameHLAPI(modelName, net);</span>
+
+<span class="nc" id="L168">		fr.lip6.move.pnml.pnmlcoremodel.hlapi.PageHLAPI page =</span>
+				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PageHLAPI(
+<span class="nc" id="L170">						&quot;g-&quot; + UUID.randomUUID().toString(), net);</span>
+<span class="nc" id="L171">		new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NameHLAPI(&quot;top-level&quot;, page);</span>
+
+<span class="nc" id="L173">		Map&lt;String, fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeHLAPI&gt; nodeMap =</span>
+				new HashMap&lt;String, fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeHLAPI&gt;();
+
+<span class="nc" id="L176">		Vector&lt;Object&gt; placeKeys = model.getStationKeysPlace();</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">		for (Object pk : placeKeys) {</span>
+<span class="nc" id="L178">			fr.lip6.move.pnml.pnmlcoremodel.hlapi.PlaceHLAPI place =</span>
+					new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PlaceHLAPI(
+<span class="nc" id="L180">							&quot;p-&quot; + UUID.randomUUID().toString(), page);</span>
+<span class="nc" id="L181">			new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NameHLAPI(</span>
+<span class="nc" id="L182">					model.getStationName(pk), place);</span>
+<span class="nc" id="L183">			nodeMap.put(model.getStationName(pk), place);</span>
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L186">				StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L187">				appendSpecificNodeGraphfics(writer, (JSimGraphModel) model, pk);</span>
+<span class="nc" id="L188">				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L189">						PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L190">						writer.getBuffer(), null, null, place);</span>
+
+<span class="nc" id="L192">				fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI graphics =</span>
+						new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI(place);
+<span class="nc" id="L194">				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PositionHLAPI(</span>
+<span class="nc" id="L195">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(pk).getX()),</span>
+<span class="nc" id="L196">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(pk).getY()),</span>
+						graphics);
+			}
+<span class="nc" id="L199">		}</span>
+
+<span class="nc" id="L201">		Vector&lt;Object&gt; transitionKeys = model.getStationKeysTransition();</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		for (Object tk : transitionKeys) {</span>
+<span class="nc" id="L203">			fr.lip6.move.pnml.pnmlcoremodel.hlapi.TransitionHLAPI transition =</span>
+					new fr.lip6.move.pnml.pnmlcoremodel.hlapi.TransitionHLAPI(
+<span class="nc" id="L205">							&quot;t-&quot; + UUID.randomUUID().toString(), page);</span>
+<span class="nc" id="L206">			new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NameHLAPI(</span>
+<span class="nc" id="L207">					model.getStationName(tk), transition);</span>
+<span class="nc" id="L208">			nodeMap.put(model.getStationName(tk), transition);</span>
+
+<span class="nc bnc" id="L210" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L211">				StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L212">				appendSpecificNodeGraphfics(writer, (JSimGraphModel) model, tk);</span>
+<span class="nc" id="L213">				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L214">						PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L215">						writer.getBuffer(), null, null, transition);</span>
+
+<span class="nc" id="L217">				fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI graphics =</span>
+						new fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI(transition);
+<span class="nc" id="L219">				new fr.lip6.move.pnml.pnmlcoremodel.hlapi.PositionHLAPI(</span>
+<span class="nc" id="L220">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(tk).getX()),</span>
+<span class="nc" id="L221">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(tk).getY()),</span>
+						graphics);
+			}
+<span class="nc" id="L224">		}</span>
+
+<span class="nc" id="L226">		Vector&lt;Object&gt; nodeKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L227">		nodeKeys.addAll(placeKeys);</span>
+<span class="nc" id="L228">		nodeKeys.addAll(transitionKeys);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">		for (int i = 0; i &lt; nodeKeys.size(); i++) {</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">			for (int j = 0; j &lt; nodeKeys.size(); j++) {</span>
+<span class="nc" id="L231">				Object sourceKey = nodeKeys.get(i);</span>
+<span class="nc" id="L232">				Object targetKey = nodeKeys.get(j);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">				if (model.areConnected(sourceKey, targetKey)) {</span>
+<span class="nc" id="L234">					String sourceName = model.getStationName(sourceKey);</span>
+<span class="nc" id="L235">					String targetName = model.getStationName(targetKey);</span>
+<span class="nc" id="L236">					fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeHLAPI source = nodeMap.get(sourceName);</span>
+<span class="nc" id="L237">					fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeHLAPI target = nodeMap.get(targetName);</span>
+<span class="nc" id="L238">					new fr.lip6.move.pnml.pnmlcoremodel.hlapi.ArcHLAPI(</span>
+<span class="nc" id="L239">							&quot;a-&quot; + UUID.randomUUID().toString(), source, target, page);</span>
+				}
+			}
+		}
+<span class="nc" id="L243">	}</span>
+
+	/**
+	 * Writes an internal model to a PNML P/T net document
+	 * @param doc PNML document that the model is written to
+	 * @param modelName name of the model
+	 * @param model data structure of the model
+	 */
+	private static void writePTNet(fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI doc,
+			String modelName, CommonModel model)
+					throws InvalidIDException, VoidRepositoryException, TransformerException {
+<span class="nc" id="L254">		fr.lip6.move.pnml.ptnet.hlapi.PetriNetHLAPI net =</span>
+				new fr.lip6.move.pnml.ptnet.hlapi.PetriNetHLAPI(
+<span class="nc" id="L256">						&quot;n-&quot; + UUID.randomUUID().toString(),</span>
+						fr.lip6.move.pnml.ptnet.hlapi.PNTypeHLAPI.PTNET, doc);
+<span class="nc" id="L258">		new fr.lip6.move.pnml.ptnet.hlapi.NameHLAPI(modelName, net);</span>
+<span class="nc" id="L259">		StringWriter writer = new StringWriter();</span>
+<span class="nc" id="L260">		appendSpecificNetParameters(writer, model);</span>
+<span class="nc" id="L261">		new fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L262">				PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L263">				writer.getBuffer(), null, null, net);</span>
+
+<span class="nc" id="L265">		fr.lip6.move.pnml.ptnet.hlapi.PageHLAPI page =</span>
+				new fr.lip6.move.pnml.ptnet.hlapi.PageHLAPI(
+<span class="nc" id="L267">						&quot;g-&quot; + UUID.randomUUID().toString(), net);</span>
+<span class="nc" id="L268">		new fr.lip6.move.pnml.ptnet.hlapi.NameHLAPI(&quot;top-level&quot;, page);</span>
+
+<span class="nc" id="L270">		Object classKey = model.getClassKeys().get(0);</span>
+<span class="nc" id="L271">		Map&lt;String, fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI&gt; nodeMap =</span>
+				new HashMap&lt;String, fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI&gt;();
+
+<span class="nc" id="L274">		Vector&lt;Object&gt; placeKeys = model.getStationKeysPlace();</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		for (Object pk : placeKeys) {</span>
+<span class="nc" id="L276">			fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI place =</span>
+					new fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI(
+<span class="nc" id="L278">							&quot;p-&quot; + UUID.randomUUID().toString(), page);</span>
+<span class="nc" id="L279">			new fr.lip6.move.pnml.ptnet.hlapi.NameHLAPI(</span>
+<span class="nc" id="L280">					model.getStationName(pk), place);</span>
+<span class="nc" id="L281">			new fr.lip6.move.pnml.ptnet.hlapi.PTMarkingHLAPI(</span>
+<span class="nc" id="L282">					Long.valueOf(model.getPreloadedJobs(pk, classKey).longValue()), place);</span>
+<span class="nc" id="L283">			nodeMap.put(model.getStationName(pk), place);</span>
+
+<span class="nc" id="L285">			writer = new StringWriter();</span>
+<span class="nc" id="L286">			appendSpecificPlaceParameters(writer, model, pk);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L288">				appendSpecificNodeGraphfics(writer, (JSimGraphModel) model, pk);</span>
+			}
+<span class="nc" id="L290">			new fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L291">					PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L292">					writer.getBuffer(), null, null, place);</span>
+
+<span class="nc bnc" id="L294" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L295">				fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI graphics =</span>
+						new fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI(place);
+<span class="nc" id="L297">				new fr.lip6.move.pnml.ptnet.hlapi.PositionHLAPI(</span>
+<span class="nc" id="L298">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(pk).getX()),</span>
+<span class="nc" id="L299">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(pk).getY()),</span>
+						graphics);
+			}
+<span class="nc" id="L302">		}</span>
+
+<span class="nc" id="L304">		Vector&lt;Object&gt; transitionKeys = model.getStationKeysTransition();</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">		for (Object tk : transitionKeys) {</span>
+<span class="nc" id="L306">			fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI transition =</span>
+					new fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI(
+<span class="nc" id="L308">							&quot;t-&quot; + UUID.randomUUID().toString(), page);</span>
+<span class="nc" id="L309">			new fr.lip6.move.pnml.ptnet.hlapi.NameHLAPI(</span>
+<span class="nc" id="L310">					model.getStationName(tk), transition);</span>
+<span class="nc" id="L311">			nodeMap.put(model.getStationName(tk), transition);</span>
+
+<span class="nc" id="L313">			writer = new StringWriter();</span>
+<span class="nc" id="L314">			appendSpecificTransitionParameters(writer, model, tk);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L316">				appendSpecificNodeGraphfics(writer, (JSimGraphModel) model, tk);</span>
+			}
+<span class="nc" id="L318">			new fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L319">					PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L320">					writer.getBuffer(), null, null, transition);</span>
+
+<span class="nc bnc" id="L322" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L323">				fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI graphics =</span>
+						new fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI(transition);
+<span class="nc" id="L325">				new fr.lip6.move.pnml.ptnet.hlapi.PositionHLAPI(</span>
+<span class="nc" id="L326">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(tk).getX()),</span>
+<span class="nc" id="L327">						Integer.valueOf((int) ((JSimGraphModel) model).getStationPosition(tk).getY()),</span>
+						graphics);
+			}
+<span class="nc" id="L330">		}</span>
+
+<span class="nc" id="L332">		Vector&lt;Object&gt; nodeKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L333">		nodeKeys.addAll(placeKeys);</span>
+<span class="nc" id="L334">		nodeKeys.addAll(transitionKeys);</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">		for (int i = 0; i &lt; nodeKeys.size(); i++) {</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			for (int j = 0; j &lt; nodeKeys.size(); j++) {</span>
+<span class="nc" id="L337">				Object sourceKey = nodeKeys.get(i);</span>
+<span class="nc" id="L338">				Object targetKey = nodeKeys.get(j);</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">				if (model.areConnected(sourceKey, targetKey)) {</span>
+<span class="nc" id="L340">					int normalInscription = 0;</span>
+<span class="nc" id="L341">					int inhibitorInscription = 0;</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">					if (STATION_TYPE_TRANSITION.equals(model.getStationType(targetKey))) {</span>
+<span class="nc" id="L343">						normalInscription = model.getEnablingCondition(targetKey, 0, sourceKey, classKey).intValue();</span>
+<span class="nc" id="L344">						inhibitorInscription = model.getInhibitingCondition(targetKey, 0, sourceKey, classKey).intValue();</span>
+					} else {
+<span class="nc" id="L346">						normalInscription = model.getFiringOutcome(sourceKey, 0, targetKey, classKey).intValue();</span>
+					}
+
+<span class="nc" id="L349">					String sourceName = model.getStationName(sourceKey);</span>
+<span class="nc" id="L350">					String targetName = model.getStationName(targetKey);</span>
+<span class="nc" id="L351">					fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI source = nodeMap.get(sourceName);</span>
+<span class="nc" id="L352">					fr.lip6.move.pnml.ptnet.hlapi.NodeHLAPI target = nodeMap.get(targetName);</span>
+
+<span class="nc bnc" id="L354" title="All 2 branches missed.">					if (normalInscription &gt; 0) {</span>
+<span class="nc" id="L355">						fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI normalArc =</span>
+								new fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI(
+<span class="nc" id="L357">										&quot;a-&quot; + UUID.randomUUID().toString(), source, target, page);</span>
+<span class="nc" id="L358">						writer = new StringWriter();</span>
+<span class="nc" id="L359">						appendSpecificArcParameters(writer, PNML_JSIM_V_ARC_TYPE_NORMAL);</span>
+<span class="nc" id="L360">						new fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L361">								PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L362">								writer.getBuffer(), null, null, normalArc);</span>
+<span class="nc" id="L363">						new fr.lip6.move.pnml.ptnet.hlapi.PTArcAnnotationHLAPI(</span>
+<span class="nc" id="L364">								Long.valueOf((long) normalInscription), normalArc);</span>
+					}
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">					if (inhibitorInscription &gt; 0) {</span>
+<span class="nc" id="L368">						fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI inhibitorArc =</span>
+								new fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI(
+<span class="nc" id="L370">										&quot;a-&quot; + UUID.randomUUID().toString(), source, target, page);</span>
+<span class="nc" id="L371">						writer = new StringWriter();</span>
+<span class="nc" id="L372">						appendSpecificArcParameters(writer, PNML_JSIM_V_ARC_TYPE_INHIBITOR);</span>
+<span class="nc" id="L373">						new fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI(</span>
+<span class="nc" id="L374">								PNML_JSIM, GlobalSettings.getSetting(GlobalSettings.VERSION),</span>
+<span class="nc" id="L375">								writer.getBuffer(), null, null, inhibitorArc);</span>
+<span class="nc" id="L376">						new fr.lip6.move.pnml.ptnet.hlapi.PTArcAnnotationHLAPI(</span>
+<span class="nc" id="L377">								Long.valueOf((long) inhibitorInscription), inhibitorArc);</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L382">	}</span>
+
+	/**
+	 * Appends the specific graphics of a node to a string writer
+	 * @param writer writer that the graphics are appended to
+	 * @param model data structure of the model
+	 * @param node search key for the node
+	 */
+	private static void appendSpecificNodeGraphfics(StringWriter writer, JSimGraphModel model, Object node)
+			throws TransformerException {
+<span class="nc" id="L392">		Element graphics = elemCreator.createElement(PNML_JSIM_E_NODE_GRAPHICS);</span>
+<span class="nc" id="L393">		Element rotate = elemCreator.createElement(PNML_JSIM_E_NODE_GRAPHICS_ROTATE);</span>
+<span class="nc" id="L394">		String text = String.valueOf(model.getStationPosition(node).isRotate());</span>
+<span class="nc" id="L395">		rotate.setTextContent(text);</span>
+<span class="nc" id="L396">		graphics.appendChild(rotate);</span>
+<span class="nc" id="L397">		transformer.transform(new DOMSource(graphics), new StreamResult(writer));</span>
+<span class="nc" id="L398">	}</span>
+
+	/**
+	 * Appends the specific parameters of a net to a string writer
+	 * @param writer writer that the parameters are appended to
+	 * @param model data structure of the model
+	 */
+	private static void appendSpecificNetParameters(StringWriter writer, CommonModel model)
+			throws TransformerException {
+<span class="nc" id="L407">		Element tokens = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS);</span>
+<span class="nc" id="L408">		Object classKey = model.getClassKeys().get(0);</span>
+<span class="nc" id="L409">		Element name = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_CLASS_NAME);</span>
+<span class="nc" id="L410">		String text = model.getClassName(classKey);</span>
+<span class="nc" id="L411">		name.setTextContent(text);</span>
+<span class="nc" id="L412">		tokens.appendChild(name);</span>
+
+<span class="nc" id="L414">		Element type = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_CLASS_TYPE);</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">		if (model.getClassType(classKey) == CLASS_TYPE_OPEN) {</span>
+<span class="nc" id="L416">			text = PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_OPEN;</span>
+		} else {
+<span class="nc" id="L418">			text = PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_CLOSED;</span>
+		}
+<span class="nc" id="L420">		type.setTextContent(text);</span>
+<span class="nc" id="L421">		tokens.appendChild(type);</span>
+
+<span class="nc" id="L423">		Object nodeKey = model.getClassRefStation(classKey);</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">		if (nodeKey != null) {</span>
+<span class="nc" id="L425">			Element referenceNode = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_REFERENCE_NODE);</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">			if (STATION_TYPE_TRANSITION.equals(nodeKey)) {</span>
+<span class="nc" id="L427">				text = STATION_TYPE_TRANSITION;</span>
+			} else {
+<span class="nc" id="L429">				text = model.getStationName(nodeKey);</span>
+			}
+<span class="nc" id="L431">			referenceNode.setTextContent(text);</span>
+<span class="nc" id="L432">			tokens.appendChild(referenceNode);</span>
+		}
+
+<span class="nc bnc" id="L435" title="All 2 branches missed.">		if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L436">			Element graphics = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_GRAPHICS);</span>
+<span class="nc" id="L437">			Element color = elemCreator.createElement(PNML_JSIM_E_NET_TOKENS_GRAPHICS_COLOR);</span>
+<span class="nc" id="L438">			text = &quot;#&quot; + Integer.toHexString(((JSimGraphModel) model).getClassColor(classKey).getRGB()).toUpperCase();</span>
+<span class="nc" id="L439">			color.setTextContent(text);</span>
+<span class="nc" id="L440">			graphics.appendChild(color);</span>
+<span class="nc" id="L441">			tokens.appendChild(graphics);</span>
+		}
+<span class="nc" id="L443">		transformer.transform(new DOMSource(tokens), new StreamResult(writer));</span>
+<span class="nc" id="L444">	}</span>
+
+	/**
+	 * Appends the specific parameters of a place to a string writer
+	 * @param writer writer that the parameters are appended to
+	 * @param model data structure of the model
+	 * @param place search key for the place
+	 */
+	private static void appendSpecificPlaceParameters(StringWriter writer, CommonModel model, Object place)
+			throws TransformerException {
+<span class="nc" id="L454">		Element capacity = elemCreator.createElement(PNML_JSIM_E_PLACE_CAPACITY);</span>
+<span class="nc" id="L455">		Object classKey = model.getClassKeys().get(0);</span>
+<span class="nc" id="L456">		String text = String.valueOf(model.getQueueCapacity(place, classKey));</span>
+<span class="nc" id="L457">		capacity.setTextContent(text);</span>
+<span class="nc" id="L458">		transformer.transform(new DOMSource(capacity), new StreamResult(writer));</span>
+<span class="nc" id="L459">	}</span>
+
+	/**
+	 * Appends the specific parameters of a transition to a string writer
+	 * @param writer writer that the parameters are appended to
+	 * @param model data structure of the model
+	 * @param transition search key for the transition
+	 */
+	private static void appendSpecificTransitionParameters(StringWriter writer, CommonModel model, Object transition)
+			throws TransformerException {
+<span class="nc" id="L469">		Element numberOfServers = elemCreator.createElement(PNML_JSIM_E_TRANSITION_NUMBER_OF_SERVERS);</span>
+<span class="nc" id="L470">		String text = String.valueOf(model.getNumberOfServers(transition, 0));</span>
+<span class="nc" id="L471">		numberOfServers.setTextContent(text);</span>
+<span class="nc" id="L472">		transformer.transform(new DOMSource(numberOfServers), new StreamResult(writer));</span>
+
+<span class="nc" id="L474">		Object strategy = model.getFiringTimeDistribution(transition, 0);</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">		if (strategy instanceof Distribution) {</span>
+<span class="nc" id="L476">			Element timingStrategy = elemCreator.createElement(PNML_JSIM_E_TRANSITION_TIMING_STRATEGY);</span>
+<span class="nc" id="L477">			text = PNML_JSIM_V_TRANSITION_TIMING_STRATEGY_TIMED;</span>
+<span class="nc" id="L478">			timingStrategy.setTextContent(text);</span>
+<span class="nc" id="L479">			transformer.transform(new DOMSource(timingStrategy), new StreamResult(writer));</span>
+
+<span class="nc" id="L481">			Element firingTimeDistribution = elemCreator.createElement(PNML_JSIM_E_TRANSITION_FIRING_TIME_DISTRIBUTION);</span>
+<span class="nc" id="L482">			Element distribution = createDistribution((Distribution) strategy);</span>
+<span class="nc" id="L483">			firingTimeDistribution.appendChild(distribution);</span>
+<span class="nc" id="L484">			transformer.transform(new DOMSource(firingTimeDistribution), new StreamResult(writer));</span>
+<span class="nc" id="L485">		} else {</span>
+<span class="nc" id="L486">			Element timingStrategy = elemCreator.createElement(PNML_JSIM_E_TRANSITION_TIMING_STRATEGY);</span>
+<span class="nc" id="L487">			text = PNML_JSIM_V_TRANSITION_TIMING_STRATEGY_IMMEDIATE;</span>
+<span class="nc" id="L488">			timingStrategy.setTextContent(text);</span>
+<span class="nc" id="L489">			transformer.transform(new DOMSource(timingStrategy), new StreamResult(writer));</span>
+
+<span class="nc" id="L491">			Element firingPriority = elemCreator.createElement(PNML_JSIM_E_TRANSITION_FIRING_PRIORITY);</span>
+<span class="nc" id="L492">			text = String.valueOf(model.getFiringPriority(transition, 0));</span>
+<span class="nc" id="L493">			firingPriority.setTextContent(text);</span>
+<span class="nc" id="L494">			transformer.transform(new DOMSource(firingPriority), new StreamResult(writer));</span>
+
+<span class="nc" id="L496">			Element firingWeight = elemCreator.createElement(PNML_JSIM_E_TRANSITION_FIRING_WEIGHT);</span>
+<span class="nc" id="L497">			text = String.valueOf(model.getFiringWeight(transition, 0));</span>
+<span class="nc" id="L498">			firingWeight.setTextContent(text);</span>
+<span class="nc" id="L499">			transformer.transform(new DOMSource(firingWeight), new StreamResult(writer));</span>
+		}
+<span class="nc" id="L501">	}</span>
+
+	/**
+	 * Appends the specific parameters of an arc to a string writer
+	 * @param writer writer that the parameters are appended to
+	 * @param text text specifying the type of the arc
+	 */
+	private static void appendSpecificArcParameters(StringWriter writer, String text)
+			throws TransformerException {
+<span class="nc" id="L510">		Element type = elemCreator.createElement(PNML_JSIM_E_ARC_TYPE);</span>
+<span class="nc" id="L511">		type.setTextContent(text);</span>
+<span class="nc" id="L512">		transformer.transform(new DOMSource(type), new StreamResult(writer));</span>
+<span class="nc" id="L513">	}</span>
+
+	/**
+	 * Creates an element representing a distribution
+	 * @param d data structure of the distribution
+	 * @return element representing the distribution
+	 */
+	private static Element createDistribution(Distribution d) {
+<span class="nc" id="L521">		Element distribution = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION);</span>
+<span class="nc" id="L522">		Element type = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_TYPE);</span>
+<span class="nc" id="L523">		type.setTextContent(d.getName());</span>
+<span class="nc" id="L524">		distribution.appendChild(type);</span>
+
+<span class="nc bnc" id="L526" title="All 2 branches missed.">		for (int i = 0; i &lt; d.getNumberOfParameters(); i++) {</span>
+<span class="nc" id="L527">			Parameter p = d.getParameter(i);</span>
+<span class="nc" id="L528">			Object v = p.getValue();</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">			if (v != null) {</span>
+<span class="nc" id="L530">				Element parameter = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER);</span>
+<span class="nc" id="L531">				Element name = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_NAME);</span>
+<span class="nc" id="L532">				name.setTextContent(p.getName());</span>
+<span class="nc" id="L533">				parameter.appendChild(name);</span>
+<span class="nc" id="L534">				Element value = elemCreator.createElement(PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE);</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">				if (v instanceof Distribution) {</span>
+<span class="nc" id="L536">					value.appendChild(createDistribution((Distribution) v));</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">				} else if (v instanceof Object[][]) {</span>
+<span class="nc" id="L538">					Object[][] m = (Object[][]) v;</span>
+<span class="nc" id="L539">					Element matrix = elemCreator.createElement(PNML_JSIM_E_MATRIX);</span>
+<span class="nc bnc" id="L540" title="All 2 branches missed.">					for (int j = 0; j &lt; m.length; j++) {</span>
+<span class="nc" id="L541">						Element vector = elemCreator.createElement(PNML_JSIM_E_MATRIX_VECTOR);</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">						for (int k = 0; k &lt; m[j].length; k++) {</span>
+<span class="nc" id="L543">							Element entry = elemCreator.createElement(PNML_JSIM_E_MATRIX_VECTOR_ENTRY);</span>
+<span class="nc" id="L544">							entry.setTextContent(m[j][k].toString());</span>
+<span class="nc" id="L545">							vector.appendChild(entry);</span>
+						}
+<span class="nc" id="L547">						matrix.appendChild(vector);</span>
+					}
+<span class="nc" id="L549">					value.appendChild(matrix);</span>
+<span class="nc" id="L550">				} else {</span>
+<span class="nc" id="L551">					value.setTextContent(v.toString());</span>
+				}
+<span class="nc" id="L553">				parameter.appendChild(value);</span>
+<span class="nc" id="L554">				distribution.appendChild(parameter);</span>
+			}
+		}
+<span class="nc" id="L557">		return distribution;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

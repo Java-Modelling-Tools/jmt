@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShiftedGeometric.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.discrete</a> &gt; <span class="el_source">ShiftedGeometric.java</span></div><h1>ShiftedGeometric.java</h1><pre class="source lang-java linenums">package jmt.engine.random.discrete;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.Parameter;
+
+import java.util.function.Function;
+
+public class ShiftedGeometric extends DiscreteDistribution {
+    private double probability;
+
+    // Constructor with NO parameter, because the XML initialized the distribution parameter through Parameter.
+    public ShiftedGeometric() {
+<span class="nc" id="L13">        super();</span>
+<span class="nc" id="L14">    }</span>
+
+<span class="nc" id="L16">    public ShiftedGeometric(double p) throws IncorrectDistributionParameterException {</span>
+<span class="nc bnc" id="L17" title="All 4 branches missed.">        if (p &lt; 0 || p &gt; 1) {</span>
+<span class="nc" id="L18">            throw new IncorrectDistributionParameterException(&quot;The probability should belong to [0,1]&quot;);</span>
+        }
+<span class="nc" id="L20">        outdated();</span>
+<span class="nc" id="L21">        this.probability = p;</span>
+<span class="nc" id="L22">        this.cached = true;</span>
+<span class="nc" id="L23">    }</span>
+
+    public ShiftedGeometric(Double p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L26">        this(p.doubleValue());</span>
+<span class="nc" id="L27">    }</span>
+
+    public boolean updatePar(double p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L30" title="All 4 branches missed.">        if (p &lt; 0 || p &gt; 1) {</span>
+<span class="nc" id="L31">            throw new IncorrectDistributionParameterException(&quot;The probability should belong to [0,1]&quot;);</span>
+        }
+<span class="nc" id="L33">        outdated();</span>
+<span class="nc" id="L34">        this.probability = p;</span>
+<span class="nc" id="L35">        this.cached = true;</span>
+<span class="nc" id="L36">        return true;</span>
+    }
+
+    @Override
+    public boolean updatePar(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L41" title="All 4 branches missed.">        if (p instanceof ShiftedGeometricPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L42">            return updatePar(((ShiftedGeometricPar) p).getProbability());</span>
+        }
+<span class="nc" id="L44">        return false;</span>
+    }
+
+    @Override
+    public int getUpper() {
+<span class="nc" id="L49">        final int UPPER_BOUND_FACTOR = 100;</span>
+<span class="nc" id="L50">        return (int) (1 / probability * UPPER_BOUND_FACTOR);</span>
+    }
+
+    @Override
+    public int getlower() {
+<span class="nc" id="L55">        return 1;</span>
+    }
+
+    protected &lt;T&gt; T unboxParameter(Parameter p, Function&lt;Double, T&gt; function) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L59" title="All 4 branches missed.">        if (p instanceof ShiftedGeometricPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L60">            return function.apply(((ShiftedGeometricPar) p).getProbability());</span>
+        } else {
+<span class="nc" id="L62">            throw new IncorrectDistributionParameterException(</span>
+                    &quot;Error: The probability should belong to [0,1]\n&quot; +
+                            &quot;Error: the Parameter must be the `ShiftedGeometricPar`&quot;);
+        }
+    }
+
+    protected int checkCached(int value) {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">        if (cached) {</span>
+<span class="nc" id="L70">            return value;</span>
+        }
+<span class="nc" id="L72">        return -1;</span>
+    }
+
+    protected double checkCached(double value) {
+<span class="nc bnc" id="L76" title="All 2 branches missed.">        if (cached) {</span>
+<span class="nc" id="L77">            return value;</span>
+        }
+<span class="nc" id="L79">        return -1.0;</span>
+    }
+
+    protected int nextRand(double probability) {
+<span class="nc" id="L83">        return (int) Math.ceil(Math.log(engine.raw()) / Math.log(1 - probability));</span>
+    }
+
+    @Override
+    public int nextRand() {
+<span class="nc" id="L88">        return checkCached(nextRand(probability));</span>
+    }
+
+    @Override
+    public int nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L93">        return unboxParameter(p, this::nextRand);</span>
+    }
+
+    protected double pmf(double probability, int x) {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if (x &gt;= 1) {</span>
+<span class="nc" id="L98">            return probability * Math.pow(1 - probability, x - 1);</span>
+        } else {
+<span class="nc" id="L100">            return 0.0;</span>
+        }
+    }
+
+    @Override
+    public double pmf(int x) {
+<span class="nc" id="L106">        return checkCached(pmf(probability, x));</span>
+    }
+
+    @Override
+    public double pmf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L111">        return unboxParameter(p, (probability) -&gt; pmf(probability, x));</span>
+    }
+
+    protected double cdf(double probability, int x) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if (x &lt; 1) {</span>
+<span class="nc" id="L116">            return 0.0;</span>
+        } else {
+<span class="nc" id="L118">            return 1 - Math.pow(1 - probability, x);</span>
+        }
+    }
+
+    @Override
+    public double cdf(int x) {
+<span class="nc" id="L124">        return checkCached(cdf(probability, x));</span>
+    }
+
+    @Override
+    public double cdf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L129">        return unboxParameter(p, (probability) -&gt; cdf(probability, x));</span>
+    }
+
+    protected double theorMean(double probability) {
+<span class="nc" id="L133">        return 1 / probability;</span>
+    }
+
+    @Override
+    public double theorMean() {
+<span class="nc" id="L138">        return checkCached(theorMean(probability));</span>
+    }
+
+    @Override
+    public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L143">        return unboxParameter(p, this::theorMean);</span>
+    }
+
+    protected double theorVariance(double probability) {
+<span class="nc" id="L147">        return (1 - probability) / (probability * probability);</span>
+    }
+
+    @Override
+    public double theorVariance() {
+<span class="nc" id="L152">        return checkCached(theorVariance(probability));</span>
+    }
+
+    @Override
+    public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L157">        return unboxParameter(p, this::theorVariance);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

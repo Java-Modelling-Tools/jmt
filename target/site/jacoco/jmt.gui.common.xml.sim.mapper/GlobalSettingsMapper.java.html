@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GlobalSettingsMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper</a> &gt; <span class="el_source">GlobalSettingsMapper.java</span></div><h1>GlobalSettingsMapper.java</h1><pre class="source lang-java linenums">/**
+ * This class is responsible for mapping the global settings from the {@link SimDescriptor} to the {@link CommonModel}
+ * and vice-versa. This includes simulation parameters like seed, duration, and logging configurations.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper;
+
+import jmt.framework.data.MacroReplacer;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+import java.io.File;
+import java.util.Map;
+
+<span class="fc" id="L19">public class GlobalSettingsMapper implements ModelElementMapper {</span>
+
+    // --- READING PHASE (XML -&gt; DTO -&gt; Model) ---
+
+    @Override
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
+<span class="fc" id="L25">        CommonModel model = context.getModel();</span>
+<span class="fc" id="L26">        Map&lt;String, String&gt; globals = dto.getGlobalAttributes();</span>
+
+<span class="fc" id="L28">        mapSimulationAndSeed(model, globals);</span>
+<span class="fc" id="L29">        mapTimeLimits(model, globals);</span>
+<span class="fc" id="L30">        mapIntervalsAndSamples(model, globals);</span>
+<span class="fc" id="L31">        mapStatisticsAndEvents(model, globals);</span>
+<span class="fc" id="L32">        mapLoggerParameters(model, globals);</span>
+<span class="fc" id="L33">    }</span>
+
+    private void mapSimulationAndSeed(CommonModel model, Map&lt;String, String&gt; globals) {
+<span class="fc" id="L36">        String seed = globals.get(XML_A_ROOT_SEED);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">        if (isPresent(seed)) {</span>
+<span class="fc" id="L38">            model.setUseRandomSeed(Boolean.FALSE);</span>
+<span class="fc" id="L39">            model.setSimulationSeed(Long.valueOf(seed));</span>
+        } else {
+<span class="fc" id="L41">            model.setUseRandomSeed(Boolean.TRUE);</span>
+        }
+<span class="fc" id="L43">    }</span>
+
+    private void mapTimeLimits(CommonModel model, Map&lt;String, String&gt; globals) {
+<span class="fc" id="L46">        model.setMaximumDuration(getDouble(globals.get(XML_A_ROOT_DURATION), -1.0));</span>
+<span class="fc" id="L47">        model.setMaxSimulatedTime(getDouble(globals.get(XML_A_ROOT_SIMULATED), -1.0));</span>
+<span class="fc" id="L48">    }</span>
+
+    private void mapIntervalsAndSamples(CommonModel model, Map&lt;String, String&gt; globals) {
+<span class="fc" id="L51">        String polling = globals.get(XML_A_ROOT_POLLING);</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">        if (isPresent(polling)) {</span>
+<span class="fc" id="L53">            model.setPollingInterval(Double.valueOf(polling));</span>
+        }
+
+<span class="fc" id="L56">        String maxSamples = globals.get(XML_A_ROOT_MAXSAMPLES);</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if (isPresent(maxSamples)) {</span>
+<span class="fc" id="L58">            model.setMaxSimulationSamples(Integer.valueOf(maxSamples));</span>
+        }
+<span class="fc" id="L60">    }</span>
+
+    private void mapStatisticsAndEvents(CommonModel model, Map&lt;String, String&gt; globals) {
+<span class="fc" id="L63">        String disableStatistic = globals.get(XML_A_ROOT_DISABLESTATISTIC);</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">        if (isPresent(disableStatistic)) {</span>
+<span class="fc" id="L65">            model.setDisableStatistic(Boolean.valueOf(disableStatistic));</span>
+        }
+
+<span class="fc" id="L68">        model.setMaxSimulationEvents(getInt(globals.get(XML_A_ROOT_MAXEVENTS), -1));</span>
+<span class="fc" id="L69">    }</span>
+
+    private void mapLoggerParameters(CommonModel model, Map&lt;String, String&gt; globals) {
+<span class="fc" id="L72">        String logPath = globals.get(XML_A_ROOT_LOGPATH);</span>
+<span class="fc bfc" id="L73" title="All 4 branches covered.">        if (isPresent(logPath) &amp;&amp; new File(logPath).isDirectory()) {</span>
+<span class="fc" id="L74">            model.setLoggingGlbParameter(LOGGER_PARAM_PATH, new File(logPath).getAbsolutePath());</span>
+        } else {
+<span class="fc" id="L76">            model.setLoggingGlbParameter(LOGGER_PARAM_PATH, MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR));</span>
+        }
+
+<span class="fc" id="L79">        model.setLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND, globals.getOrDefault(XML_A_ROOT_LOGREPLACE, Defaults.get(&quot;loggerAutoAppend&quot;)));</span>
+<span class="fc" id="L80">        model.setLoggingGlbParameter(LOGGER_PARAM_DELIM, globals.getOrDefault(XML_A_ROOT_LOGDELIM, Defaults.get(&quot;loggerDelimiter&quot;)));</span>
+<span class="fc" id="L81">        model.setLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR, globals.getOrDefault(XML_A_ROOT_LOGDECIMALSEPARATOR, Defaults.get(&quot;loggerDecimalSeparator&quot;)));</span>
+<span class="fc" id="L82">    }</span>
+
+
+    // --- WRITING PHASE (Model -&gt; DTO -&gt; XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+<span class="fc" id="L89">        CommonModel model = context.model; // Accessing the model from the writing context</span>
+
+<span class="fc" id="L91">        mapModelSimulationAndSeedToDto(model, dto);</span>
+<span class="fc" id="L92">        mapModelTimeLimitsToDto(model, dto);</span>
+<span class="fc" id="L93">        mapModelIntervalsAndSamplesToDto(model, dto);</span>
+<span class="fc" id="L94">        mapModelStatisticsAndEventsToDto(model, dto);</span>
+<span class="fc" id="L95">        mapModelLoggerParametersToDto(model, dto);</span>
+<span class="fc" id="L96">    }</span>
+
+    private void mapModelSimulationAndSeedToDto(CommonModel model, SimDescriptor dto) {
+<span class="fc" id="L99">        Boolean useRandomSeed = model.getUseRandomSeed();</span>
+        // If random seed is not used and a seed is present, we write it to the DTO
+<span class="pc bpc" id="L101" title="1 of 4 branches missed.">        if (useRandomSeed != null &amp;&amp; !useRandomSeed) {</span>
+<span class="fc" id="L102">            Long seed = model.getSimulationSeed();</span>
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">            if (seed != null) {</span>
+<span class="fc" id="L104">                dto.addGlobalAttribute(XML_A_ROOT_SEED, seed.toString());</span>
+            }
+        }
+<span class="fc" id="L107">    }</span>
+
+    private void mapModelTimeLimitsToDto(CommonModel model, SimDescriptor dto) {
+<span class="fc" id="L110">        Double maxDuration = model.getMaximumDuration();</span>
+<span class="pc bpc" id="L111" title="1 of 4 branches missed.">        if (maxDuration != null &amp;&amp; maxDuration &gt; 0) {</span>
+<span class="fc" id="L112">            dto.addGlobalAttribute(XML_A_ROOT_DURATION, maxDuration.toString());</span>
+        }
+
+<span class="fc" id="L115">        Double maxSimulatedTime = model.getMaxSimulatedTime();</span>
+<span class="pc bpc" id="L116" title="2 of 4 branches missed.">        if (maxSimulatedTime != null &amp;&amp; maxSimulatedTime &gt; 0) {</span>
+<span class="nc" id="L117">            dto.addGlobalAttribute(XML_A_ROOT_SIMULATED, maxSimulatedTime.toString());</span>
+        }
+<span class="fc" id="L119">    }</span>
+
+    private void mapModelIntervalsAndSamplesToDto(CommonModel model, SimDescriptor dto) {
+<span class="fc" id="L122">        dto.addGlobalAttribute(XML_A_ROOT_POLLING, model.getPollingInterval().toString());</span>
+<span class="fc" id="L123">        dto.addGlobalAttribute(XML_A_ROOT_MAXSAMPLES, model.getMaxSimulationSamples().toString());</span>
+<span class="fc" id="L124">    }</span>
+
+    private void mapModelStatisticsAndEventsToDto(CommonModel model, SimDescriptor dto) {
+<span class="fc" id="L127">        dto.addGlobalAttribute(XML_A_ROOT_DISABLESTATISTIC, model.getDisableStatistic().toString());</span>
+<span class="fc" id="L128">        dto.addGlobalAttribute(XML_A_ROOT_MAXEVENTS, model.getMaxSimulationEvents().toString());</span>
+<span class="fc" id="L129">    }</span>
+
+    private void mapModelLoggerParametersToDto(CommonModel model, SimDescriptor dto) {
+<span class="fc" id="L132">        dto.addGlobalAttribute(XML_A_ROOT_LOGPATH,</span>
+<span class="fc" id="L133">                MacroReplacer.replace(model.getLoggingGlbParameter(LOGGER_PARAM_PATH)));</span>
+<span class="fc" id="L134">        dto.addGlobalAttribute(XML_A_ROOT_LOGREPLACE,</span>
+<span class="fc" id="L135">                model.getLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND));</span>
+<span class="fc" id="L136">        dto.addGlobalAttribute(XML_A_ROOT_LOGDELIM,</span>
+<span class="fc" id="L137">                model.getLoggingGlbParameter(LOGGER_PARAM_DELIM));</span>
+<span class="fc" id="L138">        dto.addGlobalAttribute(XML_A_ROOT_LOGDECIMALSEPARATOR,</span>
+<span class="fc" id="L139">                model.getLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR));</span>
+<span class="fc" id="L140">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

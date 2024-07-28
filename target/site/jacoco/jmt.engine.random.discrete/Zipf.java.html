@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Zipf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.discrete</a> &gt; <span class="el_source">Zipf.java</span></div><h1>Zipf.java</h1><pre class="source lang-java linenums">package jmt.engine.random.discrete;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.Parameter;
+
+import java.util.Hashtable;
+
+public class Zipf extends DiscreteDistribution {
+
+	private double alpha;
+	private int numberOfElements;
+
+	private double Hmax;
+	private boolean meanCalculated;
+	private double mean;
+	private boolean varCalculated;
+	private double variance;
+
+
+	// This constructor is used for method with outside `Parameter`
+	// In XML the `distribution` and `distributionPar` initialize separately.
+<span class="nc" id="L22">	public Zipf(){ super(); }</span>
+
+	// This constructor is used for directly assigning the parameter
+	// In XML, assigning the distribution parameter through &lt;subParameter&gt;.
+<span class="nc" id="L26">	public Zipf(double alpha, int numberOfElements) throws IncorrectDistributionParameterException{</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">		if ( numberOfElements&lt;=0) {</span>
+<span class="nc" id="L28">			throw new IncorrectDistributionParameterException(&quot;`numberOfElements` should be positive.&quot;);</span>
+		}
+<span class="nc bnc" id="L30" title="All 2 branches missed.">		if ( alpha&lt;=0) {</span>
+<span class="nc" id="L31">			throw new IncorrectDistributionParameterException(&quot;`alpha` should be positive.&quot;);</span>
+		}
+
+<span class="nc" id="L34">		outdated();		// Set all cache flag false;</span>
+<span class="nc" id="L35">		this.alpha = alpha;</span>
+<span class="nc" id="L36">		this.numberOfElements = numberOfElements;</span>
+<span class="nc" id="L37">		this.Hmax = Harmonic(numberOfElements, alpha);</span>
+<span class="nc" id="L38">		this.cached = true;</span>
+
+		// Update and cache mean and variance.
+<span class="nc" id="L41">		theorMean();</span>
+<span class="nc" id="L42">		theorVariance();</span>
+<span class="nc" id="L43">	}</span>
+
+	public Zipf(Double alpha, Integer numberOfElements) throws IncorrectDistributionParameterException{
+<span class="nc" id="L46">		this(alpha.doubleValue(), numberOfElements.intValue());</span>
+<span class="nc" id="L47">	}</span>
+	public Zipf(Integer numberOfElements, Double alpha) throws IncorrectDistributionParameterException{
+<span class="nc" id="L49">		this(alpha.doubleValue(), numberOfElements.intValue());</span>
+<span class="nc" id="L50">	}</span>
+
+	public boolean updatePar(double alpha, int numberOfElements)throws IncorrectDistributionParameterException{
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		if ( numberOfElements&lt;=0) {</span>
+<span class="nc" id="L54">			throw new IncorrectDistributionParameterException(&quot;`numberOfElements` should be positive.&quot;);</span>
+		}
+<span class="nc bnc" id="L56" title="All 2 branches missed.">		if ( alpha&lt;=0) {</span>
+<span class="nc" id="L57">			throw new IncorrectDistributionParameterException(&quot;`alpha` should be positive.&quot;);</span>
+		}
+<span class="nc" id="L59">		outdated();		// Set all cache flag false;</span>
+<span class="nc" id="L60">		this.alpha = alpha;</span>
+<span class="nc" id="L61">		this.numberOfElements = numberOfElements;</span>
+<span class="nc" id="L62">		this.Hmax = Harmonic(numberOfElements, alpha);</span>
+<span class="nc" id="L63">		this.cached = true;</span>
+
+<span class="nc" id="L65">		theorMean();</span>
+<span class="nc" id="L66">		theorVariance();</span>
+
+<span class="nc" id="L68">		return true;</span>
+	}
+
+	@Override
+	public boolean updatePar(Parameter p) throws IncorrectDistributionParameterException{
+<span class="nc bnc" id="L73" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L74">			return updatePar(((ZipfPar) p).getAlpha(), ((ZipfPar) p).getNumberOfElements());</span>
+		}
+<span class="nc" id="L76">		return false;</span>
+	}
+
+	@Override
+	public void outdated(){
+<span class="nc" id="L81">		super.outdated();		// inform the super-calss to outdate the cache.</span>
+<span class="nc" id="L82">		this.varCalculated = false;</span>
+<span class="nc" id="L83">		this.meanCalculated = false;</span>
+<span class="nc" id="L84">	}</span>
+
+	@Override
+	public int getUpper() {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc" id="L89">			return numberOfElements;</span>
+		}
+<span class="nc" id="L91">		return -1;</span>
+	}
+
+	@Override
+	public int getlower() {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc" id="L97">			return 0;</span>
+		}
+<span class="nc" id="L99">		return -1;</span>
+	}
+
+	@Override
+	public int nextRand(){
+		// Use `cdf()` and upper/lower bound to calculate the next random variable.
+<span class="nc" id="L105">		return this.inverseTransformSampling(0, numberOfElements);</span>
+	}
+
+	@Override
+	public double pmf(int x){
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L111" title="All 4 branches missed.">			if (x &lt;= 0 || x &gt; numberOfElements) {</span>
+<span class="nc" id="L112">				return 0.0;</span>
+			}
+<span class="nc" id="L114">			return 1/(Math.pow(x, alpha) * Hmax);</span>
+		}
+<span class="nc" id="L116">		return -1.0;</span>
+	}
+
+	@Override
+	public double cdf(int x){
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		if(cached) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if (x &lt;= 0) {</span>
+<span class="nc" id="L123">				return 0.0;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			} else if (x &gt;= numberOfElements) {</span>
+<span class="nc" id="L125">				return 1.0;</span>
+			}
+<span class="nc" id="L127">			return Harmonic(x, alpha) / Hmax;</span>
+		}
+<span class="nc" id="L129">		return -1.0;</span>
+	}
+
+	@Override
+	public double theorMean(){
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">			if(!meanCalculated){</span>
+<span class="nc" id="L136">				this.mean = Harmonic(numberOfElements, alpha-1) / Hmax;</span>
+<span class="nc" id="L137">				this.meanCalculated = true;</span>
+			}
+<span class="nc" id="L139">			return this.mean;</span>
+		}
+<span class="nc" id="L141">		return -1.0;</span>
+	}
+
+	@Override
+	public double theorVariance(){
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			if(!varCalculated) {</span>
+<span class="nc" id="L148">				double hs1 = Harmonic(numberOfElements, alpha - 1);</span>
+<span class="nc" id="L149">				double hs2 = Harmonic(numberOfElements, alpha - 2);</span>
+<span class="nc" id="L150">				this.variance = hs2 / Hmax - (hs1 * hs1) / (Hmax * Hmax);</span>
+<span class="nc" id="L151">				this.varCalculated = true;</span>
+			}
+<span class="nc" id="L153">			return this.variance;</span>
+		}
+<span class="nc" id="L155">		return -1.0;</span>
+	}
+
+
+	@Override
+	public int nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L161" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L162">			ZipfPar up = (ZipfPar) p;</span>
+<span class="nc" id="L163">			int max = up.getNumberOfElements();</span>
+
+			// the Parameter p is used to call `cdf(int x, Parameter p)`
+<span class="nc" id="L166">			Hashtable&lt;Integer,Double&gt; cdf_array = createdCDFList(0, max, p);</span>
+<span class="nc" id="L167">			return binarySearch(0, max, engine.nextDouble(), cdf_array);</span>
+		} else {
+<span class="nc" id="L169">			throw new IncorrectDistributionParameterException(</span>
+				&quot;Error: Max must be a integer &gt; 0\n&quot; +
+				&quot;Error: Alpha must be (0, 100), to avoid the data oveflow\n&quot; +
+				&quot;Error: the Parameter must be the `ZipfPar`&quot;);
+		}
+	}
+
+	@Override
+	public double pmf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L178" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L179">			ZipfPar up = (ZipfPar) p;</span>
+<span class="nc" id="L180">			double alpha = up.getAlpha();</span>
+<span class="nc" id="L181">			int max = up.getNumberOfElements();</span>
+
+<span class="nc bnc" id="L183" title="All 4 branches missed.">			if (x &lt;= 0 || x &gt; max) {</span>
+<span class="nc" id="L184">				return 0.0;</span>
+			}
+<span class="nc" id="L186">			return 1/(Math.pow(x, alpha) * Harmonic(max, alpha));</span>
+		} else {
+<span class="nc" id="L188">			throw new IncorrectDistributionParameterException(</span>
+				&quot;Error: Max must be a integer &gt; 0\n&quot; +
+				&quot;Error: Alpha must be (0, 100), to avoid the data oveflow\n&quot; +
+				&quot;Error: the Parameter must be the `ZipfPar`&quot;);
+		}
+	}
+
+	@Override
+	public double cdf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L197" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L198">			ZipfPar up = (ZipfPar) p;</span>
+<span class="nc" id="L199">			double alpha = up.getAlpha();</span>
+<span class="nc" id="L200">			int max = up.getNumberOfElements();</span>
+
+<span class="nc bnc" id="L202" title="All 2 branches missed.">			if (x &lt;= 0) {</span>
+<span class="nc" id="L203">				return 0.0;</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			} else if (x &gt;= max) {</span>
+<span class="nc" id="L205">				return 1.0;</span>
+			}
+<span class="nc" id="L207">			return Harmonic(x, alpha) / Harmonic(max, alpha);</span>
+		} else {
+<span class="nc" id="L209">			throw new IncorrectDistributionParameterException(</span>
+				&quot;Error: Max must be a integer &gt; 0\n&quot; +
+				&quot;Error: Alpha must be (0, 100), to avoid the data oveflow\n&quot; +
+				&quot;Error: the Parameter must be the `ZipfPar`&quot;);
+		}
+	}
+
+	@Override
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L218" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L219">			ZipfPar up = (ZipfPar) p;</span>
+<span class="nc" id="L220">			double alpha = up.getAlpha();</span>
+<span class="nc" id="L221">			int max = up.getNumberOfElements();</span>
+
+<span class="nc" id="L223">			return Harmonic(max, alpha-1) / Harmonic(max, alpha);</span>
+		} else {
+<span class="nc" id="L225">			throw new IncorrectDistributionParameterException(</span>
+				&quot;Error: Max must be a integer &gt; 0\n&quot; +
+				&quot;Error: Alpha must be (0, 100), to avoid the data oveflow\n&quot; +
+				&quot;Error: the Parameter must be the `ZipfPar`&quot;);
+		}
+	}
+
+	@Override
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L234" title="All 4 branches missed.">		if (p instanceof ZipfPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L235">			ZipfPar up = (ZipfPar) p;</span>
+<span class="nc" id="L236">			double alpha = up.getAlpha();</span>
+<span class="nc" id="L237">			int max = up.getNumberOfElements();</span>
+
+<span class="nc" id="L239">			double hs1 = Harmonic(max, alpha-1);</span>
+<span class="nc" id="L240">			double hs2 = Harmonic(max, alpha-2);</span>
+<span class="nc" id="L241">			double hmax = Harmonic(max, alpha);</span>
+<span class="nc" id="L242">			return hs2/hmax - (hs1 * hs1)/(hmax * hmax);</span>
+		} else {
+<span class="nc" id="L244">			throw new IncorrectDistributionParameterException(</span>
+				&quot;Error: Max must be a integer &gt; 0\n&quot; +
+				&quot;Error: Alpha must be (0, 100), to avoid the data oveflow\n&quot; +
+				&quot;Error: the Parameter must be the `ZipfPar`&quot;);
+		}
+	}
+
+
+	private static double Harmonic(int num, double alpha){
+<span class="nc" id="L253">		double total = 0.0;</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		for(int i=1; i&lt;=num; i++){</span>
+<span class="nc" id="L255">			total += 1 / Math.pow(i, alpha);</span>
+		}
+<span class="nc" id="L257">		return total;</span>
+	}
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

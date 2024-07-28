@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WorkloadResultLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.workloadAnalysis.utils</a> &gt; <span class="el_source">WorkloadResultLoader.java</span></div><h1>WorkloadResultLoader.java</h1><pre class="source lang-java linenums">package jmt.engine.jwat.workloadAnalysis.utils;
+
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import jmt.engine.jwat.JwatSession;
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.input.ResultLoader;
+import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
+import jmt.engine.jwat.workloadAnalysis.clustering.Clustering;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusterInfoFuzzy;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusteringInfosFuzzy;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.FuzzyKMean;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.ClusterInfoKMean;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.ClusteringInfosKMean;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMean;
+import jmt.gui.jwat.JWATConstants;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+<span class="nc" id="L26">public class WorkloadResultLoader implements ResultLoader {</span>
+	private WorkloadAnalysisSession waSession;
+
+	public int loadResult(ZipFile zf, NodeList resultNodeList, JwatSession session) throws IOException {
+<span class="nc" id="L30">		int i, nclustLoaded = 0, numSave;</span>
+		Node tmpNode;
+<span class="nc" id="L32">		Clustering tmpClust = null;</span>
+		String name, algo, numCluster, varSel;
+		int varSelLst[];
+<span class="nc" id="L35">		waSession = (WorkloadAnalysisSession) session;</span>
+
+<span class="nc" id="L37">		tmpNode = resultNodeList.item(0);</span>
+<span class="nc" id="L38">		numSave = Integer.parseInt(tmpNode.getAttributes().getNamedItem(&quot;num&quot;).getNodeValue());</span>
+<span class="nc" id="L39">		resultNodeList = tmpNode.getChildNodes();</span>
+
+<span class="nc bnc" id="L41" title="All 2 branches missed.">		for (i = 0; i &lt; resultNodeList.getLength(); i++) {</span>
+<span class="nc" id="L42">			tmpNode = resultNodeList.item(i);</span>
+			//System.out.println(&quot;Clustering:&quot;);
+<span class="nc bnc" id="L44" title="All 2 branches missed.">			if (tmpNode.getNodeType() == Node.ELEMENT_NODE) {</span>
+<span class="nc" id="L45">				algo = tmpNode.getAttributes().getNamedItem(&quot;algo&quot;).getNodeValue();</span>
+				//System.out.println(&quot;TIPO &quot; + algo);
+
+<span class="nc" id="L48">				name = tmpNode.getAttributes().getNamedItem(&quot;name&quot;).getNodeValue();</span>
+				//System.out.println(&quot;NOME &quot; + name);
+
+<span class="nc" id="L51">				numCluster = tmpNode.getAttributes().getNamedItem(&quot;numcluster&quot;).getNodeValue();</span>
+				//System.out.println(&quot;NUMCLUSTER &quot; + numCluster);
+
+<span class="nc" id="L54">				varSel = tmpNode.getAttributes().getNamedItem(&quot;varsel&quot;).getNodeValue();</span>
+				//System.out.println(&quot;VARSEL &quot; + varSel);
+
+<span class="nc" id="L57">				varSelLst = parseVarsSel(varSel);</span>
+<span class="nc bnc" id="L58" title="All 3 branches missed.">				switch (Integer.parseInt(algo)) {</span>
+					case JWATConstants.KMEANS:
+<span class="nc" id="L60">						tmpClust = loadKmeanResult(Integer.parseInt(numCluster), varSelLst, name + &quot;_&quot; + nclustLoaded + JwatSession.BINext, zf);</span>
+<span class="nc" id="L61">						break;</span>
+					case JWATConstants.FUZZYK:
+<span class="nc" id="L63">						tmpClust = loadFuzzyResult(Integer.parseInt(numCluster), varSelLst, name + &quot;_&quot; + nclustLoaded + JwatSession.BINext, zf);</span>
+<span class="nc" id="L64">						break;</span>
+
+					default:
+<span class="nc" id="L67">						System.out.println(&quot;ALGORITHM NOT DEFINED&quot;);</span>
+						break;
+				}
+
+<span class="nc" id="L71">				waSession.addClustering(tmpClust);</span>
+<span class="nc" id="L72">				nclustLoaded++;</span>
+			}
+
+		}
+<span class="nc" id="L76">		return nclustLoaded;</span>
+	}
+
+	private int[] parseVarsSel(String varSel) {
+		int varSelLst[];
+<span class="nc" id="L81">		StringTokenizer st = new StringTokenizer(varSel, &quot;,&quot;);</span>
+<span class="nc" id="L82">		varSelLst = new int[st.countTokens()];</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		for (int i = 0; i &lt; st.countTokens(); i++) {</span>
+<span class="nc" id="L85">			varSelLst[i] = Integer.parseInt(st.nextToken());</span>
+		}
+<span class="nc" id="L87">		return varSelLst;</span>
+	}
+
+	private KMean loadKmeanResult(int numCluster, int varSelLst[], String fileName, ZipFile zf) throws IOException {
+		ClusteringInfosKMean curInfo[];
+		int i, j, k;
+		int curNumCluster;
+<span class="nc" id="L94">		MatrixObservations m = waSession.getDataModel().getMatrix();</span>
+<span class="nc" id="L95">		int numvars = m.getNumVariables();</span>
+<span class="nc" id="L96">		int numoss = m.getNumOfObs();</span>
+<span class="nc" id="L97">		DataInputStream dis = new DataInputStream(zf.getInputStream(new ZipEntry(fileName)));</span>
+		short asseg[][];
+
+		//init result vector
+<span class="nc" id="L101">		curInfo = new ClusteringInfosKMean[numCluster];</span>
+<span class="nc" id="L102">		asseg = new short[numCluster][numoss];</span>
+
+		//System.out.println(&quot;Loading kMeans Results &quot;+fileName);
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (i = 0; i &lt; numCluster; i++) {</span>
+<span class="nc" id="L106">			curNumCluster = dis.readInt();</span>
+<span class="nc" id="L107">			curInfo[i] = new ClusteringInfosKMean(curNumCluster - 1, numvars);</span>
+<span class="nc" id="L108">			curInfo[i].omsr = dis.readDouble();</span>
+<span class="nc" id="L109">			curInfo[i].ratio = dis.readDouble();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			for (k = 0; k &lt; curNumCluster; k++) {</span>
+<span class="nc" id="L111">				curInfo[i].infoCluster[k] = new ClusterInfoKMean(numvars);</span>
+<span class="nc" id="L112">				curInfo[i].infoCluster[k].numObs = dis.readInt();</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">				for (j = 0; j &lt; numvars; j++) {</span>
+<span class="nc" id="L114">					curInfo[i].infoCluster[k].percVar[j] = dis.readDouble();</span>
+<span class="nc" id="L115">					curInfo[i].infoCluster[k].statClust[j].iNotZr = dis.readInt();</span>
+<span class="nc" id="L116">					curInfo[i].infoCluster[k].statClust[j].dMean = dis.readDouble();</span>
+<span class="nc" id="L117">					curInfo[i].infoCluster[k].statClust[j].dStdEr = dis.readDouble();</span>
+<span class="nc" id="L118">					curInfo[i].infoCluster[k].statClust[j].dStdDv = dis.readDouble();</span>
+<span class="nc" id="L119">					curInfo[i].infoCluster[k].statClust[j].dVarnc = dis.readDouble();</span>
+<span class="nc" id="L120">					curInfo[i].infoCluster[k].statClust[j].dKurto = dis.readDouble();</span>
+<span class="nc" id="L121">					curInfo[i].infoCluster[k].statClust[j].dSkewn = dis.readDouble();</span>
+<span class="nc" id="L122">					curInfo[i].infoCluster[k].statClust[j].dRange = dis.readDouble();</span>
+<span class="nc" id="L123">					curInfo[i].infoCluster[k].statClust[j].dMaxObs = dis.readDouble();</span>
+<span class="nc" id="L124">					curInfo[i].infoCluster[k].statClust[j].dMinObs = dis.readDouble();</span>
+				}
+			}
+<span class="nc bnc" id="L127" title="All 2 branches missed.">			for (k = 0; k &lt; numoss; k++) {</span>
+<span class="nc" id="L128">				asseg[i][k] = dis.readShort();</span>
+			}
+		}
+<span class="nc" id="L131">		return new KMean(curInfo, varSelLst, asseg);</span>
+	}
+
+	private FuzzyKMean loadFuzzyResult(int numCluster, int varSelLst[], String fileName, ZipFile zf) throws IOException {
+		ClusteringInfosFuzzy curInfo[];
+		int i, j, k;
+		int curNumCluster;
+<span class="nc" id="L138">		MatrixObservations m = waSession.getDataModel().getMatrix();</span>
+<span class="nc" id="L139">		int numvars = m.getNumVariables();</span>
+<span class="nc" id="L140">		int numoss = m.getNumOfObs();</span>
+<span class="nc" id="L141">		DataInputStream dis = new DataInputStream(zf.getInputStream(new ZipEntry(fileName)));</span>
+		double asseg[][];
+		double entropy[];
+		double error;
+		ClusterInfoFuzzy infoCluster[];
+<span class="nc" id="L146">		FuzzyKMean fkm = new FuzzyKMean(numCluster + 1, varSelLst);</span>
+
+		//init result vector
+<span class="nc" id="L149">		curInfo = new ClusteringInfosFuzzy[numCluster];</span>
+<span class="nc" id="L150">		entropy = new double[numCluster];</span>
+
+		//System.out.println(&quot;Loading Fuzzy kMeans Results &quot;+fileName);
+<span class="nc bnc" id="L153" title="All 2 branches missed.">		for (i = 0; i &lt; numCluster; i++) {</span>
+<span class="nc" id="L154">			curNumCluster = dis.readInt();</span>
+<span class="nc" id="L155">			entropy[i] = dis.readDouble();</span>
+<span class="nc" id="L156">			error = dis.readDouble();</span>
+<span class="nc" id="L157">			infoCluster = new ClusterInfoFuzzy[curNumCluster];</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">			if (error != -1) {</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">				for (k = 0; k &lt; curNumCluster; k++) {</span>
+<span class="nc" id="L160">					infoCluster[k] = new ClusterInfoFuzzy(numvars);</span>
+<span class="nc" id="L161">					infoCluster[k].numObs = dis.readInt();</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">					for (j = 0; j &lt; numvars; j++) {</span>
+<span class="nc" id="L163">						infoCluster[k].percVar[j] = dis.readDouble();</span>
+<span class="nc" id="L164">						infoCluster[k].statClust[j].iNotZr = dis.readInt();</span>
+<span class="nc" id="L165">						infoCluster[k].statClust[j].dMean = dis.readDouble();</span>
+<span class="nc" id="L166">						infoCluster[k].statClust[j].dStdEr = dis.readDouble();</span>
+<span class="nc" id="L167">						infoCluster[k].statClust[j].dStdDv = dis.readDouble();</span>
+<span class="nc" id="L168">						infoCluster[k].statClust[j].dVarnc = dis.readDouble();</span>
+<span class="nc" id="L169">						infoCluster[k].statClust[j].dKurto = dis.readDouble();</span>
+<span class="nc" id="L170">						infoCluster[k].statClust[j].dSkewn = dis.readDouble();</span>
+<span class="nc" id="L171">						infoCluster[k].statClust[j].dRange = dis.readDouble();</span>
+<span class="nc" id="L172">						infoCluster[k].statClust[j].dMaxObs = dis.readDouble();</span>
+<span class="nc" id="L173">						infoCluster[k].statClust[j].dMinObs = dis.readDouble();</span>
+					}
+				}
+			}
+<span class="nc" id="L177">			asseg = new double[curNumCluster][numoss];</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			for (k = 0; k &lt; curNumCluster; k++) {</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">				for (j = 0; j &lt; numoss; j++) {</span>
+<span class="nc" id="L180">					asseg[k][j] = dis.readDouble();</span>
+				}
+			}
+
+<span class="nc" id="L184">			fkm.setAssign(i, asseg);</span>
+<span class="nc" id="L185">			curInfo[i] = (ClusteringInfosFuzzy) fkm.getClusteringInfos(i);</span>
+<span class="nc" id="L186">			curInfo[i].infoCluster = infoCluster;</span>
+<span class="nc" id="L187">			curInfo[i].setError(m, error);</span>
+
+		}
+
+<span class="nc" id="L191">		fkm.setEntropy(entropy);</span>
+<span class="nc" id="L192">		return fkm;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

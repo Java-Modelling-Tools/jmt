@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverMultiClosedRGF.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.multiSolverAlgorithms</a> &gt; <span class="el_source">SolverMultiClosedRGF.java</span></div><h1>SolverMultiClosedRGF.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.engine.random.engine.RandomEngine;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RGFSolver;
+
+/**
+ * Solves a multiclass closed model, using RGF algorithm.
+ */
+public class SolverMultiClosedRGF extends SolverMulti {
+
+	//Array containing population for each class
+	protected int[] population;
+<span class="nc" id="L21">	protected Integer scale = 1000000;</span>
+
+	/**
+	 * Contains the queueing network model
+	 */
+	protected QNModel qnm;
+	/**
+	 * Number of threads that the MoMSolver should use
+	 */
+	protected int nThreads;
+
+<span class="nc" id="L32">	private RandomEngine engine = RandomEngine.makeDefault();</span>
+
+	/** Creates new SolverMultiClosedRGF
+	 *  @param  stations    number of service centers
+	 *  @param  classes     number of classes
+	 *  @param  population  array of class populations
+	 */
+	public SolverMultiClosedRGF(int classes, int stations, int[] population) {
+<span class="nc" id="L40">		super(classes, stations);</span>
+<span class="nc" id="L41">		this.classes = classes;</span>
+<span class="nc" id="L42">		this.stations = stations;</span>
+<span class="nc" id="L43">		this.population = population;</span>
+<span class="nc" id="L44">	}</span>
+
+	/** Initializes the solver with the system parameters.
+	 * It must be called before trying to solve the model.
+	 *  @param  t   array of the types (LD or LI) of service centers
+	 *  @param  s   matrix of service times of the service centers
+	 *  @param  v   array of visits to the service centers
+	 *  @param  nThr The number of threads the solver should use
+	 *  @return True if the operation is completed with success
+	 */
+	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
+<span class="nc bnc" id="L55" title="All 6 branches missed.">		if ((t.length &gt; stations) || (s.length &gt; stations) || (v.length &gt; stations)) {</span>
+			// wrong input.
+<span class="nc" id="L57">			return false;</span>
+		}
+<span class="nc" id="L59">		nThreads = nThr;</span>
+<span class="nc" id="L60">		visits = new double[stations][classes];</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L62">			System.arraycopy(v[i], 0, visits[i], 0, classes);</span>
+		}
+
+<span class="nc" id="L65">		servTime = new double[stations][classes][1];</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			for (int r = 0; r &lt; classes; r++) {</span>
+<span class="nc" id="L68">				servTime[i][r][0] = s[i][r][0] * scale;</span>
+			}
+		}
+
+		try {
+<span class="nc" id="L73">			int M = 0, R = this.classes;</span>
+<span class="nc" id="L74">			double[] Z = new double[classes];</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">			for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L76">				Z[r] = 0;</span>
+			}
+
+			// Discover delay times (think times)
+<span class="nc bnc" id="L80" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">				if (t[i] == LI) {</span>
+<span class="nc" id="L82">					M++;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">				} else if (t[i] == LD) {</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">					for (int r = 0; r &lt; classes; r++) {</span>
+<span class="nc" id="L85">						Z[r] += (int) (servTime[i][r][0] * visits[i][r]);</span>
+					}
+				} else {
+<span class="nc" id="L88">					return false;</span>
+				}
+			}
+			// Now Z contains the delay times
+
+			// Discover service demands
+<span class="nc" id="L94">			double[][] D = new double[M][R];</span>
+<span class="nc" id="L95">			int mIndex = 0; // current queue</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">				if (t[i] == LI) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">					for (int r = 0; r &lt; classes; r++) {</span>
+<span class="nc" id="L99">						D[mIndex][r] = (int) (servTime[i][r][0] * visits[i][r]);</span>
+					}
+<span class="nc" id="L101">					mIndex++;</span>
+				}
+			}
+			// Now D contains service demands
+
+			// Create queue multiplicities array
+			// All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
+
+<span class="nc" id="L109">			Integer[] multiplicities = new Integer[M];</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			for (int m = 0; m &lt; M; m++) {</span>
+<span class="nc" id="L111">				multiplicities[m] = 1;</span>
+			}
+
+			// Transform population from int[] to Integer[]
+<span class="nc" id="L115">			Integer[] N = new Integer[R];</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L117">				N[r] = population[r];</span>
+			}
+
+			// Instantiate queueing network model
+<span class="nc" id="L121">			qnm = new QNModel(R, M, t, N, Z, multiplicities, D);</span>
+<span class="nc" id="L122">		} catch (Exception ex) {</span>
+<span class="nc" id="L123">			ex.printStackTrace();</span>
+			// Return false if initialisation fails for any reason.
+<span class="nc" id="L125">			return false;</span>
+<span class="nc" id="L126">		}</span>
+<span class="nc" id="L127">		return true;</span>
+	}
+
+	/**
+	 * Solves the system through the RGF algorithm.
+	 * input(...) must have been called first.
+	 *
+	 * @throws InternalErrorException
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
+	 */
+	@Override
+	public void solve() {
+<span class="nc" id="L141">		QNSolver c = null;</span>
+		try {
+<span class="nc" id="L143">			c = new RGFSolver(qnm);</span>
+<span class="nc" id="L144">			c.computeNormalisingConstant();</span>
+<span class="nc" id="L145">		} catch (Exception e) {</span>
+<span class="nc" id="L146">			e.printStackTrace();</span>
+<span class="nc" id="L147">			double D[][]=new double[qnm.M][qnm.R];</span>
+<span class="nc" id="L148">			int T[]=new int[qnm.M];</span>
+<span class="nc" id="L149">			double Z[]=new double[qnm.R];</span>
+<span class="nc" id="L150">			Integer mi[]=new Integer[qnm.M];</span>
+<span class="nc" id="L151">			Integer N[]=new Integer[qnm.R];</span>
+<span class="nc" id="L152">			Integer pert = 1;</span>
+<span class="nc" id="L153">			Integer newscale = scale  * pert;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			for (int r=0; r&lt;qnm.R; r++) {</span>
+<span class="nc" id="L155">				Z[r] = qnm.getDelay(r) * pert;</span>
+<span class="nc" id="L156">				N[r] = qnm.getPopulationVector().get(r);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">				for (int i=0; i&lt;qnm.M; i++) {</span>
+<span class="nc" id="L158">					T[i] = qnm.getQueueType(i).ordinal();</span>
+<span class="nc" id="L159">					mi[i] = qnm.getMultiplicitiesVector().get(i);</span>
+					// Replaced Math.random
+<span class="nc" id="L161">					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude</span>
+				}
+			}
+<span class="nc" id="L164">			scale = newscale;</span>
+
+<span class="nc" id="L166">			QNModel qnm2 = null;</span>
+			try {
+<span class="nc" id="L168">				qnm2 = new QNModel(qnm.R, qnm.M, T, N, Z, mi, D);</span>
+<span class="nc" id="L169">			} catch (Exception e1) {</span>
+<span class="nc" id="L170">				e1.printStackTrace();</span>
+<span class="nc" id="L171">			}</span>
+<span class="nc" id="L172">			qnm = qnm2;</span>
+			try {
+<span class="nc" id="L174">				c = new RGFSolver(qnm);</span>
+<span class="nc" id="L175">				c.computeNormalisingConstant();</span>
+<span class="nc" id="L176">			} catch (Exception e2) {</span>
+<span class="nc" id="L177">				e2.printStackTrace();</span>
+<span class="nc" id="L178">			}</span>
+<span class="nc" id="L179">		}</span>
+
+		try {
+<span class="nc" id="L182">			c.computePerformanceMeasures();</span>
+<span class="nc" id="L183">		} catch (InternalErrorException e) {</span>
+<span class="nc" id="L184">			e.printStackTrace();</span>
+<span class="nc" id="L185">		}</span>
+
+<span class="nc" id="L187">		clsThroughput = qnm.getMeanThroughputsAsDoubles();</span>
+<span class="nc" id="L188">		queueLen = qnm.getMeanQueueLengthsAsDoubles();</span>
+
+<span class="nc" id="L190">		throughput = new double[stations][classes];</span>
+<span class="nc" id="L191">		utilization = new double[stations][classes];</span>
+<span class="nc" id="L192">		scThroughput = new double[stations];</span>
+<span class="nc" id="L193">		scUtilization = new double[stations];</span>
+<span class="nc" id="L194">		scResidTime = new double[stations];</span>
+<span class="nc" id="L195">		scQueueLen = new double[stations];</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">		for (int m = 0; m &lt; qnm.M; m++) {</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">			for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc" id="L198">				throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;</span>
+<span class="nc" id="L199">				utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc</span>
+<span class="nc" id="L200">				residenceTime[m][r] = queueLen[m][r] / clsThroughput[r] / scale;</span>
+<span class="nc" id="L201">				scThroughput[m] += throughput[m][r];</span>
+<span class="nc" id="L202">				scUtilization[m] += utilization[m][r];</span>
+<span class="nc" id="L203">				scResidTime[m] += residenceTime[m][r];</span>
+<span class="nc" id="L204">				scQueueLen[m] += queueLen[m][r];</span>
+			}
+		}
+
+		//NEW
+		//@author Stefano Omini
+		//compute system parameters
+<span class="nc" id="L211">		sysResponseTime = 0;</span>
+<span class="nc" id="L212">		sysNumJobs = 0;</span>
+
+		//for (c = 0; c &lt; classes; c++) {
+		//	for (m = 0; m &lt; stations; m++) {
+		//		clsRespTime[c] += residenceTime[m][c];
+		//		sysNumJobs += queueLen[m][c];
+		//	}
+		//	sysResponseTime += clsRespTime[c];
+		//}
+
+<span class="nc" id="L222">		sysThroughput = sysNumJobs / sysResponseTime;</span>
+		//end NEW
+<span class="nc" id="L224">	}</span>
+
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		// only closed class - no saturation problem
+<span class="nc" id="L229">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

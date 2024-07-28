@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PollingServerPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">PollingServerPanel.java</span></div><h1>PollingServerPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.editors.DistributionsEditor;
+import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.common.editors.LDStrategyEditor;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Menu for editing polling server properties
+ * @author Ahmed Salem
+ */
+public class PollingServerPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	protected StationDefinition data;
+	protected Object stationKey;
+	protected ClassDefinition classData;
+
+	protected ImagedComboBoxCellEditorFactory classEditor;
+	protected SwitchoverTable switchoverTable;
+
+	protected JComboBox pollingTypeCombo;
+	protected JSpinner pollingKValue;
+
+<span class="nc" id="L68">	protected static final String[] pollingTypes = {</span>
+			STATION_QUEUE_STRATEGY_POLLING_LIMITED,
+			STATION_QUEUE_STRATEGY_POLLING_GATED,
+			STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE
+	};
+
+<span class="nc" id="L74">	protected AbstractAction editDistribution = new AbstractAction(&quot;Edit&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L79">			putValue(Action.SHORT_DESCRIPTION, &quot;Edits Service Time Distribution&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L83">			int index = switchoverTable.getSelectedRow();</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">			if (index &gt;= 0 &amp;&amp; index &lt; switchoverTable.getRowCount()) {</span>
+<span class="nc" id="L85">				Object key = classData.getClassKeys().elementAt(index);</span>
+<span class="nc" id="L86">				Object service = data.getPollingSwitchoverDistribution(stationKey, key);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">				if (service instanceof Distribution) {</span>
+<span class="nc" id="L88">					DistributionsEditor editor = DistributionsEditor.getInstance(PollingServerPanel.this.getParent(), (Distribution) service);</span>
+<span class="nc" id="L89">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(key) + &quot; Switchover Time Distribution...&quot;);</span>
+<span class="nc" id="L90">					editor.setVisible(true);</span>
+<span class="nc" id="L91">					data.setPollingSwitchoverDistribution(stationKey, key, editor.getResult());</span>
+<span class="nc" id="L92">					switchoverTable.repaint();</span>
+<span class="nc" id="L93">				} else {</span>
+<span class="nc" id="L94">					LDStrategyEditor editor = LDStrategyEditor.getInstance(PollingServerPanel.this.getParent(), (LDStrategy) service);</span>
+<span class="nc" id="L95">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(key) + &quot; Load Dependent Switchover Strategy...&quot;);</span>
+<span class="nc" id="L96">					editor.setVisible(true);</span>
+<span class="nc" id="L97">					switchoverTable.repaint();</span>
+				}
+			}
+<span class="nc" id="L100">		}</span>
+
+	};
+
+<span class="nc" id="L104">	public PollingServerPanel(Dialog owner, StationDefinition data, Object stationKey, ClassDefinition cd) {</span>
+<span class="nc" id="L105">		setData(data, stationKey, cd);</span>
+<span class="nc" id="L106">	}</span>
+
+	private void setData(StationDefinition sd, Object sk, ClassDefinition cd) {
+<span class="nc" id="L109">		data = sd;</span>
+<span class="nc" id="L110">		stationKey = sk;</span>
+<span class="nc" id="L111">		classData = cd;</span>
+<span class="nc" id="L112">		classEditor = new ImagedComboBoxCellEditorFactory(cd);</span>
+<span class="nc" id="L113">		classEditor.setData(cd);</span>
+
+<span class="nc" id="L115">		switchoverTable = new SwitchoverTable();</span>
+
+<span class="nc" id="L117">		pollingTypeCombo = new JComboBox();</span>
+<span class="nc" id="L118">		pollingTypeCombo.setModel(new DefaultComboBoxModel(pollingTypes));</span>
+
+<span class="nc" id="L120">		pollingKValue = new JSpinner();</span>
+<span class="nc" id="L121">		pollingKValue.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L122">		updateServerPreferences();</span>
+<span class="nc" id="L123">		addDataManagers();</span>
+<span class="nc" id="L124">		initComponents();</span>
+<span class="nc" id="L125">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L128">		this.setLayout(new BorderLayout(5, 5));</span>
+<span class="nc" id="L129">		this.setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+<span class="nc" id="L130">		JPanel topPanel = new JPanel();</span>
+<span class="nc" id="L131">		topPanel.setLayout(new BorderLayout(3, 3));</span>
+<span class="nc" id="L132">		topPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Polling Server Preferences&quot;));</span>
+<span class="nc" id="L133">		JPanel pollingSettings = new JPanel();</span>
+<span class="nc" id="L134">		pollingSettings.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));</span>
+<span class="nc" id="L135">		pollingSettings.add(new JLabel(&quot;Polling Type:&quot;));</span>
+<span class="nc" id="L136">		pollingSettings.add(pollingTypeCombo);</span>
+<span class="nc" id="L137">		pollingSettings.add(Box.createRigidArea(new Dimension((int)(5 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling))));</span>
+<span class="nc" id="L138">		pollingSettings.add(new JLabel(&quot;Limit Value K&quot;));</span>
+<span class="nc" id="L139">		pollingSettings.add(pollingKValue);</span>
+<span class="nc" id="L140">		topPanel.add(pollingSettings, BorderLayout.NORTH);</span>
+<span class="nc" id="L141">		this.add(topPanel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L143">		WarningScrollTable ServiceSectionTable = new WarningScrollTable(switchoverTable, WARNING_CLASS);</span>
+<span class="nc" id="L144">		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), &quot;Switchover Time Distributions&quot;));</span>
+<span class="nc" id="L145">		this.add(ServiceSectionTable, BorderLayout.CENTER);</span>
+<span class="nc" id="L146">	}</span>
+
+	private void updateServerPreferences() {
+<span class="nc" id="L149">		pollingKValue.setValue(data.getStationPollingServerKValue(stationKey));</span>
+<span class="nc" id="L150">		String pollingType = data.getStationPollingServerType(stationKey);</span>
+<span class="nc" id="L151">		int index = 0;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		for (int i = 0; i &lt; pollingTypes.length; i++) {</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			if (pollingTypes[i].equals(pollingType)) {</span>
+<span class="nc" id="L154">				index = i;</span>
+<span class="nc" id="L155">				break;</span>
+
+			}
+		}
+<span class="nc" id="L159">		pollingTypeCombo.setSelectedIndex(index);</span>
+<span class="nc" id="L160">		pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));</span>
+<span class="nc" id="L161">	}</span>
+
+	private void addDataManagers() {
+<span class="nc" id="L164">		pollingTypeCombo.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L167">				String pollingType = (String) pollingTypeCombo.getSelectedItem();</span>
+<span class="nc" id="L168">				data.setStationPollingServerType(stationKey, pollingType);</span>
+<span class="nc" id="L169">				pollingKValue.setEnabled(pollingType.equals(STATION_QUEUE_STRATEGY_POLLING_LIMITED));</span>
+<span class="nc" id="L170">			}</span>
+		});
+
+<span class="nc" id="L173">		pollingKValue.addChangeListener(new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">				if (pollingKValue.getValue() instanceof Integer) {</span>
+<span class="nc" id="L177">					Integer kValue = (Integer) pollingKValue.getValue();</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">					if (kValue.intValue() &lt; 1) {</span>
+<span class="nc" id="L179">						kValue = new Integer(1);</span>
+<span class="nc" id="L180">						pollingKValue.setValue(kValue);</span>
+					}
+
+<span class="nc" id="L183">					data.setStationPollingServerKValue(stationKey, kValue);</span>
+				}
+<span class="nc" id="L185">			}</span>
+		});
+
+<span class="nc" id="L188">	}</span>
+
+	protected class SwitchoverTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L193">		protected Object[] serviceType = new Object[] { SWITCHOVER_ZERO, SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT};</span>
+<span class="nc" id="L194">		JButton editButton = new JButton() {</span>
+			private static final long serialVersionUID = 1L;
+			{
+<span class="nc" id="L197">				setText(&quot;Edit&quot;);</span>
+			}
+		};
+
+<span class="nc" id="L201">		int[] columnSizes = new int[] { 90, 90, 150, 30 };</span>
+
+<span class="nc" id="L203">		public SwitchoverTable() {</span>
+<span class="nc" id="L204">			setModel(new SwitchoverTableModel());</span>
+<span class="nc" id="L205">			sizeColumns();</span>
+<span class="nc" id="L206">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L207">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L208">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L209">		}</span>
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">			if (column == 0) {</span>
+<span class="nc" id="L214">				return classEditor.getRenderer();</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">			} else if (column == 1) {</span>
+<span class="nc" id="L216">				return ComboBoxCellEditor.getRendererInstance();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			} else if (column == 3) {</span>
+<span class="nc" id="L218">				return new PollingServerPanel.DisabledButtonCellRenderer(editButton);</span>
+			} else {
+<span class="nc" id="L220">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L226" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L227">				return ComboBoxCellEditor.getEditorInstance(serviceType);</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">			} else if (column == 3) {</span>
+<span class="nc" id="L229">				return new ButtonCellEditor(new JButton(editDistribution));</span>
+			} else {
+<span class="nc" id="L231">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L236" title="All 4 branches missed.">			for (int i = 0; i &lt; columnSizes.length &amp;&amp; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L237">				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);</span>
+			}
+<span class="nc" id="L239">		}</span>
+	}
+
+<span class="nc" id="L242">	protected class SwitchoverTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L245">		private String[] columnNames = new String[] { &quot;Class&quot;, &quot;Strategy&quot;, &quot;Switchover Time Distribution&quot;, &quot;&quot; };</span>
+<span class="nc" id="L246">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };</span>
+
+		public int getRowCount() {
+<span class="nc" id="L249">			return classData.getClassKeys().size();</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L253">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L258">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L263">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L268">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L270">				return false;</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">			} else if (columnIndex == 2) {</span>
+<span class="nc" id="L272">				return false;</span>
+<span class="nc bnc" id="L273" title="All 4 branches missed.">			} else if (columnIndex == 3 &amp;&amp; data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {</span>
+<span class="nc" id="L274">				return false;</span>
+			} else {
+<span class="nc" id="L276">				return true;</span>
+			}
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L282">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L283" title="All 4 branches missed.">			switch (columnIndex) {</span>
+			case (0):
+<span class="nc" id="L285">				return classKey;</span>
+			case (1):
+				// Checks if current service section is load dependent or independent
+<span class="nc bnc" id="L288" title="All 2 branches missed.">				if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy) {</span>
+<span class="nc" id="L289">					return SERVICE_LOAD_DEPENDENT;</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">				} else if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy) {</span>
+<span class="nc" id="L291">					return SWITCHOVER_ZERO;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">				} else if (data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof DisabledStrategy) {</span>
+<span class="nc" id="L293">					return SERVICE_DISABLED;</span>
+				} else {
+<span class="nc" id="L295">					return SERVICE_LOAD_INDEPENDENT;</span>
+				}
+			case (2):
+<span class="nc" id="L298">				return data.getPollingSwitchoverDistribution(stationKey, classKey);</span>
+			}
+<span class="nc" id="L300">			return null;</span>
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L305">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			switch (columnIndex) {</span>
+			// Load dependency
+			case (1):
+<span class="nc bnc" id="L309" title="All 3 branches missed.">				switch (((String) aValue)) {</span>
+				case SERVICE_LOAD_DEPENDENT:
+					// Puts a Load Dependent Service Strategy only if previously it was different
+<span class="nc bnc" id="L312" title="All 2 branches missed.">					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof LDStrategy)) {</span>
+<span class="nc" id="L313">						data.setPollingSwitchoverDistribution(stationKey, classKey, new LDStrategy());</span>
+					}
+					break;
+				case SWITCHOVER_ZERO:
+					// Puts a Zero Service Time Strategy only if previously it was different
+<span class="nc bnc" id="L318" title="All 2 branches missed.">					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof ZeroStrategy)) {</span>
+<span class="nc" id="L319">						data.setPollingSwitchoverDistribution(stationKey, classKey, new ZeroStrategy());</span>
+					}
+					break;
+				default:
+					// Puts the default service strategy only if previously it was different
+<span class="nc bnc" id="L324" title="All 2 branches missed.">					if (!(data.getPollingSwitchoverDistribution(stationKey, classKey) instanceof Distribution)) {</span>
+<span class="nc" id="L325">						Object distribution = Defaults.getAsNewInstance(&quot;stationServiceStrategy&quot;);</span>
+<span class="nc" id="L326">						data.setPollingSwitchoverDistribution(stationKey, classKey, distribution);</span>
+					}
+					break;
+				}
+<span class="nc" id="L330">			repaint();</span>
+			}
+<span class="nc" id="L332">		}</span>
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+<span class="nc" id="L341">		public DisabledButtonCellRenderer(JButton jbutt) {</span>
+<span class="nc" id="L342">			super(jbutt);</span>
+<span class="nc" id="L343">			button = jbutt;</span>
+<span class="nc" id="L344">		}</span>
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L348" title="All 2 branches missed.">			if (table.isCellEditable(row, column)) {</span>
+<span class="nc" id="L349">				button.setEnabled(true);</span>
+			} else {
+<span class="nc" id="L351">				button.setEnabled(false);</span>
+			}
+<span class="nc" id="L353">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+	@Override
+	public String getName() {
+<span class="nc" id="L360">		return &quot;Polling Server Properties Editor&quot;;</span>
+	}
+
+	@Override
+	public void repaint() {
+<span class="nc bnc" id="L365" title="All 2 branches missed.">		if (switchoverTable != null) {</span>
+<span class="nc" id="L366">			switchoverTable.tableChanged(new TableModelEvent(switchoverTable.getModel()));</span>
+		}
+<span class="nc" id="L368">		super.repaint();</span>
+<span class="nc" id="L369">	}</span>
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L373">		classEditor.clearCache();</span>
+<span class="nc" id="L374">	}</span>
+
+	@Override
+	public void lostFocus() {
+		// Aborts editing of table
+<span class="nc" id="L379">		TableCellEditor editor = switchoverTable.getCellEditor();</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L381">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L383">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

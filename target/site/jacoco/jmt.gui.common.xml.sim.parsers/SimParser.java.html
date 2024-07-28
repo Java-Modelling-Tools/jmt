@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimParser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.parsers</a> &gt; <span class="el_source">SimParser.java</span></div><h1>SimParser.java</h1><pre class="source lang-java linenums">/**
+ * Parser for the {@link jmt.gui.common.xml.sim.dto.SimDescriptor} DTO. Converts a DOM
+ * {@link org.w3c.dom.Element} representing the simulation root into a fully populated DTO.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.parsers;
+
+import jmt.gui.common.xml.XMLConstantNames;
+import jmt.gui.common.xml.XmlEntityParser;
+import jmt.gui.common.xml.sim.dto.*;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+<span class="fc" id="L18">public class SimParser implements XmlEntityParser&lt;SimDescriptor&gt; {</span>
+
+    @Override
+    public SimDescriptor parse(Element element) {
+<span class="fc" id="L22">        SimDescriptor descriptor = new SimDescriptor();</span>
+<span class="fc" id="L23">        parseGlobalAttributes(element, descriptor);</span>
+
+<span class="fc" id="L25">        NodeParser nodeParser = new NodeParser();</span>
+<span class="fc" id="L26">        NodeList children = element.getChildNodes();</span>
+<span class="fc bfc" id="L27" title="All 2 branches covered.">        for (int i = 0; i &lt; children.getLength(); i++) {</span>
+<span class="fc" id="L28">            Node node = children.item(i);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">            if (node.getNodeType() != Node.ELEMENT_NODE) continue;</span>
+
+<span class="fc" id="L31">            Element child = (Element) node;</span>
+<span class="fc" id="L32">            String tagName = child.getTagName();</span>
+<span class="fc" id="L33">            dispatchTopLevelElement(descriptor, nodeParser, child, tagName);</span>
+        }
+<span class="fc" id="L35">        return descriptor;</span>
+    }
+
+    private void parseGlobalAttributes(Element element, SimDescriptor descriptor) {
+<span class="fc" id="L39">        NamedNodeMap attributes = element.getAttributes();</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        for (int i = 0; i &lt; attributes.getLength(); i++) {</span>
+<span class="fc" id="L41">            Node attribute = attributes.item(i);</span>
+<span class="fc" id="L42">            descriptor.addGlobalAttribute(attribute.getNodeName(), attribute.getNodeValue());</span>
+        }
+<span class="fc" id="L44">    }</span>
+
+    private void dispatchTopLevelElement(SimDescriptor descriptor, NodeParser nodeParser, Element child, String tagName) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        if (XMLConstantNames.XML_NODE.equals(tagName)) {</span>
+<span class="fc" id="L48">            descriptor.addNode(nodeParser.parse(child));</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CLASS.equals(tagName)) {</span>
+<span class="fc" id="L50">            descriptor.addUserClass(parseUserClass(child));</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CONNECTION.equals(tagName)) {</span>
+<span class="fc" id="L52">            descriptor.addConnection(parseConnection(child));</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_MEASURE.equals(tagName)) {</span>
+<span class="fc" id="L54">            descriptor.addMeasure(parseMeasure(child));</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_REGION.equals(tagName)) {</span>
+<span class="fc" id="L56">            descriptor.addBlockingRegion(parseBlockingRegion(child));</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        } else if (XMLConstantNames.XML_E_PRELOAD.equals(tagName)) {</span>
+<span class="fc" id="L58">            parsePreload(descriptor, child);</span>
+        }
+<span class="fc" id="L60">    }</span>
+
+    private UserClassDescriptor parseUserClass(Element child) {
+<span class="fc" id="L63">        UserClassDescriptor uc = new UserClassDescriptor();</span>
+<span class="fc" id="L64">        uc.setName(readAttribute(child, XMLConstantNames.XML_A_CLASS_NAME));</span>
+<span class="fc" id="L65">        uc.setType(readAttribute(child, XMLConstantNames.XML_A_CLASS_TYPE));</span>
+<span class="fc" id="L66">        uc.setPriority(readAttribute(child, XMLConstantNames.XML_A_CLASS_PRIORITY));</span>
+<span class="fc" id="L67">        uc.setReferenceSource(firstNonEmpty(readAttribute(child, XMLConstantNames.XML_A_CLASS_REFSOURCE), readAttribute(child, XMLConstantNames.XML_A_CLASS_REFSOURCE)));</span>
+<span class="fc" id="L68">        uc.setSoftDeadline(readAttribute(child, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE));</span>
+<span class="fc" id="L69">        uc.setCustomers(readAttribute(child, XMLConstantNames.XML_A_CLASS_CUSTOMERS));</span>
+<span class="fc" id="L70">        uc.setCacheMissClass(readAttribute(child, XMLConstantNames.XML_A_CLASS_CACHEMISSCLASS));</span>
+<span class="fc" id="L71">        uc.setCacheHitClass(readAttribute(child, XMLConstantNames.XML_A_CLASS_CACHEHITCLASS));</span>
+<span class="fc" id="L72">        return uc;</span>
+    }
+
+    private ConnectionDescriptor parseConnection(Element child) {
+<span class="fc" id="L76">        ConnectionDescriptor cd = new ConnectionDescriptor();</span>
+<span class="fc" id="L77">        cd.setSource(readAttribute(child, XMLConstantNames.XML_A_CONNECTION_SOURCE));</span>
+<span class="fc" id="L78">        cd.setTarget(readAttribute(child, XMLConstantNames.XML_A_CONNECTION_TARGET));</span>
+<span class="fc" id="L79">        return cd;</span>
+    }
+
+    private MeasureDescriptor parseMeasure(Element child) {
+<span class="fc" id="L83">        MeasureDescriptor md = new MeasureDescriptor();</span>
+<span class="fc" id="L84">        md.setName(readAttribute(child, XMLConstantNames.XML_A_MEASURE_NAME));</span>
+<span class="fc" id="L85">        md.setNodeType(readAttribute(child, XMLConstantNames.XML_A_MEASURE_NODETYPE));</span>
+<span class="fc" id="L86">        md.setReferenceNode(firstNonEmpty(readAttribute(child, XMLConstantNames.XML_A_MEASURE_STATION), readAttribute(child, XMLConstantNames.XML_A_MEASURE_STATION)));</span>
+<span class="fc" id="L87">        md.setReferenceUserClass(firstNonEmpty(readAttribute(child, XMLConstantNames.XML_A_MEASURE_CLASS), readAttribute(child, XMLConstantNames.XML_E_PARAMETER_REFCLASS)));</span>
+<span class="fc" id="L88">        md.setType(readAttribute(child, XMLConstantNames.XML_A_MEASURE_TYPE));</span>
+<span class="fc" id="L89">        md.setAlpha(readAttribute(child, XMLConstantNames.XML_A_MEASURE_ALPHA));</span>
+<span class="fc" id="L90">        md.setPrecision(readAttribute(child, XMLConstantNames.XML_A_MEASURE_PRECISION));</span>
+<span class="fc" id="L91">        md.setVerbose(readAttribute(child, XMLConstantNames.XML_A_MEASURE_VERBOSE));</span>
+<span class="fc" id="L92">        md.setServerType(readAttribute(child, XMLConstantNames.XML_A_MEASURE_SERVERTYPE));</span>
+<span class="fc" id="L93">        return md;</span>
+    }
+
+    private BlockingRegionDescriptor parseBlockingRegion(Element child) {
+<span class="fc" id="L97">        BlockingRegionDescriptor br = new BlockingRegionDescriptor();</span>
+<span class="fc" id="L98">        br.setName(readAttribute(child, XMLConstantNames.XML_A_REGION_NAME));</span>
+<span class="fc" id="L99">        br.setType(readAttribute(child, XMLConstantNames.XML_A_REGION_TYPE));</span>
+
+<span class="fc" id="L101">        NodeList regionChildren = child.getChildNodes();</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        for (int j = 0; j &lt; regionChildren.getLength(); j++) {</span>
+<span class="fc" id="L103">            Node regionNode = regionChildren.item(j);</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            if (regionNode.getNodeType() != Node.ELEMENT_NODE) continue;</span>
+
+<span class="fc" id="L106">            Element regionChild = (Element) regionNode;</span>
+<span class="fc" id="L107">            dispatchRegionElement(br, child, regionChild, regionChild.getTagName());</span>
+        }
+<span class="fc" id="L109">        return br;</span>
+    }
+
+    private void dispatchRegionElement(BlockingRegionDescriptor br, Element parent, Element regionChild, String regionTag) {
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if (XMLConstantNames.XML_E_REGIONNODE.equals(regionTag)) {</span>
+<span class="fc" id="L114">            br.addRegionNode(firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_REGIONNODE_NAME), readAttribute(regionChild, XMLConstantNames.XML_A_STATION_NAME)));</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_GLOBALCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L116">            br.addGlobalConstraint(XMLConstantNames.XML_A_GLOBALCONSTRAINT_MAXJOBS, readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALCONSTRAINT_MAXJOBS));</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_GLOBALMEMORYCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L118">            br.addGlobalConstraint(XMLConstantNames.XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY, readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY));</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CLASSCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L120">            parseClassConstraint(br, parent, regionChild);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CLASSMEMORYCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L122">            parseClassMemoryConstraint(br, parent, regionChild);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_DROPRULES.equals(regionTag)) {</span>
+<span class="fc" id="L124">            parseDropRule(br, parent, regionChild);</span>
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CLASSWEIGHT.equals(regionTag)) {</span>
+<span class="fc" id="L126">            parseClassWeight(br, parent, regionChild);</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_CLASSSIZE.equals(regionTag)) {</span>
+<span class="fc" id="L128">            parseClassSize(br, parent, regionChild);</span>
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        } else if (XMLConstantNames.XML_E_CLASSDUEDATE.equals(regionTag) || XMLConstantNames.XML_A_CLASS_DUE_DATE.equals(regionTag)) {</span>
+<span class="fc" id="L130">            parseClassDueDate(br, parent, regionChild);</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_GROUPCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L132">            parseGroupConstraint(br, regionChild);</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        } else if (XMLConstantNames.XML_E_GROUPMEMORYCONSTRAINT.equals(regionTag)) {</span>
+<span class="fc" id="L134">            parseGroupMemoryConstraint(br, regionChild);</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        } else if (XMLConstantNames.XML_E_GROUPCLASSLIST.equals(regionTag)) {</span>
+<span class="fc" id="L136">            parseGroupClassList(br, parent, regionChild);</span>
+        }
+<span class="fc" id="L138">    }</span>
+
+    private void parseClassConstraint(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L141">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSCONSTRAINT_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L142">        br.addClassConstraint(className, XMLConstantNames.XML_A_CLASSCONSTRAINT_MAXJOBS, firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSCONSTRAINT_MAXJOBS), readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALCONSTRAINT_MAXJOBS)));</span>
+<span class="fc" id="L143">    }</span>
+
+    private void parseClassMemoryConstraint(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L146">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L147">        br.addClassConstraint(className, XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY, firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY), readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY)));</span>
+<span class="fc" id="L148">    }</span>
+
+    private void parseDropRule(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L151">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_DROPRULE_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L152">        br.addDropRule(className, firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_DROPRULE_DROP), readAttribute(regionChild, XMLConstantNames.XML_DROP)));</span>
+<span class="fc" id="L153">    }</span>
+
+    private void parseClassWeight(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L156">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSWEIGHT_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L157">        br.addClassWeight(className, readAttribute(regionChild, XMLConstantNames.XML_A_CLASSWEIGHT_WEIGHT));</span>
+<span class="fc" id="L158">    }</span>
+
+    private void parseClassSize(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L161">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSSIZE_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L162">        br.addClassSize(className, readAttribute(regionChild, XMLConstantNames.XML_A_CLASSSIZE_SIZE));</span>
+<span class="fc" id="L163">    }</span>
+
+    private void parseClassDueDate(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L166">        String className = firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSDUEDATE_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS));</span>
+<span class="fc" id="L167">        br.addClassConstraint(className, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE, firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_CLASSDUEDATE_DUEDATE), readAttribute(regionChild, XMLConstantNames.XML_A_CLASS_DUE_DATE)));</span>
+<span class="fc" id="L168">    }</span>
+
+    private void parseGroupConstraint(BlockingRegionDescriptor br, Element regionChild) {
+<span class="fc" id="L171">        br.addGroupConstraint(firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_GROUPCONSTRAINT_GROUP), readAttribute(regionChild, XMLConstantNames.XML_GROUP)),</span>
+<span class="fc" id="L172">                firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_GROUPCONSTRAINT_MAXJOBS), readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALCONSTRAINT_MAXJOBS)));</span>
+<span class="fc" id="L173">    }</span>
+
+    private void parseGroupMemoryConstraint(BlockingRegionDescriptor br, Element regionChild) {
+<span class="fc" id="L176">        br.addGroupMemoryConstraint(firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_GROUPMEMORYCONSTRAINT_GROUP), readAttribute(regionChild, XMLConstantNames.XML_GROUP)),</span>
+<span class="fc" id="L177">                firstNonEmpty(readAttribute(regionChild, XMLConstantNames.XML_A_GROUPMEMORYCONSTRAINT_MAXMEMORY), readAttribute(regionChild, XMLConstantNames.XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY)));</span>
+<span class="fc" id="L178">    }</span>
+
+    private void parseGroupClassList(BlockingRegionDescriptor br, Element parent, Element regionChild) {
+<span class="fc" id="L181">        NodeList groupClassNodes = regionChild.getChildNodes();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        for (int k = 0; k &lt; groupClassNodes.getLength(); k++) {</span>
+<span class="fc" id="L183">            Node classNode = groupClassNodes.item(k);</span>
+<span class="pc bpc" id="L184" title="1 of 4 branches missed.">            if (classNode.getNodeType() != Node.ELEMENT_NODE || !XMLConstantNames.XML_E_GROUPCLASS.equals(classNode.getNodeName())) continue;</span>
+<span class="fc" id="L185">            Element groupClass = (Element) classNode;</span>
+<span class="fc" id="L186">            br.addGroupClass(firstNonEmpty(readAttribute(groupClass, XMLConstantNames.XML_A_GROUPCLASS_GROUP), readAttribute(groupClass, XMLConstantNames.XML_GROUP)),</span>
+<span class="fc" id="L187">                    firstNonEmpty(readAttribute(groupClass, XMLConstantNames.XML_A_GROUPCLASS_CLASS), readAttribute(parent, XMLConstantNames.XML_E_CLASS)));</span>
+        }
+<span class="fc" id="L189">    }</span>
+
+    private void parsePreload(SimDescriptor descriptor, Element child) {
+<span class="fc" id="L192">        NodeList stationPops = child.getElementsByTagName(XMLConstantNames.XML_E_STATIONPOPULATIONS);</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">        for (int j = 0; j &lt; stationPops.getLength(); j++) {</span>
+<span class="fc" id="L194">            Element statPop = (Element) stationPops.item(j);</span>
+<span class="fc" id="L195">            descriptor.addPreload(getNodeDescriptor(statPop));</span>
+        }
+<span class="fc" id="L197">    }</span>
+
+    private NodeDescriptor getNodeDescriptor(Element statPop) {
+<span class="fc" id="L200">        NodeDescriptor pd = new NodeDescriptor();</span>
+<span class="fc" id="L201">        pd.setName(statPop.getAttribute(XMLConstantNames.XML_A_PRELOADSTATION_NAME));</span>
+<span class="fc" id="L202">        NodeList classPops = statPop.getElementsByTagName(XMLConstantNames.XML_E_CLASSPOPULATION);</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">        for (int k = 0; k &lt; classPops.getLength(); k++) {</span>
+<span class="fc" id="L204">            Element cPop = (Element) classPops.item(k);</span>
+<span class="fc" id="L205">            SectionDescriptor sd = new SectionDescriptor();</span>
+<span class="fc" id="L206">            sd.setClassName(firstNonEmpty(cPop.getAttribute(&quot;populationName&quot;), cPop.getAttribute(XMLConstantNames.XML_A_CLASSPOPULATION_NAME)));</span>
+<span class="fc" id="L207">            ParameterDescriptor val = new ParameterDescriptor();</span>
+<span class="fc" id="L208">            val.setValue(cPop.getAttribute(XMLConstantNames.XML_A_CLASSPOPULATION_POPULATION));</span>
+<span class="fc" id="L209">            sd.addParameter(val);</span>
+<span class="fc" id="L210">            pd.addSection(sd);</span>
+        }
+<span class="fc" id="L212">        return pd;</span>
+    }
+
+    private String readAttribute(Element element, String attributeName) {
+<span class="fc bfc" id="L216" title="All 2 branches covered.">        return element.hasAttribute(attributeName) ? element.getAttribute(attributeName) : null;</span>
+    }
+
+    private String firstNonEmpty(String first, String second) {
+<span class="pc bpc" id="L220" title="1 of 4 branches missed.">        if (first != null &amp;&amp; !first.isEmpty()) return first;</span>
+<span class="fc" id="L221">        return second;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

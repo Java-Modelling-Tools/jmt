@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtJGraph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">JmtJGraph.java</span></div><h1>JmtJGraph.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.JGraphMod;
+
+import java.awt.Graphics;
+import java.awt.geom.Point2D;
+
+import jmt.common.GlobalSettings;
+import jmt.gui.common.Defaults;
+import jmt.gui.jsimgraph.controller.JmtGraphUI;
+import jmt.gui.jsimgraph.controller.Mediator;
+
+import org.freehep.graphics2d.VectorGraphics;
+import org.freehep.graphicsbase.util.export.ExportDialog;
+import org.jgraph.JGraph;
+import org.jgraph.graph.BasicMarqueeHandler;
+import org.jgraph.graph.CellView;
+import org.jgraph.graph.DefaultCellViewFactory;
+import org.jgraph.graph.DefaultGraphModel;
+import org.jgraph.graph.DefaultGraphSelectionModel;
+import org.jgraph.graph.GraphLayoutCache;
+import org.jgraph.graph.GraphModel;
+
+/** Jmt version of JGraph.
+
+ * @author Federico Granata
+ * Date: 11-lug-2003
+ * Time: 10.38.27
+
+ * Modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
+ * Added Blocking Region Support 24-mar-2006
+
+ * @author Bertoli Marco (16-jun-2006) Added support for screenshots in vectorial format.
+
+ */
+public class JmtJGraph extends JGraph {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L56">	static DefaultCellViewFactory cellViewFactory = new DefaultCellViewFactory();</span>
+
+	protected Mediator mediator;
+
+	/**
+	 * Returns a &lt;code&gt;JGraph&lt;/code&gt; with a sample model.
+	 */
+	public JmtJGraph(Mediator m) {
+<span class="nc" id="L64">		this(null, m);</span>
+<span class="nc" id="L65">	}</span>
+
+	/**
+	 * Returns an instance of &lt;code&gt;JGraph&lt;/code&gt; which displays the
+	 * the specified data model.
+	 *
+	 * @param model  the &lt;code&gt;GraphModel&lt;/code&gt; to use as the data model
+	 */
+	public JmtJGraph(GraphModel model, Mediator m) {
+<span class="nc" id="L74">		this(model, (GraphLayoutCache) null, m);</span>
+<span class="nc" id="L75">	}</span>
+
+	/**
+	 * Returns an instance of &lt;code&gt;JGraph&lt;/code&gt; which displays
+	 * the specified data model using the specified view.
+	 *
+	 * @param model  the &lt;code&gt;GraphModel&lt;/code&gt; to use as the data model
+	 * @param mh  the &lt;code&gt;MarqueeHandler&lt;/code&gt;
+	 */
+	public JmtJGraph(GraphModel model, BasicMarqueeHandler mh, Mediator m) {
+<span class="nc" id="L85">		this(model, null, mh, m);</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Returns an instance of &lt;code&gt;JGraph&lt;/code&gt; which displays
+	 * the specified data model using the specified view.
+	 *
+	 * @param model  the &lt;code&gt;GraphModel&lt;/code&gt; to use as the data model
+	 * @param view  the &lt;code&gt;GraphLayoutCache&lt;/code&gt; to use as the view
+	 */
+	public JmtJGraph(GraphModel model, GraphLayoutCache view, Mediator m) {
+<span class="nc" id="L96">		this(model, view, new BasicMarqueeHandler(), m);</span>
+<span class="nc" id="L97">	}</span>
+
+	/**
+	 * Returns an instance of &lt;code&gt;JGraph&lt;/code&gt; which displays
+	 * the specified data model using the specified view.
+	 *
+	 * @param model  the &lt;code&gt;GraphModel&lt;/code&gt; to use as the data model
+	 * @param view  the &lt;code&gt;GraphLayoutCache&lt;/code&gt; to use as the view
+	 */
+<span class="nc" id="L106">	public JmtJGraph(GraphModel model, GraphLayoutCache view, BasicMarqueeHandler mh, Mediator m) {</span>
+<span class="nc" id="L107">		setMediator(m);</span>
+<span class="nc" id="L108">		selectionModel = new DefaultGraphSelectionModel(this);</span>
+<span class="nc" id="L109">		setLayout(null);</span>
+<span class="nc" id="L110">		marquee = mh;</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		if (view == null) {</span>
+<span class="nc" id="L112">			view = createDefaultGraphView(this);</span>
+		}
+<span class="nc" id="L114">		setGraphLayoutCache(view);</span>
+<span class="nc" id="L115">		updateUI();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if (model == null) {</span>
+<span class="nc" id="L117">			model = new DefaultGraphModel();</span>
+<span class="nc" id="L118">			setModel(model);</span>
+<span class="nc" id="L119">			addSampleData(model);</span>
+		} else {
+<span class="nc" id="L121">			setModel(model);</span>
+		}
+<span class="nc" id="L123">		setDoubleBuffered(true);</span>
+		// Properties for Blocking Region
+<span class="nc" id="L125">		setMoveIntoGroups(true);</span>
+<span class="nc" id="L126">		setMoveOutOfGroups(true);</span>
+<span class="nc" id="L127">	}</span>
+
+	/**
+	 * Sets the &lt;code&gt;Mediator&lt;/code&gt; for this object
+	 * @param mediator
+	 */
+	public void setMediator(Mediator mediator) {
+<span class="nc" id="L134">		this.mediator = mediator;</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * @return the &lt;code&gt;Mediator&lt;/code&gt; for this object
+	 */
+	public Mediator getMediator() {
+<span class="nc" id="L141">		return mediator;</span>
+	}
+
+	/**
+	 * Creates and returns a default &lt;code&gt;GraphLayoutCache&lt;/code&gt;.
+	 *
+	 * @return the default &lt;code&gt;GraphLayoutCache&lt;/code&gt;
+	 */
+	protected static GraphLayoutCache createDefaultGraphView(JGraph graph) {
+<span class="nc" id="L150">		return new JmtGraphLayoutCache(graph.getModel(), cellViewFactory);</span>
+	}
+
+	/**
+	 * Gets the input port for the cell under Point(x,y)
+	 *
+	 * @param x  horizontal coordinate
+	 * @param y  vertical coordinate
+	 * @return the input port if available else null
+	 */
+	public InputPort getInPortAt(int x, int y) {
+<span class="nc" id="L161">		JmtCell cell = getVertexAt(x, y);</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">		for (int i = 0; i &lt; getModel().getChildCount(cell); i++) {</span>
+<span class="nc" id="L163">			Object child = getModel().getChild(cell, i);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">			if (child instanceof InputPort) {</span>
+<span class="nc" id="L165">				return (InputPort) child;</span>
+			}
+		}
+<span class="nc" id="L168">		return null;</span>
+	}
+
+	/**
+	 * Gets the output port for the cell under Point(x,y)
+	 *
+	 * @param x  horizontal coordinate
+	 * @param y  vertical coordinate
+	 * @return the output port if available else null
+	 */
+	public OutputPort getOutPortAt(int x, int y) {
+<span class="nc" id="L179">		Object cell = getVertexAt(x, y);</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		if (cell instanceof JmtCell) {</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			for (int i = 0; i &lt; getModel().getChildCount(cell); i++) {</span>
+<span class="nc" id="L182">				Object child = getModel().getChild(cell, i);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">				if (child instanceof OutputPort) {</span>
+<span class="nc" id="L184">					return (OutputPort) child;</span>
+				}
+			}
+		}
+<span class="nc" id="L188">		return null;</span>
+	}
+
+	/**
+	 * Gets the first vertex at this position.
+	 *
+	 * @param x horizontal coordinate
+	 * @param y vertical coordinate
+	 * @return first vertex
+	 */
+	public JmtCell getVertexAt(int x, int y) {
+<span class="nc" id="L199">		CellView[] cellViews = getGraphLayoutCache().getAllViews();</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">		for (CellView cellView : cellViews) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (cellView.getCell() instanceof JmtCell) {</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">				if (cellView.getBounds().contains(x, y)) {</span>
+<span class="nc" id="L203">					return (JmtCell) cellView.getCell();</span>
+				}
+			}
+		}
+<span class="nc" id="L207">		return null;</span>
+	}
+
+	/**
+	 * Notification from the &lt;code&gt;UIManager&lt;/code&gt; that the L&amp;F has changed.
+	 * Replaces the current UI object with the latest version from the
+	 * &lt;code&gt;UIManager&lt;/code&gt;. Subclasses can override this to support
+	 * different GraphUIs.
+	 * @see javax.swing.JComponent#updateUI
+	 *
+	 */
+	@Override
+	public void updateUI() {
+<span class="nc" id="L220">		setUI(new JmtGraphUI(mediator));</span>
+<span class="nc" id="L221">		invalidate();</span>
+<span class="nc" id="L222">	}</span>
+
+	// --- Methods used to catch ScreenShots in vectorial format --------------------------------
+	/**
+	 * Overrides paintComponent method to add support for screenshots
+	 */
+	@Override
+	protected void paintComponent(Graphics g) {
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		if (g == null) {</span>
+<span class="nc" id="L231">			return;</span>
+		}
+<span class="nc" id="L233">		VectorGraphics vg = VectorGraphics.create(g);</span>
+<span class="nc" id="L234">		super.paintComponent(vg);</span>
+<span class="nc" id="L235">	}</span>
+
+	/**
+	 * Shows a screenshot dialog used to select screenshot format
+	 */
+	public void showScreenShotDialog() {
+<span class="nc" id="L241">		ExportDialog export = new ExportDialog(&quot;Java Modelling Tools - version &quot; + GlobalSettings.getSetting(GlobalSettings.VERSION));</span>
+<span class="nc" id="L242">		export.setUserProperties(Defaults.getProperties());</span>
+<span class="nc" id="L243">		export.showExportDialog(this, &quot;Export as image...&quot;, this, &quot;graph&quot;);</span>
+<span class="nc" id="L244">		Defaults.save();</span>
+<span class="nc" id="L245">	}</span>
+
+	// ------------------------------------------------------------------------------------------
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

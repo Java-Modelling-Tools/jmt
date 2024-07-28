@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">NetController.java</span></div><h1>NetController.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import java.util.ListIterator;
+
+import jmt.common.exception.NetException;
+import jmt.engine.simEngine.SimSystem;
+
+/**
+ * Controls the state of the simulation and determines when to stop the simulation.
+ *
+ * @author Federico Granata, Stefano Omini
+ */
+class NetController {
+
+	private boolean running;
+
+	private double startTime;
+
+	private double stopTime;
+
+	//number of system &quot;ticks&quot;
+	private int n;
+	//check measures every refreshPeriod system ticks
+<span class="nc" id="L42">	private int refreshPeriod = 12000;</span>
+
+	//check if some measures have not receive any sample yet
+	//WARNING: this samples number must be a multiple of refreshPeriod!!
+<span class="nc" id="L46">	private int reachabilityTest = refreshPeriod * 10;</span>
+
+<span class="nc" id="L48">	private boolean blocked = false;</span>
+
+	//set to true when when the first abort measures is called due to max simulated time
+	//in order to prevent further calls while the system is still processing enqueued events
+<span class="nc" id="L52">	private boolean aborting = false;</span>
+
+	//the maximum simulated time a simulation is allowed to reach before it is stopped, negative value means infinite
+<span class="nc" id="L55">	private double maxSimulatedTime = -1;</span>
+
+	//the maximum processed events a simulation is allowed to reach before it is stopped, negative value means infinite
+<span class="nc" id="L58">	private int maxProcessedEvents = -1;</span>
+
+	private NetSystem netSystem;
+<span class="nc" id="L61">	NetController() {</span>
+<span class="nc" id="L62">		running = false;</span>
+		//initializes tick counter
+<span class="nc" id="L64">		n = 0;</span>
+<span class="nc" id="L65">	}</span>
+
+	/** This is the run method of the NetController (thread).
+	 * @throws NetException
+	 * @throws InterruptedException
+	 */
+	public void run() throws InterruptedException, NetException {
+<span class="nc" id="L72">		SimSystem simSystem = netSystem.getSimSystem();</span>
+<span class="nc" id="L73">		simSystem.runStart();</span>
+<span class="nc" id="L74">		startTime = netSystem.getElapsedTime();</span>
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		while (simSystem.runTick()) {</span>
+<span class="nc" id="L77">			synchronized (this) {</span>
+				//the presence of this &quot;if&quot; allows pause control
+<span class="nc bnc" id="L79" title="All 2 branches missed.">				if (blocked) {</span>
+<span class="nc" id="L80">					wait();</span>
+				}
+<span class="nc" id="L82">				n++;</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">				if (n % refreshPeriod == 0) {</span>
+					//User may have defined measures that will not receive any sample
+<span class="nc bnc" id="L86" title="All 2 branches missed.">					if (n % reachabilityTest == 0) {</span>
+						//stop measures which have not collected samples yet
+<span class="nc" id="L88">						netSystem.stopNoSamplesMeasures();</span>
+					}
+					//refresh measures
+<span class="nc" id="L91">					netSystem.checkMeasures();</span>
+				}
+				//check if a positive max simulated time is set and has been reached for the first time
+<span class="nc bnc" id="L94" title="All 6 branches missed.">				if (maxSimulatedTime &gt; 0 &amp;&amp; simSystem.getClock() &gt; maxSimulatedTime &amp;&amp; !aborting) {</span>
+<span class="nc" id="L95">					ListIterator&lt;QueueNetwork&gt; nets = netSystem.getNetworkList().listIterator();</span>
+					QueueNetwork network;
+<span class="nc bnc" id="L97" title="All 2 branches missed.">					while (nets.hasNext()) {</span>
+<span class="nc" id="L98">						network = nets.next();</span>
+<span class="nc" id="L99">						network.abortAllMeasures();</span>
+<span class="nc" id="L100">						aborting = true;</span>
+					}
+<span class="nc" id="L102">					netSystem.checkMeasures(); //refresh measures, this triggers a simulation stop because all measures have been aborted</span>
+				}
+<span class="nc" id="L104">			}</span>
+		}
+		//sim is finished: get stop time
+<span class="nc" id="L107">		stopTime = netSystem.getElapsedTime();</span>
+<span class="nc" id="L108">		simSystem.runStop();</span>
+<span class="nc" id="L109">		running = false;</span>
+<span class="nc" id="L110">	}</span>
+
+	public void start() {
+<span class="nc" id="L113">		running = true;</span>
+<span class="nc" id="L114">	}</span>
+
+	/** Checks if the NetSystem Engine thread is running.
+	 * @return True if NetSystem Engine thread is running.
+	 */
+	synchronized boolean isRunning() {
+<span class="nc" id="L120">		return running;</span>
+	}
+
+	/** Gets simulation time.
+	 * @return Simulation time.
+	 */
+	synchronized double getSimulationTime() {
+<span class="nc" id="L127">		return stopTime - startTime;</span>
+	}
+
+	/**
+	 * Blocks NetController for synchronized access to data.
+	 */
+	public synchronized void block() {
+<span class="nc" id="L134">		blocked = true;</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * Unblocks the object.
+	 */
+	public synchronized void unblock() {
+<span class="nc" id="L141">		blocked = false;</span>
+<span class="nc" id="L142">		notifyAll();</span>
+<span class="nc" id="L143">	}</span>
+
+	/**
+	 * Sets the value of the max simulated time, when this value is reached in a simulation the run is stopped
+	 * @param maxSimulatedTime the value to be set for the max simulated time
+	 */
+	public void setMaxSimulatedTime(double maxSimulatedTime) {
+<span class="nc" id="L150">		this.maxSimulatedTime = maxSimulatedTime;</span>
+<span class="nc" id="L151">	}</span>
+
+	/**
+	 * Sets the value of the max processed events, when this value is reached in a simulation the run is stopped
+	 * @param maxProcessedEvents the value to be set for the max processed events
+	 */
+	public void setMaxProcessedEvents(int maxProcessedEvents) {
+<span class="nc" id="L158">		this.maxProcessedEvents = maxProcessedEvents;</span>
+<span class="nc" id="L159">	}</span>
+
+	public void setNetSystem(NetSystem netSystem) {
+<span class="nc" id="L162">		this.netSystem = netSystem;</span>
+<span class="nc" id="L163">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TableSelectionListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.table</a> &gt; <span class="el_source">TableSelectionListener.java</span></div><h1>TableSelectionListener.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.table;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableColumnModelEvent;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 14-set-2003
+ * Time: 18.53.05
+
+ */
+
+/**
+ * an object that intercepts all selection events for a table
+ */
+<span class="nc" id="L39">public abstract class TableSelectionListener implements ListSelectionListener {</span>
+
+	private ListSelectionModel rowSelectionModel;
+
+	private ListSelectionModel colSelectionModel;
+
+	public static final int TYPE_ROW = 1;
+	public static final int TYPE_COLUMN = 2;
+
+	protected JTable table;
+
+	/**
+	 * row selection events
+	 */
+	public final void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L55">			return;</span>
+		}
+<span class="nc" id="L57">		Object source = e.getSource();</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (source == rowSelectionModel) {</span>
+<span class="nc" id="L59">			selectionChanged(table, e, TYPE_ROW);</span>
+		}
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (source == colSelectionModel) {</span>
+<span class="nc" id="L62">			selectionChanged(table, e, TYPE_COLUMN);</span>
+		}
+<span class="nc" id="L64">	}</span>
+
+	/**
+	 * called whenever the table selection changes
+	 */
+	protected abstract void selectionChanged(JTable table, ListSelectionEvent e, int type);
+
+	/**
+	 * Add this object to a JTable
+	 */
+	public void install(JTable table) {
+<span class="nc" id="L75">		this.table = table;</span>
+<span class="nc" id="L76">		rowSelectionModel = table.getSelectionModel();</span>
+<span class="nc" id="L77">		rowSelectionModel.addListSelectionListener(this);</span>
+
+<span class="nc" id="L79">		colSelectionModel = table.getColumnModel().getSelectionModel();</span>
+<span class="nc" id="L80">		colSelectionModel.addListSelectionListener(this);</span>
+<span class="nc" id="L81">	}</span>
+
+	public void uninstall() {
+<span class="nc" id="L84">		table = null;</span>
+<span class="nc" id="L85">		rowSelectionModel.removeListSelectionListener(this);</span>
+<span class="nc" id="L86">		colSelectionModel.removeListSelectionListener(this);</span>
+<span class="nc" id="L87">	}</span>
+
+	/* these are not used */
+	public void columnAdded(TableColumnModelEvent e) {
+<span class="nc" id="L91">	}</span>
+
+	public void columnMarginChanged(ChangeEvent e) {
+<span class="nc" id="L94">	}</span>
+
+	public void columnMoved(TableColumnModelEvent e) {
+<span class="nc" id="L97">	}</span>
+
+	public void columnRemoved(TableColumnModelEvent e) {
+<span class="nc" id="L100">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

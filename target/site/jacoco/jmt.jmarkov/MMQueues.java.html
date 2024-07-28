@@ -1,0 +1,1237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MMQueues.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov</a> &gt; <span class="el_source">MMQueues.java</span></div><h1>MMQueues.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmarkov;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Dictionary;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.framework.gui.components.JMTFrame;
+import jmt.framework.gui.controller.Manager;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.panels.AboutDialogFactory;
+import jmt.jmarkov.Graphics.JobsDrawer;
+import jmt.jmarkov.Graphics.LogFile;
+import jmt.jmarkov.Graphics.Notifier;
+import jmt.jmarkov.Graphics.QueueDrawer;
+import jmt.jmarkov.Graphics.StatiDrawer;
+import jmt.jmarkov.Graphics.TANotifier;
+import jmt.jmarkov.Graphics.constants.DrawBig;
+import jmt.jmarkov.Graphics.constants.DrawConstrains;
+import jmt.jmarkov.Graphics.constants.DrawNormal;
+import jmt.jmarkov.Graphics.constants.DrawSmall;
+import jmt.jmarkov.Queues.Arrivals;
+import jmt.jmarkov.Queues.JobQueue;
+import jmt.jmarkov.Queues.MM1Logic;
+import jmt.jmarkov.Queues.MM1dLogic;
+import jmt.jmarkov.Queues.MMNLogic;
+import jmt.jmarkov.Queues.MMNdLogic;
+import jmt.jmarkov.Queues.Processor;
+import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
+import jmt.jmarkov.utils.Formatter;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
+
+/**
+ * @author Arif Canakoglu
+ *
+ */
+public class MMQueues extends JMTFrame {
+
+	private static final long serialVersionUID = 1L;
+
+	private static final boolean DEBUG = false;
+
+	private boolean nonErgodic;//if the utilization is less than 1
+	private double U; // Utilization [%]
+	private double Q; // Average customer in station
+<span class="nc" id="L98">	private double sMultiplier = 1; //service time slide bar multiplier</span>
+<span class="nc" id="L99">	private double lambdaMultiplier = 1; //lambda slide bar multiplier</span>
+<span class="nc" id="L100">	private int lambdaMultiplierChange = 0; //for the lambda slide bar</span>
+<span class="nc" id="L101">	private int sMultiplierChange = 1; //for the service slide bar</span>
+
+	private int buffer; //number of place for the waiting queue
+	private int cpuNum; //number of server in the system
+<span class="nc" id="L105">	private boolean paused = false; //if the system is paused </span>
+
+<span class="nc" id="L107">	private Dimension initSize = new Dimension(CommonConstants.MAX_GUI_WIDTH_JMCH, CommonConstants.MAX_GUI_HEIGHT_JMCH);</span>
+
+	private JPanel sPanel;
+	private JPanel lambdaPanel;
+	private JSlider sS;
+	private JSlider lambdaS;
+	private JSlider buffS;
+
+	private JButton playB;
+	private JButton stopB;
+	private JButton pauseB;
+
+	private QueueDrawer queueDrawer;
+	private StatiDrawer statiDrawer;
+	private JobsDrawer jobsDrawer;
+	private JTabbedPane outputTabP;
+	private JScrollPane txtScroll;
+	private TANotifier outputTA;
+	private LogFile logFile;
+<span class="nc" id="L126">	private Notifier[] tan = new Notifier[5];</span>
+
+	private JPanel buttonsP;
+
+	private JPanel resultsP;
+	public JFrame mf;
+	private JPanel outputP;
+	private JPanel parametersP;
+	private JPanel simulationP;
+
+	private JPanel buffPanel;
+	private JPanel accelerationP;
+	private JPanel jobsP;
+	private JSlider accelerationS;
+
+	// Label &amp; Label strings
+	private JLabel sL;
+
+	private JLabel lambdaL;
+
+	private JLabel mediaJobsL;
+
+	private JLabel utilizationL;
+
+	private JLabel buffL;
+
+	private JLabel thrL;
+
+	private JLabel responseL;
+
+	private JLabel accelerationL;
+
+<span class="nc" id="L158">	private String sStrS = &quot;Avg. Service Time S = &quot;;</span>
+
+<span class="nc" id="L160">	private String sStrE = &quot; s&quot;;</span>
+
+<span class="nc" id="L162">	private String lambdaStrS = &quot;Avg. Arrival Rate (lambda) = &quot;;</span>
+
+<span class="nc" id="L164">	private String lambdaStrE = &quot; cust./s&quot;;</span>
+
+<span class="nc" id="L166">	private String nStrS = &quot;Avg. Cust. in Station (Queue + Service) N = &quot;;</span>
+
+<span class="nc" id="L168">	private String nStrE = &quot; cust.&quot;;</span>
+
+<span class="nc" id="L170">	private String uStrS = &quot;Avg. Utilization (Sum of All Servers) U = &quot;;</span>
+
+<span class="nc" id="L172">	private String uStrE = &quot;&quot;;</span>
+
+<span class="nc" id="L174">	private String bufStrS = &quot;Max Station Capacity k = &quot;;</span>
+
+<span class="nc" id="L176">	private String bufStrE = &quot; cust.&quot;;</span>
+
+<span class="nc" id="L178">	private String thrStrS = &quot;Avg. Throughput X =&quot;;</span>
+
+<span class="nc" id="L180">	private String thrStrE = &quot; cust./s&quot;;</span>
+
+<span class="nc" id="L182">	private String respStrS = &quot;Avg. Response Time R = &quot;;</span>
+
+<span class="nc" id="L184">	private String respStrE = &quot; s&quot;;</span>
+
+	// Settings
+<span class="nc" id="L187">	private Color emptyC = Color.WHITE;</span>
+
+<span class="nc" id="L189">	private Color probC = Color.GREEN;</span>
+
+<span class="nc" id="L191">	private Color queueC = Color.BLUE;</span>
+
+<span class="nc" id="L193">	private Color animC = Color.RED;</span>
+<span class="nc" id="L194">	private boolean gradientF = false;</span>
+<span class="nc" id="L195">	private DrawConstrains dCst = new DrawNormal();</span>
+<span class="nc" id="L196">	private int BUFF_I = 15;</span>
+
+<span class="nc" id="L198">	private int LAMBDA_I = 50;</span>
+
+<span class="nc" id="L200">	private int S_I = 95;</span>
+
+	// menu
+	private JMenuBar menuB;
+
+	// help
+	private JMenu helpMenu;
+
+	// queue
+	private JMenu queueMenu;
+	private Action selectQueueRB;
+	private JRadioButtonMenuItem gradientItem;
+	// settings
+	private JMenu settingsMenu;
+	// colors
+	private JMenu colorsMenu;
+
+	// size
+	private JMenu sizeMenu;
+	// Queues data:
+<span class="nc" id="L220">	MM1Logic ql = new MM1Logic(0.0, 0.0);</span>
+	JobQueue jq;
+
+	Arrivals arrival;
+	Processor[] processors;
+
+<span class="nc" id="L226">	private Simulator sim = null;</span>
+<span class="nc" id="L227">	private boolean lambdaSChange = true;</span>
+<span class="nc" id="L228">	private boolean sSChange = true;</span>
+
+<span class="nc" id="L230">	public MMQueues() {</span>
+<span class="nc" id="L231">		mf = this;</span>
+<span class="nc" id="L232">		initGUI();</span>
+
+<span class="nc" id="L234">		this.setVisible(true);</span>
+<span class="nc" id="L235">		selectMethod();</span>
+
+<span class="nc" id="L237">	}</span>
+
+	protected void initGUI() {
+		// for setting the place of the screen
+<span class="nc" id="L241">		Toolkit kit = Toolkit.getDefaultToolkit();</span>
+<span class="nc" id="L242">		Dimension screenSize = kit.getScreenSize();</span>
+<span class="nc" id="L243">		this.setLocation((screenSize.width - initSize.width) / 2, (screenSize.height - initSize.height) / 2);</span>
+		// for setting the place of the screen
+		try {
+			// Simulation data panel
+<span class="nc" id="L247">			simulationP = new JPanel();</span>
+<span class="nc" id="L248">			parametersP = new JPanel();</span>
+<span class="nc" id="L249">			lambdaPanel = new JPanel();</span>
+<span class="nc" id="L250">			lambdaL = new JLabel();</span>
+<span class="nc" id="L251">			lambdaS = new JSlider();</span>
+<span class="nc" id="L252">			buffS = new JSlider();</span>
+<span class="nc" id="L253">			sPanel = new JPanel();</span>
+<span class="nc" id="L254">			sS = new JSlider();</span>
+<span class="nc" id="L255">			resultsP = new JPanel();</span>
+<span class="nc" id="L256">			mediaJobsL = new JLabel();</span>
+<span class="nc" id="L257">			utilizationL = new JLabel();</span>
+<span class="nc" id="L258">			mediaJobsL = new JLabel();</span>
+<span class="nc" id="L259">			thrL = new JLabel();</span>
+<span class="nc" id="L260">			responseL = new JLabel();</span>
+
+			// simulation output panels
+<span class="nc" id="L263">			outputP = new JPanel();</span>
+<span class="nc" id="L264">			outputTabP = new JTabbedPane();</span>
+<span class="nc" id="L265">			txtScroll = new JScrollPane();</span>
+<span class="nc" id="L266">			outputTA = new TANotifier();</span>
+<span class="nc" id="L267">			logFile = new LogFile();</span>
+			// logD = new LogDrawer();
+<span class="nc" id="L269">			statiDrawer = new StatiDrawer(ql);</span>
+<span class="nc" id="L270">			queueDrawer = new QueueDrawer(ql);</span>
+<span class="nc" id="L271">			jobsDrawer = new JobsDrawer();</span>
+
+<span class="nc" id="L273">			buffPanel = new JPanel();</span>
+<span class="nc" id="L274">			accelerationP = new JPanel();</span>
+<span class="nc" id="L275">			jobsP = new JPanel();</span>
+<span class="nc" id="L276">			accelerationS = new JSlider();</span>
+
+			// acceleration
+<span class="nc" id="L279">			accelerationP.setLayout(new GridBagLayout());</span>
+<span class="nc" id="L280">			GridBagConstraints gbc = new GridBagConstraints();</span>
+<span class="nc" id="L281">			gbc.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L282">			gbc.gridx = 0;</span>
+<span class="nc" id="L283">			gbc.gridy = 0;</span>
+<span class="nc" id="L284">			gbc.weightx = 0;</span>
+<span class="nc" id="L285">			accelerationP.setBorder(addTitle(&quot;Simulation time&quot;, dCst.getSmallGUIFont()));</span>
+<span class="nc" id="L286">			accelerationL = new JLabel(&quot;Time x0.0&quot;);</span>
+<span class="nc" id="L287">			accelerationL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L288">			accelerationL.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L289">			accelerationP.add(accelerationL, gbc);</span>
+<span class="nc" id="L290">			accelerationS.setValue(50);</span>
+<span class="nc" id="L291">			accelerationS.setMaximum(100);</span>
+<span class="nc" id="L292">			accelerationS.setMinimum(1);</span>
+<span class="nc" id="L293">			accelerationS.setMajorTickSpacing(50);</span>
+<span class="nc" id="L294">			accelerationS.setMinorTickSpacing(1);</span>
+<span class="nc" id="L295">			accelerationS.setSnapToTicks(true);</span>
+<span class="nc" id="L296">			accelerationS.setPaintTicks(true);</span>
+<span class="nc" id="L297">			accelerationS.setPaintLabels(true);</span>
+<span class="nc" id="L298">			Dictionary&lt;Integer, JLabel&gt; ad = accelerationS.getLabelTable();</span>
+<span class="nc" id="L299">			ad.keys();</span>
+<span class="nc" id="L300">			ad.put(new Integer(1), new JLabel(&quot;real time&quot;));</span>
+<span class="nc" id="L301">			ad.put(new Integer(51), new JLabel(&quot;faster&quot;));</span>
+<span class="nc" id="L302">			ad.put(new Integer(100), new JLabel(&quot;fastest&quot;));</span>
+<span class="nc" id="L303">			accelerationS.setLabelTable(ad);</span>
+<span class="nc" id="L304">			gbc.gridy = 1;</span>
+<span class="nc" id="L305">			gbc.weightx = 1;</span>
+<span class="nc" id="L306">			accelerationP.add(accelerationS, gbc);</span>
+<span class="nc" id="L307">			accelerationS.setValue(50);</span>
+<span class="nc" id="L308">			accelerationS.addChangeListener(new ChangeListener() {</span>
+
+				public void stateChanged(ChangeEvent evt) {
+<span class="nc" id="L311">					int value = accelerationS.getValue();</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">					if (sim != null) {</span>
+<span class="nc" id="L313">						sim.setTimeMultiplier(value);</span>
+<span class="nc" id="L314">						accelerationL.setText(&quot;Time x&quot; + Formatter.formatNumber(sim.getTimeMultiplier(), 2));</span>
+					} else {
+<span class="nc" id="L316">						accelerationL.setText(&quot;Time x&quot; + Formatter.formatNumber(value, 2));</span>
+					}
+
+<span class="nc" id="L319">				}</span>
+
+			});
+<span class="nc" id="L322">			accelerationL.setText(&quot;Time x&quot; + Formatter.formatNumber(accelerationS.getValue(), 2));</span>
+
+			// jobs panel
+<span class="nc" id="L325">			jobsP.setBorder(addTitle(&quot;Customers&quot;, dCst.getSmallGUIFont()));</span>
+<span class="nc" id="L326">			jobsP.setLayout(new GridLayout(1, 1));</span>
+<span class="nc" id="L327">			jobsP.add(jobsDrawer);</span>
+
+			// buttons
+<span class="nc" id="L330">			buttonsP = new JPanel();</span>
+<span class="nc" id="L331">			playB = new JButton();</span>
+<span class="nc" id="L332">			stopB = new JButton();</span>
+<span class="nc" id="L333">			pauseB = new JButton();</span>
+
+			// Adding to main frame
+<span class="nc" id="L336">			GridBagConstraints c = new GridBagConstraints();</span>
+<span class="nc" id="L337">			c.fill = GridBagConstraints.BOTH;</span>
+<span class="nc" id="L338">			this.getContentPane().setLayout(new BorderLayout());</span>
+<span class="nc" id="L339">			this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L340">			this.addWindowListener(new WindowAdapter() {</span>
+				/**
+				 * Invoked when a window has been closed.
+				 */
+				@Override
+				public void windowClosed(WindowEvent e) {
+<span class="nc" id="L346">					Manager.exit(MMQueues.this);</span>
+<span class="nc" id="L347">				}</span>
+			});
+
+<span class="nc" id="L350">			this.setTitle(&quot;JMCH - Markov Chain M/M/1 Station &quot;);</span>
+
+<span class="nc" id="L352">			this.setIconImage(jmt.gui.common.JMTImageLoader.loadImage(&quot;JMCHIcon&quot;).getImage());</span>
+
+<span class="nc" id="L354">			this.setSize(new java.awt.Dimension(initSize.width, initSize.height));</span>
+<span class="nc" id="L355">			simulationP.setLayout(new GridBagLayout());</span>
+<span class="nc" id="L356">			this.getContentPane().add(simulationP, BorderLayout.CENTER);</span>
+<span class="nc" id="L357">			parametersP.setLayout(new GridBagLayout());</span>
+<span class="nc" id="L358">			parametersP.setBorder(addTitle(&quot;Simulation Parameters&quot;, dCst.getSmallGUIFont()));</span>
+<span class="nc" id="L359">			c.weightx = 1;</span>
+<span class="nc" id="L360">			c.weighty = 0;</span>
+<span class="nc" id="L361">			c.gridx = 0;</span>
+<span class="nc" id="L362">			c.gridy = 0;</span>
+<span class="nc" id="L363">			simulationP.add(parametersP, c);</span>
+
+			// lambda
+<span class="nc" id="L366">			lambdaPanel.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L367">			c.weightx = 0.5;</span>
+
+<span class="nc" id="L369">			parametersP.add(lambdaPanel, c);</span>
+
+<span class="nc" id="L371">			c.gridx = 1;</span>
+<span class="nc" id="L372">			c.weightx = 0;</span>
+<span class="nc" id="L373">			parametersP.add(getSplitter(10, 1), c);</span>
+<span class="nc" id="L374">			c.weightx = 0.5;</span>
+
+<span class="nc" id="L376">			lambdaL.setAlignmentX(SwingConstants.CENTER);</span>
+<span class="nc" id="L377">			lambdaPanel.add(lambdaL);</span>
+<span class="nc" id="L378">			lambdaMultiplier = 0.01;</span>
+<span class="nc" id="L379">			lambdaMultiplierChange = 0;</span>
+<span class="nc" id="L380">			lambdaS.setMaximum(100);</span>
+<span class="nc" id="L381">			lambdaS.setMinimum(0);</span>
+<span class="nc" id="L382">			lambdaS.setMajorTickSpacing(25);</span>
+<span class="nc" id="L383">			lambdaS.setMinorTickSpacing(1);</span>
+<span class="nc" id="L384">			lambdaS.setPaintLabels(true);</span>
+<span class="nc" id="L385">			lambdaS.setSnapToTicks(true);</span>
+<span class="nc" id="L386">			lambdaPanel.add(lambdaS);</span>
+<span class="nc" id="L387">			lambdaL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L388">			lambdaS.setValue(LAMBDA_I);</span>
+<span class="nc" id="L389">			setLambdaSlider();</span>
+<span class="nc" id="L390">			lambdaS.addChangeListener(new ChangeListener() {</span>
+				public void stateChanged(ChangeEvent evt) {
+<span class="nc" id="L392">					lambdaSStateChanged(evt);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">					if (lambdaSChange) {</span>
+<span class="nc" id="L394">						setLambdaMultiplier();</span>
+					}
+
+<span class="nc" id="L397">				}</span>
+			});
+<span class="nc" id="L399">			lambdaS.addMouseListener(new MouseListener() {</span>
+
+				public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L402">				}</span>
+
+				public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L405">				}</span>
+
+				public void mouseExited(MouseEvent e) {
+<span class="nc" id="L408">				}</span>
+
+				public void mousePressed(MouseEvent e) {
+<span class="nc" id="L411">					lambdaSChange = false;</span>
+<span class="nc" id="L412">				}</span>
+
+				public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L415">					setLambdaMultiplier();</span>
+<span class="nc" id="L416">					lambdaSChange = true;</span>
+<span class="nc" id="L417">				}</span>
+
+			});
+<span class="nc" id="L420">			lambdaS.repaint();</span>
+
+			// S slider
+<span class="nc" id="L423">			sPanel.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L424">			c.gridx = 2;</span>
+<span class="nc" id="L425">			parametersP.add(sPanel, c);</span>
+
+<span class="nc" id="L427">			c.gridx = 3;</span>
+<span class="nc" id="L428">			c.weightx = 0;</span>
+<span class="nc" id="L429">			parametersP.add(getSplitter(10, 1), c);</span>
+<span class="nc" id="L430">			c.weightx = 0.5;</span>
+
+<span class="nc" id="L432">			sL = new JLabel();</span>
+<span class="nc" id="L433">			sL.setAlignmentX(SwingConstants.CENTER);</span>
+<span class="nc" id="L434">			sPanel.add(sL);</span>
+<span class="nc" id="L435">			sS.setMaximum(100);</span>
+<span class="nc" id="L436">			sS.setMinimum(0);</span>
+<span class="nc" id="L437">			sS.setMajorTickSpacing(25);</span>
+<span class="nc" id="L438">			sS.setMinorTickSpacing(1);</span>
+<span class="nc" id="L439">			sS.setPaintLabels(true);</span>
+<span class="nc" id="L440">			sL.setFont(dCst.getNormalGUIFont());</span>
+
+<span class="nc" id="L442">			sPanel.add(sS);</span>
+
+<span class="nc" id="L444">			sMultiplier = 0.02;</span>
+<span class="nc" id="L445">			sMultiplierChange = 1;</span>
+<span class="nc" id="L446">			sS.setValue(S_I);</span>
+
+<span class="nc" id="L448">			setSSlider();</span>
+<span class="nc" id="L449">			sS.addChangeListener(new ChangeListener() {</span>
+				public void stateChanged(ChangeEvent evt) {
+<span class="nc" id="L451">					sSStateChanged(evt);</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">					if (sSChange) {</span>
+<span class="nc" id="L453">						setSMultiplier();</span>
+					}
+<span class="nc" id="L455">				}</span>
+			});
+<span class="nc" id="L457">			sS.addMouseListener(new MouseListener() {</span>
+
+				public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L460">				}</span>
+
+				public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L463">				}</span>
+
+				public void mouseExited(MouseEvent e) {
+<span class="nc" id="L466">				}</span>
+
+				public void mousePressed(MouseEvent e) {
+<span class="nc" id="L469">					sSChange = false;</span>
+<span class="nc" id="L470">				}</span>
+
+				public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L473">					setSMultiplier();</span>
+<span class="nc" id="L474">					sSChange = true;</span>
+<span class="nc" id="L475">				}</span>
+
+			});
+
+			// queueBuffer slider
+<span class="nc" id="L480">			buffPanel.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L481">			c.gridx = 4;</span>
+<span class="nc" id="L482">			buffPanel.setVisible(false);</span>
+<span class="nc" id="L483">			parametersP.add(buffPanel, c);</span>
+<span class="nc" id="L484">			buffL = new JLabel();</span>
+<span class="nc" id="L485">			buffL.setAlignmentX(SwingConstants.CENTER);</span>
+<span class="nc" id="L486">			buffL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L487">			buffPanel.add(buffL);</span>
+<span class="nc" id="L488">			buffS.setValue(BUFF_I);</span>
+<span class="nc" id="L489">			buffS.setMaximum(31);</span>
+<span class="nc" id="L490">			buffS.setMinimum(1);</span>
+<span class="nc" id="L491">			buffS.setMajorTickSpacing(5);</span>
+<span class="nc" id="L492">			buffS.setMinorTickSpacing(1);</span>
+<span class="nc" id="L493">			buffS.setPaintLabels(true);</span>
+<span class="nc" id="L494">			buffPanel.add(buffS);</span>
+<span class="nc" id="L495">			buffL.setText(bufStrS + buffS.getValue() + bufStrE);</span>
+<span class="nc" id="L496">			buffS.addChangeListener(new ChangeListener() {</span>
+				public void stateChanged(ChangeEvent evt) {
+<span class="nc" id="L498">					buffSStateChanged(evt);</span>
+<span class="nc" id="L499">				}</span>
+			});
+
+			// results
+<span class="nc" id="L503">			resultsP.setLayout(new GridLayout(2, 2));</span>
+<span class="nc" id="L504">			resultsP.setBorder(addTitle(&quot;Simulation Results&quot;, dCst.getSmallGUIFont()));</span>
+<span class="nc" id="L505">			c.gridx = 0;</span>
+<span class="nc" id="L506">			c.gridy = 1;</span>
+<span class="nc" id="L507">			simulationP.add(resultsP, c);</span>
+
+			// media
+<span class="nc" id="L510">			mediaJobsL.setText(nStrS + &quot;0&quot; + nStrE);</span>
+<span class="nc" id="L511">			mediaJobsL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L512">			resultsP.add(mediaJobsL);</span>
+
+			// utilization
+<span class="nc" id="L515">			utilizationL.setText(uStrS + &quot;0&quot; + uStrE);</span>
+<span class="nc" id="L516">			utilizationL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L517">			resultsP.add(utilizationL);</span>
+
+			// throughput
+<span class="nc" id="L520">			thrL.setText(thrStrS + &quot;0&quot; + thrStrE);</span>
+<span class="nc" id="L521">			thrL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L522">			resultsP.add(thrL);</span>
+
+			// response time
+<span class="nc" id="L525">			responseL.setText(respStrS + &quot;0&quot; + respStrE);</span>
+<span class="nc" id="L526">			responseL.setFont(dCst.getNormalGUIFont());</span>
+<span class="nc" id="L527">			resultsP.add(responseL);</span>
+
+<span class="nc" id="L529">			updateFields();</span>
+
+<span class="nc" id="L531">			outputP.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L532">			c.weightx = 1;</span>
+<span class="nc" id="L533">			c.weighty = 0.7;</span>
+<span class="nc" id="L534">			c.gridy = 2;</span>
+<span class="nc" id="L535">			simulationP.add(outputP, c);</span>
+<span class="nc" id="L536">			outputP.add(outputTabP);</span>
+<span class="nc" id="L537">			txtScroll.setBorder(addTitle(&quot;Simulation Output&quot;, dCst.getSmallGUIFont()));</span>
+<span class="nc" id="L538">			txtScroll.setName(&quot;Text Output&quot;);</span>
+<span class="nc" id="L539">			outputTabP.add(statiDrawer);</span>
+<span class="nc" id="L540">			outputTabP.setTitleAt(0, &quot;States&quot;);</span>
+<span class="nc" id="L541">			outputTabP.add(txtScroll);</span>
+<span class="nc" id="L542">			outputTabP.setTitleAt(1, &quot;Log&quot;);</span>
+			//outputTA.setEditable(false);
+<span class="nc" id="L544">			outputTA.setAutoscrolls(true);</span>
+<span class="nc" id="L545">			txtScroll.add(outputTA);</span>
+<span class="nc" id="L546">			txtScroll.setViewportView(outputTA);</span>
+			// outputTabP.add(logD);
+			// outputTabP.setTitleAt(2, &quot;Results&quot;);
+<span class="nc" id="L549">			outputP.add(queueDrawer);</span>
+<span class="nc" id="L550">			JPanel p = new JPanel(new GridLayout(1, 2));</span>
+<span class="nc" id="L551">			p.add(accelerationP);</span>
+<span class="nc" id="L552">			p.add(jobsP);</span>
+<span class="nc" id="L553">			c.weightx = 0;</span>
+<span class="nc" id="L554">			c.weighty = 0;</span>
+<span class="nc" id="L555">			c.gridy = 3;</span>
+<span class="nc" id="L556">			simulationP.add(p, c);</span>
+<span class="nc" id="L557">			c.gridx = 0;</span>
+<span class="nc" id="L558">			c.weightx = 0;</span>
+<span class="nc" id="L559">			c.gridy = 4;</span>
+<span class="nc" id="L560">			c.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L561">			simulationP.add(buttonsP, c);</span>
+<span class="nc" id="L562">			playB.setText(&quot;start&quot;);</span>
+<span class="nc" id="L563">			buttonsP.add(playB);</span>
+<span class="nc" id="L564">			playB.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L566">					playBActionPerformed(evt);</span>
+<span class="nc" id="L567">				}</span>
+			});
+<span class="nc" id="L569">			stopB.setEnabled(false);</span>
+<span class="nc" id="L570">			stopB.setText(&quot;stop&quot;);</span>
+<span class="nc" id="L571">			buttonsP.add(stopB);</span>
+<span class="nc" id="L572">			stopB.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L574">					stopBActionPerformed(evt);</span>
+<span class="nc" id="L575">				}</span>
+			});
+<span class="nc" id="L577">			pauseB.setEnabled(false);</span>
+<span class="nc" id="L578">			pauseB.setText(&quot;pause&quot;);</span>
+<span class="nc" id="L579">			buttonsP.add(pauseB);</span>
+<span class="nc" id="L580">			pauseB.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent evt) {
+<span class="nc" id="L582">					pauseBActionPerformed(evt);</span>
+<span class="nc" id="L583">				}</span>
+			});
+
+			// menu
+<span class="nc" id="L587">			menuB = new JMenuBar();</span>
+<span class="nc" id="L588">			setJMenuBar(menuB);</span>
+			// queue
+<span class="nc" id="L590">			queueMenu = new JMenu(&quot;Queue&quot;);</span>
+
+<span class="nc" id="L592">			selectQueueRB = new AbstractAction(&quot;Select Station Type&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+<span class="nc" id="L598">					selectMethod();</span>
+<span class="nc" id="L599">				}</span>
+
+			};
+
+<span class="nc" id="L603">			queueMenu.add(selectQueueRB);</span>
+
+<span class="nc" id="L605">			queueMenu.addSeparator();</span>
+			// exitMenuItem = new JMenuItem();
+<span class="nc" id="L607">			Action exitAction = new AbstractAction(&quot;Exit&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+<span class="nc" id="L613">					dispose();</span>
+<span class="nc" id="L614">					Manager.exit(MMQueues.this);</span>
+<span class="nc" id="L615">				}</span>
+
+			};
+<span class="nc" id="L618">			queueMenu.add(exitAction);</span>
+<span class="nc" id="L619">			menuB.add(queueMenu);</span>
+
+			// settings
+<span class="nc" id="L622">			settingsMenu = new JMenu(&quot;Settings&quot;);</span>
+<span class="nc" id="L623">			colorsMenu = new JMenu(&quot;Colors&quot;);</span>
+<span class="nc" id="L624">			Action queueCAction = new AbstractAction(&quot;Probability...&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+					Color tmpC;
+<span class="nc" id="L631">					tmpC = JColorChooser.showDialog(null, &quot;Probability color&quot;, probC);</span>
+<span class="nc bnc" id="L632" title="All 2 branches missed.">					if (tmpC != null) {</span>
+						if (DEBUG) {
+							System.out.println(&quot;queueC - R:&quot; + tmpC.getRed() + &quot; G:&quot; + tmpC.getGreen() + &quot; B:&quot; + tmpC.getBlue());
+						}
+<span class="nc" id="L636">						probC = tmpC;</span>
+<span class="nc" id="L637">						changeColors();</span>
+					}
+<span class="nc" id="L639">				}</span>
+
+			};
+<span class="nc" id="L642">			colorsMenu.add(queueCAction);</span>
+<span class="nc" id="L643">			Action queueFCAction = new AbstractAction(&quot;Queue...&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+					Color tmpC;
+<span class="nc" id="L650">					tmpC = JColorChooser.showDialog(null, &quot;Queue color&quot;, queueC);</span>
+<span class="nc bnc" id="L651" title="All 2 branches missed.">					if (tmpC != null) {</span>
+						if (DEBUG) {
+							System.out.println(&quot;queueFC - R:&quot; + tmpC.getRed() + &quot; G:&quot; + tmpC.getGreen() + &quot; B:&quot; + tmpC.getBlue());
+						}
+<span class="nc" id="L655">						queueC = tmpC;</span>
+<span class="nc" id="L656">						changeColors();</span>
+					}
+<span class="nc" id="L658">				}</span>
+
+			};
+<span class="nc" id="L661">			colorsMenu.add(queueFCAction);</span>
+<span class="nc" id="L662">			colorsMenu.addSeparator();</span>
+<span class="nc" id="L663">			Action statusCAction = new AbstractAction(&quot;Empty state...&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+					Color tmpC;
+<span class="nc" id="L670">					tmpC = JColorChooser.showDialog(null, &quot;Empty state color&quot;, emptyC);</span>
+<span class="nc bnc" id="L671" title="All 2 branches missed.">					if (tmpC != null) {</span>
+						if (DEBUG) {
+							System.out.println(&quot;statusC - R:&quot; + tmpC.getRed() + &quot; G:&quot; + tmpC.getGreen() + &quot; B:&quot; + tmpC.getBlue());
+						}
+<span class="nc" id="L675">						emptyC = tmpC;</span>
+<span class="nc" id="L676">						changeColors();</span>
+					}
+<span class="nc" id="L678">				}</span>
+
+			};
+<span class="nc" id="L681">			colorsMenu.add(statusCAction);</span>
+<span class="nc" id="L682">			Action animCAction = new AbstractAction(&quot;Animation...&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+					Color tmpC;
+<span class="nc" id="L689">					tmpC = JColorChooser.showDialog(null, &quot;Animation color&quot;, animC);</span>
+<span class="nc bnc" id="L690" title="All 2 branches missed.">					if (tmpC != null) {</span>
+						if (DEBUG) {
+							System.out.println(&quot;animC - R:&quot; + tmpC.getRed() + &quot; G:&quot; + tmpC.getGreen() + &quot; B:&quot; + tmpC.getBlue());
+						}
+<span class="nc" id="L694">						animC = tmpC;</span>
+<span class="nc" id="L695">						changeColors();</span>
+					}
+<span class="nc" id="L697">				}</span>
+
+			};
+<span class="nc" id="L700">			colorsMenu.add(animCAction);</span>
+<span class="nc" id="L701">			colorsMenu.addSeparator();</span>
+
+			// gradientItem = new JRadioButtonMenuItem(&quot;usa gradiente&quot;, false);
+<span class="nc" id="L704">			gradientItem = new JRadioButtonMenuItem(&quot;Use gradient&quot;, false);</span>
+<span class="nc" id="L705">			gradientItem.addActionListener(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L707">					gradientF = gradientItem.isSelected();</span>
+<span class="nc" id="L708">					changeColors();</span>
+<span class="nc" id="L709">				}</span>
+			});
+<span class="nc" id="L711">			colorsMenu.add(gradientItem);</span>
+<span class="nc" id="L712">			settingsMenu.add(colorsMenu);</span>
+
+			// sizeMenu = new JMenu(&quot;Dimensioni&quot;);
+<span class="nc" id="L715">			sizeMenu = new JMenu(&quot;Icon size&quot;);</span>
+
+			// Action drawSmallAction = new AbstractAction(&quot;Piccole&quot;) {
+<span class="nc" id="L718">			Action drawSmallAction = new AbstractAction(&quot;Small&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+<span class="nc" id="L724">					dCst = new DrawSmall();</span>
+<span class="nc" id="L725">					changeSize();</span>
+<span class="nc" id="L726">				}</span>
+
+			};
+<span class="nc" id="L729">			sizeMenu.add(drawSmallAction);</span>
+
+			// Action drawNormalAction = new AbstractAction(&quot;Normali&quot;) {
+<span class="nc" id="L732">			Action drawNormalAction = new AbstractAction(&quot;Normal&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+<span class="nc" id="L738">					dCst = new DrawNormal();</span>
+<span class="nc" id="L739">					changeSize();</span>
+<span class="nc" id="L740">				}</span>
+
+			};
+<span class="nc" id="L743">			sizeMenu.add(drawNormalAction);</span>
+			// Action drawBigAction = new AbstractAction(&quot;Grandi&quot;) {
+<span class="nc" id="L745">			Action drawBigAction = new AbstractAction(&quot;Large&quot;) {</span>
+
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent event) {
+					// action code goes here
+<span class="nc" id="L751">					dCst = new DrawBig();</span>
+<span class="nc" id="L752">					changeSize();</span>
+<span class="nc" id="L753">				}</span>
+
+			};
+<span class="nc" id="L756">			sizeMenu.add(drawBigAction);</span>
+<span class="nc" id="L757">			settingsMenu.add(sizeMenu);</span>
+
+<span class="nc" id="L759">			menuB.add(settingsMenu);</span>
+
+			// help
+<span class="nc" id="L762">			helpMenu = new JMenu(&quot;Help&quot;);</span>
+
+<span class="nc" id="L764">			JMenuItem help = new JMenuItem();</span>
+<span class="nc" id="L765">			help.setText(&quot;JMCH Help&quot;);</span>
+<span class="nc" id="L766">			help.setToolTipText(&quot;Show JMCH help&quot;);</span>
+<span class="nc" id="L767">			help.addActionListener(new ActionListener() {</span>
+				/**
+				 * Invoked when an action occurs.
+				 */
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L772">					Runnable r = new Runnable() {</span>
+						public void run() {
+							try {
+<span class="nc" id="L775">								new PDFViewer(&quot;JMCH Manual&quot;, ChapterIdentifier.JMCH);</span>
+<span class="nc" id="L776">							} catch (Exception e) {</span>
+<span class="nc" id="L777">								e.printStackTrace();</span>
+<span class="nc" id="L778">							}</span>
+<span class="nc" id="L779">						}</span>
+					};
+<span class="nc" id="L781">					EventQueue.invokeLater(r);</span>
+<span class="nc" id="L782">				}</span>
+			});
+<span class="nc" id="L784">			helpMenu.add(help);</span>
+
+<span class="nc" id="L786">			helpMenu.addSeparator();</span>
+
+<span class="nc" id="L788">			JMenuItem about = new JMenuItem();</span>
+<span class="nc" id="L789">			about.setText(&quot;About JMCH&quot;);</span>
+<span class="nc" id="L790">			about.setToolTipText(&quot;About JMCH&quot;);</span>
+<span class="nc" id="L791">			about.addActionListener(new ActionListener() {</span>
+				/**
+				 * Invoked when an action occurs.
+				 */
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L796">					AboutDialogFactory.showJMCH(MMQueues.this);</span>
+<span class="nc" id="L797">				}</span>
+			});
+<span class="nc" id="L799">			helpMenu.add(about);</span>
+
+<span class="nc" id="L801">			menuB.add(helpMenu);</span>
+<span class="nc" id="L802">		} catch (Exception e) {</span>
+<span class="nc" id="L803">			e.printStackTrace();</span>
+<span class="nc" id="L804">		}</span>
+<span class="nc" id="L805">	}</span>
+
+	/**
+	 * Changes the size of the drawing text
+	 */
+	protected void changeSize() {
+<span class="nc" id="L811">		queueDrawer.changeDrawSettings(dCst);</span>
+<span class="nc" id="L812">		queueDrawer.repaint();</span>
+<span class="nc" id="L813">		statiDrawer.changeDrawSettings(dCst);</span>
+<span class="nc" id="L814">		statiDrawer.repaint();</span>
+<span class="nc" id="L815">		outputTA.changeDrawSettings(dCst);</span>
+		// logD.changeDrawSettings(dCst);
+<span class="nc" id="L817">		validate();</span>
+
+<span class="nc" id="L819">	}</span>
+
+	protected void changeColors() {
+<span class="nc" id="L822">		queueDrawer.setColors(emptyC, queueC, animC, gradientF);</span>
+<span class="nc" id="L823">		queueDrawer.repaint();</span>
+<span class="nc" id="L824">		statiDrawer.setColors(emptyC, queueC, probC, animC);</span>
+<span class="nc" id="L825">		statiDrawer.repaint();</span>
+<span class="nc" id="L826">	}</span>
+
+	protected void buffSStateChanged(ChangeEvent evt) {
+<span class="nc" id="L829">		buffer = buffS.getValue() - cpuNum;</span>
+<span class="nc bnc" id="L830" title="All 2 branches missed.">		if (buffer &lt; 1) {</span>
+<span class="nc" id="L831">			buffS.setValue(1);</span>
+<span class="nc" id="L832">			buffer = 1;</span>
+		}
+<span class="nc" id="L834">		ql.setMaxStates(buffer);</span>
+<span class="nc" id="L835">		queueDrawer.setMaxJobs(buffer + 1);</span>
+<span class="nc" id="L836">		statiDrawer.setMaxJobs(buffer + cpuNum);</span>
+<span class="nc" id="L837">		buffL.setText(bufStrS + buffS.getValue() + bufStrE);</span>
+<span class="nc" id="L838">		updateFields();</span>
+<span class="nc" id="L839">	}</span>
+
+	protected void showQueue(int queueType, int cpuNumber) {
+<span class="nc" id="L842">		buffer = BUFF_I;</span>
+<span class="nc" id="L843">		cpuNum = cpuNumber;</span>
+<span class="nc" id="L844">		buffS.setMaximum(30 + cpuNumber + 1);</span>
+<span class="nc" id="L845">		buffS.setMinimum(cpuNumber + 1);</span>
+<span class="nc" id="L846">		buffS.setValue(buffer + cpuNumber);</span>
+<span class="nc bnc" id="L847" title="All 5 branches missed.">		switch (queueType) {</span>
+
+		case 0:
+<span class="nc" id="L850">			buffer = 0;</span>
+<span class="nc" id="L851">			ql = new MM1Logic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier);</span>
+<span class="nc" id="L852">			buffPanel.setVisible(false);</span>
+<span class="nc" id="L853">			sS.setValue(S_I);</span>
+<span class="nc" id="L854">			lambdaS.setValue(LAMBDA_I);</span>
+<span class="nc" id="L855">			statiDrawer.updateLogic(ql);</span>
+<span class="nc" id="L856">			queueDrawer.updateLogic(ql);</span>
+<span class="nc" id="L857">			queueDrawer.setMaxJobs(0);</span>
+<span class="nc" id="L858">			statiDrawer.setMaxJobs(0);</span>
+<span class="nc" id="L859">			queueDrawer.setCpuNumber(1);</span>
+<span class="nc" id="L860">			updateFields();</span>
+<span class="nc" id="L861">			this.setTitle(&quot;JMCH - Markov Chain M/M/1  Station&quot;);</span>
+<span class="nc" id="L862">			break;</span>
+
+		case 1:
+			//buffer = BUFF_I;
+<span class="nc" id="L866">			ql = new MM1dLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, buffer);</span>
+<span class="nc" id="L867">			buffPanel.setVisible(true);</span>
+<span class="nc" id="L868">			sS.setValue(S_I);</span>
+<span class="nc" id="L869">			lambdaS.setValue(LAMBDA_I);</span>
+<span class="nc" id="L870">			statiDrawer.updateLogic(ql);</span>
+<span class="nc" id="L871">			queueDrawer.updateLogic(ql);</span>
+<span class="nc" id="L872">			queueDrawer.setMaxJobs(buffer + 1);</span>
+<span class="nc" id="L873">			statiDrawer.setMaxJobs(buffer + 1);</span>
+<span class="nc" id="L874">			queueDrawer.setCpuNumber(1);</span>
+<span class="nc" id="L875">			updateFields();</span>
+<span class="nc" id="L876">			this.setTitle(&quot;JMCH - Markov Chain M/M/1/k Finite Capacity Station&quot;);</span>
+<span class="nc" id="L877">			break;</span>
+
+		case 2:
+<span class="nc" id="L880">			buffer = 0;</span>
+<span class="nc" id="L881">			ql = new MMNLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber);</span>
+<span class="nc" id="L882">			buffPanel.setVisible(false);</span>
+<span class="nc" id="L883">			sS.setValue(S_I);</span>
+<span class="nc" id="L884">			lambdaS.setValue(LAMBDA_I);</span>
+<span class="nc" id="L885">			statiDrawer.updateLogic(ql);</span>
+<span class="nc" id="L886">			queueDrawer.updateLogic(ql);</span>
+<span class="nc" id="L887">			queueDrawer.setMaxJobs(0);</span>
+<span class="nc" id="L888">			statiDrawer.setMaxJobs(0);</span>
+<span class="nc" id="L889">			queueDrawer.setCpuNumber(cpuNumber);</span>
+<span class="nc" id="L890">			updateFields();</span>
+<span class="nc" id="L891">			this.setTitle(&quot;JMCH - Markov Chain M/M/&quot; + cpuNumber + &quot; Station&quot;);</span>
+<span class="nc" id="L892">			break;</span>
+
+		case 3:
+			//buffer = BUFF_I;
+<span class="nc" id="L896">			ql = new MMNdLogic(lambdaMultiplier * lambdaS.getValue(), sS.getValue() * sMultiplier, cpuNumber, buffer);</span>
+<span class="nc" id="L897">			buffPanel.setVisible(true);</span>
+<span class="nc" id="L898">			sS.setValue(S_I);</span>
+<span class="nc" id="L899">			lambdaS.setValue(LAMBDA_I);</span>
+<span class="nc" id="L900">			statiDrawer.updateLogic(ql);</span>
+<span class="nc" id="L901">			queueDrawer.updateLogic(ql);</span>
+<span class="nc" id="L902">			queueDrawer.setMaxJobs(buffer + 1);</span>
+<span class="nc" id="L903">			statiDrawer.setMaxJobs(buffer + cpuNumber);</span>
+<span class="nc" id="L904">			queueDrawer.setCpuNumber(cpuNumber);</span>
+<span class="nc" id="L905">			updateFields();</span>
+<span class="nc" id="L906">			this.setTitle(&quot;JMCH - Markov Chain M/M/&quot; + cpuNumber + &quot;/k Finite Capacity Station&quot;);</span>
+<span class="nc" id="L907">			break;</span>
+
+		default:
+			break;
+		}
+<span class="nc" id="L912">	}</span>
+
+	public static void main(String[] args) {
+<span class="nc" id="L915">		showGUI();</span>
+<span class="nc" id="L916">	}</span>
+
+	public static void showGUI() {
+		try {
+<span class="nc" id="L920">			MMQueues inst = new MMQueues();</span>
+<span class="nc" id="L921">			inst.setVisible(true);</span>
+<span class="nc" id="L922">			Manager.addWindow(inst);</span>
+<span class="nc" id="L923">		} catch (Exception e) {</span>
+<span class="nc" id="L924">			e.printStackTrace();</span>
+<span class="nc" id="L925">		}</span>
+<span class="nc" id="L926">	}</span>
+
+	private void setLogAnalyticalResults() {
+		try {
+<span class="nc bnc" id="L930" title="All 2 branches missed.">			if (ql.getMaxStates() == 0) {</span>
+<span class="nc" id="L931">				outputTA.setAnalyticalResult(ql.mediaJobs(), ql.utilization(), ql.throughput(), ql.responseTime(), ql.getLambda(), ql.getS(), 0);</span>
+			} else {
+<span class="nc" id="L933">				outputTA.setAnalyticalResult(ql.mediaJobs(), ql.utilization(), ql.throughput(), ql.responseTime(), ql.getLambda(), ql.getS(), ql</span>
+<span class="nc" id="L934">						.getStatusProbability(ql.getMaxStates() + ql.getNumberServer()));</span>
+			}
+<span class="nc" id="L936">		} catch (NonErgodicException e) {</span>
+<span class="nc" id="L937">			outputTA.setAnalyticalResult();</span>
+<span class="nc" id="L938">		}</span>
+<span class="nc" id="L939">	}</span>
+
+	protected void playBActionPerformed(ActionEvent evt) {
+<span class="nc" id="L942">		boolean goOn = true;</span>
+
+<span class="nc bnc" id="L944" title="All 2 branches missed.">		if (nonErgodic) {</span>
+<span class="nc bnc" id="L945" title="All 2 branches missed.">			if (JOptionPane.showConfirmDialog(this, &quot;The process is not ergodico.\nDo you want to continue?&quot;, &quot;Warning&quot;, JOptionPane.YES_NO_OPTION)</span>
+					== JOptionPane.NO_OPTION) {
+<span class="nc" id="L947">				goOn = false;</span>
+			}
+		}
+<span class="nc bnc" id="L950" title="All 2 branches missed.">		if (goOn) {</span>
+<span class="nc" id="L951">			CustomDialog jobsDialog = new CustomDialog(mf);</span>
+<span class="nc" id="L952">			jobsDialog.pack();</span>
+<span class="nc" id="L953">			jobsDialog.setLocationRelativeTo(mf);</span>
+<span class="nc" id="L954">			jobsDialog.setVisible(true);</span>
+<span class="nc" id="L955">			logFile.setLogging(false);</span>
+<span class="nc bnc" id="L956" title="All 2 branches missed.">			if (jobsDialog.isLogging()) {</span>
+<span class="nc bnc" id="L957" title="All 2 branches missed.">				if (jobsDialog.getLogFile() == null) {</span>
+<span class="nc" id="L958">					JOptionPane.showMessageDialog(mf, &quot;Logging check box is selected \n&quot; + &quot;but file is not selected.&quot;, &quot;Warning&quot;,</span>
+							JOptionPane.WARNING_MESSAGE);
+				} else {
+<span class="nc" id="L961">					logFile.setLogFile(jobsDialog.getLogFile(), jobsDialog.getDelimiterType(), mf);</span>
+<span class="nc" id="L962">					logFile.setLogging(true);</span>
+				}
+			}
+
+<span class="nc" id="L966">			jq = new JobQueue();</span>
+<span class="nc" id="L967">			queueDrawer.setMediaJobs(Q - U);</span>
+<span class="nc" id="L968">			queueDrawer.setTotalJobs(jobsDialog.getValidatedValue());</span>
+<span class="nc" id="L969">			jobsDrawer.setTotalJobs(jobsDialog.getValidatedValue());</span>
+<span class="nc" id="L970">			tan[0] = outputTA;</span>
+<span class="nc" id="L971">			tan[1] = queueDrawer;</span>
+<span class="nc" id="L972">			tan[2] = statiDrawer;</span>
+<span class="nc" id="L973">			tan[3] = jobsDrawer;</span>
+<span class="nc" id="L974">			tan[4] = logFile;</span>
+
+<span class="nc" id="L976">			arrival = new Arrivals(ql, jq, tan, jobsDialog.getValidatedValue());</span>
+
+			int numServer;
+<span class="nc" id="L979">			numServer = ql.getNumberServer();</span>
+<span class="nc" id="L980">			processors = new Processor[numServer];</span>
+<span class="nc bnc" id="L981" title="All 2 branches missed.">			for (int i = 0; i &lt; numServer; i++) {</span>
+<span class="nc" id="L982">				processors[i] = new Processor(ql, jq, tan, i/*, jobsDialog.getValidatedValue()*/);</span>
+			}
+
+<span class="nc" id="L985">			sim = new Simulator(arrival, processors, accelerationS.getValue(), tan);</span>
+
+<span class="nc" id="L987">			arrival.sim = sim;</span>
+<span class="nc bnc" id="L988" title="All 2 branches missed.">			for (int i = 0; i &lt; numServer; i++) {</span>
+<span class="nc" id="L989">				processors[i].sim = sim;</span>
+			}
+
+<span class="nc" id="L992">			sim.start();</span>
+
+<span class="nc" id="L994">			playB.setEnabled(false);</span>
+<span class="nc" id="L995">			stopB.setEnabled(true);</span>
+<span class="nc" id="L996">			pauseB.setEnabled(true);</span>
+<span class="nc" id="L997">			selectQueueRB.setEnabled(false);</span>
+
+<span class="nc" id="L999">			setLogAnalyticalResults();</span>
+		}
+<span class="nc" id="L1001">	}</span>
+
+	protected void stopBActionPerformed(ActionEvent evt) {
+<span class="nc" id="L1004">		stopProcessing(true);</span>
+<span class="nc" id="L1005">	}</span>
+
+	/** Auto-generated event handler method */
+	protected void pauseBActionPerformed(ActionEvent evt) {
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">		if (paused) {</span>
+<span class="nc" id="L1010">			paused = false;</span>
+<span class="nc" id="L1011">			sim.pause();</span>
+		} else {
+<span class="nc" id="L1013">			paused = true;</span>
+<span class="nc" id="L1014">			sim.pause();</span>
+<span class="nc" id="L1015">			outputTA.refresh();</span>
+<span class="nc" id="L1016">			logFile.refresh();</span>
+		}
+<span class="nc" id="L1018">	}</span>
+
+	/** Auto-generated event handler method */
+	protected void lambdaSStateChanged(ChangeEvent evt) {
+<span class="nc bnc" id="L1022" title="All 2 branches missed.">		if (lambdaS.getValue() == 0) {</span>
+<span class="nc" id="L1023">			lambdaMultiplier = 0.01;</span>
+<span class="nc" id="L1024">			lambdaMultiplierChange = 0;</span>
+<span class="nc" id="L1025">			lambdaS.setValue(1);</span>
+		}
+<span class="nc" id="L1027">		ql.setLambda(lambdaMultiplier * lambdaS.getValue());</span>
+<span class="nc" id="L1028">		lambdaL.setText(lambdaStrS + Formatter.formatNumber(lambdaS.getValue() * lambdaMultiplier, 2) + lambdaStrE);</span>
+<span class="nc" id="L1029">		setSSlider();</span>
+<span class="nc" id="L1030">		updateFields();</span>
+<span class="nc" id="L1031">	}</span>
+
+	protected void sSStateChanged(ChangeEvent evt) {
+<span class="nc" id="L1034">		setSSlider();</span>
+<span class="nc" id="L1035">		updateFields();</span>
+<span class="nc" id="L1036">	}</span>
+
+	private void updateFields() {
+		try {
+<span class="nc" id="L1040">			Q = ql.mediaJobs();</span>
+<span class="nc" id="L1041">			U = ql.utilization();</span>
+<span class="nc" id="L1042">			utilizationL.setForeground(Color.BLACK);</span>
+<span class="nc" id="L1043">			utilizationL.setText(uStrS + Formatter.formatNumber(U, 2) + uStrE);</span>
+<span class="nc" id="L1044">			mediaJobsL.setText(nStrS + Formatter.formatNumber(Q, 2) + nStrE);</span>
+
+<span class="nc" id="L1046">			thrL.setText(thrStrS + Formatter.formatNumber(ql.throughput(), 2) + thrStrE);</span>
+<span class="nc" id="L1047">			responseL.setText(respStrS + Formatter.formatNumber(ql.responseTime(), 2) + respStrE);</span>
+<span class="nc" id="L1048">			nonErgodic = false;</span>
+
+<span class="nc bnc" id="L1050" title="All 4 branches missed.">			if (sim != null &amp;&amp; ql.getLambda() &gt; 0) {</span>
+<span class="nc" id="L1051">				sim.setLambdaZero(false);</span>
+			}
+<span class="nc" id="L1053">		} catch (NonErgodicException e) {</span>
+<span class="nc" id="L1054">			Q = 0.0;</span>
+<span class="nc" id="L1055">			U = 0.0;</span>
+<span class="nc" id="L1056">			mediaJobsL.setText(nStrS + &quot;Saturation&quot;);</span>
+
+<span class="nc" id="L1058">			utilizationL.setForeground(Color.RED);</span>
+<span class="nc" id="L1059">			utilizationL.setText(uStrS + &quot;Saturation&quot;);</span>
+<span class="nc" id="L1060">			thrL.setText(thrStrS + &quot;Saturation&quot;);</span>
+<span class="nc" id="L1061">			responseL.setText(respStrS + &quot;Saturation&quot;);</span>
+<span class="nc" id="L1062">			nonErgodic = true;</span>
+<span class="nc" id="L1063">		}</span>
+<span class="nc" id="L1064">		queueDrawer.setMediaJobs(Q - U);</span>
+<span class="nc" id="L1065">		statiDrawer.repaint();</span>
+
+<span class="nc bnc" id="L1067" title="All 4 branches missed.">		if (sim == null || !sim.isStarted()) {</span>
+<span class="nc" id="L1068">			setLogAnalyticalResults();</span>
+		} else {
+<span class="nc" id="L1070">			outputTA.setAnalyticalResult();</span>
+		}
+<span class="nc" id="L1072">	}</span>
+
+	private TitledBorder addTitle(String title, Font f) {
+<span class="nc" id="L1075">		return new TitledBorder(null, title, TitledBorder.LEADING, TitledBorder.TOP, f, new java.awt.Color(0, 0, 0));</span>
+	}
+
+	public void stopProcessing(boolean isSaveFileOption) {
+<span class="nc" id="L1079">		sim.stop();</span>
+<span class="nc bnc" id="L1080" title="All 2 branches missed.">		while (sim.isRunning()) {</span>
+			//waiting to stop
+<span class="nc" id="L1082">			try {Thread.sleep(100);} </span>
+<span class="nc" id="L1083">			catch (InterruptedException e) {}</span>
+		}
+<span class="nc" id="L1085">		try {Thread.sleep(100);} </span>
+<span class="nc" id="L1086">		catch (InterruptedException e) {}</span>
+<span class="nc" id="L1087">		jq.clearQueue();</span>
+<span class="nc" id="L1088">		outputTA.reset();</span>
+<span class="nc" id="L1089">		logFile.reset();</span>
+<span class="nc" id="L1090">		queueDrawer.reset();</span>
+<span class="nc" id="L1091">		statiDrawer.reset();</span>
+<span class="nc" id="L1092">		jobsDrawer.reset();</span>
+
+<span class="nc" id="L1094">		playB.setEnabled(true);</span>
+<span class="nc" id="L1095">		stopB.setEnabled(false);</span>
+<span class="nc" id="L1096">		pauseB.setEnabled(false);</span>
+<span class="nc" id="L1097">		selectQueueRB.setEnabled(true);</span>
+
+<span class="nc" id="L1099">		updateFields();</span>
+<span class="nc" id="L1100">	}</span>
+
+	public void setSSlider() {
+		//sMultiplier = ql.getMaxErgodicS();
+<span class="nc" id="L1104">		Dictionary&lt;Integer, JLabel&gt; d = sS.getLabelTable();</span>
+		//for (int i = 0; i &lt; 6; i++) {
+		//	d.put(new Integer(i * 25), new JLabel(&quot;&quot; + Formatter.formatNumber(i * sMultiplier), 2));
+		//}
+<span class="nc bnc" id="L1108" title="All 2 branches missed.">		for (int i = sS.getMinimum(); i &lt;= sS.getMaximum(); i += sS.getMajorTickSpacing()) {</span>
+<span class="nc" id="L1109">			d.put(new Integer(i), new JLabel(&quot;&quot; + Formatter.formatNumber(i * sMultiplier, 2)));</span>
+		}
+<span class="nc" id="L1111">		sS.setLabelTable(d);</span>
+<span class="nc" id="L1112">		sL.setText(sStrS + Formatter.formatNumber(sS.getValue() * sMultiplier, 2) + sStrE);</span>
+<span class="nc" id="L1113">		sS.repaint();</span>
+<span class="nc" id="L1114">		ql.setS(sS.getValue() * sMultiplier);</span>
+<span class="nc" id="L1115">	}</span>
+
+	public void setLambdaSlider() {
+<span class="nc" id="L1118">		Dictionary&lt;Integer, JLabel&gt; ld = lambdaS.getLabelTable();</span>
+
+<span class="nc bnc" id="L1120" title="All 2 branches missed.">		for (int i = lambdaS.getMinimum(); i &lt;= lambdaS.getMaximum(); i += lambdaS.getMajorTickSpacing()) {</span>
+<span class="nc" id="L1121">			ld.put(new Integer(i), new JLabel(&quot;&quot; + Formatter.formatNumber(i * lambdaMultiplier, 2)));</span>
+		}
+
+		//for (int i = 0; i &lt;= 4; i++) {
+		//	ld.put(new Integer(i * 25), new JLabel(&quot;&quot; + Formatter.formatNumber(i * 0.25, 2)));
+		//}
+<span class="nc" id="L1127">		lambdaS.setLabelTable(ld);</span>
+<span class="nc" id="L1128">		ql.setLambda(lambdaMultiplier * lambdaS.getValue());</span>
+<span class="nc" id="L1129">		lambdaL.setText(lambdaStrS + Formatter.formatNumber(lambdaS.getValue() * lambdaMultiplier, 2) + lambdaStrE);</span>
+<span class="nc" id="L1130">	}</span>
+
+	public void setLambdaMultiplier() {
+		while (true) {
+<span class="nc bnc" id="L1134" title="All 2 branches missed.">			if (lambdaS.getValue() &gt; lambdaS.getMaximum() * 0.95) {</span>
+<span class="nc bnc" id="L1135" title="All 2 branches missed.">				if (lambdaMultiplierChange &lt;= 4) {</span>
+<span class="nc bnc" id="L1136" title="All 2 branches missed.">					if (lambdaMultiplierChange % 2 == 0) {</span>
+<span class="nc" id="L1137">						lambdaMultiplier *= 2;</span>
+<span class="nc" id="L1138">						setLambdaSlider();</span>
+<span class="nc" id="L1139">						lambdaS.setValue((lambdaS.getValue() + 1) / 2);</span>
+					} else {
+<span class="nc" id="L1141">						lambdaMultiplier *= 5;</span>
+<span class="nc" id="L1142">						setLambdaSlider();</span>
+<span class="nc" id="L1143">						lambdaS.setValue((lambdaS.getValue() + 1) / 5);</span>
+					}
+<span class="nc" id="L1145">					lambdaMultiplierChange++;</span>
+				} else {
+					break;
+				}
+<span class="nc bnc" id="L1149" title="All 2 branches missed.">			} else if (lambdaS.getValue() &lt; lambdaS.getMaximum() * 0.05) {</span>
+<span class="nc bnc" id="L1150" title="All 2 branches missed.">				if (lambdaMultiplierChange &gt; 0) {</span>
+<span class="nc bnc" id="L1151" title="All 2 branches missed.">					if (lambdaMultiplierChange % 2 == 1) {</span>
+<span class="nc" id="L1152">						lambdaMultiplier /= 2;</span>
+<span class="nc" id="L1153">						setLambdaSlider();</span>
+<span class="nc" id="L1154">						lambdaS.setValue(lambdaS.getValue() * 2);</span>
+					} else {
+<span class="nc" id="L1156">						lambdaMultiplier /= 5;</span>
+<span class="nc" id="L1157">						setLambdaSlider();</span>
+<span class="nc" id="L1158">						lambdaS.setValue(lambdaS.getValue() * 5);</span>
+					}
+<span class="nc" id="L1160">					lambdaMultiplierChange--;</span>
+				} else {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+<span class="nc" id="L1168">	}</span>
+
+	public void setSMultiplier() {
+		while (true) {
+<span class="nc bnc" id="L1172" title="All 2 branches missed.">			if (sS.getValue() &gt; sS.getMaximum() * 0.95) {</span>
+<span class="nc bnc" id="L1173" title="All 2 branches missed.">				if (sMultiplierChange &lt;= 4) {</span>
+<span class="nc bnc" id="L1174" title="All 2 branches missed.">					if (sMultiplierChange % 2 == 0) {</span>
+<span class="nc" id="L1175">						sMultiplier *= 2;</span>
+<span class="nc" id="L1176">						setSSlider();</span>
+<span class="nc" id="L1177">						sS.setValue((sS.getValue() + 1) / 2);</span>
+					} else {
+<span class="nc" id="L1179">						sMultiplier *= 5;</span>
+<span class="nc" id="L1180">						setSSlider();</span>
+<span class="nc" id="L1181">						sS.setValue((sS.getValue() + 1) / 5);</span>
+					}
+<span class="nc" id="L1183">					sMultiplierChange++;</span>
+				} else {
+					break;
+				}
+<span class="nc bnc" id="L1187" title="All 2 branches missed.">			} else if (sS.getValue() &lt; sS.getMaximum() * 0.05) {</span>
+<span class="nc bnc" id="L1188" title="All 2 branches missed.">				if (sMultiplierChange &gt; 0) {</span>
+<span class="nc bnc" id="L1189" title="All 2 branches missed.">					if (sMultiplierChange % 2 == 1) {</span>
+<span class="nc" id="L1190">						sMultiplier /= 2;</span>
+<span class="nc" id="L1191">						setSSlider();</span>
+<span class="nc" id="L1192">						sS.setValue(sS.getValue() * 2);</span>
+					} else {
+<span class="nc" id="L1194">						sMultiplier /= 5;</span>
+<span class="nc" id="L1195">						setSSlider();</span>
+<span class="nc" id="L1196">						sS.setValue(sS.getValue() * 5);</span>
+					}
+<span class="nc" id="L1198">					sMultiplierChange--;</span>
+				} else {
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+<span class="nc" id="L1206">	}</span>
+
+	private JPanel getSplitter(int widht, int height) {
+<span class="nc" id="L1209">		JPanel splitPane = new JPanel();</span>
+<span class="nc" id="L1210">		Dimension dim = new Dimension(widht, height);</span>
+<span class="nc" id="L1211">		splitPane.setEnabled(false);</span>
+<span class="nc" id="L1212">		splitPane.setPreferredSize(dim);</span>
+<span class="nc" id="L1213">		splitPane.setMaximumSize(dim);</span>
+<span class="nc" id="L1214">		splitPane.setMinimumSize(dim);</span>
+<span class="nc" id="L1215">		return splitPane;</span>
+	}
+
+	private void selectMethod() {
+<span class="nc" id="L1219">		CustomDialogMethod methodDialog = new CustomDialogMethod(this);</span>
+<span class="nc" id="L1220">		methodDialog.pack();</span>
+<span class="nc" id="L1221">		methodDialog.setLocationRelativeTo(mf);</span>
+<span class="nc" id="L1222">		methodDialog.setVisible(true);</span>
+
+<span class="nc" id="L1224">		String selectedMethod = methodDialog.getSelectedMethod();</span>
+<span class="nc bnc" id="L1225" title="All 2 branches missed.">		if (selectedMethod == &quot;mm1&quot;) {</span>
+<span class="nc" id="L1226">			showQueue(0, 1);</span>
+<span class="nc bnc" id="L1227" title="All 2 branches missed.">		} else if (selectedMethod == &quot;mm1k&quot;) {</span>
+<span class="nc" id="L1228">			showQueue(1, 1);</span>
+<span class="nc bnc" id="L1229" title="All 2 branches missed.">		} else if (selectedMethod == &quot;mmn&quot;) {</span>
+<span class="nc" id="L1230">			showQueue(2, methodDialog.getValidatedValue());</span>
+<span class="nc bnc" id="L1231" title="All 2 branches missed.">		} else if (selectedMethod == &quot;mmnk&quot;) {</span>
+<span class="nc" id="L1232">			showQueue(3, methodDialog.getValidatedValue());</span>
+		}
+<span class="nc" id="L1234">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

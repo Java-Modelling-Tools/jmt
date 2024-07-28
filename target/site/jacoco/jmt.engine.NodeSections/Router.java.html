@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Router.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Router.java</span></div><h1>Router.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.Arrays;
+
+import javax.swing.JOptionPane;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.RoutingStrategy;
+import jmt.engine.QueueNet.BlockingRegion;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeList;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * This class implements a router, which routes the jobs according to the specified
+ * routing strategies (one for each job class).
+ * &lt;br&gt;&lt;br&gt;
+ * The class has different constructors to create a generic router or a blocking
+ * region border queue, that is the router of a node which is inside a blocking
+ * region and which sends jobs also to nodes outside the region.
+ * When a job leaves the blocking region, the region input station must receive
+ * a message, in order to serve the blocked jobs.
+ * &lt;br&gt;
+ * However it is also possible to create a generic router and then to turn on/off the
+ * &quot;border router&quot; behaviour using the &lt;tt&gt;borderRouterTurnON(..)&lt;/tt&gt; and
+ * &lt;tt&gt;borderRouterTurnOFF()&lt;/tt&gt; methods.
+ *
+ * @author Francesco Radaelli, Stefano Omini
+ * @author Bertoli Marco - Fixed lockup issues with closed class and sinks 13/11/2005
+ * @author Bertoli Marco - Fixed bug with multiserver stations
+ * 
+ * Modified by Ashanka (Oct 2009) for FCR Bug fix: Events are created with job instead of null for EVENT_JOB_OUT_OF_REGION
+ */
+public class Router extends OutputSection {
+
+	private RoutingStrategy[] routingStrategies;
+
+	private NodeList outNodeList;
+	private RandomEngine randomEngine;
+	private boolean[] isClosedJobRoutingWarningShown;
+
+	/*-------------------BLOCKING REGION PROPERTIES-------------------*/
+
+	/*
+	these properties are used if this router is the border router of
+	a blocking region (i.e. it is connected also to nodes outside the
+	blocking region)
+	in fact, if the router sends a job outside the region, a message
+	must be sent to the input station of that region, to decrease the
+	number of jobs inside the region
+	 */
+
+	/** true if this router is the border router of a blocking region */
+	private boolean borderRouterON;
+	/** the blocking region this router belongs to */
+	private BlockingRegion myRegion;
+	/** the region input station of the blocking region */
+	private NetNode regionInputStation;
+
+	/*----------------------------------------------------------------*/
+
+	/**
+	 * Creates a new instance of Router.
+	 * @param routingStrategies Routing strategies, one for each class.
+	 */
+<span class="nc" id="L91">	public Router(RoutingStrategy[] routingStrategies) {</span>
+<span class="nc" id="L92">		this.routingStrategies = routingStrategies;</span>
+<span class="nc" id="L93">		borderRouterTurnOFF();</span>
+<span class="nc" id="L94">	}</span>
+
+	/**
+	 * Tells whether the &quot;border router&quot; behaviour has been turned on.
+	 * @return true, if the &quot;border router&quot; behaviour is on; false otherwise.
+	 */
+	public boolean isBorderRouterON() {
+<span class="nc" id="L101">		return borderRouterON;</span>
+	}
+
+	/**
+	 * Turns on the &quot;border router&quot; behaviour.
+	 * @param region the blocking region to which the owner node of this router
+	 * belongs.
+	 */
+	public void borderRouterTurnON(BlockingRegion region) {
+		//sets blocking region properties
+<span class="nc" id="L111">		borderRouterON = true;</span>
+<span class="nc" id="L112">		myRegion = region;</span>
+<span class="nc" id="L113">		regionInputStation = myRegion.getInputStation();</span>
+<span class="nc" id="L114">	}</span>
+
+	/**
+	 * Turns off the &quot;borderRouter&quot; behaviour.
+	 */
+	public void borderRouterTurnOFF() {
+		//sets blocking region properties
+<span class="nc" id="L121">		borderRouterON = false;</span>
+<span class="nc" id="L122">		myRegion = null;</span>
+<span class="nc" id="L123">		regionInputStation = null;</span>
+<span class="nc" id="L124">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L128">		outNodeList = node.getOutputNodes();</span>
+<span class="nc" id="L129">		randomEngine = node.getNetSystem().getEngine();</span>
+<span class="nc" id="L130">		JobClassList jobClasses = getJobClasses();</span>
+<span class="nc" id="L131">		isClosedJobRoutingWarningShown = new boolean[jobClasses.size()];</span>
+<span class="nc" id="L132">		Arrays.fill(isClosedJobRoutingWarningShown, false);</span>
+<span class="nc" id="L133">	}</span>
+
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc bnc" id="L137" title="All 5 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+<span class="nc" id="L140">			break;</span>
+
+		case NetEvent.EVENT_JOB:
+
+<span class="nc" id="L144">			Job job = message.getJob();</span>
+
+			//EVENT_JOB
+			//if the router is not busy, an output node is chosen using
+			//the routing strategy and a message containing the job is sent to it.
+
+<span class="nc" id="L150">			JobClass jobClass = job.getJobClass();</span>
+
+			//choose the outNode using the corresponding routing strategy
+<span class="nc" id="L153">			NetNode outNode = routingStrategies[jobClass.getId()].getOutNode(this, job);</span>
+			// Bertoli Marco: sanity checks with closed classes and sinks were moved inside
+			// routing strategies
+
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			if (outNode == null) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">				if (job instanceof ForkJob) {</span>
+<span class="nc" id="L159">					outNode = outNodeList.get((int) Math.floor(randomEngine.raw() * outNodeList.size()));</span>
+				} else {
+<span class="nc" id="L161">					showClosedJobRoutingWarning(jobClass);</span>
+<span class="nc" id="L162">					break;</span>
+				}
+			}
+
+			//send the job to all nodes identified by the strategy
+<span class="nc" id="L167">			send(job, 0.0, outNode);</span>
+
+			//Border router behaviour (used in case of blocking region)
+<span class="nc bnc" id="L170" title="All 2 branches missed.">			if (borderRouterON) {</span>
+				//the owner node of this router is inside the region: if the outNode is outside
+				//the region, it means that one job has left the blocking region so the region
+				//input station (its blocking router) must receive a particular message
+<span class="nc bnc" id="L174" title="All 2 branches missed.">				if (!myRegion.belongsToRegion(outNode)) {</span>
+<span class="nc" id="L175">					myRegion.decreaseOccupation(jobClass);</span>
+<span class="nc" id="L176">					send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);</span>
+					//Since now for blocking regions the job dropping is handles manually at node 
+					//level hence need to create events with Jobs ..Modified for FCR Bug Fix
+				}
+			}
+			break;
+
+		case NetEvent.EVENT_ACK:
+
+			//EVENT_ACK
+			//An ack is sent back to the service section.
+
+<span class="nc" id="L188">			sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);</span>
+<span class="nc" id="L189">			break;</span>
+
+		case NetEvent.EVENT_STOP:
+<span class="nc" id="L192">			break;</span>
+
+		default:
+<span class="nc" id="L195">			return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L198">		return MSG_PROCESSED;</span>
+	}
+
+	/**
+	 * Shows the closed job routing error.
+	 */
+	private void showClosedJobRoutingWarning(final JobClass jobClass) {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">		if (!isClosedJobRoutingWarningShown[jobClass.getId()]) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {</span>
+<span class="nc" id="L207">				System.out.println(&quot;JSIMengine - Warning: &quot; + getOwnerNode().getName()</span>
+<span class="nc" id="L208">						+ &quot; could not route one or more &quot; + jobClass.getName()</span>
+						+ &quot; jobs forward as its output stations are all sinks or routing is disabled.&quot;);
+			} else {
+<span class="nc" id="L211">				new Thread(new Runnable() {</span>
+					@Override
+					public void run() {
+						try {
+<span class="nc" id="L215">							Thread.sleep(800);</span>
+<span class="nc" id="L216">						} catch (InterruptedException e) {</span>
+<span class="nc" id="L217">						}</span>
+<span class="nc" id="L218">						JOptionPane.showMessageDialog(null, getOwnerNode().getName()</span>
+<span class="nc" id="L219">								+ &quot; could not route one or more &quot; + jobClass.getName()</span>
+								+ &quot; jobs forward as its output stations are all sinks or routing is disabled.&quot;,
+								&quot;JSIMengine - Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L222">					}</span>
+<span class="nc" id="L223">				}).start();</span>
+			}
+<span class="nc" id="L225">			isClosedJobRoutingWarningShown[jobClass.getId()] = true;</span>
+		}
+<span class="nc" id="L227">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

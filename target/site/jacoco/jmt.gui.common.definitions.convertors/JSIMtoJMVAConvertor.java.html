@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JSIMtoJMVAConvertor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.convertors</a> &gt; <span class="el_source">JSIMtoJMVAConvertor.java</span></div><h1>JSIMtoJMVAConvertor.java</h1><pre class="source lang-java linenums">package jmt.gui.common.definitions.convertors;
+
+import Jama.Matrix;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RandomRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+
+import java.util.*;
+
+<span class="nc" id="L18">public class JSIMtoJMVAConvertor {</span>
+
+    /**
+     * Converts a JSIM model to JMVA. Visits are computed from topology. To work well this
+     * method requires:
+     * &lt;ul&gt;
+     * &lt;li&gt; Reference station to be set for each class
+     * &lt;li&gt; Every station must have at least one incoming connection and one outgoing connection
+     * &lt;li&gt; Routing strategy have to be &lt;code&gt;ProbabilityRouting&lt;/code&gt; or &lt;code&gt;RandomRouting&lt;/code&gt;
+     * &lt;/ul&gt;
+     * @param input JSIM model (read only)
+     * @param output empty JMVA model (write)
+     * @return a vector that enumerates all conversion warnings and how they have been fixed
+     */
+    public static List&lt;String&gt; convert(CommonModel input, ExactModel output) {
+        // Manage probabilities
+<span class="nc" id="L34">        input.manageProbabilities();</span>
+
+        // Used to store warnings
+<span class="nc" id="L37">        ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();</span>
+        int classNum, stationNum;
+        // Used to iterate on lists
+        Iterator&lt;Object&gt; it;
+
+        // Number of classes
+<span class="nc" id="L43">        classNum = input.getClassKeys().size();</span>
+<span class="nc" id="L44">        Vector&lt;Object&gt; classKeys = input.getClassKeys();</span>
+
+        // Find number of convertible stations
+<span class="nc" id="L47">        it = input.getStationKeys().iterator();</span>
+<span class="nc" id="L48">        stationNum = 0;</span>
+<span class="nc" id="L49">        Vector&lt;Object&gt; stationKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+<span class="nc" id="L51">            Object key = it.next();</span>
+<span class="nc" id="L52">            String stationType = input.getStationType(key);</span>
+<span class="nc bnc" id="L53" title="All 4 branches missed.">            if (stationType.equals(CommonConstants.STATION_TYPE_DELAY) || stationType.equals(CommonConstants.STATION_TYPE_SERVER)) {</span>
+<span class="nc" id="L54">                stationNum++;</span>
+<span class="nc" id="L55">                stationKeys.add(key);</span>
+            }
+<span class="nc" id="L57">        }</span>
+
+        // Resizes output data structure
+<span class="nc" id="L60">        output.resize(stationNum, classNum);</span>
+
+        // Exports class data
+<span class="nc" id="L63">        exportClassData(input, output, classNum, classKeys, res);</span>
+
+        // Exports station data
+<span class="nc" id="L66">        exportStationData(input, output, stationNum, classNum, stationKeys, classKeys, res);</span>
+
+        // Now calculates visits starting from routing.
+<span class="nc" id="L69">        double[][] visits = new double[stationNum][classNum];</span>
+<span class="nc" id="L70">        double[] vis = null; // array used to store results of mldivide</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        for (int cl = 0; cl &lt; classNum; cl++) {</span>
+            // This is not equivalent to stationKeys as routers are considered
+<span class="nc" id="L73">            Vector&lt;Object&gt; stations = input.getStationKeysNoSourceSink();</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">            if (output.getClassTypes()[cl] == ExactConstants.CLASS_OPEN) {</span>
+                // Open class, must calculate routing from source
+<span class="nc" id="L76">                Object refStat = input.getClassRefStation(classKeys.get(cl));</span>
+                double[] p0;
+<span class="nc bnc" id="L78" title="All 6 branches missed.">                if (refStat == null || refStat.equals(CommonConstants.STATION_TYPE_FORK) || refStat.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)</span>
+<span class="nc bnc" id="L79" title="All 4 branches missed.">                        || refStat.equals(CommonConstants.STATION_TYPE_SCALER) || refStat.equals(CommonConstants.STATION_TYPE_TRANSITION)) {</span>
+                    // Reference station for this class was not valid
+<span class="nc" id="L81">                    Vector&lt;Object&gt; sources = input.getStationKeysSource();</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">                    if (sources.size() &gt; 0) {</span>
+<span class="nc" id="L83">                        refStat = sources.get(0);</span>
+<span class="nc" id="L84">                        res.add(&quot;Reference station for &quot; + output.getClassNames()[cl] + &quot; is not valid. &quot;</span>
+<span class="nc" id="L85">                                + input.getStationName(refStat) + &quot; is chosen instead.&quot;);</span>
+                    } else {
+<span class="nc" id="L87">                        res.add(&quot;Reference station for &quot; + output.getClassNames()[cl] + &quot; is not valid. &quot;</span>
+<span class="nc" id="L88">                                + output.getStationNames()[0] + &quot; is chosen instead.&quot;);</span>
+                    }
+                }
+
+<span class="nc bnc" id="L92" title="All 2 branches missed.">                if (refStat != null) {</span>
+<span class="nc" id="L93">                    p0 = getRoutingProbability(refStat, classKeys.get(cl), input, stations, res);</span>
+                } else {
+<span class="nc" id="L95">                    p0 = new double[stations.size()];</span>
+<span class="nc" id="L96">                    p0[0] = 1; // Assumes that all jobs enter first station</span>
+                }
+                try {
+<span class="nc" id="L99">                    Matrix b = new Matrix(p0, 1);</span>
+<span class="nc" id="L100">                    Matrix P = new Matrix(buildProbabilityMatrix(stations, input, classKeys.get(cl), res));</span>
+                    // V = (P-eye(3))' \ (-b') where \ is &quot;mldivide&quot;
+<span class="nc" id="L102">                    Matrix V = P.minus(Matrix.identity(stations.size(), stations.size())).solveTranspose(b.uminus());</span>
+<span class="nc" id="L103">                    vis = V.getColumnPackedCopy();</span>
+<span class="nc" id="L104">                } catch (Exception e) {</span>
+                    // Matrix is singular
+<span class="nc" id="L106">                    res.add(&quot;Cannot compute the number of visits for &quot; + output.getClassNames()[cl]</span>
+                            + &quot; as the topology of the model is badly specified.&quot;);
+<span class="nc" id="L108">                }</span>
+<span class="nc" id="L109">            } else {</span>
+                // Closed class, system is undefined, so sets visits to reference station to
+                // 1 and builds a smaller P matrix
+<span class="nc" id="L112">                Object refStat = input.getClassRefStation(classKeys.get(cl));</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">                if (refStat == null) {</span>
+<span class="nc" id="L114">                    refStat = stations.get(0);</span>
+<span class="nc" id="L115">                    res.add(&quot;Reference station for &quot; + output.getClassNames()[cl] + &quot; is not valid. &quot;</span>
+<span class="nc" id="L116">                            + input.getStationName(refStat) + &quot; is chosen instead.&quot;);</span>
+                }
+
+                // Sets visits to reference station (if allowed) to 1
+<span class="nc bnc" id="L120" title="All 2 branches missed.">                if (stationKeys.contains(refStat)) {</span>
+<span class="nc" id="L121">                    visits[stationKeys.lastIndexOf(refStat)][cl] = 1;</span>
+                }
+                // Removes reference station from stations vector and computes p0
+<span class="nc" id="L124">                stations.remove(refStat);</span>
+<span class="nc" id="L125">                double[] p0 = getRoutingProbability(refStat, classKeys.get(cl), input, stations, res);</span>
+
+                try {
+<span class="nc" id="L128">                    Matrix b = new Matrix(p0, 1);</span>
+<span class="nc" id="L129">                    Matrix P = new Matrix(buildProbabilityMatrix(stations, input, classKeys.get(cl), res));</span>
+                    // V = (P-eye(3))' \ (-b') where \ is &quot;mldivide&quot;
+<span class="nc" id="L131">                    Matrix V = P.minus(Matrix.identity(stations.size(), stations.size())).solveTranspose(b.uminus());</span>
+<span class="nc" id="L132">                    vis = V.getColumnPackedCopy();</span>
+<span class="nc" id="L133">                } catch (Exception e) {</span>
+                    // Matrix is singular
+<span class="nc" id="L135">                    res.add(&quot;Cannot compute the number of visits for &quot; + output.getClassNames()[cl]</span>
+                            + &quot; as the topology of the model is badly specified.&quot;);
+<span class="nc" id="L137">                }</span>
+            }
+
+            // Puts computed values into visits matrix. Rounds at 1e-10 for machine precision issues
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            if (vis != null) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">                for (int i = 0; i &lt; vis.length; i++) {</span>
+                    // Skips not allowed components (Routers, Terminals, Fork, Join....)
+<span class="nc bnc" id="L144" title="All 2 branches missed.">                    if (stationKeys.contains(stations.get(i))) {</span>
+<span class="nc" id="L145">                        visits[stationKeys.lastIndexOf(stations.get(i))][cl] = 1e-10 * Math.round(vis[i] * 1e10);</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L150">        output.setVisits(visits);</span>
+<span class="nc" id="L151">        return res;</span>
+    }
+
+    private static void exportClassData(CommonModel input, ExactModel output, int classNum, Vector&lt;Object&gt; classKeys, List&lt;String&gt; warnings) {
+<span class="nc" id="L155">        int[] classTypes = new int[classNum];</span>
+<span class="nc" id="L156">        String[] classNames = new String[classNum];</span>
+<span class="nc" id="L157">        double[] classData = new double[classNum];</span>
+<span class="nc" id="L158">        int[] classPriorities = new int[classNum];</span>
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">        for (int i = 0; i &lt; classNum; i++) {</span>
+<span class="nc" id="L161">            Object key = classKeys.get(i);</span>
+<span class="nc" id="L162">            classNames[i] = input.getClassName(key);</span>
+<span class="nc" id="L163">            classPriorities[i] = input.getClassPriority(key);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">            if (input.getClassType(key) == CommonConstants.CLASS_TYPE_CLOSED) {</span>
+                // Closed class parameters
+<span class="nc" id="L166">                classTypes[i] = ExactConstants.CLASS_CLOSED;</span>
+<span class="nc" id="L167">                classData[i] = input.getClassPopulation(key).doubleValue();</span>
+            } else {
+                // Open class parameters
+<span class="nc" id="L170">                classTypes[i] = ExactConstants.CLASS_OPEN;</span>
+<span class="nc" id="L171">                Distribution d = (Distribution) input.getClassDistribution(key);</span>
+<span class="nc bnc" id="L172" title="All 4 branches missed.">                if (d != null &amp;&amp; d.hasMean()) {</span>
+<span class="nc" id="L173">                    classData[i] = 1.0 / d.getMean();</span>
+                } else {
+<span class="nc" id="L175">                    classData[i] = 1.0;</span>
+<span class="nc" id="L176">                    warnings.add(&quot;Interarrival time distribution for &quot; + input.getClassName(key) + &quot; does not have a valid mean value. &quot;</span>
+                            + &quot;Arrival rate is set to default value 1.&quot;);
+                }
+            }
+        }
+        // Sets extracted values to output
+<span class="nc" id="L182">        output.setClassNames(classNames);</span>
+<span class="nc" id="L183">        output.setClassTypes(classTypes);</span>
+<span class="nc" id="L184">        output.setClassData(classData);</span>
+<span class="nc" id="L185">        output.setClassPriorities(classPriorities);</span>
+<span class="nc" id="L186">        classNames = null;</span>
+<span class="nc" id="L187">        classTypes = null;</span>
+<span class="nc" id="L188">        classData = null;</span>
+<span class="nc" id="L189">        classPriorities = null;</span>
+<span class="nc" id="L190">    }</span>
+
+    private static void exportStationData(CommonModel input,
+                                          ExactModel output,
+                                          int stationNum,
+                                          int classNum,
+                                          Vector&lt;Object&gt; stationKeys,
+                                          Vector&lt;Object&gt; classKeys,
+                                          List&lt;String&gt; warnings) {
+<span class="nc" id="L199">        double[][][] serviceTimes = new double[stationNum][classNum][];</span>
+<span class="nc" id="L200">        int[] stationTypes = new int[stationNum];</span>
+<span class="nc" id="L201">        String[] stationNames = new String[stationNum];</span>
+<span class="nc" id="L202">        int[] stationServers = new int[stationNum];</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">        for (int st = 0; st &lt; stationNum; st++) {</span>
+<span class="nc" id="L204">            Object key = stationKeys.get(st);</span>
+<span class="nc" id="L205">            stationNames[st] = input.getStationName(key);</span>
+<span class="nc" id="L206">            Integer serverNum = input.getStationNumberOfServers(key);</span>
+<span class="nc bnc" id="L207" title="All 4 branches missed.">            if (serverNum != null &amp;&amp; serverNum.intValue() &gt; 0) {</span>
+<span class="nc" id="L208">                stationServers[st] = serverNum.intValue();</span>
+            } else {
+<span class="nc" id="L210">                stationServers[st] = 1;</span>
+            }
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            if (input.getStationType(key).equals(CommonConstants.STATION_TYPE_DELAY)) {</span>
+<span class="nc" id="L213">                stationTypes[st] = ExactConstants.STATION_DELAY;</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">            } else if (input.getStationType(key).equals(CommonConstants.STATION_TYPE_SERVER)) {</span>
+                // A queue of some sort
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                if (input.getStationQueueStrategy(key).equals(CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE)) {</span>
+                    // FCFS Preemptive Resume
+                    // In JSIM, the only service strategy is LCFS but JMVA only has FCFS for preemptive scheduling
+<span class="nc" id="L219">                    stationTypes[st] = ExactConstants.STATION_PRS;</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">                } else if (input.getStationQueueStrategy(key).equals(CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {</span>
+                    // FCFS Non-preemptive Head-of-Line
+                    // Currently this is the only non-preemptive strategy
+<span class="nc" id="L223">                    stationTypes[st] = ExactConstants.STATION_HOL;</span>
+                } else {
+                    // JSIM implements more serving strategies than JMVA
+<span class="nc" id="L226">                    stationTypes[st] = ExactConstants.STATION_LI;</span>
+                }
+            } else {
+                // TODO: Should non-serving stations automatically be converted into servers?
+                // If so, should the user be informed about the change
+<span class="nc" id="L231">                stationTypes[st] = ExactConstants.STATION_LI;</span>
+            }
+
+            // Sets service time for each class
+<span class="nc bnc" id="L235" title="All 2 branches missed.">            for (int cl = 0; cl &lt; classNum; cl++) {</span>
+<span class="nc" id="L236">                Object serv = input.getServiceTimeDistribution(key, classKeys.get(cl));</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">                if (serv instanceof Distribution) {</span>
+<span class="nc" id="L238">                    Distribution d = (Distribution) serv;</span>
+<span class="nc" id="L239">                    serviceTimes[st][cl] = new double[1]; // This is not load dependent</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                    if (d.hasMean()) {</span>
+<span class="nc" id="L241">                        serviceTimes[st][cl][0] = d.getMean();</span>
+                    } else {
+<span class="nc" id="L243">                        serviceTimes[st][cl][0] = 1;</span>
+<span class="nc" id="L244">                        warnings.add(&quot;Service time distribution for &quot; + output.getClassNames()[cl] + &quot; at &quot; + output.getStationNames()[st]</span>
+                                + &quot; does not have a valid mean value. Service time is set to default value 1.&quot;);
+                    }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                } else if (serv instanceof ZeroStrategy) {</span>
+<span class="nc" id="L248">                    serviceTimes[st][cl] = new double[1];</span>
+<span class="nc" id="L249">                    serviceTimes[st][cl][0] = 0;</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                } else if (serv instanceof DisabledStrategy) {</span>
+<span class="nc" id="L251">                    serviceTimes[st][cl] = new double[1];</span>
+<span class="nc" id="L252">                    serviceTimes[st][cl][0] = 0;</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                } else if (serv instanceof LDStrategy) {</span>
+<span class="nc" id="L254">                    LDStrategy lds = (LDStrategy) serv;</span>
+<span class="nc bnc" id="L255" title="All 4 branches missed.">                    if (output.isClosed() &amp;&amp; output.isSingleClass()) {</span>
+<span class="nc" id="L256">                        int pop = input.getClassPopulation(classKeys.get(cl)).intValue();</span>
+<span class="nc" id="L257">                        serviceTimes[st][cl] = new double[pop]; // This is load dependent</span>
+<span class="nc" id="L258">                        stationTypes[st] = ExactConstants.STATION_LD;</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                        for (int i = 0; i &lt; pop; i++) {</span>
+<span class="nc" id="L260">                            serviceTimes[st][cl][i] = lds.getMeanValue(i);</span>
+                        }
+<span class="nc" id="L262">                    } else {</span>
+<span class="nc" id="L263">                        serviceTimes[st][cl] = new double[1]; // This is not load dependent</span>
+<span class="nc" id="L264">                        serviceTimes[st][cl][0] = lds.getMeanValue(1);</span>
+<span class="nc" id="L265">                        warnings.add(&quot;LD stations are supported only if the model has a single closed class. &quot;</span>
+                                + stationNames[st] + &quot; is converted to a LI station.&quot;);
+                    }
+                }
+            }
+        }
+        // Sets extracted values to output
+<span class="nc" id="L272">        output.setStationNames(stationNames);</span>
+<span class="nc" id="L273">        output.setStationServers(stationServers);</span>
+<span class="nc" id="L274">        output.setStationTypes(stationTypes);</span>
+<span class="nc" id="L275">        output.setServiceTimes(serviceTimes);</span>
+<span class="nc" id="L276">    }</span>
+
+    /**
+     * This method will return a reachability vector for given station and given class
+     * @param stationKey search's key for given station
+     * @param classKey search's key for given class
+     * @param model model data structure
+     * @param stations vector with ordered station keys (the same order is used in output array)
+     * @param warnings vector Vector to store warnings found during computation
+     * @return an array with probability to reach each other station starting from given station
+     */
+    private static double[] getRoutingProbability(Object stationKey, Object classKey, CommonModel model, List&lt;Object&gt; stations, List&lt;String&gt; warnings) {
+<span class="nc" id="L288">        double[] p = new double[stations.size()];</span>
+<span class="nc" id="L289">        RoutingStrategy strategy = (RoutingStrategy) model.getRoutingStrategy(stationKey, classKey);</span>
+<span class="nc" id="L290">        String type = model.getStationType(stationKey);</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        if (type.equals(CommonConstants.STATION_TYPE_FORK)</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_JOIN)</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_LOGGER)</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_CLASSSWITCH)</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_SEMAPHORE)</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_SCALER)</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_PLACE)</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                || type.equals(CommonConstants.STATION_TYPE_TRANSITION)) {</span>
+<span class="nc" id="L299">            warnings.add(&quot;Station type of &quot; + model.getStationName(stationKey) + &quot; is &quot; + type</span>
+                    + &quot;, which is considered as Router in JMVA.&quot;);
+        }
+<span class="nc bnc" id="L302" title="All 2 branches missed.">        if (strategy instanceof ProbabilityRouting) {</span>
+<span class="nc" id="L303">            Map&lt;Object, Double&gt; routingMap = ((ProbabilityRouting) strategy).getValues();</span>
+<span class="nc" id="L304">            Iterator&lt;Object&gt; it = routingMap.keySet().iterator();</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">            while (it.hasNext()) {</span>
+<span class="nc" id="L306">                Object dest = it.next();</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                if (stations.lastIndexOf(dest) &gt;= 0) {</span>
+<span class="nc" id="L308">                    p[stations.lastIndexOf(dest)] = (routingMap.get(dest)).doubleValue();</span>
+                }
+<span class="nc" id="L310">            }</span>
+<span class="nc" id="L311">        } else {</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">            if (type.equals(CommonConstants.STATION_TYPE_FORK)</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">                    || type.equals(CommonConstants.STATION_TYPE_SCALER)</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">                    || type.equals(CommonConstants.STATION_TYPE_PLACE)</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">                    || type.equals(CommonConstants.STATION_TYPE_TRANSITION)) {</span>
+<span class="nc" id="L316">                strategy = new RandomRouting();</span>
+            }
+<span class="nc bnc" id="L318" title="All 2 branches missed.">            if (!(strategy instanceof RandomRouting)) {</span>
+<span class="nc" id="L319">                warnings.add(&quot;Routing strategy for &quot; + model.getClassName(classKey) + &quot; at &quot; + model.getStationName(stationKey) + &quot; is &quot; + strategy.getName()</span>
+                        + &quot;, which is considered as Random in JMVA.&quot;);
+            }
+
+<span class="nc" id="L323">            Vector&lt;Object&gt; links = model.getForwardConnections(stationKey);</span>
+<span class="nc" id="L324">            int linksNum = links.size();</span>
+            // Now ignores sinks for closed classes
+<span class="nc bnc" id="L326" title="All 2 branches missed.">            if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_CLOSED) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                for (int i = 0; i &lt; links.size(); i++) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                    if (model.getStationType(links.get(i)).equals(CommonConstants.STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L329">                        linksNum--;</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L334">            double weight = 1.0 / linksNum;</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">            for (int i = 0; i &lt; links.size(); i++) {</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">                if (stations.contains(links.get(i))) {</span>
+<span class="nc" id="L337">                    p[stations.lastIndexOf(links.get(i))] = weight;</span>
+                }
+            }
+        }
+
+<span class="nc" id="L342">        return p;</span>
+    }
+
+    /**
+     * Builds a routing probability matrix for a given set of stations
+     * @param stations stations to be considered
+     * @param model data structure
+     * @param classKey search's key for target class
+     * @param warnings Vector where computation warnings must be put
+     * @return computed routing probability matrix
+     */
+    private static double[][] buildProbabilityMatrix(List&lt;Object&gt; stations, CommonModel model, Object classKey, List&lt;String&gt; warnings) {
+<span class="nc" id="L354">        double[][] matrix = new double[stations.size()][stations.size()];</span>
+        double[] tmp;
+<span class="nc bnc" id="L356" title="All 2 branches missed.">        for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc" id="L357">            tmp = getRoutingProbability(stations.get(i), classKey, model, stations, warnings);</span>
+<span class="nc" id="L358">            System.arraycopy(tmp, 0, matrix[i], 0, tmp.length);</span>
+        }
+<span class="nc" id="L360">        return matrix;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

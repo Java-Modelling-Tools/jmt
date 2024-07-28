@@ -1,0 +1,1135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BezierEdgeModificationState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller</a> &gt; <span class="el_source">BezierEdgeModificationState.java</span></div><h1>BezierEdgeModificationState.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller;
+
+import jmt.gui.jsimgraph.JGraphMod.*;
+import jmt.gui.jsimgraph.UtilPoint;
+import jmt.gui.jsimgraph.definitions.JMTArc;
+import jmt.gui.jsimgraph.definitions.JMTPath;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
+import org.jgraph.graph.DefaultPort;
+import org.jgraph.graph.GraphConstants;
+import org.jgraph.graph.PortView;
+
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.*;
+import java.util.ArrayList;
+/**
+ * &lt;p&gt;Title:  Handles all the events when the user modifies a Bezier connection &lt;/p&gt;
+ * &lt;p&gt;Description: This class handles all the all the possible actions when modifying a Bezier connection&lt;/p&gt;
+ *
+ * @author Emma Bortone
+ *         Date: 2020
+ *
+ */
+
+public class BezierEdgeModificationState extends UIStateDefault {
+
+<span class="nc" id="L45">	private JmtEdge edge = null;</span>
+<span class="nc" id="L46">	private  java.util.List controlPoints = new ArrayList&lt;&gt;();</span>
+
+
+<span class="nc" id="L49">	private Point2D selectedPoint =null; //control point where the user clicked</span>
+	private GraphMouseListener ml;//reference to mouse listener
+
+<span class="nc" id="L52">	private Graphics2D dashedGraphics =null;</span>
+	protected JMTPath path; //edge path (modified when validating an action)
+	protected  Point2D source;
+	protected Point2D target;
+	private JMTPath path_tmp; //temporary edge path
+	private String indexCurrentArc; //index of the arc where the user clicked
+	private int typeControlPoint; //type of the control point (0 = source; 1 = first tangent; 2 = scd tangent; 3 = target)
+	private boolean lockedTangent; //true if tangent is locked
+	private boolean brokenArc; //true if the arc is broken
+
+<span class="nc" id="L62">	protected String state=&quot;SELECT&quot;; //can be SELECT; ADD_TGTS; DEL_POINT; UNLOCK; BREAK; ADD_POINT</span>
+	protected Point2D current; // current position of the mouse
+
+
+	/** Creates the select state
+	 *
+	 * @param mediator
+	 * @param ml
+	 */
+	public BezierEdgeModificationState(Mediator mediator, GraphMouseListener ml) {
+<span class="nc" id="L72">		super(mediator);</span>
+<span class="nc" id="L73">		this.ml = ml;</span>
+<span class="nc" id="L74">	}</span>
+
+	/**
+	 * Handles press event, it selects the cell that is under the pointer
+	 * If there is no cell deselects. There is also the possibility of
+	 * activating the marquee handler
+	 *
+	 * @param e press mouse event
+	 */
+	@Override
+	public void handlePress(MouseEvent e) {
+//		System.out.println(&quot;BezierEdgeModificationState -&gt; handlePress click on x=&quot;+e.getX()+&quot;  y=&quot;+e.getY());
+<span class="nc bnc" id="L86" title="All 10 branches missed.">		if (state.equals(&quot;SELECT&quot;) || state.equals(&quot;DEL_POINT&quot;) || state.equals(&quot;UNLOCK&quot;) || state.equals(&quot;BREAK&quot;) || state.equals(&quot;ADD_TGTS&quot;)) {</span>
+<span class="nc bnc" id="L87" title="All 4 branches missed.">			if (selectedPoint == null &amp;&amp; (!e.isConsumed()) ){</span>
+<span class="nc" id="L88">				boolean pressedOnControlPoint = false;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">				if (selectControlPoint(e.getPoint())){</span>
+<span class="nc" id="L90">					pressedOnControlPoint =true;</span>
+
+<span class="nc bnc" id="L92" title="All 6 branches missed.">					if (state.equals(&quot;UNLOCK&quot;) &amp;&amp; (typeControlPoint==1 || typeControlPoint ==2)){</span>
+<span class="nc" id="L93">						lockedTangent=false;</span>
+					}
+				}
+<span class="nc bnc" id="L96" title="All 2 branches missed.">				if (!pressedOnControlPoint){</span>
+<span class="nc" id="L97">					mediator.hideBezierEditingPanel();</span>
+<span class="nc" id="L98">					ml.setSelectState();</span>
+<span class="nc" id="L99">					ml.setHandle(null);</span>
+<span class="nc" id="L100">					ml.getCurrentState().handlePress(e);</span>
+				}else {
+<span class="nc" id="L102">					e.consume();</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if(state.equals(&quot;ADD_POINT&quot;)){</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			if (!e.isConsumed()){</span>
+<span class="nc" id="L108">				boolean pressedOnArc = false;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">				if (selectArc(e.getPoint())){</span>
+<span class="nc" id="L110">					pressedOnArc =true;</span>
+				}
+<span class="nc bnc" id="L112" title="All 2 branches missed.">				if (!pressedOnArc){</span>
+<span class="nc" id="L113">					ml.setSelectState();</span>
+<span class="nc" id="L114">					mediator.hideBezierEditingPanel();</span>
+<span class="nc" id="L115">					ml.setHandle(null);</span>
+<span class="nc" id="L116">					ml.getCurrentState().handlePress(e);</span>
+				}else {
+<span class="nc" id="L118">					e.consume();</span>
+				}
+			}
+		}
+<span class="nc" id="L122">	}</span>
+
+	@Override
+	public void handleMove(MouseEvent e) {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if (!e.isConsumed()) {</span>
+<span class="nc bnc" id="L127" title="All 4 branches missed.">			if (state.equals(&quot;SELECT&quot;) || state.equals(&quot;DEL_POINT&quot;)) {</span>
+<span class="nc" id="L128">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L129">				highlightPoints(g, e.getPoint());</span>
+
+<span class="nc" id="L131">				current = mediator.snap(e.getPoint());</span>
+			}
+<span class="nc bnc" id="L133" title="All 2 branches missed.">			if (state.equals(&quot;UNLOCK&quot;)) {</span>
+<span class="nc" id="L134">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L135">				highlightTangentsPoints(g, e.getPoint());</span>
+
+<span class="nc" id="L137">				current = mediator.snap(e.getPoint());</span>
+			}
+<span class="nc bnc" id="L139" title="All 2 branches missed.">			if (state.equals(&quot;BREAK&quot;)){</span>
+<span class="nc" id="L140">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L141">				highlightIntermediaryPoints(g, e.getPoint());</span>
+
+<span class="nc" id="L143">				current = mediator.snap(e.getPoint());</span>
+			}
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (state.equals(&quot;ADD_TGTS&quot;)){</span>
+<span class="nc" id="L146">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L147">				highlightSharpIntermediaryPoint(g, e.getPoint());</span>
+
+<span class="nc" id="L149">				current = mediator.snap(e.getPoint());</span>
+			}
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			if (state.equals(&quot;ADD_POINT&quot;)){</span>
+<span class="nc" id="L152">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L153">				highlightArc(g, e.getPoint());</span>
+
+<span class="nc" id="L155">				current = mediator.snap(e.getPoint());</span>
+			}
+<span class="nc" id="L157">			e.consume();</span>
+		}
+<span class="nc" id="L159">	}</span>
+
+	@Override
+	public void handleDrag(MouseEvent e) {
+<span class="nc bnc" id="L163" title="All 4 branches missed.">		if (indexCurrentArc!=null &amp;&amp; selectedPoint != null){</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">			if (state.equals(&quot;SELECT&quot;)){</span>
+<span class="nc bnc" id="L165" title="All 4 branches missed.">				if (!isFirstPoint(typeControlPoint, Integer.parseInt(indexCurrentArc)) &amp;&amp; !isLastPoint(typeControlPoint, Integer.parseInt(indexCurrentArc))) {</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">					if (!e.isConsumed()) {</span>
+<span class="nc" id="L167">						Graphics2D g = mediator.getGraphGraphics();</span>
+						//If broken arc, highlight other point of the broken piece
+<span class="nc" id="L169">						highlightBrokenArcMergingPoint(g, e.getPoint());</span>
+
+<span class="nc" id="L171">						drawOverlay(g);</span>
+
+<span class="nc" id="L173">						current = mediator.snap(e.getPoint());</span>
+
+<span class="nc" id="L175">						moveControlPoints();</span>
+
+<span class="nc" id="L177">						drawOverlay(g);</span>
+<span class="nc" id="L178">						e.consume();</span>
+<span class="nc" id="L179">					}</span>
+				}
+				else {
+<span class="nc bnc" id="L182" title="All 2 branches missed.">					if (!e.isConsumed()) {</span>
+<span class="nc" id="L183">						Graphics2D g = mediator.getGraphGraphics();</span>
+
+<span class="nc" id="L185">						current = mediator.snap(e.getPoint());</span>
+<span class="nc" id="L186">						snapMouseInCellRegion(g,e.isShiftDown());</span>
+
+<span class="nc" id="L188">						drawOverlay(g);</span>
+
+<span class="nc" id="L190">						moveControlPoints();</span>
+
+<span class="nc" id="L192">						drawOverlay(g);</span>
+<span class="nc" id="L193">						e.consume();</span>
+					}
+				}
+			}
+		}
+<span class="nc bnc" id="L198" title="All 2 branches missed.">		if (state.equals(&quot;UNLOCK&quot;)) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			if (!e.isConsumed()) {</span>
+<span class="nc bnc" id="L200" title="All 8 branches missed.">				if ((selectedPoint != null)  &amp;&amp; (indexCurrentArc != null) &amp;&amp; (typeControlPoint==1 || typeControlPoint ==2)) {</span>
+
+<span class="nc" id="L202">					Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L203">					drawOverlay(g);</span>
+
+<span class="nc" id="L205">					current = mediator.snap(e.getPoint());</span>
+<span class="nc" id="L206">					moveControlPoints();</span>
+
+<span class="nc" id="L208">					drawOverlay(g);</span>
+				}
+<span class="nc" id="L210">				e.consume();</span>
+			}
+		}
+<span class="nc" id="L213">	}</span>
+
+	@Override
+	public void handleRelease(MouseEvent e) {
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		if (!e.isConsumed()) {</span>
+<span class="nc bnc" id="L218" title="All 4 branches missed.">			if (state.equals(&quot;SELECT&quot;) || state.equals(&quot;UNLOCK&quot;) ) {</span>
+<span class="nc bnc" id="L219" title="All 4 branches missed.">				if ((selectedPoint != null) &amp;&amp; (indexCurrentArc != null)) {</span>
+<span class="nc" id="L220">					validateAction();</span>
+				}
+<span class="nc" id="L222">				e.consume();</span>
+<span class="nc" id="L223">				mediator.graphRepaint();</span>
+			}
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (state.equals(&quot;DEL_POINT&quot;)) {</span>
+<span class="nc bnc" id="L226" title="All 4 branches missed.">				if ((selectedPoint != null) &amp;&amp; (indexCurrentArc != null) ) {</span>
+<span class="nc" id="L227">					deleteControlPoint();</span>
+<span class="nc" id="L228">					validateAction();</span>
+				}
+<span class="nc" id="L230">				e.consume();</span>
+<span class="nc" id="L231">				mediator.graphRepaint();</span>
+			}
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			if (state.equals(&quot;BREAK&quot;)) {</span>
+<span class="nc bnc" id="L234" title="All 4 branches missed.">				if ((selectedPoint != null) &amp;&amp; (indexCurrentArc != null) ) {</span>
+<span class="nc" id="L235">					breakArc();</span>
+<span class="nc" id="L236">					validateAction();</span>
+				}
+<span class="nc" id="L238">				e.consume();</span>
+<span class="nc" id="L239">				mediator.graphRepaint();</span>
+			}
+<span class="nc bnc" id="L241" title="All 2 branches missed.">			if (state.equals(&quot;ADD_TGTS&quot;)){</span>
+<span class="nc bnc" id="L242" title="All 4 branches missed.">				if ((selectedPoint != null) &amp;&amp; (indexCurrentArc != null) ) {</span>
+<span class="nc" id="L243">					addTangents();</span>
+<span class="nc" id="L244">					validateAction();</span>
+				}
+<span class="nc" id="L246">				e.consume();</span>
+<span class="nc" id="L247">				mediator.graphRepaint();</span>
+			}
+<span class="nc bnc" id="L249" title="All 2 branches missed.">			if (state.equals(&quot;ADD_POINT&quot;)){</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">				if (indexCurrentArc!=  null) {</span>
+<span class="nc" id="L251">					addIntermediaryPoint();</span>
+<span class="nc" id="L252">					validateAction();</span>
+				}
+<span class="nc" id="L254">				e.consume();</span>
+<span class="nc" id="L255">				mediator.graphRepaint();</span>
+			}
+		}
+
+<span class="nc" id="L259">	}</span>
+
+	@Override
+	public void handleEnter(MouseEvent e) {
+<span class="nc" id="L263">		mediator.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));</span>
+<span class="nc" id="L264">	}</span>
+
+	/**
+	 * Sets the edge to be modified
+	 */
+	public void setEdge(JmtEdge edge) {
+		//set Edge
+<span class="nc" id="L271">		this.edge = edge;</span>
+
+		//set control points
+<span class="nc" id="L274">		JmtEdgeView edgeView = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(edge, false);</span>
+<span class="nc" id="L275">		controlPoints = new ArrayList();</span>
+<span class="nc" id="L276">		controlPoints.addAll(edgeView.getPoints());</span>
+
+		//set path
+<span class="nc" id="L279">		path = mediator.getModel().getConnectionShape(edge.getSourceKey(),edge.getTargetKey());</span>
+<span class="nc" id="L280">		path_tmp = new JMTPath(path);</span>
+
+		// set source and target
+<span class="nc" id="L283">		 source = ((PortView) edgeView.getSource()).getLocation();</span>
+<span class="nc" id="L284">		 target =((PortView) edgeView.getTarget()).getLocation();</span>
+
+<span class="nc" id="L286">	}</span>
+
+	/**
+	 * Updates the state
+	 */
+	public void setState(String state){
+<span class="nc" id="L292">		this.state=state;</span>
+<span class="nc" id="L293">		this.selectedPoint=null;</span>
+<span class="nc" id="L294">		this.indexCurrentArc=null;</span>
+<span class="nc" id="L295">	};</span>
+
+	/**
+	 * This function updates the path according to the temporary path and re-initialize the state
+	 * This function is used when the users release the mouse after a modification
+	 */
+	private void validateAction() {
+<span class="nc" id="L302">		path.setArcs(path_tmp.getArcs());</span>
+<span class="nc" id="L303">		selectedPoint = null;</span>
+<span class="nc" id="L304">		indexCurrentArc =null;</span>
+<span class="nc" id="L305">		mediator.editConnectionLabels(edge.getSourceKey(),edge.getTargetKey(), source, target, edge);</span>
+<span class="nc" id="L306">		mediator.graphRepaint();</span>
+<span class="nc" id="L307">		mediator.getGraph().getGraphLayoutCache().reload();</span>
+<span class="nc" id="L308">		ml.setBezierEdgeModificationState(edge);</span>
+<span class="nc" id="L309">	}</span>
+
+	/**
+	 * Creates tolerance square around a point
+	 * @param p  point
+	 * @param side side of the square
+	 * @return shape of the rectangle
+	 */
+	private Shape getToleranceRectangle(Point2D p, double side) {
+		// Create a small square around the given point.
+<span class="nc" id="L319">		return new Rectangle2D.Double(</span>
+<span class="nc" id="L320">				p.getX() - side / 2, p.getY() - side / 2,</span>
+				side, side);
+	}
+
+	/**
+	 * Creates the dashed graphics
+	 * @param g graphics2D
+	 */
+	private void createDashedGraphics(Graphics2D g){
+<span class="nc" id="L329">		dashedGraphics = (Graphics2D) g.create();</span>
+		BasicStroke dashed;
+<span class="nc" id="L331">		dashed =new BasicStroke(1.0f,</span>
+				BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_MITER,
+				10.0f, new float[]{10.0f}, 0.0f);
+<span class="nc" id="L335">		dashedGraphics.setStroke(dashed);</span>
+<span class="nc" id="L336">	}</span>
+
+	/**
+	 * This function defines the attributes :
+	 *
+	 *  indexCurrentArc //Integer index of the arc where the user clicked
+	 * 	typeControlPoint  //Integer type of the control point
+	 * 	selectedPoint //Point2D selected point
+	 * 	brokenArc //Boolean true if the arc is broken
+	 *
+	 * @param point //point where the user clicked
+	 * @return true if the user clicked on a control point
+	 * 		   false otherwise
+	 */
+	private boolean selectControlPoint(Point2D point){
+<span class="nc" id="L351">		boolean res=false;</span>
+<span class="nc" id="L352">		Integer indexControlPoint=0;</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">		for (int i = 0; i &lt; controlPoints.size(); i++) {</span>
+<span class="nc" id="L354">			Shape s = getToleranceRectangle((Point2D) controlPoints.get(i), 6);</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">			if (s.contains(point)) {</span>
+<span class="nc" id="L356">				indexControlPoint=i;</span>
+<span class="nc" id="L357">				indexCurrentArc = Integer.toString(i *path.getArcsNb()/controlPoints.size());</span>
+<span class="nc" id="L358">				typeControlPoint =i%4;</span>
+<span class="nc" id="L359">				selectedPoint=(Point2D) controlPoints.get(i);</span>
+<span class="nc" id="L360">				brokenArc =false;</span>
+<span class="nc" id="L361">				res=true;</span>
+<span class="nc" id="L362">				break;</span>
+			}
+		}
+		//if the user clicked on a tangent, check that it is not a null tangent, otherwise select the origin of the tangent instead.
+<span class="nc bnc" id="L366" title="All 6 branches missed.">		if ((typeControlPoint!=0 &amp;&amp; typeControlPoint!=3) &amp;&amp; res) {</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">			if ((typeControlPoint == 1)) {</span>
+<span class="nc" id="L368">				Point2D previousPoint =(Point2D) controlPoints.get(indexControlPoint-1);</span>
+<span class="nc" id="L369">				Point2D tangentPoint = path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0);</span>
+<span class="nc" id="L370">				double tol = 0.001;</span>
+<span class="nc bnc" id="L371" title="All 6 branches missed.">				if (Math.abs(tangentPoint.getX()) &lt; tol &amp; Math.abs(tangentPoint.getX()) &lt; tol) {</span>
+<span class="nc" id="L372">					typeControlPoint = 0;</span>
+<span class="nc" id="L373">					selectedPoint = previousPoint;</span>
+				} else { // if the tangent is not null, check if it should be locked of not
+<span class="nc" id="L375">					lockedTangent = isLockedTangent(typeControlPoint,Integer.parseInt(indexCurrentArc));</span>
+				}
+
+			}
+<span class="nc bnc" id="L379" title="All 2 branches missed.">			if ((typeControlPoint == 2)) {</span>
+<span class="nc" id="L380">				Point2D nextPoint = (Point2D) controlPoints.get(indexControlPoint+1);</span>
+<span class="nc" id="L381">				Point2D tangentPoint = path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1);</span>
+<span class="nc" id="L382">				double tol = 0.001;</span>
+<span class="nc bnc" id="L383" title="All 6 branches missed.">				if (Math.abs(tangentPoint.getX() )&lt; tol &amp; Math.abs(tangentPoint.getY()) &lt; tol) {</span>
+<span class="nc" id="L384">					typeControlPoint = 3;</span>
+<span class="nc" id="L385">					selectedPoint = nextPoint;</span>
+				} else {// if the tangent is not null, check if it should be locked of not
+<span class="nc" id="L387">					lockedTangent = isLockedTangent(typeControlPoint,Integer.parseInt(indexCurrentArc));</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L391" title="All 4 branches missed.">		if (res &amp;&amp; isBreakPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+<span class="nc" id="L392">			brokenArc=true;</span>
+		}
+<span class="nc" id="L394">		return res;</span>
+	}
+
+	/**
+	 * This function defines the attribute :
+	 *
+	 * indexCurrentArc //Integer index of the arc where the user clicked
+	 */
+	private boolean selectArc(Point2D point){
+<span class="nc" id="L403">		boolean res =false;</span>
+<span class="nc" id="L404">		int n = path.getArcsNb();</span>
+		GeneralPath shape;
+<span class="nc bnc" id="L406" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L407">			shape = createArcShape(i, path, source,target);</span>
+<span class="nc" id="L408">			double side=6;</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">			if ((shape.intersects(point.getX()-side/2.0,point.getY()-side/2.0,side,side))){</span>
+<span class="nc" id="L410">				res= true;</span>
+<span class="nc" id="L411">				indexCurrentArc=Integer.toString(i);</span>
+			}
+		}
+<span class="nc" id="L414">		return res;</span>
+	}
+
+	/**
+	 * This function is used to move the control points of an edge
+	 */
+	private void moveControlPoints(){
+		Point2D newPoint, newTangent, symmetricOffset;
+
+<span class="nc" id="L423">		Point2D offset = UtilPoint.subtractPoints(current,selectedPoint);</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">		if (typeControlPoint==0){</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">			if (!brokenArc) {</span>
+				// update source :
+<span class="nc" id="L427">				newPoint = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getSource());</span>
+<span class="nc" id="L428">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSource(newPoint);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">				if (!isFirstPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+					//update target :
+<span class="nc" id="L431">					path_tmp.getArc(Integer.parseInt(indexCurrentArc)-1).setTarget(newPoint);</span>
+				}
+			}
+			else { //If arc is broken
+<span class="nc" id="L435">				newPoint = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getSource());</span>
+				//If the user puts the source very close to the previous target, then we assume he tried to un-break the arc
+<span class="nc bnc" id="L437" title="All 4 branches missed.">				if (Integer.parseInt(indexCurrentArc)&gt;0 &amp;&amp; UtilPoint.equalsWithTolerance(newPoint,path.getArc(Integer.parseInt(indexCurrentArc)-1).getTarget(),6)){</span>
+<span class="nc" id="L438">					newPoint=path.getArc(Integer.parseInt(indexCurrentArc)-1).getTarget();</span>
+				}
+<span class="nc" id="L440">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSource(newPoint);</span>
+			}
+		}
+<span class="nc bnc" id="L443" title="All 2 branches missed.">		if (typeControlPoint==3){</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">			if (!brokenArc) {</span>
+				// update target :
+<span class="nc" id="L446">				newPoint = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getTarget());</span>
+<span class="nc" id="L447">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setTarget(newPoint);</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">				if (!isLastPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+					//update source :
+<span class="nc" id="L450">					path_tmp.getArc(Integer.parseInt(indexCurrentArc)+1).setSource(newPoint);</span>
+				}
+			}
+			else { //If arc is broken
+<span class="nc" id="L454">				newPoint = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getTarget());</span>
+				//If the user puts the target very close to the next source, then we assume he tried to un-break the arc
+<span class="nc bnc" id="L456" title="All 4 branches missed.">				if (Integer.parseInt(indexCurrentArc)+1&lt;path.getArcsNb() &amp;&amp; UtilPoint.equalsWithTolerance(newPoint,path.getArc(Integer.parseInt(indexCurrentArc)+1).getSource(),6)){</span>
+<span class="nc" id="L457">					newPoint=path.getArc(Integer.parseInt(indexCurrentArc)+1).getSource();</span>
+				}
+<span class="nc" id="L459">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setTarget(newPoint);</span>
+			}
+		}
+<span class="nc bnc" id="L462" title="All 2 branches missed.">		if (typeControlPoint==1){</span>
+			//Case : modification tangent source
+<span class="nc" id="L464">			newTangent = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0));</span>
+<span class="nc" id="L465">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setFirstControlPoint(newTangent);</span>
+<span class="nc bnc" id="L466" title="All 4 branches missed.">			if (Integer.parseInt(indexCurrentArc)-1&gt;=0 &amp;&amp; lockedTangent){</span>
+				//Update symmetrically tangent target of the previous arc
+<span class="nc" id="L468">				symmetricOffset=UtilPoint.inversePoint(offset);</span>
+<span class="nc" id="L469">				newTangent = UtilPoint.addPoints(symmetricOffset,path.getArc(Integer.parseInt(indexCurrentArc)-1).getArcPoints().get(1));</span>
+<span class="nc" id="L470">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)-1).setSecondControlPoint(newTangent);</span>
+			}
+		}
+<span class="nc bnc" id="L473" title="All 2 branches missed.">		if (typeControlPoint==2){</span>
+			//Case : modification tangent target
+<span class="nc" id="L475">			newTangent = UtilPoint.addPoints(offset,path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1));</span>
+<span class="nc" id="L476">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSecondControlPoint(newTangent);</span>
+<span class="nc bnc" id="L477" title="All 4 branches missed.">			if (Integer.parseInt(indexCurrentArc)+1&lt;path.getArcsNb() &amp;&amp; lockedTangent){</span>
+				//Update symmetrically tangent source of the next arc
+<span class="nc" id="L479">				symmetricOffset=UtilPoint.inversePoint(offset);</span>
+<span class="nc" id="L480">				newTangent = UtilPoint.addPoints(symmetricOffset,path.getArc(Integer.parseInt(indexCurrentArc)+1).getArcPoints().get(0));</span>
+<span class="nc" id="L481">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)+1).setFirstControlPoint(newTangent);</span>
+			}
+		}
+<span class="nc" id="L484">	}</span>
+
+	/**
+	 * Used when moving the input or output of an Edge
+	 * Snaps the point inside the region of the station
+	 */
+	private void snapMouseInCellRegion(Graphics2D g, boolean free){
+<span class="nc" id="L491">		JmtCell station = null;</span>
+<span class="nc bnc" id="L492" title="All 2 branches missed.">		if ( isFirstPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))) {</span>
+<span class="nc" id="L493">			station= (JmtCell) ((DefaultPort) edge.getSource()).getParent();</span>
+		}
+<span class="nc bnc" id="L495" title="All 2 branches missed.">		if ( isLastPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))) {</span>
+<span class="nc" id="L496">			station= (JmtCell) ((DefaultPort) edge.getTarget()).getParent();</span>
+		}
+
+<span class="nc" id="L499">		Dimension stationIconDimension =station.getIconDimension(); // full icon of the station</span>
+<span class="nc" id="L500">		Dimension stationDimension =station.getSize(mediator.getGraph()); // dimension of the station (includes title)</span>
+<span class="nc" id="L501">		Point2D stationPosition =  mediator.getCellCoordinates(station); // position of the station</span>
+
+		//rectangle including the full icon of the station (includes blank spaces if station is rotated)
+<span class="nc" id="L504">		Rectangle2D stationRegion = new Rectangle2D.Double(stationPosition.getX()+(stationDimension.getWidth()-stationIconDimension.getWidth())/2, stationPosition.getY(),stationIconDimension.getWidth(), stationIconDimension.getHeight());</span>
+<span class="nc" id="L505">		Point2D centerStationRegion = new Point2D.Double(stationRegion.getCenterX(),stationRegion.getCenterY());</span>
+
+		//rectangle including only the standard icon of the station  (if rotation angle =0 then stationIconRegion and stationRegion are equal)
+<span class="nc" id="L508">		Rectangle2D stationIconRegion = new Rectangle2D.Double(centerStationRegion.getX()-station.getStandardIconDimension().getWidth()/2, centerStationRegion.getY()-station.getStandardIconDimension().getHeight()/2,station.getStandardIconDimension().getWidth(), station.getStandardIconDimension().getHeight());</span>
+		//Rotate rectangle by angle
+<span class="nc" id="L510">		AffineTransform tx2 = new AffineTransform();</span>
+<span class="nc" id="L511">		tx2.rotate(Math.toRadians(station.getRotationAngle()),centerStationRegion.getX(), centerStationRegion.getY());</span>
+<span class="nc" id="L512">		Shape rotatedIconRegion = tx2.createTransformedShape(stationIconRegion);</span>
+
+		//draw rectangle
+<span class="nc" id="L515">		g.setColor(Color.lightGray);</span>
+<span class="nc" id="L516">		g.draw(rotatedIconRegion);</span>
+
+<span class="nc" id="L518">		current = SnappedPointOnRotatedRectangle(current,centerStationRegion,station.getRotationAngle(),station.getStandardIconDimension(), free);</span>
+
+<span class="nc" id="L520">	}</span>
+
+
+	private static Point2D SnappedPointOnRotatedRectangle(Point2D point, Point2D center, double theta, Dimension standardIcon, boolean free) {
+<span class="nc" id="L524">		double radTheta= Math.toRadians(theta);</span>
+
+		// project point in the referential of the rotated rectangle
+<span class="nc" id="L527">		Point2D relativePoint = UtilPoint.subtractPoints(point,center);</span>
+<span class="nc" id="L528">		Point2D pointRefRectangle = new Point2D.Double(relativePoint.getX()*Math.cos(-radTheta)-relativePoint.getY()*Math.sin(-radTheta),</span>
+<span class="nc" id="L529">				relativePoint.getX()*Math.sin(-radTheta)+relativePoint.getY()*Math.cos(-radTheta));</span>
+
+		// RECTANGLE REFERENTIAL ------------------------------------------------------------------------------------
+		//Determine distance vector in the referential of the rotated rectangle
+		//  O--x
+		//  |
+		//  y
+		//
+		//        I   |    II     |  III
+		//      ======+==========+======   --yMin
+		//            |V.1    V.2 |
+		//       IV   |  ___|___  |   VI
+		//            |V.3  | V.4 |
+		//      ======+==========+======   --yMax
+		//       VII  |   VIII    |   IX
+
+
+		Point2D distanceRefRectangle;
+<span class="nc bnc" id="L547" title="All 2 branches missed.">		if (pointRefRectangle.getY()&lt;-standardIcon.getHeight()/2){//ZONES I, II and III</span>
+<span class="nc bnc" id="L548" title="All 2 branches missed.">			if (pointRefRectangle.getX()&lt;-standardIcon.getWidth()/2){ // I</span>
+<span class="nc" id="L549">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()+standardIcon.getWidth()/2, pointRefRectangle.getY()+standardIcon.getHeight()/2);</span>
+			}
+<span class="nc bnc" id="L551" title="All 2 branches missed.">			else if (pointRefRectangle.getX()&gt;standardIcon.getWidth()/2){ // III</span>
+<span class="nc" id="L552">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()-standardIcon.getWidth()/2, pointRefRectangle.getY()+standardIcon.getHeight()/2);</span>
+			}
+			else { // II
+<span class="nc" id="L555">				distanceRefRectangle=new Point2D.Double(0.0, pointRefRectangle.getY()+standardIcon.getHeight()/2);</span>
+			}
+		}
+<span class="nc bnc" id="L558" title="All 2 branches missed.">		else if (pointRefRectangle.getY()&gt;standardIcon.getHeight()/2){ //ZONES VII, VIII and IX</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">			if(pointRefRectangle.getX()&lt;-standardIcon.getWidth()/2){ // ZONE VII</span>
+<span class="nc" id="L560">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()+standardIcon.getWidth()/2, pointRefRectangle.getY()-standardIcon.getHeight()/2);</span>
+			}
+<span class="nc bnc" id="L562" title="All 2 branches missed.">			else if (pointRefRectangle.getX()&gt;standardIcon.getWidth()/2){ // ZONE IX</span>
+<span class="nc" id="L563">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()-standardIcon.getWidth()/2, pointRefRectangle.getY()-standardIcon.getHeight()/2);</span>
+			}
+			else{ // ZONE VIII
+<span class="nc" id="L566">				distanceRefRectangle=new Point2D.Double(0.0, pointRefRectangle.getY()-standardIcon.getHeight()/2);</span>
+			}
+		}
+		else {
+<span class="nc bnc" id="L570" title="All 2 branches missed.">			if(pointRefRectangle.getX()&lt;-standardIcon.getWidth()/2){ // ZONE IV</span>
+<span class="nc" id="L571">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()+standardIcon.getWidth()/2, 0.0);</span>
+			}
+<span class="nc bnc" id="L573" title="All 2 branches missed.">			else if (pointRefRectangle.getX()&gt;standardIcon.getWidth()/2){ // ZONE VI</span>
+<span class="nc" id="L574">				distanceRefRectangle=new Point2D.Double(pointRefRectangle.getX()-standardIcon.getWidth()/2, 0.0);</span>
+			}
+			else{ // ZONE V
+<span class="nc bnc" id="L577" title="All 2 branches missed.">				if (free){</span>
+<span class="nc" id="L578">					distanceRefRectangle = new Point2D.Double(0.0, 0.0);</span>
+				}
+				else {
+					double ydistance, xdistance;
+<span class="nc bnc" id="L582" title="All 2 branches missed.">					if (pointRefRectangle.getX() &gt; 0) { // V.2 and V.4</span>
+<span class="nc bnc" id="L583" title="All 2 branches missed.">						if (pointRefRectangle.getY() &lt; 0) { // V.2</span>
+<span class="nc" id="L584">							ydistance = standardIcon.getHeight() / 2 + pointRefRectangle.getY();</span>
+<span class="nc" id="L585">							xdistance = standardIcon.getWidth() / 2 - pointRefRectangle.getX();</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">							if (ydistance &lt; xdistance) {</span>
+<span class="nc" id="L587">								distanceRefRectangle = new Point2D.Double(0.0, pointRefRectangle.getY() + standardIcon.getHeight() / 2);</span>
+							} else {
+<span class="nc" id="L589">								distanceRefRectangle = new Point2D.Double(pointRefRectangle.getX() - standardIcon.getWidth() / 2, 0.0);</span>
+							}
+						} else { //V.4
+<span class="nc" id="L592">							ydistance = standardIcon.getHeight() / 2 - pointRefRectangle.getY();</span>
+<span class="nc" id="L593">							xdistance = standardIcon.getWidth() / 2 - pointRefRectangle.getX();</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">							if (ydistance &lt; xdistance) {</span>
+<span class="nc" id="L595">								distanceRefRectangle = new Point2D.Double(0.0, pointRefRectangle.getY() - standardIcon.getHeight() / 2);</span>
+							} else {
+<span class="nc" id="L597">								distanceRefRectangle = new Point2D.Double(pointRefRectangle.getX() - standardIcon.getWidth() / 2, 0.0);</span>
+							}
+						}
+					} else { // V.1 and V.3
+<span class="nc bnc" id="L601" title="All 2 branches missed.">						if (pointRefRectangle.getY() &lt; 0) { // V.1</span>
+<span class="nc" id="L602">							ydistance = standardIcon.getHeight() / 2 + pointRefRectangle.getY();</span>
+<span class="nc" id="L603">							xdistance = standardIcon.getWidth() / 2 + pointRefRectangle.getX();</span>
+<span class="nc bnc" id="L604" title="All 2 branches missed.">							if (ydistance &lt; xdistance) {</span>
+<span class="nc" id="L605">								distanceRefRectangle = new Point2D.Double(0.0, pointRefRectangle.getY() + standardIcon.getHeight() / 2);</span>
+							} else {
+<span class="nc" id="L607">								distanceRefRectangle = new Point2D.Double(pointRefRectangle.getX() + standardIcon.getWidth() / 2, 0.0);</span>
+							}
+						} else { //V.3
+<span class="nc" id="L610">							ydistance = standardIcon.getHeight() / 2 - pointRefRectangle.getY();</span>
+<span class="nc" id="L611">							xdistance = standardIcon.getWidth() / 2 + pointRefRectangle.getX();</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">							if (ydistance &lt; xdistance) {</span>
+<span class="nc" id="L613">								distanceRefRectangle = new Point2D.Double(0.0, pointRefRectangle.getY() - standardIcon.getHeight() / 2);</span>
+							} else {
+<span class="nc" id="L615">								distanceRefRectangle = new Point2D.Double(0.0, pointRefRectangle.getY() - standardIcon.getHeight() / 2);</span>
+							}
+						}
+					}
+				}
+			}
+		}
+
+		//snap the point to the boundaries of the rectangle
+<span class="nc" id="L624">		Point2D snappedPointRefRectangle = UtilPoint.subtractPoints(pointRefRectangle, distanceRefRectangle);</span>
+		//  ----------------------------------------------------------------------------------------------------------
+
+		// project point back in the main referential
+<span class="nc" id="L628">		Point2D snappedRelativePoint = new Point2D.Double(snappedPointRefRectangle.getX()*Math.cos(radTheta)-snappedPointRefRectangle.getY()*Math.sin(radTheta),</span>
+<span class="nc" id="L629">				snappedPointRefRectangle.getX()*Math.sin(radTheta)+snappedPointRefRectangle.getY()*Math.cos(radTheta));</span>
+
+<span class="nc" id="L631">		return UtilPoint.addPoints(snappedRelativePoint, center);</span>
+	}
+
+
+
+	/**
+	 * This function draws the new form of the edge while the user drags a control point
+	 * @param g graphics2D
+	 */
+	private void drawOverlay(Graphics2D g) {
+		//setting environment
+<span class="nc" id="L642">		Color bg = mediator.getGraphBackground();</span>
+<span class="nc" id="L643">		Color fg = Color.BLUE;</span>
+<span class="nc" id="L644">		g.setColor(bg);</span>
+<span class="nc" id="L645">		g.setXORMode(fg);</span>
+<span class="nc" id="L646">		createDashedGraphics(g);</span>
+
+		//draw the new path
+<span class="nc" id="L649">		int n = path_tmp.getArcsNb();</span>
+
+<span class="nc" id="L651">		GeneralPath shape = new GeneralPath();</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L653">			shape.append(createArcShape(i, path_tmp, source, target),false);</span>
+		}
+<span class="nc" id="L655">		dashedGraphics.draw(shape);</span>
+<span class="nc" id="L656">		drawTangents(dashedGraphics,source, target);</span>
+<span class="nc" id="L657">	}</span>
+
+	/**
+	 * This function draws the new form of the tangent at the control point the user is dragging
+	 * @param g graphics2D
+	 */
+	private void drawTangents(Graphics2D g, Point2D source, Point2D target) {
+<span class="nc bnc" id="L664" title="All 2 branches missed.">		if (typeControlPoint==0){</span>
+<span class="nc bnc" id="L665" title="All 4 branches missed.">			if (!brokenArc &amp;&amp; !isFirstPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+				Point2D tangentLeft, tangentRight;
+<span class="nc" id="L667">				tangentLeft = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1), current);</span>
+<span class="nc" id="L668">				tangentRight = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)+1).getArcPoints().get(0), current);</span>
+<span class="nc" id="L669">				g.draw(new Line2D.Double(current.getX(), current.getY(), tangentRight.getX(), tangentRight.getY()));</span>
+<span class="nc" id="L670">				g.draw(new Line2D.Double(tangentLeft.getX(), tangentLeft.getY(), current.getX(), current.getY()));</span>
+<span class="nc" id="L671">			}</span>
+			else {
+<span class="nc" id="L673">				Point2D tangentRight = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0), current);</span>
+<span class="nc" id="L674">				g.draw(new Line2D.Double(current.getX(), current.getY(), tangentRight.getX(), tangentRight.getY()));</span>
+			}
+
+		}
+<span class="nc bnc" id="L678" title="All 2 branches missed.">		if ( typeControlPoint==3 ){</span>
+<span class="nc bnc" id="L679" title="All 4 branches missed.">			if (!brokenArc &amp;&amp; !isLastPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))) {</span>
+				Point2D tangentLeft, tangentRight;
+<span class="nc" id="L681">				tangentLeft = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1), current);</span>
+<span class="nc" id="L682">				tangentRight = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc) + 1).getArcPoints().get(0), current);</span>
+<span class="nc" id="L683">				g.draw(new Line2D.Double(tangentLeft.getX(), tangentLeft.getY(), current.getX(), current.getY()));</span>
+<span class="nc" id="L684">				g.draw(new Line2D.Double(current.getX(), current.getY(), tangentRight.getX(), tangentRight.getY()));</span>
+<span class="nc" id="L685">				}</span>
+			else {
+				Point2D tangentLeft;
+<span class="nc" id="L688">				tangentLeft = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1), current);</span>
+<span class="nc" id="L689">				g.draw(new Line2D.Double(tangentLeft.getX(), tangentLeft.getY(), current.getX(), current.getY()));</span>
+<span class="nc" id="L690">			}</span>
+		}
+<span class="nc bnc" id="L692" title="All 2 branches missed.">		else if (typeControlPoint==1){</span>
+			Point2D tangentLeft, originPoint;
+<span class="nc" id="L694">			originPoint = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getSource(), source);</span>
+<span class="nc" id="L695">			g.draw(new Line2D.Double(current.getX(), current.getY(), originPoint.getX(), originPoint.getY()));</span>
+<span class="nc bnc" id="L696" title="All 4 branches missed.">			if (Integer.parseInt(indexCurrentArc) &gt; 0 &amp;&amp; lockedTangent){</span>
+<span class="nc" id="L697">				Point2D offset = UtilPoint.inversePoint(UtilPoint.subtractPoints(current,originPoint));</span>
+<span class="nc" id="L698">				tangentLeft = UtilPoint.addMultiplePoints(originPoint,offset);</span>
+<span class="nc" id="L699">				g.draw(new Line2D.Double(originPoint.getX(), originPoint.getY(), tangentLeft.getX(), tangentLeft.getY()));</span>
+			}
+<span class="nc" id="L701">		}</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">		else if (typeControlPoint==2){</span>
+			Point2D tangentRight, originPoint;
+<span class="nc bnc" id="L704" title="All 2 branches missed.">			if (Integer.parseInt(indexCurrentArc)&lt;path_tmp.getArcsNb()-1) {</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">				if (lockedTangent) {</span>
+<span class="nc" id="L706">					originPoint = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getTarget(), source );</span>
+<span class="nc" id="L707">					g.draw(new Line2D.Double(current.getX(), current.getY(), originPoint.getX(), originPoint.getY()));</span>
+
+<span class="nc" id="L709">					Point2D offset = UtilPoint.inversePoint(UtilPoint.subtractPoints(current,originPoint));</span>
+<span class="nc" id="L710">					tangentRight =  UtilPoint.addMultiplePoints(originPoint,offset);</span>
+<span class="nc" id="L711">					g.draw(new Line2D.Double(originPoint.getX(), originPoint.getY(), tangentRight.getX(), tangentRight.getY()));</span>
+<span class="nc" id="L712">				}</span>
+				else {
+<span class="nc" id="L714">					originPoint = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getTarget(), source );</span>
+<span class="nc" id="L715">					g.draw(new Line2D.Double(current.getX(), current.getY(), originPoint.getX(), originPoint.getY()));</span>
+				}
+			}
+			else {
+<span class="nc" id="L719">				originPoint = UtilPoint.addPoints(path_tmp.getArc(Integer.parseInt(indexCurrentArc)).getTarget(), target );</span>
+<span class="nc" id="L720">				g.draw(new Line2D.Double(current.getX(), current.getY(), originPoint.getX(), originPoint.getY()));</span>
+			}
+		}
+<span class="nc" id="L723">	}</span>
+
+	/**
+	 * This function role is to highlight the control points (intermediary points and tangent points)
+	 * 	Used to indicate the points that can be moved around
+	 * @param g graphics2D
+	 * @param point  point where the mouse is
+	 */
+	private void highlightPoints(Graphics2D g, Point2D point) {
+<span class="nc bnc" id="L732" title="All 2 branches missed.">		for (int i = 0; i &lt; controlPoints.size(); i++) {</span>
+<span class="nc" id="L733">			highlightPoint(g, point, (Point2D) controlPoints.get(i));</span>
+		}
+<span class="nc" id="L735">	}</span>
+
+	/**
+	 * This function role is to highlight the tangent points
+	 * 	Used to indicate the points where the tangents can be unlocked
+	 * @param g graphics2D
+	 * @param point  point where the mouse is
+	 */
+	private void highlightTangentsPoints(Graphics2D g, Point2D point) {
+<span class="nc bnc" id="L744" title="All 2 branches missed.">		for (int i = 1; i &lt; controlPoints.size()-1; i++) {</span>
+<span class="nc" id="L745">			Point2D tgt = (Point2D) controlPoints.get(i);</span>
+<span class="nc bnc" id="L746" title="All 2 branches missed.">			if (i%4 == 1 ){ //If it's a tangent at the source</span>
+<span class="nc" id="L747">				Point2D sourceTgt = (Point2D)  controlPoints.get(i-1);</span>
+<span class="nc bnc" id="L748" title="All 2 branches missed.">				if (!UtilPoint.equalsWithTolerance(sourceTgt,tgt)){</span>
+<span class="nc" id="L749">					highlightPoint(g, point, tgt);</span>
+				}
+			}
+<span class="nc bnc" id="L752" title="All 2 branches missed.">			if (i%4 == 2){ //If it's a tangent at the target</span>
+<span class="nc" id="L753">				Point2D sourceTgt = (Point2D)  controlPoints.get(i+1);</span>
+<span class="nc bnc" id="L754" title="All 2 branches missed.">				if (!UtilPoint.equalsWithTolerance(sourceTgt,tgt)){</span>
+<span class="nc" id="L755">					highlightPoint(g,  point, tgt);</span>
+				}
+			}
+		}
+<span class="nc" id="L759">	}</span>
+
+	/**
+	 * This function role is to highlight the intermediary points
+	 * Used to indicate the points where the edge can be broken
+	 * @param g graphics2D
+	 * @param point point where the mouse is
+	 */
+	private void highlightIntermediaryPoints(Graphics2D g, Point2D point) {
+<span class="nc bnc" id="L768" title="All 2 branches missed.">		for (int i = 2; i &lt; controlPoints.size()-2; i++) {</span>
+<span class="nc bnc" id="L769" title="All 4 branches missed.">			if (i%4 == 0 || i%4 == 3){ //If it's an intermediary point</span>
+<span class="nc" id="L770">				highlightPoint(g,  point, (Point2D) controlPoints.get(i));</span>
+			}
+		}
+<span class="nc" id="L773">	}</span>
+
+	/**
+	 * This function role is to highlight the control point when a user is going to merge a broken edge back with
+	 * its other piece
+	 * @param g graphics2D
+	 * @param point point where the mouse is
+	 */
+	private void highlightBrokenArcMergingPoint(Graphics2D g, Point2D point) {
+<span class="nc bnc" id="L782" title="All 2 branches missed.">		for (int i = 2; i &lt; controlPoints.size()-2; i++) {</span>
+<span class="nc bnc" id="L783" title="All 10 branches missed.">			if (brokenArc &amp;&amp; ((typeControlPoint==0  &amp;&amp; (i==(Integer.parseInt(indexCurrentArc)-1)*4+3)) || (typeControlPoint==3 &amp;&amp; (i==(Integer.parseInt(indexCurrentArc)+1)*4)))){</span>
+<span class="nc" id="L784">				highlightPoint(g,  point, (Point2D) controlPoints.get(i));</span>
+			}
+		}
+<span class="nc" id="L787">	}</span>
+
+	/**
+	 * This function role is to highlight the intermediary point that have null tangent
+	 * @param g graphics2D
+	 * @param point point where the mouse is
+	 */
+	private void highlightSharpIntermediaryPoint(Graphics2D g, Point2D point) {
+		Point2D targetTgt, sourceTgt, intPoint;
+		//first point
+<span class="nc" id="L797">		sourceTgt=(Point2D)  controlPoints.get(1);</span>
+<span class="nc" id="L798">		intPoint = (Point2D)  controlPoints.get(0);</span>
+<span class="nc bnc" id="L799" title="All 2 branches missed.">		if (UtilPoint.equalsWithTolerance(sourceTgt,intPoint)){</span>
+<span class="nc" id="L800">			highlightPoint(g,  point, intPoint);</span>
+		}
+		//last point
+<span class="nc" id="L803">		targetTgt=(Point2D)  controlPoints.get(controlPoints.size()-2);</span>
+<span class="nc" id="L804">		intPoint = (Point2D)  controlPoints.get(controlPoints.size()-1);</span>
+<span class="nc bnc" id="L805" title="All 2 branches missed.">		if (UtilPoint.equalsWithTolerance(targetTgt,intPoint)){</span>
+<span class="nc" id="L806">			highlightPoint(g,  point, intPoint);</span>
+		}
+<span class="nc bnc" id="L808" title="All 2 branches missed.">		for (int i = 1; i &lt; controlPoints.size()-2; i++) {</span>
+<span class="nc" id="L809">			Integer arcIndex = i *path.getArcsNb()/controlPoints.size();</span>
+<span class="nc" id="L810">			intPoint = (Point2D)  controlPoints.get(i);</span>
+<span class="nc bnc" id="L811" title="All 2 branches missed.">			if (i%4 == 0 ){ //If it's a source point</span>
+<span class="nc" id="L812">				sourceTgt=(Point2D)  controlPoints.get(i+1);</span>
+<span class="nc" id="L813">				targetTgt=(Point2D)  controlPoints.get(i-2);</span>
+<span class="nc bnc" id="L814" title="All 2 branches missed.">				if (!isBreakPoint(i%4,arcIndex)){ //if arc not broken, highlight if at least one of the tgt is null</span>
+<span class="nc bnc" id="L815" title="All 4 branches missed.">					if (UtilPoint.equalsWithTolerance(sourceTgt,intPoint) || UtilPoint.equalsWithTolerance(targetTgt,intPoint)){</span>
+<span class="nc" id="L816">						highlightPoint(g,  point, intPoint);</span>
+					}
+				}
+				else{//if arc broken, highlight if the tgt at the source is null
+<span class="nc bnc" id="L820" title="All 2 branches missed.">					if (UtilPoint.equalsWithTolerance(sourceTgt,intPoint)){</span>
+<span class="nc" id="L821">						highlightPoint(g,  point, intPoint);</span>
+					}
+				}
+			}
+<span class="nc bnc" id="L825" title="All 2 branches missed.">			if (i%4 == 3 ){ //If it's a target point</span>
+<span class="nc" id="L826">				targetTgt=(Point2D)  controlPoints.get(i-1);</span>
+<span class="nc" id="L827">				sourceTgt=(Point2D)  controlPoints.get(i+2);</span>
+<span class="nc bnc" id="L828" title="All 2 branches missed.">				if (!isBreakPoint(i%4,arcIndex)){ //if arc not broken, highlight if at least one of the tgt is null</span>
+<span class="nc bnc" id="L829" title="All 4 branches missed.">					if (UtilPoint.equalsWithTolerance(sourceTgt,intPoint) || UtilPoint.equalsWithTolerance(targetTgt,intPoint)){</span>
+<span class="nc" id="L830">						highlightPoint(g,  point, intPoint);</span>
+					}
+				}
+				else{//if arc broken, highlight if the tgt at the target is null
+<span class="nc bnc" id="L834" title="All 2 branches missed.">					if (UtilPoint.equalsWithTolerance(targetTgt,intPoint)){</span>
+<span class="nc" id="L835">						highlightPoint(g,  point, intPoint);</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L840">	}</span>
+
+	/**
+	 * This function highlights the given control point if the mouse point is on it
+	 * @param g : graphics 2D
+	 * @param mousePoint : Point where the mouse is
+	 * @param controlPoint : Control Point
+	 */
+	private void highlightPoint(Graphics2D g, Point2D mousePoint, Point2D controlPoint){
+<span class="nc" id="L849">		int side = 6;</span>
+		Shape s;
+<span class="nc" id="L851">		s = getToleranceRectangle(controlPoint, side);</span>
+<span class="nc bnc" id="L852" title="All 2 branches missed.">		if (s.contains(mousePoint)) {</span>
+<span class="nc" id="L853">			drawRectangle(g, side,controlPoint, Color.RED);</span>
+		} else {
+<span class="nc" id="L855">			drawRectangle(g, side, controlPoint, Color.GREEN);</span>
+		}
+<span class="nc" id="L857">	}</span>
+
+	/**
+	 *  this function highlight the portion of edge where the new point will be added
+	 */
+	private void highlightArc(Graphics2D g, Point2D point) {
+<span class="nc" id="L863">		int n = path.getArcsNb();</span>
+		GeneralPath shape;
+<span class="nc bnc" id="L865" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L866">			shape = createArcShape(i, path, source, target);</span>
+<span class="nc" id="L867">			double side=6;</span>
+<span class="nc bnc" id="L868" title="All 2 branches missed.">			if ((shape.intersects(point.getX()-side/2.0,point.getY()-side/2.0,side,side))){</span>
+<span class="nc" id="L869">				Color fg = Color.RED;</span>
+<span class="nc" id="L870">				createDashedGraphics(g);</span>
+<span class="nc" id="L871">				dashedGraphics.setStroke(GraphConstants.SELECTION_STROKE);</span>
+<span class="nc" id="L872">				dashedGraphics.setColor(fg);</span>
+<span class="nc" id="L873">				dashedGraphics.draw(shape);</span>
+<span class="nc" id="L874">				shape.reset();</span>
+<span class="nc" id="L875">			}</span>
+			else {
+<span class="nc" id="L877">				Color fg = Color.GREEN;</span>
+<span class="nc" id="L878">				createDashedGraphics(g);</span>
+<span class="nc" id="L879">				dashedGraphics.setStroke(GraphConstants.SELECTION_STROKE);</span>
+<span class="nc" id="L880">				dashedGraphics.setColor(fg);</span>
+<span class="nc" id="L881">				dashedGraphics.draw(shape);</span>
+<span class="nc" id="L882">				shape.reset();</span>
+			}
+		}
+<span class="nc" id="L885">	}</span>
+
+	/**
+	 * This function draws a square
+	 * @param graphics Graphics2D
+	 * @param side size of the sides of the square
+	 * @param topLeftPoint top left point of the square
+	 * @param color color of the square
+	 */
+	private void drawRectangle(Graphics2D graphics, int side, Point2D topLeftPoint, Color color) {
+<span class="nc" id="L895">		Rectangle2D rect = new Rectangle2D.Double(</span>
+<span class="nc" id="L896">				topLeftPoint.getX() - side / 2.0, topLeftPoint.getY() - side / 2.0,</span>
+				side, side);
+		//Draw in black the outline of the rectangle
+<span class="nc" id="L899">		graphics.setColor(Color.BLACK);</span>
+<span class="nc" id="L900">		graphics.draw(rect);</span>
+
+		//Fill the rectangle with the chosen color
+<span class="nc" id="L903">		graphics.setColor(color);</span>
+<span class="nc" id="L904">		graphics.fill(rect);</span>
+<span class="nc" id="L905">	}</span>
+
+	/**
+	 * This function deletes the selected control point
+	 */
+	private void deleteControlPoint() {
+<span class="nc bnc" id="L911" title="All 4 branches missed.">		if (typeControlPoint==0 &amp;&amp; !isFirstPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+			// Delete arc
+<span class="nc" id="L913">			ArrayList newControlPoints = new ArrayList();</span>
+<span class="nc" id="L914">			newControlPoints.add(path.getArc(Integer.parseInt(indexCurrentArc)-1).getArcPoints().get(0));</span>
+<span class="nc" id="L915">			newControlPoints.add(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1));</span>
+<span class="nc" id="L916">			JMTArc newArc= new JMTArc(path.getArc(Integer.parseInt(indexCurrentArc)-1).getSource(),newControlPoints,path.getArc(Integer.parseInt(indexCurrentArc)).getTarget());</span>
+
+<span class="nc" id="L918">			path_tmp.getArcs().remove(Integer.parseInt(indexCurrentArc)-1);</span>
+<span class="nc" id="L919">			path_tmp.getArcs().remove(Integer.parseInt(indexCurrentArc)-1);</span>
+<span class="nc" id="L920">			path_tmp.getArcs().add(Integer.parseInt(indexCurrentArc)-1,newArc);</span>
+		}
+<span class="nc bnc" id="L922" title="All 4 branches missed.">		if (typeControlPoint==3 &amp;&amp; !isLastPoint(typeControlPoint,Integer.parseInt(indexCurrentArc))){</span>
+			// Delete arc
+<span class="nc" id="L924">			ArrayList newControlPoints = new ArrayList();</span>
+<span class="nc" id="L925">			newControlPoints.add(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0));</span>
+<span class="nc" id="L926">			newControlPoints.add(path.getArc(Integer.parseInt(indexCurrentArc)+1).getArcPoints().get(1));</span>
+<span class="nc" id="L927">			JMTArc newArc= new JMTArc(path.getArc(Integer.parseInt(indexCurrentArc)).getSource(),newControlPoints,path.getArc(Integer.parseInt(indexCurrentArc)+1).getTarget());</span>
+
+<span class="nc" id="L929">			path_tmp.getArcs().remove(Integer.parseInt(indexCurrentArc));</span>
+<span class="nc" id="L930">			path_tmp.getArcs().remove(Integer.parseInt(indexCurrentArc));</span>
+<span class="nc" id="L931">			path_tmp.getArcs().add(Integer.parseInt(indexCurrentArc),newArc);</span>
+		}
+<span class="nc bnc" id="L933" title="All 2 branches missed.">		if (typeControlPoint==1){</span>
+<span class="nc" id="L934">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setFirstControlPoint(new Point2D.Double(0,0));</span>
+		}
+<span class="nc bnc" id="L936" title="All 2 branches missed.">		if (typeControlPoint==2){</span>
+<span class="nc" id="L937">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSecondControlPoint(new Point2D.Double(0,0));</span>
+		}
+<span class="nc" id="L939">	}</span>
+
+	/**
+	 * This function breaks an edge at the selected intermediary point
+	 */
+	private void breakArc(){
+<span class="nc" id="L945">		Point2D offset = new Point2D.Double(20.0,0.0);</span>
+//		System.out.println(&quot;breakArc&quot;);
+<span class="nc bnc" id="L947" title="All 4 branches missed.">		if (typeControlPoint==0 &amp;&amp; Integer.parseInt(indexCurrentArc)&gt;0){</span>
+<span class="nc" id="L948">			Point2D newSource = UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getSource(),offset);</span>
+<span class="nc" id="L949">			Point2D newTarget = UtilPoint.subtractPoints(path.getArc(Integer.parseInt(indexCurrentArc)-1).getTarget(),offset);</span>
+<span class="nc" id="L950">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSource(newSource);</span>
+<span class="nc" id="L951">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)-1).setTarget(newTarget);</span>
+		}
+<span class="nc bnc" id="L953" title="All 4 branches missed.">		if (typeControlPoint==3 &amp;&amp; (Integer.parseInt(indexCurrentArc) &lt; path.getArcsNb()-1)){</span>
+<span class="nc" id="L954">			Point2D newSource = UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)+1).getSource(),offset);</span>
+<span class="nc" id="L955">			Point2D newTarget = UtilPoint.subtractPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getTarget(),offset);</span>
+<span class="nc" id="L956">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)+1).setSource(newSource);</span>
+<span class="nc" id="L957">			path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setTarget(newTarget);</span>
+		}
+<span class="nc" id="L959">	}</span>
+
+	/**
+	 * This function add tangents to a sharp intermediary point
+	 */
+	private void addTangents(){
+<span class="nc" id="L965">		Point2D offset = new Point2D.Double(50.0,0.0);</span>
+//		System.out.println(&quot;addTangents&quot;);
+<span class="nc bnc" id="L967" title="All 2 branches missed.">		if (typeControlPoint==0) {</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">			if (UtilPoint.equalsWithTolerance(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0),new Point2D.Double(0.0,0.0))){</span>
+<span class="nc" id="L969">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setFirstControlPoint(offset);</span>
+			}
+<span class="nc bnc" id="L971" title="All 6 branches missed.">			if (!brokenArc &amp;&amp; !isFirstPoint(typeControlPoint,Integer.parseInt(indexCurrentArc)) &amp;&amp; UtilPoint.equalsWithTolerance(path.getArc(Integer.parseInt(indexCurrentArc)-1).getArcPoints().get(1),new Point2D.Double(0.0,0.0))){</span>
+<span class="nc" id="L972">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)-1).setSecondControlPoint(UtilPoint.inversePoint(offset));</span>
+			}
+		}
+<span class="nc bnc" id="L975" title="All 2 branches missed.">		else if (typeControlPoint==3){</span>
+<span class="nc bnc" id="L976" title="All 2 branches missed.">			if (UtilPoint.equalsWithTolerance(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1),new Point2D.Double(0.0,0.0))){</span>
+<span class="nc" id="L977">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)).setSecondControlPoint(UtilPoint.inversePoint(offset));</span>
+			}
+<span class="nc bnc" id="L979" title="All 6 branches missed.">			if (!brokenArc &amp;&amp; !isLastPoint(typeControlPoint,Integer.parseInt(indexCurrentArc)) &amp;&amp; UtilPoint.equalsWithTolerance(path.getArc(Integer.parseInt(indexCurrentArc)+1).getArcPoints().get(0),new Point2D.Double(0.0,0.0))){</span>
+<span class="nc" id="L980">				path_tmp.getArc(Integer.parseInt(indexCurrentArc)+1).setFirstControlPoint(offset);</span>
+			}
+		}
+<span class="nc" id="L983">	}</span>
+
+	/**
+	 * This function add an intermediary point with null tangent
+	 */
+	private void addIntermediaryPoint(){
+<span class="nc" id="L989">		ArrayList newControlPoints1 = new ArrayList();</span>
+<span class="nc" id="L990">		ArrayList newControlPoints2 = new ArrayList();</span>
+
+<span class="nc" id="L992">		Point2D sourceArc = UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getSource(),source);</span>
+		Point2D targetArc;
+
+<span class="nc bnc" id="L995" title="All 2 branches missed.">		if (Integer.parseInt(indexCurrentArc)==path.getArcsNb()-1){</span>
+<span class="nc" id="L996">			 targetArc =  UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getTarget(),target);</span>
+		}
+		else {
+<span class="nc" id="L999">			 targetArc =  UtilPoint.addPoints(path.getArc(Integer.parseInt(indexCurrentArc)).getTarget(),source);</span>
+		}
+
+<span class="nc" id="L1002">		double x_newIntermediaryPoint = Math.abs(sourceArc.getX()-targetArc.getX())/2.0 + Math.min(sourceArc.getX(),targetArc.getX());</span>
+<span class="nc" id="L1003">		double y_newIntermediaryPoint = Math.abs(sourceArc.getY()-targetArc.getY())/2.0 + Math.min(sourceArc.getY(),targetArc.getY());</span>
+<span class="nc" id="L1004">		Point2D newIntermediaryPoint = UtilPoint.subtractPoints(new Point2D.Double(x_newIntermediaryPoint,y_newIntermediaryPoint),source);</span>
+
+<span class="nc" id="L1006">		newControlPoints1.add(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(0));</span>
+<span class="nc" id="L1007">		newControlPoints1.add(new Point2D.Double(0.0,0.0));</span>
+
+<span class="nc" id="L1009">		newControlPoints2.add(new Point2D.Double(0.0,0.0));</span>
+<span class="nc" id="L1010">		newControlPoints2.add(path.getArc(Integer.parseInt(indexCurrentArc)).getArcPoints().get(1));</span>
+
+<span class="nc" id="L1012">		JMTArc newArc1= new JMTArc(UtilPoint.subtractPoints(sourceArc,source),newControlPoints1,newIntermediaryPoint);</span>
+		JMTArc newArc2;
+<span class="nc bnc" id="L1014" title="All 2 branches missed.">		if (Integer.parseInt(indexCurrentArc)==path.getArcsNb()-1){</span>
+<span class="nc" id="L1015">			 newArc2= new JMTArc(newIntermediaryPoint,newControlPoints2,UtilPoint.subtractPoints(targetArc,target));</span>
+		}
+		else {
+<span class="nc" id="L1018">			 newArc2= new JMTArc(newIntermediaryPoint,newControlPoints2,UtilPoint.subtractPoints(targetArc,source));</span>
+		}
+
+<span class="nc" id="L1021">		path_tmp.getArcs().remove(Integer.parseInt(indexCurrentArc));</span>
+<span class="nc" id="L1022">		path_tmp.getArcs().add(Integer.parseInt(indexCurrentArc),newArc1);</span>
+<span class="nc" id="L1023">		path_tmp.getArcs().add(Integer.parseInt(indexCurrentArc)+1,newArc2);</span>
+
+<span class="nc" id="L1025">	}</span>
+
+	/**
+	 * This function returns true if the selected point is the point connected to the source station
+	 * @return true if the selected point is the first control point
+	 */
+	private boolean isFirstPoint(Integer type, Integer arcIndex){
+<span class="nc bnc" id="L1032" title="All 4 branches missed.">		return (type==0 &amp;&amp; arcIndex==0);</span>
+	}
+
+	/**
+	 * This function returns true if the selected point is the point connected to the target station
+	 * @return true if the selected point is the last control point
+	 */
+	private boolean isLastPoint(Integer type, Integer arcIndex){
+<span class="nc bnc" id="L1040" title="All 4 branches missed.">		return (type==3 &amp;&amp; arcIndex==path.getArcsNb()-1);</span>
+	}
+
+	/**
+	 * This function returns true if the selected point is the point where an edge break
+	 * @return true if the selected point is a break point
+	 */
+	private boolean isBreakPoint(Integer type, Integer arcIndex){
+<span class="nc" id="L1048">		boolean res=false;</span>
+<span class="nc" id="L1049">		Point2D sourcePath = (Point2D) controlPoints.get(0);</span>
+<span class="nc bnc" id="L1050" title="All 4 branches missed.">		if (type==0  &amp;&amp; arcIndex&gt;0){</span>
+<span class="nc" id="L1051">			Point2D source = UtilPoint.addPoints(sourcePath,path.getArc(arcIndex).getSource());</span>
+<span class="nc" id="L1052">			Point2D target = UtilPoint.addPoints(sourcePath,path.getArc(arcIndex-1).getTarget());</span>
+<span class="nc bnc" id="L1053" title="All 2 branches missed.">			res= !UtilPoint.equalsWithTolerance(source, target);</span>
+<span class="nc" id="L1054">		}</span>
+<span class="nc bnc" id="L1055" title="All 4 branches missed.">		else if (type==3 &amp;&amp; arcIndex&lt;path.getArcsNb()-1){</span>
+<span class="nc" id="L1056">			Point2D source = UtilPoint.addPoints(sourcePath,path.getArc(arcIndex+1).getSource());</span>
+<span class="nc" id="L1057">			Point2D target = UtilPoint.addPoints(sourcePath,path.getArc(arcIndex).getTarget());</span>
+<span class="nc bnc" id="L1058" title="All 2 branches missed.">			res= !UtilPoint.equalsWithTolerance(source, target);</span>
+		}
+<span class="nc" id="L1060">		return (res);</span>
+	}
+
+	/**
+	 * This function returns true if the selected point is a locked tangent
+	 * @return true if the selected point is a locked tangent
+	 */
+	private boolean isLockedTangent(Integer type, Integer arcIndex){
+<span class="nc" id="L1068">		boolean res=true;</span>
+<span class="nc bnc" id="L1069" title="All 4 branches missed.">		if (type == 1 &amp;&amp; arcIndex &gt; 0){</span>
+<span class="nc" id="L1070">			Point2D tangentPoint = path.getArc(arcIndex).getArcPoints().get(0);</span>
+<span class="nc" id="L1071">			Point2D symmetricTangent= path.getArc(arcIndex - 1).getArcPoints().get(1);</span>
+<span class="nc bnc" id="L1072" title="All 2 branches missed.">			if (!UtilPoint.equalsWithTolerance(tangentPoint, UtilPoint.inversePoint(symmetricTangent))) {</span>
+<span class="nc" id="L1073">				res = false;</span>
+			}
+			//if broken arc, unlock tangent
+<span class="nc bnc" id="L1076" title="All 2 branches missed.">			if (isBreakPoint(0,arcIndex)){</span>
+<span class="nc" id="L1077">				res = false;</span>
+			}
+<span class="nc" id="L1079">		}</span>
+<span class="nc bnc" id="L1080" title="All 4 branches missed.">		else if (type == 2 &amp;&amp; arcIndex &lt;path.getArcsNb()-1){</span>
+<span class="nc" id="L1081">			Point2D tangentPoint = path.getArc(arcIndex).getArcPoints().get(1);</span>
+<span class="nc" id="L1082">			Point2D symmetricTangent= path.getArc(arcIndex + 1).getArcPoints().get(0);</span>
+<span class="nc bnc" id="L1083" title="All 2 branches missed.">			if (!UtilPoint.equalsWithTolerance(tangentPoint, UtilPoint.inversePoint(symmetricTangent))) {</span>
+<span class="nc" id="L1084">				res = false;</span>
+			}
+			//if broken arc, unlock tangent
+<span class="nc bnc" id="L1087" title="All 2 branches missed.">			if (isBreakPoint(3,arcIndex)){</span>
+<span class="nc" id="L1088">				res = false;</span>
+			}
+		}
+<span class="nc" id="L1091">		return (res);</span>
+	}
+
+	/**Creates the shape of a given arc
+	 *
+	 * @param indexArc index of the arc
+	 * @param jmtPath  path from where the arc must be drawn
+	 * @return path of the arc
+	 */
+	private GeneralPath createArcShape(Integer indexArc, JMTPath jmtPath, Point2D source, Point2D target){
+<span class="nc" id="L1101">		int n = jmtPath.getArcsNb();</span>
+<span class="nc" id="L1102">		GeneralPath shape = new GeneralPath();</span>
+		Point2D  controlPointSource, controlPointTarget, sourceOfArc, targetOfArc;
+
+<span class="nc bnc" id="L1105" title="All 2 branches missed.">		if (indexArc&lt;n-1) {</span>
+<span class="nc" id="L1106">			sourceOfArc = new Point2D.Double(jmtPath.getArc(indexArc).getSource().getX() + source.getX(), jmtPath.getArc(indexArc).getSource().getY() + source.getY());</span>
+<span class="nc" id="L1107">			targetOfArc = new Point2D.Double(jmtPath.getArc(indexArc).getTarget().getX() + source.getX(), jmtPath.getArc(indexArc).getTarget().getY() + source.getY());</span>
+<span class="nc" id="L1108">			controlPointSource = new Point2D.Double(jmtPath.getArc(indexArc).getArcPoints().get(0).getX() + sourceOfArc.getX(), jmtPath.getArc(indexArc).getArcPoints().get(0).getY() + sourceOfArc.getY());</span>
+<span class="nc" id="L1109">			controlPointTarget = new Point2D.Double(jmtPath.getArc(indexArc).getArcPoints().get(1).getX() + targetOfArc.getX(), jmtPath.getArc(indexArc).getArcPoints().get(1).getY() + targetOfArc.getY());</span>
+
+<span class="nc" id="L1111">			shape.moveTo((float) sourceOfArc.getX(), (float) sourceOfArc.getY());</span>
+<span class="nc" id="L1112">			shape.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY()</span>
+<span class="nc" id="L1113">					, (float) controlPointTarget.getX(), (float) controlPointTarget.getY()</span>
+<span class="nc" id="L1114">					, (float) targetOfArc.getX(), (float) targetOfArc.getY());</span>
+<span class="nc" id="L1115">			shape.moveTo((float) targetOfArc.getX(), (float) targetOfArc.getY());</span>
+		}
+		else{
+<span class="nc" id="L1118">			sourceOfArc = new Point2D.Double(jmtPath.getArc(indexArc).getSource().getX() + source.getX(), jmtPath.getArc(indexArc).getSource().getY() + source.getY());</span>
+<span class="nc" id="L1119">			targetOfArc = new Point2D.Double(jmtPath.getArc(indexArc).getTarget().getX() + target.getX(), jmtPath.getArc(indexArc).getTarget().getY() + target.getY());</span>
+<span class="nc" id="L1120">			controlPointSource = new Point2D.Double(jmtPath.getArc(indexArc).getArcPoints().get(0).getX() + sourceOfArc.getX(), jmtPath.getArc(indexArc).getArcPoints().get(0).getY() + sourceOfArc.getY());</span>
+<span class="nc" id="L1121">			controlPointTarget = new Point2D.Double(jmtPath.getArc(indexArc).getArcPoints().get(1).getX() + targetOfArc.getX(), jmtPath.getArc(indexArc).getArcPoints().get(1).getY() + targetOfArc.getY());</span>
+
+<span class="nc" id="L1123">			shape.moveTo((float) sourceOfArc.getX(), (float) sourceOfArc.getY());</span>
+<span class="nc" id="L1124">			shape.curveTo((float) controlPointSource.getX(), (float) controlPointSource.getY()</span>
+<span class="nc" id="L1125">					, (float) controlPointTarget.getX(), (float) controlPointTarget.getY()</span>
+<span class="nc" id="L1126">					, (float) targetOfArc.getX(), (float) targetOfArc.getY());</span>
+<span class="nc" id="L1127">			shape.moveTo((float) targetOfArc.getX(), (float) targetOfArc.getY());</span>
+		}
+<span class="nc" id="L1129">		return shape;</span>
+	}
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

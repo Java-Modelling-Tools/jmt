@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Debug.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic</a> &gt; <span class="el_source">Debug.java</span></div><h1>Debug.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
+
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMS;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMSBD;
+import org.apache.commons.math3.analysis.*;
+import org.apache.commons.math3.optimization.GoalType;
+import org.apache.commons.math3.optimization.PointValuePair;
+import org.apache.commons.math3.optimization.direct.BOBYQAOptimizer;
+import org.apache.commons.math3.optimization.direct.PowellOptimizer;
+import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
+import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
+
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMS;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMSBD;
+
+<span class="nc" id="L27">public class Debug {</span>
+
+	public static void main(String[] args) throws Exception {
+
+		/* ============= Test use of direct optimizer =============== */
+		class QuadraticFunction2D implements MultivariateFunction {
+			private double a, b, c;
+
+<span class="nc" id="L35">			public QuadraticFunction2D(double a, double b, double c) {</span>
+<span class="nc" id="L36">				this.a = a;</span>
+<span class="nc" id="L37">				this.b = b;</span>
+<span class="nc" id="L38">				this.c = c;</span>
+<span class="nc" id="L39">			}</span>
+
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L43">				double x = doubles[0];</span>
+<span class="nc" id="L44">				double y = doubles[1];</span>
+<span class="nc" id="L45">				return a * (Math.pow(x, 2)) + b * x + c + a * (Math.pow(y, 2)) + b * y + c;</span>
+			}
+		}
+
+<span class="nc" id="L49">		BOBYQAOptimizer Opt = new BOBYQAOptimizer(4);</span>
+<span class="nc" id="L50">		PointValuePair optimum = Opt.optimize(1000, new QuadraticFunction2D(1, 1, 1), GoalType.MINIMIZE,</span>
+				new double[] { -5.0, 5.0 });
+<span class="nc" id="L52">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L53">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+
+		/* ============= Test functions =============== */
+<span class="nc" id="L56">		double[][] dem_mat = new double[][] { { .8 }, { .6 } };</span>
+<span class="nc" id="L57">		double[] s = new double[] { 2, 2 };</span>
+<span class="nc" id="L58">		int[] pop = new int[] { 3 };</span>
+<span class="nc" id="L59">		LogisticFunctionMS LFMS = new LogisticFunctionMS(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L60">		LogisticFunctionMSBD LFMSBD = new LogisticFunctionMSBD(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L61">		System.out.print(&quot;Optimum value: &quot;);</span>
+<span class="nc" id="L62">		System.out.println(LFMS.evaluate(new double[] { .30036055 }));</span>
+<span class="nc" id="L63">		System.out.print(&quot;Optimum value BD: &quot;);</span>
+<span class="nc" id="L64">		System.out.println(LFMSBD.evaluate(new double[] { .30036055 }));</span>
+<span class="nc" id="L65">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L66">		System.out.println(Arrays.toString(LFMS.evaluateJac(new double[] { .30036055 })));</span>
+<span class="nc" id="L67">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L68">		System.out.println(Arrays.toString(LFMSBD.evaluateJac(new double[] { .30036055 })));</span>
+<span class="nc" id="L69">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L70">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(new double[] { .30036055 })));</span>
+<span class="nc" id="L71">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L72">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(new double[] { .30036055 })));</span>
+
+<span class="nc" id="L74">		pop = new int[] { 11 };</span>
+<span class="nc" id="L75">		LFMS = new LogisticFunctionMS(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L76">		LFMSBD = new LogisticFunctionMSBD(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L77">		System.out.print(&quot;Optimum value: &quot;);</span>
+<span class="nc" id="L78">		System.out.println(LFMS.evaluate(new double[] { 1.10520391 }));</span>
+<span class="nc" id="L79">		System.out.print(&quot;Optimum value BD: &quot;);</span>
+<span class="nc" id="L80">		System.out.println(LFMSBD.evaluate(new double[] { 1.10520391 }));</span>
+<span class="nc" id="L81">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L82">		System.out.println(Arrays.toString(LFMS.evaluateJac(new double[] { 1.10520391 })));</span>
+<span class="nc" id="L83">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L84">		System.out.println(Arrays.toString(LFMSBD.evaluateJac(new double[] { 1.10520391 })));</span>
+<span class="nc" id="L85">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L86">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(new double[] { 1.10520391 })));</span>
+<span class="nc" id="L87">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L88">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(new double[] { 1.10520391 })));</span>
+
+<span class="nc" id="L90">		dem_mat = new double[][] { { 3.8 }, { .4 }, { .9 } };</span>
+<span class="nc" id="L91">		s = new double[] { 2, 2, 4 };</span>
+<span class="nc" id="L92">		pop = new int[] { 3 };</span>
+<span class="nc" id="L93">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L94">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L95">		System.out.print(&quot;Optimum value: &quot;);</span>
+<span class="nc" id="L96">		System.out.println(LFMS.evaluate(new double[] { 1.02029616, -0.00949956 }));</span>
+<span class="nc" id="L97">		System.out.print(&quot;Optimum value BD: &quot;);</span>
+<span class="nc" id="L98">		System.out.println(LFMSBD.evaluate(new double[] { 1.02029616, -0.00949956 }));</span>
+<span class="nc" id="L99">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L100">		System.out.println(Arrays.toString(LFMS.evaluateJac(new double[] { 1.02029616, -0.00949956 })));</span>
+<span class="nc" id="L101">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L102">		System.out.println(Arrays.toString(LFMSBD.evaluateJac(new double[] { 1.02029616, -0.00949956 })));</span>
+<span class="nc" id="L103">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L104">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(new double[] { 1.02029616, -0.00949956 })));</span>
+<span class="nc" id="L105">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L106">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(new double[] { 1.02029616, -0.00949956 })));</span>
+
+<span class="nc" id="L108">		pop = new int[] { 11 };</span>
+<span class="nc" id="L109">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L110">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L111">		System.out.print(&quot;Optimum value: &quot;);</span>
+<span class="nc" id="L112">		System.out.println(LFMS.evaluate(new double[] { 2.27028574, -0.01329452 }));</span>
+<span class="nc" id="L113">		System.out.print(&quot;Optimum value BD: &quot;);</span>
+<span class="nc" id="L114">		System.out.println(LFMSBD.evaluate(new double[] { 2.27028574, -0.01329452 }));</span>
+<span class="nc" id="L115">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L116">		System.out.println(Arrays.toString(LFMS.evaluateJac(new double[] { 2.27028574, -0.01329452 })));</span>
+<span class="nc" id="L117">		System.out.print(&quot;Jacobian: &quot;);</span>
+<span class="nc" id="L118">		System.out.println(Arrays.toString(LFMSBD.evaluateJac(new double[] { 2.27028574, -0.01329452 })));</span>
+<span class="nc" id="L119">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L120">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(new double[] { 2.27028574, -0.01329452 })));</span>
+<span class="nc" id="L121">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L122">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(new double[] { 2.27028574, -0.01329452 })));</span>
+
+		/* ============= Test use of direct optimizer on LFMS =============== */
+<span class="nc" id="L125">		dem_mat = new double[][] { { .8 }, { .6 } };</span>
+<span class="nc" id="L126">		s = new double[] { 2, 2 };</span>
+<span class="nc" id="L127">		pop = new int[] { 3 };</span>
+
+		class LFMS1D implements MultivariateFunction {
+			private LogisticFunctionMS LFMS;
+
+			public LFMS1D(int ndim, int[] population, double[][] demands, double[] servers, double epsilon)
+<span class="nc" id="L133">					throws InternalErrorException {</span>
+<span class="nc" id="L134">				LFMS = new LogisticFunctionMS(ndim, population, demands, servers, epsilon);</span>
+<span class="nc" id="L135">			}</span>
+
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L139">				double[] x = new double[doubles.length - 1];</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">				for (int i = 0; i &lt; doubles.length - 1; i++)</span>
+<span class="nc" id="L141">					x[i] = doubles[i];</span>
+
+				try {
+<span class="nc" id="L144">					BigDecimal F = LFMS.evaluate(x);</span>
+<span class="nc" id="L145">					F = log(F, MathContext.DECIMAL128);</span>
+<span class="nc" id="L146">					return -F.doubleValue() + Math.pow(doubles[doubles.length - 1], 2);</span>
+<span class="nc" id="L147">				} catch (Exception e) {</span>
+<span class="nc" id="L148">					return 0.;</span>
+				}
+			}
+		}
+
+<span class="nc" id="L153">		PowellOptimizer POpt = new PowellOptimizer(1e-05, 1e-05);</span>
+<span class="nc" id="L154">		optimum = POpt.optimize(1000, new LFMS1D(1, pop, dem_mat, s, 0), GoalType.MINIMIZE, new double[] { -5.0, 0.0 });</span>
+<span class="nc" id="L155">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L156">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+
+<span class="nc" id="L158">		dem_mat = new double[][] { { 3.8 }, { .4 }, { .9 } };</span>
+<span class="nc" id="L159">		s = new double[] { 2, 2, 4 };</span>
+<span class="nc" id="L160">		pop = new int[] { 3 };</span>
+
+<span class="nc" id="L162">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L163">		System.out.println(LFMS.evaluate(new double[] { 1.020336, -0.00955834 }));</span>
+
+<span class="nc" id="L165">		POpt = new PowellOptimizer(1e-05, 1e-05);</span>
+<span class="nc" id="L166">		optimum = POpt.optimize(1000, new LFMS1D(2, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -5.0, 0.0, 0.0 });
+<span class="nc" id="L168">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L169">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+
+		/* =============== Test use of grad_desc optimizer on LFMS =============== */
+
+		class LFMS1D_grad implements MultivariateVectorFunction {
+			private LogisticFunctionMSBD LFMS;
+
+			public LFMS1D_grad(int ndim, int[] population, double[][] demands, double[] servers, double epsilon)
+<span class="nc" id="L177">					throws InternalErrorException {</span>
+<span class="nc" id="L178">				LFMS = new LogisticFunctionMSBD(ndim, population, demands, servers, epsilon, new MathContext(512));</span>
+<span class="nc" id="L179">			}</span>
+
+			@Override
+			public double[] value(double[] doubles) {
+<span class="nc" id="L183">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">				for (int i = 0; i &lt; doubles.length; i++)</span>
+<span class="nc" id="L185">					x[i] = doubles[i];</span>
+				try {
+<span class="nc" id="L187">					double[] J = LFMS.evaluateJac(x);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">					for (int i = 0; i &lt; J.length; i++)</span>
+<span class="nc" id="L189">						J[i] *= -1;</span>
+<span class="nc" id="L190">					System.out.println(new DenseDoubleMatrix1D(J));</span>
+<span class="nc" id="L191">					return J;</span>
+<span class="nc" id="L192">				} catch (Exception e) {</span>
+<span class="nc" id="L193">					double[] J = new double[x.length];</span>
+<span class="nc" id="L194">					Arrays.fill(J, 0.);</span>
+<span class="nc" id="L195">					return J;</span>
+				}
+			}
+		}
+
+		class LFMS1D_partgrad implements MultivariateFunction {
+			private LogisticFunctionMS LFMS;
+			private int k;
+
+			public LFMS1D_partgrad(int ndim, int[] population, double[][] demands, double[] servers, double epsilon,
+<span class="nc" id="L205">					int k) throws InternalErrorException {</span>
+<span class="nc" id="L206">				LFMS = new LogisticFunctionMS(ndim, population, demands, servers, epsilon);</span>
+<span class="nc" id="L207">				this.k = k;</span>
+<span class="nc" id="L208">			}</span>
+
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L212">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">				for (int i = 0; i &lt; doubles.length; i++)</span>
+<span class="nc" id="L214">					x[i] = doubles[i];</span>
+
+				try {
+<span class="nc" id="L217">					double[] J = LFMS.evaluateJac(x);</span>
+<span class="nc" id="L218">					return -J[k];</span>
+<span class="nc" id="L219">				} catch (Exception e) {</span>
+<span class="nc" id="L220">					double[] J = new double[x.length];</span>
+<span class="nc" id="L221">					Arrays.fill(J, 0.);</span>
+<span class="nc" id="L222">					return J[k];</span>
+				}
+			}
+		}
+
+		class LFMS1D_diff implements DifferentiableMultivariateFunction {
+			private LogisticFunctionMSBD LFMS;
+			private int ndim;
+			private int[] pop;
+			private double[][] demands;
+			private double[] servers;
+
+			public LFMS1D_diff(int ndim, int[] population, double[][] demands, double[] servers, double epsilon)
+<span class="nc" id="L235">					throws InternalErrorException {</span>
+<span class="nc" id="L236">				this.ndim = ndim;</span>
+<span class="nc" id="L237">				this.pop = population;</span>
+<span class="nc" id="L238">				this.demands = demands;</span>
+<span class="nc" id="L239">				this.servers = servers;</span>
+<span class="nc" id="L240">				LFMS = new LogisticFunctionMSBD(ndim, population, demands, servers, epsilon, new MathContext(512));</span>
+<span class="nc" id="L241">			}</span>
+
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L245">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">				for (int i = 0; i &lt; doubles.length; i++)</span>
+<span class="nc" id="L247">					x[i] = doubles[i];</span>
+
+<span class="nc" id="L249">				BigDecimal G = BigDecimal.ZERO;</span>
+				try {
+<span class="nc" id="L251">					BigDecimal F = LFMS.evaluate(x);</span>
+<span class="nc" id="L252">					G = F;</span>
+<span class="nc" id="L253">					F = log(F, MathContext.DECIMAL128);</span>
+<span class="nc" id="L254">					return -F.doubleValue();</span>
+<span class="nc" id="L255">				} catch (Exception e) {</span>
+<span class="nc" id="L256">					System.out.println(G);</span>
+<span class="nc" id="L257">					e.printStackTrace();</span>
+<span class="nc" id="L258">					return 0.;</span>
+				}
+			}
+
+			@Override
+			public MultivariateVectorFunction gradient() {
+				try {
+<span class="nc" id="L265">					return new LFMS1D_grad(ndim, pop, demands, servers, 0);</span>
+<span class="nc" id="L266">				} catch (Exception e) {</span>
+<span class="nc" id="L267">					return null;</span>
+				}
+			}
+
+			@Override
+			public MultivariateFunction partialDerivative(int i) {
+				try {
+<span class="nc" id="L274">					return new LFMS1D_partgrad(ndim, pop, demands, servers, 0, i);</span>
+<span class="nc" id="L275">				} catch (Exception e) {</span>
+<span class="nc" id="L276">					return null;</span>
+				}
+			}
+		}
+
+<span class="nc" id="L281">		NonLinearConjugateGradientOptimizer optimizer = new NonLinearConjugateGradientOptimizer(</span>
+				ConjugateGradientFormula.POLAK_RIBIERE);
+
+<span class="nc" id="L284">		dem_mat = new double[][] { { .8 }, { .6 } };</span>
+<span class="nc" id="L285">		s = new double[] { 2, 2 };</span>
+<span class="nc" id="L286">		pop = new int[] { 3 };</span>
+
+<span class="nc" id="L288">		optimum = optimizer.optimize(1000, new LFMS1D_diff(1, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0 });
+<span class="nc" id="L290">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L291">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L292">		LFMS = new LogisticFunctionMS(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L293">		LFMSBD = new LogisticFunctionMSBD(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L294">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L295">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L296">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L297">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L299">		pop = new int[] { 6 };</span>
+
+<span class="nc" id="L301">		optimum = optimizer.optimize(1000, new LFMS1D_diff(1, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0 });
+<span class="nc" id="L303">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L304">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L305">		LFMS = new LogisticFunctionMS(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L306">		LFMSBD = new LogisticFunctionMSBD(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L307">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L308">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L309">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L310">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L312">		pop = new int[] { 10 };</span>
+
+<span class="nc" id="L314">		optimum = optimizer.optimize(1000, new LFMS1D_diff(1, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0 });
+<span class="nc" id="L316">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L317">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L318">		LFMS = new LogisticFunctionMS(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L319">		LFMSBD = new LogisticFunctionMSBD(1, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L320">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L321">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L322">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L323">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L325">		dem_mat = new double[][] { { 3.8 }, { .4 }, { .9 } };</span>
+<span class="nc" id="L326">		s = new double[] { 2, 2, 4 };</span>
+<span class="nc" id="L327">		pop = new int[] { 3 };</span>
+
+<span class="nc" id="L329">		optimum = optimizer.optimize(1000, new LFMS1D_diff(2, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0, 0.0 });
+<span class="nc" id="L331">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L332">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L333">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L334">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L335">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L336">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L337">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L338">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L340">		pop = new int[] { 5 };</span>
+
+<span class="nc" id="L342">		optimum = optimizer.optimize(1000, new LFMS1D_diff(2, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0, 0.0 });
+<span class="nc" id="L344">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L345">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L346">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L347">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L348">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L349">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L350">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L351">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L353">		pop = new int[] { 12 };</span>
+
+<span class="nc" id="L355">		optimum = optimizer.optimize(1000, new LFMS1D_diff(2, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0, 0.0 });
+<span class="nc" id="L357">		System.out.print(&quot;optimum: &quot;);</span>
+<span class="nc" id="L358">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+<span class="nc" id="L359">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L360">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L361">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L362">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L363">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L364">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+
+<span class="nc" id="L366">		dem_mat = new double[][] { { 3.8, 3.8, 1.8 }, { 2.6, 2.6, 1.8 }, { 3.4, 3.4, 1.8 } };</span>
+<span class="nc" id="L367">		s = new double[] { 2, 2, 4 };</span>
+<span class="nc" id="L368">		pop = new int[] { 10, 10, 10 };</span>
+
+<span class="nc" id="L370">		optimum = optimizer.optimize(1000, new LFMS1D_diff(2, pop, dem_mat, s, 0), GoalType.MINIMIZE,</span>
+				new double[] { -1.0, 0.0 });
+<span class="nc" id="L372">		System.out.print(&quot;optimum grad : &quot;);</span>
+<span class="nc" id="L373">		System.out.println(Arrays.toString(optimum.getPoint()));</span>
+
+<span class="nc" id="L375">		LFMS = new LogisticFunctionMS(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L376">		LFMSBD = new LogisticFunctionMSBD(2, pop, dem_mat, s, 0);</span>
+<span class="nc" id="L377">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L378">		System.out.println(new DenseDoubleMatrix2D(LFMS.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L379">		System.out.print(&quot;Hessian: &quot;);</span>
+<span class="nc" id="L380">		System.out.println(new DenseDoubleMatrix2D(LFMSBD.evaluateHessStat(optimum.getPoint())));</span>
+<span class="nc" id="L381">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

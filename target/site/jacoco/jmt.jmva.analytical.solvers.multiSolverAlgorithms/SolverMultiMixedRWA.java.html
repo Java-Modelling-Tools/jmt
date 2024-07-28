@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverMultiMixedRWA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.multiSolverAlgorithms</a> &gt; <span class="el_source">SolverMultiMixedRWA.java</span></div><h1>SolverMultiMixedRWA.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
+
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.SolverMultiIterative;
+import jmt.jmva.analytical.solvers.priority.PriorityToNonPriorityConvertor;
+import jmt.jmva.analytical.solvers.priority.rwaCalculators.ReducedServiceTimeCalculator;
+import jmt.jmva.analytical.solvers.priority.rwaCalculators.implementations.SCAServiceTimeCalculator;
+import jmt.jmva.analytical.solvers.utilities.ProcessingCapacityChecker;
+
+import java.util.*;
+
+/**
+ * Reduced Work Rate Approximation
+ */
+
+public class SolverMultiMixedRWA extends SolverMultiIterative {
+
+    /**
+     * Array with class types
+     */
+    private int[] classTypes;
+
+    /**
+     * Array describing the classes: each element can be either an
+     * arrival rate (for open classes) or a population (for closed ones),
+     * according to the class type
+     */
+    private double[] classData;
+
+    private SolverMulti nonPrioritySolver;
+    private ReducedServiceTimeCalculator reducedServiceTimeCalculator;
+
+    /**
+     * Number of PRS or HOL stations in original model
+     */
+    private int numPriorityStations;
+    /**
+     * Number of LI, LD, Delay stations in the original model
+     */
+    private int numNonPriorityStations;
+    /**
+     * Number of shadow servers created
+     */
+    private int numConvertedStations;
+
+    /**
+     * Ordered list of priorities
+     */
+    private List&lt;Integer&gt; uniquePriorities;
+    /**
+     * numPriorities = length(uniquePriorities)
+     */
+    private int numPriorities;
+    /**
+     * Map from class index to index in the list uniquePriorities
+     */
+    private Map&lt;Integer, Integer&gt; classToPriorityIndex;
+
+    /**
+     * The inputs of the shadow model created
+     */
+    private int[] convertedStationTypes;
+    private double[][][] convertedServiceTimes;
+    private double[][] convertedVisits;
+
+    /**
+     * Map from the shadow model to the original model
+     * so index of converted arrays above to the index
+     * in the main arrays such as &quot;throughput&quot;
+     */
+    private Map&lt;Integer, Integer&gt; shadowIndexToOldIndex;
+
+    /**
+     * The algorithm checks for convergence via the throughput
+     * but only for the shadow servers
+     */
+    private double[][] lastConvergenceCheckThroughput;
+    /**
+     * It can oscillate between two solutions instead of
+     * settling on one so the last two results need to be stored
+     */
+    private double[][] secondLastConvergenceCheckThroughput;
+    private boolean oscillatingSolution;
+
+    /**
+     * When calculating new service times, the times can become negative. If
+     * this occurs, the algorithm should stop
+     */
+    private boolean forceStop;
+
+    /**
+     * @param classes  number of classes.
+     * @param stations number of stations.
+     */
+    public SolverMultiMixedRWA(int classes, int stations, ReducedServiceTimeCalculator reducedServiceTimeCalculator) {
+<span class="nc" id="L96">        super(classes, stations);</span>
+<span class="nc" id="L97">        this.classTypes = new int[classes];</span>
+<span class="nc" id="L98">        this.classData = new double[classes];</span>
+
+<span class="nc" id="L100">        this.reducedServiceTimeCalculator = reducedServiceTimeCalculator;</span>
+<span class="nc" id="L101">    }</span>
+
+    // Defaults to SCA, if Kaufman (ESA) or HOL extension is added then update
+    public SolverMultiMixedRWA(int classes, int stations) {
+<span class="nc" id="L105">        this(classes, stations, new SCAServiceTimeCalculator());</span>
+<span class="nc" id="L106">    }</span>
+
+
+    /**
+     * initializes the solver with the system parameters.
+     *
+     * @param n          array of names of service centers.
+     * @param t          array of the types (LD, LI, Delay, PRS, HOL) of service centers.
+     * @param s          matrix of service time of the service centers.
+     * @param v          matrix of visits to the service centers.
+     * @param classData  array describing the classes: each element can be either an
+     *                   arrival rate (for open classes) or a population (for closed ones),
+     *                   according to the class type
+     * @param classTypes array of class types (open or closed)
+     * @param p          array of priorities of the classes.
+     * @param tolerance  terminates if |last result - current result| &lt; tolerance
+     * @return true if the operation has been completed with success
+     */
+    public boolean input(String[] n, int[] t, double[][][] s, double[][] v, double[] classData, int[] classTypes,
+                         int[] p, double tolerance) {
+<span class="nc bnc" id="L126" title="All 4 branches missed.">        if (classData.length != classes || classTypes.length != classes) {</span>
+<span class="nc" id="L127">            return false;</span>
+        }
+<span class="nc bnc" id="L129" title="All 2 branches missed.">        if (!input(n, t, s, v, p)) {</span>
+            // Failed loading
+<span class="nc" id="L131">            return false;</span>
+        }
+<span class="nc" id="L133">        setTolerance(tolerance);</span>
+
+<span class="nc" id="L135">        System.arraycopy(classData, 0, this.classData, 0, classes);</span>
+<span class="nc" id="L136">        System.arraycopy(classTypes, 0, this.classTypes, 0, classes);</span>
+
+<span class="nc" id="L138">        Set&lt;Integer&gt; uniquePrioritiesSet = new HashSet&lt;&gt;();</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">        for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc" id="L140">            uniquePrioritiesSet.add(priorities[clas]);</span>
+        }
+<span class="nc" id="L142">        uniquePriorities = new ArrayList&lt;&gt;(uniquePrioritiesSet);</span>
+        // Sorts from the highest value to the lowest
+<span class="nc" id="L144">        Collections.sort(uniquePriorities, new Comparator&lt;Integer&gt;() {</span>
+            @Override
+            public int compare(Integer cl1, Integer cl2) {
+<span class="nc" id="L147">                return cl2 - cl1;</span>
+            }
+        });
+<span class="nc" id="L150">        numPriorities = uniquePriorities.size();</span>
+
+<span class="nc" id="L152">        return true;</span>
+    }
+
+    public boolean input(String[] n, int[] t, double[][][] s, double[][] v, double[] classData, int[] classTypes,
+                         int[] p) {
+<span class="nc" id="L157">        return input(n, t, s, v, classData, classTypes, p, DEFAULT_TOLERANCE);</span>
+    }
+
+    @Override
+    public void solve() {
+<span class="nc" id="L162">        createShadowModel();</span>
+<span class="nc" id="L163">        initialiseGlobals();</span>
+<span class="nc" id="L164">        iterations = 0;</span>
+<span class="nc" id="L165">        boolean converged = false;</span>
+<span class="nc bnc" id="L166" title="All 4 branches missed.">        while (iterations &lt; MAX_ITERATIONS &amp;&amp; !converged) {</span>
+<span class="nc" id="L167">            setNewServTimeForShadowServers();</span>
+<span class="nc bnc" id="L168" title="All 4 branches missed.">            if (forceStop || !nonPrioritySolver.hasSufficientProcessingCapacity()) {</span>
+<span class="nc" id="L169">                System.out.printf(&quot;Shadow model has become unstable after %s iterations%n&quot;, iterations);</span>
+<span class="nc" id="L170">                break;</span>
+            }
+<span class="nc" id="L172">            solveShadowModel();</span>
+<span class="nc" id="L173">            converged = checkConverged();</span>
+<span class="nc" id="L174">            iterations++;</span>
+        }
+<span class="nc" id="L176">        convertShadowModelToOriginalModel();</span>
+<span class="nc" id="L177">    }</span>
+
+    private void convertShadowModelToOriginalModel() {
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        for (int station = 0; station &lt; numNonPriorityStations; station++) {</span>
+<span class="nc" id="L181">            copyNonPriorityStationAcross(station);</span>
+        }
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        for (int station = 0; station &lt; numPriorityStations; station++) {</span>
+<span class="nc" id="L184">            copyPriorityStationAcross(station);</span>
+        }
+<span class="nc" id="L186">    }</span>
+
+    /**
+     * Needs to copy values from all of the shadow servers associated with the station
+     *
+     * @param station The priorityIndex
+     */
+    private void copyPriorityStationAcross(int station) {
+<span class="nc" id="L194">        int stationStartIndex = getShadowStationStartIndex(station);</span>
+<span class="nc" id="L195">        int originalIndex = shadowIndexToOldIndex.get(stationStartIndex);</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc" id="L197">            int shadowStationIndex = stationStartIndex + classToPriorityIndex.get(clas);</span>
+<span class="nc" id="L198">            throughput[originalIndex][clas] = nonPrioritySolver.getThroughput()[shadowStationIndex][clas];</span>
+<span class="nc" id="L199">            queueLen[originalIndex][clas] = nonPrioritySolver.getQueueLen()[shadowStationIndex][clas];</span>
+<span class="nc" id="L200">            utilization[originalIndex][clas] = nonPrioritySolver.getThroughput()[shadowStationIndex][clas] * servTime[originalIndex][clas][0];</span>
+<span class="nc" id="L201">            residenceTime[originalIndex][clas] = nonPrioritySolver.getResTime()[shadowStationIndex][clas];</span>
+        }
+<span class="nc" id="L203">    }</span>
+
+    /**
+     * Directly copies from the solution of the multi solver
+     *
+     * @param shadowIndex the station in the converted model to be copied across
+     */
+    private void copyNonPriorityStationAcross(int shadowIndex) {
+<span class="nc" id="L211">        int originalIndex = shadowIndexToOldIndex.get(shadowIndex);</span>
+<span class="nc" id="L212">        System.arraycopy(nonPrioritySolver.getThroughput()[shadowIndex], 0, throughput[originalIndex], 0, classes);</span>
+<span class="nc" id="L213">        System.arraycopy(nonPrioritySolver.getUtilization()[shadowIndex], 0, utilization[originalIndex], 0, classes);</span>
+<span class="nc" id="L214">        System.arraycopy(nonPrioritySolver.getQueueLen()[shadowIndex], 0, queueLen[originalIndex], 0, classes);</span>
+<span class="nc" id="L215">        System.arraycopy(nonPrioritySolver.getResTime()[shadowIndex], 0, residenceTime[originalIndex], 0, classes);</span>
+<span class="nc" id="L216">    }</span>
+
+    private boolean checkConverged() {
+<span class="nc" id="L219">        double[][] newThroughput = new double[numPriorityStations][classes];</span>
+<span class="nc" id="L220">        boolean converged = true;</span>
+<span class="nc" id="L221">        double[][] throughputSolution = nonPrioritySolver.getThroughput();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">        for (int station = 0; station &lt; numPriorityStations; station++) {</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc" id="L224">                int stationStartIndex = getShadowStationStartIndex(station);</span>
+<span class="nc" id="L225">                newThroughput[station][clas] = throughputSolution[stationStartIndex + classToPriorityIndex.get(clas)][clas];</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">                if (newThroughput[station][clas] - lastConvergenceCheckThroughput[station][clas] &gt; tolerance) {</span>
+<span class="nc" id="L227">                    converged = false;</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        if (converged) {</span>
+<span class="nc" id="L232">            return true;</span>
+        }
+<span class="nc" id="L234">        converged = checkOscillatingSolution(newThroughput);</span>
+<span class="nc" id="L235">        secondLastConvergenceCheckThroughput = lastConvergenceCheckThroughput;</span>
+<span class="nc" id="L236">        lastConvergenceCheckThroughput = newThroughput;</span>
+<span class="nc" id="L237">        return converged;</span>
+    }
+
+    private boolean checkOscillatingSolution(double[][] newThroughput) {
+<span class="nc" id="L241">        oscillatingSolution = true;</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        for (int station = 0; station &lt; numPriorityStations; station++) {</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">            for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                if (newThroughput[station][clas] - secondLastConvergenceCheckThroughput[station][clas] &gt; tolerance) {</span>
+<span class="nc" id="L245">                    oscillatingSolution = false;</span>
+<span class="nc" id="L246">                    break;</span>
+                }
+            }
+        }
+<span class="nc" id="L250">        return oscillatingSolution;</span>
+    }
+
+    private void initialiseGlobals() {
+<span class="nc" id="L254">        reducedServiceTimeCalculator.initialise(this);</span>
+<span class="nc" id="L255">        lastConvergenceCheckThroughput = new double[numPriorityStations][classes];</span>
+<span class="nc" id="L256">        secondLastConvergenceCheckThroughput = new double[numPriorityStations][classes];</span>
+<span class="nc" id="L257">        SolverMultiMixed mixedSolver = new SolverMultiMixed(classes, numConvertedStations);</span>
+        // The station names aren't important
+<span class="nc" id="L259">        mixedSolver.input(new String[numConvertedStations], convertedStationTypes, convertedServiceTimes, convertedVisits, classData, classTypes);</span>
+<span class="nc" id="L260">        nonPrioritySolver = mixedSolver;</span>
+<span class="nc" id="L261">        oscillatingSolution = false;</span>
+<span class="nc" id="L262">        forceStop = false;</span>
+<span class="nc" id="L263">    }</span>
+
+    private void solveShadowModel() {
+<span class="nc" id="L266">        nonPrioritySolver.setServTime(convertedServiceTimes);</span>
+<span class="nc" id="L267">        nonPrioritySolver.solve();</span>
+<span class="nc" id="L268">    }</span>
+
+    private void setNewServTimeForShadowServers() {
+<span class="nc" id="L271">        double[][] newServTimes = reducedServiceTimeCalculator.calculateNewServiceTimes(this);</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">        if (forceStop) {</span>
+<span class="nc" id="L273">            return;</span>
+        }
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        for (int station = 0; station &lt; numPriorityStations; station++) {</span>
+<span class="nc" id="L276">            int shadowStart = getShadowStationStartIndex(station);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">            for (int priority = 0; priority &lt; numPriorities; priority++) {</span>
+<span class="nc" id="L278">                int currentPriority = uniquePriorities.get(priority);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">                for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                    if (priorities[clas] != currentPriority) {</span>
+<span class="nc" id="L281">                        convertedServiceTimes[shadowStart + priority][clas][0] = 0.0;</span>
+                    } else {
+<span class="nc" id="L283">                        convertedServiceTimes[shadowStart + priority][clas][0] = newServTimes[station][clas];</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L288">    }</span>
+
+    /**
+     * Stations go to
+     * [non-priority stations] ++ [shadow priority stations]
+     * The non-priority stations are in the same order but with the priority stations removed
+     * Priority station i goes to
+     * num non-priority stations + (stations * num priority stations before i in list)
+     * and has num priorities shadow servers
+     */
+    private void createShadowModel() {
+<span class="nc" id="L299">        calculateNumberOfShadowStations();</span>
+<span class="nc" id="L300">        convertedStationTypes = new int[numConvertedStations];</span>
+<span class="nc" id="L301">        convertedVisits = new double[numConvertedStations][classes];</span>
+<span class="nc" id="L302">        convertedServiceTimes = new double[numConvertedStations][classes][];</span>
+
+<span class="nc" id="L304">        shadowIndexToOldIndex = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L305">        int nonPriorityIndex = 0;</span>
+<span class="nc" id="L306">        int priorityIndex = 0;</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">            if (PriorityToNonPriorityConvertor.stationIsPriority(type[station])) {</span>
+<span class="nc" id="L309">                int startOfShadowStations = getShadowStationStartIndex(priorityIndex);</span>
+<span class="nc" id="L310">                initialiseShadowStationsForAPriorityStation(station, startOfShadowStations);</span>
+                // Shadow to old index map handled in the intialisation function
+<span class="nc" id="L312">                priorityIndex++;</span>
+<span class="nc" id="L313">            } else {</span>
+<span class="nc" id="L314">                initialiseShadowStationsForANonPriorityStation(station, nonPriorityIndex);</span>
+<span class="nc" id="L315">                shadowIndexToOldIndex.put(nonPriorityIndex, station);</span>
+<span class="nc" id="L316">                nonPriorityIndex++;</span>
+            }
+        }
+
+        // TODO: There's got to be better logic than this to do this
+<span class="nc" id="L321">        classToPriorityIndex = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">        for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">            for (int i = 0; i &lt; uniquePriorities.size(); i++) {</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">                if (uniquePriorities.get(i) == priorities[clas]) {</span>
+<span class="nc" id="L325">                    classToPriorityIndex.put(clas, i);</span>
+<span class="nc" id="L326">                    break;</span>
+                }
+            }
+        }
+<span class="nc" id="L330">    }</span>
+
+    public int getShadowStationStartIndex(int stationIndex) {
+<span class="nc" id="L333">        return numNonPriorityStations + stationIndex * numPriorities;</span>
+    }
+
+    private void calculateNumberOfShadowStations() {
+<span class="nc" id="L337">        numPriorityStations = PriorityToNonPriorityConvertor.countNumPriorityStations(type);</span>
+<span class="nc" id="L338">        numNonPriorityStations = stations - numPriorityStations;</span>
+<span class="nc" id="L339">        int numShadowStations = numPriorities * numPriorityStations;</span>
+<span class="nc" id="L340">        numConvertedStations = numNonPriorityStations + numShadowStations;</span>
+<span class="nc" id="L341">    }</span>
+
+    private void initialiseShadowStationsForANonPriorityStation(int station, int nonPriorityIndex) {
+<span class="nc" id="L344">        convertedStationTypes[nonPriorityIndex] = type[station];</span>
+<span class="nc" id="L345">        convertedServiceTimes[nonPriorityIndex] = servTime[station];</span>
+<span class="nc" id="L346">        convertedVisits[nonPriorityIndex] = visits[station];</span>
+<span class="nc" id="L347">    }</span>
+
+    private void initialiseShadowStationsForAPriorityStation(int station, int startOfShadowStations) {
+<span class="nc bnc" id="L350" title="All 2 branches missed.">        for (int priority = 0; priority &lt; numPriorities; priority++) {</span>
+<span class="nc" id="L351">            int currentShadowStation = startOfShadowStations + priority;</span>
+<span class="nc" id="L352">            shadowIndexToOldIndex.put(currentShadowStation, station);</span>
+<span class="nc" id="L353">            convertedStationTypes[currentShadowStation] = SolverMulti.LI;</span>
+
+<span class="nc" id="L355">            int currentPriority = uniquePriorities.get(priority);</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">            for (int clas = 0; clas &lt; classes; clas++) {</span>
+<span class="nc" id="L357">                convertedServiceTimes[currentShadowStation][clas] = new double[1];</span>
+<span class="nc" id="L358">                convertedServiceTimes[currentShadowStation][clas][0] = servTime[station][clas][0];</span>
+
+<span class="nc bnc" id="L360" title="All 2 branches missed.">                if (priorities[clas] == currentPriority) {</span>
+<span class="nc" id="L361">                    convertedVisits[currentShadowStation][clas] = visits[station][clas];</span>
+                } else {
+<span class="nc" id="L363">                    convertedVisits[currentShadowStation][clas] = 0.0;</span>
+                }
+            }
+        }
+<span class="nc" id="L367">    }</span>
+
+    @Override
+    public boolean hasSufficientProcessingCapacity() {
+<span class="nc" id="L371">        return ProcessingCapacityChecker.mixedHasSufficientProcessingCapacity(type, visits, servTime, classData, classTypes);</span>
+    }
+
+    public double[][] getLastConvergenceCheckThroughput() {
+<span class="nc" id="L375">        return lastConvergenceCheckThroughput;</span>
+    }
+
+    public double[][][] getServTime() {
+<span class="nc" id="L379">        return servTime;</span>
+    }
+
+    public double[][][] getConvertedServiceTimes() {
+<span class="nc" id="L383">        return convertedServiceTimes;</span>
+    }
+
+    public int[] getStationTypes() {
+<span class="nc" id="L387">        return type;</span>
+    }
+
+    public int getClasses() {
+<span class="nc" id="L391">        return classes;</span>
+    }
+
+    public int getNumPriorityStations() {
+<span class="nc" id="L395">        return numPriorityStations;</span>
+    }
+
+    public int[] getPriorities() {
+<span class="nc" id="L399">        return priorities;</span>
+    }
+
+    public int getStations() {
+<span class="nc" id="L403">        return stations;</span>
+    }
+
+    public void forceStop() {
+<span class="nc" id="L407">        forceStop = true;</span>
+<span class="nc" id="L408">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

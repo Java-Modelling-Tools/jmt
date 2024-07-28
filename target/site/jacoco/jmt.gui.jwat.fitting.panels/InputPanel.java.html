@@ -1,0 +1,1174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InputPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.fitting.panels</a> &gt; <span class="el_source">InputPanel.java</span></div><h1>InputPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.fitting.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.text.DefaultFormatter;
+
+import jmt.engine.jwat.ProgressStatusListener;
+import jmt.engine.jwat.fitting.utils.ModelFitting;
+import jmt.engine.jwat.input.EventFinishAbort;
+import jmt.engine.jwat.input.EventFinishLoad;
+import jmt.engine.jwat.input.EventStatus;
+import jmt.engine.jwat.input.Loader;
+import jmt.engine.jwat.input.Parameter;
+import jmt.engine.jwat.input.ProgressMonitorShow;
+import jmt.engine.jwat.workloadAnalysis.utils.FormatFileReader;
+import jmt.engine.jwat.workloadAnalysis.utils.FormatFileWriter;
+import jmt.engine.jwat.workloadAnalysis.utils.SteppedComboBox;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.JWatWizard;
+import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jwat.workloadAnalysis.panels.LogVisualizer;
+import jmt.gui.jwat.workloadAnalysis.tables.JWatVariableInputTable;
+import jmt.gui.jwat.workloadAnalysis.tables.JWatVariableInputTableModel;
+import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
+
+/**
+ * Description: This class represents workload analysis tool input panel
+ *
+ * @author Brambilla Davide Matr 667986, Fumagalli Claudio 667971
+ * Created: 30-lug-2006 10.54.14 Darksch
+ */
+public class InputPanel extends WizardPanel implements CommonConstants, JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	/*** Help strings ***/
+<span class="nc" id="L91">	private static String ADD_NEW_VARIABLE = &quot;Add new variable&quot;;</span>
+<span class="nc" id="L92">	private static String SPINNER_VARIABLE = &quot;Enter the number of variables&quot;;</span>
+<span class="nc" id="L93">	private static String COMBO_FILE_INPUT = &quot;Select input file&quot;;</span>
+<span class="nc" id="L94">	private static String COMBO_FILTER_INPUT = &quot;Select workload sampling method&quot;;</span>
+<span class="nc" id="L95">	private static String COMBO_FORMAT_INPUT = &quot;Select format for input file&quot;;</span>
+<span class="nc" id="L96">	private static String PANEL_INFORMATION = &quot;Name and observations of selected file&quot;;</span>
+<span class="nc" id="L97">	private static String INPUT_TABLE = &quot;Click or drag to select classes; to edit data double-click and start typing. Right-click for a list of available operations&quot;;</span>
+	/** JComboBox filter section texts **/
+<span class="nc" id="L99">	private String FILTER_TEXT_COMPLETE = &quot;Complete file&quot;;</span>
+<span class="nc" id="L100">	private String FILTER_TEXT_RANDOM = &quot;Random Sampling&quot;;</span>
+<span class="nc" id="L101">	private String FILTER_TEXT_INTERVAL = &quot;By interval&quot;;</span>
+	/** Description of main and subpanels **/
+	// Main description
+	private static final String INPUT_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Input record description of the file to be fitted&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define a new input format or open a saved format&quot; + HTML_FONT_NOR_END + HTML_END;
+	// Text of label of log file input
+	private static final String LOAD_FILE_LABEL = HTML_START + HTML_FONT_NORM + &quot;Load file name&quot; + HTML_FONT_NOR_END + HTML_END;
+	// Text of label of format input file
+	public static final String LOAD_FORMAT_LABEL = HTML_START + HTML_FONT_NORM + &quot;Load saved format &quot; + HTML_FONT_NOR_END + HTML_END;
+	// Text of label of filter on input file
+	public static final String LOAD_FILTER_LABEL = HTML_START + HTML_FONT_NORM + &quot;Choose sampling method &quot; + HTML_FONT_NOR_END + HTML_END;
+	// Text button save new format
+	public static final String BUTTON_SAVE_FORMAT = HTML_START + HTML_FONT_NORM + &quot;Save format&quot; + HTML_FONT_NOR_END + HTML_END;
+	//Text button load
+	public static final String LOAD_LOG = HTML_START + HTML_FONT_NORM + &quot;LOAD&quot; + HTML_FONT_NOR_END + HTML_END;
+	// Text information about filtering on variable
+	public static final String FILTER_NEXT_STEP = HTML_START + HTML_FONT_NORM + &quot;&lt;CENTER&gt;For filtering on variable see next step&lt;/CENTER&gt;&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+	// String of browsing for a new file used in input file panel
+<span class="nc" id="L120">	private static String browseInputPanelText = &quot;Browse...&quot;;</span>
+	// Table used to define or show existing format of a log file ( variables information )
+<span class="nc" id="L122">	private JWatVariableInputTable inputTable = null;</span>
+	// Reference to main startscreen
+<span class="nc" id="L124">	private ModelFitting model = null;</span>
+	// Reference to Wizard 
+	private MainJwatWizard parent;
+	/** References to subpanels and objects used in these panels **/
+	// Input File panel
+<span class="nc" id="L129">	private JPanel inputPanel = null;</span>
+	// File Format panel
+<span class="nc" id="L131">	private JPanel formatPanel = null;</span>
+	// Main filtering panel
+<span class="nc" id="L133">	private JPanel filterPanel = null;</span>
+	// Information panel
+<span class="nc" id="L135">	private JPanel infoPanel = null;</span>
+<span class="nc" id="L136">	private JLabel observationNumb = null;</span>
+<span class="nc" id="L137">	private JLabel fileName = null;</span>
+<span class="nc" id="L138">	private static String obsNumbString = &quot;Number of observations: &quot;;</span>
+<span class="nc" id="L139">	private static String obsFileName = &quot;File name: &quot;;</span>
+<span class="nc" id="L140">	private int obsNumb = -1;</span>
+	// Combobox http log files retrieved from default directory
+<span class="nc" id="L142">	private SteppedComboBox filechooser = new SteppedComboBox(new String[] { browseInputPanelText });</span>
+	// List of log files in save directory and opened by user
+	private File nameFile;
+	// ComboBox file format retrieved from default format directory
+<span class="nc" id="L146">	private SteppedComboBox formatchooser = new SteppedComboBox(new String[] { browseInputPanelText });</span>
+<span class="nc" id="L147">	private JButton saveNewFormat = null;</span>
+	// ComboBox filtering possibilities
+<span class="nc" id="L149">	private JComboBox filterchooser = new JComboBox();</span>
+	// Main filtering options panel
+	private JPanel optionFilterPanel;
+	// Random option panel and spinner element
+<span class="nc" id="L153">	private JPanel randomOptionPanel = null;</span>
+<span class="nc" id="L154">	private JSpinner randomNObs = null;</span>
+	// Interval option panel and Spinner elements from / to observation
+<span class="nc" id="L156">	private JPanel intervalOptionPanel = null;</span>
+<span class="nc" id="L157">	private JSpinner intervalFromObs = null;</span>
+<span class="nc" id="L158">	private JSpinner intervalToObs = null;</span>
+	// Panel used to organize filter option panel and others organizer panels
+<span class="nc" id="L160">	private JPanel centerFilterOpt = new JPanel(new BorderLayout(0, 5));</span>
+	// Indicates if the application can go to next panel (statistics)
+<span class="nc" id="L162">	private boolean canGoOn = false;</span>
+	// Used to indicates that loading is on progress
+<span class="nc" id="L164">	private JButton loadFileBtn = null;</span>
+<span class="nc" id="L165">	private boolean loadOnRun = false;</span>
+	// Help bar reference
+<span class="nc" id="L167">	private HoverHelp help = null;</span>
+	// Format file chooser window
+<span class="nc" id="L169">	private JFileChooser fileSaveF = new JFileChooser(Defaults.getWorkingPath()) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L174">			setAcceptAllFileFilterUsed(false);</span>
+<span class="nc" id="L175">			setFileFilter(new FileFilter() {</span>
+				@Override
+				public boolean accept(File f) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">					if (f.isDirectory()) {</span>
+<span class="nc" id="L179">						return true;</span>
+					}
+<span class="nc bnc" id="L181" title="All 2 branches missed.">					if (f.getName().indexOf(&quot;.jwatformat&quot;) != -1) {</span>
+<span class="nc" id="L182">						return true;</span>
+					}
+<span class="nc" id="L184">					return false;</span>
+				}
+
+				@Override
+				public String getDescription() {
+<span class="nc" id="L189">					return &quot;Workload analysis format file&quot;;</span>
+				}
+			});
+<span class="nc" id="L192">			setApproveButtonText(&quot;Save&quot;);</span>
+<span class="nc" id="L193">			setFileSelectionMode(JFileChooser.FILES_ONLY);</span>
+		}
+
+	};
+	// Input log file chooser window
+<span class="nc" id="L198">	private JFileChooser file = new JFileChooser(Defaults.getWorkingPath()) {</span>
+		private static final long serialVersionUID = 1L;
+	};
+	// Spinner listener for format definition
+<span class="nc" id="L202">	private ChangeListener spinnerListener = new ChangeListener() {</span>
+
+		public void stateChanged(ChangeEvent ce) {
+			/** Reset format combo box **/
+<span class="nc bnc" id="L206" title="All 4 branches missed.">			if (((Integer) numOfVars.getValue()).intValue() == 0 || inputTable.getRowCount() == 0) {</span>
+<span class="nc" id="L207">				formatchooser.setSelectedIndex(-1);</span>
+			}
+			/** Decrement number of variables shows by spinner **/
+<span class="nc bnc" id="L210" title="All 4 branches missed.">			if (((Integer) numOfVars.getValue()).intValue() &lt; inputTable.getRowCount() &amp;&amp; inputTable.getRowCount() &gt; 0) {</span>
+<span class="nc" id="L211">				((JWatVariableInputTableModel) inputTable.getModel()).deleteRow(inputTable.getRowCount() - 1);</span>
+<span class="nc" id="L212">				inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L213">				formatchooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L214">				return;</span>
+			}
+			/** Add a variabile on spinner **/
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			if (((Integer) numOfVars.getValue()).intValue() &gt; inputTable.getRowCount()) {</span>
+<span class="nc" id="L218">				addVariable();</span>
+			}
+<span class="nc" id="L220">		}</span>
+
+	};
+	// Spinner and button used in format definition in main panel
+<span class="nc" id="L224">	private JSpinner numOfVars = new JSpinner(new SpinnerNumberModel(0, 0, 50, 1)) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L229">			setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L230">			setToolTipText(SPINNER_VARIABLE);</span>
+<span class="nc" id="L231">			((DefaultFormatter) ((JSpinner.DefaultEditor) getEditor()).getTextField().getFormatter()).setAllowsInvalid(false);</span>
+<span class="nc" id="L232">			registerKeyboardAction(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">					if (((Integer) getValue()).intValue() &lt; ((Integer) ((SpinnerNumberModel) getModel()).getMaximum()).intValue()) {</span>
+<span class="nc" id="L235">						addVariable();</span>
+					}
+<span class="nc" id="L237">				}</span>
+<span class="nc" id="L238">			}, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);</span>
+<span class="nc" id="L239">			registerKeyboardAction(new ActionListener() {</span>
+				public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">					if (((Integer) getValue()).intValue() &gt; ((Integer) ((SpinnerNumberModel) getModel()).getMinimum()).intValue()) {</span>
+<span class="nc" id="L242">						setValue(new Integer(((Integer) getValue()).intValue() - 1));</span>
+					}
+<span class="nc" id="L244">				}</span>
+<span class="nc" id="L245">			}, KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);</span>
+		}
+
+	};
+<span class="nc" id="L249">	private JButton addVar = null;</span>
+	// Loading action associated with LOAD button
+<span class="nc" id="L251">	protected AbstractAction loadFile = new AbstractAction(LOAD_LOG) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L256">			putValue(Action.SHORT_DESCRIPTION, &quot;Loads data from file and fits it for both Pareto and Exponential distributions&quot;);</span>
+		}
+
+		// Adds a new row to inputTable and update varchooser comboBox used to show list of variables on which can be applied a filter
+		public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">			if (nameFile == null) {</span>
+<span class="nc" id="L262">				JOptionPane.showMessageDialog(InputPanel.this, &quot;You have no selected any input file, please select one and then retry&quot;);</span>
+<span class="nc" id="L263">				return;</span>
+			}
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			if (!((JWatVariableInputTableModel) inputTable.getModel()).checkFittingRequirements()) {</span>
+<span class="nc" id="L266">				JOptionPane.showMessageDialog(InputPanel.this,</span>
+						&quot;You must select only ONE numeric variable to fit the data&quot;);
+<span class="nc" id="L268">				return;</span>
+			}
+<span class="nc bnc" id="L270" title="All 2 branches missed.">			if (!loadOnRun) {</span>
+<span class="nc" id="L271">				loadOnRun = true;</span>
+<span class="nc" id="L272">				JWatVariableInputTableModel tableModel = ((JWatVariableInputTableModel) inputTable.getModel());</span>
+<span class="nc" id="L273">				Parameter fileParameter = tableModel.getParameter();</span>
+				//Check needed to create the filtering
+<span class="nc bnc" id="L275" title="All 2 branches missed.">				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_COMPLETE)) {</span>
+					try {
+<span class="nc" id="L277">						fileParameter.setOption(new int[] { Loader.calcNumOfObs((nameFile.getAbsolutePath())),</span>
+<span class="nc" id="L278">								((SpinnerNumberModel) randomNObs.getModel()).getNumber().intValue() });</span>
+<span class="nc" id="L279">					} catch (Exception e) {</span>
+<span class="nc" id="L280">						e.printStackTrace();</span>
+<span class="nc" id="L281">					}</span>
+				}
+<span class="nc bnc" id="L283" title="All 2 branches missed.">				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_RANDOM)) {</span>
+					// OPTION FOR RANDOM
+<span class="nc" id="L285">					fileParameter.setSampleMethod(Parameter.RANDOM_INPUT);</span>
+					try {
+<span class="nc" id="L287">						fileParameter.setOption(new int[] { Loader.calcNumOfObs(nameFile.getAbsolutePath()),</span>
+<span class="nc" id="L288">								((SpinnerNumberModel) randomNObs.getModel()).getNumber().intValue() });</span>
+<span class="nc" id="L289">					} catch (Exception e) {</span>
+<span class="nc" id="L290">						e.printStackTrace();</span>
+<span class="nc" id="L291">					}</span>
+				}
+<span class="nc bnc" id="L293" title="All 2 branches missed.">				if (((String) filterchooser.getModel().getSelectedItem()).equals(FILTER_TEXT_INTERVAL)) {</span>
+					// OPTION FOR INTERVAL
+<span class="nc" id="L295">					fileParameter.setSampleMethod(Parameter.INTERVAL_INPUT);</span>
+<span class="nc" id="L296">					fileParameter.setOption(new int[] { ((SpinnerNumberModel) intervalFromObs.getModel()).getNumber().intValue(),</span>
+<span class="nc" id="L297">							((SpinnerNumberModel) intervalToObs.getModel()).getNumber().intValue() });</span>
+				}
+				//Call to loader
+				try {
+<span class="nc" id="L301">					Loader.readData(nameFile.getAbsolutePath(), fileParameter, new ProgressMonitorShow(InputPanel.this, &quot;Loading Data...&quot;, 1000),</span>
+							new InputStatusListener());
+<span class="nc" id="L303">				} catch (Exception e) {</span>
+<span class="nc" id="L304">					e.printStackTrace();</span>
+<span class="nc" id="L305">				}</span>
+			}
+<span class="nc" id="L307">		}</span>
+
+	};
+	// Action applied to add new variable button used to add a variable definition to inputTable
+<span class="nc" id="L311">	protected AbstractAction addNewVariable = new AbstractAction(&quot;Add new var&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L316">			putValue(Action.SHORT_DESCRIPTION, ADD_NEW_VARIABLE);</span>
+		}
+
+		// Adds a new row to inputTable and update varchooser comboBox used to show list of variables on which can be applied a filter
+		public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">			if (((Integer) numOfVars.getValue()).intValue() &lt; ((Integer) ((SpinnerNumberModel) numOfVars.getModel()).getMaximum()).intValue()) {</span>
+<span class="nc" id="L322">				addVariable();</span>
+			}
+<span class="nc" id="L324">		}</span>
+
+	};
+
+	// Add new variable to format
+	private void addVariable() {
+		// Adds new row to table
+<span class="nc" id="L331">		((JWatVariableInputTableModel) inputTable.getModel()).addNewRow();</span>
+		// Notify to inputTable changes
+<span class="nc" id="L333">		inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+		// Update Spinner
+<span class="nc" id="L335">		numOfVars.setValue(new Integer(inputTable.getRowCount()));</span>
+		// Refresh values in varchooser comboBox reset value to null and clean option panel
+<span class="nc" id="L337">		centerFilterOpt.removeAll();</span>
+		// Set formatchooser to none
+<span class="nc" id="L339">		formatchooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L340">	}</span>
+
+	// Add save new format Action, this action saves new format in format directory
+<span class="nc" id="L343">	protected AbstractAction saveFormat = new AbstractAction(BUTTON_SAVE_FORMAT) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L348">			putValue(Action.SHORT_DESCRIPTION, &quot;Save current defined format&quot;);</span>
+		}
+
+		// Removes all rows from inputTable and update varchooser comboBox and option panel
+		public void actionPerformed(ActionEvent arg0) {
+// If there are any values I save them
+<span class="nc bnc" id="L354" title="All 2 branches missed.">			if (((JWatVariableInputTableModel) inputTable.getModel()).getSize() &gt; 0) {</span>
+//The format is selected
+<span class="nc bnc" id="L356" title="All 2 branches missed.">				if (formatchooser.getSelectedIndex() &gt;= 0) {</span>
+<span class="nc" id="L357">					int response = JOptionPane.showConfirmDialog(null, &quot;Overwrite existing file?&quot;, &quot;Confirm overwrite&quot;, JOptionPane.YES_NO_OPTION,</span>
+							JOptionPane.QUESTION_MESSAGE);
+<span class="nc bnc" id="L359" title="All 2 branches missed.">					if (response == JOptionPane.YES_OPTION) {</span>
+<span class="nc" id="L360">						File file = new File(formatchooser.getSelectedItem().toString());</span>
+<span class="nc" id="L361">						JWatVariableInputTableModel mod = ((JWatVariableInputTableModel) inputTable.getModel());</span>
+<span class="nc" id="L362">						new FormatFileWriter(mod.getNames(), mod.getComments(), mod.getDelimiters(), mod.getRegExpr(), mod.getTypes(), file</span>
+<span class="nc" id="L363">								.getAbsolutePath(), mod.getDefaults(), mod.getReplaces());</span>
+<span class="nc" id="L364">						formatchooser.setSelectedItem(file.getAbsolutePath());</span>
+<span class="nc" id="L365">					} else {</span>
+<span class="nc" id="L366">						chooseFile();</span>
+					}
+<span class="nc" id="L368">				} else {</span>
+<span class="nc" id="L369">					chooseFile();</span>
+				}
+			} else {
+<span class="nc" id="L372">				JOptionPane.showMessageDialog(null, &quot;There are no variables defined. Please choose format and then clcik save button&quot;, &quot;Information&quot;,</span>
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+<span class="nc" id="L375">		}</span>
+
+		private void chooseFile() {
+<span class="nc bnc" id="L378" title="All 2 branches missed.">			if (fileSaveF.showOpenDialog(InputPanel.this) == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L379">				File fFile = fileSaveF.getSelectedFile();</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">				if (fFile.getName().indexOf(&quot;.jwatformat&quot;) == -1) {</span>
+<span class="nc" id="L381">					fFile = new File(fFile.getAbsolutePath() + &quot;.jwatformat&quot;);</span>
+				}
+<span class="nc bnc" id="L383" title="All 2 branches missed.">				if (fFile.exists()) {</span>
+<span class="nc" id="L384">					int response = JOptionPane.showConfirmDialog(null, &quot;Overwrite existing file?&quot;, &quot;Confirm overwrite&quot;, JOptionPane.YES_NO_OPTION,</span>
+							JOptionPane.QUESTION_MESSAGE);
+<span class="nc bnc" id="L386" title="All 2 branches missed.">					if (response == JOptionPane.NO_OPTION) {</span>
+<span class="nc" id="L387">						return;</span>
+					}
+<span class="nc" id="L389">					JWatVariableInputTableModel mod = ((JWatVariableInputTableModel) inputTable.getModel());</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">					if (fFile.getName().indexOf(&quot;.jwatformat&quot;) == -1) {</span>
+<span class="nc" id="L391">						fFile = new File(fFile.getAbsolutePath() + &quot;.jwatformat&quot;);</span>
+					}
+<span class="nc" id="L393">					new FormatFileWriter(mod.getNames(), mod.getComments(), mod.getDelimiters(), mod.getRegExpr(), mod.getTypes(), fFile</span>
+<span class="nc" id="L394">							.getAbsolutePath(), mod.getDefaults(), mod.getReplaces());</span>
+//check if the file is currently loaded or not
+<span class="nc" id="L396">					boolean exist = false;</span>
+//check if the selected item already exists
+<span class="nc bnc" id="L398" title="All 2 branches missed.">					for (int i = 1; i &lt; formatchooser.getModel().getSize(); i++) {</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">						if (((String) formatchooser.getModel().getElementAt(i)).equals(fFile.getAbsolutePath())) {</span>
+<span class="nc" id="L400">							exist = true;</span>
+<span class="nc" id="L401">							break;</span>
+						}
+					}
+<span class="nc bnc" id="L404" title="All 2 branches missed.">					if (!exist) {</span>
+<span class="nc" id="L405">						formatchooser.insertItemAt(fFile.getAbsolutePath(), formatchooser.getItemCount());</span>
+<span class="nc" id="L406">						formatchooser.setSelectedItem(fFile.getAbsolutePath());</span>
+					} else {
+<span class="nc" id="L408">						formatchooser.setSelectedItem(fFile.getAbsolutePath());</span>
+					}
+<span class="nc" id="L410">				} else {</span>
+<span class="nc" id="L411">					JWatVariableInputTableModel mod = ((JWatVariableInputTableModel) inputTable.getModel());</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">					if (fFile.getName().indexOf(&quot;.jwatformat&quot;) == -1) {</span>
+<span class="nc" id="L413">						fFile = new File(fFile.getAbsolutePath() + &quot;.jwatformat&quot;);</span>
+					}
+<span class="nc" id="L415">					new FormatFileWriter(mod.getNames(), mod.getComments(), mod.getDelimiters(), mod.getRegExpr(), mod.getTypes(), fFile</span>
+<span class="nc" id="L416">							.getAbsolutePath(), mod.getDefaults(), mod.getReplaces());</span>
+<span class="nc" id="L417">					formatchooser.insertItemAt(fFile.getAbsolutePath(), formatchooser.getItemCount());</span>
+<span class="nc" id="L418">					formatchooser.setSelectedIndex(formatchooser.getItemCount() - 1);</span>
+				}
+			}
+<span class="nc" id="L421">		}</span>
+
+	};
+
+	/**
+	 * Creates and sets up a workload analysis input panel. This panels contains all necessary information to
+	 * correctly load observation from a specified log file.
+	 *
+	 * @param parent reference to current Wizard frame
+	 */
+<span class="nc" id="L431">	public InputPanel(MainJwatWizard parent) {</span>
+<span class="nc" id="L432">		this.parent = parent;</span>
+<span class="nc" id="L433">		model = (ModelFitting) parent.getModel();</span>
+<span class="nc" id="L434">		help = parent.getHelp();</span>
+<span class="nc" id="L435">		initGUI();</span>
+<span class="nc" id="L436">	}</span>
+
+	/**
+	 * Initialize GUI
+	 */
+	private void initGUI() {
+<span class="nc" id="L442">		Box mainHorizontalBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L443">		mainHorizontalBox.add(Box.createHorizontalStrut(5));</span>
+
+<span class="nc" id="L445">		Box centralVerticalBox = Box.createVerticalBox();</span>
+<span class="nc" id="L446">		mainHorizontalBox.add(centralVerticalBox);</span>
+
+<span class="nc" id="L448">		centralVerticalBox.add(Box.createVerticalStrut(5));</span>
+<span class="nc" id="L449">		JPanel componentsPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L450">		centralVerticalBox.add(componentsPanel);</span>
+
+<span class="nc" id="L452">		JPanel centralUpperPanel = new JPanel(new BorderLayout());</span>
+
+<span class="nc" id="L454">		JPanel buttonNewVariable = new JPanel(new BorderLayout());</span>
+
+<span class="nc" id="L456">		JPanel spinnerP = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L457">		help.addHelp(numOfVars, SPINNER_VARIABLE);</span>
+<span class="nc" id="L458">		spinnerP.add(new JLabel(&quot;Number:&quot;));</span>
+<span class="nc" id="L459">		spinnerP.add(numOfVars);</span>
+<span class="nc" id="L460">		numOfVars.addChangeListener(spinnerListener);</span>
+<span class="nc" id="L461">		JPanel addP = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L462">		addVar = new JButton(addNewVariable);</span>
+<span class="nc" id="L463">		help.addHelp(addVar, ADD_NEW_VARIABLE);</span>
+<span class="nc" id="L464">		addP.add(addVar);</span>
+
+<span class="nc" id="L466">		buttonNewVariable.add(spinnerP, BorderLayout.NORTH);</span>
+<span class="nc" id="L467">		buttonNewVariable.add(addP, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L469">		centralUpperPanel.add(buttonNewVariable, BorderLayout.EAST);</span>
+<span class="nc" id="L470">		centralUpperPanel.add(new JLabel(INPUT_DESCRIPTION), BorderLayout.CENTER);</span>
+
+<span class="nc" id="L472">		componentsPanel.add(centralUpperPanel, BorderLayout.NORTH);</span>
+		/********** TABLE **********/
+<span class="nc" id="L474">		inputTable = new JWatVariableInputTable();</span>
+<span class="nc" id="L475">		inputTable.setToolTipText(INPUT_TABLE);</span>
+<span class="nc" id="L476">		help.addHelp(inputTable, INPUT_TABLE);</span>
+<span class="nc" id="L477">		inputTable.getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L478">		inputTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L479">		inputTable.setModel(new JWatVariableInputTableModel());</span>
+<span class="nc" id="L480">		inputTable.addDeleteRowListener(new RowDeleteListener() {</span>
+			public void rowsDeletedEvent() {
+<span class="nc" id="L482">				numOfVars.setValue(new Integer(inputTable.getRowCount()));</span>
+				// Set formatchooser to none
+<span class="nc" id="L484">				formatchooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L485">			}</span>
+		});
+
+<span class="nc" id="L488">		JScrollPane inputTabSP = new JScrollPane(inputTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L489">		inputTabSP.setPreferredSize(new Dimension((int)(550 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L491">		componentsPanel.add(inputTabSP, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L493">		JPanel rightPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L494">		rightPanel.setMaximumSize(new Dimension((int)(230 * CommonConstants.widthScaling), (int)(800 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L495">		rightPanel.setPreferredSize(new Dimension((int)(230 * CommonConstants.widthScaling), (int)(800 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L497">		mainHorizontalBox.add(rightPanel);</span>
+		/********** INPUT FILE PANEL **********/
+<span class="nc" id="L499">		inputPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L500">		inputPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;File to be fitted&quot;));</span>
+<span class="nc" id="L501">		inputPanel.add(new JLabel(LOAD_FILE_LABEL), BorderLayout.NORTH);</span>
+<span class="nc" id="L502">		inputPanel.add(filechooser, BorderLayout.SOUTH);</span>
+<span class="nc" id="L503">		help.addHelp(inputPanel, &quot;Select input file&quot;);</span>
+
+		/** UPDATE 09/11/06 **/
+<span class="nc" id="L506">		JPanel infoFile = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L507">		infoFile.add(inputPanel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L509">		infoPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L510">		help.addHelp(infoPanel, PANEL_INFORMATION);</span>
+<span class="nc" id="L511">		infoPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;File information&quot;));</span>
+
+<span class="nc" id="L513">		observationNumb = new JLabel(obsNumbString);</span>
+<span class="nc" id="L514">		fileName = new JLabel(obsFileName);</span>
+<span class="nc" id="L515">		infoPanel.add(observationNumb, BorderLayout.NORTH);</span>
+<span class="nc" id="L516">		infoPanel.add(fileName, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L518">		infoFile.add(infoPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L520">		rightPanel.add(infoFile, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L522">		JPanel centerInputPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L523">		rightPanel.add(centerInputPanel, BorderLayout.CENTER);</span>
+		/********** FORMAT FILE PANEL **********/
+<span class="nc" id="L525">		formatPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L526">		help.addHelp(formatPanel, &quot;Select a format for current input file&quot;);</span>
+
+<span class="nc" id="L528">		JPanel test = new JPanel(new GridLayout(1, 2));</span>
+<span class="nc" id="L529">		formatPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;File format&quot;));</span>
+<span class="nc" id="L530">		test.add(new JLabel(LOAD_FORMAT_LABEL));</span>
+<span class="nc" id="L531">		saveNewFormat = new JButton(saveFormat);</span>
+<span class="nc" id="L532">		help.addHelp(saveNewFormat, &quot;Save current defined format&quot;);</span>
+<span class="nc" id="L533">		test.add(saveNewFormat);</span>
+
+<span class="nc" id="L535">		formatPanel.add(test, BorderLayout.NORTH);</span>
+<span class="nc" id="L536">		formatPanel.add(formatchooser, BorderLayout.SOUTH);</span>
+<span class="nc" id="L537">		centerInputPanel.add(formatPanel, BorderLayout.NORTH);</span>
+		/********** SMAPLING PANEL **********/
+<span class="nc" id="L539">		filterPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L540">		help.addHelp(filterPanel, &quot;Specify the sampling method: Complete file, Random sampling or by interval&quot;);</span>
+<span class="nc" id="L541">		filterPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;File extraction method&quot;));</span>
+
+<span class="nc" id="L543">		JPanel chooseFilterPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L544">		filterPanel.add(chooseFilterPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L545">		chooseFilterPanel.add(new JLabel(LOAD_FILTER_LABEL), BorderLayout.NORTH);</span>
+
+<span class="nc" id="L547">		optionFilterPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L548">		optionFilterPanel.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;Loading size options&quot;));</span>
+
+<span class="nc" id="L550">		chooseFilterPanel.add(filterchooser, BorderLayout.SOUTH);</span>
+<span class="nc" id="L551">		filterPanel.add(optionFilterPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L552">		centerInputPanel.add(filterPanel, BorderLayout.CENTER);</span>
+		/********** INFORMATION PANEL **********/
+<span class="nc" id="L554">		JPanel southPanel = new JPanel(new BorderLayout());</span>
+
+<span class="nc" id="L556">		loadFileBtn = new JButton(loadFile);</span>
+<span class="nc" id="L557">		JPanel loadPanel = new JPanel();</span>
+<span class="nc" id="L558">		loadFileBtn.setPreferredSize(new Dimension((int) (BUTTONSIZE * 4.5), (int) (BUTTONSIZE * 0.8)));</span>
+<span class="nc" id="L559">		loadFileBtn.setBackground(Color.RED);</span>
+<span class="nc" id="L560">		loadPanel.add(loadFileBtn);</span>
+
+<span class="nc" id="L562">		southPanel.add(loadPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L563">		centerInputPanel.add(southPanel, BorderLayout.SOUTH);</span>
+		/********** INIT COMBOBOXES ****************/
+<span class="nc" id="L565">		initComboInputPanel();</span>
+<span class="nc" id="L566">		initComboFormatPanel();</span>
+<span class="nc" id="L567">		initComboFilterPanel();</span>
+
+<span class="nc" id="L569">		this.setLayout(new GridLayout(1, 1));</span>
+<span class="nc" id="L570">		this.add(mainHorizontalBox);</span>
+<span class="nc" id="L571">	}</span>
+
+	/**
+	 * Returns the name of the pane
+	 *
+	 * @see java.awt.Component#getName()
+	 */
+	public String getName() {
+<span class="nc" id="L579">		return &quot;Input&quot;;</span>
+	}
+
+	/**
+	 * Sets up combobox of file with format defined
+	 */
+	private void initComboInputPanel() {
+<span class="nc" id="L586">		filechooser.setToolTipText(COMBO_FILE_INPUT);</span>
+<span class="nc" id="L587">		filechooser.setSelectedIndex(-1);</span>
+
+<span class="nc" id="L589">		filechooser.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent event) {
+<span class="nc" id="L592">				String choice = (String) ((JComboBox) event.getSource()).getSelectedItem();</span>
+<span class="nc bnc" id="L593" title="All 4 branches missed.">				if (choice != null &amp;&amp; choice.equals(browseInputPanelText)) {</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">					if (file.showOpenDialog(InputPanel.this) == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L595">						nameFile = file.getSelectedFile();</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">						if (!nameFile.exists()) {</span>
+<span class="nc" id="L597">							JOptionPane.showMessageDialog(InputPanel.this, &quot;File does not exists&quot;, &quot;Error&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L598">							return;</span>
+						}
+						try {
+<span class="nc" id="L601">							obsNumb = Loader.calcNumOfObs((nameFile.getAbsolutePath()));</span>
+<span class="nc" id="L602">						} catch (Exception e) {</span>
+<span class="nc" id="L603">							e.printStackTrace();</span>
+<span class="nc" id="L604">						}</span>
+<span class="nc" id="L605">						boolean exist = false;</span>
+						//check if the selected item already exists
+<span class="nc bnc" id="L607" title="All 2 branches missed.">						for (int i = 1; i &lt; filechooser.getModel().getSize(); i++) {</span>
+<span class="nc bnc" id="L608" title="All 2 branches missed.">							if (((String) filechooser.getModel().getElementAt(i)).equals(file.getSelectedFile().getAbsolutePath())) {</span>
+<span class="nc" id="L609">								exist = true;</span>
+<span class="nc" id="L610">								break;</span>
+							}
+						}
+<span class="nc bnc" id="L613" title="All 2 branches missed.">						if (!exist) {</span>
+<span class="nc" id="L614">							filechooser.insertItemAt(file.getSelectedFile().getAbsolutePath(), filechooser.getItemCount());</span>
+<span class="nc" id="L615">							filechooser.setSelectedIndex(filechooser.getItemCount() - 1);</span>
+						} else {
+<span class="nc" id="L617">							filechooser.setSelectedItem(file.getSelectedFile().getAbsolutePath());</span>
+						}
+						//Update information
+<span class="nc" id="L620">						observationNumb.setText(obsNumbString + obsNumb);</span>
+<span class="nc" id="L621">						fileName.setText(obsFileName + file.getSelectedFile().getName());</span>
+<span class="nc" id="L622">						fileName.setToolTipText(nameFile.getName());</span>
+<span class="nc" id="L623">					} else {</span>
+<span class="nc" id="L624">						filechooser.setSelectedIndex(-1);</span>
+					}
+				} else {
+<span class="nc bnc" id="L627" title="All 2 branches missed.">					if (choice != null) {</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">						if (!choice.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">							if (choice.indexOf(&quot;\\&quot;) == -1) {</span>
+<span class="nc" id="L630">								nameFile = new File(choice);</span>
+								try {
+<span class="nc" id="L632">									obsNumb = Loader.calcNumOfObs((nameFile.getAbsolutePath()));</span>
+<span class="nc" id="L633">								} catch (Exception e) {</span>
+<span class="nc" id="L634">									e.printStackTrace();</span>
+<span class="nc" id="L635">								}</span>
+							} else {
+<span class="nc" id="L637">								nameFile = new File(choice);</span>
+								try {
+<span class="nc" id="L639">									obsNumb = Loader.calcNumOfObs((nameFile.getAbsolutePath()));</span>
+<span class="nc" id="L640">								} catch (Exception e) {</span>
+<span class="nc" id="L641">									e.printStackTrace();</span>
+<span class="nc" id="L642">								}</span>
+							}
+							//Update information
+<span class="nc" id="L645">							observationNumb.setText(obsNumbString + obsNumb);</span>
+<span class="nc" id="L646">							fileName.setText(obsFileName + nameFile.getName());</span>
+<span class="nc" id="L647">							fileName.setToolTipText(nameFile.getName());</span>
+						} else {
+<span class="nc" id="L649">							filechooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L650">							observationNumb.setText(obsNumbString);</span>
+<span class="nc" id="L651">							fileName.setText(obsFileName);</span>
+						}
+					} else {
+<span class="nc" id="L654">						observationNumb.setText(obsNumbString);</span>
+<span class="nc" id="L655">						fileName.setText(obsFileName);</span>
+					}
+				}
+<span class="nc" id="L658">			}</span>
+
+		});
+<span class="nc" id="L661">	}</span>
+
+<span class="nc" id="L663">	private JFileChooser fileF = new JFileChooser(Defaults.getWorkingPath()) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L668">			setFileFilter(new FileFilter() {</span>
+				@Override
+				public boolean accept(File f) {
+<span class="nc bnc" id="L671" title="All 2 branches missed.">					if (f.isDirectory()) {</span>
+<span class="nc" id="L672">						return true;</span>
+					}
+<span class="nc bnc" id="L674" title="All 2 branches missed.">					if (f.getAbsolutePath().indexOf(&quot;.jwatformat&quot;) != -1) {</span>
+<span class="nc" id="L675">						return true;</span>
+					}
+<span class="nc" id="L677">					return false;</span>
+				}
+
+				@Override
+				public String getDescription() {
+<span class="nc" id="L682">					return &quot;Workload analysis format file&quot;;</span>
+				}
+			});
+<span class="nc" id="L685">			setAcceptAllFileFilterUsed(false);</span>
+		}
+
+	};
+
+	/**
+	 * Sets up combobox format defined
+	 */
+	private void initComboFormatPanel() {
+<span class="nc" id="L694">		formatchooser.setToolTipText(COMBO_FORMAT_INPUT);</span>
+<span class="nc" id="L695">		formatchooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L696">		addListenersComboFormatPanel();</span>
+<span class="nc" id="L697">	}</span>
+
+	private void addListenersComboFormatPanel() {
+<span class="nc" id="L700">		formatchooser.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent event) {
+<span class="nc" id="L703">				String choice = (String) ((JComboBox) event.getSource()).getSelectedItem();</span>
+<span class="nc bnc" id="L704" title="All 4 branches missed.">				if (choice != null &amp;&amp; choice.equals(browseInputPanelText)) {</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">					if (fileF.showOpenDialog(InputPanel.this) == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L706">						File nameFile = fileF.getSelectedFile();</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">						if (!nameFile.exists()) {</span>
+<span class="nc" id="L708">							JOptionPane.showMessageDialog(InputPanel.this, &quot;File does not exists&quot;, &quot;Error&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L709">							return;</span>
+						}
+						//Load format
+<span class="nc" id="L712">						((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+						try {
+<span class="nc" id="L714">							FormatFileReader form = new FormatFileReader(nameFile.getAbsolutePath());</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">							for (int i = 0; i &lt; form.getNumVars(); i++) {</span>
+<span class="nc" id="L716">								String tipo = &quot;&quot;;</span>
+<span class="nc bnc" id="L717" title="All 4 branches missed.">								switch (form.getType()) {</span>
+								case Parameter.NUMBER:
+<span class="nc" id="L719">									tipo = &quot;Numeric&quot;;</span>
+<span class="nc" id="L720">									break;</span>
+								case Parameter.STRING:
+<span class="nc" id="L722">									tipo = &quot;String&quot;;</span>
+<span class="nc" id="L723">									break;</span>
+								case Parameter.DATE:
+<span class="nc" id="L725">									tipo = &quot;Date&quot;;</span>
+									break;
+								}
+<span class="nc" id="L728">								((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form</span>
+<span class="nc" id="L729">										.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());</span>
+<span class="nc" id="L730">								form.next();</span>
+							}
+<span class="nc" id="L732">							inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L733">							numOfVars.setValue(new Integer(form.getNumVars()));</span>
+<span class="nc" id="L734">						} catch (Exception e) {</span>
+<span class="nc" id="L735">							JOptionPane.showMessageDialog(null, &quot;Wrong file format.&quot;, &quot;Error&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L736">							((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+<span class="nc" id="L737">							inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L738">							numOfVars.setValue(new Integer(0));</span>
+<span class="nc" id="L739">							fileF.setSelectedFile(new File(&quot;&quot;));</span>
+<span class="nc" id="L740">							fileF.setFileFilter(new FileFilter() {</span>
+								public boolean accept(File f) {
+<span class="nc bnc" id="L742" title="All 2 branches missed.">									if (f.isDirectory()) {</span>
+<span class="nc" id="L743">										return true;</span>
+									}
+<span class="nc bnc" id="L745" title="All 2 branches missed.">									if (f.getAbsolutePath().indexOf(&quot;.jwatformat&quot;) != -1) {</span>
+<span class="nc" id="L746">										return true;</span>
+									}
+<span class="nc" id="L748">									return false;</span>
+								}
+
+								public String getDescription() {
+<span class="nc" id="L752">									return &quot;Workload analysis format file&quot;;</span>
+								}
+							});
+<span class="nc" id="L755">							return;</span>
+<span class="nc" id="L756">						}</span>
+<span class="nc" id="L757">						boolean exist = false;</span>
+						//controllo se esiste gia' la voce selezionata
+<span class="nc bnc" id="L759" title="All 2 branches missed.">						for (int i = 1; i &lt; formatchooser.getModel().getSize(); i++) {</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">							if (((String) formatchooser.getModel().getElementAt(i)).equals(fileF.getSelectedFile().getAbsolutePath())) {</span>
+<span class="nc" id="L761">								exist = true;</span>
+<span class="nc" id="L762">								break;</span>
+							}
+						}
+<span class="nc bnc" id="L765" title="All 2 branches missed.">						if (!exist) {</span>
+<span class="nc" id="L766">							formatchooser.insertItemAt(fileF.getSelectedFile().getAbsolutePath(), formatchooser.getItemCount());</span>
+<span class="nc" id="L767">							formatchooser.setSelectedIndex(formatchooser.getItemCount() - 1);</span>
+						} else {
+<span class="nc" id="L769">							formatchooser.setSelectedItem(fileF.getSelectedFile().getAbsolutePath());</span>
+						}
+<span class="nc" id="L771">					} else {</span>
+<span class="nc" id="L772">						formatchooser.setSelectedIndex(-1);</span>
+					}
+				} else {
+<span class="nc bnc" id="L775" title="All 2 branches missed.">					if (choice != null) {</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">						if (!choice.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L777" title="All 2 branches missed.">							if (choice.indexOf(&quot;\\&quot;) == -1) {</span>
+<span class="nc" id="L778">								File nameFile = new File(choice);</span>
+								//Load format
+<span class="nc" id="L780">								((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+								try {
+<span class="nc" id="L782">									FormatFileReader form = new FormatFileReader(nameFile.getAbsolutePath());</span>
+<span class="nc bnc" id="L783" title="All 2 branches missed.">									for (int i = 0; i &lt; form.getNumVars(); i++) {</span>
+<span class="nc" id="L784">										String tipo = &quot;&quot;;</span>
+<span class="nc bnc" id="L785" title="All 4 branches missed.">										switch (form.getType()) {</span>
+										case Parameter.NUMBER:
+<span class="nc" id="L787">											tipo = &quot;Numeric&quot;;</span>
+<span class="nc" id="L788">											break;</span>
+										case Parameter.STRING:
+<span class="nc" id="L790">											tipo = &quot;String&quot;;</span>
+<span class="nc" id="L791">											break;</span>
+										case Parameter.DATE:
+<span class="nc" id="L793">											tipo = &quot;Date&quot;;</span>
+											break;
+										}
+<span class="nc" id="L796">										((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form</span>
+<span class="nc" id="L797">												.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());</span>
+<span class="nc" id="L798">										form.next();</span>
+									}
+<span class="nc" id="L800">									inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L801">									numOfVars.setValue(new Integer(form.getNumVars()));</span>
+<span class="nc" id="L802">								} catch (Exception e) {</span>
+<span class="nc" id="L803">									JOptionPane.showMessageDialog(null, &quot;Wrong file format.&quot;, &quot;Error&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L804">									((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+<span class="nc" id="L805">									inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L806">									numOfVars.setValue(new Integer(0));</span>
+<span class="nc" id="L807">									fileF.setSelectedFile(new File(&quot;&quot;));</span>
+<span class="nc" id="L808">									fileF.setFileFilter(new FileFilter() {</span>
+										public boolean accept(File f) {
+<span class="nc bnc" id="L810" title="All 2 branches missed.">											if (f.isDirectory()) {</span>
+<span class="nc" id="L811">												return true;</span>
+											}
+<span class="nc bnc" id="L813" title="All 2 branches missed.">											if (f.getAbsolutePath().indexOf(&quot;.jwatformat&quot;) != -1) {</span>
+<span class="nc" id="L814">												return true;</span>
+											}
+<span class="nc" id="L816">											return false;</span>
+										}
+
+										public String getDescription() {
+<span class="nc" id="L820">											return &quot;Workload analysis format file&quot;;</span>
+										}
+									});
+<span class="nc" id="L823">									return;</span>
+<span class="nc" id="L824">								}</span>
+<span class="nc" id="L825">							} else {</span>
+<span class="nc" id="L826">								File nameFile = new File(choice);</span>
+								//Load format
+<span class="nc" id="L828">								((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+								try {
+<span class="nc" id="L830">									FormatFileReader form = new FormatFileReader(nameFile.getAbsolutePath());</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">									for (int i = 0; i &lt; form.getNumVars(); i++) {</span>
+<span class="nc" id="L832">										String tipo = &quot;&quot;;</span>
+<span class="nc bnc" id="L833" title="All 4 branches missed.">										switch (form.getType()) {</span>
+										case Parameter.NUMBER:
+<span class="nc" id="L835">											tipo = &quot;Numeric&quot;;</span>
+<span class="nc" id="L836">											break;</span>
+										case Parameter.STRING:
+<span class="nc" id="L838">											tipo = &quot;String&quot;;</span>
+<span class="nc" id="L839">											break;</span>
+										case Parameter.DATE:
+<span class="nc" id="L841">											tipo = &quot;Date&quot;;</span>
+											break;
+										}
+<span class="nc" id="L844">										((JWatVariableInputTableModel) inputTable.getModel()).addNewRow(form.getName(), tipo, form.getComment(), form</span>
+<span class="nc" id="L845">												.getDelimiters(), form.getRegExpr(), form.getDefaults(), form.getReplace());</span>
+<span class="nc" id="L846">										form.next();</span>
+									}
+<span class="nc" id="L848">									inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L849">									numOfVars.setValue(new Integer(form.getNumVars()));</span>
+<span class="nc" id="L850">								} catch (Exception e) {</span>
+<span class="nc" id="L851">									JOptionPane.showMessageDialog(null, &quot;Wrong file format.&quot;, &quot;Error&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L852">									((JWatVariableInputTableModel) inputTable.getModel()).clearTable();</span>
+<span class="nc" id="L853">									inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L854">									numOfVars.setValue(new Integer(0));</span>
+<span class="nc" id="L855">									fileF.setSelectedFile(new File(&quot;&quot;));</span>
+<span class="nc" id="L856">									fileF.setFileFilter(new FileFilter() {</span>
+										public boolean accept(File f) {
+<span class="nc bnc" id="L858" title="All 2 branches missed.">											if (f.isDirectory()) {</span>
+<span class="nc" id="L859">												return true;</span>
+											}
+<span class="nc bnc" id="L861" title="All 2 branches missed.">											if (f.getAbsolutePath().indexOf(&quot;.jwatformat&quot;) != -1) {</span>
+<span class="nc" id="L862">												return true;</span>
+											}
+<span class="nc" id="L864">											return false;</span>
+										}
+
+										public String getDescription() {
+<span class="nc" id="L868">											return &quot;Workload analysis format file&quot;;</span>
+										}
+									});
+<span class="nc" id="L871">									return;</span>
+<span class="nc" id="L872">								}</span>
+							}
+						}
+					}
+				}
+<span class="nc" id="L877">			}</span>
+
+		});
+<span class="nc" id="L880">	}</span>
+
+	/**
+	 * Sets up combobox filter defined
+	 */
+	private void initComboFilterPanel() {
+<span class="nc" id="L886">		filterchooser.addItem(FILTER_TEXT_COMPLETE);</span>
+<span class="nc" id="L887">		filterchooser.addItem(FILTER_TEXT_RANDOM);</span>
+<span class="nc" id="L888">		filterchooser.addItem(FILTER_TEXT_INTERVAL);</span>
+<span class="nc" id="L889">		filterchooser.setToolTipText(COMBO_FILTER_INPUT);</span>
+
+<span class="nc" id="L891">		createIntervalOptionPanel();</span>
+<span class="nc" id="L892">		createRandomOptionPanel();</span>
+
+<span class="nc" id="L894">		filterchooser.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent event) {
+<span class="nc" id="L897">				int index = ((JComboBox) event.getSource()).getSelectedIndex();</span>
+<span class="nc bnc" id="L898" title="All 4 branches missed.">				switch (index) {</span>
+				case 0:
+<span class="nc" id="L900">					optionFilterPanel.removeAll();</span>
+<span class="nc" id="L901">					optionFilterPanel.revalidate();</span>
+<span class="nc" id="L902">					optionFilterPanel.repaint();</span>
+<span class="nc" id="L903">					break;</span>
+				case 1:
+<span class="nc" id="L905">					optionFilterPanel.removeAll();</span>
+<span class="nc" id="L906">					optionFilterPanel.add(createRandomOptionPanel(), BorderLayout.CENTER);</span>
+<span class="nc" id="L907">					optionFilterPanel.revalidate();</span>
+<span class="nc" id="L908">					optionFilterPanel.repaint();</span>
+<span class="nc" id="L909">					break;</span>
+				case 2:
+<span class="nc" id="L911">					optionFilterPanel.removeAll();</span>
+<span class="nc" id="L912">					optionFilterPanel.add(createIntervalOptionPanel(), BorderLayout.CENTER);</span>
+<span class="nc" id="L913">					optionFilterPanel.revalidate();</span>
+<span class="nc" id="L914">					optionFilterPanel.repaint();</span>
+					break;
+				}
+<span class="nc" id="L917">			}</span>
+
+		});
+<span class="nc" id="L920">		filterchooser.setSelectedIndex(0);</span>
+<span class="nc" id="L921">	}</span>
+
+	/**
+	 * Creates or returns the random option panel
+	 * @return random option panel
+	 */
+	private JPanel createRandomOptionPanel() {
+<span class="nc bnc" id="L928" title="All 2 branches missed.">		if (randomOptionPanel == null) {</span>
+			// Creazione del pannello alla prima chiamata
+<span class="nc" id="L930">			randomOptionPanel = new JPanel();</span>
+<span class="nc" id="L931">			randomNObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));</span>
+<span class="nc" id="L932">			randomNObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L933">			randomOptionPanel.add(new JLabel(&quot;Number of observations:&quot;), BorderLayout.NORTH);</span>
+<span class="nc" id="L934">			randomOptionPanel.add(randomNObs, BorderLayout.SOUTH);</span>
+		} else {
+<span class="nc bnc" id="L936" title="All 2 branches missed.">			if (obsNumb == -1) {</span>
+<span class="nc" id="L937">				randomNObs.setModel(new SpinnerNumberModel(0, 0, 0, 1));</span>
+			} else {
+<span class="nc" id="L939">				randomNObs.setModel(new SpinnerNumberModel(1, 1, obsNumb, 1));</span>
+			}
+		}
+<span class="nc" id="L942">		return randomOptionPanel;</span>
+	}
+
+	/**
+	 * Creates or returns the interval option panel
+	 * @return interval option panel
+	 */
+	private JPanel createIntervalOptionPanel() {
+<span class="nc bnc" id="L950" title="All 2 branches missed.">		if (intervalOptionPanel == null) {</span>
+<span class="nc" id="L951">			intervalOptionPanel = new JPanel(new BorderLayout());</span>
+
+<span class="nc" id="L953">			JPanel fromPanel = new JPanel(new GridLayout(1, 2));</span>
+<span class="nc" id="L954">			JLabel fromLabel = new JLabel(&quot;From observation #: &quot;, JLabel.RIGHT);</span>
+<span class="nc" id="L955">			fromPanel.add(fromLabel);</span>
+<span class="nc" id="L956">			intervalFromObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));</span>
+<span class="nc" id="L957">			intervalFromObs.addChangeListener(new ChangeListener() {</span>
+
+				public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L960">					if (((SpinnerNumberModel) intervalFromObs.getModel()).getNumber().longValue() &gt;= ((SpinnerNumberModel) intervalToObs.getModel())</span>
+<span class="nc bnc" id="L961" title="All 2 branches missed.">							.getNumber().longValue()) {</span>
+<span class="nc" id="L962">						((SpinnerNumberModel) intervalToObs.getModel()).setValue(new Integer(((SpinnerNumberModel) intervalFromObs.getModel())</span>
+<span class="nc" id="L963">								.getNumber().intValue() + 1));</span>
+					}
+<span class="nc" id="L965">				}</span>
+
+			});
+<span class="nc" id="L968">			intervalFromObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L969">			JPanel fromPan = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L970">			fromPan.add(intervalFromObs);</span>
+<span class="nc" id="L971">			fromPanel.add(fromPan);</span>
+
+<span class="nc" id="L973">			JPanel toPanel = new JPanel(new GridLayout(1, 2));</span>
+<span class="nc" id="L974">			JLabel toLabel = new JLabel(&quot;To observation #: &quot;, JLabel.RIGHT);</span>
+<span class="nc" id="L975">			toLabel.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L976">			toPanel.add(toLabel);</span>
+<span class="nc" id="L977">			intervalToObs = new JSpinner(new SpinnerNumberModel(0, 0, 0, 1));</span>
+<span class="nc" id="L978">			intervalToObs.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L979">			JPanel toPan = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L980">			toPan.add(intervalToObs);</span>
+<span class="nc" id="L981">			toPanel.add(toPan);</span>
+
+<span class="nc" id="L983">			JPanel temp = new JPanel(new GridLayout(2, 1, 0, 10));</span>
+<span class="nc" id="L984">			temp.add(fromPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L985">			temp.add(toPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L987">			intervalOptionPanel.add(temp, BorderLayout.NORTH);</span>
+<span class="nc" id="L988">		} else {</span>
+<span class="nc bnc" id="L989" title="All 2 branches missed.">			if (obsNumb == -1) {</span>
+<span class="nc" id="L990">				intervalFromObs.setModel(new SpinnerNumberModel(0, 0, 0, 1));</span>
+<span class="nc" id="L991">				intervalToObs.setModel(new SpinnerNumberModel(0, 0, 0, 1));</span>
+			} else {
+<span class="nc" id="L993">				intervalFromObs.setModel(new SpinnerNumberModel(1, 1, obsNumb - 1, 1));</span>
+<span class="nc" id="L994">				intervalToObs.setModel(new SpinnerNumberModel(2, 2, obsNumb, 1));</span>
+			}
+		}
+<span class="nc" id="L997">		return intervalOptionPanel;</span>
+	}
+
+	/********** WIZARD MANAGEMENT FUNCTIONS **********/
+	// TODO controllare validita dei dati forniti nel pannello e creazione e passaggio informazioni al modello per il prossimo panello
+	// Chiamata prima di passare al prossimo pannello
+	public boolean canGoForward() {
+<span class="nc" id="L1004">		return canGoOn;</span>
+	}
+
+	public void setCanGoForward(boolean canGo) {
+<span class="nc" id="L1008">		canGoOn = canGo;</span>
+<span class="nc" id="L1009">	}</span>
+
+	// TODO controllare con Fuma cosa fare
+	// Chiamata quando dal pannello si torna indietro
+	public boolean canGoBack() {
+<span class="nc bnc" id="L1014" title="All 2 branches missed.">		if (JOptionPane.showConfirmDialog(this, &quot;Are you sure you want to go back to start screen?&quot;, &quot;Back operation&quot;, JOptionPane.YES_NO_OPTION,</span>
+				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
+<span class="nc" id="L1016">			return false;</span>
+		}
+		//Reset della finestra principale
+<span class="nc" id="L1019">		parent.resetScreen();</span>
+<span class="nc" id="L1020">		return true;</span>
+	}
+
+	/**
+	 * 
+	 * @author Administrator
+	 *
+	 */
+<span class="nc" id="L1028">	private class InputStatusListener implements ProgressStatusListener {</span>
+
+		public void statusEvent(EventStatus e) {
+<span class="nc bnc" id="L1031" title="All 3 branches missed.">			switch (e.getType()) {</span>
+			case EventStatus.ABORT_EVENT:
+<span class="nc" id="L1033">				abortEvent((EventFinishAbort) e);</span>
+<span class="nc" id="L1034">				break;</span>
+			case EventStatus.DONE_EVENT:
+<span class="nc" id="L1036">				finishedEvent((EventFinishLoad) e);</span>
+				break;
+			}
+<span class="nc" id="L1039">		}</span>
+
+		//Abort caricamento file input
+		private void abortEvent(EventFinishAbort e) {
+<span class="nc" id="L1043">			JOptionPane.showMessageDialog(InputPanel.this, e.getMessage(), &quot;LOADING ABORTED!!&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L1044">			loadOnRun = false;</span>
+<span class="nc" id="L1045">			canGoOn = false;</span>
+<span class="nc" id="L1046">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, false);</span>
+<span class="nc" id="L1047">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L1048">		}</span>
+
+		//dati caricati
+		private void finishedEvent(final EventFinishLoad e) {
+<span class="nc" id="L1052">			JButton[] optBtn = new JButton[3];</span>
+			JOptionPane pane;
+
+<span class="nc" id="L1055">			optBtn[0] = new JButton(&quot;Continue&quot;);</span>
+<span class="nc" id="L1056">			optBtn[1] = new JButton(&quot;Show Log&quot;);</span>
+<span class="nc" id="L1057">			optBtn[2] = new JButton(&quot;Cancel&quot;);</span>
+
+<span class="nc" id="L1059">			pane = new JOptionPane(&quot;# observations processed: &quot; + e.valToRead() + &quot;\n# correct observations &quot; + e.valReaded()</span>
+			+ &quot;\nTo see errors press Show Log&quot;, JOptionPane.QUESTION_MESSAGE, JOptionPane.DEFAULT_OPTION, null, optBtn, null);
+<span class="nc" id="L1061">			final JDialog dialog = pane.createDialog(InputPanel.this.getParentWizard(), &quot;Loading Complete&quot;);</span>
+<span class="nc" id="L1062">			pane.selectInitialValue();</span>
+
+<span class="nc" id="L1064">			optBtn[0].addActionListener(new ActionListener() {</span>
+
+				public void actionPerformed(ActionEvent ev) {
+<span class="nc" id="L1067">					dialog.dispose();</span>
+					try {
+<span class="nc" id="L1069">						model.setMatrix(e.getSession());</span>
+<span class="nc" id="L1070">					} catch (OutOfMemoryError err) {</span>
+<span class="nc" id="L1071">						JOptionPane.showMessageDialog(InputPanel.this, &quot;Out of Memory error. Try with more memory&quot;, &quot;Error&quot;,</span>
+								JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L1073">						loadOnRun = false;</span>
+<span class="nc" id="L1074">						return;</span>
+<span class="nc" id="L1075">					}</span>
+<span class="nc" id="L1076">					((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, true);</span>
+<span class="nc" id="L1077">					((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L1078">					loadOnRun = false;</span>
+<span class="nc" id="L1079">					canGoOn = true;</span>
+<span class="nc" id="L1080">					((JWatWizard) getParentWizard()).showNextPanel();</span>
+<span class="nc" id="L1081">				}</span>
+
+			});
+
+<span class="nc" id="L1085">			optBtn[1].addActionListener(new ActionListener() {</span>
+
+				public void actionPerformed(ActionEvent ev) {
+<span class="nc" id="L1088">					final JDialog f = new JDialog();</span>
+<span class="nc" id="L1089">					f.setModal(true);</span>
+<span class="nc" id="L1090">					f.setTitle(&quot;Error log&quot;);</span>
+<span class="nc" id="L1091">					f.setSize(new Dimension((int)(400 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L1092">					f.setContentPane(new LogVisualizer(f));</span>
+<span class="nc" id="L1093">					f.addWindowListener(new WindowAdapter() {</span>
+						public void windowClosing(WindowEvent e) {
+<span class="nc" id="L1095">							f.dispose();</span>
+<span class="nc" id="L1096">						}</span>
+
+						public void windowClosed(WindowEvent e) {
+<span class="nc" id="L1099">							f.dispose();</span>
+<span class="nc" id="L1100">						}</span>
+					});
+<span class="nc" id="L1102">					f.setVisible(true);</span>
+<span class="nc" id="L1103">				}</span>
+
+			});
+
+<span class="nc" id="L1107">			optBtn[2].addActionListener(new ActionListener() {</span>
+
+				public void actionPerformed(ActionEvent ev) {
+<span class="nc" id="L1110">					dialog.dispose();</span>
+<span class="nc" id="L1111">					loadOnRun = false;</span>
+<span class="nc" id="L1112">					canGoOn = false;</span>
+<span class="nc" id="L1113">					System.gc();</span>
+<span class="nc" id="L1114">					((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, false);</span>
+<span class="nc" id="L1115">					((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L1116">				}</span>
+
+			});
+
+<span class="nc bnc" id="L1120" title="All 2 branches missed.">			if (e.valReaded() == e.valToRead()) {</span>
+<span class="nc" id="L1121">				optBtn[1].setEnabled(false);</span>
+			}
+
+<span class="nc" id="L1124">			dialog.show();</span>
+<span class="nc" id="L1125">		}</span>
+
+	}
+
+	private static final String helpText = &quot;&lt;html&gt;In this panel you can choose input data file and define or select a file format.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot;To load a file:&quot; + &quot;&lt;UL&gt;&lt;LI&gt; Select input file&lt;/LI&gt;&quot; + &quot;&lt;LI&gt; Select or define a format for the input file&lt;/LI&gt;&quot;
+			+ &quot;&lt;LI&gt; Select a sampling method (&lt;I&gt;if necessary&lt;/I&gt;)&lt;/LI&gt;&quot; + &quot;&lt;LI&gt; Press Load button&lt;/LI&gt;&lt;/UL&gt;&quot;
+			+ &quot; To edit values, double-click on the desired cell&quot; + &quot; and start typing.&lt;br&gt; &lt;b&gt;For a list of the available operations right-click&quot;
+			+ &quot; on the table&lt;/b&gt;.&lt;br&gt;&quot; + &quot; Pressing DELETE removes all selected classes from the system.&lt;/html&gt;&quot;;
+
+	public void help() {
+<span class="nc" id="L1136">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L1137">	}</span>
+
+	public void gotFocus() {
+		// Chiedere a utente se cancellare tutto
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">		if (model.getMatrix() != null) {</span>
+<span class="nc bnc" id="L1142" title="All 2 branches missed.">			if (JOptionPane.showConfirmDialog(this, &quot;This operation resets all data. Continue?&quot;, &quot;WARNING&quot;, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {</span>
+<span class="nc" id="L1143">				model.resetModel();</span>
+<span class="nc" id="L1144">				resetOnNew();</span>
+<span class="nc" id="L1145">				((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, false);</span>
+<span class="nc" id="L1146">				((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+			} else {
+<span class="nc" id="L1148">				parent.setLastPanel();</span>
+			}
+		} else {
+<span class="nc" id="L1151">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, false);</span>
+<span class="nc" id="L1152">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+		}
+<span class="nc" id="L1154">		parent.setCurrentPanel(FITTING_INPUT_PANEL);</span>
+<span class="nc" id="L1155">	}</span>
+
+	public void lostFocus() {
+<span class="nc" id="L1158">		parent.setLastPanel(FITTING_INPUT_PANEL);</span>
+<span class="nc" id="L1159">	}</span>
+
+	public void resetOnNew() {
+<span class="nc" id="L1162">		canGoOn = false;</span>
+<span class="nc" id="L1163">		((JWatVariableInputTableModel) inputTable.getModel()).resetTable();</span>
+<span class="nc" id="L1164">		inputTable.tableChanged(new TableModelEvent(inputTable.getModel()));</span>
+<span class="nc" id="L1165">		filechooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L1166">		formatchooser.setSelectedIndex(-1);</span>
+<span class="nc" id="L1167">		filterchooser.setSelectedIndex(0);</span>
+<span class="nc" id="L1168">		numOfVars.setValue(new Integer(0));</span>
+<span class="nc" id="L1169">		observationNumb.setText(obsNumbString);</span>
+<span class="nc" id="L1170">		fileName.setText(obsFileName);</span>
+<span class="nc" id="L1171">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

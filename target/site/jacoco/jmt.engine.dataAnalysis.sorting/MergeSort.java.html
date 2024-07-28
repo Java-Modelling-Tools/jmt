@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MergeSort.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis.sorting</a> &gt; <span class="el_source">MergeSort.java</span></div><h1>MergeSort.java</h1><pre class="source lang-java linenums">package jmt.engine.dataAnalysis.sorting;
+
+//
+// Modified by Lev Shereshevsky (leo@aeriesoft.ru) 98/03/20
+//
+
+/*
+ * @(#)MergeSort.java  1.0 95/06/23 Jason Harrison
+ *
+ * Copyright (c) 1995 University of British Columbia
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for NON-COMMERCIAL purposes and without
+ * fee is hereby granted provided that this copyright notice
+ * appears in all copies. Please refer to the file &quot;copyright.html&quot;
+ * for further important copyright and licensing information.
+ *
+ * UBC MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
+ * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE, OR NON-INFRINGEMENT. UBC SHALL NOT BE LIABLE FOR
+ * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+ * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
+ */
+
+/**
+ * A merge sort demonstration algorithm.
+ * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
+ *
+ * @author Jason Harrison@cs.ubc.ca
+ * @version     1.1, 12 Jan 1998
+ */
+<span class="nc" id="L33">public class MergeSort implements SortAlgorithm {</span>
+
+	/**
+	 *   pre :  0 &lt;= p &lt;= r &lt;= A.length
+	 *
+	 *  post :  elements of A[p..r] are rearranged so that
+	 *
+	 *             A[p] &lt;= A[p + 1] &lt;= ... &lt;= A[r]
+	 */
+	private static void sort(double[] A, int p, int r) {
+		int q;
+
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		if (p &lt; r) {</span>
+			/* split the data into two halves */
+<span class="nc" id="L47">			q = (p + r) / 2;</span>
+
+			/* recursively sort each half */
+<span class="nc" id="L50">			sort(A, p, q);</span>
+<span class="nc" id="L51">			sort(A, q + 1, r);</span>
+
+			/* ``merge'' the two halves */
+<span class="nc" id="L54">			merge(A, p, q, r);</span>
+		}
+<span class="nc" id="L56">	}</span>
+
+	/**
+	 *   pre :  (i)   0 &lt;= p &lt;= q &lt; r &lt;= A.length-1
+	 *          (ii)  A[p] &lt;= A[p+1] &lt;= ... &lt;= A[q]
+	 *          (iii) A[q+1] &lt;= A[q+2] &lt;= ... &lt;= A[r]
+	 *
+	 *  post :  elements of A[p..r] are rearranged so that
+	 *
+	 *             A[p] &lt;= A[p+1] &lt;= ... &lt;= A[r]
+	 */
+	private static void merge(double[] A, int p, int q, int r) {
+		int i, j, k;
+
+<span class="nc" id="L70">		int N = r - p + 1;</span>
+<span class="nc" id="L71">		double[] copy = new double[N];</span>
+
+		/* copy data to be merged into array ``copy'' */
+<span class="nc bnc" id="L74" title="All 2 branches missed.">		for (i = 0; i &lt; N; i++) {</span>
+<span class="nc" id="L75">			copy[i] = A[p + i];</span>
+		}
+
+<span class="nc" id="L78">		int mid = q - p; // index of middle element in ``copy''</span>
+<span class="nc" id="L79">		int end = r - p; // index of last element in ``copy''</span>
+
+<span class="nc" id="L81">		i = 0;</span>
+<span class="nc" id="L82">		j = mid + 1;</span>
+<span class="nc" id="L83">		k = p;</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">		while (i &lt;= mid &amp;&amp; j &lt;= end) {</span>
+
+			/* invariant:
+			 *   A[p] &lt;= A[p+1] &lt;= ... &lt;= A[k] &lt;= min(copy[i], copy[j])
+			 */
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">			if (copy[i] &lt; copy[j]) {</span>
+<span class="nc" id="L91">				A[k] = copy[i];</span>
+<span class="nc" id="L92">				i++;</span>
+			} else {
+<span class="nc" id="L94">				A[k] = copy[j];</span>
+<span class="nc" id="L95">				j++;</span>
+			}
+<span class="nc" id="L97">			k++;</span>
+		}
+
+		// copy left over stuff
+		int a0, aN;
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (i &gt; mid) {</span>
+<span class="nc" id="L103">			a0 = j;</span>
+<span class="nc" id="L104">			aN = end;</span>
+		} else {
+<span class="nc" id="L106">			a0 = i;</span>
+<span class="nc" id="L107">			aN = mid;</span>
+		}
+
+		/* A[k-1] &lt;= copy[a0] &lt;= copy[a0+1] &lt;= ... &lt;= copy[aN] */
+
+		// copy rest
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		for (i = a0; i &lt;= aN; i++) {</span>
+<span class="nc" id="L114">			A[k] = copy[i];</span>
+<span class="nc" id="L115">			k++;</span>
+		}
+<span class="nc" id="L117">	}</span>
+
+	public void sort(double[] data) {
+<span class="nc" id="L120">		sort(data, 0, data.length - 1);</span>
+<span class="nc" id="L121">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

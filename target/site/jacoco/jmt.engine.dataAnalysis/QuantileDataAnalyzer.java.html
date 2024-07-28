@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QuantileDataAnalyzer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis</a> &gt; <span class="el_source">QuantileDataAnalyzer.java</span></div><h1>QuantileDataAnalyzer.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.dataAnalysis;
+
+import jmt.engine.dataAnalysis.sorting.HeapSort;
+import jmt.engine.dataAnalysis.sorting.SortAlgorithm;
+import jmt.engine.math.DoubleArrayList;
+import jmt.engine.math.SampleMeanVar;
+
+/**
+
+ * Analyzes the data in order to calculate the requested quantiles.
+ * @author Federico Granata
+ * Date: 24-lug-2003
+ * Time: 12.04.49
+
+ */
+public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
+
+	//TODO: does this class work also in the case of InverseMeasure????
+	DoubleArrayList data;
+
+<span class="nc" id="L39">	boolean ordered = false;</span>
+
+	double[] quantile;
+
+	SortAlgorithm sorter;
+
+	/**
+	 * Creates a QuantileDataAnalyzer.
+	 * @param  alfa    the quantile required for the confidence interval
+	 * @param  precision   maximum amplitude of confidence interval
+	 *                      (precision = maxamplitude / mean)
+	 * @param maxData  maximum number of data to be analyzed
+	 *
+	 * @param quantile Requested quantiles //TODO: correct??
+	 * @param sorter Sorting algorithm used to manage data
+	 */
+	public QuantileDataAnalyzer(double alfa, double precision, int maxData, double[] quantile, SortAlgorithm sorter) {
+<span class="nc" id="L56">		super(alfa, precision, maxData);</span>
+<span class="nc" id="L57">		this.quantile = quantile;</span>
+<span class="nc" id="L58">		this.sorter = sorter;</span>
+<span class="nc" id="L59">	}</span>
+
+	/**
+	 * Creates a QuantileDataAnalyzer. A default sorting algorithm is
+	 * used to manage data.
+	 * @param  alfa    the quantile required for the confidence interval
+	 * @param  precision   maximum amplitude of confidence interval
+	 *                      (precision = maxamplitude / mean)
+	 * @param maxData  maximum number of data to be analyzed
+	 *
+	 * @param quantile Requested quantiles
+	 */
+	public QuantileDataAnalyzer(double alfa, double precision, int maxData, double[] quantile) {
+<span class="nc" id="L72">		super(alfa, precision, maxData);</span>
+<span class="nc" id="L73">		this.quantile = quantile;</span>
+<span class="nc" id="L74">		data = new DoubleArrayList(1024);</span>
+<span class="nc" id="L75">		data.add(0);</span>
+<span class="nc" id="L76">		sorter = new HeapSort();</span>
+<span class="nc" id="L77">	}</span>
+
+	/**
+	 * Adds the new sample to the statistic.
+	 * @param newSample the new sample
+	 * @param Weight the weight of the newSample, if it is not needed put 1.
+	 * @return true if the confidence interval is smaller than required by
+	 *          the user, or the data analyzed are too many
+	 */
+	@Override
+	public boolean addSample(double newSample, double Weight) {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if (initialized) {</span>
+<span class="nc" id="L89">			data.add(newSample * Weight);</span>
+<span class="nc" id="L90">			ordered = false;</span>
+		}
+<span class="nc" id="L92">		return super.addSample(newSample, Weight);</span>
+	}
+
+	/**
+	 * returns the quantile with the requested probability.
+	 *
+	 * @param prob probability of the quantile
+	 * @return the estimated quantile
+	 */
+	public double getQuantile(double prob) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (ordered) {</span>
+<span class="nc" id="L103">			return data.get((int) (data.getSize() * prob));</span>
+		} else {
+<span class="nc" id="L105">			sort();</span>
+<span class="nc" id="L106">			ordered = true;</span>
+<span class="nc" id="L107">			return data.get((int) (data.getSize() * prob));</span>
+		}
+	}
+
+	/**
+	 * gets all requested quantiles.
+	 * @return vector of quantiles.
+	 */
+	public double[] getQuantiles() {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if (quantile != null) {</span>
+<span class="nc" id="L117">			double[] res = new double[quantile.length];</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L119">				res[i] = getQuantile(quantile[i]);</span>
+			}
+<span class="nc" id="L121">			return res;</span>
+		} else {
+<span class="nc" id="L123">			return null;</span>
+		}
+	}
+
+	/**
+	 * returns the probability that a number extracted from the empirical
+	 * distribution analyzed is greater than the quantile.
+	 * @param quantile the requested quantile
+	 * @return estimated probability
+	 */
+	public double getProbability(double quantile) {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (ordered) {</span>
+<span class="nc" id="L135">			return search(quantile);</span>
+		}
+<span class="nc" id="L137">		return Double.NaN;</span>
+	}
+
+	protected double search(double element) {
+<span class="nc" id="L141">		int l = 1, r = data.getSize() - 1, x;</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		while (l &lt; r) {</span>
+<span class="nc" id="L143">			x = (l + r) &gt;&gt; 1;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">			if (element == data.get(x)) {</span>
+<span class="nc" id="L145">				return (x / (data.getSize() - 1.0));</span>
+			}
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			if (element &lt; data.get(x)) {</span>
+<span class="nc" id="L148">				r = x - 1;</span>
+			} else {
+<span class="nc" id="L150">				l = x + 1;</span>
+			}
+		}
+<span class="nc" id="L153">		return (l / (data.getSize() - 1.0));</span>
+	}
+
+	protected void sort() {
+<span class="nc" id="L157">		double[] d = data.toArray(0, data.getSize() - 1);</span>
+<span class="nc" id="L158">		sorter.sort(d);</span>
+<span class="nc" id="L159">		data = new DoubleArrayList(d);</span>
+
+<span class="nc" id="L161">	}</span>
+
+	/** Applies the spectral test to generate the Confidence Intervals.
+	 *  see: P. Heidelberger, Peter D. Welch
+	 * &quot;A spectral method for confidence interval generation and run length
+	 * control in simulations&quot;
+	 *
+	 *
+	 * @return true if the precision requirement met. false if not.
+	 */
+	@Override
+	protected boolean HWtest() {
+<span class="nc" id="L173">		sort();</span>
+<span class="nc" id="L174">		ordered = true;</span>
+<span class="nc" id="L175">		return super.HWtest();</span>
+	}
+
+	/**
+	 *updates the variance
+	 */
+	@Override
+	protected void calcVar() {
+		double[] C;
+<span class="nc" id="L184">		double[] tempBatch = new double[numBatch];</span>
+<span class="nc" id="L185">		double sampleVar = (new SampleMeanVar(batchMean)).getVar();</span>
+<span class="nc" id="L186">		K = numBatch / 4;</span>
+<span class="nc" id="L187">		C = calcConstants(K, polyOrder);</span>
+<span class="nc" id="L188">		C1 = C[0];</span>
+<span class="nc" id="L189">		C2 = (int) C[1];</span>
+<span class="nc" id="L190">		System.arraycopy(batchMean, 0, tempBatch, 0, numBatch - 1);</span>
+
+<span class="nc" id="L192">		extVar = calcVar(tempBatch, 0, batch, K, polyOrder);</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">		if (Math.abs(extVar - sampleVar) &gt; sampleVar * precision * 2) {</span>
+<span class="nc" id="L194">			extVar = Double.MAX_VALUE;</span>
+		}
+<span class="nc bnc" id="L196" title="All 2 branches missed.">		if (extVar &lt; sampleVar) {</span>
+<span class="nc" id="L197">			extVar = sampleVar;</span>
+		}
+<span class="nc" id="L199">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

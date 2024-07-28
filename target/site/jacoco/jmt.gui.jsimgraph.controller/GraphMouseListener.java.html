@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphMouseListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller</a> &gt; <span class="el_source">GraphMouseListener.java</span></div><h1>GraphMouseListener.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller;
+
+import java.awt.*;
+import java.awt.event.MouseEvent;
+
+import javax.swing.event.MouseInputListener;
+
+import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
+import org.jgraph.graph.BasicMarqueeHandler;
+import org.jgraph.graph.CellHandle;
+import org.jgraph.graph.CellView;
+
+/**
+
+ * @author Federico Granata
+ * Date: 6-giu-2003
+ * Time: 14.17.30
+
+ */
+public class GraphMouseListener implements MouseInputListener {
+
+	Mediator mediator;
+
+	protected UIState currentState;
+
+	protected UIState connect;
+
+	protected UIState bezierconnect;
+
+	protected UIState delete;
+
+	protected UIState insert;
+
+	protected UIState paste;
+
+	protected UIState select;
+
+	protected  UIState bezierSelect;
+
+	protected UIState nothing;
+
+	/** The focused cell under the mousepointer. */
+	protected CellView focus;
+
+	/** The cell under the mousepointer. */
+	protected CellView cell;
+
+	/** The object that handles mouse operations. */
+	protected Object handler;
+
+	/** Handle that we are going to use. */
+	protected CellHandle handle;
+
+	/** Marquee that we are going to use. */
+	protected BasicMarqueeHandler marquee;
+
+<span class="nc" id="L75">	protected transient Cursor previousCursor = null;</span>
+
+<span class="nc" id="L77">	public GraphMouseListener(Mediator mediator) {</span>
+<span class="nc" id="L78">		insert = new InsertState(mediator);</span>
+<span class="nc" id="L79">		this.mediator = mediator;</span>
+<span class="nc" id="L80">		currentState = nothing = new UIStateDefault(mediator);</span>
+<span class="nc" id="L81">		select = new SelectState(mediator, this);</span>
+<span class="nc" id="L82">		bezierSelect = new BezierEdgeModificationState(mediator, this);</span>
+<span class="nc" id="L83">		connect = new ConnectState(mediator, this);</span>
+<span class="nc" id="L84">		bezierconnect = new BezierConnectState(mediator, this);</span>
+<span class="nc" id="L85">		marquee = new BasicMarqueeHandler();</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Invoked when the mouse button has been clicked (pressed
+	 * and released) on a component.
+	 */
+	public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L93">		currentState.handleClick(e);</span>
+<span class="nc" id="L94">	}</span>
+
+	/**
+	 * Invoked when a mouse button has been pressed on a component.
+	 */
+	public void mousePressed(MouseEvent e) {
+<span class="nc" id="L100">		currentState.handlePress(e);</span>
+<span class="nc" id="L101">	}</span>
+
+	/**
+	 * Invoked when a mouse button has been released on a component.
+	 */
+	public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L107">		currentState.handleRelease(e);</span>
+<span class="nc" id="L108">	}</span>
+
+	/**
+	 * Invoked when the mouse enters a component.
+	 */
+	public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L114">		currentState.handleEnter(e);</span>
+<span class="nc" id="L115">	}</span>
+
+	/**
+	 * Invoked when the mouse exits a component.
+	 */
+	public void mouseExited(MouseEvent e) {
+<span class="nc" id="L121">		currentState.handleExit(e);</span>
+<span class="nc" id="L122">	}</span>
+
+	/**
+	 * Invoked when a mouse button is pressed on a component and then
+	 * dragged.  &lt;code&gt;MOUSE_DRAGGED&lt;/code&gt; events will continue to be
+	 * delivered to the component where the drag originated until the
+	 * mouse button is released (regardless of whether the mouse position
+	 * is within the bounds of the component).
+	 * &lt;p&gt;
+	 * Due to platform-dependent Drag&amp;Drop implementations,
+	 * &lt;code&gt;MOUSE_DRAGGED&lt;/code&gt; events may not be delivered during a native
+	 * Drag&amp;Drop operation.
+	 */
+	public void mouseDragged(MouseEvent e) {
+<span class="nc" id="L136">		currentState.handleDrag(e);</span>
+<span class="nc" id="L137">	}</span>
+
+	/**
+	 * Invoked when the mouse cursor has been moved onto a component
+	 * but no buttons have been pushed.
+	 */
+	public void mouseMoved(MouseEvent e) {
+<span class="nc" id="L144">		currentState.handleMove(e);</span>
+<span class="nc" id="L145">	}</span>
+
+	public void setConnectState() {
+		// Deselect selected cells
+<span class="nc" id="L149">		mediator.getGraph().clearSelection();</span>
+<span class="nc" id="L150">		((BezierConnectState) bezierconnect).initializeState();</span>
+<span class="nc" id="L151">		mediator.BezierConnecthideHelperBar();</span>
+<span class="nc" id="L152">		mediator.hideBezierEditingPanel();</span>
+<span class="nc" id="L153">		currentState = connect;</span>
+<span class="nc" id="L154">	}</span>
+
+	public void setBezierConnectState() {
+		// Deselect selected cells
+<span class="nc" id="L158">		mediator.getGraph().clearSelection();</span>
+<span class="nc" id="L159">		mediator.getCancelEdgeDrawing().setEnabled(true);</span>
+<span class="nc" id="L160">		mediator.hideBezierEditingPanel();</span>
+<span class="nc" id="L161">		currentState = bezierconnect;</span>
+<span class="nc" id="L162">		mediator.BezierConnectshowHelperBar();</span>
+<span class="nc" id="L163">		((BezierConnectState) currentState).initializeState();</span>
+//		System.out.println(&quot;GraphMouseListener -&gt; Going in Bezier Connect State&quot;);
+<span class="nc" id="L165">	}</span>
+
+	public void setDeleteState() {
+<span class="nc" id="L168">		currentState = delete;</span>
+<span class="nc" id="L169">	}</span>
+
+	public void setDefaultState() {
+<span class="nc" id="L172">		currentState = nothing;</span>
+<span class="nc" id="L173">	}</span>
+
+	public void setInsertState(String className) {
+<span class="nc" id="L176">		((BezierConnectState) bezierconnect).initializeState();</span>
+<span class="nc" id="L177">		mediator.BezierConnecthideHelperBar();</span>
+<span class="nc" id="L178">		mediator.hideBezierEditingPanel();</span>
+<span class="nc" id="L179">		currentState = insert;</span>
+<span class="nc" id="L180">		((InsertState) insert).setInsertClass(className);</span>
+<span class="nc" id="L181">	}</span>
+
+	public void setPasteState() {
+<span class="nc" id="L184">		currentState = paste;</span>
+<span class="nc" id="L185">	}</span>
+
+	public void setSelectState() {
+<span class="nc" id="L188">		((BezierConnectState) bezierconnect).initializeState();</span>
+<span class="nc" id="L189">		mediator.BezierConnecthideHelperBar();</span>
+<span class="nc" id="L190">		currentState = select;</span>
+<span class="nc" id="L191">	}</span>
+
+	public void setBezierEdgeModificationState(JmtEdge edge) {
+<span class="nc" id="L194">		currentState = bezierSelect;</span>
+<span class="nc" id="L195">		mediator.showBezierEditingPanel();</span>
+<span class="nc" id="L196">		((BezierEdgeModificationState) currentState).setEdge(edge);</span>
+<span class="nc" id="L197">	}</span>
+
+	/**
+	 * Invoked after a cell has been selected in the mouseReleased method.
+	 * This can be used to do something interesting if the cell was already
+	 * selected, in which case this implementation selects the parent.
+	 * Override if you want different behaviour, such as start editing.
+	 */
+	protected void postProcessSelection(MouseEvent e, Object cell, boolean wasSelected) {
+<span class="nc bnc" id="L206" title="All 4 branches missed.">		if (wasSelected &amp;&amp; mediator.isCellSelected(cell)) {</span>
+<span class="nc" id="L207">			Object parent = cell;</span>
+<span class="nc" id="L208">			Object nextParent = null;</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">			while (((nextParent = mediator.getParent(parent)) != null) &amp;&amp; mediator.isCellVisible(nextParent)) {</span>
+<span class="nc" id="L210">				parent = nextParent;</span>
+			}
+<span class="nc" id="L212">			mediator.selectCellForEvent(parent, e);</span>
+<span class="nc" id="L213">			focus = mediator.getViewOfCell(parent, false);</span>
+		}
+<span class="nc" id="L215">	}</span>
+
+	protected boolean isDescendant(CellView parentView, CellView childView) {
+<span class="nc bnc" id="L218" title="All 4 branches missed.">		if (parentView == null || childView == null) {</span>
+<span class="nc" id="L219">			return false;</span>
+		}
+<span class="nc" id="L221">		Object parent = parentView.getCell();</span>
+<span class="nc" id="L222">		Object child = childView.getCell();</span>
+<span class="nc" id="L223">		Object ancestor = child;</span>
+		do {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (ancestor == parent) {</span>
+<span class="nc" id="L226">				return true;</span>
+			}
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		} while ((ancestor = mediator.getParent(ancestor)) != null);</span>
+<span class="nc" id="L229">		return false;</span>
+	}
+
+	public void setHandle(CellHandle handle) {
+<span class="nc" id="L233">		this.handle = handle;</span>
+<span class="nc" id="L234">	}</span>
+
+	public CellHandle getHandle() {
+<span class="nc" id="L237">		return handle;</span>
+	}
+
+	public CellView getFocus() {
+<span class="nc" id="L241">		return focus;</span>
+	}
+
+	public Object getHandler() {
+<span class="nc" id="L245">		return handler;</span>
+	}
+
+	public BasicMarqueeHandler getMarquee() {
+<span class="nc" id="L249">		return marquee;</span>
+	}
+
+	public Cursor getPreviousCursor() {
+<span class="nc" id="L253">		return previousCursor;</span>
+	}
+
+	public CellView getCell() {
+<span class="nc" id="L257">		return cell;</span>
+	}
+
+	public void setHandler(Object handler) {
+<span class="nc" id="L261">		this.handler = handler;</span>
+<span class="nc" id="L262">	}</span>
+
+	public void setFocus(CellView focus) {
+<span class="nc" id="L265">		this.focus = focus;</span>
+<span class="nc" id="L266">	}</span>
+
+	public void setCell(CellView cell) {
+<span class="nc" id="L269">		this.cell = cell;</span>
+<span class="nc" id="L270">	}</span>
+
+	protected void handleEditTrigger(Object cell) {
+<span class="nc" id="L273">		mediator.startEditingAtCell(cell);</span>
+<span class="nc" id="L274">	}</span>
+
+	public UIState getCurrentState() {
+<span class="nc" id="L277">		return currentState;</span>
+	}
+
+	public void setPreviousCursor(Cursor cursor) {
+<span class="nc" id="L281">		previousCursor = cursor;</span>
+<span class="nc" id="L282">	}</span>
+
+	/**
+	 * Modify graphMouseListener when a cell has been deleted
+	 **/
+	public void cellDeleted() {
+<span class="nc bnc" id="L288" title="All 2 branches missed.">		if(this.currentState == this.bezierSelect){</span>
+<span class="nc" id="L289">			this.setSelectState();</span>
+		}
+<span class="nc" id="L291">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoadDemoPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.panels</a> &gt; <span class="el_source">LoadDemoPanel.java</span></div><h1>LoadDemoPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.workloadAnalysis.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
+import jmt.engine.jwat.ProgressStatusListener;
+import jmt.engine.jwat.input.EventFinishAbort;
+import jmt.engine.jwat.input.EventFinishLoad;
+import jmt.engine.jwat.input.EventStatus;
+import jmt.engine.jwat.input.Loader;
+import jmt.engine.jwat.input.ProgressMonitorShow;
+import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.JWatWizard;
+import jmt.gui.jwat.MainJwatWizard;
+
+public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L61">	private String demoDescription = &quot;&lt;HTML&gt;&quot; + &quot;&lt;b&gt;Type of demo:&lt;/b&gt; Workload analysis &lt;p&gt;&quot;</span>
+			//+ &quot;&lt;b&gt;Description:&lt;/b&gt; This demo has been extracted from an Apache log file selecting only some variables&lt;p&gt;&quot;
+			+ &quot;&lt;b&gt;# observations:&lt;/b&gt; This demo has 4000 observations related to the visits to a website&lt;p&gt;&quot;
+			+ &quot;&lt;b&gt;# variables:&lt;/b&gt; Each observation is characterized by two numeric variables&lt;p&gt;&quot; + &quot;&lt;b&gt;Variables description:&lt;/b&gt;&lt;p&gt;&quot;
+			+ &quot;&lt;TABLE align=center border=1&gt;&quot; + &quot;&lt;TR&gt;&lt;TD&gt;&lt;B&gt;Name&lt;/B&gt;&lt;/TD&gt;&lt;TD&gt;&lt;B&gt;Description&lt;/B&gt;&lt;/TD&gt;&lt;TD&gt;&lt;B&gt;Type&lt;/B&gt;&lt;/TD&gt;&lt;/TR&gt;&quot;
+			+ &quot;&lt;TR&gt;&lt;TD&gt;Execution time&lt;/TD&gt;&lt;TD&gt;Time required to execute the request&lt;/TD&gt;&lt;TD&gt;Numeric&lt;/TD&gt;&lt;/TR&gt;&quot;
+			+ &quot;&lt;TR&gt;&lt;TD&gt;KB transferred&lt;/TD&gt;&lt;TD&gt;Number of KB transferred during the request&lt;/TD&gt;&lt;TD&gt;Numeric&lt;/TD&gt;&lt;/TR&gt;&quot;;
+			//+ &quot;&lt;TR&gt;&lt;TD&gt;IP&lt;/TD&gt;&lt;TD&gt;IP address&lt;/TD&gt;&lt;TD&gt;String&lt;/TD&gt;&lt;/TR&gt;&quot;
+			//+ &quot;&lt;TR&gt;&lt;TD&gt;Timestamp&lt;/TD&gt;&lt;TD&gt;Timestamp of the visit as seen by the web server&lt;/TD&gt;&lt;TD&gt;Date&lt;/TD&gt;&lt;/TR&gt;&quot;
+			//+ &quot;&lt;TR&gt;&lt;TD&gt;Access request&lt;/TD&gt;&lt;TD&gt;The request made&lt;/TD&gt;&lt;TD&gt;String&lt;/TD&gt;&lt;/TR&gt;&quot;
+			//+ &quot;&lt;TR&gt;&lt;TD&gt;Bytes transferred&lt;/TD&gt;&lt;TD&gt;The number of bytes transferred&lt;/TD&gt;&lt;TD&gt;Numeric&lt;/TD&gt;&lt;/TR&gt;&quot; + &quot;&lt;/TABLE&gt;&lt;/HTML&gt;&quot;;
+<span class="nc" id="L72">	private String useDescription = &quot;&lt;HTML&gt;&quot;</span>
+			+ &quot;&lt;b&gt;STEP 1:&lt;/b&gt; Choose demo file from the list then click 'Load demo'.&lt;p&gt;&lt;p&gt;&quot;
+			+ &quot;&lt;b&gt;STEP 2:&lt;/b&gt; Analyze the statistics panels then click next.&lt;p&gt;&lt;p&gt;&quot;
+			+ &quot;&lt;b&gt;STEP 3:&lt;/b&gt; Choose clustering algorithm, choose the options ( we suggest to select the (value-min)/(max-min) transformation) of clustering then click 'solve'.&lt;p&gt;&lt;p&gt;&quot;
+			+ &quot;&lt;b&gt;STEP 4:&lt;/b&gt; Analyze the cluster results (using back button you can return to STEP 3 and apply different clustering algorithm).&lt;p&gt;&lt;p&gt;&quot;
+			+ &quot;&lt;/HTML&gt;&quot;;
+
+	private static final String TEMP_DEMO_NAME_WA = &quot;Demo_WA&quot;;
+<span class="nc" id="L80">	private static final String DEMO_FILE = EXAMPLE_PATH + TEMP_DEMO_NAME_WA + &quot;Data.jwat&quot;;</span>
+	private JButton loadDemo;
+	private boolean canGoOn;
+	private ModelWorkloadAnalysis model;
+	private JList demos;
+	private JLabel demoDesc;
+	private JLabel useDesc;
+	private MainJwatWizard parent;
+
+	public LoadDemoPanel(MainJwatWizard parent) {
+<span class="nc" id="L90">		super();</span>
+<span class="nc" id="L91">		model = (ModelWorkloadAnalysis) parent.getModel();</span>
+<span class="nc" id="L92">		canGoOn = false;</span>
+<span class="nc" id="L93">		this.parent = parent;</span>
+<span class="nc" id="L94">		initGUI();</span>
+<span class="nc" id="L95">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L99">		return &quot;Load Demo&quot;;</span>
+	}
+
+	private void initGUI() {
+<span class="nc" id="L103">		this.setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L105">		JPanel grid = new JPanel(new GridLayout(2, 1, 5, 5));</span>
+
+<span class="nc" id="L107">		JPanel upper = new JPanel(new BorderLayout(10, 10));</span>
+<span class="nc" id="L108">		demos = new JList(new String[] { TEMP_DEMO_NAME_WA });</span>
+<span class="nc" id="L109">		Font f = demos.getFont();</span>
+<span class="nc" id="L110">		demos.setFont(new Font(f.getFontName(), f.getStyle(), f.getSize() + 2));</span>
+<span class="nc" id="L111">		demos.setFixedCellWidth(150);</span>
+<span class="nc" id="L112">		demos.addListSelectionListener(new ListSelectionListener() {</span>
+
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">				if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L116">					return;</span>
+				}
+<span class="nc bnc" id="L118" title="All 2 branches missed.">				if (demos.getSelectedIndex() &gt;= 0) {</span>
+					//TODO insert peculiar strings for demo
+				} else {
+<span class="nc" id="L121">					demos.setSelectedIndex(0);</span>
+				}
+<span class="nc" id="L123">			}</span>
+
+		});
+<span class="nc" id="L126">		demos.setSelectedIndex(0);</span>
+<span class="nc" id="L127">		demoDesc = new JLabel(demoDescription);</span>
+<span class="nc" id="L128">		upper.add(new JScrollPane(demos), BorderLayout.WEST);</span>
+<span class="nc" id="L129">		upper.add(new JScrollPane(demoDesc), BorderLayout.CENTER);</span>
+<span class="nc" id="L130">		demoDesc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;Demo description&quot;));</span>
+
+<span class="nc" id="L132">		useDesc = new JLabel(useDescription);</span>
+<span class="nc" id="L133">		useDesc.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;How to execute a demo&quot;));</span>
+
+<span class="nc" id="L135">		grid.add(upper);</span>
+<span class="nc" id="L136">		grid.add(new JScrollPane(useDesc));</span>
+
+<span class="nc" id="L138">		JPanel south = new JPanel(new FlowLayout(FlowLayout.CENTER));</span>
+<span class="nc" id="L139">		south.add(new JLabel(&quot;Click this button to load selected demo   ---&gt;   &quot;));</span>
+<span class="nc" id="L140">		loadDemo = new JButton(&quot;Load demo&quot;);</span>
+<span class="nc" id="L141">		loadDemo.setBackground(Color.RED);</span>
+<span class="nc" id="L142">		loadDemo.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L144">				File demoFile = new File(Defaults.getWorkingPath(), DEMO_FILE);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">				if (!demoFile.isFile()) {</span>
+<span class="nc" id="L146">					demoFile = new File(&quot;.&quot;, DEMO_FILE);</span>
+				}
+				//Calls loader
+				try {
+<span class="nc" id="L150">					Loader.readData(demoFile.getAbsolutePath(), Loader.loadParameter(demoFile.getParentFile(), TEMP_DEMO_NAME_WA),</span>
+							new ProgressMonitorShow(LoadDemoPanel.this, &quot;Loading Data...&quot;, 1000), new InputStatusListener());
+<span class="nc" id="L152">				} catch (FileNotFoundException ee) {</span>
+<span class="nc" id="L153">					JOptionPane.showMessageDialog(LoadDemoPanel.this, &quot;Loading aborted. File not found.&quot;, &quot;ABORT!!&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L154">				} catch (IOException ee) {</span>
+<span class="nc" id="L155">					JOptionPane.showMessageDialog(LoadDemoPanel.this, &quot;Loading demo failed.&quot;, &quot;ABORT!!&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L156">				}</span>
+<span class="nc" id="L157">			}</span>
+		});
+<span class="nc" id="L159">		south.add(loadDemo);</span>
+<span class="nc" id="L160">		this.add(grid, BorderLayout.CENTER);</span>
+<span class="nc" id="L161">		this.add(south, BorderLayout.SOUTH);</span>
+<span class="nc" id="L162">	}</span>
+
+<span class="nc" id="L164">	private class InputStatusListener implements ProgressStatusListener {</span>
+
+		public void statusEvent(EventStatus e) {
+
+<span class="nc bnc" id="L168" title="All 3 branches missed.">			switch (e.getType()) {</span>
+			case EventStatus.ABORT_EVENT:
+<span class="nc" id="L170">				abortEvent((EventFinishAbort) e);</span>
+<span class="nc" id="L171">				break;</span>
+			case EventStatus.DONE_EVENT:
+<span class="nc" id="L173">				finishedEvent((EventFinishLoad) e);</span>
+				break;
+			}
+
+<span class="nc" id="L177">		}</span>
+
+		//Abort input file loading
+		private void abortEvent(EventFinishAbort e) {
+<span class="nc" id="L181">			JOptionPane.showMessageDialog(LoadDemoPanel.this, e.getMessage(), &quot;LOADING ABORTED!!&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L182">			canGoOn = false;</span>
+<span class="nc" id="L183">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, false);</span>
+<span class="nc" id="L184">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L185">		}</span>
+
+		//		data loaded
+		private void finishedEvent(final EventFinishLoad e) {
+<span class="nc" id="L189">			model.setMatrix(e.getSession());</span>
+<span class="nc" id="L190">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Next &gt;&quot;, true);</span>
+<span class="nc" id="L191">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L192">			canGoOn = true;</span>
+<span class="nc" id="L193">			((JWatWizard) getParentWizard()).showNextPanel();</span>
+<span class="nc" id="L194">		}</span>
+	}
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L199">		parent.setLastPanel(WORKLOAD_INPUT_PANEL);</span>
+<span class="nc" id="L200">	}</span>
+
+	/********** WIZARD MANAGEMENT FUNCTIONS **********/
+	// TODO controllare validita dei dati forniti nel pannello e creazione e passaggio informazioni al modello per il prossimo panello
+	// Chiamata prima di passare al prossimo pannello
+	@Override
+	public boolean canGoForward() {
+<span class="nc" id="L207">		return canGoOn;</span>
+	}
+
+	public void setCanGoForward(boolean canGo) {
+<span class="nc" id="L211">		canGoOn = canGo;</span>
+<span class="nc" id="L212">	}</span>
+
+	// TODO controllare con Fuma cosa fare
+	// Chiamata quando dal pannello si torna indietro
+	@Override
+	public boolean canGoBack() {
+<span class="nc bnc" id="L218" title="All 2 branches missed.">		if (JOptionPane.showConfirmDialog(this, &quot;Are you sure you want to go back to start screen?&quot;, &quot;Back operation&quot;, JOptionPane.YES_NO_OPTION,</span>
+				JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
+<span class="nc" id="L220">			return false;</span>
+		}
+		//Reset della finestra principale
+<span class="nc" id="L223">		parent.resetScreen();</span>
+<span class="nc" id="L224">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

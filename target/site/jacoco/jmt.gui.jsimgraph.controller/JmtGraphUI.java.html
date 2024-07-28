@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtGraphUI.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller</a> &gt; <span class="el_source">JmtGraphUI.java</span></div><h1>JmtGraphUI.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller;
+
+import java.awt.Color;
+import java.awt.event.MouseListener;
+
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
+
+import jmt.gui.jsimgraph.JGraphMod.BlockingRegion;
+import jmt.gui.jsimgraph.JGraphMod.JmtCell;
+import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
+
+import org.jgraph.event.GraphSelectionEvent;
+import org.jgraph.event.GraphSelectionListener;
+import org.jgraph.graph.GraphLayoutCache;
+import org.jgraph.graph.GraphSelectionModel;
+import org.jgraph.plaf.basic.BasicGraphUI;
+
+/**
+
+ * @author Federico Granata
+ * Date: 15-lug-2003
+ * Time: 16.12.00
+ *
+ * @author Bertoli Marco (29-mar-2006)
+
+ */
+public class JmtGraphUI extends BasicGraphUI {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected Mediator mediator;
+
+<span class="nc" id="L56">	public JmtGraphUI(Mediator mediator) {</span>
+<span class="nc" id="L57">		setMediator(mediator);</span>
+<span class="nc" id="L58">	}</span>
+
+	/**
+	 * Messages to stop the editing session. If the UI the receiver
+	 * is providing the look and feel for returns true from
+	 * &lt;code&gt;getInvokesStopCellEditing&lt;/code&gt;, stopCellEditing will
+	 * invoked on the current editor. Then completeEditing will
+	 * be messaged with false, true, false to cancel any lingering
+	 * editing.
+	 */
+	@Override
+	public void completeEditing() {
+<span class="nc" id="L70">		super.completeEditing();</span>
+<span class="nc" id="L71">	}</span>
+
+	public GraphLayoutCache getGraphLayoutCache() {
+<span class="nc" id="L74">		return graphLayoutCache;</span>
+	}
+
+	/**
+	 * Creates the listener responsible for calling the correct handlers
+	 * based on mouse events, and to select invidual cells.
+	 */
+	@Override
+	protected MouseListener createMouseListener() {
+<span class="nc" id="L83">		return null;</span>
+	}
+
+	@Override
+	protected GraphSelectionListener createGraphSelectionListener() {
+<span class="nc" id="L88">		return new JmtGraphSelectionHandler();</span>
+	}
+
+	/**
+	 * A GraphSelectionHandler that can enable/disable UI actions
+	 */
+<span class="nc" id="L94">	public class JmtGraphSelectionHandler extends GraphSelectionHandler {</span>
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void valueChanged(GraphSelectionEvent e) {
+<span class="nc" id="L103">			super.valueChanged(e);</span>
+			// Bomb out with a ClassCastException in case the event's source is
+			// something unexpected. Not robust, but a good debugging feature :)
+<span class="nc" id="L106">			GraphSelectionModel sm = (GraphSelectionModel) e.getSource();</span>
+
+			// New --- Bertoli Marco ---
+			// Checks selection cells to enables correct toolbar elements
+<span class="nc" id="L110">			boolean foundStations = false;</span>
+<span class="nc" id="L111">			boolean foundBlockingRegion = false;</span>
+<span class="nc" id="L112">			boolean foundConnection = false;</span>
+<span class="nc" id="L113">			boolean cannotAddBlockingRegion = false;</span>
+<span class="nc" id="L114">			boolean foundRotableStations = true;</span>
+<span class="nc" id="L115">			Object[] cells = sm.getSelectionCells();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			for (Object cell : cells) {</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">				if (cell instanceof JmtCell) {</span>
+<span class="nc" id="L118">					foundStations = true;</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">					if(!(((JmtCell) cell).isFreeRotationAllowed())){</span>
+						// the free rotation is enabled only if the station is connected by bezier edges only
+<span class="nc" id="L122">						foundRotableStations=false;</span>
+					};
+
+					// If selected station is member of a BlockingRegion, signals it
+<span class="nc bnc" id="L126" title="All 2 branches missed.">					if (((JmtCell) cell).getParent() instanceof BlockingRegion) {</span>
+<span class="nc" id="L127">						cannotAddBlockingRegion = true;</span>
+					}
+					// If selected cell cannot be added to a blocking region, signals it
+<span class="nc bnc" id="L130" title="All 2 branches missed.">					if (((JmtCell) cell).generateOrDestroyJobs()) {</span>
+<span class="nc" id="L131">						cannotAddBlockingRegion = true;</span>
+					}
+<span class="nc bnc" id="L133" title="All 2 branches missed.">				} else if (cell instanceof BlockingRegion) {</span>
+<span class="nc" id="L134">					foundBlockingRegion = true;</span>
+<span class="nc" id="L135">					cannotAddBlockingRegion = true;</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				} else if (cell instanceof JmtEdge) {</span>
+<span class="nc" id="L137">					foundConnection = true;</span>
+				}
+				// Shorten cycle to avoid useless computation
+<span class="nc bnc" id="L140" title="All 4 branches missed.">				if (foundStations &amp;&amp; foundBlockingRegion) {</span>
+<span class="nc" id="L141">					break;</span>
+				}
+			}
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (foundStations) {</span>
+
+<span class="nc" id="L147">				mediator.enableCutAction(true);</span>
+<span class="nc" id="L148">				mediator.enableCopyAction(true);</span>
+<span class="nc" id="L149">				mediator.enableDeleteAction(true);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">				mediator.enableAddBlockingRegion(!cannotAddBlockingRegion);</span>
+<span class="nc" id="L151">				mediator.enableRotateAction(true);</span>
+
+				//By default the free rotation is disabled for all stations
+<span class="nc" id="L154">				mediator.enableRotateLeftAction(false);</span>
+<span class="nc" id="L155">				mediator.enableRotateRightAction(false);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">				if (foundRotableStations){</span>
+					// the free rotation is enabled only if the station is connected by bezier edges only
+<span class="nc" id="L158">					mediator.enableRotateLeftAction(true);</span>
+<span class="nc" id="L159">					mediator.enableRotateRightAction(true);</span>
+				}
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			} else if (foundBlockingRegion) {</span>
+<span class="nc" id="L162">				mediator.enableCutAction(true);</span>
+<span class="nc" id="L163">				mediator.enableCopyAction(true);</span>
+<span class="nc" id="L164">				mediator.enableDeleteAction(true);</span>
+<span class="nc" id="L165">				mediator.enableAddBlockingRegion(false);</span>
+<span class="nc" id="L166">				mediator.enableRotateAction(false);</span>
+<span class="nc" id="L167">				mediator.enableRotateLeftAction(false);</span>
+<span class="nc" id="L168">				mediator.enableRotateRightAction(false);</span>
+			} else {
+<span class="nc" id="L170">				mediator.enableCutAction(false);</span>
+<span class="nc" id="L171">				mediator.enableCopyAction(false);</span>
+<span class="nc" id="L172">				mediator.enableDeleteAction(false);</span>
+<span class="nc" id="L173">				mediator.enableAddBlockingRegion(false);</span>
+<span class="nc" id="L174">				mediator.enableRotateAction(false);</span>
+<span class="nc" id="L175">				mediator.enableRotateLeftAction(false);</span>
+<span class="nc" id="L176">				mediator.enableRotateRightAction(false);</span>
+			}
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			if (foundConnection) {</span>
+<span class="nc" id="L179">				mediator.enableDeleteAction(true);</span>
+			}
+			// End new --- Bertoli Marco ---
+<span class="nc" id="L182">		}</span>
+
+	}
+
+	@Override
+	protected void installDefaults() {
+<span class="nc" id="L188">		super.installDefaults();</span>
+<span class="nc" id="L189">		graph.setLockedHandleColor(graph.getHighlightColor());</span>
+<span class="nc" id="L190">		graph.setMarqueeColor(Color.GRAY); // make it a little more visible</span>
+<span class="nc" id="L191">	}</span>
+
+	@Override
+	protected void installKeyboardActions() {
+<span class="nc" id="L195">		super.installKeyboardActions();</span>
+<span class="nc" id="L196">		ActionMap am = SwingUtilities.getUIActionMap(graph);</span>
+<span class="nc" id="L197">		am.remove(TransferHandler.getCutAction().getValue(Action.NAME));</span>
+<span class="nc" id="L198">		am.remove(TransferHandler.getCopyAction().getValue(Action.NAME));</span>
+<span class="nc" id="L199">		am.remove(TransferHandler.getPasteAction().getValue(Action.NAME));</span>
+<span class="nc" id="L200">		SwingUtilities.replaceUIActionMap(graph, am);</span>
+<span class="nc" id="L201">	}</span>
+
+	public void setMediator(Mediator mediator) {
+<span class="nc" id="L204">		this.mediator = mediator;</span>
+<span class="nc" id="L205">	}</span>
+
+	/**
+	 * Update the handle using createHandle.
+	 */
+	@Override
+	public void updateHandle() {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		if (graphLayoutCache != null) {</span>
+<span class="nc" id="L213">			Object[] cells = graph.getSelectionCells();</span>
+<span class="nc bnc" id="L214" title="All 4 branches missed.">			if (cells != null &amp;&amp; cells.length &gt; 0) {</span>
+<span class="nc" id="L215">				mediator.setHandle(createHandle(createContext(graph, cells)));</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">			} else if (mouseListener != null) {</span>
+<span class="nc" id="L217">				mediator.setHandle(null);</span>
+			}
+		}
+<span class="nc" id="L220">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

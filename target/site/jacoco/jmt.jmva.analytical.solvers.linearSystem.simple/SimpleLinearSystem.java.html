@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleLinearSystem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.simple</a> &gt; <span class="el_source">SimpleLinearSystem.java</span></div><h1>SimpleLinearSystem.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.simple;
+
+import java.math.BigInteger;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.control.Main;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationChangeVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.LinearSystem;
+import jmt.jmva.analytical.solvers.linearSystem.simple.matrix.StandardMatrix;
+import jmt.jmva.analytical.solvers.linearSystemSolver.ModularSolver;
+import jmt.jmva.analytical.solvers.linearSystemSolver.SimpleSolver;
+import jmt.jmva.analytical.solvers.linearSystemSolver.Solver;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class extends the LinearSystem class to implement the linear system for 
+ * the simple CoMoMimplementation.
+ * 
+ * @author Jack Bradshaw
+ */
+public class SimpleLinearSystem extends LinearSystem {
+
+private static StandardMatrix A, B;
+	
+	private int M,R;	
+	
+	private  Solver solver;
+	
+	private int num_threads;
+	
+	public SimpleLinearSystem(QNModel qnm, CoMoMBasis basis, int num_threads)
+			throws InternalErrorException {
+<span class="nc" id="L41">		super(qnm, basis);</span>
+		
+		//basis = new CoMoMReorderingBasis(qnm);
+		//basis = new BTFCoMoMBasis(qnm);
+	
+<span class="nc" id="L46">		this.num_threads = num_threads;</span>
+		
+<span class="nc" id="L48">		M = qnm.M;</span>
+<span class="nc" id="L49">		R = qnm.R;</span>
+		
+<span class="nc" id="L51">		A = new StandardMatrix(basis, basis.getSize());</span>
+<span class="nc" id="L52">		B = new StandardMatrix(basis, basis.getSize());</span>
+		
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if (num_threads == 1) {</span>
+<span class="nc" id="L55">            solver = new SimpleSolver();</span>
+        } else {
+<span class="nc" id="L57">            solver = new ModularSolver(num_threads);</span>
+        }       
+<span class="nc" id="L59">	}</span>
+
+	@Override
+	public void update(int current_class_population) {
+<span class="nc" id="L63">		solver.goToULevel(current_class_population-1);		</span>
+<span class="nc" id="L64">	}</span>
+
+	@Override
+	public void solve() throws OperationNotSupportedException,
+			InconsistentLinearSystemException, InternalErrorException,
+			BTFMatrixErrorException {
+		
+<span class="nc" id="L71">		basis.startBasisComputation();</span>
+		
+<span class="nc" id="L73">		System.out.println(&quot;Solving System...\n&quot;);</span>
+<span class="nc" id="L74">		BigRational[] sysB  = B.multiply();</span>
+		
+<span class="nc" id="L76">		BigRational[] result = solver.solve(sysB);</span>
+		
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		for (int i = 0; i &lt; basis.getSize(); i++) {</span>
+<span class="nc" id="L79">			basis.setValue(result[i], i);</span>
+		}
+<span class="nc" id="L81">	}</span>
+
+	@Override
+	public void initialiseMatricesForClass(PopulationVector current_N, int current_class)
+			throws InternalErrorException, BTFMatrixErrorException, InconsistentLinearSystemException, OperationNotSupportedException {
+<span class="nc" id="L86">		System.out.println(&quot;current_class: &quot; + current_class);</span>
+<span class="nc" id="L87">		generateAB(current_N, current_class);</span>
+		
+<span class="nc" id="L89">		System.out.println(&quot;Intialising A and B:&quot;);</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if (Main.verbose) { </span>
+<span class="nc" id="L91">			System.out.println(&quot;A:&quot;);</span>
+<span class="nc" id="L92">			A.print();</span>
+<span class="nc" id="L93">			System.out.println(&quot;B:&quot;);</span>
+<span class="nc" id="L94">			B.print();</span>
+		}
+		
+<span class="nc" id="L97">		 Integer maxA = (int)getMaxAElement();</span>
+<span class="nc" id="L98">	     Integer val = basis.getSize();</span>
+<span class="nc" id="L99">	     BigInteger maxB = qnm.getMaxG().multiply(new BigInteger(maxA.toString())).multiply(new BigInteger(val.toString()));</span>
+<span class="nc" id="L100">	     solver.initialise(A.getArray(), A.getUpdateList(), basis.getUncomputables(), maxA, maxB, new BigRational(qnm.getMaxG()));</span>
+<span class="nc" id="L101">	}</span>
+	
+	 private void generateAB(PopulationVector N, int current_class) throws InternalErrorException {
+<span class="nc" id="L104">		 	A.reset();</span>
+<span class="nc" id="L105">		 	B.reset();</span>
+<span class="nc" id="L106">		 	basis.reset_uncomputables();</span>
+		 			
+<span class="nc" id="L108">		   	int row = -1;</span>
+<span class="nc" id="L109">		   	int col = 0;</span>
+		   	PopulationChangeVector n;
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		   	for (int i = 0; i &lt; MiscMathsFunctions.binomialCoefficient(M + R - 1, M); i++) { //loop over all possible population changes n</span>
+<span class="nc" id="L112">		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		   		if (n.sumTail(current_class-1) &gt; 0) {  //potential negative population</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		   			for (int k = 0; k &lt;= M; k++) {</span>
+<span class="nc" id="L115">		   				row++;</span>
+<span class="nc" id="L116">		   				col = basis.indexOf(n,k);</span>
+<span class="nc" id="L117">		   				A.write(row, col, BigRational.ONE);</span>
+<span class="nc" id="L118">		   				basis.computatble(col);</span>
+		   				//System.out.println(&quot;Fisrt n: &quot; + n);
+		   				//System.out.println(&quot;row: &quot; + row);
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		   				if (n.sumTail(current_class) &gt; 0) {  //negative population</span>
+<span class="nc" id="L122">		   					A.write(row, col, BigRational.ONE);</span>
+		   					//System.out.println(&quot;1&quot;);
+<span class="nc" id="L124">		   					col = basis.indexOf(n, k);</span>
+		   					//System.out.println(&quot;col: &quot; + col);
+<span class="nc" id="L126">		   					B.write(row, col, BigRational.ONE);</span>
+		   				} else {
+		   					//System.out.println(&quot;2&quot;);
+<span class="nc" id="L129">		   					A.write(row, col, BigRational.ONE);</span>
+<span class="nc" id="L130">		   					n.minusOne(current_class);</span>
+<span class="nc" id="L131">		   					col = basis.indexOf(n, k);</span>
+		   					//System.out.println(&quot;col: &quot; + col);
+<span class="nc" id="L133">		   					B.write(row, col,BigRational.ONE);</span>
+<span class="nc" id="L134">		   					n.restore();</span>
+		   				}    				
+		   			}
+		   		} else {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		   			if (n.sumHead(current_class - 1) &lt; M) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		   				for (int k = 1; k &lt;= M; k++) {</span>
+		   					//add CE corresponding to G(0, N - n) for each queue k
+<span class="nc" id="L141">		   					row++;</span>
+<span class="nc" id="L142">		   					col = basis.indexOf(n, k);</span>
+<span class="nc" id="L143">		   					A.write(row, col, BigRational.ONE);</span>
+<span class="nc" id="L144">		   					basis.computatble(col);</span>
+<span class="nc" id="L145">		   					col = basis.indexOf(n, 0);</span>
+<span class="nc" id="L146">		   					A.write(row, col, BigRational.ONE.negate());</span>
+<span class="nc" id="L147">		   					basis.computatble(col);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		   					for (int s = 1; s &lt;= current_class - 1; s++) {</span>
+<span class="nc" id="L149">		   						n.plusOne(s);	</span>
+		   						//System.out.println(&quot;n: &quot; + n);
+<span class="nc" id="L151">		   						col = basis.indexOf(n, k);</span>
+<span class="nc" id="L152">		   						n.restore();</span>
+<span class="nc" id="L153">		   						A.write(row, col, qnm.getDemandAsBigRational(k-1, s-1).negate());</span>
+<span class="nc" id="L154">		   						basis.computatble(col);</span>
+		   						//System.out.println(&quot;k-1,s-1: &quot; + qnm.getDemandAsBigRational(k-1, s-1));
+		   					}
+<span class="nc" id="L157">		   					col = basis.indexOf(n, k);</span>
+<span class="nc" id="L158">		  					B.write(row, col, qnm.getDemandAsBigRational(k-1, current_class-1));</span>
+		  				}
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		   				for (int s = 1; s &lt; current_class; s++) {</span>
+		   					//add PC  corresponding to G(0, N - n) for each class s less than the current class
+<span class="nc" id="L162">		   					row++;</span>
+<span class="nc" id="L163">		    				col = basis.indexOf(n, 0);</span>
+<span class="nc" id="L164">		   					A.write(row, col, N.getAsBigRational(s-1).subtract(n.getAsBigRational(s-1))); </span>
+<span class="nc" id="L165">		   					basis.computatble(col);</span>
+<span class="nc" id="L166">		   					n.plusOne(s);</span>
+<span class="nc" id="L167">		   					col = basis.indexOf(n, 0);</span>
+<span class="nc" id="L168">		   					A.write(row, col, qnm.getDelayAsBigRational(s-1).negate());</span>
+<span class="nc" id="L169">		   					basis.computatble(col);</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		   					for (int k = 1; k &lt;= M; k++) { //loop over all queues k (= sum)</span>
+<span class="nc" id="L171">		   						col = basis.indexOf(n, k);</span>
+<span class="nc" id="L172">		   						A.write(row, col, qnm.getDemandAsBigRational(k-1, s-1).negate());</span>
+<span class="nc" id="L173">		   						basis.computatble(col);</span>
+		   					}
+<span class="nc" id="L175">		   					n.restore();</span>
+		   				}
+		   			}    			    			
+		   		}
+		   	}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		   	for (int i = 0; i &lt; MiscMathsFunctions.binomialCoefficient(M + R - 1, M); i++) { //loop over all possible population changes n</span>
+		   		//add PC of class 'current_class'
+<span class="nc" id="L182">		   		n  = basis.getPopulationChangeVector(i).copy(); // To improve bug safety</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		   		if (n.sumTail(current_class-1) &lt;= 0) {  // TODO remove &lt;</span>
+<span class="nc" id="L184">		   			row++;</span>
+<span class="nc" id="L185">		   			col = basis.indexOf(n, 0);</span>
+<span class="nc" id="L186">					A.write(row, col, N.getAsBigRational(current_class-1));</span>
+<span class="nc" id="L187">					basis.computatble(col);</span>
+<span class="nc" id="L188">					A.toBeUpdated(row, col);					</span>
+<span class="nc" id="L189">					B.write(row, col, qnm.getDelayAsBigRational(current_class -1 ));</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">					for ( int k = 1; k &lt;= M; k++) {</span>
+<span class="nc" id="L191">						col = basis.indexOf(n, k);</span>
+<span class="nc" id="L192">						B.write(row, col, qnm.getDemandAsBigRational( k - 1, current_class -1 ));					</span>
+					}
+		   		}
+		   	}
+<span class="nc" id="L196">		}</span>
+	 
+	 /**
+	  * Multiply methods for testing purposes
+	  */
+	 public BigRational[] multiplyrhs() throws BTFMatrixErrorException {
+<span class="nc" id="L202">		 return B.multiply();		 </span>
+	 }
+	 
+	 public BigRational[] multiplylhs() throws BTFMatrixErrorException {
+<span class="nc" id="L206">		 return A.multiply();</span>
+		 
+	 }
+	 
+	 private double getMaxAElement() throws OperationNotSupportedException {
+<span class="nc" id="L211">		 double max = qnm.getMaxModelValue();</span>
+<span class="nc" id="L212">	     max *= qnm.multiplicities.max() + qnm.R;</span>
+<span class="nc" id="L213">	     return max;</span>
+	 }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

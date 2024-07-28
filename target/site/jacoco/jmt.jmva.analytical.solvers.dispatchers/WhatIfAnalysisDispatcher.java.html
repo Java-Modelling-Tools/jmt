@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WhatIfAnalysisDispatcher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.dispatchers</a> &gt; <span class="el_source">WhatIfAnalysisDispatcher.java</span></div><h1>WhatIfAnalysisDispatcher.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.dispatchers;
+
+import jmt.common.exception.InputDataException;
+import jmt.common.exception.SolverException;
+import jmt.framework.data.ArrayUtils;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+
+public class WhatIfAnalysisDispatcher {
+
+    private final SolverDispatcher solverDispatcher;
+
+<span class="nc" id="L13">    public WhatIfAnalysisDispatcher(SolverDispatcher solverDispatcher) {</span>
+<span class="nc" id="L14">        this.solverDispatcher = solverDispatcher;</span>
+<span class="nc" id="L15">    }</span>
+
+    // --- What-if Analysis methods --- Bertoli Marco -------------------------------------
+    /**
+     * Performs a what-if analysis by changing arrival rates.
+     * @param model input model
+     */
+    public void whatIfArrival(ExactModel model) throws InputDataException, SolverException {
+        // Sanity checks on input model.
+<span class="nc bnc" id="L24" title="All 4 branches missed.">        if (model.getWhatIfClass() &gt;= 0 &amp;&amp; model.getClassTypes()[model.getWhatIfClass()] != ExactConstants.CLASS_OPEN) {</span>
+<span class="nc" id="L25">            throw new InputDataException(&quot;Cannot change arrival rate of a closed class.&quot;);</span>
+        }
+<span class="nc bnc" id="L27" title="All 2 branches missed.">        if (model.isClosed()) {</span>
+<span class="nc" id="L28">            throw new InputDataException(&quot;Cannot change arrival rates in a closed model.&quot;);</span>
+        }
+        // Values for what-if
+<span class="nc" id="L31">        double[] values = model.getWhatIfValues();</span>
+
+        // Backup class data
+<span class="nc" id="L34">        double[] initials = model.getClassData().clone();</span>
+
+        // Iterates for what-if executions
+<span class="nc bnc" id="L37" title="All 4 branches missed.">        for (int i = 0; i &lt; model.getWhatIfValues().length &amp;&amp; !solverDispatcher.hasStopped(); i++) {</span>
+<span class="nc" id="L38">            double[] current = initials.clone();</span>
+            // If this is one class only
+<span class="nc bnc" id="L40" title="All 2 branches missed.">            if (model.getWhatIfClass() &gt;= 0) {</span>
+<span class="nc" id="L41">                current[model.getWhatIfClass()] = values[i];</span>
+            }
+            // If this is all open classes
+            else {
+<span class="nc bnc" id="L45" title="All 2 branches missed.">                for (int j = 0; j &lt; current.length; j++) {</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                    if (model.getClassTypes()[j] == ExactConstants.CLASS_OPEN) {</span>
+<span class="nc" id="L47">                        current[j] = initials[j] * values[i];</span>
+                    }
+                }
+            }
+<span class="nc" id="L51">            model.setClassData(current);</span>
+
+            // Checks if stopped
+<span class="nc bnc" id="L54" title="All 2 branches missed.">            if (solverDispatcher.hasStopped()) {</span>
+<span class="nc" id="L55">                break;</span>
+            }
+
+            // Now solves current model - we cannot interrupt this as it is not designed to
+            // be done.
+<span class="nc" id="L60">            solverDispatcher.finalDispatch(model, i);</span>
+        }
+        // Resets initial model
+<span class="nc" id="L63">        model.setClassData(initials);</span>
+        // Results are ok if the process was not stopped.
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        model.setResultsOK(!solverDispatcher.hasStopped());</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Performs a what-if analysis by changing the number of customers.
+     * @param model input model
+     */
+    public void whatIfCustomers(ExactModel model) throws InputDataException, SolverException {
+        // Sanity checks on input model.
+<span class="nc bnc" id="L74" title="All 4 branches missed.">        if (model.getWhatIfClass() &gt;= 0 &amp;&amp; model.getClassTypes()[model.getWhatIfClass()] != ExactConstants.CLASS_CLOSED) {</span>
+<span class="nc" id="L75">            throw new InputDataException(&quot;Cannot change the number of customers of an open class.&quot;);</span>
+        }
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        if (model.isOpen()) {</span>
+<span class="nc" id="L78">            throw new InputDataException(&quot;Cannot change the number of customers in an open model.&quot;);</span>
+        }
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (model.isLd()) {</span>
+<span class="nc" id="L81">            throw new InputDataException(&quot;Cannot change the number of customers in a load-dependent model.&quot;);</span>
+        }
+
+        // Values for what-if
+<span class="nc" id="L85">        double[] values = model.getWhatIfValues();</span>
+
+        // Backup class data
+<span class="nc" id="L88">        double[] initials = model.getClassData().clone();</span>
+
+        // Iterates for what-if executions
+        int i;
+<span class="nc bnc" id="L92" title="All 4 branches missed.">        for (i = 0; i &lt; model.getWhatIfValues().length &amp;&amp; !solverDispatcher.hasStopped(); i++) {</span>
+<span class="nc" id="L93">            double[] current = initials.clone();</span>
+            // If this is one class only
+<span class="nc bnc" id="L95" title="All 2 branches missed.">            if (model.getWhatIfClass() &gt;= 0) {</span>
+<span class="nc" id="L96">                current[model.getWhatIfClass()] = values[i];</span>
+                // Check for not integer values
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                if (Math.abs(current[model.getWhatIfClass()] - Math.rint(current[model.getWhatIfClass()])) &gt; 1e-8) {</span>
+<span class="nc" id="L99">                    throw new InputDataException(&quot;A fractional population value was assigned to class &quot;</span>
+<span class="nc" id="L100">                            + model.getClassNames()[model.getWhatIfClass()] + &quot; during step &quot; + i);</span>
+                }
+                // Rounds number to avoid truncation problems
+<span class="nc" id="L103">                current[model.getWhatIfClass()] = Math.round(current[model.getWhatIfClass()]);</span>
+
+            }
+            // If this is all closed classes
+            else {
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                for (int j = 0; j &lt; current.length; j++) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                    if (model.getClassTypes()[j] == ExactConstants.CLASS_CLOSED) {</span>
+<span class="nc" id="L110">                        current[j] = initials[j] * values[i];</span>
+                        // Check for not integer values
+<span class="nc bnc" id="L112" title="All 2 branches missed.">                        if (Math.abs(current[j] - Math.rint(current[j])) &gt; 1e-8) {</span>
+<span class="nc" id="L113">                            throw new InputDataException(&quot;A fractional population value was assigned to class &quot; + model.getClassNames()[j]</span>
+                                    + &quot; during step &quot; + i);
+                        }
+                        // Rounds number to avoid truncation problems
+<span class="nc" id="L117">                        current[j] = Math.round(current[j]);</span>
+                    }
+                }
+            }
+<span class="nc" id="L121">            model.setClassData(current);</span>
+
+            // Checks if stopped
+<span class="nc bnc" id="L124" title="All 2 branches missed.">            if (solverDispatcher.hasStopped()) {</span>
+<span class="nc" id="L125">                break;</span>
+            }
+
+            // Now solves current model - we cannot interrupt this as it is not designed to
+            // be done.
+<span class="nc" id="L130">            solverDispatcher.finalDispatch(model, i);</span>
+        }
+        // Resets initial model
+<span class="nc" id="L133">        model.setClassData(initials);</span>
+        // Results are ok if the process was not stopped.
+<span class="nc bnc" id="L135" title="All 2 branches missed.">        model.setResultsOK(!solverDispatcher.hasStopped());</span>
+<span class="nc" id="L136">    }</span>
+
+    /**
+     * Performs a what-if analysis by changing service demands of a given station.
+     * @param model input model
+     */
+    public void whatIfDemands(ExactModel model) throws InputDataException, SolverException {
+        // Sanity checks on input model.
+<span class="nc bnc" id="L144" title="All 4 branches missed.">        if (model.getWhatIfStation() &lt; 0 || model.getWhatIfStation() &gt;= model.getStations()) {</span>
+<span class="nc" id="L145">            throw new InputDataException(&quot;Station for what-if analysis not specified.&quot;);</span>
+        }
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        if (model.getStationTypes()[model.getWhatIfStation()] == ExactConstants.STATION_LD) {</span>
+<span class="nc" id="L148">            throw new InputDataException(&quot;Service Demands what-if analysis not supported on Load Dependent stations.&quot;);</span>
+        }
+
+        // Values for what-if
+<span class="nc" id="L152">        double[] values = model.getWhatIfValues();</span>
+
+        // Backup service times data (note: we multiply only service times as it is the
+        // same of multiply service demands)
+<span class="nc" id="L156">        double[][][] initials = ArrayUtils.copy3(model.getServiceTimes());</span>
+
+        // Saves what-if class and station indices
+<span class="nc" id="L159">        int cl = model.getWhatIfClass();</span>
+<span class="nc" id="L160">        int st = model.getWhatIfStation();</span>
+
+        // Iterates for what-if executions
+        int i;
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        for (i = 0; i &lt; values.length &amp;&amp; !solverDispatcher.hasStopped(); i++) {</span>
+<span class="nc" id="L165">            double[][][] current = ArrayUtils.copy3(initials);</span>
+            // If this is one class only
+<span class="nc bnc" id="L167" title="All 2 branches missed.">            if (cl &gt;= 0) {</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">                if (model.getVisits()[st][cl] &gt; 0) {</span>
+<span class="nc" id="L169">                    current[st][cl][0] = values[i] / model.getVisits()[st][cl];</span>
+                } else {
+<span class="nc" id="L171">                    current[st][cl][0] = 0.0;</span>
+                }
+            }
+            // If this is all classes
+            else {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                for (int j = 0; j &lt; model.getClasses(); j++) {</span>
+<span class="nc" id="L177">                    current[st][j][0] = initials[st][j][0] * values[i];</span>
+                }
+            }
+<span class="nc" id="L180">            model.setServiceTimes(current);</span>
+
+            // Checks if stopped
+<span class="nc bnc" id="L183" title="All 2 branches missed.">            if (solverDispatcher.hasStopped()) {</span>
+<span class="nc" id="L184">                break;</span>
+            }
+
+            // Now solves current model - we cannot interrupt this as it is not designed to
+            // be done.
+<span class="nc" id="L189">            solverDispatcher.finalDispatch(model, i);</span>
+        }
+        // Resets initial model
+<span class="nc" id="L192">        model.setServiceTimes(initials);</span>
+        // Results are ok if the process was not stopped.
+<span class="nc bnc" id="L194" title="All 2 branches missed.">        model.setResultsOK(!solverDispatcher.hasStopped());</span>
+<span class="nc" id="L195">    }</span>
+
+    /**
+     * Performs a what-if analysis by changing population mix.
+     * @param model input model
+     */
+    public void whatIfMix(ExactModel model) throws InputDataException, SolverException {
+        // First and second closed class for population mix what-if
+<span class="nc" id="L203">        int class1, class2 = -1;</span>
+<span class="nc" id="L204">        class1 = model.getWhatIfClass();</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        if (class1 &lt; 0) {</span>
+<span class="nc" id="L206">            throw new InputDataException(&quot;Class not specified for population mix what-if analysis.&quot;);</span>
+        }
+        // Find second class
+<span class="nc bnc" id="L209" title="All 2 branches missed.">        for (int i = 0; i &lt; model.getClasses(); i++) {</span>
+<span class="nc bnc" id="L210" title="All 4 branches missed.">            if (model.getClassTypes()[i] == ExactConstants.CLASS_CLOSED &amp;&amp; i != class1) {</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">                if (class2 &lt; 0) {</span>
+<span class="nc" id="L212">                    class2 = i;</span>
+                } else {
+<span class="nc" id="L214">                    throw new InputDataException(&quot;Only models with two closed classes are supported. More than two classes detected.&quot;);</span>
+                }
+            }
+        }
+<span class="nc bnc" id="L218" title="All 2 branches missed.">        if (class2 &lt; 0) {</span>
+<span class="nc" id="L219">            throw new InputDataException(&quot;Only models with two closed classes are supported. Only one classes detected.&quot;);</span>
+        }
+
+        // Values for what-if
+<span class="nc" id="L223">        double[] values = model.getWhatIfValues();</span>
+
+        // Backup class data
+<span class="nc" id="L226">        double[] initials = model.getClassData().clone();</span>
+
+        // Value for total number of customer
+<span class="nc" id="L229">        double N = initials[class1] + initials[class2];</span>
+
+        // Iterates for what-if executions
+        int i;
+<span class="nc bnc" id="L233" title="All 4 branches missed.">        for (i = 0; i &lt; model.getWhatIfValues().length &amp;&amp; !solverDispatcher.hasStopped(); i++) {</span>
+<span class="nc" id="L234">            double[] current = initials.clone();</span>
+<span class="nc" id="L235">            current[class1] = values[i] * N;</span>
+<span class="nc" id="L236">            current[class2] = (1 - values[i]) * N;</span>
+            // Check for not integer values
+<span class="nc bnc" id="L238" title="All 2 branches missed.">            if (Math.abs(current[class1] - Math.rint(current[class1])) &gt; 1e-8) {</span>
+<span class="nc" id="L239">                throw new InputDataException(&quot;A fractional population value was assigned to class &quot; + model.getClassNames()[class1]</span>
+                        + &quot; during step &quot; + i);
+<span class="nc bnc" id="L241" title="All 2 branches missed.">            } else if (Math.abs(current[class2] - Math.rint(current[class2])) &gt; 1e-8) {</span>
+<span class="nc" id="L242">                throw new InputDataException(&quot;A fractional population value was assigned to class &quot; + model.getClassNames()[class2]</span>
+                        + &quot; during step &quot; + i);
+            }
+            // Rounds number to avoid truncation problems
+<span class="nc" id="L246">            current[class1] = Math.round(current[class1]);</span>
+<span class="nc" id="L247">            current[class2] = Math.round(current[class2]);</span>
+
+<span class="nc" id="L249">            model.setClassData(current);</span>
+
+            // Checks if stopped
+<span class="nc bnc" id="L252" title="All 2 branches missed.">            if (solverDispatcher.hasStopped()) {</span>
+<span class="nc" id="L253">                break;</span>
+            }
+
+            // Now solves current model - we cannot interrupt this as it is not designed to
+            // be done.
+<span class="nc" id="L258">            solverDispatcher.finalDispatch(model, i);</span>
+        }
+        // Resets initial model
+<span class="nc" id="L261">        model.setClassData(initials);</span>
+        // Results are ok if the process was not stopped.
+<span class="nc bnc" id="L263" title="All 2 branches missed.">        model.setResultsOK(!solverDispatcher.hasStopped());</span>
+<span class="nc" id="L264">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>KMeanClusteringEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.workloadAnalysis.clustering.kMean</a> &gt; <span class="el_source">KMeanClusteringEngine.java</span></div><h1>KMeanClusteringEngine.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.Observation;
+import jmt.engine.jwat.TimeConsumingWorker;
+import jmt.engine.jwat.VariableNumber;
+
+public class KMeanClusteringEngine {
+	private TimeConsumingWorker worker;
+	private KMean clustering;
+	private MatrixObservations m;
+	private Observation[] obsVal;
+	private VariableNumber[] listAllVar; //Pointers to all variables
+	private VariableNumber[] listSelVar; //Pointers to all variables
+	private int indexSelVar[];
+
+private int numMaxClust; //Maximum number of clusters to consider
+private int numMaxIter; //Maximum number of iterations
+private int numTotVar; //Total number of variables
+private int numVarSel; //Total number of variables
+
+private boolean[] isSelectedVar; //Mark the variables involved in clustering within the total of variables
+
+public TempClusterStatistics[][] sum; //Contains the statistics of the various clusters
+private double[] omsr; //Total variance report per partition
+
+private int[] nn; //Used to contain the number of obs.per
+
+public String m_strKMLog; //Log to add to session log
+//public Vector nclusArray; //Vector containing a vector for each cluster //Array containing the current cluster of the variable
+public short[][] nclust; //Matrix containing current observation cluster, for each n-clustering
+
+<span class="nc" id="L54">NumberFormat Floatformatter = new DecimalFormat(&quot;###.###E0&quot;);</span>
+
+<span class="nc" id="L56">public class TempClusterStatistics {</span>
+public double Coord; // 1 coordinate
+public int numOs; // 2 # of observations
+public double Media; // 3 medium
+public double stdDv; // 4 std. deviation
+public double minOs; // 5 minimum values
+public double maxOs; // 6 maximum values
+public double Skewn; // 7 skewness
+public double Kurto; // 8 Kurtosis
+public double Varnz; // 9 variance
+public double SSDev; // 10 sum of square deviations from center of cluster
+
+public double Somma; // 1 sum of values
+public double SumQd; // 2 sum of squares
+public double SumTz; // 3 sum of the third powers
+public double SumQt; // 4 sum of the fourth powers
+
+public double VVdi5; // 5
+public double VVdi6; // 6
+public double VVdi7; // 7	
+}
+
+<span class="nc" id="L78">	public KMeanClusteringEngine(KMean clustering, TimeConsumingWorker worker) {</span>
+<span class="nc" id="L79">		this.worker = worker;</span>
+<span class="nc" id="L80">		this.clustering = clustering;</span>
+<span class="nc" id="L81">	}</span>
+
+	public boolean PrepClustering(MatrixObservations m, int numberMaximumCluster, int numberMaximumIterations, int chosenVariables[]) {
+<span class="nc" id="L84">		int j = 0, i = 0;</span>
+<span class="nc" id="L85">		this.m = m;</span>
+/* Enter for TEST */
+<span class="nc" id="L87">numMaxClust = numberMaximumCluster; // Maximum number of clusters to consider</span>
+<span class="nc" id="L88">numMaxIter = numberMaximumIterations; // Max number of iterations</span>
+/* Save total number of variables */
+<span class="nc" id="L90">numTotVar = m.getNumVariables(); //Total number of variables</span>
+<span class="nc" id="L91">numVarSel = chosenVariables.length; //Total number of variables</span>
+
+<span class="nc" id="L93">obsVal = m.getVariables()[0].getCurObs();</span>
+/* Initialize array normalized variables and pointers to variables */
+<span class="nc" id="L95">listAllVar = m.getVariables();</span>
+<span class="nc" id="L96">listSelVar = new VariableNumber[numVarSel];</span>
+<span class="nc" id="L97">indexSelVar = chosenVariables;</span>
+/* Setting the variables that are involved in clustering */
+
+<span class="nc" id="L100">		isSelectedVar = new boolean[numTotVar];</span>
+<span class="nc" id="L101">		sum = new TempClusterStatistics[numTotVar][numMaxClust];</span>
+<span class="nc" id="L102">		omsr = new double[numMaxClust];</span>
+<span class="nc" id="L103">		nn = new int[numMaxClust];</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (i = 0; i &lt; numTotVar; i++) {</span>
+<span class="nc" id="L106">			isSelectedVar[i] = false;</span>
+		}
+
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		for (i = 0; i &lt; numTotVar; i++) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			if (chosenVariables[j] == i) {</span>
+<span class="nc" id="L111">				isSelectedVar[i] = true;</span>
+<span class="nc" id="L112">				listSelVar[j] = listAllVar[i];</span>
+<span class="nc" id="L113">				j++;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">				if (j == numVarSel) {</span>
+<span class="nc" id="L115">					break;</span>
+				}
+			}
+		}
+<span class="nc" id="L119">		InitData();</span>
+<span class="nc" id="L120">		return true;</span>
+
+	}
+
+	private void InitData() {
+<span class="nc" id="L125">		int i = 0;</span>
+/* Initialize the variable statistics vector */
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		for (i = 0; i &lt; numMaxClust; i++) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			for (int j = 0; j &lt; numVarSel; j++) {</span>
+<span class="nc" id="L129">				sum[j][i] = new TempClusterStatistics();</span>
+<span class="nc" id="L130">				sum[j][i].Coord = 0;</span>
+<span class="nc" id="L131">				sum[j][i].Kurto = 0;</span>
+<span class="nc" id="L132">				sum[j][i].maxOs = 0;</span>
+<span class="nc" id="L133">				sum[j][i].Media = listSelVar[j].getUniStats().getMinValue();</span>
+<span class="nc" id="L134">				sum[j][i].minOs = 0;</span>
+<span class="nc" id="L135">				sum[j][i].numOs = 0;</span>
+<span class="nc" id="L136">				sum[j][i].Skewn = 0;</span>
+<span class="nc" id="L137">				sum[j][i].SSDev = 0;</span>
+<span class="nc" id="L138">				sum[j][i].stdDv = 0;</span>
+<span class="nc" id="L139">				sum[j][i].Varnz = 0;</span>
+
+<span class="nc" id="L141">				sum[j][i].Somma = 0;</span>
+<span class="nc" id="L142">				sum[j][i].SumQd = 0;</span>
+<span class="nc" id="L143">				sum[j][i].SumTz = 0;</span>
+<span class="nc" id="L144">				sum[j][i].SumQt = 0;</span>
+<span class="nc" id="L145">				sum[j][i].VVdi5 = 0;</span>
+<span class="nc" id="L146">				sum[j][i].VVdi6 = 0;</span>
+<span class="nc" id="L147">				sum[j][i].VVdi7 = 0;</span>
+			}
+/* Initialize the array containing the number of points per cluster */
+<span class="nc" id="L150">nn[i] = 0;</span>
+/* Clear array of total variance ratio per partition */
+<span class="nc" id="L152">			omsr[i] = 0;</span>
+		}
+<span class="nc" id="L154">	}</span>
+
+	public boolean DoClustering() {
+
+/* Indicate the starting cluster */
+<span class="nc" id="L159">		int endclust, startClust = 0;</span>
+		//nclusArray= new Vector();
+<span class="nc" id="L161">		nclust = new short[numMaxClust][obsVal.length];</span>
+/* Call the function that does clustering */
+<span class="nc" id="L163">		endclust = Build(startClust);</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">		if (endclust != -1) {</span>
+<span class="nc" id="L165">			clustering.setRatio(endclust + 1);</span>
+<span class="nc" id="L166">			return true;</span>
+		} else {
+<span class="nc" id="L168">			return false;</span>
+		}
+	}
+
+	private int Build(int startClust) {
+//Actually builds the various clusters
+//update the state of the calculations on the Status Bar
+<span class="nc" id="L175">		int km = 0;</span>
+/* create variables of unknown utility */
+<span class="nc" id="L177">		int nclus = 0;</span>
+<span class="nc" id="L178">		double dclus = 0;</span>
+<span class="nc" id="L179">		int retVal = 0;</span>
+<span class="nc" id="L180">		int i = 0;</span>
+/* Execute the cycle of operations for the number of clusters to be considered chosen in the clustering form*/
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		for (int kk = startClust; kk &lt; numMaxClust; kk++) {</span>
+/* Execute the cycle of operations for the maximum number of iterations chosen in the clustering form */
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			for (int nc = 0; nc &lt; numMaxIter; nc++) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">				if (worker.isCanceled()) {</span>
+<span class="nc" id="L186">					return -1;</span>
+				}
+<span class="nc" id="L188">				worker.updateInfos(2 + nc + (kk * numMaxIter), &quot;Clustering &quot; + (kk + 1) + &quot; Iteration &quot; + (nc + 1), false);</span>
+<span class="nc" id="L189">				boolean err = false;</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">				for (int kkk = 0; kkk &lt;= kk; kkk++) {</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">					for (int j = 0; j &lt; numVarSel; j++) {</span>
+<span class="nc bnc" id="L192" title="All 4 branches missed.">						if ((nc == 0) || (sum[j][kkk].Coord != sum[j][kkk].Media)) {</span>
+/* Check that the Coordinate ??? is different from the mean of cluster j */
+<span class="nc" id="L194">							err = true;</span>
+						}
+					}
+				}
+/* The first loop always enters the if since nc = 0 and err is set to TRUE */
+<span class="nc bnc" id="L199" title="All 2 branches missed.">				if (err) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">					for (int kkk = 0; kkk &lt;= kk; kkk++) {</span>
+/* Reset the number of observations for cluster kkk */
+<span class="nc" id="L202">						nn[kkk] = 0;</span>
+/* Re Initialize the sum variable which contains the statistics of each cluster */
+<span class="nc bnc" id="L204" title="All 2 branches missed.">						for (int j = 0; j &lt; numVarSel; j++) {</span>
+							/* WHY' ???? */
+<span class="nc" id="L206">							sum[j][kkk].Coord = sum[j][kkk].Media;</span>
+							/* Zero the fields */
+<span class="nc" id="L208">							sum[j][kkk].Somma = 0;</span>
+<span class="nc" id="L209">							sum[j][kkk].SumQd = 0;</span>
+<span class="nc" id="L210">							sum[j][kkk].SumTz = 0;</span>
+<span class="nc" id="L211">							sum[j][kkk].SumQt = 0;</span>
+<span class="nc" id="L212">							sum[j][kkk].VVdi5 = 0;</span>
+<span class="nc" id="L213">							sum[j][kkk].VVdi6 = 0;</span>
+<span class="nc" id="L214">							sum[j][kkk].VVdi7 = 0;</span>
+						}
+					}
+					/**************************************** kmeans ********************************************/
+/* Retrieve the number of total observations */
+<span class="nc" id="L219">					int numObserv = listSelVar[0].Size();</span>
+/* Prepare the variable to hold the current cluster */
+					//nclusArray.add(new Vector());
+					//((Vector)nclusArray.get(kk)).setSize(numObserv);
+<span class="nc bnc" id="L223" title="All 2 branches missed.">					for (int xx = 0; xx &lt; numObserv; xx++) {</span>
+
+/* Operations to indicate the current percentage and pace of the kmean algorithm in the bar */
+
+<span class="nc" id="L227">nclus = 0; /* I assume they are the number of clusters ??????????? */</span>
+<span class="nc" id="L228">dclus = Double.POSITIVE_INFINITY; /* Indicate the initial difference to consider between clusters ???????????????? */</span>
+						/*************************************************/
+/* kk is the current number of clusters used
+						  /*************************************************/
+<span class="nc bnc" id="L232" title="All 2 branches missed.">						for (int j = 0; j &lt;= kk; j++) {</span>
+							/*
+							 xp = 10^(-10)
+							 dd = ????????
+							 */
+<span class="nc" id="L237">							double xp = Math.pow(10, -10);</span>
+<span class="nc" id="L238">							double dd = 0;</span>
+							/*
+m_Num Norm Number of normalized variables
+							 */
+<span class="nc bnc" id="L242" title="All 2 branches missed.">							for (int r = 0; r &lt; numVarSel; r++) {</span>
+<span class="nc" id="L243">								dd += Math.pow(obsVal[xx].getIndex(indexSelVar[r]) - sum[r][j].Coord, 2);</span>
+<span class="nc" id="L244">								xp = xp + 1;</span>
+							}
+<span class="nc" id="L246">							double temp = dd / xp;</span>
+							//double temp = dd/1;
+<span class="nc" id="L248">							dd = Math.sqrt(temp);</span>
+							//System.err.println(&quot;Xp : &quot; + xp + &quot; temp : &quot; + temp + &quot; dclus : &quot; + dclus + &quot; dd : &quot; + dd);
+<span class="nc bnc" id="L250" title="All 2 branches missed.">							if (dd &lt;= dclus) {</span>
+<span class="nc" id="L251">								dclus = dd;</span>
+<span class="nc" id="L252">								nclus = j;</span>
+							}
+						}
+
+<span class="nc" id="L256">						nn[nclus]++;</span>
+						//((Vector)nclusArray.get(kk)).setElementAt(new Integer(nclus),obsVal[xx].getID()-1);
+<span class="nc" id="L258">						nclust[kk][obsVal[xx].getID() - 1] = (short) nclus;</span>
+						//
+						// computation of stat val
+						//
+<span class="nc" id="L262">						int tempNum = nn[nclus];</span>
+
+<span class="nc bnc" id="L264" title="All 2 branches missed.">						if (tempNum == 0) {</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">							for (i = 0; i &lt; numVarSel; i++) {</span>
+<span class="nc" id="L266">								sum[i][nclus].minOs = 0;</span>
+<span class="nc" id="L267">								sum[i][nclus].maxOs = 0;</span>
+<span class="nc" id="L268">								sum[i][nclus].Media = 0;</span>
+<span class="nc" id="L269">								sum[i][nclus].SSDev = 0;</span>
+							}
+						} else {
+<span class="nc bnc" id="L272" title="All 2 branches missed.">							for (i = 0; i &lt; numVarSel; i++) {</span>
+<span class="nc" id="L273">								double curVal = obsVal[xx].getIndex(indexSelVar[i]);</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">								if (tempNum == 1) {</span>
+<span class="nc" id="L275">									sum[i][nclus].Media = curVal;</span>
+<span class="nc" id="L276">									sum[i][nclus].SSDev = 0;</span>
+<span class="nc" id="L277">									sum[i][nclus].minOs = curVal;</span>
+<span class="nc" id="L278">									sum[i][nclus].maxOs = curVal;</span>
+								} else {
+<span class="nc bnc" id="L280" title="All 2 branches missed.">									if (sum[i][nclus].maxOs &lt;= curVal) {</span>
+<span class="nc" id="L281">										sum[i][nclus].maxOs = curVal;</span>
+									}
+<span class="nc bnc" id="L283" title="All 2 branches missed.">									if (sum[i][nclus].minOs &gt;= curVal) {</span>
+<span class="nc" id="L284">										sum[i][nclus].minOs = curVal;</span>
+									}
+<span class="nc" id="L286">									sum[i][nclus].Media = sum[i][nclus].Media + (curVal - sum[i][nclus].Media) / tempNum;</span>
+<span class="nc" id="L287">									sum[i][nclus].SSDev = sum[i][nclus].SSDev + tempNum * Math.pow(curVal - sum[i][nclus].Media, 2) / (tempNum - 1);</span>
+								}
+
+<span class="nc" id="L290">								sum[i][nclus].Somma += curVal;</span>
+<span class="nc" id="L291">								sum[i][nclus].SumQd += Math.pow(curVal, 2);</span>
+<span class="nc" id="L292">								sum[i][nclus].SumTz += Math.pow(curVal, 3);</span>
+<span class="nc" id="L293">								sum[i][nclus].SumQt += Math.pow(curVal, 4);</span>
+							}
+						}
+					}
+
+<span class="nc bnc" id="L298" title="All 2 branches missed.">					for (nclus = 0; nclus &lt;= kk; nclus++) {</span>
+
+<span class="nc" id="L300">						int tempNum = nn[nclus];</span>
+						// stat2c
+<span class="nc bnc" id="L302" title="All 2 branches missed.">						for (i = 0; i &lt; numVarSel; i++) {</span>
+
+<span class="nc bnc" id="L304" title="All 2 branches missed.">							if (tempNum != 0) {</span>
+<span class="nc" id="L305">								sum[i][nclus].VVdi5 = Math.pow(sum[i][nclus].Media, 2);</span>
+<span class="nc" id="L306">								sum[i][nclus].VVdi6 = Math.pow(sum[i][nclus].Media, 3);</span>
+<span class="nc" id="L307">								sum[i][nclus].VVdi7 = Math.pow(sum[i][nclus].Media, 4);</span>
+
+<span class="nc" id="L309">								sum[i][nclus].stdDv = Math.sqrt(sum[i][nclus].SSDev / tempNum);</span>
+
+<span class="nc bnc" id="L311" title="All 4 branches missed.">								if (!((tempNum == 1) || (sum[i][nclus].minOs == sum[i][nclus].maxOs))) {</span>
+<span class="nc" id="L312">									sum[i][nclus].Varnz = sum[i][nclus].SumQd - tempNum * sum[i][nclus].VVdi5 / (tempNum - 1);</span>
+
+<span class="nc" id="L314">									sum[i][nclus].Skewn = sum[i][nclus].SumTz;</span>
+<span class="nc" id="L315">									sum[i][nclus].Skewn -= 3 * sum[i][nclus].Media * sum[i][nclus].SumQd;</span>
+<span class="nc" id="L316">									sum[i][nclus].Skewn += 3 * sum[i][nclus].VVdi5 * sum[i][nclus].Somma;</span>
+
+<span class="nc" id="L318">									sum[i][nclus].Kurto = sum[i][nclus].SumQt;</span>
+<span class="nc" id="L319">									sum[i][nclus].Kurto -= 4 * sum[i][nclus].Media * sum[i][nclus].SumTz;</span>
+<span class="nc" id="L320">									sum[i][nclus].Kurto += 6 * sum[i][nclus].VVdi5 * sum[i][nclus].SumQd;</span>
+<span class="nc" id="L321">									sum[i][nclus].Kurto -= 4 * sum[i][nclus].VVdi6 * sum[i][nclus].Somma;</span>
+
+<span class="nc" id="L323">									double qsum9 = Math.pow(sum[i][nclus].Varnz, 2);</span>
+<span class="nc" id="L324">									double csum9 = Math.pow(sum[i][nclus].Varnz, 3 / 2);</span>
+
+<span class="nc bnc" id="L326" title="All 2 branches missed.">									if (csum9 == 0) {</span>
+<span class="nc" id="L327">										sum[i][nclus].Skewn = 0;</span>
+<span class="nc" id="L328">										sum[i][nclus].Kurto = 0;</span>
+									} else {
+<span class="nc" id="L330">										sum[i][nclus].Skewn /= tempNum;</span>
+<span class="nc" id="L331">										sum[i][nclus].Skewn -= sum[i][nclus].VVdi6 / csum9;</span>
+
+<span class="nc bnc" id="L333" title="All 2 branches missed.">										if (qsum9 == 0) {</span>
+<span class="nc" id="L334">											sum[i][nclus].Kurto = 0;</span>
+										} else {
+<span class="nc" id="L336">											sum[i][nclus].Kurto /= tempNum;</span>
+<span class="nc" id="L337">											sum[i][nclus].Kurto += sum[i][nclus].VVdi7;</span>
+<span class="nc" id="L338">											sum[i][nclus].Kurto /= qsum9;</span>
+<span class="nc" id="L339">											sum[i][nclus].Kurto -= 3;</span>
+										}
+									}
+<span class="nc" id="L342">								} else {</span>
+<span class="nc" id="L343">									sum[i][nclus].Varnz = 0;</span>
+<span class="nc" id="L344">									sum[i][nclus].stdDv = 0;</span>
+<span class="nc" id="L345">									sum[i][nclus].Skewn = 0;</span>
+<span class="nc" id="L346">									sum[i][nclus].Kurto = 0;</span>
+								}
+							} else {
+<span class="nc" id="L349">								sum[i][nclus].Varnz = 0;</span>
+<span class="nc" id="L350">								sum[i][nclus].stdDv = 0;</span>
+<span class="nc" id="L351">								sum[i][nclus].Skewn = 0;</span>
+<span class="nc" id="L352">								sum[i][nclus].Kurto = 0;</span>
+							}
+						}
+
+<span class="nc bnc" id="L356" title="All 2 branches missed.">						for (int j = 0; j &lt; numVarSel; j++) {</span>
+<span class="nc" id="L357">							sum[j][nclus].numOs = nn[nclus];</span>
+
+						}//j
+					}// nclust
+				} else {
+					break; //quit for nc
+				}// endif (err!=0)
+			}// nc
+
+<span class="nc" id="L366">			clustering.calcClusteringInfo(kk, sum,/*(Vector)nclusArray.get(kk),*/nclust[kk], m);</span>
+
+<span class="nc bnc" id="L368" title="All 2 branches missed.">			if (kk != (numMaxClust - 1)) { //was 20</span>
+<span class="nc" id="L369">				double sm = 0;</span>
+<span class="nc bnc" id="L370" title="All 2 branches missed.">				for (int j = 0; j &lt; numVarSel; j++) {</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">					for (int kkk = 0; kkk &lt;= kk; kkk++) {</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">						if (sum[j][kkk].stdDv &gt;= sm) {</span>
+<span class="nc" id="L373">							sm = sum[j][kkk].stdDv;</span>
+<span class="nc" id="L374">							km = kkk;</span>
+						}
+					}
+				}
+
+<span class="nc" id="L379">				int kn = kk + 1;</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">				for (int jj = 0; jj &lt; numVarSel; jj++) {</span>
+<span class="nc" id="L381">					sum[jj][kn].numOs = 0;</span>
+<span class="nc" id="L382">					sum[jj][kn].Media = 0.;</span>
+<span class="nc" id="L383">					sum[jj][km].numOs = 0;</span>
+<span class="nc" id="L384">					sum[jj][km].Media = 0.;</span>
+				}
+				// it compute the centroid of...
+<span class="nc bnc" id="L387" title="All 2 branches missed.">				for (int xx = 0; xx &lt; listSelVar[0].Size(); xx++) {</span>
+					//if (Integer.parseInt(((Vector)nclusArray.get(kk)).get(obsVal[xx].getID()-1).toString()) == km) {
+<span class="nc bnc" id="L389" title="All 2 branches missed.">					if (nclust[kk][obsVal[xx].getID() - 1] == km) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">						for (int jj = 0; jj &lt; numVarSel; jj++) {</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">							if (obsVal[xx].getIndex(indexSelVar[jj]) &lt; sum[jj][km].Coord) {</span>
+<span class="nc" id="L392">								sum[jj][km].numOs++;</span>
+<span class="nc" id="L393">								sum[jj][km].Media += obsVal[xx].getIndex(indexSelVar[jj]);</span>
+							} else {
+<span class="nc" id="L395">								sum[jj][kn].numOs++;</span>
+<span class="nc" id="L396">								sum[jj][kn].Media += obsVal[xx].getIndex(indexSelVar[jj]);</span>
+							}
+						}
+					}
+				}
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">				for (int jj = 0; jj &lt; numVarSel; jj++) {</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">					if (sum[jj][km].numOs != 0) {</span>
+<span class="nc" id="L404">						sum[jj][km].Media /= sum[jj][km].numOs;</span>
+					}
+
+<span class="nc bnc" id="L407" title="All 2 branches missed.">					if (sum[jj][kn].numOs != 0) {</span>
+<span class="nc" id="L408">						sum[jj][kn].Media /= sum[jj][kn].numOs;</span>
+					}
+				}
+			}
+
+<span class="nc" id="L413">			retVal = kk;</span>
+		}// kk
+<span class="nc" id="L415">		return retVal;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

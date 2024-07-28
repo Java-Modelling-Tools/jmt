@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PriorityToNonPriorityConvertor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.priority</a> &gt; <span class="el_source">PriorityToNonPriorityConvertor.java</span></div><h1>PriorityToNonPriorityConvertor.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.priority;
+
+import jmt.jmva.analytical.solvers.SolverMulti;
+
+import java.util.List;
+
+/**
+ * Alot of this class isn't currently used, however, the functions implemented may be of use at some point
+ */
+<span class="nc" id="L10">public class PriorityToNonPriorityConvertor {</span>
+
+    public static boolean stationIsPriority(int stationType) {
+<span class="nc bnc" id="L13" title="All 4 branches missed.">       return stationType == SolverMulti.PRS || stationType == SolverMulti.HOL ;</span>
+    }
+
+    public static int countNumPriorityStations(int[] stationTypes) {
+<span class="nc" id="L17">        int numPriority = 0;</span>
+<span class="nc bnc" id="L18" title="All 2 branches missed.">        for (int type: stationTypes) {</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">            if (stationIsPriority(type)) {</span>
+<span class="nc" id="L20">                numPriority++;</span>
+            }
+        }
+<span class="nc" id="L23">        return numPriority;</span>
+    }
+
+    public static int[] getNonPriorityStationTypes(int[] oldTypes) {
+<span class="nc" id="L27">        int[] convertedStationTypes = new int[oldTypes.length];</span>
+
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        for (int station = 0; station &lt; oldTypes.length; station++) {</span>
+<span class="nc bnc" id="L30" title="All 4 branches missed.">            if (oldTypes[station] == SolverMulti.PRS || oldTypes[station] == SolverMulti.HOL) {</span>
+<span class="nc" id="L31">                convertedStationTypes[station] = SolverMulti.LI;</span>
+            } else {
+                // LI, LD, Delay
+<span class="nc" id="L34">                convertedStationTypes[station] = oldTypes[station];</span>
+            }
+        }
+<span class="nc" id="L37">        return convertedStationTypes;</span>
+    }
+
+    public static double[][][] getClosedOnlyServiceTimes(double[][][] servTimes, int[] type, List&lt;Integer&gt; closedClasses, int closedClassesTotalPop) {
+<span class="nc" id="L41">        double[][][] closedOnlyServiceTimes = new double[type.length][closedClasses.size()][];</span>
+
+<span class="nc bnc" id="L43" title="All 2 branches missed.">        for (int station = 0; station &lt; type.length; station++) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">            for (int i = 0; i &lt; closedClasses.size(); i++) {</span>
+<span class="nc" id="L45">                Integer clas = closedClasses.get(i);</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">                if (type[station] == SolverMulti.LD) {</span>
+                    // Don't need totPop, only closed pop
+<span class="nc" id="L48">                    closedOnlyServiceTimes[station][clas] = new double[closedClassesTotalPop];</span>
+                } else {
+                    // LI, Delay, PRS, HOL
+<span class="nc" id="L51">                    closedOnlyServiceTimes[station][clas] = new double[1];</span>
+                }
+
+<span class="nc" id="L54">                System.arraycopy(servTimes[station][clas], 0,</span>
+                        closedOnlyServiceTimes[station][i], 0,
+                        closedClassesTotalPop);
+            }
+        }
+
+<span class="nc" id="L60">        return closedOnlyServiceTimes;</span>
+    }
+
+    public static double[][] getClosedOnlyVisits(double[][] visits, List&lt;Integer&gt; closedClasses) {
+<span class="nc" id="L64">        double[][] closedOnlyVisits = new double[visits.length][closedClasses.size()];</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        for (int station = 0; station &lt; visits.length; station++) {</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">            for (int i = 0; i &lt; closedClasses.size(); i++) {</span>
+<span class="nc" id="L67">                Integer clas = closedClasses.get(i);</span>
+<span class="nc" id="L68">                closedOnlyVisits[station][i] = visits[station][clas];</span>
+            }
+        }
+
+<span class="nc" id="L72">        return closedOnlyVisits;</span>
+    }
+
+    public static int[] getClosedOnlyPopulations(double[] classData, List&lt;Integer&gt; closedClasses) {
+<span class="nc" id="L76">        int[] closedOnlyPop = new int[closedClasses.size()];</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">        for (int i = 0; i &lt; closedClasses.size(); i++) {</span>
+<span class="nc" id="L78">            Integer clas = closedClasses.get(i);</span>
+            // For closed classes, classData = classPop which should be an int anyway
+<span class="nc" id="L80">            closedOnlyPop[i] = (int) classData[clas];</span>
+        }
+
+<span class="nc" id="L83">        return closedOnlyPop;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

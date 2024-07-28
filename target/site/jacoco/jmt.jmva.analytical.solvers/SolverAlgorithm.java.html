@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverAlgorithm.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers</a> &gt; <span class="el_source">SolverAlgorithm.java</span></div><h1>SolverAlgorithm.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical.solvers;
+
+import java.util.*;
+
+/**
+ * Enum class for all implemented algorithm solvers
+ *
+ * @author Abhimanyu Chugh
+ */
+<span class="nc" id="L28">public enum SolverAlgorithm {</span>
+    //enum format:
+	// algorithmName, closed, open, exact, iterative, loadDependent, priority
+    
+    // EXACT
+<span class="nc" id="L33">    EXACT(&quot;MVA&quot;, true, true, true, false, true, false),</span>
+    // TODO: Update below algorithms to use new constructor instead of the old constructor as a wrapper
+<span class="nc" id="L35">    RECAL(&quot;RECAL&quot;, true, false, true, false, false, false),</span>
+    //MOM(&quot;MoM&quot;, true, true, false),
+<span class="nc" id="L37">    COMOM(&quot;CoMoM&quot;, true, false, true, false, false, false),</span>
+    //RGF(&quot;RGF&quot;, true, true, false), /* Looks buggy */
+<span class="nc" id="L39">    TREE_MVA(&quot;Tree MVA&quot;, true, false, true, false, false, false),</span>
+    //TREE_CONV(&quot;Tree Convolution&quot;, true, true, false), /* Looks buggy */
+    //MIXED(&quot;Mixed MVA&quot;, true, true, true, false, false, false),
+    //OPEN(&quot;Open MVA&quot;, false, true, true, false, false, false),
+
+    // APPROXIMATE
+<span class="nc" id="L45">    CHOW(&quot;Chow&quot;, true, false, false, true, false, false),</span>
+<span class="nc" id="L46">    BARD_SCHWEITZER(&quot;Bard-Schweitzer&quot;, true, false, false, true, false, false),</span>
+<span class="nc" id="L47">    AQL(&quot;AQL&quot;, true, false, false, true, false, false),</span>
+<span class="nc" id="L48">    LINEARIZER(&quot;Linearizer&quot;, true, false, false, true, false, false),</span>
+<span class="nc" id="L49">    DESOUZA_MUNTZ_LINEARIZER(&quot;De Souza-Muntz Linearizer&quot;, true, false, false, true, false, false),</span>
+    //MONTE_CARLO(&quot;Monte Carlo&quot;, true, false, false), /* Looks buggy */
+<span class="nc" id="L51">    MONTE_CARLO_LOGISTIC(&quot;Logistic Sampling&quot;, true, false, false, true, false, false),</span>
+
+    // Priority
+    // PrioMVA's - can be LD in same way that MixedMVA can be, not implemented though
+<span class="nc" id="L55">    PRIO_MVA_BKT(&quot;Bryant-Krzesinski-Teunissen&quot;, true, true, false, false, false, true),</span>
+<span class="nc" id="L56">    PRIO_MVA_CL(&quot;Chandy-Lakshmi&quot;, true, true, false, false, false, true),</span>
+    //PRIO_MVA_T(&quot;Teunissen&quot;, true, true, false, false, false, true),
+    // If mixed MVA implements LD then SCA can be LD, shouldn't really be used with open
+<span class="nc" id="L59">    SCA(&quot;Shadow Server&quot;, true, true, false, true, false, true);</span>
+    //PRIO_MVA_CL_Z(&quot;PRIOMVA - CL:Z&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_CL_Y(&quot;PRIOMVA - CL:Y&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_NLI_LI(&quot;PRIOMVA - NLI:LI&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_NLI_Z(&quot;PRIOMVA - NLI:Z&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_NLI_Y(&quot;PRIOMVA - NLI:Y&quot;, true, true, false, false, false, true),
+    // NC is No Change
+    //PRIO_MVA_RNLI_NC(&quot;PRIOMVA - RNLI&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_RNLI_LI(&quot;PRIOMVA - RNLI:LI&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_RNLI_Z(&quot;PRIOMVA - RNLI:Z&quot;, true, true, false, false, false, true),
+    //PRIO_MVA_RNLI_Y(&quot;PRIOMVA - RNLI:Y&quot;, true, true, false, false, false, true);
+
+    // string representation of the algorithm
+    private final String algorithmName;
+    // If the algorithm can handle closed classes
+    private final boolean closed;
+    // If the algorithm can handle open classes
+    private final boolean open;
+    private final boolean exact;
+    private final boolean loadDependent;
+    private final boolean priority;
+    // Some algorithms such as PRIO_MVA aren't exact but aren't iterative
+    // Means the algorithm will need either max num. samples or a tolerance
+    private final boolean iterative;
+
+    private static final String[] NAMES;
+    private static final SolverAlgorithm[] CLOSED_VALUES;
+    private static final SolverAlgorithm[] OPEN_VALUES;
+    private static final SolverAlgorithm[] MIXED_VALUES;
+    private static final Map&lt;String, SolverAlgorithm&gt; REVERSE_MAP;
+
+    static {
+<span class="nc" id="L91">        HashMap&lt;String, SolverAlgorithm&gt; revMap = new HashMap&lt;String, SolverAlgorithm&gt;();</span>
+<span class="nc" id="L92">        NAMES = new String[SolverAlgorithm.values().length];</span>
+<span class="nc" id="L93">        ArrayList&lt;SolverAlgorithm&gt; closedValues = new ArrayList&lt;SolverAlgorithm&gt;();</span>
+<span class="nc" id="L94">        ArrayList&lt;SolverAlgorithm&gt; openValues = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L95">        ArrayList&lt;SolverAlgorithm&gt; mixedValues = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">        for (int i = 0; i &lt; NAMES.length; i++) {</span>
+<span class="nc" id="L97">            SolverAlgorithm algo = SolverAlgorithm.values()[i];</span>
+<span class="nc" id="L98">            NAMES[i] = SolverAlgorithm.values()[i].toString();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if (algo.supportsClosedClasses()) {</span>
+<span class="nc" id="L100">                closedValues.add(algo);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                if (algo.supportsOpenClasses()) {</span>
+<span class="nc" id="L102">                    mixedValues.add(algo);</span>
+                }
+            }
+<span class="nc bnc" id="L105" title="All 2 branches missed.">            if (algo.supportsOpenClasses()) {</span>
+<span class="nc" id="L106">                openValues.add(algo);</span>
+            }
+<span class="nc" id="L108">            revMap.put(algo.toString(), algo);</span>
+        }
+<span class="nc" id="L110">        CLOSED_VALUES = closedValues.toArray(new SolverAlgorithm[closedValues.size()]);</span>
+<span class="nc" id="L111">        OPEN_VALUES = openValues.toArray(new SolverAlgorithm[openValues.size()]);</span>
+<span class="nc" id="L112">        MIXED_VALUES = mixedValues.toArray(new SolverAlgorithm[mixedValues.size()]);</span>
+<span class="nc" id="L113">        REVERSE_MAP = Collections.unmodifiableMap(revMap);</span>
+<span class="nc" id="L114">    }</span>
+
+<span class="nc" id="L116">    private SolverAlgorithm(String algorithmName, boolean closed, boolean open, boolean exact, boolean iterative, boolean loadDependent, boolean priority) {</span>
+<span class="nc" id="L117">        this.algorithmName = algorithmName;</span>
+<span class="nc" id="L118">        this.closed = closed;</span>
+<span class="nc" id="L119">        this.open = open;</span>
+<span class="nc" id="L120">        this.exact = exact;</span>
+<span class="nc" id="L121">        this.iterative = iterative;</span>
+<span class="nc" id="L122">        this.loadDependent = loadDependent;</span>
+<span class="nc" id="L123">        this.priority = priority;</span>
+<span class="nc" id="L124">    }</span>
+
+    // Allows for backwards compatibility, please don't use this constructor and use the more up to date one above
+    // If swapping to the new constructor, be careful as the order of the arguments changes as new ones are added
+    private SolverAlgorithm(String algorithmName, boolean closed, boolean exact, boolean loadDependent) {
+<span class="nc" id="L129">        this(algorithmName, closed, false, exact, true, loadDependent, false);</span>
+<span class="nc" id="L130">    }</span>
+
+
+    @Override
+    public String toString() {
+<span class="nc" id="L135">        return algorithmName;</span>
+    }
+
+    /**
+     * @return true if this algorithm supports closed classes
+     */
+    public boolean supportsClosedClasses() {
+<span class="nc" id="L142">        return closed;</span>
+    }
+
+    /**
+     * @return true if this algorithm supports open classes
+     */
+    public boolean supportsOpenClasses() {
+<span class="nc" id="L149">        return open;</span>
+    }
+
+    /**
+     * @return true if this algorithm is exact
+     */
+    public boolean isExact() {
+<span class="nc" id="L156">        return exact;</span>
+    }
+
+    /**
+     * @return true if the algorithm supports load dependent, false otherwise.
+     */
+    public boolean supportsLoadDependent() {
+<span class="nc" id="L163">        return loadDependent;</span>
+    }
+
+    /**
+     * @return true if the algorithm supports priorities, false otherwise.
+     */
+    public boolean supportsPriorities() {
+<span class="nc" id="L170">        return priority;</span>
+    }
+
+    /**
+     * @return true if the algorithm is iterative, false otherwise.
+     */
+    public boolean isIterative() {
+<span class="nc" id="L177">        return iterative;</span>
+    }
+
+    /**
+     * Find the enum value that corresponds to the given string
+     */
+    public static SolverAlgorithm fromString(String algName) {
+<span class="nc" id="L184">        return REVERSE_MAP.get(algName);</span>
+    }
+
+    /**
+     * Returns an array of string representations of all potential SolverAlgorithm values
+     */
+    public static String[] names() {
+<span class="nc" id="L191">        return NAMES;</span>
+    }
+
+    /**
+     * Returns an array of all closed SolverAlgorithm values
+     */
+    public static SolverAlgorithm[] closedValues() {
+<span class="nc" id="L198">        return CLOSED_VALUES;</span>
+    }
+
+    /**
+     * Returns an array of all open SolverAlgorithm values
+     */
+    public static SolverAlgorithm[] openValues() {
+<span class="nc" id="L205">        return OPEN_VALUES;</span>
+    }
+
+    /**
+     * Returns an array of all mixed SolverAlgorithm values
+     */
+    public static SolverAlgorithm[] mixedValues() {
+<span class="nc" id="L212">        return MIXED_VALUES;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

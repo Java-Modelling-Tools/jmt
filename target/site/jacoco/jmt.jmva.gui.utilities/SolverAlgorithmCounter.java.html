@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverAlgorithmCounter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.utilities</a> &gt; <span class="el_source">SolverAlgorithmCounter.java</span></div><h1>SolverAlgorithmCounter.java</h1><pre class="source lang-java linenums">package jmt.jmva.gui.utilities;
+
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L8">public class SolverAlgorithmCounter {</span>
+
+
+    public static int numExactAlgs() {
+<span class="nc" id="L12">        return countExact(SolverAlgorithm.values());</span>
+    }
+
+    public static int numClosedExactAlgorithms() {
+<span class="nc" id="L16">        return countExact(SolverAlgorithm.closedValues());</span>
+    }
+
+    public static int numOpenExactAlgorithms() {
+<span class="nc" id="L20">        return countExact(SolverAlgorithm.openValues());</span>
+    }
+
+    public static int numMixedExactAlgorithms() {
+<span class="nc" id="L24">        return countExact(SolverAlgorithm.mixedValues());</span>
+    }
+
+    public static int countExact(SolverAlgorithm[] algorithms) {
+<span class="nc" id="L28">        int exact = 0;</span>
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        for (SolverAlgorithm algo : algorithms) {</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">            if (algo.isExact()) {</span>
+<span class="nc" id="L31">                exact++;</span>
+            }
+        }
+<span class="nc" id="L34">        return exact;</span>
+    }
+
+    public static int numPriorityAlgs() {
+<span class="nc" id="L38">        return countPriority(SolverAlgorithm.values());</span>
+    }
+
+    public static int numClosedPriorityAlgorithms() {
+<span class="nc" id="L42">        return countPriority(SolverAlgorithm.closedValues());</span>
+    }
+
+    public static int numOpenPriorityAlgorithms() {
+<span class="nc" id="L46">        return countPriority(SolverAlgorithm.openValues());</span>
+    }
+
+    public static int numMixedPriorityAlgorithms() {
+<span class="nc" id="L50">        return countPriority(SolverAlgorithm.mixedValues());</span>
+    }
+
+    public static int countPriority(SolverAlgorithm[] algorithms) {
+<span class="nc" id="L54">        int priorities = 0;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for (SolverAlgorithm algo : algorithms) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">            if (algo.supportsPriorities()) {</span>
+<span class="nc" id="L57">                priorities++;</span>
+            }
+        }
+<span class="nc" id="L60">        return priorities;</span>
+    }
+
+    public static List&lt;SolverAlgorithm&gt; getExactAlgorithms(List&lt;SolverAlgorithm&gt; algorithms, boolean excludePriority, boolean excludeLD) {
+<span class="nc" id="L64">        List&lt;SolverAlgorithm&gt; exact = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        for (SolverAlgorithm algo : algorithms) {</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">            if (excludePriority &amp;&amp; algo.supportsPriorities()) {</span>
+<span class="nc" id="L67">                continue;</span>
+            }
+<span class="nc bnc" id="L69" title="All 4 branches missed.">            if (excludeLD &amp;&amp; algo.supportsLoadDependent()) {</span>
+<span class="nc" id="L70">                continue;</span>
+            }
+<span class="nc bnc" id="L72" title="All 2 branches missed.">            if (algo.isExact()) {</span>
+<span class="nc" id="L73">                exact.add(algo);</span>
+            }
+<span class="nc" id="L75">        }</span>
+<span class="nc" id="L76">        return exact;</span>
+    }
+
+    public static List&lt;SolverAlgorithm&gt; getApproximateAlgorithms(List&lt;SolverAlgorithm&gt; algorithms, boolean excludePriority, boolean excludeLD) {
+<span class="nc" id="L80">        List&lt;SolverAlgorithm&gt; approximate = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (SolverAlgorithm algo : algorithms) {</span>
+<span class="nc bnc" id="L82" title="All 4 branches missed.">            if (excludePriority &amp;&amp; algo.supportsPriorities()) {</span>
+<span class="nc" id="L83">                continue;</span>
+            }
+<span class="nc bnc" id="L85" title="All 4 branches missed.">            if (excludeLD &amp;&amp; algo.supportsLoadDependent()) {</span>
+<span class="nc" id="L86">                continue;</span>
+            }
+<span class="nc bnc" id="L88" title="All 2 branches missed.">            if (!algo.isExact()) {</span>
+<span class="nc" id="L89">                approximate.add(algo);</span>
+            }
+<span class="nc" id="L91">        }</span>
+<span class="nc" id="L92">        return approximate;</span>
+    }
+
+    public static List&lt;SolverAlgorithm&gt; getPriorityAlgorithms(List&lt;SolverAlgorithm&gt; algorithms, boolean excludeLD) {
+<span class="nc" id="L96">        List&lt;SolverAlgorithm&gt; priorities = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (SolverAlgorithm algo : algorithms) {</span>
+<span class="nc bnc" id="L98" title="All 4 branches missed.">            if (excludeLD &amp;&amp; algo.supportsLoadDependent()) {</span>
+<span class="nc" id="L99">                continue;</span>
+            }
+<span class="nc bnc" id="L101" title="All 2 branches missed.">            if (algo.supportsPriorities()) {</span>
+<span class="nc" id="L102">                priorities.add(algo);</span>
+            }
+<span class="nc" id="L104">        }</span>
+<span class="nc" id="L105">        return priorities;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Segment3D.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba</a> &gt; <span class="el_source">Segment3D.java</span></div><h1>Segment3D.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jaba;
+
+import java.util.Vector;
+
+import jmt.engine.jaba.Hull.Vertex;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Andrea
+ * Date: 5-ago-2005
+ * Time: 15.01.25
+ * To change this template use File | Settings | File Templates.
+ */
+public class Segment3D {
+
+	private double beta11;
+	private double beta12;
+	private double beta13;
+	private double beta21;
+	private double beta22;
+	private double beta23;
+	private Vertex s1;
+	private Vertex s2;
+
+<span class="nc" id="L43">	public Segment3D() {</span>
+
+<span class="nc" id="L45">	}</span>
+
+<span class="nc" id="L47">	public Segment3D(double beta11, double beta12, double beta13, double beta21, double beta22, double beta23, Vertex s1, Vertex s2) {</span>
+<span class="nc" id="L48">		this.beta11 = beta11;</span>
+<span class="nc" id="L49">		this.beta12 = beta12;</span>
+<span class="nc" id="L50">		this.beta13 = beta13;</span>
+<span class="nc" id="L51">		this.beta21 = beta21;</span>
+<span class="nc" id="L52">		this.beta22 = beta22;</span>
+<span class="nc" id="L53">		this.beta23 = beta23;</span>
+<span class="nc" id="L54">		this.s1 = s1;</span>
+<span class="nc" id="L55">		this.s2 = s2;</span>
+<span class="nc" id="L56">	}</span>
+
+<span class="nc" id="L58">	public Segment3D(BetaVertex b1, BetaVertex b2, Vertex s1, Vertex s2) {</span>
+<span class="nc" id="L59">		beta11 = b1.getX();</span>
+<span class="nc" id="L60">		beta12 = b1.getY();</span>
+<span class="nc" id="L61">		beta13 = b1.getZ();</span>
+<span class="nc" id="L62">		beta21 = b2.getX();</span>
+<span class="nc" id="L63">		beta22 = b2.getY();</span>
+<span class="nc" id="L64">		beta23 = b2.getZ();</span>
+<span class="nc" id="L65">		this.s1 = s1;</span>
+<span class="nc" id="L66">		this.s2 = s2;</span>
+<span class="nc" id="L67">	}</span>
+
+	/**
+* Create a vector of segments. It is used to check not to use the same
+* segment twice in 3D space construction
+	 * @param tri
+	 * @return
+	 */
+	public Vector&lt;Object&gt; CreateLt(Vector&lt;Object&gt; tri) {
+<span class="nc" id="L76">		Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		for (int i = 0; i &lt; tri.size(); i++) {</span>
+<span class="nc" id="L79">			double[] abetas = ((Sector3D) tri.get(i)).getBetas(0);</span>
+<span class="nc" id="L80">			double[] bbetas = ((Sector3D) tri.get(i)).getBetas(1);</span>
+<span class="nc" id="L81">			double[] cbetas = ((Sector3D) tri.get(i)).getBetas(2);</span>
+<span class="nc" id="L82">			Vertex s0 = ((Sector3D) tri.get(i)).getS0();</span>
+<span class="nc" id="L83">			Vertex s1 = ((Sector3D) tri.get(i)).getS1();</span>
+<span class="nc" id="L84">			Vertex s2 = ((Sector3D) tri.get(i)).getS2();</span>
+
+			// Segment S0-S1
+<span class="nc" id="L87">			out.addElement(new Segment3D(abetas[0], abetas[1], abetas[2], bbetas[0], bbetas[1], bbetas[2], s0, s1));</span>
+			// Segment S0-S2
+<span class="nc" id="L89">			out.addElement(new Segment3D(abetas[0], abetas[1], abetas[2], cbetas[0], cbetas[1], cbetas[2], s0, s2));</span>
+			// Segment S1-S2
+<span class="nc" id="L91">			out.addElement(new Segment3D(bbetas[0], bbetas[1], bbetas[2], cbetas[0], cbetas[1], cbetas[2], s1, s2));</span>
+
+		}
+
+<span class="nc" id="L95">		return out;</span>
+	}
+
+	public BetaVertex getBeta(int stat) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (stat == 0) {</span>
+<span class="nc" id="L100">			return new BetaVertex(beta11, beta12, beta13);</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">		} else if (stat == 1) {</span>
+<span class="nc" id="L102">			return new BetaVertex(beta21, beta22, beta23);</span>
+		} else {
+<span class="nc" id="L104">			return new BetaVertex(-1, -1, -1);</span>
+		}
+	}
+
+	public double getBeta11() {
+<span class="nc" id="L109">		return beta11;</span>
+	}
+
+	public double getBeta12() {
+<span class="nc" id="L113">		return beta12;</span>
+	}
+
+	public double getBeta13() {
+<span class="nc" id="L117">		return beta13;</span>
+	}
+
+	public double getBeta21() {
+<span class="nc" id="L121">		return beta21;</span>
+	}
+
+	public double getBeta22() {
+<span class="nc" id="L125">		return beta22;</span>
+	}
+
+	public double getBeta23() {
+<span class="nc" id="L129">		return beta23;</span>
+	}
+
+	public Vertex getS1() {
+<span class="nc" id="L133">		return s1;</span>
+	}
+
+	public Vertex getS2() {
+<span class="nc" id="L137">		return s2;</span>
+	}
+
+	@Override
+	public String toString() {
+<span class="nc" id="L142">		return (s1 + &quot;[&quot; + beta11 + &quot;,&quot; + beta12 + &quot;]&quot; + &quot;-&quot; + s2 + &quot;[&quot; + beta21 + &quot;,&quot; + beta22 + &quot;]&quot;);</span>
+	}
+
+	/**
+* Starting from the sides of the sectors where they saturate 2 stations obtained by joining them
+* where saturate 3 stations adds the segments created and removes those already used
+* @param sett2stat
+* @param lt
+	 * @return
+	 */
+	public Vector&lt;Object&gt; FixLtFromJoin(Vector&lt;Object&gt; sect2station, Vector&lt;Object&gt; lt) {
+		//Vector ltout = new Vector();
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		for (int i = 0; i &lt; sect2station.size(); i++) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">			for (int j = 0; j &lt; lt.size(); j++) {</span>
+// I take advantage of the fact that a sector with this sequence is created from the join of 2 triangles:
+// TrA S0 - TrB S0 - TrA S1 - TrB S1
+
+// Caution!! No control over betas, I'm assuming (eg) stations
+// 0 and 1 are always present only on at most 2 triangles, and therefore are united
+
+<span class="nc bnc" id="L162" title="All 2 branches missed.">if (((Sector3D) sect2station.get(i)).getS0() == ((Segment3D) lt.get(j)).getS1()</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">&amp;&amp; ((Sector3D) sect2station.get(i)).getS2() == ((Segment3D) lt.get(j)).getS2()) {</span>
+<span class="nc" id="L164">lt.removeElementAt(j);</span>
+<span class="nc" id="L165">j--;</span>
+}
+}
+
+// For each 2-station 3D sector I must then add the new sides created by joining
+// the sectors.
+
+// Add the segment made by the first station that saturates
+<span class="nc" id="L173">lt.addElement(new Segment3D(((Sector3D) sect2station.get(i)).getBeta(0, 1), ((Sector3D) sect2station.get(i)).getBeta(0, 2),</span>
+<span class="nc" id="L174">((Sector3D) sect2station.get(i)).getBeta(0, 3), ((Sector3D) sect2station.get(i)).getBeta(1, 1), ((Sector3D) sect2station.get(i)). getBeta(</span>
+<span class="nc" id="L175">1, 2), ((Sector3D) sect2station.get(i)).getBeta(1, 3), ((Sector3D) sect2station.get(i)).getS0(), ((Sector3D) sect2station.get(i) )</span>
+<span class="nc" id="L176">.getS1()));</span>
+// Add the segment made by the second station that saturates
+<span class="nc" id="L178">			lt.addElement(new Segment3D(((Sector3D) sect2station.get(i)).getBeta(2, 1), ((Sector3D) sect2station.get(i)).getBeta(2, 2),</span>
+<span class="nc" id="L179">					((Sector3D) sect2station.get(i)).getBeta(2, 3), ((Sector3D) sect2station.get(i)).getBeta(3, 1), ((Sector3D) sect2station.get(i)).getBeta(</span>
+<span class="nc" id="L180">							3, 2), ((Sector3D) sect2station.get(i)).getBeta(3, 3), ((Sector3D) sect2station.get(i)).getS2(), ((Sector3D) sect2station.get(i))</span>
+<span class="nc" id="L181">							.getS(3)));</span>
+		}
+<span class="nc" id="L183">		return lt;</span>
+	}
+
+	public Vector&lt;Object&gt; FixLtFrom2Dxy(Vector&lt;Sector2D&gt; resxy) {
+<span class="nc" id="L187">		Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">		for (int i = 0; i &lt; resxy.size(); i++) {</span>
+<span class="nc" id="L189">			Vertex st1 = new Vertex((resxy.get(i).getP1()).x, (resxy.get(i).getP1()).y,</span>
+// put -1 to indicate that the original coordinate is lost
+-1);
+<span class="nc" id="L192">Vertex st2 = new Vertex((resxy.get(i).getP2()).x, (resxy.get(i).getP2()).y, -1);</span>
+<span class="nc" id="L193">out.addElement(new Segment3D(resxy.get(i).getBeta1(), resxy.get(i).getBeta11(),</span>
+// the points coming from xy have by definition beta3=0
+<span class="nc" id="L195">0, resxy.get(i).getBeta2(), resxy.get(i).getBeta22(), 0, st1, st2));</span>
+}
+<span class="nc" id="L197">return out;</span>
+}
+
+public Vector&lt;Object&gt; FixLtFrom2Dxz(Vector&lt;Sector2D&gt; resxz) {
+<span class="nc" id="L201">Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">for (int i = 0; i &lt; resxz.size(); i++) {</span>
+<span class="nc" id="L203">Vertex st1 = new Vertex((resxz.get(i).getP1()).x,</span>
+// put -1 to indicate that the original coordinate is lost
+<span class="nc" id="L205">-1, (resxz.get(i).getP1()).y);</span>
+<span class="nc" id="L206">Vertex st2 = new Vertex((resxz.get(i).getP2()).x, -1, (resxz.get(i).getP2()).y);</span>
+<span class="nc" id="L207">out.addElement(new Segment3D(resxz.get(i).getBeta1(),</span>
+// the points coming from xz have by definition beta2=0
+<span class="nc" id="L209">0.0, resxz.get(i).getBeta11(), resxz.get(i).getBeta2(), 0.0, resxz.get(i).getBeta22(), st1, st2));</span>
+}
+<span class="nc" id="L211">return out;</span>
+}
+
+public Vector&lt;Object&gt; FixLtFrom2Dyz(Vector&lt;Sector2D&gt; resyz) {
+<span class="nc" id="L215">Vector&lt;Object&gt; out = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">for (int i = 0; i &lt; resyz.size(); i++) {</span>
+<span class="nc" id="L217">Vertex st1 = new Vertex(</span>
+// put -1 to indicate that the original coordinate is lost
+<span class="nc" id="L219">-1, (resyz.get(i).getP1()).x, (resyz.get(i).getP1()).y);</span>
+<span class="nc" id="L220">Vertex st2 = new Vertex(-1, (resyz.get(i).getP2()).x, (resyz.get(i).getP2()).y);</span>
+<span class="nc" id="L221">out.addElement(new Segment3D(</span>
+// the points coming from yz have by definition beta2=0
+<span class="nc" id="L223">					0.0, resyz.get(i).getBeta1(), resyz.get(i).getBeta11(), 0, resyz.get(i).getBeta2(), resyz.get(i).getBeta22(), st1, st2));</span>
+		}
+<span class="nc" id="L225">		return out;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,2266 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverSingleClosedMVA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.singleSolverAlgorithms</a> &gt; <span class="el_source">SolverSingleClosedMVA.java</span></div><h1>SolverSingleClosedMVA.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * SolverSingleClosedMVA.java
+ * Created on 13 novembre 2002, 10.48
+ */
+
+package jmt.jmva.analytical.solvers.singleSolverAlgorithms;
+
+import jmt.engine.math.Printer;
+import jmt.jmva.analytical.solvers.Solver;
+
+/**
+ * Solves a single class closed model, using Aggregated Mean Value Analysis algorithm.
+ * @author  Federico Granata, Stefano Omini
+ */
+public class SolverSingleClosedMVA extends Solver {
+
+	public static final boolean DEBUG = false;
+
+	//NEW
+	//Now SolverSingleClosedMVA extends Solver
+	//
+	//@author Stefano Omini
+
+	/**
+	 * number of customers or jobs in the system
+	 */
+<span class="nc" id="L45">	protected int customers = 0;</span>
+
+	//end NEW
+
+	//NEW
+	//Intermediate results
+	//@author stefano Omini
+
+	/**
+	 * Tells whether intermediate results have been computed or not
+	 */
+<span class="nc" id="L56">	protected boolean intermediate_results = false;</span>
+
+	/** array containing the throughput for each population and for each
+	 * service center
+	 * &lt;br&gt;[population][service center]
+	 */
+	protected double[][] interm_throughput;
+
+	/** array containing the utilization for each population and for each
+	 * service center
+	 * &lt;br&gt;[population][service center]
+	 */
+	protected double[][] interm_utilization;
+
+	/** array containing the queue length  for each population and for each
+	 * service center
+	 * &lt;br&gt;[population][service center]
+	 */
+	protected double[][] interm_queueLen;
+
+	/** array containing the residence time  for each population and for each
+	 * service center (residence time = time spent in queue + time spent in service)
+	 * &lt;br&gt;[population][service center]
+	 */
+	protected double[][] interm_residenceTime;
+
+	/**  total throughput for each population */
+	protected double[] interm_totThroughput;
+
+	/**  total response time for each population*/
+	protected double[] interm_totRespTime;
+
+	/**  total number of users for each population*/
+	protected double[] interm_totUser;
+
+	//end NEW
+
+	/* ------------------------
+	   Class variables
+	 * ------------------------ */
+
+	private int[] position;//the original position of the station before the
+	//reordering
+
+	private int countLI; //number of LI &amp; Delay stations
+
+	/* ------------------------
+	   Constructor
+	 * ------------------------ */
+
+	/**
+	 * Creates a new instance of SolverSingleClosedMVA
+	 * @param stat number of stations
+	 * @param cust number of customers
+	 */
+<span class="nc" id="L111">	public SolverSingleClosedMVA(int cust, int stat) {</span>
+		//OLD
+		//super(stat, cust);
+		//NEW
+		//old parameters were inverted!
+		//@author Stefano Omini
+
+		//OLD
+		//Not useful anymore: no longer extends SolverSingleClosedExact
+		//super(cust, stat);
+
+<span class="nc" id="L122">		stations = stat;</span>
+<span class="nc" id="L123">		customers = cust;</span>
+<span class="nc" id="L124">		name = new String[stat];</span>
+<span class="nc" id="L125">		type = new int[stat];</span>
+		//one service time for each possible population (from 1 to customers)
+		//position 0 is used for LI stations
+<span class="nc" id="L128">		servTime = new double[stat][];</span>
+<span class="nc" id="L129">		visits = new double[stat];</span>
+
+<span class="nc" id="L131">		throughput = new double[stat];</span>
+<span class="nc" id="L132">		queueLen = new double[stat];</span>
+<span class="nc" id="L133">		utilization = new double[stat];</span>
+<span class="nc" id="L134">		residenceTime = new double[stat];</span>
+<span class="nc" id="L135">		position = new int[stat];</span>
+
+		//NEW
+		//@author Stefano Omini
+
+		//the structures with intermediate results are allocated only if
+		//requested
+<span class="nc" id="L142">		interm_throughput = null;</span>
+<span class="nc" id="L143">		interm_utilization = null;</span>
+<span class="nc" id="L144">		interm_queueLen = null;</span>
+<span class="nc" id="L145">		interm_residenceTime = null;</span>
+
+<span class="nc" id="L147">		interm_totThroughput = null;</span>
+<span class="nc" id="L148">		interm_totRespTime = null;</span>
+<span class="nc" id="L149">		interm_totUser = null;</span>
+
+		//end NEW
+<span class="nc" id="L152">	}</span>
+
+	/* ------------------------
+	   Methods: initialization
+	 * ------------------------ */
+
+	/** Initializes the solver with the system parameters.
+	 * It must be called before trying to solve the model.
+	 * &lt;br&gt;
+	 * WARNING: This method changes the order of the stations (LI and DELAY before, LD after):
+	 * the original order is restored only after calling the &quot;solve&quot; method
+	 * (so if you solve the model, you do not need to reorder results,
+	 * they are reordered by the &quot;solve&quot; method itself; otherwise, if you
+	 * do not solve the model after calling &quot;input&quot; method, you may have some problems).
+	 *  @param  n   array of names of service centers.
+	 *  @param  t   array of the types (LD or LI) of service centers.
+	 *  @param  s   matrix of service times of the service centers.
+	 *  @param  v   array of visits to the service centers.
+	 *  @return true if the operation is completed with success
+	 */
+	@Override
+	public boolean input(String[] n, int[] t, double[][] s, double[] v) {
+<span class="nc bnc" id="L174" title="All 8 branches missed.">		if ((n.length &gt; stations) || (t.length &gt; stations) || (s.length &gt; stations) || (v.length &gt; stations)) {</span>
+			// wrong input.
+<span class="nc" id="L176">			return false;</span>
+		}
+
+		//number of not LD stations
+<span class="nc" id="L180">		countLI = 0;</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		for (int element : t) {</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">			if (element != Solver.LD) {</span>
+<span class="nc" id="L183">				countLI++;</span>
+			}
+		}
+
+		//OLD
+		//if (!(countLI != 0 || countLI != t.length)) {
+		//NEW
+		//@author Stefano Omini
+<span class="nc bnc" id="L191" title="All 4 branches missed.">		if (!(countLI &gt; 0 &amp;&amp; countLI &lt; t.length)) {</span>
+			//end NEW
+			//TODO: check the new condition
+			//stations are either only LI or only LD
+<span class="nc bnc" id="L195" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L196">				position[i] = i;</span>
+				//copy names, types and visits
+<span class="nc" id="L198">				name[i] = n[i];</span>
+<span class="nc" id="L199">				type[i] = t[i];</span>
+<span class="nc" id="L200">				visits[i] = v[i];</span>
+				//copy service times
+<span class="nc bnc" id="L202" title="All 2 branches missed.">				if (type[i] == Solver.LD) {</span>
+					//LD
+					//an array of customers+1 elements is created
+					//the first element for LD center is set to 0)
+					//the others are the values for each population
+<span class="nc" id="L207">					servTime[i] = new double[customers + 1];</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">					if (s[i].length != customers + 1) {</span>
+<span class="nc" id="L209">						return false;</span>
+					}
+<span class="nc bnc" id="L211" title="All 2 branches missed.">					for (int j = 0; j &lt;= customers; j++) {</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">						if (j == 0) {</span>
+<span class="nc" id="L213">							servTime[i][j] = 0;</span>
+						} else {
+<span class="nc" id="L215">							servTime[i][j] = s[i][j];</span>
+						}
+					}
+				} else {
+					//LI
+					//only one element
+<span class="nc" id="L221">					servTime[i] = new double[1];</span>
+<span class="nc" id="L222">					servTime[i][0] = s[i][0];</span>
+				}
+			}
+		} else {
+			//there are both LI and LD stations: change the order
+			//LI stations are put first (i.e. from position 0 to position countLI-1)
+			//LD stations are put after all LI stations (i.e. from position count to the end)
+
+<span class="nc" id="L230">			int countLD = 0;</span>
+<span class="nc" id="L231">			int countInserted = 0;</span>
+
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">				if (t[i] != Solver.LD) {</span>
+					//LI + Delay
+<span class="nc" id="L236">					position[countInserted] = i;</span>
+<span class="nc" id="L237">					name[countInserted] = n[i];</span>
+<span class="nc" id="L238">					type[countInserted] = t[i];</span>
+<span class="nc" id="L239">					visits[countInserted] = v[i];</span>
+<span class="nc" id="L240">					servTime[countInserted] = new double[1];</span>
+<span class="nc" id="L241">					servTime[countInserted][0] = s[i][0];</span>
+<span class="nc" id="L242">					countInserted++;</span>
+				} else {
+					//LD
+<span class="nc" id="L245">					position[countLI + countLD] = i;</span>
+<span class="nc" id="L246">					name[countLI + countLD] = n[i];</span>
+<span class="nc" id="L247">					type[countLI + countLD] = t[i];</span>
+<span class="nc" id="L248">					visits[countLI + countLD] = v[i];</span>
+
+<span class="nc" id="L250">					servTime[countLI + countLD] = new double[customers + 1];</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">					if (s[i].length != customers + 1) {</span>
+<span class="nc" id="L252">						return false;</span>
+					}
+<span class="nc bnc" id="L254" title="All 2 branches missed.">					for (int j = 0; j &lt;= customers; j++) {</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">						if (j == 0) {</span>
+<span class="nc" id="L256">							servTime[countLI + countLD][j] = 0;</span>
+						} else {
+<span class="nc" id="L258">							servTime[countLI + countLD][j] = s[i][j];</span>
+						}
+					}
+<span class="nc" id="L261">					countLD++;</span>
+				}
+			}
+		}
+<span class="nc" id="L265">		return true;</span>
+	}
+
+	/* ------------------------
+	   Methods to solve the model with MVA
+	 * ------------------------ */
+
+	//NEW
+	//@author Stefano Omini
+	/**
+	 * A system is said to have sufficient capacity to process a given load
+	 * &lt;tt&gt;lambda&lt;/tt&gt; if no service center is saturated as a result of such a load.
+	 * &lt;br&gt;
+	 * WARNING: This method should be called before solving the system.
+	 * @return true if sufficient capacity exists for the given workload, false otherwise
+	 */
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		//closed class: no saturation problem
+<span class="nc" id="L284">		return true;</span>
+	}
+	//end NEW
+
+	/*
+		public void indices() {
+	        //TODO: not implemented!!!!
+		}
+	    //overrides indices() of SolverSingleClosedExact
+	 */
+
+	/**
+	 *  Solves a single class closed model using MVA algorithm.&lt;br&gt;
+	 *  &quot;input(...)&quot; method must have been called before solving the model!!&lt;br&gt;&lt;br&gt;
+	 *  Reference:&lt;br&gt;
+	 * &lt;em&gt;
+	 *  G.Balbo, S.C.Bruell, L.Cerchio, D.Chiaberto, L.Molinatti&lt;br&gt;
+	 *  &quot;Mean Value Analysis of Closed Load Dependent Networks&quot;&lt;br&gt;
+	 * &lt;/em&gt;
+	 */
+	@Override
+	public void solve() {
+		//tests if all the resources, stations, are load independent
+<span class="nc" id="L307">		boolean loadIndep = true;</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">			if (type[i] == Solver.LD) {</span>
+<span class="nc" id="L310">				loadIndep = false;</span>
+<span class="nc" id="L311">				break;</span>
+			}
+		}
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">		if (loadIndep) {</span>
+<span class="nc" id="L316">			solveSingleLI();</span>
+			//solveSingleLI_approx();
+		} else {
+<span class="nc" id="L319">			solveSingleLD();</span>
+			//solveSingleLDErrCtr();
+			//solveSingleLDErrCtrFast();
+			//solveSingleLDErrCtrFaster();
+			//solveSingleLD2();
+		}
+
+		//&quot;input&quot; method has changed the order of the stations.
+		//this method has to be called to restore the original order.
+<span class="nc" id="L328">		reorder();</span>
+<span class="nc" id="L329">	}</span>
+
+	/**
+	 * Solves a single class closed model using MVA algorithm.&lt;br&gt;
+	 *
+	 * &quot;input(...)&quot; method must have been called before solving the model!!&lt;br&gt;&lt;br&gt;
+	 *
+	 * To solve a closed model with N customers, all the models with
+	 * 0, 1, 2, ... N-1 customers must be solved before.
+	 * This method allows to save the results for these intermediate models.
+	 *
+	 * Reference:&lt;br&gt;
+	 * &lt;em&gt;
+	 *  G.Balbo, S.C.Bruell, L.Cerchio, D.Chiaberto, L.Molinatti&lt;br&gt;
+	 *  &quot;Mean Value Analysis of Closed Load Dependent Networks&quot;&lt;br&gt;
+	 * &lt;/em&gt;
+	 *
+	 * @param intermediate true to save results for intermediate populations
+	 */
+	public void solve(boolean intermediate) {
+		//tests if all the stations are load independent
+<span class="nc" id="L350">		boolean loadIndep = true;</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">			if (type[i] == Solver.LD) {</span>
+<span class="nc" id="L353">				loadIndep = false;</span>
+<span class="nc" id="L354">				break;</span>
+			}
+		}
+
+		//this var is used by &quot;toString&quot; method: if true, also intermediate
+		//results will be written
+<span class="nc" id="L360">		intermediate_results = intermediate;</span>
+
+<span class="nc bnc" id="L362" title="All 2 branches missed.">		if (loadIndep) {</span>
+<span class="nc" id="L363">			solveSingleLI(intermediate);</span>
+		} else {
+			//TODO: add case intermediate=true for LD
+			//TODO: debug
+<span class="nc" id="L367">			solveSingleLD(intermediate);</span>
+			//solveSingleLDErrCtrFaster(intermediate);
+		}
+
+<span class="nc" id="L371">		reorder();</span>
+<span class="nc" id="L372">	}</span>
+
+	/** Solves a single class closed model with only LI stations */
+	private void solveSingleLI() {
+		int k;//index of station
+		int n;//index of customer
+		double sum;
+
+		//service demands: D = visits * servTime
+<span class="nc" id="L381">		double[] D = new double[stations];</span>
+
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc bnc" id="L384" title="All 2 branches missed.">		for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L385">			queueLen[k] = 0.0;</span>
+<span class="nc" id="L386">			D[k] = servTime[k][0] * visits[k];//uses D = S * V to speed up</span>
+		}
+
+		//calculation of throughput for the whole network and of queue length for each station
+		//recursively starting from 0 customer in network to max customers
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L392">			sum = 0.0;</span>
+
+<span class="nc bnc" id="L394" title="All 2 branches missed.">			for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">				switch (type[k]) {</span>
+				case Solver.DELAY:
+<span class="nc" id="L397">					residenceTime[k] = D[k];</span>
+<span class="nc" id="L398">					break;</span>
+				case Solver.LI:
+					//recursion uses the queue length of the model with n-1 customers
+<span class="nc" id="L401">					residenceTime[k] = D[k] * (1 + queueLen[k]);</span>
+<span class="nc" id="L402">					break;</span>
+				case Solver.LD://not supported use another method
+<span class="nc" id="L404">					throw new IllegalArgumentException(&quot;error in solveSingleLI, type of service centers must be delay or load Independent&quot;);</span>
+				}//end case
+
+<span class="nc" id="L407">				sum += residenceTime[k];</span>
+			}//end loop through stations
+
+			//OLD
+			//totThroughput = n / sum;
+			//NEW
+			//@author Stefano Omini
+<span class="nc bnc" id="L414" title="All 2 branches missed.">			if (sum == 0) {</span>
+				//D = 0 --&gt; v = 0
+<span class="nc" id="L416">				totThroughput = 0;</span>
+			} else {
+<span class="nc" id="L418">				totThroughput = n / sum;</span>
+			}
+			//end NEW
+
+<span class="nc bnc" id="L422" title="All 2 branches missed.">			for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L423">				queueLen[k] = totThroughput * residenceTime[k];</span>
+			}//end loop through stations
+		}//end loop through customers
+
+		//the other indices dependent on totThroughput
+<span class="nc bnc" id="L428" title="All 2 branches missed.">		for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L429">			throughput[k] = totThroughput * visits[k];</span>
+<span class="nc" id="L430">			totRespTime = customers / totThroughput;</span>
+<span class="nc" id="L431">			utilization[k] = totThroughput * D[k];</span>
+		}//end loop through stations
+<span class="nc" id="L433">	}//end of solveSingleLI</span>
+
+	//NEW
+	//@author Stefano Omini
+
+	/**
+	 * Solves a single class closed model with only LI stations.
+	 * To solve a closed model with N customers, all the models with
+	 * 0, 1, 2, ... N-1 customers must be solved before.
+	 * This method allows to save the results for these intermediate models.
+	 * @param intermediate true to save results for intermediate populations
+	 *
+	 */
+	private void solveSingleLI(boolean intermediate) {
+<span class="nc bnc" id="L447" title="All 2 branches missed.">		if (!intermediate) {</span>
+			//intermediate results must not be saved, then use
+			//the base method
+<span class="nc" id="L450">			solveSingleLI();</span>
+<span class="nc" id="L451">			return;</span>
+		}
+
+		//create structures with intermediate results
+
+<span class="nc" id="L456">		interm_throughput = new double[customers + 1][stations];</span>
+<span class="nc" id="L457">		interm_queueLen = new double[customers + 1][stations];</span>
+<span class="nc" id="L458">		interm_utilization = new double[customers + 1][stations];</span>
+<span class="nc" id="L459">		interm_residenceTime = new double[customers + 1][stations];</span>
+
+<span class="nc" id="L461">		interm_totThroughput = new double[customers + 1];</span>
+<span class="nc" id="L462">		interm_totRespTime = new double[customers + 1];</span>
+<span class="nc" id="L463">		interm_totUser = new double[customers + 1];</span>
+
+		int k;//index of station
+		int n;//index of customer
+		double sum;
+
+		//service demands: D = visits * servTime
+<span class="nc" id="L470">		double[] D = new double[stations];</span>
+
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc bnc" id="L473" title="All 2 branches missed.">		for (k = 0; k &lt; stations; k++) {</span>
+
+			//intermediate results: population = n = 0;
+<span class="nc" id="L476">			interm_queueLen[0][k] = 0.0;</span>
+<span class="nc" id="L477">			interm_residenceTime[0][k] = 0.0;</span>
+<span class="nc" id="L478">			interm_throughput[0][k] = 0.0;</span>
+<span class="nc" id="L479">			interm_utilization[0][k] = 0.0;</span>
+
+<span class="nc" id="L481">			interm_totThroughput[0] = 0;</span>
+<span class="nc" id="L482">			interm_totRespTime[0] = 0;</span>
+<span class="nc" id="L483">			interm_totUser[0] = 0;</span>
+
+<span class="nc" id="L485">			D[k] = servTime[k][0] * visits[k];//uses D = S * V to speed up</span>
+		}
+
+		//calculation of throughput for the whole network and of queue length for each station
+		//recursively starting from 0 customer in network to max customers
+		//intermediate results are saved
+<span class="nc bnc" id="L491" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L492">			sum = 0.0;</span>
+
+<span class="nc bnc" id="L494" title="All 2 branches missed.">			for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L495" title="All 4 branches missed.">				switch (type[k]) {</span>
+				case Solver.DELAY:
+<span class="nc" id="L497">					interm_residenceTime[n][k] = D[k];</span>
+<span class="nc" id="L498">					break;</span>
+				case Solver.LI:
+					//recursion uses the queue length of the model with n-1 customers
+<span class="nc" id="L501">					interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);</span>
+<span class="nc" id="L502">					break;</span>
+				case Solver.LD://not supported use another method
+<span class="nc" id="L504">					throw new IllegalArgumentException(&quot;error in solveSingleLI, type of service centers must be delay or load Independent&quot;);</span>
+				}//end case
+
+<span class="nc" id="L507">				sum += interm_residenceTime[n][k];</span>
+			}//end loop through stations
+
+<span class="nc" id="L510">			interm_totThroughput[n] = n / sum;</span>
+
+<span class="nc" id="L512">			interm_totUser[n] = 0;</span>
+
+<span class="nc bnc" id="L514" title="All 2 branches missed.">			for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L515">				interm_queueLen[n][k] = interm_totThroughput[n] * interm_residenceTime[n][k];</span>
+<span class="nc" id="L516">				interm_throughput[n][k] = interm_totThroughput[n] * visits[k];</span>
+<span class="nc" id="L517">				interm_utilization[n][k] = interm_totThroughput[n] * D[k];</span>
+
+<span class="nc" id="L519">				interm_totRespTime[n] = customers / interm_totThroughput[n];</span>
+<span class="nc" id="L520">				interm_totUser[n] += interm_queueLen[n][k]; //of course must be equals to n</span>
+			}//end loop through stations
+		}//end loop through customers
+
+		//copy final results from last intermediate results (n=customers)
+		//into the usual structure
+<span class="nc bnc" id="L526" title="All 2 branches missed.">		for (k = 0; k &lt; stations; k++) {</span>
+
+<span class="nc" id="L528">			queueLen[k] = interm_queueLen[customers][k];</span>
+<span class="nc" id="L529">			residenceTime[k] = interm_residenceTime[customers][k];</span>
+<span class="nc" id="L530">			throughput[k] = interm_throughput[customers][k];</span>
+<span class="nc" id="L531">			utilization[k] = interm_utilization[customers][k];</span>
+		}
+<span class="nc" id="L533">		totThroughput = interm_totThroughput[customers];</span>
+<span class="nc" id="L534">		totRespTime = interm_totRespTime[customers];</span>
+<span class="nc" id="L535">		totUser = interm_totUser[customers];</span>
+<span class="nc" id="L536">	}//end of solveSingleLI</span>
+
+	//end NEW
+	//@author Stefano Omini
+
+	/**
+	 * Solves a model with LI and LD stations
+	 */
+	private void solveSingleLD() {
+		int stat;//index of station
+		int cust;//index of customer
+		int k;//index of customers, in marginal probability
+		//int sum;//internal variable for summations
+<span class="nc" id="L549">		double[] X = new double[customers + 1];//throughput of subsystem</span>
+
+		//queue length vectors of precedent subsystem
+<span class="nc" id="L552">		double[][] nsPrec = new double[stations][customers + 1];</span>
+		//queue length vectors of actual subsystem
+<span class="nc" id="L554">		double[][] nsCorr = new double[stations][customers + 1];</span>
+		//utilization vectors of precedent subsystem
+<span class="nc" id="L556">		double[][] usPrec = new double[stations][customers + 1];</span>
+		//utilization vectors of actual subsystem
+<span class="nc" id="L558">		double[][] usCorr = new double[stations][customers + 1];</span>
+
+		//maginal probability of precedent subsystem
+<span class="nc" id="L561">		double[] pPrec = new double[customers + 1];</span>
+		//marginal probability of current subsystem
+<span class="nc" id="L563">		double[] pCorr = new double[customers + 1];</span>
+
+<span class="nc" id="L565">		double[] Y = new double[customers + 1];// 1/throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+		//double prod;//internal variable
+
+		//NEW
+		//@author Stefano Omini
+		//loop over all stations, transform all stations in load dependent
+		//it is not efficient must be changed
+<span class="nc bnc" id="L574" title="All 2 branches missed.">		for (stat = 0; stat &lt; stations; stat++) {</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">			if (type[stat] != Solver.LD) {</span>
+<span class="nc" id="L576">				wcomp = servTime[stat][0];</span>
+				//create an element for each population n
+<span class="nc" id="L578">				servTime[stat] = new double[customers + 1];</span>
+
+<span class="nc bnc" id="L580" title="All 2 branches missed.">				if (type[stat] == Solver.DELAY) {</span>
+<span class="nc" id="L581">					servTime[stat][0] = wcomp;</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">					for (cust = 1; cust &lt;= customers; cust++) {</span>
+<span class="nc" id="L583">						servTime[stat][cust] = wcomp / cust;</span>
+					}
+				} else {
+<span class="nc bnc" id="L586" title="All 2 branches missed.">					for (cust = 0; cust &lt;= customers; cust++) {</span>
+<span class="nc" id="L587">						servTime[stat][cust] = wcomp;</span>
+					}
+				}
+			}
+		}//end loop over all stations
+		//end NEW
+
+		//initialization
+<span class="nc bnc" id="L595" title="All 2 branches missed.">		for (cust = 1; cust &lt;= customers; cust++) {</span>
+<span class="nc" id="L596">			X[cust] = 1 / (servTime[0][cust]);</span>
+<span class="nc" id="L597">			nsPrec[0][cust] = cust;</span>
+<span class="nc" id="L598">			usPrec[0][cust] = 1;</span>
+		}//end initialization
+
+		//loop over all stations except the first, it merges a station at every
+		//pass when all the stations are merged, the system is solved
+<span class="nc bnc" id="L603" title="All 2 branches missed.">		for (stat = 1; stat &lt; stations; stat++) {</span>
+<span class="nc" id="L604">			pPrec[0] = 1.0;</span>
+<span class="nc bnc" id="L605" title="All 2 branches missed.">			for (cust = 1; cust &lt;= customers; cust++) {</span>
+				//Y[cust] = X[cust] * visits[stat]/visits[stat-1];
+<span class="nc" id="L607">				Y[cust] = visits[stat - 1] / (X[cust] * visits[stat]);</span>
+			}
+
+			//loop oover all customers
+<span class="nc bnc" id="L611" title="All 2 branches missed.">			for (cust = 1; cust &lt;= customers; cust++) {</span>
+<span class="nc" id="L612">				ws = 0.0;</span>
+<span class="nc" id="L613">				wcomp = 0.0;</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">				for (k = 1; k &lt;= cust; k++) {</span>
+<span class="nc" id="L615">					ws += k * servTime[stat][k] * pPrec[k - 1];</span>
+					//wcomp += k * pPrec[cust-k] / Y[k];
+<span class="nc" id="L617">					wcomp += k * pPrec[cust - k] * Y[k];</span>
+				}
+
+<span class="nc" id="L620">				X[cust] = cust / (ws + wcomp);</span>
+				//computation of all marginal probabilities of the subsystem
+<span class="nc" id="L622">				nsPrec[stat][cust] = X[cust] * ws;</span>
+<span class="nc bnc" id="L623" title="All 2 branches missed.">				for (k = 1; k &lt; cust; k++) {</span>
+<span class="nc bnc" id="L624" title="All 2 branches missed.">					if (pPrec[k - 1] == 0) {</span>
+						//pCorr[k] = pPrec[k] * X[cust] / Y[cust-k];
+<span class="nc" id="L626">						pCorr[k] = pPrec[k] * X[cust] * Y[cust - k];</span>
+					} else {
+<span class="nc" id="L628">						pCorr[k] = servTime[stat][k] * X[cust] * pPrec[k - 1];</span>
+					}
+				}
+<span class="nc" id="L631">				pCorr[cust] = servTime[stat][cust] * X[cust] * pPrec[cust - 1];</span>
+				//pCorr[0] = pPrec[0] * X[cust] / Y[cust];
+<span class="nc" id="L633">				pCorr[0] = pPrec[0] * X[cust] * Y[cust];</span>
+				//end computation of marginal probabilities
+
+				//computation of utilization &amp; queque length
+<span class="nc" id="L637">				usPrec[stat][cust] = 0;</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">				for (k = 1; k &lt;= cust; k++) {</span>
+<span class="nc" id="L639">					usPrec[stat][cust] += pCorr[k];</span>
+				}
+
+				//loop over all inserted stations
+<span class="nc bnc" id="L643" title="All 2 branches missed.">				for (int i = 0; i &lt; stat; i++) {</span>
+<span class="nc" id="L644">					nsCorr[i][cust] = 0;</span>
+<span class="nc" id="L645">					usCorr[i][cust] = 0;</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">					for (k = 1; k &lt;= cust; k++) {</span>
+<span class="nc" id="L647">						nsCorr[i][cust] += pCorr[cust - k] * nsPrec[i][k];</span>
+<span class="nc" id="L648">						usCorr[i][cust] += pCorr[cust - k] * usPrec[i][k];</span>
+					}
+				}//end loop over all inserted stations
+				//end calculation of utilization &amp; queque length
+
+<span class="nc" id="L653">				System.arraycopy(pCorr, 0, pPrec, 0, cust + 1);</span>
+			}//end of loop over all customers
+
+			//adjourns the utilization &amp; queue length precedent vectors
+<span class="nc bnc" id="L657" title="All 2 branches missed.">			for (int c = 0; c &lt; stat; c++) {</span>
+<span class="nc" id="L658">				System.arraycopy(nsCorr[c], 1, nsPrec[c], 1, customers);</span>
+<span class="nc" id="L659">				System.arraycopy(usCorr[c], 1, usPrec[c], 1, customers);</span>
+			}
+		}//end loop over all stations
+
+		//calculation of other parameters
+<span class="nc" id="L664">		totThroughput = X[customers] / visits[stations - 1];</span>
+<span class="nc" id="L665">		totRespTime = customers / totThroughput;</span>
+		//loop over all stations
+<span class="nc bnc" id="L667" title="All 2 branches missed.">		for (stat = 0; stat &lt; stations; stat++) {</span>
+<span class="nc" id="L668">			throughput[stat] = totThroughput * visits[stat];</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">			if (type[stat] == Solver.DELAY) {</span>
+				//OLD
+				//utilization[stat] = visits[stat] * servTime[stat][0];
+<span class="nc" id="L672">				utilization[stat] = usPrec[stat][customers];</span>
+				//queueLen[stat] = 0;
+<span class="nc" id="L674">				queueLen[stat] = nsPrec[stat][customers];</span>
+
+<span class="nc" id="L676">				residenceTime[stat] = servTime[stat][0];</span>
+			} else {
+<span class="nc" id="L678">				utilization[stat] = usPrec[stat][customers];</span>
+<span class="nc" id="L679">				queueLen[stat] = nsPrec[stat][customers];</span>
+<span class="nc" id="L680">				residenceTime[stat] = queueLen[stat] / totThroughput;</span>
+			}
+		}//end loop over all stations
+<span class="nc" id="L683">	}//end solveSingleLD</span>
+
+	/**
+	 * Solves a model with LI and LD stations
+	 *
+	 */
+	private void solveSingleLD(boolean intermediate) {
+		//TODO: still to fix!!!
+<span class="nc bnc" id="L691" title="All 2 branches missed.">		if (!intermediate) {</span>
+			//intermediate results must not be saved, then use
+			//the base method
+<span class="nc" id="L694">			solveSingleLD();</span>
+<span class="nc" id="L695">			return;</span>
+		}
+
+		//create structures with intermediate results
+
+<span class="nc" id="L700">		interm_throughput = new double[customers + 1][stations];</span>
+<span class="nc" id="L701">		interm_queueLen = new double[customers + 1][stations];</span>
+<span class="nc" id="L702">		interm_utilization = new double[customers + 1][stations];</span>
+<span class="nc" id="L703">		interm_residenceTime = new double[customers + 1][stations];</span>
+
+<span class="nc" id="L705">		interm_totThroughput = new double[customers + 1];</span>
+<span class="nc" id="L706">		interm_totRespTime = new double[customers + 1];</span>
+<span class="nc" id="L707">		interm_totUser = new double[customers + 1];</span>
+
+		int stat;//index of station
+		int n;//index of customer
+		int k;//index of customers, in marginal probability
+		//int sum;//internal variable for summations
+<span class="nc" id="L713">		double[] X = new double[customers + 1];//throughput of subsystem</span>
+
+		//queue length vectors of precedent subsystem
+<span class="nc" id="L716">		double[][] nsPrec = new double[stations][customers + 1];</span>
+		//queue length vectors of actual subsystem
+<span class="nc" id="L718">		double[][] nsCorr = new double[stations][customers + 1];</span>
+		//utilization vectors of precedent subsystem
+<span class="nc" id="L720">		double[][] usPrec = new double[stations][customers + 1];</span>
+		//utilization vectors of actual subsystem
+<span class="nc" id="L722">		double[][] usCorr = new double[stations][customers + 1];</span>
+
+		//maginal probability of precedent subsystem
+<span class="nc" id="L725">		double[] pPrec = new double[customers + 1];</span>
+		//marginal probability of current subsystem
+<span class="nc" id="L727">		double[] pCorr = new double[customers + 1];</span>
+
+<span class="nc" id="L729">		double[] Y = new double[customers + 1];// 1/throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+
+		//loop over all stations, transform all stations in load dependent
+		//it is not efficient must be changed
+<span class="nc bnc" id="L735" title="All 2 branches missed.">		for (stat = 0; stat &lt; stations; stat++) {</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">			if (type[stat] != Solver.LD) {</span>
+<span class="nc" id="L737">				wcomp = servTime[stat][0];</span>
+				//create an element for each population n
+<span class="nc" id="L739">				servTime[stat] = new double[customers + 1];</span>
+
+<span class="nc bnc" id="L741" title="All 2 branches missed.">				if (type[stat] == Solver.DELAY) {</span>
+<span class="nc" id="L742">					servTime[stat][0] = wcomp;</span>
+<span class="nc bnc" id="L743" title="All 2 branches missed.">					for (n = 1; n &lt;= customers; n++) {</span>
+						//OLD
+						//servTime[stat][n] = wcomp / n;
+<span class="nc" id="L746">						servTime[stat][n] = wcomp;</span>
+					}
+				} else {
+<span class="nc bnc" id="L749" title="All 2 branches missed.">					for (n = 0; n &lt;= customers; n++) {</span>
+<span class="nc" id="L750">						servTime[stat][n] = wcomp;</span>
+					}
+				}
+			}
+		}//end loop over all stations
+
+		//initialization
+<span class="nc bnc" id="L757" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L758">			X[n] = 1 / (servTime[0][n]);</span>
+<span class="nc" id="L759">			nsPrec[0][n] = n;</span>
+<span class="nc" id="L760">			usPrec[0][n] = 1;</span>
+		}//end initialization
+
+		//loop over all stations except the first, it merges a station at every
+		//pass when all the stations are merged, the system is solved
+<span class="nc bnc" id="L765" title="All 2 branches missed.">		for (stat = 1; stat &lt; stations; stat++) {</span>
+<span class="nc" id="L766">			pPrec[0] = 1.0;</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+				//Y[n] = X[n] * visits[stat]/visits[stat-1];
+<span class="nc" id="L769">				Y[n] = visits[stat - 1] / (X[n] * visits[stat]);</span>
+			}
+
+			//loop oover all customers
+<span class="nc bnc" id="L773" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L774">				ws = 0.0;</span>
+<span class="nc" id="L775">				wcomp = 0.0;</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">				for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc" id="L777">					ws += k * servTime[stat][k] * pPrec[k - 1];</span>
+					//wcomp += k * pPrec[n-k] / Y[k];
+<span class="nc" id="L779">					wcomp += k * pPrec[n - k] * Y[k];</span>
+				}
+
+<span class="nc" id="L782">				X[n] = n / (ws + wcomp);</span>
+				//computation of all marginal probabilities of the subsystem
+<span class="nc" id="L784">				nsPrec[stat][n] = X[n] * ws;</span>
+<span class="nc bnc" id="L785" title="All 2 branches missed.">				for (k = 1; k &lt; n; k++) {</span>
+<span class="nc bnc" id="L786" title="All 2 branches missed.">					if (pPrec[k - 1] == 0) {</span>
+						//pCorr[k] = pPrec[k] * X[n] / Y[n-k];
+<span class="nc" id="L788">						pCorr[k] = pPrec[k] * X[n] * Y[n - k];</span>
+					} else {
+<span class="nc" id="L790">						pCorr[k] = servTime[stat][k] * X[n] * pPrec[k - 1];</span>
+					}
+				}
+<span class="nc" id="L793">				pCorr[n] = servTime[stat][n] * X[n] * pPrec[n - 1];</span>
+				//pCorr[0] = pPrec[0] * X[n] / Y[n];
+<span class="nc" id="L795">				pCorr[0] = pPrec[0] * X[n] * Y[n];</span>
+				//end computation of marginal probabilities
+
+				//computation of utilization &amp; queque length
+<span class="nc" id="L799">				usPrec[stat][n] = 0;</span>
+<span class="nc bnc" id="L800" title="All 2 branches missed.">				for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc" id="L801">					usPrec[stat][n] += pCorr[k];</span>
+				}
+
+				//loop over all inserted stations
+<span class="nc bnc" id="L805" title="All 2 branches missed.">				for (int i = 0; i &lt; stat; i++) {</span>
+<span class="nc" id="L806">					nsCorr[i][n] = 0;</span>
+<span class="nc" id="L807">					usCorr[i][n] = 0;</span>
+<span class="nc bnc" id="L808" title="All 2 branches missed.">					for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc" id="L809">						nsCorr[i][n] += pCorr[n - k] * nsPrec[i][k];</span>
+<span class="nc" id="L810">						usCorr[i][n] += pCorr[n - k] * usPrec[i][k];</span>
+					}
+				}//end loop over all inserted stations
+				//end calculation of utilization &amp; queque length
+
+<span class="nc" id="L815">				System.arraycopy(pCorr, 0, pPrec, 0, n + 1);</span>
+			}//end of loop over all customers
+
+			//adjourns the utilization &amp; queue length precedent vectors
+<span class="nc bnc" id="L819" title="All 2 branches missed.">			for (int c = 0; c &lt; stat; c++) {</span>
+<span class="nc" id="L820">				System.arraycopy(nsCorr[c], 1, nsPrec[c], 1, customers);</span>
+<span class="nc" id="L821">				System.arraycopy(usCorr[c], 1, usPrec[c], 1, customers);</span>
+			}
+		}//end loop over all stations
+
+		//calculation of other parameters
+<span class="nc" id="L826">		totThroughput = X[customers] / visits[stations - 1];</span>
+<span class="nc" id="L827">		totRespTime = customers / totThroughput;</span>
+		//loop over all stations
+<span class="nc bnc" id="L829" title="All 2 branches missed.">		for (stat = 0; stat &lt; stations; stat++) {</span>
+<span class="nc" id="L830">			throughput[stat] = totThroughput * visits[stat];</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">			if (type[stat] == Solver.DELAY) {</span>
+
+				//utilization[stat] = visits[stat] * servTime[stat][0];
+<span class="nc" id="L834">				utilization[stat] = usPrec[stat][customers];</span>
+				//queueLen[stat] = 0;
+<span class="nc" id="L836">				queueLen[stat] = nsPrec[stat][customers];</span>
+<span class="nc" id="L837">				residenceTime[stat] = servTime[stat][0];</span>
+			} else {
+<span class="nc" id="L839">				utilization[stat] = usPrec[stat][customers];</span>
+<span class="nc" id="L840">				queueLen[stat] = nsPrec[stat][customers];</span>
+<span class="nc" id="L841">				residenceTime[stat] = queueLen[stat] / totThroughput;</span>
+			}
+		}//end loop over all stations
+<span class="nc" id="L844">	}//end solveSingleLD</span>
+
+	/**
+	 * Solves a model with LI and LD stations
+	 */
+	private void solveSingleLD2() {
+		int m;//index of station
+		int n;//index of customer
+		int k;//index of customers, in marginal probability
+		double sum;
+<span class="nc" id="L854">		double[] X = new double[customers + 1];</span>
+
+		double[][] nsPrec;
+		double[][] nsCorr;
+		double[][] usPrec;
+		double[][] usCorr;
+		//double[][][] us = new double[stations+1][stations][customers+1];
+		//double[][][] ns = new double[stations+1][stations][customers+1];
+
+<span class="nc" id="L863">		double[] pPrec = new double[customers + 1];</span>
+<span class="nc" id="L864">		double[] pCorr = new double[customers + 1];</span>
+		//double[][] p = new double[customers+1][customers+1];
+
+<span class="nc" id="L867">		double[] Y = new double[customers + 1];//throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+		//		double prod;//internal variable
+<span class="nc" id="L871">		int LICount = 0;</span>
+		double[] D;//D = visits * servTime
+<span class="nc" id="L873">		boolean noLI = false;</span>
+
+<span class="nc" id="L875">		int zeroCount = 0;</span>
+
+<span class="nc bnc" id="L877" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L878" title="All 2 branches missed.">			if (type[m] != Solver.LD) {</span>
+<span class="nc" id="L879">				LICount++;</span>
+			}
+		}
+<span class="nc bnc" id="L882" title="All 2 branches missed.">		if (LICount == 0) {</span>
+<span class="nc" id="L883">			noLI = true;</span>
+		}
+<span class="nc" id="L885">		D = new double[LICount];</span>
+<span class="nc" id="L886">		nsPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L887">		nsCorr = new double[stations][customers + 1];</span>
+<span class="nc" id="L888">		usPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L889">		usCorr = new double[stations][customers + 1];</span>
+
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc bnc" id="L892" title="All 2 branches missed.">		for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc" id="L893">			queueLen[k] = 0;</span>
+<span class="nc" id="L894">			D[k] = servTime[k][0] * visits[k];//D = S * V to speed up</span>
+		}//end loop through stations
+
+		//calculation of throughput for all LI subnetwork, and queue length
+		//recursively starting from 0 customer in network to max customers
+<span class="nc bnc" id="L899" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L901">				sum = 0;</span>
+<span class="nc bnc" id="L902" title="All 2 branches missed.">				for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc bnc" id="L903" title="All 4 branches missed.">					switch (type[k]) {</span>
+					case Solver.DELAY:
+<span class="nc" id="L905">						residenceTime[k] = D[k];</span>
+<span class="nc" id="L906">						break;</span>
+					case Solver.LI:
+<span class="nc" id="L908">						residenceTime[k] = D[k] * (1 + queueLen[k]);</span>
+<span class="nc" id="L909">						break;</span>
+					case Solver.LD://not supported use another method
+<span class="nc" id="L911">						throw new IllegalArgumentException(&quot;error in solveSingleLI, type of service centers must be delay or load Independent&quot;);</span>
+					}//end case
+
+<span class="nc" id="L914">					sum += residenceTime[k];</span>
+				}//end loop through stations
+<span class="nc" id="L916">				totThroughput = n / sum;</span>
+<span class="nc" id="L917">				X[n] = totThroughput;</span>
+<span class="nc bnc" id="L918" title="All 2 branches missed.">				for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L919">					queueLen[k] = totThroughput * residenceTime[k];</span>
+				}//end loop through stations
+			}//end loop through customers
+		}
+
+		//initialization
+<span class="nc bnc" id="L925" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L926" title="All 2 branches missed.">			if (!noLI) {</span>
+<span class="nc" id="L927">				Y[n] = X[n] * visits[LICount];</span>
+<span class="nc" id="L928">				nsPrec[LICount - 1][n] = n;</span>
+<span class="nc" id="L929">				usPrec[LICount - 1][n] = 1;</span>
+			} else {
+<span class="nc" id="L931">				X[n] = 1 / servTime[0][n];</span>
+<span class="nc" id="L932">				nsPrec[0][n] = n;</span>
+<span class="nc" id="L933">				usPrec[0][n] = 1;</span>
+			}
+		}//end initialization
+
+		//loop over all LD stations
+		//for (m = LICount; m &lt; stations; m++) {
+<span class="nc bnc" id="L939" title="All 4 branches missed.">		for (m = noLI ? 1 : LICount; m &lt; stations; m++) {</span>
+			//p[0][0] = 1;
+<span class="nc" id="L941">			pPrec[0] = 1;</span>
+<span class="nc bnc" id="L942" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+				//Y[n] = X[n] * visits[m]/visits[m-1];
+<span class="nc bnc" id="L944" title="All 2 branches missed.">				if (m != LICount) {</span>
+<span class="nc" id="L945">					Y[n] = X[n] * visits[m] / visits[m - 1];</span>
+				}
+			}
+
+<span class="nc bnc" id="L949" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L950">				ws = 0;</span>
+<span class="nc" id="L951">				wcomp = 0;</span>
+<span class="nc bnc" id="L952" title="All 2 branches missed.">				for (k = 1; k &lt;= n; k++) {</span>
+					//ws += k * servTime[m][k] * p[k-1][n-1];
+<span class="nc" id="L954">					ws += k * servTime[m][k] * pPrec[k - 1];</span>
+					//wcomp += k * p[n-k][n-1] / Y[k];
+<span class="nc" id="L956">					wcomp += k * pPrec[n - k] / Y[k];</span>
+				}
+
+<span class="nc" id="L959">				X[n] = n / (ws + wcomp);</span>
+
+				//ns[m+1][m][n] = X[n] * ws;
+<span class="nc" id="L962">				nsPrec[m][n] = X[n] * ws;</span>
+<span class="nc" id="L963">				sum = 0;</span>
+<span class="nc" id="L964">				zeroCount = 0;</span>
+<span class="nc bnc" id="L965" title="All 2 branches missed.">				for (k = 1; k &lt; n; k++) {</span>
+					//if (p[k-1][n-1] == 0)
+<span class="nc bnc" id="L967" title="All 2 branches missed.">					if (pPrec[k - 1] == 0) {</span>
+						//p[k][n] = p[k][n-1] * X[n] / Y[n-k];
+<span class="nc" id="L969">						pCorr[k] = pPrec[k] * X[n] / Y[n - k];</span>
+<span class="nc bnc" id="L970" title="All 2 branches missed.">						if (pPrec[k] == 0) {</span>
+<span class="nc" id="L971">							zeroCount++;</span>
+						}
+					} else {
+						//p[k][n] = servTime[m][k] * X[n] * p[k-1][n-1];
+<span class="nc" id="L975">						pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1];</span>
+					}
+<span class="nc" id="L977">					sum += pCorr[k];</span>
+				}
+				//p[n][n] = servTime[m][n] * X[n] * p[n-1][n-1];
+<span class="nc" id="L980">				pCorr[n] = servTime[m][n] * X[n] * pPrec[n - 1];</span>
+<span class="nc" id="L981">				sum += pCorr[n];</span>
+				//p[0][n] = p[0][n-1] * X[n] / Y[n];
+<span class="nc" id="L983">				pCorr[0] = pPrec[0] * X[n] / Y[n];</span>
+<span class="nc" id="L984">				sum += pCorr[0];</span>
+
+<span class="nc bnc" id="L986" title="All 6 branches missed.">				if (Math.abs(sum - 1) &gt;= 0.01 &amp;&amp; (n % 500 == 0 || n == customers)) {</span>
+					//System.out.println(n+&quot; ERROR   Sum of prob : &quot;+sum+&quot; zeros &quot;+zeroCount);
+				}
+
+				//us[m+1][m][n] = 0;
+<span class="nc" id="L991">				usPrec[m][n] = 0;</span>
+<span class="nc bnc" id="L992" title="All 2 branches missed.">				for (k = 1; k &lt;= n; k++) {</span>
+					//us[m+1][m][n]  += p[k][n];
+					//us[m+1][m][n]  += pCorr[k];
+<span class="nc" id="L995">					usPrec[m][n] += pCorr[k];</span>
+				}
+
+				//for (int i=LICount; i &lt; m; i++) {
+<span class="nc bnc" id="L999" title="All 4 branches missed.">				for (int i = noLI ? 0 : LICount; i &lt; m; i++) {</span>
+					//ns[m+1][i][n] = 0;
+<span class="nc" id="L1001">					nsCorr[i][n] = 0;</span>
+					//us[m+1][i][n] = 0;
+<span class="nc" id="L1003">					usCorr[i][n] = 0;</span>
+<span class="nc bnc" id="L1004" title="All 2 branches missed.">					for (k = 1; k &lt;= n; k++) {</span>
+						//ns[m+1][i][n] += p[n-k][n] * ns[m][i][k];
+						//ns[m+1][i][n] += pCorr[n-k] * ns[m][i][k];
+<span class="nc" id="L1007">						nsCorr[i][n] += pCorr[n - k] * nsPrec[i][k];</span>
+
+						//us[m+1][i][n] += p[n-k][n] * us[m][i][k];
+						//us[m+1][i][n] += pCorr[n-k] * us[m][i][k];
+<span class="nc" id="L1011">						usCorr[i][n] += pCorr[n - k] * usPrec[i][k];</span>
+					}
+				}
+<span class="nc" id="L1014">				System.arraycopy(pCorr, 0, pPrec, 0, n + 1);</span>
+			}//end of loop over all customers
+<span class="nc bnc" id="L1016" title="All 2 branches missed.">			for (int c = LICount; c &lt; m; c++) {</span>
+<span class="nc" id="L1017">				System.arraycopy(nsCorr[c], 1, nsPrec[c], 1, customers);</span>
+<span class="nc" id="L1018">				System.arraycopy(usCorr[c], 1, usPrec[c], 1, customers);</span>
+			}
+		}//end loop over all stations
+		//System.arraycopy(nsPrec[stations-1], 0, nsCorr[stations-1], 0, customers +1);
+		//System.arraycopy(usPrec[stations-1], 0, usCorr[stations-1], 0, customers +1);
+
+		//calculation of other parameters
+<span class="nc" id="L1025">		totThroughput = X[customers] / visits[stations - 1];</span>
+
+		//for (m = LICount; m &lt; stations; m++) {
+<span class="nc bnc" id="L1028" title="All 4 branches missed.">		for (m = noLI ? 0 : LICount; m &lt; stations; m++) {</span>
+<span class="nc" id="L1029">			throughput[m] = totThroughput * visits[m];</span>
+<span class="nc bnc" id="L1030" title="All 2 branches missed.">			if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L1031">				utilization[m] = visits[m] * servTime[m][0];</span>
+			} else {
+				//utilization[m] = us[stations][m][customers];
+<span class="nc" id="L1034">				utilization[m] = usPrec[m][customers];</span>
+			}
+			//queueLen[m] = ns[stations][m][customers];
+<span class="nc" id="L1037">			queueLen[m] = nsPrec[m][customers];</span>
+<span class="nc" id="L1038">			residenceTime[m] = queueLen[m] / totThroughput;</span>
+		}
+
+<span class="nc bnc" id="L1041" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L1042" title="All 2 branches missed.">			for (m = 0; m &lt; LICount; m++) {</span>
+<span class="nc" id="L1043">				throughput[m] = totThroughput * visits[m];</span>
+<span class="nc" id="L1044">				utilization[m] = D[m] * totThroughput;</span>
+<span class="nc" id="L1045">				queueLen[m] = 0;</span>
+<span class="nc bnc" id="L1046" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1047" title="All 2 branches missed.">					if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L1048">						residenceTime[m] = D[m];</span>
+					} else {
+<span class="nc" id="L1050">						residenceTime[m] = D[m] * (1 + queueLen[m]);</span>
+					}
+<span class="nc" id="L1052">					queueLen[m] = (X[n] / visits[stations - 1]) * residenceTime[m];</span>
+				}
+<span class="nc" id="L1054">				residenceTime[m] = queueLen[m] / totThroughput;</span>
+			}
+		}
+<span class="nc" id="L1057">	}</span>
+
+	/**
+	 * Solves a model with LI and LD stations
+	 */
+	private void solveSingleLDErrCtr() {
+		int m;//index of station
+		int n;//index of customer
+		int k;//index of customers, in marginal probability
+<span class="nc" id="L1066">		double sum = 0;</span>
+		double sumW;
+		double sumWcomp;
+		double wsPar;
+		double wcompPar;
+
+<span class="nc" id="L1072">		double[] X = new double[customers + 1];</span>
+<span class="nc" id="L1073">		double MIN = 1.0E-290;</span>
+<span class="nc" id="L1074">		double MAX = 1.0E290;</span>
+
+<span class="nc" id="L1076">		int min = 0;</span>
+<span class="nc" id="L1077">		int[] expMultPrec = new int[customers + 1];</span>
+<span class="nc" id="L1078">		int[] expMultCorr = new int[customers + 1];</span>
+
+		double[][] nsPrec;
+		double[][] nsCorr;
+		double[][] usPrec;
+		double[][] usCorr;
+
+<span class="nc" id="L1085">		double[] pPrec = new double[customers + 1];</span>
+<span class="nc" id="L1086">		double[] pCorr = new double[customers + 1];</span>
+
+<span class="nc" id="L1088">		double[] Y = new double[customers + 1];//throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+		double prod;//internal variable
+<span class="nc" id="L1092">		int LICount = 0;</span>
+		double[] D;//D = visits * servTime
+<span class="nc" id="L1094">		boolean noLI = false;</span>
+
+<span class="nc" id="L1096">		int zeroCount = 0;</span>
+<span class="nc" id="L1097">		int firstLD = -1;</span>
+
+<span class="nc bnc" id="L1099" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1100" title="All 2 branches missed.">			if (type[m] != Solver.LD) {</span>
+<span class="nc" id="L1101">				LICount++;</span>
+<span class="nc bnc" id="L1102" title="All 2 branches missed.">			} else if (firstLD == -1) {</span>
+<span class="nc" id="L1103">				firstLD = m;</span>
+			}
+		}
+<span class="nc bnc" id="L1106" title="All 2 branches missed.">		if (LICount == 0) {</span>
+<span class="nc" id="L1107">			noLI = true;</span>
+		}
+<span class="nc" id="L1109">		D = new double[LICount];</span>
+		//DEK (Federico Granata) 23-09-2003
+		//nsPrec = new double[stations][customers + 1];
+		//nsCorr = new double[stations][customers + 1];
+		//usPrec = new double[stations][customers + 1];
+		//usCorr = new double[stations][customers + 1];
+<span class="nc" id="L1115">		nsPrec = new double[stations - LICount + 1][customers + 1];</span>
+<span class="nc" id="L1116">		nsCorr = new double[stations - LICount + 1][customers + 1];</span>
+<span class="nc" id="L1117">		usPrec = new double[stations - LICount + 1][customers + 1];</span>
+<span class="nc" id="L1118">		usCorr = new double[stations - LICount + 1][customers + 1];</span>
+
+		//22-09-2003 DEK (Federico Granata)
+		/*//put all queue length to 0 for n = 0 customers in the network
+		for (k = 0; k &lt; LICount; k++) {
+			queueLen[k] = 0;
+			D[k] = servTime[k][0] * visits[k];//D = S * V to speed up
+		}//end loop through stations*/
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc" id="L1127">		int counter = 0;</span>
+<span class="nc bnc" id="L1128" title="All 2 branches missed.">		for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L1129" title="All 2 branches missed.">			if (type[k] != Solver.LD) {</span>
+<span class="nc" id="L1130">				queueLen[k] = 0;</span>
+<span class="nc" id="L1131">				D[counter] = servTime[k][0] * visits[k];//D = S * V to speed up</span>
+<span class="nc" id="L1132">				counter++;</span>
+			}
+		}//end loop through stations*/
+
+		//calculation of throughput for all LI subnetwork, and queue length
+		//recursively starting from 0 customer in network to max customers
+<span class="nc bnc" id="L1138" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L1139" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L1140">				sum = 0;</span>
+				//22-09-2003 DEK (Federico Granata)
+				/*for (k = 0; k &lt; LICount; k++) {
+					switch (type[k]) {
+						case Solver.DELAY:
+							residenceTime[k] = D[k];
+							break;
+						case Solver.LI:
+							residenceTime[k] = D[k] * (1 + queueLen[k]);
+							break;
+						case Solver.LD://not supported use another method
+							throw new IllegalArgumentException(&quot;error in solveSingleLI, type of service centers must be delay or load Independent&quot;);
+					}//end case
+
+					sum += residenceTime[k];
+				}//end loop through stations*/
+<span class="nc" id="L1156">				counter = 0;</span>
+<span class="nc bnc" id="L1157" title="All 2 branches missed.">				for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L1158" title="All 3 branches missed.">					switch (type[k]) {</span>
+					case Solver.DELAY:
+<span class="nc" id="L1160">						residenceTime[k] = D[counter];</span>
+<span class="nc" id="L1161">						sum += residenceTime[k];</span>
+<span class="nc" id="L1162">						counter++;</span>
+<span class="nc" id="L1163">						break;</span>
+					case Solver.LI:
+<span class="nc" id="L1165">						residenceTime[k] = D[counter] * (1 + queueLen[k]);</span>
+<span class="nc" id="L1166">						sum += residenceTime[k];</span>
+<span class="nc" id="L1167">						counter++;</span>
+<span class="nc" id="L1168">						break;</span>
+					case Solver.LD://not supported use another method
+						break;
+					}//end case
+				}
+<span class="nc" id="L1173">				totThroughput = n / sum;</span>
+<span class="nc" id="L1174">				X[n] = totThroughput;</span>
+<span class="nc bnc" id="L1175" title="All 2 branches missed.">				for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">					if (type[k] != Solver.LD) {</span>
+<span class="nc" id="L1177">						queueLen[k] = totThroughput * residenceTime[k];</span>
+					}
+				}//end loop through stations
+
+				//DEBUG
+				/*System.out.println(&quot;n = &quot; + n);
+				for (int i = 0; i &lt; residenceTime.length; i++) {
+					System.out.print(residenceTime[i]+ &quot;  &quot;);
+				}
+				System.out.println();
+				for (int i = 0; i &lt; queueLen.length; i++) {
+					System.out.print(queueLen[i]+ &quot;  &quot;);
+				}
+				System.out.println();
+				System.out.println();*/
+			}//end loop through customers
+		}
+
+		//initialization
+<span class="nc bnc" id="L1196" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1197" title="All 2 branches missed.">			if (!noLI) {</span>
+				//DEK (Federico Granata) 23-9-2003
+				//Y[n] = 1 / (X[n] * visits[LICount]);
+<span class="nc" id="L1200">				Y[n] = 1 / (X[n] * visits[firstLD]);</span>
+				//nsPrec[LICount - 1][n] = n;
+				//usPrec[LICount - 1][n] = 1;
+<span class="nc" id="L1203">				nsPrec[0][n] = n;</span>
+<span class="nc" id="L1204">				usPrec[0][n] = 1;</span>
+			} else {
+<span class="nc" id="L1206">				X[n] = 1 / servTime[0][n];</span>
+				//nsPrec[0][n] = n;
+				//usPrec[0][n] = 1;
+<span class="nc" id="L1209">				nsPrec[1][n] = n;</span>
+<span class="nc" id="L1210">				usPrec[1][n] = 1;</span>
+			}
+
+			//DEBUG
+			//System.out.println(&quot;n = &quot; + n);
+			//System.out.print(&quot;Y = &quot;);
+			//for (int i = 0; i &lt; Y.length; i++) {
+			//	System.out.print(Y[i]+&quot; &quot;);
+			//}
+			//System.out.println();
+			//System.out.println();
+			//System.out.print(&quot;X = &quot;);
+			//for (int i = 0; i &lt; X.length; i++) {
+			//	System.out.print(X[i]+&quot; &quot;);
+			//}
+			//System.out.println();
+			//System.out.println();
+			//for (int i = 0; i &lt; nsPrec.length; i++) {
+			//	for (int j = 0; j &lt; nsPrec[i].length; j++) {
+			//		System.out.print(nsPrec[i][j]+&quot; &quot;);
+			//	}
+			//	System.out.println();
+			//}
+			//System.out.println();
+			//for (int i = 0; i &lt; usPrec.length; i++) {
+			//	for (int j = 0; j &lt; usPrec[i].length; j++) {
+			//	System.out.print(usPrec[i][j]+&quot; &quot;);
+			//	}
+			//	System.out.println();
+			//}
+			//System.out.println();
+		}//end initialization
+
+		//loop over all LD stations
+		//i have to use 2 counters to make it work correctly
+		//1 to loop over all stations, 1 to loop over the arrays that
+		//are available only for load dependent stations.
+
+		//for (m = noLI ? 1 : LICount; m &lt; stations; m++) {
+<span class="nc" id="L1249">		counter = 1;</span>
+<span class="nc" id="L1250">		int lastLD = firstLD;</span>
+<span class="nc bnc" id="L1251" title="All 2 branches missed.">		for (m = 1; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1252" title="All 2 branches missed.">			if (type[m] == Solver.LD) {</span>
+<span class="nc" id="L1253">				pPrec[0] = 1;</span>
+<span class="nc" id="L1254">				expMultPrec[0] = 0;</span>
+<span class="nc bnc" id="L1255" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+					//DEK (Federico Granata) 23-09-2003
+					//if (m != LICount)
+<span class="nc bnc" id="L1258" title="All 2 branches missed.">					if (m != firstLD) {</span>
+<span class="nc" id="L1259">						Y[n] = visits[lastLD] / (X[n] * visits[m]);</span>
+						/*System.out.println(&quot;m = &quot; + m);
+						System.out.println(&quot;n = &quot; + n);
+						System.out.print(&quot;Y = &quot;);
+						for (int i = 0; i &lt; Y.length; i++) {
+							System.out.print(Y[i] + &quot; &quot;);
+						}
+						System.out.println();
+						System.out.println();*/
+					}
+				}
+
+<span class="nc bnc" id="L1271" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+					//calculation of waiting time at station m an of the aggregated m-1
+					//stations.
+<span class="nc" id="L1274">					ws = 0;</span>
+<span class="nc" id="L1275">					wcomp = 0;</span>
+<span class="nc bnc" id="L1276" title="All 2 branches missed.">					for (int c = min; c &lt; 0; c++) {</span>
+<span class="nc" id="L1277">						sumW = 0;</span>
+<span class="nc" id="L1278">						sumWcomp = 0;</span>
+<span class="nc" id="L1279">						wsPar = 0;</span>
+<span class="nc" id="L1280">						wcompPar = 0;</span>
+<span class="nc bnc" id="L1281" title="All 2 branches missed.">						for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1282" title="All 2 branches missed.">							if (expMultPrec[k - 1] == c) {</span>
+<span class="nc" id="L1283">								sumW += k * servTime[m][k] * pPrec[k - 1];</span>
+							}
+<span class="nc bnc" id="L1285" title="All 2 branches missed.">							if (sumW &gt; MAX) {</span>
+<span class="nc" id="L1286">								wsPar += sumW * MIN;</span>
+<span class="nc" id="L1287">								sumW = 0;</span>
+							}
+<span class="nc bnc" id="L1289" title="All 2 branches missed.">							if (expMultPrec[n - k] == c) {</span>
+<span class="nc" id="L1290">								sumWcomp += k * pPrec[n - k] * Y[k];</span>
+							}
+<span class="nc bnc" id="L1292" title="All 2 branches missed.">							if (sumWcomp &gt; MAX) {</span>
+<span class="nc" id="L1293">								wcompPar += sumWcomp * MIN;</span>
+<span class="nc" id="L1294">								sumWcomp = 0;</span>
+							}
+						}
+<span class="nc" id="L1297">						ws = (ws + sumW) * MIN + wsPar;</span>
+<span class="nc" id="L1298">						wcomp = (wcomp + sumWcomp) * MIN + wcompPar;</span>
+					}
+
+<span class="nc bnc" id="L1301" title="All 2 branches missed.">					for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1302" title="All 2 branches missed.">						if (expMultPrec[k - 1] == 0) {</span>
+<span class="nc" id="L1303">							ws += k * servTime[m][k] * pPrec[k - 1];</span>
+						}
+<span class="nc bnc" id="L1305" title="All 2 branches missed.">						if (expMultPrec[n - k] == 0) {</span>
+<span class="nc" id="L1306">							wcomp += k * pPrec[n - k] * Y[k];</span>
+						}
+					}
+
+<span class="nc" id="L1310">					X[n] = n / (ws + wcomp);</span>
+
+					//nsPrec[m][n] = X[n] * ws;
+					//System.out.println(&quot;counter = &quot; + counter);
+					//System.out.println(&quot;m = &quot; + m);
+<span class="nc" id="L1315">					nsPrec[counter][n] = X[n] * ws;</span>
+					//calculation of marginal probabilities
+<span class="nc bnc" id="L1317" title="All 2 branches missed.">					for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc" id="L1318">						pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1];</span>
+<span class="nc" id="L1319">						expMultCorr[k] = expMultPrec[k - 1];</span>
+<span class="nc bnc" id="L1320" title="All 2 branches missed.">						if (pCorr[k] &lt; MIN) {</span>
+<span class="nc" id="L1321">							pCorr[k] = servTime[m][k] * X[n] * (pPrec[k - 1] * MAX);</span>
+<span class="nc" id="L1322">							expMultCorr[k]--;</span>
+<span class="nc bnc" id="L1323" title="All 2 branches missed.">							if (expMultCorr[k] &lt; min) {</span>
+<span class="nc" id="L1324">								min = expMultCorr[k];</span>
+							}
+<span class="nc bnc" id="L1326" title="All 2 branches missed.">						} else if (pCorr[k] &gt; MAX) {</span>
+<span class="nc" id="L1327">							pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1] * MIN;</span>
+<span class="nc" id="L1328">							expMultCorr[k]++;</span>
+						}
+					}
+
+<span class="nc" id="L1332">					pCorr[0] = pPrec[0] * X[n] * Y[n];</span>
+
+<span class="nc" id="L1334">					expMultCorr[0] = expMultPrec[0];</span>
+<span class="nc bnc" id="L1335" title="All 2 branches missed.">					if (pCorr[0] &lt; MIN) {</span>
+<span class="nc" id="L1336">						pCorr[0] = (pPrec[0] * MAX) * X[n] * Y[n];</span>
+<span class="nc" id="L1337">						expMultCorr[0]--;</span>
+<span class="nc bnc" id="L1338" title="All 2 branches missed.">						if (expMultCorr[0] &lt; min) {</span>
+<span class="nc" id="L1339">							min = expMultCorr[0];</span>
+						}
+<span class="nc bnc" id="L1341" title="All 2 branches missed.">					} else if (pCorr[0] &gt; MAX) {</span>
+<span class="nc" id="L1342">						pCorr[0] = pPrec[0] * X[n] * MIN * Y[n];</span>
+<span class="nc" id="L1343">						expMultCorr[0]++;</span>
+					}
+
+					//DEK (Federico Granata)
+					//usPrec[m][n] = 0;
+<span class="nc" id="L1348">					usPrec[counter][n] = 0;</span>
+<span class="nc bnc" id="L1349" title="All 2 branches missed.">					for (int c = min; c &lt; 0; c++) {</span>
+<span class="nc bnc" id="L1350" title="All 2 branches missed.">						for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1351" title="All 2 branches missed.">							if (expMultCorr[k] == c) {</span>
+								//DEK (Federico Granata)
+								//usPrec[m][n] += pCorr[k];
+<span class="nc" id="L1354">								usPrec[counter][n] += pCorr[k];</span>
+							}
+						}
+						//DEK (Federico Granata)
+						//usPrec[m][n] *= MIN;
+<span class="nc" id="L1359">						usPrec[counter][n] *= MIN;</span>
+					}
+
+<span class="nc bnc" id="L1362" title="All 2 branches missed.">					for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1363" title="All 2 branches missed.">						if (expMultCorr[k] == 0) {</span>
+							//DEK (Federico Granata)
+							//usPrec[m][n] += pCorr[k];
+<span class="nc" id="L1366">							usPrec[counter][n] += pCorr[k];</span>
+						}
+					}
+
+					//if (Math.abs(usPrec[m][n]+(pCorr[0]*Math.pow(MIN,
+					//- expMultCorr[0]) )- 1) &gt; 0.0000000000001)
+					//    System.out.println(n+&quot; ERROR   Sum of prob : &quot;
+					//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN,- expMultCorr[0]) ))
+					//    +&quot; zeros &quot;+zeroCount);
+
+					//DEK (Federico Granata)
+					//for (int i = noLI ? 0 : LICount; i &lt; m; i++) {
+<span class="nc" id="L1378">					int cStat = 1;</span>
+<span class="nc bnc" id="L1379" title="All 2 branches missed.">					for (int i = 0; i &lt; m; i++) {</span>
+<span class="nc bnc" id="L1380" title="All 2 branches missed.">						if (type[i] == Solver.LD) {</span>
+<span class="nc" id="L1381">							nsCorr[cStat][n] = 0;</span>
+<span class="nc" id="L1382">							usCorr[cStat][n] = 0;</span>
+<span class="nc bnc" id="L1383" title="All 2 branches missed.">							for (int c = min; c &lt; 0; c++) {</span>
+<span class="nc bnc" id="L1384" title="All 2 branches missed.">								for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1385" title="All 2 branches missed.">									if (expMultCorr[n - k] == c) {</span>
+<span class="nc" id="L1386">										nsCorr[cStat][n] += pCorr[n - k] * nsPrec[cStat][k];</span>
+<span class="nc" id="L1387">										usCorr[cStat][n] += pCorr[n - k] * usPrec[cStat][k];</span>
+									}
+								}
+<span class="nc" id="L1390">								nsCorr[cStat][n] *= MIN;</span>
+<span class="nc" id="L1391">								usCorr[cStat][n] *= MIN;</span>
+							}
+
+<span class="nc bnc" id="L1394" title="All 2 branches missed.">							for (k = 1; k &lt;= n; k++) {</span>
+<span class="nc bnc" id="L1395" title="All 2 branches missed.">								if (expMultCorr[n - k] == 0) {</span>
+<span class="nc" id="L1396">									nsCorr[cStat][n] += pCorr[n - k] * nsPrec[cStat][k];</span>
+<span class="nc" id="L1397">									usCorr[cStat][n] += pCorr[n - k] * usPrec[cStat][k];</span>
+								}
+							}
+<span class="nc" id="L1400">							cStat++;</span>
+						}
+					}
+
+<span class="nc" id="L1404">					System.arraycopy(pCorr, 0, pPrec, 0, n + 1);</span>
+<span class="nc" id="L1405">					System.arraycopy(expMultCorr, 0, expMultPrec, 0, n + 1);</span>
+
+					//DEBUG
+					/*	System.out.println(&quot;m = &quot; + m);
+					System.out.println(&quot;n = &quot; + n);
+					System.out.print(&quot;Y = &quot;);
+					for (int i = 0; i &lt; Y.length; i++) {
+						System.out.print(Y[i]+&quot; &quot;);
+					}
+					System.out.println();
+					System.out.println();
+					System.out.print(&quot;X = &quot;);
+					for (int i = 0; i &lt; X.length; i++) {
+						System.out.print(X[i]+&quot; &quot;);
+					}
+					System.out.println();
+					System.out.println();
+					for (int i = 0; i &lt; nsCorr.length; i++) {
+						for (int j = 0; j &lt; nsCorr[i].length; j++) {
+							System.out.print(nsCorr[i][j]+&quot; &quot;);
+						}
+						System.out.println();
+					}
+					System.out.println();
+					for (int i = 0; i &lt; usCorr.length; i++) {
+						for (int j = 0; j &lt; usCorr[i].length; j++) {
+						System.out.print(usCorr[i][j]+&quot; &quot;);
+						}
+						System.out.println();
+					}
+					System.out.println();*/
+				}//end of loop over all customers
+				//DEBUG
+				//System.out.println(&quot;m = &quot; + m);
+				//System.out.println(&quot;n = &quot; + n);
+				//System.out.print(&quot;Y = &quot;);
+				//for (int i = 0; i &lt; Y.length; i++) {
+				//	System.out.print(Y[i]+&quot; &quot;);
+				//}
+				//System.out.println();
+				//System.out.println();
+				//System.out.print(&quot;X = &quot;);
+				//for (int i = 0; i &lt; X.length; i++) {
+				//	System.out.print(X[i]+&quot; &quot;);
+				//}
+				//System.out.println();
+				//System.out.println();
+				//for (int i = 0; i &lt; nsCorr.length; i++) {
+				//	for (int j = 0; j &lt; nsCorr[i].length; j++) {
+				//		System.out.print(nsCorr[i][j]+&quot; &quot;);
+				//	}
+				//	System.out.println();
+				//}
+				//System.out.println();
+				//for (int i = 0; i &lt; usCorr.length; i++) {
+				//	for (int j = 0; j &lt; usCorr[i].length; j++) {
+				//		System.out.print(usCorr[i][j]+&quot; &quot;);
+				//	}
+				//	System.out.println();
+				//}
+				//System.out.println();
+
+				//DEK (Federico Granata) 23-09-2003
+				//for (int c = LICount; c &lt; m; c++) {
+
+<span class="nc" id="L1470">				int cStat = 1;</span>
+<span class="nc bnc" id="L1471" title="All 2 branches missed.">				for (int c = 0; c &lt; m; c++) {</span>
+<span class="nc bnc" id="L1472" title="All 2 branches missed.">					if (type[c] == Solver.LD) {</span>
+<span class="nc" id="L1473">						System.arraycopy(nsCorr[cStat], 1, nsPrec[cStat], 1, customers);</span>
+<span class="nc" id="L1474">						System.arraycopy(usCorr[cStat], 1, usPrec[cStat], 1, customers);</span>
+<span class="nc" id="L1475">						cStat++;</span>
+					}
+				}
+<span class="nc" id="L1478">				counter++;</span>
+<span class="nc" id="L1479">				lastLD = m;</span>
+			}
+		}//end loop over all stations
+
+		//DEBUG
+		/*System.out.println(&quot;m = &quot; + m);
+			System.out.println(&quot;n = &quot; + n);
+			System.out.print(&quot;Y = &quot;);
+			for (int i = 0; i &lt; Y.length; i++) {
+				System.out.print(Y[i]+&quot; &quot;);
+			}
+			System.out.println();
+			System.out.println();
+			System.out.print(&quot;X = &quot;);
+			for (int i = 0; i &lt; X.length; i++) {
+				System.out.print(X[i]+&quot; &quot;);
+			}
+			System.out.println();
+			System.out.println();
+			for (int i = 0; i &lt; nsPrec.length; i++) {
+				for (int j = 0; j &lt; nsPrec[i].length; j++) {
+				System.out.print(nsPrec[i][j]+&quot; &quot;);
+				}
+				System.out.println();
+			}
+			System.out.println();
+			for (int i = 0; i &lt; usPrec.length; i++) {
+				for (int j = 0; j &lt; usPrec[i].length; j++) {
+				System.out.print(usPrec[i][j]+&quot; &quot;);
+				}
+				System.out.println();
+			}
+			System.out.println();*/
+
+		//calculation of other parameters
+<span class="nc" id="L1514">		totThroughput = X[customers] / visits[stations - 1];</span>
+<span class="nc" id="L1515">		totRespTime = customers / totThroughput;</span>
+
+		//DEK (Federico Granata)
+		//LD stations
+		//for (m = noLI ? 0 : LICount; m &lt; stations; m++) {
+<span class="nc" id="L1520">		counter = 1;</span>
+<span class="nc bnc" id="L1521" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1522" title="All 2 branches missed.">			if (type[m] == Solver.LD) {</span>
+<span class="nc" id="L1523">				throughput[m] = totThroughput * visits[m];</span>
+				//if (type[m] == Solver.DELAY)
+				//	utilization[m] = visits[m] * servTime[m][0];
+				//else
+				//	utilization[m] = usPrec[m][customers];
+<span class="nc" id="L1528">				utilization[m] = usPrec[counter][customers];</span>
+				//queueLen[m] = nsPrec[m][customers];
+<span class="nc" id="L1530">				queueLen[m] = nsPrec[counter][customers];</span>
+<span class="nc" id="L1531">				residenceTime[m] = queueLen[m] / totThroughput;</span>
+<span class="nc" id="L1532">				counter++;</span>
+			}
+		}
+
+		//LI stations
+<span class="nc" id="L1537">		counter = 0;</span>
+<span class="nc bnc" id="L1538" title="All 2 branches missed.">		if (!noLI) {</span>
+			//DEK (Federico Granata)
+			//for (m = 0; m &lt; LICount; m++) {
+<span class="nc bnc" id="L1541" title="All 2 branches missed.">			for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1542" title="All 2 branches missed.">				if (type[m] != Solver.LD) {</span>
+<span class="nc" id="L1543">					throughput[m] = totThroughput * visits[m];</span>
+<span class="nc" id="L1544">					utilization[m] = D[counter] * totThroughput;</span>
+<span class="nc" id="L1545">					queueLen[m] = 0;</span>
+<span class="nc bnc" id="L1546" title="All 2 branches missed.">					for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1547" title="All 2 branches missed.">						if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L1548">							residenceTime[m] = D[counter];</span>
+						} else {
+<span class="nc" id="L1550">							residenceTime[m] = D[counter] * (1 + queueLen[m]);</span>
+						}
+<span class="nc" id="L1552">						queueLen[m] = (X[n] / visits[stations - 1]) * residenceTime[m];</span>
+					}
+<span class="nc" id="L1554">					residenceTime[m] = queueLen[m] / totThroughput;</span>
+<span class="nc" id="L1555">					counter++;</span>
+				}
+			}
+		}
+<span class="nc" id="L1559">	}</span>
+
+	/**
+	 * Solves a model with LI and LD stations
+	 */
+	private void solveSingleLDErrCtrFaster() {
+		int m;//index of station
+		int n;//index of customer
+		int k;//index of customers, in marginal probability
+<span class="nc" id="L1568">		double sum = 0.0;</span>
+
+<span class="nc" id="L1570">		double[] X = new double[customers + 1];</span>
+<span class="nc" id="L1571">		double MIN = 1.0E-290;</span>
+<span class="nc" id="L1572">		double MAX = 1.0E290;</span>
+
+<span class="nc" id="L1574">		int min = 0;</span>
+<span class="nc" id="L1575">		byte[] expMultPrec = new byte[customers + 1];</span>
+<span class="nc" id="L1576">		byte[] expMultCorr = new byte[customers + 1];</span>
+<span class="nc" id="L1577">		int[] puntProb = new int[customers + 2];</span>
+
+		int num;// number of elements in vector puntProb[c]
+
+<span class="nc" id="L1581">		double[][] nsPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L1582">		double[][] nsCorr = new double[stations][customers + 1];</span>
+<span class="nc" id="L1583">		double[][] usPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L1584">		double[][] usCorr = new double[stations][customers + 1];</span>
+
+		//TODO: queste dovrebbero essere probabilità marginali di avere j customer nalla stazione (con o&lt;j&lt;n)
+<span class="nc" id="L1587">		double[] pPrec = new double[customers + 1];</span>
+<span class="nc" id="L1588">		double[] pCorr = new double[customers + 1];</span>
+
+<span class="nc" id="L1590">		double[] Y = new double[customers + 1];//throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+
+<span class="nc" id="L1594">		int LICount = 0;//number of LI and DELAY centers</span>
+		double[] D;//Service demands: D = visits * servTime
+<span class="nc" id="L1596">		boolean noLI = false;//true if there are only LD centers</span>
+
+		//count the number of LI and DELAY stations
+<span class="nc bnc" id="L1599" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1600" title="All 2 branches missed.">			if (type[m] != Solver.LD) {</span>
+<span class="nc" id="L1601">				LICount++;</span>
+			}
+		}
+<span class="nc bnc" id="L1604" title="All 2 branches missed.">		if (LICount == 0) {</span>
+<span class="nc" id="L1605">			noLI = true;//all centers are LD</span>
+		}
+<span class="nc" id="L1607">		D = new double[LICount];</span>
+
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc bnc" id="L1610" title="All 2 branches missed.">		for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc" id="L1611">			queueLen[k] = 0.0;</span>
+<span class="nc" id="L1612">			D[k] = servTime[k][0] * visits[k];//D = S * V to speed up</span>
+		}//end loop through stations
+
+		//now computes throughput and queue length for all LI subnetwork,
+		//recursively starting from 0 customer in network to max customers
+		//later all the LI subnetworks will be transformed into a single LD station: service time for n customers
+		//is equal to response time of the whole LI subnetwork with n customers
+		//then the LD stations will be merged one at each time
+
+<span class="nc bnc" id="L1621" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L1622" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L1623">				sum = 0.0;</span>
+<span class="nc bnc" id="L1624" title="All 2 branches missed.">				for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc bnc" id="L1625" title="All 3 branches missed.">					switch (type[k]) {</span>
+					case Solver.DELAY:
+<span class="nc" id="L1627">						residenceTime[k] = D[k];</span>
+<span class="nc" id="L1628">						break;</span>
+					case Solver.LI:
+<span class="nc" id="L1630">						residenceTime[k] = D[k] * (1 + queueLen[k]);</span>
+						break;
+					}//end case
+
+<span class="nc" id="L1634">					sum += residenceTime[k];</span>
+				}//end loop through stations
+<span class="nc" id="L1636">				totThroughput = n / sum;</span>
+<span class="nc" id="L1637">				X[n] = totThroughput;</span>
+<span class="nc bnc" id="L1638" title="All 2 branches missed.">				for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L1639">					queueLen[k] = totThroughput * residenceTime[k];</span>
+				}//end loop through stations
+			}//end loop through customers
+		}
+
+		//initialization
+<span class="nc bnc" id="L1645" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1646" title="All 2 branches missed.">			if (!noLI) {</span>
+<span class="nc" id="L1647">				Y[n] = 1 / (X[n] * visits[LICount]);</span>
+<span class="nc" id="L1648">				nsPrec[LICount - 1][n] = n;</span>
+<span class="nc" id="L1649">				usPrec[LICount - 1][n] = 1;</span>
+			} else {
+<span class="nc" id="L1651">				X[n] = 1 / servTime[0][n];</span>
+<span class="nc" id="L1652">				nsPrec[0][n] = n;</span>
+<span class="nc" id="L1653">				usPrec[0][n] = 1;</span>
+			}
+
+		}//end initialization
+
+		//loop over all LD stations (except the first which does not require to be
+		//short-circuited (see Balbo-Bruell)
+<span class="nc bnc" id="L1660" title="All 4 branches missed.">		for (m = noLI ? 1 : LICount; m &lt; stations; m++) {</span>
+<span class="nc" id="L1661">			pPrec[0] = 1.0;</span>
+<span class="nc" id="L1662">			expMultPrec[0] = 0;</span>
+<span class="nc" id="L1663">			puntProb[0] = 1;</span>
+<span class="nc" id="L1664">			puntProb[1] = 0;</span>
+
+<span class="nc bnc" id="L1666" title="All 2 branches missed.">			if (m != LICount) {</span>
+<span class="nc bnc" id="L1667" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L1668">					Y[n] = visits[m - 1] / (X[n] * visits[m]);</span>
+				}
+			}
+
+<span class="nc bnc" id="L1672" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+				//calculation of waiting time of station m and of the aggregated m-1
+				//stations.
+<span class="nc" id="L1675">				ws = 0.0;</span>
+<span class="nc" id="L1676">				wcomp = 0.0;</span>
+
+<span class="nc" id="L1678">				num = puntProb[0];</span>
+<span class="nc bnc" id="L1679" title="All 2 branches missed.">				for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L1680">					ws += (puntProb[k] + 1) * servTime[m][puntProb[k] + 1] * pPrec[puntProb[k]];</span>
+<span class="nc" id="L1681">					wcomp += (n - puntProb[k]) * pPrec[puntProb[k]] * Y[n - puntProb[k]];</span>
+				}
+				//throughput of aggregated subsystem
+<span class="nc" id="L1684">				X[n] = n / (ws + wcomp);</span>
+
+				//R:esatto
+<span class="nc" id="L1687">				nsPrec[m][n] = X[n] * ws;</span>
+<span class="nc" id="L1688">				puntProb[0] = 0;</span>
+
+				//calculation of marginal probabilities p(k,n) except k = 0, n
+<span class="nc bnc" id="L1691" title="All 2 branches missed.">				for (k = 1; k &lt; n; k++) {</span>
+<span class="nc" id="L1692">					pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1];</span>
+					//this is for probabilities that are very low or very high
+<span class="nc" id="L1694">					expMultCorr[k] = expMultPrec[k - 1];</span>
+<span class="nc bnc" id="L1695" title="All 2 branches missed.">					if (pCorr[k] &lt; MIN) {</span>
+<span class="nc" id="L1696">						pCorr[k] *= MAX;</span>
+<span class="nc" id="L1697">						expMultCorr[k]++;</span>
+<span class="nc bnc" id="L1698" title="All 2 branches missed.">						if (expMultCorr[k] &gt; min) {</span>
+<span class="nc" id="L1699">							min = expMultCorr[k];</span>
+						}
+<span class="nc bnc" id="L1701" title="All 2 branches missed.">					} else if (pCorr[k] &gt; MAX) {</span>
+<span class="nc" id="L1702">						pCorr[k] *= MIN;</span>
+<span class="nc" id="L1703">						expMultCorr[k]--;</span>
+					}
+					//when the mutiplier for the prob k-esima is 0 I increase the value
+<span class="nc bnc" id="L1706" title="All 2 branches missed.">					if (expMultCorr[k] == 0) {</span>
+<span class="nc" id="L1707">						puntProb[0]++;</span>
+<span class="nc" id="L1708">						puntProb[puntProb[0]] = k;</span>
+					}
+				}
+
+				//calculation of p(n,n)
+<span class="nc" id="L1713">				pCorr[n] = servTime[m][n] * X[n] * pPrec[n - 1];</span>
+<span class="nc" id="L1714">				expMultCorr[n] = expMultPrec[n - 1];</span>
+<span class="nc bnc" id="L1715" title="All 2 branches missed.">				if (pCorr[n] &lt; MIN) {</span>
+<span class="nc" id="L1716">					pCorr[n] *= MAX;</span>
+<span class="nc" id="L1717">					expMultCorr[n]++;</span>
+<span class="nc bnc" id="L1718" title="All 2 branches missed.">				} else if (pCorr[n] &gt; MAX) {</span>
+<span class="nc" id="L1719">					pCorr[n] *= MIN;</span>
+<span class="nc" id="L1720">					expMultCorr[n]--;</span>
+				}
+				//p(n,n) it is calculated, but not inserted for now....
+
+				//initialize utilization of subsystem m at n
+<span class="nc" id="L1725">				usPrec[m][n] = 0;</span>
+
+<span class="nc" id="L1727">				num = puntProb[0];</span>
+<span class="nc bnc" id="L1728" title="All 2 branches missed.">				for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L1729">					usPrec[m][n] += pCorr[puntProb[k]];</span>
+				}
+<span class="nc bnc" id="L1731" title="All 2 branches missed.">				if (expMultCorr[n] == 0) {</span>
+<span class="nc" id="L1732">					usPrec[m][n] += pCorr[n];</span>
+				}
+
+				//calculation of p(0,n)
+<span class="nc" id="L1736">				pCorr[0] = pPrec[0] * X[n] * Y[n];</span>
+<span class="nc" id="L1737">				expMultCorr[0] = expMultPrec[0];</span>
+<span class="nc bnc" id="L1738" title="All 2 branches missed.">				if (pCorr[0] &lt; MIN) {</span>
+<span class="nc" id="L1739">					pCorr[0] *= MAX;</span>
+<span class="nc" id="L1740">					expMultCorr[0]++;</span>
+<span class="nc bnc" id="L1741" title="All 2 branches missed.">					if (expMultCorr[0] &gt; min) {</span>
+<span class="nc" id="L1742">						min = expMultCorr[0];</span>
+					}
+<span class="nc bnc" id="L1744" title="All 2 branches missed.">				} else if (pCorr[0] &gt; MAX) {</span>
+<span class="nc" id="L1745">					pCorr[0] *= MIN;</span>
+<span class="nc" id="L1746">					expMultCorr[0]--;</span>
+				}
+<span class="nc bnc" id="L1748" title="All 2 branches missed.">				if (expMultCorr[0] == 0) {</span>
+<span class="nc" id="L1749">					puntProb[0]++;</span>
+<span class="nc" id="L1750">					puntProb[puntProb[0]] = 0;</span>
+				}
+
+				//test of correctness sum(p(k,n)) = 1. only for debug
+				//if (Math.abs(usPrec[m][n]+(pCorr[0]
+				//*Math.pow(MIN, expMultCorr[0]))- 1) &gt; 0.0000000000001)
+				//    System.out.println(n+&quot; ERROR   Sum of prob : &quot;
+				//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN, expMultCorr[0]))));
+
+				//calculation of utilization &amp; queue length of al m subsystem
+				//from n
+<span class="nc bnc" id="L1761" title="All 4 branches missed.">				for (int i = noLI ? 0 : LICount; i &lt; m; i++) {</span>
+<span class="nc" id="L1762">					nsCorr[i][n] = 0.0;</span>
+<span class="nc" id="L1763">					usCorr[i][n] = 0.0;</span>
+
+<span class="nc" id="L1765">					num = puntProb[0];</span>
+<span class="nc bnc" id="L1766" title="All 2 branches missed.">					for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L1767">						nsCorr[i][n] += pCorr[puntProb[k]] * nsPrec[i][n - puntProb[k]];</span>
+<span class="nc" id="L1768">						usCorr[i][n] += pCorr[puntProb[k]] * usPrec[i][n - puntProb[k]];</span>
+					}
+				}
+
+				//add p(n,n)
+<span class="nc bnc" id="L1773" title="All 2 branches missed.">				if (expMultCorr[n] &gt; min) {</span>
+<span class="nc" id="L1774">					min = expMultCorr[n];</span>
+				}
+<span class="nc bnc" id="L1776" title="All 2 branches missed.">				if (expMultCorr[n] == 0) {</span>
+<span class="nc" id="L1777">					puntProb[0]++;</span>
+<span class="nc" id="L1778">					puntProb[puntProb[0]] = n;</span>
+				}
+
+<span class="nc" id="L1781">				System.arraycopy(pCorr, 0, pPrec, 0, n + 1);</span>
+<span class="nc" id="L1782">				System.arraycopy(expMultCorr, 0, expMultPrec, 0, n + 1);</span>
+			}//end of loop over all customers
+<span class="nc bnc" id="L1784" title="All 2 branches missed.">			for (int c = LICount; c &lt; m; c++) {</span>
+<span class="nc" id="L1785">				System.arraycopy(nsCorr[c], 1, nsPrec[c], 1, customers);</span>
+<span class="nc" id="L1786">				System.arraycopy(usCorr[c], 1, usPrec[c], 1, customers);</span>
+			}
+		}//end loop over all stations
+
+		//calculation of other parameters
+<span class="nc" id="L1791">		totThroughput = X[customers] / visits[stations - 1];</span>
+<span class="nc bnc" id="L1792" title="All 4 branches missed.">		for (m = noLI ? 0 : LICount; m &lt; stations; m++) {</span>
+<span class="nc" id="L1793">			throughput[m] = totThroughput * visits[m];</span>
+<span class="nc bnc" id="L1794" title="All 2 branches missed.">			if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L1795">				utilization[m] = visits[m] * servTime[m][0];</span>
+			} else {
+<span class="nc" id="L1797">				utilization[m] = usPrec[m][customers];</span>
+			}
+<span class="nc" id="L1799">			queueLen[m] = nsPrec[m][customers];</span>
+<span class="nc" id="L1800">			residenceTime[m] = queueLen[m] / totThroughput;</span>
+		}
+
+<span class="nc bnc" id="L1803" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L1804" title="All 2 branches missed.">			for (m = 0; m &lt; LICount; m++) {</span>
+<span class="nc" id="L1805">				throughput[m] = totThroughput * visits[m];</span>
+<span class="nc" id="L1806">				utilization[m] = D[m] * totThroughput;</span>
+<span class="nc" id="L1807">				queueLen[m] = 0.0;</span>
+<span class="nc bnc" id="L1808" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1809" title="All 2 branches missed.">					if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L1810">						residenceTime[m] = D[m];</span>
+					} else {
+<span class="nc" id="L1812">						residenceTime[m] = D[m] * (1 + queueLen[m]);</span>
+					}
+<span class="nc" id="L1814">					queueLen[m] = (X[n] / visits[stations - 1]) * residenceTime[m];</span>
+				}
+<span class="nc" id="L1816">				residenceTime[m] = queueLen[m] / totThroughput;</span>
+			}
+		}
+
+		//NEW
+		//@author Stefano Omini
+
+		//other aggregate parameters
+<span class="nc" id="L1824">		totRespTime = totUser = 0;</span>
+<span class="nc bnc" id="L1825" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L1826">			totRespTime += residenceTime[m];</span>
+<span class="nc" id="L1827">			totUser += queueLen[m]; //of course should be equal to the number of customers</span>
+		}
+
+		//end NEW
+<span class="nc" id="L1831">	}</span>
+
+	/**
+	 * Solves a model with LI and LD stations.
+	 * To solve a closed model with N customers, all the models with
+	 * 0, 1, 2, ... N-1 customers must be solved before.
+	 * This method allows to save the results for these intermediate models.
+	 * @param intermediate true to save results for intermediate populations
+	 *
+	 */
+	private void solveSingleLDErrCtrFaster(boolean intermediate) {
+		//TODO: still to fix, it does not yet give intermediate results
+<span class="nc bnc" id="L1843" title="All 2 branches missed.">		if (!intermediate) {</span>
+			//intermediate results must not be saved, then use
+			//the base method
+<span class="nc" id="L1846">			solveSingleLDErrCtrFaster();</span>
+<span class="nc" id="L1847">			return;</span>
+		}
+
+		//create structures with intermediate results
+
+<span class="nc" id="L1852">		interm_throughput = new double[customers + 1][stations];</span>
+<span class="nc" id="L1853">		interm_queueLen = new double[customers + 1][stations];</span>
+<span class="nc" id="L1854">		interm_utilization = new double[customers + 1][stations];</span>
+<span class="nc" id="L1855">		interm_residenceTime = new double[customers + 1][stations];</span>
+
+<span class="nc" id="L1857">		interm_totThroughput = new double[customers + 1];</span>
+<span class="nc" id="L1858">		interm_totRespTime = new double[customers + 1];</span>
+<span class="nc" id="L1859">		interm_totUser = new double[customers + 1];</span>
+
+		int m;//index of station
+		int n;//index of customer
+		int k;//index of customers, in marginal probability
+<span class="nc" id="L1864">		double sum = 0.0;</span>
+
+<span class="nc" id="L1866">		double[] X = new double[customers + 1];</span>
+<span class="nc" id="L1867">		double MIN = 1.0E-290;</span>
+<span class="nc" id="L1868">		double MAX = 1.0E290;</span>
+
+<span class="nc" id="L1870">		int min = 0;</span>
+<span class="nc" id="L1871">		byte[] expMultPrec = new byte[customers + 1];</span>
+<span class="nc" id="L1872">		byte[] expMultCorr = new byte[customers + 1];</span>
+<span class="nc" id="L1873">		int[] puntProb = new int[customers + 2];</span>
+		int num;// number of elements in vector puntProb[c]
+
+		double[][] nsPrec;
+		double[][] nsCorr;
+		double[][] usPrec;
+		double[][] usCorr;
+
+<span class="nc" id="L1881">		double[] pPrec = new double[customers + 1];</span>
+<span class="nc" id="L1882">		double[] pCorr = new double[customers + 1];</span>
+
+<span class="nc" id="L1884">		double[] Y = new double[customers + 1];//throughput of composite system</span>
+		double ws;//waiting time
+		double wcomp;//composite waiting time
+<span class="nc" id="L1887">		int LICount = 0;</span>
+		double[] D;//D = visits * servTime
+<span class="nc" id="L1889">		boolean noLI = false;</span>
+
+<span class="nc bnc" id="L1891" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L1892" title="All 2 branches missed.">			if (type[m] != Solver.LD) {</span>
+<span class="nc" id="L1893">				LICount++;</span>
+			}
+		}
+<span class="nc bnc" id="L1896" title="All 2 branches missed.">		if (LICount == 0) {</span>
+<span class="nc" id="L1897">			noLI = true; //there are only LD stations</span>
+		}
+<span class="nc" id="L1899">		D = new double[LICount];</span>
+<span class="nc" id="L1900">		nsPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L1901">		nsCorr = new double[stations][customers + 1];</span>
+<span class="nc" id="L1902">		usPrec = new double[stations][customers + 1];</span>
+<span class="nc" id="L1903">		usCorr = new double[stations][customers + 1];</span>
+
+		//put all queue length to 0 for n = 0 customers in the network
+<span class="nc bnc" id="L1906" title="All 2 branches missed.">		for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc" id="L1907">			queueLen[k] = 0.0;</span>
+
+			//intermediate results: population = n = 0;
+<span class="nc" id="L1910">			interm_queueLen[0][k] = 0.0;</span>
+<span class="nc" id="L1911">			interm_residenceTime[0][k] = 0.0;</span>
+<span class="nc" id="L1912">			interm_throughput[0][k] = 0.0;</span>
+<span class="nc" id="L1913">			interm_utilization[0][k] = 0.0;</span>
+
+<span class="nc" id="L1915">			interm_totThroughput[0] = 0;</span>
+<span class="nc" id="L1916">			interm_totRespTime[0] = 0;</span>
+<span class="nc" id="L1917">			interm_totUser[0] = 0;</span>
+
+<span class="nc" id="L1919">			D[k] = servTime[k][0] * visits[k];//D = S * V to speed up</span>
+		}//end loop through stations
+
+		//calculation of throughput for all LI subnetwork, and queue length
+		//recursively starting from 0 customer in network to max customers
+
+<span class="nc bnc" id="L1925" title="All 2 branches missed.">		if (!noLI) {</span>
+			//there are also LI stations
+<span class="nc bnc" id="L1927" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L1928">				sum = 0.0;</span>
+<span class="nc bnc" id="L1929" title="All 2 branches missed.">				for (k = 0; k &lt; LICount; k++) {</span>
+<span class="nc bnc" id="L1930" title="All 3 branches missed.">					switch (type[k]) {</span>
+					case Solver.DELAY:
+<span class="nc" id="L1932">						residenceTime[k] = interm_residenceTime[n][k] = D[k];</span>
+<span class="nc" id="L1933">						break;</span>
+					case Solver.LI:
+<span class="nc" id="L1935">						residenceTime[k] = interm_residenceTime[n][k] = D[k] * (1 + interm_queueLen[n - 1][k]);</span>
+						break;
+					}//end case
+
+<span class="nc" id="L1939">					sum += interm_residenceTime[n][k];</span>
+				}//end loop through stations
+<span class="nc" id="L1941">				totThroughput = interm_totThroughput[n] = n / sum;</span>
+<span class="nc" id="L1942">				X[n] = interm_totThroughput[n];</span>
+<span class="nc bnc" id="L1943" title="All 2 branches missed.">				for (k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L1944">					queueLen[k] = interm_queueLen[n][k] = interm_totThroughput[n] * interm_residenceTime[n][k];</span>
+				}//end loop through stations
+			}//end loop through customers
+		}
+
+		//initialization
+<span class="nc bnc" id="L1950" title="All 2 branches missed.">		for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L1951" title="All 2 branches missed.">			if (!noLI) {</span>
+				//throughput of composite system with population n
+<span class="nc" id="L1953">				Y[n] = 1 / (X[n] * visits[LICount]);</span>
+
+<span class="nc" id="L1955">				nsPrec[LICount - 1][n] = n;</span>
+<span class="nc" id="L1956">				usPrec[LICount - 1][n] = 1;</span>
+			} else {
+				//throughput of composite system with population n
+<span class="nc" id="L1959">				X[n] = 1 / servTime[0][n];</span>
+<span class="nc" id="L1960">				nsPrec[0][n] = n;</span>
+<span class="nc" id="L1961">				usPrec[0][n] = 1;</span>
+			}
+		}//end initialization
+
+		//loop over all LD stations
+<span class="nc bnc" id="L1966" title="All 4 branches missed.">		for (m = noLI ? 1 : LICount; m &lt; stations; m++) {</span>
+<span class="nc" id="L1967">			pPrec[0] = 1.0;</span>
+<span class="nc" id="L1968">			expMultPrec[0] = 0;</span>
+<span class="nc" id="L1969">			puntProb[0] = 1;</span>
+<span class="nc" id="L1970">			puntProb[1] = 0;</span>
+
+<span class="nc bnc" id="L1972" title="All 2 branches missed.">			if (m != LICount) {</span>
+<span class="nc bnc" id="L1973" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc" id="L1974">					Y[n] = visits[m - 1] / (X[n] * visits[m]);</span>
+				}
+			}
+
+<span class="nc bnc" id="L1978" title="All 2 branches missed.">			for (n = 1; n &lt;= customers; n++) {</span>
+				//calculation of waiting time at station m and of the aggregated m-1
+				//stations.
+<span class="nc" id="L1981">				ws = 0.0;</span>
+<span class="nc" id="L1982">				wcomp = 0.0;</span>
+
+<span class="nc" id="L1984">				num = puntProb[0];</span>
+<span class="nc bnc" id="L1985" title="All 2 branches missed.">				for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L1986">					ws += (puntProb[k] + 1) * servTime[m][puntProb[k] + 1] * pPrec[puntProb[k]];</span>
+<span class="nc" id="L1987">					wcomp += (n - puntProb[k]) * pPrec[puntProb[k]] * Y[n - puntProb[k]];</span>
+				}
+
+				//throughput of aggregated subsystem
+<span class="nc" id="L1991">				X[n] = n / (ws + wcomp);</span>
+
+<span class="nc" id="L1993">				nsPrec[m][n] = X[n] * ws;</span>
+<span class="nc" id="L1994">				puntProb[0] = 0;</span>
+
+				//calculation of marginal probabilities p(k,n) except k = 0, n
+<span class="nc bnc" id="L1997" title="All 2 branches missed.">				for (k = 1; k &lt; n; k++) {</span>
+<span class="nc" id="L1998">					pCorr[k] = servTime[m][k] * X[n] * pPrec[k - 1];</span>
+<span class="nc" id="L1999">					expMultCorr[k] = expMultPrec[k - 1];</span>
+<span class="nc bnc" id="L2000" title="All 2 branches missed.">					if (pCorr[k] &lt; MIN) {</span>
+<span class="nc" id="L2001">						pCorr[k] *= MAX;</span>
+<span class="nc" id="L2002">						expMultCorr[k]++;</span>
+<span class="nc bnc" id="L2003" title="All 2 branches missed.">						if (expMultCorr[k] &gt; min) {</span>
+<span class="nc" id="L2004">							min = expMultCorr[k];</span>
+						}
+<span class="nc bnc" id="L2006" title="All 2 branches missed.">					} else if (pCorr[k] &gt; MAX) {</span>
+<span class="nc" id="L2007">						pCorr[k] *= MIN;</span>
+<span class="nc" id="L2008">						expMultCorr[k]--;</span>
+					}
+<span class="nc bnc" id="L2010" title="All 2 branches missed.">					if (expMultCorr[k] == 0) {</span>
+<span class="nc" id="L2011">						puntProb[0]++;</span>
+<span class="nc" id="L2012">						puntProb[puntProb[0]] = k;</span>
+					}
+				}
+
+				//calculation of p(n,n)
+<span class="nc" id="L2017">				pCorr[n] = servTime[m][n] * X[n] * pPrec[n - 1];</span>
+<span class="nc" id="L2018">				expMultCorr[n] = expMultPrec[n - 1];</span>
+<span class="nc bnc" id="L2019" title="All 2 branches missed.">				if (pCorr[n] &lt; MIN) {</span>
+<span class="nc" id="L2020">					pCorr[n] *= MAX;</span>
+<span class="nc" id="L2021">					expMultCorr[n]++;</span>
+<span class="nc bnc" id="L2022" title="All 2 branches missed.">				} else if (pCorr[n] &gt; MAX) {</span>
+<span class="nc" id="L2023">					pCorr[n] *= MIN;</span>
+<span class="nc" id="L2024">					expMultCorr[n]--;</span>
+				}
+				//p(n,n) it is calculated, but not inserted for now....
+
+				//utilization of subsystem m at n
+<span class="nc" id="L2029">				usPrec[m][n] = 0;</span>
+
+<span class="nc" id="L2031">				num = puntProb[0];</span>
+<span class="nc bnc" id="L2032" title="All 2 branches missed.">				for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L2033">					usPrec[m][n] += pCorr[puntProb[k]];</span>
+				}
+<span class="nc bnc" id="L2035" title="All 2 branches missed.">				if (expMultCorr[n] == 0) {</span>
+<span class="nc" id="L2036">					usPrec[m][n] += pCorr[n];</span>
+				}
+
+				//calculation of p(0,n)
+<span class="nc" id="L2040">				pCorr[0] = pPrec[0] * X[n] * Y[n];</span>
+<span class="nc" id="L2041">				expMultCorr[0] = expMultPrec[0];</span>
+<span class="nc bnc" id="L2042" title="All 2 branches missed.">				if (pCorr[0] &lt; MIN) {</span>
+<span class="nc" id="L2043">					pCorr[0] *= MAX;</span>
+<span class="nc" id="L2044">					expMultCorr[0]++;</span>
+<span class="nc bnc" id="L2045" title="All 2 branches missed.">					if (expMultCorr[0] &gt; min) {</span>
+<span class="nc" id="L2046">						min = expMultCorr[0];</span>
+					}
+<span class="nc bnc" id="L2048" title="All 2 branches missed.">				} else if (pCorr[0] &gt; MAX) {</span>
+<span class="nc" id="L2049">					pCorr[0] *= MIN;</span>
+<span class="nc" id="L2050">					expMultCorr[0]--;</span>
+				}
+<span class="nc bnc" id="L2052" title="All 2 branches missed.">				if (expMultCorr[0] == 0) {</span>
+<span class="nc" id="L2053">					puntProb[0]++;</span>
+<span class="nc" id="L2054">					puntProb[puntProb[0]] = 0;</span>
+				}
+
+				//test of correctness sum(p(k,n)) = 1. only for debug
+				//if (Math.abs(usPrec[m][n]+(pCorr[0]
+				//*Math.pow(MIN, expMultCorr[0]))- 1) &gt; 0.0000000000001)
+				//    System.out.println(n+&quot; ERROR   Sum of prob : &quot;
+				//    +(usPrec[m][n]+(pCorr[0]*Math.pow(MIN, expMultCorr[0]))));
+
+				//calculation of utilization &amp; queue length of al m subsystem
+				//from n
+<span class="nc bnc" id="L2065" title="All 4 branches missed.">				for (int i = noLI ? 0 : LICount; i &lt; m; i++) {</span>
+<span class="nc" id="L2066">					nsCorr[i][n] = interm_queueLen[n][i] = 0.0;</span>
+<span class="nc" id="L2067">					usCorr[i][n] = interm_utilization[n][i] = 0.0;</span>
+
+<span class="nc" id="L2069">					num = puntProb[0];</span>
+<span class="nc bnc" id="L2070" title="All 2 branches missed.">					for (k = 1; k &lt;= num; k++) {</span>
+<span class="nc" id="L2071">						nsCorr[i][n] = interm_queueLen[n][i] += pCorr[puntProb[k]] * nsPrec[i][n - puntProb[k]];</span>
+<span class="nc" id="L2072">						usCorr[i][n] = interm_utilization[n][i] += pCorr[puntProb[k]] * usPrec[i][n - puntProb[k]];</span>
+					}
+				}
+
+				//add p(n,n)
+<span class="nc bnc" id="L2077" title="All 2 branches missed.">				if (expMultCorr[n] &gt; min) {</span>
+<span class="nc" id="L2078">					min = expMultCorr[n];</span>
+				}
+<span class="nc bnc" id="L2080" title="All 2 branches missed.">				if (expMultCorr[n] == 0) {</span>
+<span class="nc" id="L2081">					puntProb[0]++;</span>
+<span class="nc" id="L2082">					puntProb[puntProb[0]] = n;</span>
+				}
+
+<span class="nc" id="L2085">				System.arraycopy(pCorr, 0, pPrec, 0, n + 1);</span>
+<span class="nc" id="L2086">				System.arraycopy(expMultCorr, 0, expMultPrec, 0, n + 1);</span>
+			}//end of loop over all customers
+<span class="nc bnc" id="L2088" title="All 2 branches missed.">			for (int c = LICount; c &lt; m; c++) {</span>
+<span class="nc" id="L2089">				System.arraycopy(nsCorr[c], 1, nsPrec[c], 1, customers);</span>
+<span class="nc" id="L2090">				System.arraycopy(usCorr[c], 1, usPrec[c], 1, customers);</span>
+			}
+		}//end loop over all stations
+
+		/*
+		//calculation of other parameters
+		totThroughput = interm_totThroughput[customers] = X[customers] / visits[stations - 1];
+		for (m = noLI ? 0 : LICount; m &lt; stations; m++) {
+			throughput[m] = totThroughput * visits[m];
+			if (type[m] == Solver.DELAY)
+			utilization[m] = visits[m] * servTime[m][0];
+			else
+			utilization[m] = usPrec[m][customers];
+			queueLen[m] = nsPrec[m][customers];
+			residenceTime[m] = queueLen[m] / totThroughput;
+		}
+		 */
+
+		//calculation of other parameters
+<span class="nc" id="L2109">		totThroughput = interm_totThroughput[customers] = X[customers] / visits[stations - 1];</span>
+<span class="nc bnc" id="L2110" title="All 4 branches missed.">		for (m = noLI ? 0 : LICount; m &lt; stations; m++) {</span>
+<span class="nc" id="L2111">			throughput[m] = interm_throughput[customers][m] = totThroughput * visits[m];</span>
+<span class="nc bnc" id="L2112" title="All 2 branches missed.">			if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L2113">				utilization[m] = interm_utilization[customers][m] = visits[m] * servTime[m][0];</span>
+			} else {
+<span class="nc" id="L2115">				utilization[m] = interm_utilization[customers][m] = usPrec[m][customers];</span>
+			}
+<span class="nc" id="L2117">			queueLen[m] = interm_queueLen[customers][m] = nsPrec[m][customers];</span>
+<span class="nc" id="L2118">			residenceTime[m] = interm_residenceTime[customers][m] = queueLen[m] / totThroughput;</span>
+		}
+
+<span class="nc bnc" id="L2121" title="All 2 branches missed.">		if (!noLI) {</span>
+<span class="nc bnc" id="L2122" title="All 2 branches missed.">			for (m = 0; m &lt; LICount; m++) {</span>
+<span class="nc" id="L2123">				throughput[m] = interm_throughput[customers][m] = totThroughput * visits[m];</span>
+<span class="nc" id="L2124">				utilization[m] = interm_utilization[customers][m] = D[m] * totThroughput;</span>
+<span class="nc" id="L2125">				queueLen[m] = interm_queueLen[customers][m] = 0.0;</span>
+<span class="nc bnc" id="L2126" title="All 2 branches missed.">				for (n = 1; n &lt;= customers; n++) {</span>
+<span class="nc bnc" id="L2127" title="All 2 branches missed.">					if (type[m] == Solver.DELAY) {</span>
+<span class="nc" id="L2128">						residenceTime[m] = interm_residenceTime[customers][m] = D[m];</span>
+					} else {
+<span class="nc" id="L2130">						residenceTime[m] = interm_residenceTime[customers][m] = D[m] * (1 + queueLen[m]);</span>
+					}
+<span class="nc" id="L2132">					queueLen[m] = interm_queueLen[customers][m] = (X[n] / visits[stations - 1]) * residenceTime[m];</span>
+				}
+<span class="nc" id="L2134">				residenceTime[m] = interm_residenceTime[customers][m] = queueLen[m] / totThroughput;</span>
+			}
+		}
+
+		//NEW
+		//@author Stefano Omini
+
+		//other aggregate parameters
+<span class="nc" id="L2142">		totRespTime = totUser = 0;</span>
+<span class="nc bnc" id="L2143" title="All 2 branches missed.">		for (m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L2144">			totRespTime += residenceTime[m];</span>
+<span class="nc" id="L2145">			totUser += queueLen[m]; //of course should be equal to the number of customers</span>
+		}
+
+		//end NEW
+<span class="nc" id="L2149">	}</span>
+
+	/**
+	 * Restores the original positions of stations (?)
+	 */
+	private void reorder() {
+		String tempName;
+		int tempInt;
+		double tempDouble;
+<span class="nc bnc" id="L2158" title="All 2 branches missed.">		for (int i = 0; i &lt; position.length; i++) {</span>
+<span class="nc" id="L2159">			tempName = name[position[i]];</span>
+<span class="nc" id="L2160">			name[position[i]] = name[i];</span>
+<span class="nc" id="L2161">			name[i] = tempName;</span>
+
+<span class="nc" id="L2163">			tempInt = type[position[i]];</span>
+<span class="nc" id="L2164">			type[position[i]] = type[i];</span>
+<span class="nc" id="L2165">			type[i] = tempInt;</span>
+
+<span class="nc" id="L2167">			tempDouble = queueLen[position[i]];</span>
+<span class="nc" id="L2168">			queueLen[position[i]] = queueLen[i];</span>
+<span class="nc" id="L2169">			queueLen[i] = tempDouble;</span>
+
+<span class="nc" id="L2171">			tempDouble = residenceTime[position[i]];</span>
+<span class="nc" id="L2172">			residenceTime[position[i]] = residenceTime[i];</span>
+<span class="nc" id="L2173">			residenceTime[i] = tempDouble;</span>
+
+<span class="nc" id="L2175">			tempDouble = throughput[position[i]];</span>
+<span class="nc" id="L2176">			throughput[position[i]] = throughput[i];</span>
+<span class="nc" id="L2177">			throughput[i] = tempDouble;</span>
+
+<span class="nc" id="L2179">			tempDouble = utilization[position[i]];</span>
+<span class="nc" id="L2180">			utilization[position[i]] = utilization[i];</span>
+<span class="nc" id="L2181">			utilization[i] = tempDouble;</span>
+
+<span class="nc bnc" id="L2183" title="All 2 branches missed.">			if (intermediate_results) {</span>
+<span class="nc bnc" id="L2184" title="All 2 branches missed.">				for (int n = 0; n &lt;= customers; n++) {</span>
+					//also intermediate results have to be reordered
+<span class="nc" id="L2186">					tempDouble = interm_queueLen[n][position[i]];</span>
+<span class="nc" id="L2187">					interm_queueLen[n][position[i]] = interm_queueLen[n][i];</span>
+<span class="nc" id="L2188">					interm_queueLen[n][i] = tempDouble;</span>
+
+<span class="nc" id="L2190">					tempDouble = interm_residenceTime[n][position[i]];</span>
+<span class="nc" id="L2191">					interm_residenceTime[n][position[i]] = interm_residenceTime[n][i];</span>
+<span class="nc" id="L2192">					interm_residenceTime[n][i] = tempDouble;</span>
+
+<span class="nc" id="L2194">					tempDouble = interm_throughput[n][position[i]];</span>
+<span class="nc" id="L2195">					interm_throughput[n][position[i]] = interm_throughput[n][i];</span>
+<span class="nc" id="L2196">					interm_throughput[n][i] = tempDouble;</span>
+
+<span class="nc" id="L2198">					tempDouble = interm_utilization[n][position[i]];</span>
+<span class="nc" id="L2199">					interm_utilization[n][position[i]] = interm_utilization[n][i];</span>
+<span class="nc" id="L2200">					interm_utilization[n][i] = tempDouble;</span>
+				}
+			}
+			//at the end &quot;resets&quot; the position array
+<span class="nc" id="L2204">			tempInt = position[position[i]];</span>
+<span class="nc" id="L2205">			position[position[i]] = position[i];</span>
+<span class="nc" id="L2206">			position[i] = tempInt;</span>
+		}
+<span class="nc" id="L2208">	}</span>
+
+	/** generates a string with all the calculated indices.
+	 * @return the string
+	 */
+	@Override
+	public String toString() {
+<span class="nc bnc" id="L2215" title="All 2 branches missed.">		if (!intermediate_results) {</span>
+			//if intermediate results have not been saved, do not write them!
+<span class="nc" id="L2217">			return super.toString();</span>
+		}
+<span class="nc" id="L2219">		StringBuffer buf = new StringBuffer();</span>
+<span class="nc" id="L2220">		buf.append(&quot;\n------------------------------------&quot;);</span>
+<span class="nc" id="L2221">		buf.append(&quot;\nAnalysis with MVA Singleclass: intermediate results&quot;);</span>
+<span class="nc" id="L2222">		buf.append(&quot;\n\n&quot;);</span>
+
+<span class="nc bnc" id="L2224" title="All 2 branches missed.">		for (int n = 0; n &lt;= customers; n++) {</span>
+<span class="nc" id="L2225">			buf.append(&quot;\n\nPopulation = &quot; + n + &quot; customers\n\n&quot;);</span>
+<span class="nc" id="L2226">			buf.append(&quot;Queue Length (Q)&quot;);</span>
+<span class="nc" id="L2227">			buf.append(&quot;\n------------------------------------\n&quot;);</span>
+<span class="nc bnc" id="L2228" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L2229">				buf.append(&quot;[   &quot;);</span>
+<span class="nc" id="L2230">				buf.append(Printer.print(interm_queueLen[n][m], 6));</span>
+<span class="nc" id="L2231">				buf.append(&quot;   ]\n&quot;);</span>
+			}
+
+<span class="nc" id="L2234">			buf.append(&quot;\n\n&quot;);</span>
+<span class="nc" id="L2235">			buf.append(&quot;Residence Time (R)&quot;);</span>
+<span class="nc" id="L2236">			buf.append(&quot;\n------------------------------------\n&quot;);</span>
+<span class="nc bnc" id="L2237" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L2238">				buf.append(&quot;[   &quot;);</span>
+<span class="nc" id="L2239">				buf.append(Printer.print(interm_residenceTime[n][m], 6));</span>
+<span class="nc" id="L2240">				buf.append(&quot;   ]\n&quot;);</span>
+			}
+
+<span class="nc" id="L2243">			buf.append(&quot;\n\n&quot;);</span>
+<span class="nc" id="L2244">			buf.append(&quot;Throughput (X)&quot;);</span>
+<span class="nc" id="L2245">			buf.append(&quot;\n------------------------------------\n&quot;);</span>
+<span class="nc bnc" id="L2246" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L2247">				buf.append(&quot;[   &quot;);</span>
+<span class="nc" id="L2248">				buf.append(Printer.print(interm_throughput[n][m], 6));</span>
+<span class="nc" id="L2249">				buf.append(&quot;   ]\n&quot;);</span>
+			}
+
+<span class="nc" id="L2252">			buf.append(&quot;\n\n&quot;);</span>
+<span class="nc" id="L2253">			buf.append(&quot;Utilization (U)&quot;);</span>
+<span class="nc" id="L2254">			buf.append(&quot;\n------------------------------------\n&quot;);</span>
+<span class="nc bnc" id="L2255" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L2256">				buf.append(&quot;[   &quot;);</span>
+<span class="nc" id="L2257">				buf.append(Printer.print(interm_utilization[n][m], 6));</span>
+<span class="nc" id="L2258">				buf.append(&quot;   ]\n&quot;);</span>
+			}
+		}
+
+<span class="nc" id="L2262">		return buf.toString();</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

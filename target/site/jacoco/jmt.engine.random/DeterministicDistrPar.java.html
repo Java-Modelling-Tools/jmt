@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DeterministicDistrPar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">DeterministicDistrPar.java</span></div><h1>DeterministicDistrPar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+
+/**
+ * 
+ * This is the parameter that should be passed to the Deterministic
+ * distribution.
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Fabrizio Frontera - ffrontera@yahoo.it
+ * 
+ */
+public class DeterministicDistrPar extends AbstractParameter implements Parameter {
+
+	private double t;
+
+	/**
+	 * It creates a new deterministic parameter. It accepts a double greater
+	 * than zero and uses this number as the constant value that will be returned.
+	 *
+	 * @param t Parameter of the deterministic distribution. It is the value which is always returned.
+	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
+	 */
+<span class="nc" id="L44">	public DeterministicDistrPar(double t) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L45">		this.t = t;</span>
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if (!check()) {</span>
+<span class="nc" id="L47">			throw new IncorrectDistributionParameterException(&quot;t &lt;= 0&quot;);</span>
+		}
+<span class="nc" id="L49">	}</span>
+
+	/**
+	 * It creates a new deterministic parameter. It accepts a Double greater
+	 * than zero and uses this number as the constant value that will be returned.
+	 *
+	 * @param t Parameter of the deterministic distribution. It is the value which is always returned.
+	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
+	 */
+	public DeterministicDistrPar(Double t) throws IncorrectDistributionParameterException {
+<span class="nc" id="L59">		this(t.doubleValue());</span>
+<span class="nc" id="L60">	}</span>
+
+	/**
+	 * It controls if the parameter is correct or not. For the deterministic distribution,
+	 * the parameter is correct if it is greater than zero.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	@Override
+	public boolean check() {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if (t &lt;= 0) {</span>
+<span class="nc" id="L72">			return false;</span>
+		} else {
+<span class="nc" id="L74">			return true;</span>
+		}
+	}
+
+	/**
+	 * It returns the value of the parameter of the deterministic distribution, that is
+	 * the constant value provided by the user.
+	 *
+	 * @return the value always returned by the distribution.
+	 *
+	 */
+	public double getParameterValue() {
+<span class="nc" id="L86">		return t;</span>
+	}
+
+	/**
+	 * It allows the user to change the value of the parameter of the deterministic distribution.
+	 * It verifies if the new value is correct (must be greater than zero).
+	 *
+	 * @param t double indicating the new value of the parameter.
+	 * @throws IncorrectDistributionParameterException if the provided parameter is not greater than zero.
+	 *
+	 */
+	public void setParameterValue(double t) throws IncorrectDistributionParameterException {
+<span class="nc" id="L98">		this.t = t;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!check()) {</span>
+<span class="nc" id="L100">			throw new IncorrectDistributionParameterException(&quot;t &lt;= 0&quot;);</span>
+		}
+<span class="nc" id="L102">	}</span>
+
+	/**
+	 * Sets mean for a given distribution parameter. This method is required to adjust the mean value
+	 * of a distribution into Load Dependent Service Time Strategy.
+	 * &lt;br&gt;Author: Bertoli Marco
+	 * @param value New mean value for this distribution.
+	 * @throws IncorrectDistributionParameterException if mean value is invalid for this distribution.
+	 */
+	@Override
+	public void setMean(double value) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (value &lt;= 0) {</span>
+<span class="nc" id="L114">			throw new IncorrectDistributionParameterException(&quot;Mean value must be greater than zero&quot;);</span>
+		}
+<span class="nc" id="L116">		t = value;</span>
+<span class="nc" id="L117">	}</span>
+
+} // end DeterministicDistrPar
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

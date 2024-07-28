@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractMCHAction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.wizard.actionsWizard</a> &gt; <span class="el_source">AbstractMCHAction.java</span></div><h1>AbstractMCHAction.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 2 of the License, or
+* (at your option) any later version.
+
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+
+* You should have received a copy of the GNU General Public License
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+*/
+
+package jmt.jmch.wizard.actionsWizard;
+
+import jmt.framework.gui.listeners.AbstractJMTAction;
+import jmt.gui.common.JMTImageLoader;
+import jmt.jmch.wizard.panels.JMCHWizardPanel;
+
+/**
+ * Defines the Abstract action of this application, it is connected to the
+ * WizardPanelMCH which has the responsibility to react to it.
+
+ * @author Lorenzo Torri
+ * Date: 29-mar-2024
+ * Time: 15.30
+ */
+public abstract class AbstractMCHAction extends AbstractJMTAction {
+
+    private static final long serialVersionUID = 1L;
+    protected JMCHWizardPanel panel;
+
+    /**
+     * Defines an &lt;code&gt;Action&lt;/code&gt; object with a default
+     * description string and default icon.
+     */
+<span class="nc" id="L42">    public AbstractMCHAction(String name, JMCHWizardPanel panel) {</span>
+<span class="nc" id="L43">        this.setName(name);</span>
+<span class="nc" id="L44">        this.panel = panel;</span>
+<span class="nc" id="L45">    }</span>
+
+    /**
+     * Defines an &lt;code&gt;Action&lt;/code&gt; object with the specified
+     * description string and a the specified icon.
+     */
+    public AbstractMCHAction(String name, String iconName, JMCHWizardPanel panel) {
+<span class="nc" id="L52">        this(name, panel);</span>
+<span class="nc" id="L53">        this.setIcon(iconName, JMTImageLoader.getImageLoader());</span>
+<span class="nc" id="L54">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

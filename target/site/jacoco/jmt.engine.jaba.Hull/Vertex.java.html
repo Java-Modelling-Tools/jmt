@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Vertex.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba.Hull</a> &gt; <span class="el_source">Vertex.java</span></div><h1>Vertex.java</h1><pre class="source lang-java linenums">// Copyright (C) Chris Pudney, The University of Western Australia, 1998.
+// All rights reserved.
+//  
+// Permission to use, copy, modify and distribute this software and its
+// documentation only for the purposes of teaching and research is hereby
+// granted without fee, provided that the above copyright notice and this
+// permission notice appear in all copies of this software/documentation
+// and that you do not sell the software.  No commercial use or
+// distribution of the software is permitted without the consent of the
+// copyright owners.  Commercial licensing is available by contacting the
+// author(s).
+// 
+// THIS SOFTWARE/DOCUMENTATION IS PROVIDED WITH NO WARRANTY, EXPRESS OR
+// IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTY OF MERCHANTABILITY OR
+// FITNESS FOR A PARTICULAR PURPOSE.
+
+package jmt.engine.jaba.Hull;
+
+/**
+ * A class defining a vertex.
+ *
+ * @author  Chris Pudney &lt;cpudney@alphapharm.pharm.uwa.edu.au&gt;
+ * @version 1.1
+ */
+public class Vertex {
+	/**
+	 * The 3D coordinates (x, y, z) of the vertex.
+	 */
+	private int x;
+	/**
+	 * The 3D coordinates (x, y, z) of the vertex.
+	 */
+	private int y;
+	/**
+	 * The 3D coordinates (x, y, z) of the vertex.
+	 */
+	private int z;
+
+	/**
+	 * Construct the vertex at (0, 0, 0).
+	 */
+<span class="nc" id="L42">	public Vertex() {</span>
+<span class="nc" id="L43">		x = 0;</span>
+<span class="nc" id="L44">		y = 0;</span>
+<span class="nc" id="L45">		z = 0;</span>
+<span class="nc" id="L46">	}</span>
+
+	/**
+	 * Construct a vertex given a set of coordinates.
+	 *
+	 * @param x, y, z  The coordinates.
+	 */
+<span class="nc" id="L53">	public Vertex(int x, int y, int z) {</span>
+<span class="nc" id="L54">		this.x = x;</span>
+<span class="nc" id="L55">		this.y = y;</span>
+<span class="nc" id="L56">		this.z = z;</span>
+<span class="nc" id="L57">	}</span>
+
+	/**
+	 * Get the coordinates of the vertex.
+	 *
+	 * @return An array of three integers containing the coordinates (x, y, z).
+	 */
+	public int[] getCoords() {
+<span class="nc" id="L65">		int[] c = new int[3];</span>
+
+<span class="nc" id="L67">		c[0] = x;</span>
+<span class="nc" id="L68">		c[1] = y;</span>
+<span class="nc" id="L69">		c[2] = z;</span>
+<span class="nc" id="L70">		return c;</span>
+	}
+
+	/**
+	 * Tests whether two vertices are the same point.
+	 *
+	 * @param  v1, v2  the vertices to compare
+	 * @return True/false if the vertices are the same/different.
+	 */
+	public static boolean sameVertex(Vertex v1, Vertex v2) {
+<span class="nc bnc" id="L80" title="All 8 branches missed.">		return v1 == v2 || (v1.x == v2.x &amp;&amp; v1.y == v2.y &amp;&amp; v1.z == v2.z);</span>
+	}
+
+	/**
+	 * Tests whether three vertices are collinear.
+	 *
+	 * @param  v1, v2, v3  the vertices to test
+	 * @return True/false if the vertices are collinear/non-collinear
+	 */
+	public static boolean collinear(Vertex v1, Vertex v2, Vertex v3) {
+<span class="nc" id="L90">		long x1 = v1.x, y1 = v1.y, z1 = v1.z;</span>
+<span class="nc" id="L91">		long x2 = v2.x, y2 = v2.y, z2 = v2.z;</span>
+<span class="nc" id="L92">		long x3 = v3.x, y3 = v3.y, z3 = v3.z;</span>
+<span class="nc bnc" id="L93" title="All 6 branches missed.">		return (z3 - z1) * (y2 - y1) - (z2 - z1) * (y3 - y1) == 0 &amp;&amp; (z2 - z1) * (x3 - x1) - (x2 - x1) * (z3 - z1) == 0</span>
+				&amp;&amp; (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1) == 0;
+	}
+
+	/**
+	 * Returns the pair of vertices that bound three collinear vertices.
+	 * 
+	 * @param  v1, v2, v3  the vertices to test
+	 * @return An array of two vertices that bound the tested vertices
+	 */
+	public static Vertex[] bounds(Vertex v1, Vertex v2, Vertex v3) {
+		Vertex min12, max12;
+
+		// Compare v1 and v2    
+<span class="nc bnc" id="L107" title="All 2 branches missed.">		if (v1.x == v2.x) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (v1.y == v2.y) {</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">				if (v1.z &lt;= v2.z) {</span>
+<span class="nc" id="L110">					min12 = v1;</span>
+<span class="nc" id="L111">					max12 = v2;</span>
+				} else {
+<span class="nc" id="L113">					min12 = v2;</span>
+<span class="nc" id="L114">					max12 = v1;</span>
+				}
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			} else if (v1.y &lt; v2.y) {</span>
+<span class="nc" id="L117">				min12 = v1;</span>
+<span class="nc" id="L118">				max12 = v2;</span>
+			} else {
+<span class="nc" id="L120">				min12 = v2;</span>
+<span class="nc" id="L121">				max12 = v1;</span>
+			}
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		} else if (v1.x &lt; v2.x) {</span>
+<span class="nc" id="L124">			min12 = v1;</span>
+<span class="nc" id="L125">			max12 = v2;</span>
+		} else {
+<span class="nc" id="L127">			min12 = v2;</span>
+<span class="nc" id="L128">			max12 = v1;</span>
+		}
+
+<span class="nc" id="L131">		Vertex[] bounds = new Vertex[2];</span>
+
+		// Compare min of v1, v2 with v3
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (min12.x == v3.x) {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">			if (min12.y == v3.y) {</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				bounds[0] = min12.z &lt;= v3.z ? min12 : v3;</span>
+			} else {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">				bounds[0] = min12.y &lt; v3.y ? min12 : v3;</span>
+			}
+		} else {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			bounds[0] = min12.x &lt; v3.x ? min12 : v3;</span>
+		}
+
+		// Compare max of v1, v2 with v3
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if (max12.x == v3.x) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">			if (max12.y == v3.y) {</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">				bounds[1] = max12.z &gt;= v3.z ? max12 : v3;</span>
+			} else {
+<span class="nc bnc" id="L149" title="All 2 branches missed.">				bounds[1] = max12.y &gt; v3.y ? max12 : v3;</span>
+			}
+		} else {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">			bounds[1] = max12.x &gt; v3.x ? max12 : v3;</span>
+		}
+<span class="nc" id="L154">		return bounds;</span>
+	}
+
+	/** 
+	 * Returns the square of the distance between two vertices.
+	 *
+	 * @param v1, v2  the vertices
+	 * @return        the distance squared between them
+	 */
+	public static long distanceSquared(Vertex v1, Vertex v2) {
+<span class="nc" id="L164">		long x1 = v1.x, y1 = v1.y, z1 = v1.z;</span>
+<span class="nc" id="L165">		long x2 = v2.x, y2 = v2.y, z2 = v2.z;</span>
+<span class="nc" id="L166">		return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2);</span>
+	}
+
+	/**
+	  * Returns the square of the norm of a vector
+	  *
+	  * @param v  the vector
+	  * @return   the square of the norm of v
+	  */
+	public long normSq() {
+<span class="nc" id="L176">		long x = this.x;</span>
+<span class="nc" id="L177">		long y = this.y;</span>
+<span class="nc" id="L178">		long z = this.z;</span>
+<span class="nc" id="L179">		return x * x + y * y + z * z;</span>
+	}
+
+	/**
+	 * Returns the dot product of two vectors
+	 *
+	 * @param v1, v2  the vectors
+	 * @return        v1.v2
+	 */
+	public static long dotProduct(Vertex v1, Vertex v2) {
+<span class="nc" id="L189">		long x1 = v1.x, y1 = v1.y, z1 = v1.z;</span>
+<span class="nc" id="L190">		long x2 = v2.x, y2 = v2.y, z2 = v2.z;</span>
+<span class="nc" id="L191">		return x1 * x2 + y1 * y2 + z1 * z2;</span>
+	}
+
+	/**
+	  * Returns the vector difference between two vertices
+	  *
+	  * @param v1, v2  the vertices
+	  * @return        v1 - v2
+	  */
+	public static Vertex vectorDiff(Vertex v1, Vertex v2) {
+<span class="nc" id="L201">		return new Vertex(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);</span>
+	}
+
+	/**
+	  * Returns the cross product of two vectors
+	  *
+	  * @param v1, v2  the vectors
+	  * @return        v1 x v2
+	  */
+	public static Vertex crossProduct(Vertex v1, Vertex v2) {
+<span class="nc" id="L211">		return new Vertex(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);</span>
+	}
+
+	/**
+	 * Returns a string that describes a vertex.
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L219">		return (&quot;(&quot; + x + &quot;, &quot; + y + &quot;, &quot; + z + &quot;)&quot;);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DialogFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph</a> &gt; <span class="el_source">DialogFactory.java</span></div><h1>DialogFactory.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import jmt.framework.gui.components.JMTDialog;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+
+/**
+ * &lt;p&gt;Title: Parameter selection Dialog Factory&lt;/p&gt;
+ * &lt;p&gt;Description: Creates a modal dialog box into main window that displays given
+ * panel. This class is used to enter input parameters of the model.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 2-giu-2005
+ *         Time: 19.52.26
+ */
+public class DialogFactory {
+
+	// Private variables
+	private JMTDialog dialogFrame;
+	private Frame mainWindow;
+
+	/**
+	 * Creates a new DialogFactory
+	 * @param mainWindow owner frame for created dialogs.
+	 */
+<span class="nc" id="L57">	public DialogFactory(Frame mainWindow) {</span>
+<span class="nc" id="L58">		this.mainWindow = mainWindow;</span>
+<span class="nc" id="L59">	}</span>
+
+	private void createDialog(int width, int height) {
+		// Creates modal dialog
+<span class="nc" id="L63">		dialogFrame = new JMTDialog(mainWindow, true);</span>
+<span class="nc" id="L64">		dialogFrame.centerWindow(width, height);</span>
+<span class="nc" id="L65">		dialogFrame.setResizable(true);</span>
+<span class="nc" id="L66">		dialogFrame.getContentPane().setLayout(new BorderLayout());</span>
+
+		//Adds button bar
+<span class="nc" id="L69">		JPanel buttonbar = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L70">		dialogFrame.getContentPane().add(buttonbar, BorderLayout.SOUTH);</span>
+
+		// Adds Close button
+<span class="nc" id="L73">		JButton closebutton = new JButton();</span>
+<span class="nc" id="L74">		closebutton.setText(&quot;Done&quot;);</span>
+<span class="nc" id="L75">		closebutton.setToolTipText(&quot;Closes this window&quot;);</span>
+<span class="nc" id="L76">		closebutton.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+				// If this contains wizard panels, calls lostFocus() method
+<span class="nc bnc" id="L79" title="All 2 branches missed.">				for (int i = 0; i &lt; dialogFrame.getContentPane().getComponentCount(); i++) {</span>
+<span class="nc" id="L80">					Component cmp = dialogFrame.getContentPane().getComponent(i);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">					if (cmp instanceof WizardPanel) {</span>
+<span class="nc" id="L82">						((WizardPanel) cmp).lostFocus();</span>
+					}
+				}
+<span class="nc" id="L85">				dialogFrame.close();</span>
+<span class="nc" id="L86">			}</span>
+		});
+<span class="nc" id="L88">		buttonbar.add(closebutton);</span>
+<span class="nc" id="L89">	}</span>
+
+	/**
+	 * Returns modal dialog box showing given panel and with given title
+	 * @param panel to be shown on the center area of this dialog
+	 * @param title title of this dialog
+	 */
+	public void getDialog(final JComponent panel, String title) {
+<span class="nc" id="L97">		getDialog(panel, title, CommonConstants.MAX_GUI_WIDTH_DIALOG_DEFAULT, CommonConstants.MAX_GUI_HEIGHT_DIALOG_DEFAULT, false, &quot;&quot;, &quot;&quot;);</span>
+<span class="nc" id="L98">	}</span>
+
+	/**
+	 * Returns modal dialog box showing given panel and with given title
+	 * @param panel to be shown on the center area of this dialog
+	 * @param title title of this dialog
+	 */
+	public void getDialog(final JComponent panel, String title, int width, int height, boolean saveSize, String defaultWidthProp, String defaultHeightProp) {
+<span class="nc" id="L106">		createDialog(width, height);</span>
+		// Adds input panel
+<span class="nc" id="L108">		dialogFrame.getContentPane().add(panel, BorderLayout.CENTER);</span>
+		// Sets title
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (title != null) {</span>
+<span class="nc" id="L111">			dialogFrame.setTitle(title);</span>
+		}
+		// If this is a wizard panel call gotFocus() method
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		if (panel instanceof WizardPanel) {</span>
+<span class="nc" id="L115">			((WizardPanel) panel).gotFocus();</span>
+		}
+		// Shows dialog
+<span class="nc" id="L118">		dialogFrame.setVisible(true);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if (saveSize) {</span>
+<span class="nc" id="L120">			Dimension d = dialogFrame.getSize();</span>
+<span class="nc" id="L121">			Defaults.set(defaultWidthProp, String.valueOf(d.width));</span>
+<span class="nc" id="L122">			Defaults.set(defaultHeightProp, String.valueOf(d.height));</span>
+<span class="nc" id="L123">			Defaults.save();</span>
+		}
+<span class="nc" id="L125">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

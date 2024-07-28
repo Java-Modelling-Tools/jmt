@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QNAnimator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.startScreen</a> &gt; <span class="el_source">QNAnimator.java</span></div><h1>QNAnimator.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.startScreen;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.util.Vector;
+
+import javax.swing.JPanel;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: OrsotronIII
+ * Date: 3-dic-2004
+ * Time: 17.49.12
+ * This component shows an animation representing a queue network.
+ * Only for graphical purposes.
+ */
+public class QNAnimator extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	//this inner class is a thread that must repaint every 0.033 seconds the qnanimator.
+	class Mover extends Thread {
+		//animation to be repainted
+		QNAnimator qna;
+		//flag representing execution state of this thread
+<span class="nc" id="L47">		boolean fRunning = false;</span>
+		//time of this animation
+		long time;
+
+<span class="nc" id="L51">		public Mover(QNAnimator animator) {</span>
+<span class="nc" id="L52">			qna = animator;</span>
+<span class="nc" id="L53">		}</span>
+
+		@Override
+		public void start() {
+<span class="nc" id="L57">			fRunning = true;</span>
+<span class="nc" id="L58">		}</span>
+
+		@Override
+		public void run() {
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			while (fRunning) {</span>
+				//while this trhead is running, repaints the animation every 0.033 seconds
+				try {
+<span class="nc" id="L65">					time += 33;</span>
+<span class="nc" id="L66">					qna.repaint(time);</span>
+<span class="nc" id="L67">					sleep(33);</span>
+<span class="nc" id="L68">				} catch (InterruptedException e) {</span>
+<span class="nc" id="L69">					qna.repaint();</span>
+<span class="nc" id="L70">				}</span>
+			}
+<span class="nc" id="L72">		}</span>
+
+		//pauses execution of this thread
+		public void freeze() {
+<span class="nc" id="L76">			fRunning = false;</span>
+<span class="nc" id="L77">		}</span>
+
+		//resumes execution
+		public void wakeUp() {
+<span class="nc" id="L81">			fRunning = true;</span>
+<span class="nc" id="L82">		}</span>
+
+		//stops this thread
+		public void kill() {
+<span class="nc" id="L86">			fRunning = false;</span>
+<span class="nc" id="L87">		}</span>
+	}
+
+	//reference to the thread that must repaint this animation
+	Mover mover;
+
+	interface ConsumerProducer {
+		public void addJob(Job j);
+
+		public void addConsumer(ConsumerProducer cp);
+	}
+
+	//represents an edge of the queue network
+	class Path {
+		//time this instance was created, used set animation frames
+<span class="nc" id="L102">		private long birthTime = System.currentTimeMillis();</span>
+		//speed for the jobs on this path
+		private double jobSpeed;
+		//angles of this path
+		private int[] xPoints;
+		private int[] yPoints;
+
+<span class="nc" id="L109">		public Path(int[] xCoords, int[] yCoords, double speed) {</span>
+<span class="nc" id="L110">			xPoints = xCoords;</span>
+<span class="nc" id="L111">			yPoints = yCoords;</span>
+<span class="nc" id="L112">			jobSpeed = speed;</span>
+<span class="nc" id="L113">		}</span>
+	}
+
+	//represents a station
+<span class="nc" id="L117">	class Station {</span>
+		//jobs that are currently in this station
+<span class="nc" id="L119">		Vector jobs = new Vector();</span>
+
+	}
+
+	//represents a job
+	class Job {
+		Image i;
+
+<span class="nc" id="L127">		public Job() {</span>
+
+<span class="nc" id="L129">		}</span>
+
+<span class="nc" id="L131">		public Job(Image jobImg) {</span>
+<span class="nc" id="L132">			i = jobImg;</span>
+<span class="nc" id="L133">		}</span>
+
+		public void paint(Graphics g, int x, int y) {
+
+<span class="nc" id="L137">		}</span>
+	}
+
+	public QNAnimator(java.awt.LayoutManager lm) {
+<span class="nc" id="L141">		super(lm);</span>
+<span class="nc" id="L142">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

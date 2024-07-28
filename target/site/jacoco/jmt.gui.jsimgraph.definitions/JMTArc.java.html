@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JMTArc.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.definitions</a> &gt; <span class="el_source">JMTArc.java</span></div><h1>JMTArc.java</h1><pre class="source lang-java linenums">package jmt.gui.jsimgraph.definitions;
+
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+
+
+/**
+ * &lt;p&gt;Title: JmtArc connection structure&lt;/p&gt;
+ * &lt;p&gt;Description: This class is used to defined the arcs composing the Bezier curves&lt;/p&gt;
+ *
+ * @author Emma Bortone
+ *         Date: 13-feb-2020
+ *         Time: 13.33.00
+ *
+ */
+
+public class JMTArc {
+
+    private static final long serialVersionUID = 1L;
+    protected ArrayList&lt;Point2D&gt; arcPoints ;
+    protected Point2D target ;
+    protected Point2D source ;
+
+<span class="fc" id="L24">    public JMTArc(Point2D source, ArrayList&lt;Point2D&gt; arcPoints, Point2D target) {</span>
+<span class="fc" id="L25">        this.source = source;</span>
+<span class="fc" id="L26">        this.arcPoints = arcPoints;</span>
+<span class="fc" id="L27">        this.target = target;</span>
+<span class="fc" id="L28">    }</span>
+
+<span class="nc" id="L30">    public JMTArc(JMTArc original) {</span>
+<span class="nc" id="L31">        this.source = (Point2D) original.source.clone();</span>
+<span class="nc" id="L32">        this.arcPoints = new ArrayList&lt;Point2D&gt;();</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        for(int i=0;i&lt;original.arcPoints.size();i++){</span>
+<span class="nc" id="L34">            arcPoints.add((Point2D) original.arcPoints.get(i).clone());</span>
+        }
+<span class="nc" id="L36">        this.target = (Point2D) original.target.clone();</span>
+<span class="nc" id="L37">    }</span>
+
+    public ArrayList&lt;Point2D&gt; getArcPoints() {
+<span class="fc" id="L40">        return arcPoints;</span>
+    }
+
+    public Point2D getTarget() {
+<span class="fc" id="L44">        return target;</span>
+    }
+    public Point2D getSource() {
+<span class="fc" id="L47">        return source;</span>
+    }
+
+    public void setSource(Point2D source){
+<span class="nc" id="L51">        this.source=source;</span>
+<span class="nc" id="L52">    }</span>
+
+    public void setTarget(Point2D target){
+<span class="nc" id="L55">        this.target=target;</span>
+<span class="nc" id="L56">    }</span>
+
+    public void setFirstControlPoint(Point2D tangentSource){
+<span class="nc" id="L59">        this.arcPoints.set(0,tangentSource);</span>
+<span class="nc" id="L60">    }</span>
+
+    public void setSecondControlPoint(Point2D tangentTarget){
+<span class="nc" id="L63">        this.arcPoints.set(1,tangentTarget);</span>
+<span class="nc" id="L64">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

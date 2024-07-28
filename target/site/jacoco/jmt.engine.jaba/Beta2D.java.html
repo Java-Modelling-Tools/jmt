@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Beta2D.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba</a> &gt; <span class="el_source">Beta2D.java</span></div><h1>Beta2D.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jaba;
+
+import java.util.Vector;
+
+import Jama.Matrix;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: PoliMi
+ * Date: 25-lug-2005
+ * Time: 10.48.18
+ * To change this template use File | Settings | File Templates.
+ */
+<span class="nc" id="L32">public class Beta2D {</span>
+
+<span class="nc" id="L34">	double EPSYLON = 0.0001; //costant for the approximations</span>
+        
+	/**
+	 * Given two points p1 and p2 the method return the betas of the saturation
+         * sector by means of solving a system of linear equations
+	 * @param p1
+	 * @param p2
+	 * @return a sector Sector2D with the coordinates in the space of the betas and the associated service demands
+         */
+	public Sector2D BetaCalc2D(newPoint p1, newPoint p2) {
+<span class="nc" id="L44">		double[][] arraya = { { 1, 1, 0, 0 }, { 0, 0, 1, 1 }, { -p2.getX(), 0, p1.getX(), 0 }, { 0, p2.getY(), 0, -p1.getY() } };</span>
+<span class="nc" id="L45">		double[][] arrayb = { { 1 }, { 1 }, { 0 }, { 0 } };</span>
+<span class="nc" id="L46">		Matrix A = new Matrix(arraya);</span>
+<span class="nc" id="L47">		Matrix b = new Matrix(arrayb);</span>
+<span class="nc" id="L48">		Matrix x = A.solve(b);</span>
+		// Creates a new sector with the associates solutions and points
+<span class="nc" id="L50">                Sector2D out = new Sector2D(x.get(0, 0), x.get(1, 0), x.get(2, 0), x.get(3, 0), p1, p2);</span>
+<span class="nc" id="L51">		return out;</span>
+	}
+
+	/**
+         * Given a vector of vertices returns a vector double[] representing
+         * the betas and the points in the associated sector
+	 * @param verticesnp    the vector of vertices
+         * @return              a vector with the beta with the data structures in BetaCal2D
+	 */
+	public Vector&lt;Sector2D&gt; BetaVector(Vector&lt;newPoint&gt; verticesnp) {
+<span class="nc" id="L61">		Vector&lt;Sector2D&gt; sector = new Vector&lt;Sector2D&gt;();</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		for (int i = 0; i &lt; (verticesnp.size() - 1); i++) {</span>
+<span class="nc" id="L63">			Sector2D out = new Sector2D();</span>
+<span class="nc" id="L64">			out = BetaCalc2D(verticesnp.get(i), verticesnp.get(i + 1));</span>
+<span class="nc" id="L65">			sector.addElement(out);</span>
+		}
+<span class="nc" id="L67">		return sector;</span>
+	}
+
+	/**
+         * The method associates a vector passed from BetaVector to each sector 
+         * a station, exploding in such a way to obtain also the sectors where
+         * a single station saturates
+	 * @param sector        a vettore passed by BetaVector
+	 * @return              {b1,1-b1,b2,1-b2,xa,ya,xb,yb}
+	 *                      if in the sector saturates a single station=&gt;xb,yb=-1
+	 */
+	public Vector&lt;Sector2D&gt; StatAss(Vector&lt;Sector2D&gt; sector) {
+		//Util2d uti = new Util2d();
+<span class="nc" id="L80">		Vector&lt;Sector2D&gt; out = new Vector&lt;Sector2D&gt;();</span>
+		// Suppose to have 2 intervals [b1,1-b1]-&gt;[b2,1-b2] and [b3,1-b3]-&gt;[b4,1-b4]
+
+		// if b1!=0 associate to station A the interval [0,1]-&gt;[b1,1-b1]
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if (sector.get(0).getBeta1() &gt; EPSYLON) {</span>
+<span class="nc" id="L85">			Sector2D sss = new Sector2D(0, 1, sector.get(0).getBeta1(), sector.get(0).getBeta11(), sector.get(0).getP1());</span>
+<span class="nc" id="L86">			out.addElement(sss);</span>
+		}
+
+		// Now proceed to scanning all intervals
+<span class="nc bnc" id="L90" title="All 2 branches missed.">                for (int i = 0; i &lt; (sector.size()); i++) {</span>
+
+			// Normal sectors
+
+<span class="nc" id="L94">			Sector2D sss = new Sector2D(sector.get(i).getBeta1(), sector.get(i).getBeta11(), sector.get(i).getBeta2(), sector.get(i).getBeta22(),</span>
+<span class="nc" id="L95">					sector.get(i).getP1(), sector.get(i).getP2());</span>
+<span class="nc" id="L96">			out.addElement(sss);</span>
+
+			// if the extremes b2 and b3 do not coincide (except EPSYLON) associate b2--&gt;b3 to the station b2
+<span class="nc bnc" id="L99" title="All 2 branches missed.">			if (i != (sector.size() - 1) //TODO: check extension</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">					&amp;&amp; (sector.get(i + 1).getBeta1() - sector.get(i).getBeta2()) &gt; EPSYLON) {</span>
+<span class="nc" id="L101">				Sector2D ss1 = new Sector2D(sector.get(i).getBeta2(), sector.get(i).getBeta22(), sector.get(i + 1).getBeta1(), sector.get(i + 1)</span>
+<span class="nc" id="L102">						.getBeta11(), sector.get(i).getP2());</span>
+<span class="nc" id="L103">				out.addElement(ss1);</span>
+<span class="nc" id="L104">			}</span>
+
+			//Associate the last station to the interval b4-&gt;1 if b4!=0
+<span class="nc bnc" id="L107" title="All 4 branches missed.">			else if (i == (sector.size() - 1) &amp;&amp; sector.get(i).getBeta2() != 1) {</span>
+<span class="nc" id="L108">				Sector2D ssf = new Sector2D(sector.get(i).getBeta2(), sector.get(i).getBeta22(), 1, 0, sector.get(i).getP2()); //aggiungere ,end</span>
+<span class="nc" id="L109">				out.addElement(ssf);</span>
+			}
+
+		}
+<span class="nc" id="L113">		return out;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

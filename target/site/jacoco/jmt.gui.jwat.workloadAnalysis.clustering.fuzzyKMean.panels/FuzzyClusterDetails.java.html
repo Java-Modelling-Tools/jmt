@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FuzzyClusterDetails.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels</a> &gt; <span class="el_source">FuzzyClusterDetails.java</span></div><h1>FuzzyClusterDetails.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import jmt.engine.jwat.Observation;
+import jmt.engine.jwat.VariableNumber;
+import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusteringInfosFuzzy;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.FuzzyKMean;
+import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
+import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.jwat.workloadAnalysis.chart.FuzzyKSingleClusterScatter;
+
+public class FuzzyClusterDetails extends JPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private JButton loadInfo;
+	private JButton saveInfo;
+	private JTextArea infoCluster;
+	private ModelWorkloadAnalysis model;
+	private WorkloadAnalysisSession session;
+
+	private JComboBox&lt;String&gt; xVar;
+	private JComboBox&lt;String&gt; yVar;
+	private SingleScatter panel;
+<span class="nc" id="L74">	private int cluster = -1;</span>
+<span class="nc" id="L75">	private int match = 0;</span>
+	private int clustering;
+<span class="nc" id="L77">	private boolean redraw = true;</span>
+
+<span class="nc" id="L79">	public FuzzyClusterDetails(WorkloadAnalysisSession m, int clustering, int cluster) {</span>
+<span class="nc" id="L80">		this.model = (ModelWorkloadAnalysis) m.getDataModel();</span>
+<span class="nc" id="L81">		this.session = m;</span>
+<span class="nc" id="L82">		this.clustering = clustering;</span>
+<span class="nc" id="L83">		this.cluster = cluster;</span>
+<span class="nc" id="L84">		initPanel();</span>
+<span class="nc" id="L85">	}</span>
+
+	public void setCluster(int value) {
+<span class="nc" id="L88">		this.match = value + 2;</span>
+<span class="nc" id="L89">		infoCluster.setText(&quot;&quot;);</span>
+<span class="nc" id="L90">		redraw = true;</span>
+<span class="nc" id="L91">		panel.repaint();</span>
+<span class="nc" id="L92">	}</span>
+
+	private void initPanel() {
+<span class="nc" id="L95">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L96">		setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;Single cluster details&quot;));</span>
+<span class="nc" id="L97">		panel = new SingleScatter();</span>
+
+<span class="nc" id="L99">		infoCluster = new JTextArea();</span>
+<span class="nc" id="L100">		infoCluster.setEditable(false);</span>
+<span class="nc" id="L101">		infoCluster.setFont(new Font(infoCluster.getFont().getName(), infoCluster.getFont().getStyle(), infoCluster.getFont().getSize() + 1));</span>
+
+<span class="nc" id="L103">		JScrollPane sp = new JScrollPane(infoCluster, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,</span>
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+<span class="nc" id="L106">		loadInfo = new JButton(&quot;Show Obser.&quot;);</span>
+<span class="nc" id="L107">		loadInfo.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L110">				int ret = JOptionPane.showConfirmDialog(FuzzyClusterDetails.this, &quot;This operation may require several minutes, continue? &quot;,</span>
+						&quot;Warning!!&quot;, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+<span class="nc bnc" id="L112" title="All 2 branches missed.">				if (ret == JOptionPane.YES_OPTION) {</span>
+<span class="nc" id="L113">					Observation[] o = model.getMatrix().getVariables()[0].getCurObs();</span>
+<span class="nc" id="L114">					String s = &quot;&quot;;</span>
+<span class="nc" id="L115">					short[] c1 = ((ClusteringInfosFuzzy) ((FuzzyKMean) session.getListOfClustering().get(clustering)).getClusteringInfos(cluster - 2))</span>
+<span class="nc" id="L116">							.getAssignment();</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">					for (Observation element : o) {</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">						if (c1[element.getID() - 1] == match) {</span>
+<span class="nc" id="L119">							s += element.toString() + &quot;\n&quot;;</span>
+						}
+					}
+<span class="nc" id="L122">					infoCluster.setText(s);</span>
+				}
+<span class="nc" id="L124">			}</span>
+
+		});
+<span class="nc" id="L127">		saveInfo = new JButton(&quot;Save Info&quot;);</span>
+<span class="nc" id="L128">		saveInfo.setEnabled(false);</span>
+
+<span class="nc" id="L130">		JPanel combos = new JPanel(new GridLayout(2, 1));</span>
+<span class="nc" id="L131">		xVar = new JComboBox&lt;String&gt;(model.getMatrix().getVariableNames());</span>
+<span class="nc" id="L132">		yVar = new JComboBox&lt;String&gt;(model.getMatrix().getVariableNames());</span>
+<span class="nc" id="L133">		xVar.setSelectedIndex(0);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (model.getMatrix().getVariableNames().length &gt; 1) {</span>
+<span class="nc" id="L135">			yVar.setSelectedIndex(1);</span>
+		} else {
+<span class="nc" id="L137">			yVar.setSelectedIndex(0);</span>
+		}
+<span class="nc" id="L139">		xVar.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L142">				redraw = true;</span>
+<span class="nc" id="L143">				panel.repaint();</span>
+<span class="nc" id="L144">			}</span>
+
+		});
+<span class="nc" id="L147">		yVar.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L150">				redraw = true;</span>
+<span class="nc" id="L151">				panel.repaint();</span>
+<span class="nc" id="L152">			}</span>
+
+		});
+<span class="nc" id="L155">		xVar.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L156">		JPanel uno = new JPanel();</span>
+<span class="nc" id="L157">		uno.add(new JLabel(&quot;X: &quot;));</span>
+<span class="nc" id="L158">		uno.add(xVar);</span>
+<span class="nc" id="L159">		JPanel due = new JPanel();</span>
+<span class="nc" id="L160">		due.add(new JLabel(&quot;Y: &quot;));</span>
+<span class="nc" id="L161">		yVar.setPreferredSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L162">		due.add(yVar);</span>
+<span class="nc" id="L163">		combos.add(uno);</span>
+<span class="nc" id="L164">		combos.add(due);</span>
+
+<span class="nc" id="L166">		JPanel left = new JPanel(new BorderLayout());</span>
+
+<span class="nc" id="L168">		JPanel t = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L169">		JPanel buttons = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L170">		loadInfo.setPreferredSize(DIM_BUTTON_S);</span>
+<span class="nc" id="L171">		loadInfo.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L174">			}</span>
+
+		});
+<span class="nc" id="L177">		buttons.add(loadInfo);</span>
+
+<span class="nc" id="L179">		saveInfo.setPreferredSize(DIM_BUTTON_S);</span>
+<span class="nc" id="L180">		saveInfo.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L183">			}</span>
+
+		});
+<span class="nc" id="L186">		buttons.add(saveInfo);</span>
+
+<span class="nc" id="L188">		t.add(sp, BorderLayout.CENTER);</span>
+<span class="nc" id="L189">		t.add(buttons, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L191">		add(t, BorderLayout.CENTER);</span>
+<span class="nc" id="L192">		left.add(panel, BorderLayout.CENTER);</span>
+<span class="nc" id="L193">		left.add(combos, BorderLayout.SOUTH);</span>
+<span class="nc" id="L194">		add(left, BorderLayout.WEST);</span>
+<span class="nc" id="L195">	}</span>
+
+	private class SingleScatter extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L201">		private int WIDTH = 100;</span>
+<span class="nc" id="L202">		private int HEIGHT = 100;</span>
+<span class="nc" id="L203">		private BufferedImage graph = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);</span>
+
+<span class="nc" id="L205">		public SingleScatter() {</span>
+<span class="nc" id="L206">			setPreferredSize(new Dimension(WIDTH + 4, HEIGHT + 4));</span>
+<span class="nc" id="L207">			setCursor(new Cursor(Cursor.HAND_CURSOR));</span>
+<span class="nc" id="L208">			addMouseListener(new MouseListener() {</span>
+
+				public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L211" title="All 2 branches missed.">					if (e.getClickCount() == 2) {</span>
+<span class="nc" id="L212">						final JFrame f = new JFrame();</span>
+<span class="nc" id="L213">						JWatWorkloadManager.addJMTWindow(f);</span>
+<span class="nc" id="L214">						f.addWindowListener(new WindowAdapter() {</span>
+							@Override
+							public void windowClosing(WindowEvent e) {
+<span class="nc" id="L217">								JWatWorkloadManager.exit(f);</span>
+<span class="nc" id="L218">							}</span>
+
+							@Override
+							public void windowClosed(WindowEvent e) {
+<span class="nc" id="L222">								JWatWorkloadManager.exit(f);</span>
+<span class="nc" id="L223">							}</span>
+						});
+<span class="nc" id="L225">						f.setSize(640, 690);</span>
+<span class="nc" id="L226">						f.setTitle(&quot;Single cluster Fuzzy K-Means scatter plot&quot;);</span>
+<span class="nc" id="L227">						f.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);</span>
+<span class="nc" id="L228">						f.setContentPane(new FuzzyKSingleClusterScatter(xVar.getSelectedIndex(), yVar.getSelectedIndex(), session, f, clustering,</span>
+<span class="nc" id="L229">								cluster - 2, match));</span>
+<span class="nc" id="L230">						f.setVisible(true);</span>
+					}
+<span class="nc" id="L232">				}</span>
+
+				public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L235">				}</span>
+
+				public void mouseExited(MouseEvent e) {
+<span class="nc" id="L238">				}</span>
+
+				public void mousePressed(MouseEvent e) {
+<span class="nc" id="L241">				}</span>
+
+				public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L244">				}</span>
+
+			});
+<span class="nc" id="L247">		}</span>
+
+		@Override
+		public void paint(Graphics g) {
+<span class="nc" id="L251">			super.paint(g);</span>
+			//Draw Black rectangle
+<span class="nc" id="L253">			Graphics2D g1 = (Graphics2D) g;</span>
+			//Sfondo Bianco
+<span class="nc" id="L255">			g1.setColor(Color.WHITE);</span>
+<span class="nc" id="L256">			g1.fillRect(0, 0, WIDTH + 3, HEIGHT + 3);</span>
+			//Bordi neri
+<span class="nc" id="L258">			g1.setColor(Color.BLACK);</span>
+<span class="nc" id="L259">			g1.drawLine(1, 1, 1, HEIGHT + 1);</span>
+<span class="nc" id="L260">			g1.drawLine(1, 1, WIDTH + 1, 1);</span>
+<span class="nc" id="L261">			g1.drawLine(1, HEIGHT + 1, WIDTH + 1, HEIGHT + 1);</span>
+<span class="nc" id="L262">			g1.drawLine(WIDTH + 1, 1, WIDTH + 1, HEIGHT + 1);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">			if (redraw) {</span>
+<span class="nc" id="L264">				Graphics2D g2 = (Graphics2D) graph.getGraphics();</span>
+<span class="nc" id="L265">				VariableNumber x = model.getMatrix().getVariables()[xVar.getSelectedIndex()];</span>
+<span class="nc" id="L266">				VariableNumber y = model.getMatrix().getVariables()[yVar.getSelectedIndex()];</span>
+<span class="nc" id="L267">				int row = yVar.getSelectedIndex();</span>
+<span class="nc" id="L268">				short[] c1 = ((ClusteringInfosFuzzy) ((FuzzyKMean) session.getListOfClustering().get(clustering)).getClusteringInfos(cluster - 2))</span>
+<span class="nc" id="L269">						.getAssignment();</span>
+<span class="nc" id="L270">				g2.setColor(Color.WHITE);</span>
+<span class="nc" id="L271">				g2.fillRect(1, 1, WIDTH - 1, HEIGHT - 1);</span>
+				//Graph step calculation
+				/*double yFoot = (HEIGHT - 1) / y.getUniStats().getRangeValue();
+				for (int i = 1; i &lt;= WIDTH - 1; i++) {
+					boolean[] done = new boolean[101];
+					for (int j = x.getStartInt(i); j &lt; x.getEndInt(i); j++) {
+						if ((int) ((x.getValue(j, row) - y.getUniStats().getMinValue()) * yFoot) &gt;= 0) {
+							if (!done[(int) ((x.getValue(j, row) - y.getUniStats().getMinValue()) * yFoot)]) {
+								if (c1[x.getObsID(j) - 1] == match) {
+									g2.setColor(JavaWatColor.getColor(c1[x.getObsID(j) - 1]));
+									g2.fillOval(i, HEIGHT - ((int) (((x.getValue(j, row) - y.getUniStats().getMinValue())) * yFoot)), 1, 1);
+								}
+								done[(int) ((x.getValue(j, row) - y.getUniStats().getMinValue()) * yFoot)] = true;
+							}
+						}
+					}
+				}*/
+<span class="nc" id="L288">				redraw = false;</span>
+<span class="nc" id="L289">				repaint();</span>
+			}
+<span class="nc" id="L291">			g1.drawImage(graph, 1, 1, null);</span>
+<span class="nc" id="L292">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

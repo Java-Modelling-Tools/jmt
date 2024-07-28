@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Simulator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov</a> &gt; <span class="el_source">Simulator.java</span></div><h1>Simulator.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmarkov;
+
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.Random;
+
+import jmt.jmarkov.Graphics.Notifier;
+import jmt.jmarkov.Queues.Arrivals;
+import jmt.jmarkov.Queues.Processor;
+
+public class Simulator implements Runnable {
+
+	//list of jobs which contains jobs waiting in the simulator.
+	private LinkedList&lt;Job&gt; jobList;
+	//this contains list of jobs which exits from the system
+	//it is no use anymore 
+	//this could be used get the statistics of the exiting job but 
+	//the statistics gathering by other component 
+	//private LinkedList endJobList;
+
+	private Notifier[] n;
+
+	//current simulation time
+	private double currentTime;// in millisecond
+	//if lambda is zero this value is set to true
+	//(if lambda set to zero new job will not create 
+<span class="nc" id="L45">	private boolean lambdaZero = false;</span>
+	//Arrival class
+	private Arrivals arrival;
+	//array of processor
+	private Processor[] processors;
+	//it saves the data if the simulator is paused or not
+<span class="nc" id="L51">	private boolean paused = false;</span>
+	//multiplier is used for multiplier for timer.(comes from simulation time slide bar)
+<span class="nc" id="L53">	private double timeMultiplier = 1.0;</span>
+
+<span class="nc" id="L55">	private boolean running = false;</span>
+<span class="nc" id="L56">	private boolean started = false;</span>
+
+	public Simulator(Arrivals arrival, Processor[] processors, double timeMultiplier, Notifier[] n) {
+<span class="nc" id="L59">		super();</span>
+<span class="nc" id="L60">		jobList = new LinkedList&lt;Job&gt;();</span>
+		// waitingJobList = new LinkedList();
+		// endJobList = new LinkedList();
+<span class="nc" id="L63">		this.arrival = arrival;</span>
+<span class="nc" id="L64">		currentTime = 0;</span>
+<span class="nc" id="L65">		this.processors = processors;</span>
+		// numberOfTotalProcessor = processors.length;
+<span class="nc" id="L67">		setTimeMultiplier(timeMultiplier);</span>
+<span class="nc" id="L68">		this.n = n;</span>
+<span class="nc" id="L69">	}</span>
+
+	public void run() {
+<span class="nc" id="L72">		running = true;</span>
+<span class="nc" id="L73">		started = true;</span>
+		// this is the simulation time till run command is called
+		double currentTimeMultiplied;
+		//when calling run getting the current real time
+		long realTimeStart;
+		//this is the time after return the thread.sleep
+		long realTimeCurrent;
+<span class="nc" id="L80">		currentTimeMultiplied = 0;</span>
+<span class="nc" id="L81">		realTimeStart = new Date().getTime();</span>
+
+		//this is the first job which is created
+		//if job list is not empty this means run is called from the paused situation
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		if (jobList.isEmpty()) {</span>
+<span class="nc" id="L86">			arrival.createJob(currentTime); // this is the first job which is created after pressed start</span>
+			//it is called in order calculate first arrival time to the system
+		}
+
+		//if there is still some job is waiting for processing it is running recursive
+		//if paused the running will stop.
+<span class="nc bnc" id="L92" title="All 4 branches missed.">		while (jobList.size() &gt; 0 &amp;&amp; !paused) {</span>
+			//this is calculating how long system will sleep
+<span class="nc" id="L94">			currentTimeMultiplied += (peekJob().getNextEventTime() - currentTime) / timeMultiplier;</span>
+			//this is calculating how long system will sleep
+<span class="nc" id="L96">			realTimeCurrent = new Date().getTime() - realTimeStart;</span>
+
+			//this is for calculating if the system will pause or not?
+<span class="nc bnc" id="L99" title="All 2 branches missed.">			if ((long) currentTimeMultiplied &gt; realTimeCurrent) {</span>
+				//System.out.println(currentTime + &quot;\t&quot; + currentTimeMultiplied + &quot;\t&quot; + realTimeCurrent);
+				try {
+<span class="nc" id="L102">					Thread.sleep((long) currentTimeMultiplied - realTimeCurrent);</span>
+<span class="nc" id="L103">				} catch (InterruptedException e) {</span>
+<span class="nc" id="L104">					e.printStackTrace();</span>
+<span class="nc" id="L105">				}</span>
+
+				//System.out.println(&quot;\t\tSLEEP:\t&quot; + ((long) currentTimeMultiplied - realTimeCurrent));
+<span class="nc" id="L108">				realTimeCurrent = new Date().getTime() - realTimeStart;</span>
+			}
+			//System.out.println(currentTime + &quot;\t&quot; + currentTimeMultiplied + &quot;\t&quot; + realTimeCurrent);
+
+<span class="nc" id="L112">			Job job = dequeueJob();</span>
+<span class="nc" id="L113">			currentTime = job.getNextEventTime();</span>
+<span class="nc bnc" id="L114" title="All 4 branches missed.">			switch (job.getCurrentStateType()) {</span>
+				case Job.CURRENT_STATE_CREATED:
+<span class="nc" id="L116">					newJobArrival(job);</span>
+<span class="nc" id="L117">					break;</span>
+				case Job.CURRENT_STATE_ANIMATION:
+<span class="nc bnc" id="L119" title="All 2 branches missed.">					if ((long) currentTimeMultiplied + 300 &gt; realTimeCurrent) {</span>
+<span class="nc" id="L120">						animate(job);</span>
+					}
+					break;
+				case Job.CURRENT_STATE_IN_CPU:
+<span class="nc" id="L124">					exitProcessor(job);</span>
+					break;
+			}
+<span class="nc" id="L127">		}</span>
+
+<span class="nc" id="L129">		running = false;</span>
+<span class="nc" id="L130">	}</span>
+
+	private void newJobArrival(Job job) {
+		//the job whose arrival time has calculated entering the queue
+<span class="nc" id="L134">		arrival.addQ(job, currentTime);</span>
+		//the new job is creating for calculating arrival time
+<span class="nc" id="L136">		arrival.createJob(currentTime);</span>
+		// if (numberOfTotalProcessor &gt; numberOfWorkingProcessor) {
+<span class="nc" id="L138">		startProcess();// if there is an empty processor start it</span>
+		//for the red circle animation 
+<span class="nc" id="L140">		createAnimation(job);</span>
+<span class="nc" id="L141">	}</span>
+
+	private void createAnimation(Job job) {
+		Job cloneJob;
+		double nextEventTime;
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		if (!jobList.isEmpty()) {</span>
+<span class="nc" id="L147">			nextEventTime = peekJob().getNextEventTime();</span>
+		} else {
+<span class="nc" id="L149">			nextEventTime = currentTime + 100;</span>
+		}
+		//if (job.getCurrentStateType() != Job.CURRENT_STATE_EXIT_SYSTEM) {
+<span class="nc" id="L152">		cloneJob = (Job) job.clone();</span>
+<span class="nc" id="L153">		cloneJob.setAnimationTime(currentTime + (nextEventTime - currentTime) * 1 / 4);</span>
+<span class="nc" id="L154">		this.enqueueJob(cloneJob);</span>
+<span class="nc" id="L155">		cloneJob = (Job) job.clone();</span>
+<span class="nc" id="L156">		cloneJob.setAnimationTime(currentTime + (nextEventTime - currentTime) * 2 / 4);</span>
+<span class="nc" id="L157">		this.enqueueJob(cloneJob);</span>
+<span class="nc" id="L158">		cloneJob = (Job) job.clone();</span>
+<span class="nc" id="L159">		cloneJob.setAnimationTime(currentTime + (nextEventTime - currentTime) * 3 / 4);</span>
+<span class="nc" id="L160">		this.enqueueJob(cloneJob);</span>
+		//}
+<span class="nc" id="L162">	}</span>
+
+	private void animate(Job job) {
+<span class="nc" id="L165">		arrival.animate(job, currentTime);</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">		for (Processor processor : processors) {</span>
+<span class="nc" id="L167">			processor.animate(currentTime);</span>
+		}
+<span class="nc" id="L169">	}</span>
+
+	private void startProcess() {// if there is an empty processor start it
+		int i;
+		//assign randomly to free one
+		// if (numberOfTotalProcessor &gt; numberOfWorkingProcessor
+		// &amp;&amp;
+		// if (waitingJobList.size() &gt; 0) {
+<span class="nc" id="L177">		int numFreeProcessor = 0;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		for (i = 0; i &lt; processors.length; i++) {</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">			if (!processors[i].isProcessing()) {</span>
+<span class="nc" id="L180">				numFreeProcessor++;</span>
+				// numberOfWorkingProcessor++;
+				// break;
+			}
+		}
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		if (numFreeProcessor != 0) {</span>
+<span class="nc" id="L186">			int assigned = new Random().nextInt(numFreeProcessor);</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">			for (i = 0; i &lt; processors.length; i++) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">				if (!processors[i].isProcessing()) {</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">					if (assigned == 0) {</span>
+<span class="nc" id="L190">						processors[i].process(currentTime);</span>
+<span class="nc" id="L191">						break;</span>
+					}
+<span class="nc" id="L193">					assigned--;</span>
+				}
+			}
+		}
+<span class="nc" id="L197">	}</span>
+
+	private void exitProcessor(Job job) {
+<span class="nc" id="L200">		job.getProcessor().endProcessing(currentTime);// this processor is stopped</span>
+<span class="nc" id="L201">		job.setStateExitSystem();// set the state of the job as a</span>
+		// finished
+		//endJobList.add(job); // add exit list
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		for (Notifier element : n) {</span>
+<span class="nc" id="L205">			element.exitSystem(job.getJobId(), job.getProcessorId(), job.getEnteringQueueTime(), job.getEnteringCpuTime(), job.getSystemExitTime());</span>
+		}
+<span class="nc" id="L207">		startProcess();</span>
+<span class="nc" id="L208">		createAnimation(job);</span>
+<span class="nc" id="L209">	}</span>
+
+	public void enqueueJob(Job newJob) {// priority queue wrt their next job
+		int i;
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		for (i = 0; i &lt; jobList.size(); i++) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">			if (jobList.get(i).getNextEventTime() &gt; newJob.getNextEventTime()) {</span>
+<span class="nc" id="L215">				break;</span>
+			}
+		}
+<span class="nc" id="L218">		jobList.add(i, newJob);</span>
+<span class="nc" id="L219">	}</span>
+
+	public Job dequeueJob() {
+<span class="nc" id="L222">		return jobList.removeFirst();</span>
+	}
+
+	public Job peekJob() {
+<span class="nc" id="L226">		return jobList.element();</span>
+	}
+
+	// public void enqueueWaitingJob(Job job) {
+	// waitingJobList.add(job);
+	// }
+	//
+	// public Job dequeueWaitingJob() {
+	// return (Job) waitingJobList.removeFirst();
+	// }
+	//
+	// public Job peekWaitingJob() {
+	// return (Job) waitingJobList.element();
+	// }
+
+	public boolean isLambdaZero() {
+<span class="nc" id="L242">		return lambdaZero;</span>
+	}
+
+	public void setLambdaZero(boolean lambdaZero) {
+<span class="nc" id="L246">		this.lambdaZero = lambdaZero;</span>
+<span class="nc" id="L247">	}</span>
+
+	public void pause() {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">		if (paused) {</span>
+<span class="nc" id="L251">			paused = false;</span>
+<span class="nc" id="L252">			start();</span>
+		} else {
+<span class="nc" id="L254">			paused = true;</span>
+		}
+<span class="nc" id="L256">	}</span>
+
+	public void start() {
+<span class="nc" id="L259">		Thread simt = new Thread(this);</span>
+<span class="nc" id="L260">		simt.setDaemon(true);</span>
+<span class="nc" id="L261">		simt.start();</span>
+<span class="nc" id="L262">	}</span>
+
+	public void stop() {
+<span class="nc" id="L265">		paused = true;</span>
+<span class="nc" id="L266">		started = false;</span>
+<span class="nc" id="L267">	}</span>
+
+	public double getTimeMultiplier() {
+<span class="nc" id="L270">		return timeMultiplier;</span>
+	}
+
+	public void setTimeMultiplier(double timeMultiplier) {
+<span class="nc" id="L274">		this.timeMultiplier = timeMultiplier;</span>
+<span class="nc" id="L275">	}</span>
+
+	public boolean isRunning() {
+<span class="nc" id="L278">		return running;</span>
+	}
+
+	public boolean isStarted() {
+<span class="nc" id="L282">		return started;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

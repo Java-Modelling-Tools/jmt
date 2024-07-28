@@ -1,0 +1,749 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TemplateAddingPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.panels</a> &gt; <span class="el_source">TemplateAddingPanel.java</span></div><h1>TemplateAddingPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.AbstractListModel;
+import javax.swing.ComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JEditorPane;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+
+import jmt.gui.common.CommonConstants;
+import org.jdesktop.swingx.JXTreeTable;
+import org.jdesktop.swingx.treetable.AbstractTreeTableModel;
+import org.xml.sax.SAXException;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.xml.TemplateFileOperation;
+import jmt.gui.jsimgraph.template.AddingPanelData;
+import jmt.gui.jsimgraph.template.TemplateConstants;
+import jmt.gui.jsimgraph.template.TemplateData;
+import jmt.gui.common.RootNode;
+import jmt.gui.common.TreeTableNode;
+
+/**
+ * @author S Jiang
+ * 
+ */
+public class TemplateAddingPanel extends WizardPanel implements TemplateConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private static final String CONNECTION_ERROR = &quot;Connection error&quot;;
+	private static final String NO_DESC_PAGE = &quot;NoDescriptionPage.html&quot;;
+	private static final String ERROR_PAGE = &quot;ErrorPage.html&quot;;
+	private static final String BLANK_PAGE = &quot;BlankPage.html&quot;;
+	private static final String MAIN_PAGE = &quot;MainPage.html&quot;;
+
+	private TemplatePanel templatePanel;
+	private AddingPanelData data;
+	private JLabel status;
+	private JComboBox&lt;String&gt; siteList;
+	private AvailableTreeTable availableTreeTable;
+
+	private JButton siteUpdate;
+	private JButton siteAdd;
+	private JButton tempDownload;
+	private JButton close;
+	private String indexFile;
+
+	private JPanel parent;
+	private JScrollPane tablePane;
+	private JScrollPane desPane;
+	private JEditorPane pagePane;
+	private File[] templates;
+
+<span class="nc" id="L115">	private boolean index_init_error = false;</span>
+
+<span class="nc" id="L117">	public TemplateAddingPanel(TemplatePanel templatePanel) {</span>
+<span class="nc" id="L118">		data = new AddingPanelData();</span>
+<span class="nc" id="L119">		this.templatePanel = templatePanel;</span>
+<span class="nc" id="L120">		parent = this;</span>
+<span class="nc" id="L121">		initComponents();</span>
+<span class="nc" id="L122">	}</span>
+
+	public void initComponents() {
+		// check the essential files
+<span class="nc" id="L126">		pagePane = new JEditorPane();</span>
+<span class="nc" id="L127">		pagePane.setEditable(false);</span>
+
+		try {
+<span class="nc" id="L130">			TemplateFileOperation.parseSiteXML(data);</span>
+<span class="nc" id="L131">			File index = File.createTempFile(&quot;F_NAME_INDEX&quot;, &quot;&quot;);</span>
+<span class="nc" id="L132">			indexFile = index.getAbsolutePath();</span>
+<span class="nc" id="L133">			TemplateFileOperation.download(DEFAULT_SITE + &quot;/&quot; + F_NAME_INDEX, index.getAbsolutePath(), CONN_TIMEOUT, READ_TIMEOUT);</span>
+<span class="nc" id="L134">			TemplateFileOperation.parseIndexXML(indexFile, data);</span>
+<span class="nc" id="L135">			pagePane.setPage(TemplateAddingPanel.class.getResource(MAIN_PAGE));</span>
+<span class="nc" id="L136">		} catch (Exception e) {</span>
+			try {
+<span class="nc" id="L138">				index_init_error = true;</span>
+<span class="nc" id="L139">				pagePane.setPage(TemplateAddingPanel.class.getResource(ERROR_PAGE));</span>
+<span class="nc" id="L140">			} catch (IOException ex) {</span>
+<span class="nc" id="L141">				Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L142">			}</span>
+<span class="nc" id="L143">		}</span>
+
+<span class="nc" id="L145">		this.setLayout(new BorderLayout());</span>
+<span class="nc" id="L146">		availableTreeTable = new AvailableTreeTable();</span>
+<span class="nc" id="L147">		availableTreeTable.expandRow(0);</span>
+<span class="nc" id="L148">		templates = TemplateFileOperation.findTemplateFiles(TEMPLATE_FOLDER);</span>
+<span class="nc" id="L149">		status = new JLabel(&quot;&quot;);</span>
+
+<span class="nc" id="L151">		JLabel siteTag = new JLabel(&quot;Site:&quot;);</span>
+<span class="nc" id="L152">		siteList = new JComboBox&lt;String&gt;(new SiteComboBoxModel());</span>
+<span class="nc" id="L153">		siteList.setEditable(true);</span>
+<span class="nc" id="L154">		siteList.setPreferredSize(new Dimension((int)(580 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L155">		siteTag.setLabelFor(siteList);</span>
+
+<span class="nc" id="L157">		siteUpdate = new JButton(&quot;Update&quot;);</span>
+<span class="nc" id="L158">		siteUpdate.setPreferredSize(new Dimension((int)(70 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L159">		siteAdd = new JButton(&quot;Add Site&quot;);</span>
+<span class="nc" id="L160">		siteAdd.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L162">		JPanel upperPane = new JPanel();</span>
+<span class="nc" id="L163">		upperPane.add(siteTag);</span>
+<span class="nc" id="L164">		upperPane.add(siteList);</span>
+<span class="nc" id="L165">		upperPane.add(siteUpdate);</span>
+<span class="nc" id="L166">		upperPane.add(siteAdd);</span>
+
+		// display the current site
+<span class="nc" id="L169">		int index = data.getSiteURLs().indexOf(data.getSiteURL());</span>
+<span class="nc bnc" id="L170" title="All 4 branches missed.">		if (index != -1 &amp;&amp; !index_init_error) {</span>
+<span class="nc" id="L171">			siteList.getEditor().setItem(data.getSiteInfos().get(index));</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		} else if (!index_init_error) {</span>
+<span class="nc" id="L173">			siteList.getEditor().setItem(data.getSiteInfo());</span>
+		} else {
+<span class="nc" id="L175">			siteList.getEditor().setItem(DEFAULT_SITE);</span>
+		}
+
+<span class="nc" id="L178">		tempDownload = new JButton(&quot;Download&quot;);</span>
+<span class="nc" id="L179">		tempDownload.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L180">		tempDownload.setBackground(Color.RED);</span>
+<span class="nc" id="L181">		tempDownload.setEnabled(false);</span>
+<span class="nc" id="L182">		close = new JButton(&quot;Close&quot;);</span>
+<span class="nc" id="L183">		close.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(24 * CommonConstants.heightScaling)));</span>
+
+		// update the index.xml when user inputing a new site two situations:
+		// 1. the site is stored in the site list
+		// 2. the site is not in the site list, it's typed by user in the bar
+<span class="nc" id="L188">		siteUpdate.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L191">				doUpdate();</span>
+<span class="nc" id="L192">			}</span>
+		});
+
+<span class="nc" id="L195">		siteList.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {</span>
+			public void keyPressed(KeyEvent evt) {
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				if (evt.getKeyCode() == KeyEvent.VK_ENTER) {</span>
+<span class="nc" id="L198">					doUpdate();</span>
+				}
+<span class="nc" id="L200">			}</span>
+		});
+
+		// add a new site to the site list
+<span class="nc" id="L204">		siteAdd.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L207">				status.setText(&quot;creating a new site...&quot;);</span>
+<span class="nc" id="L208">				status.repaint();</span>
+
+<span class="nc" id="L210">				AddingSitePanel newSite = new AddingSitePanel();</span>
+<span class="nc" id="L211">				String siteName = &quot;&quot;;</span>
+<span class="nc" id="L212">				String siteAddress = &quot;&quot;;</span>
+
+<span class="nc" id="L214">				int result = JOptionPane.showConfirmDialog(parent, newSite,newSite.getPanelName(),</span>
+						JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+<span class="nc bnc" id="L216" title="All 2 branches missed.">				if (result == JOptionPane.OK_OPTION) {</span>
+<span class="nc" id="L217">					siteName = newSite.getName();</span>
+<span class="nc" id="L218">					siteAddress = newSite.getAddress();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">					if (!&quot;http://&quot;.equals(siteAddress)) {</span>
+<span class="nc" id="L220">						String siteIndexUrl = siteAddress + &quot;/&quot; + F_NAME_INDEX;</span>
+						// verify the site
+<span class="nc" id="L222">						new Checker(siteIndexUrl, status, siteName, siteAddress).execute();</span>
+<span class="nc" id="L223">					} else {</span>
+<span class="nc" id="L224">						JOptionPane.showMessageDialog(parent, &quot;Error: please check the URL&quot;);</span>
+<span class="nc" id="L225">						status.setText(&quot;&quot;);</span>
+<span class="nc" id="L226">						status.repaint();</span>
+					}
+				} else {
+<span class="nc" id="L229">					status.setText(&quot;&quot;);</span>
+<span class="nc" id="L230">					status.repaint();</span>
+				}
+<span class="nc" id="L232">			}</span>
+		});
+
+		// download the selected template
+<span class="nc" id="L236">		tempDownload.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L239">				int rowIndex = availableTreeTable.getSelectedRow();</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">				if (rowIndex != -1) {</span>
+<span class="nc" id="L241">					TreePath path = availableTreeTable.getPathForRow(rowIndex);</span>
+<span class="nc" id="L242">					TreeTableNode node = (TreeTableNode) path.getLastPathComponent();</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">					if (&quot;template&quot;.equals(node.getType())) {</span>
+<span class="nc" id="L244">						String tempURL = ((TemplateData) node.getData()[0]).getUpdateAddress();</span>
+<span class="nc" id="L245">						String tempFileName = ((TemplateData) node.getData()[0]).getFileName();</span>
+
+<span class="nc" id="L247">						boolean flag = false;</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">						for (File template : templates) {</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">							if (template.getName().equals(tempFileName)) {</span>
+<span class="nc" id="L250">								flag = true;</span>
+							}
+						}
+
+<span class="nc" id="L254">						int overwrite = 0;</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">						if (flag) {</span>
+<span class="nc" id="L256">							overwrite = JOptionPane.showConfirmDialog(parent, &quot;Replace the existing file?&quot;, &quot;Replace&quot;,</span>
+									JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+						}
+
+<span class="nc bnc" id="L260" title="All 2 branches missed.">						if (overwrite == 0) {</span>
+<span class="nc" id="L261">							new Downloader(tempURL, TEMPLATE_FOLDER + tempFileName, status, D_TYPE_TEMPLATE).execute();</span>
+						}
+					}
+				}
+<span class="nc" id="L265">			}</span>
+		});
+
+<span class="nc" id="L268">		close.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L271">				SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+<span class="nc" id="L272">			}</span>
+		});
+
+<span class="nc" id="L275">		JPanel buttons = new JPanel();</span>
+<span class="nc" id="L276">		buttons.add(tempDownload);</span>
+<span class="nc" id="L277">		buttons.add(close);</span>
+<span class="nc" id="L278">		buttons.setLayout(new FlowLayout(FlowLayout.TRAILING));</span>
+
+<span class="nc" id="L280">		JPanel bottomPane = new JPanel();</span>
+<span class="nc" id="L281">		bottomPane.setLayout(new GridLayout(1, 2));</span>
+<span class="nc" id="L282">		bottomPane.add(status);</span>
+<span class="nc" id="L283">		bottomPane.add(buttons);</span>
+
+<span class="nc" id="L285">		tablePane = new JScrollPane();</span>
+<span class="nc" id="L286">		tablePane.getViewport().add(availableTreeTable);</span>
+<span class="nc" id="L287">		desPane = new JScrollPane(pagePane);</span>
+
+<span class="nc" id="L289">		JPanel cenPane = new JPanel();</span>
+<span class="nc" id="L290">		cenPane.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L291">		cenPane.add(tablePane);</span>
+<span class="nc" id="L292">		cenPane.add(desPane);</span>
+
+		// if user select a template, the description page of that template will be displayed
+<span class="nc" id="L295">		availableTreeTable.addMouseListener(new MouseAdapter() {</span>
+			@Override
+			public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L298">				int rowIndex = availableTreeTable.getSelectedRow();</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">				if (rowIndex != -1) {</span>
+<span class="nc" id="L300">					TreePath path = availableTreeTable.getPathForRow(rowIndex);</span>
+<span class="nc" id="L301">					TreeTableNode node = (TreeTableNode) path.getLastPathComponent();</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">					if (&quot;template&quot;.equals(node.getType())) {</span>
+<span class="nc" id="L303">						String DescriptionURL = ((TemplateData) node.getData()[0]).getDescriptionAddress();</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">						if (DescriptionURL != null) {</span>
+<span class="nc" id="L305">							new PageLoader(DescriptionURL).execute();</span>
+						} else {
+<span class="nc" id="L307">							new PageLoader(TemplateAddingPanel.class.getResource(NO_DESC_PAGE).toString()).execute();</span>
+						}
+					}
+				}
+<span class="nc" id="L311">			}</span>
+		});
+
+<span class="nc" id="L314">		this.add(upperPane, BorderLayout.NORTH);</span>
+<span class="nc" id="L315">		this.add(cenPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L316">		this.add(bottomPane, BorderLayout.SOUTH);</span>
+<span class="nc" id="L317">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L321">		return &quot;Add templates&quot;;</span>
+	}
+
+	private void doUpdate() {
+<span class="nc" id="L325">		String indexURL = null;</span>
+		// prepare the index URL
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		if (siteList.getSelectedIndex() != -1) {</span>
+			// in the list
+<span class="nc" id="L329">			indexURL = data.getSiteURLs().get(siteList.getSelectedIndex()) + &quot;/&quot; + F_NAME_INDEX;</span>
+		} else {
+			// not in the list
+<span class="nc" id="L332">			String raw = (String) siteList.getEditor().getItem();</span>
+<span class="nc" id="L333">			String find = &quot;http.*&quot;;</span>
+<span class="nc" id="L334">			Pattern pattern = Pattern.compile(find);</span>
+<span class="nc" id="L335">			Matcher matcher = pattern.matcher(raw);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			if (matcher.find()) {</span>
+<span class="nc" id="L337">				indexURL = matcher.group() + &quot;/&quot; + F_NAME_INDEX;</span>
+			}
+		}
+
+		File index;
+		try {
+<span class="nc" id="L343">			index = File.createTempFile(&quot;index&quot;, &quot;.xml&quot;);</span>
+			// download the index.xml
+<span class="nc" id="L345">			indexFile = index.getAbsolutePath();</span>
+<span class="nc" id="L346">			new Downloader(indexURL, index.getAbsolutePath(), status, D_TYPE_INDEX).execute();</span>
+<span class="nc" id="L347">		} catch (IOException ex) {</span>
+<span class="nc" id="L348">			Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L349">		}</span>
+<span class="nc" id="L350">	}</span>
+
+	public class AvailableTreeTable extends JXTreeTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L356">		public AvailableTreeTable() {</span>
+<span class="nc" id="L357">			super();</span>
+<span class="nc" id="L358">			setTreeTableModel(new AvailableTreeTableModel(data.getRoot()));</span>
+<span class="nc" id="L359">			sizeColumns();</span>
+<span class="nc" id="L360">			setRowHeight(CELL_HEIGHT);</span>
+<span class="nc" id="L361">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L362">			getTableHeader().setReorderingAllowed(false);</span>
+
+<span class="nc" id="L364">			addTreeSelectionListener(new TreeSelectionListener() {</span>
+				@Override
+				public void valueChanged(TreeSelectionEvent e) {
+<span class="nc" id="L367">					TreePath path = e.getPath();</span>
+<span class="nc" id="L368">					TreeTableNode node = (TreeTableNode) path.getLastPathComponent();</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">					if (&quot;template&quot;.equals(node.getType())) {</span>
+<span class="nc" id="L370">						tempDownload.setEnabled(true);</span>
+					} else {
+<span class="nc" id="L372">						tempDownload.setEnabled(false);</span>
+					}
+<span class="nc" id="L374">				}</span>
+			});
+<span class="nc" id="L376">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L379" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L380">				getColumnModel().getColumn(i).setPreferredWidth(((AvailableTreeTableModel) getTreeTableModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L382">		}</span>
+
+		@Override
+		public String getToolTipText(MouseEvent e) {
+<span class="nc" id="L386">			String tip = null;</span>
+<span class="nc" id="L387">			Point p = e.getPoint();</span>
+<span class="nc" id="L388">			int rowIndex = rowAtPoint(p);</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">			if (rowIndex != -1) {</span>
+<span class="nc" id="L390">				TreePath path = availableTreeTable.getPathForRow(rowIndex);</span>
+<span class="nc" id="L391">				TreeTableNode node = (TreeTableNode) path.getLastPathComponent();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">				if (&quot;template&quot;.equals(node.getType())) {</span>
+<span class="nc" id="L393">					tip = ((TemplateData) node.getData()[0]).getToolTip();</span>
+				}
+			}
+<span class="nc" id="L396">			return tip;</span>
+		}
+
+	}
+
+	public class AvailableTreeTableModel extends AbstractTreeTableModel {
+
+<span class="nc" id="L403">		private String[] columnNames = new String[] { &quot;Name&quot;, &quot;Author&quot;, &quot;Version&quot;, &quot;Upload Date&quot;, &quot;Description&quot;, &quot;Downloaded&quot; };</span>
+<span class="nc" id="L404">		public int[] columnSizes = new int[] { 240, 100, 60, 100, 400, 200 };</span>
+
+<span class="nc" id="L406">		AvailableTreeTableModel(Object root) {</span>
+<span class="nc" id="L407">			super(root);</span>
+<span class="nc" id="L408">		}</span>
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L412">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int colIndex) {
+<span class="nc" id="L417">			return columnNames[colIndex];</span>
+		}
+
+		public void resetRoot(Object root) {
+<span class="nc" id="L421">			this.root = root;</span>
+<span class="nc" id="L422">			modelSupport.fireNewRoot();</span>
+<span class="nc" id="L423">		}</span>
+
+		@Override
+		public Object getValueAt(Object parent, int index) {
+<span class="nc bnc" id="L427" title="All 2 branches missed.">			if (!(parent instanceof RootNode)) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">				if ((&quot;template&quot;.equals(((TreeTableNode) parent).getType()))) {</span>
+<span class="nc bnc" id="L429" title="All 7 branches missed.">					switch (index) {</span>
+					case 0:
+<span class="nc" id="L431">						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getName();</span>
+					case 1:
+<span class="nc" id="L433">						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getAuthor();</span>
+					case 2:
+<span class="nc" id="L435">						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getVersion();</span>
+					case 3:
+<span class="nc" id="L437">						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getDate();</span>
+					case 4:
+<span class="nc" id="L439">						return ((TemplateData) ((TreeTableNode) parent).getData()[0]).getShortDescription();</span>
+					case 5:
+<span class="nc" id="L441">						Path temPath = Paths.get(TEMPLATE_FOLDER + ((TemplateData) ((TreeTableNode) parent).getData()[0]).getFileName());</span>
+						try {
+<span class="nc" id="L443">							BasicFileAttributes view = Files.getFileAttributeView(temPath, BasicFileAttributeView.class).readAttributes();</span>
+<span class="nc" id="L444">							FileTime modifiedTime = view.lastModifiedTime();</span>
+<span class="nc" id="L445">							DateFormat df = new SimpleDateFormat(&quot;HH:mm:ss dd/MM/yyyy&quot;);</span>
+<span class="nc" id="L446">							String cTime = df.format(modifiedTime.toMillis());</span>
+<span class="nc" id="L447">							return cTime;</span>
+<span class="nc" id="L448">						} catch (Exception e) {</span>
+<span class="nc" id="L449">							return &quot;--&quot;;</span>
+						}
+					default:
+<span class="nc" id="L452">						return null;</span>
+					}
+				} else {
+<span class="nc bnc" id="L455" title="All 2 branches missed.">					if (index &lt; 1)</span>
+<span class="nc" id="L456">						return ((TreeTableNode) parent).getData()[index];</span>
+					else
+<span class="nc" id="L458">						return null;</span>
+				}
+			}
+<span class="nc" id="L461">			return null;</span>
+		}
+
+		@Override
+		public Object getChild(Object parent, int index) {
+<span class="nc" id="L466">			return ((TreeTableNode) parent).getChildAt(index);</span>
+		}
+
+		@Override
+		public int getChildCount(Object parent) {
+<span class="nc" id="L471">			return ((TreeTableNode) parent).getChildCount();</span>
+		}
+
+		@Override
+		public int getIndexOfChild(Object parent, Object child) {
+<span class="nc" id="L476">			return ((TreeTableNode) parent).getIndex((TreeTableNode) child);</span>
+		}
+
+	}
+
+	// site list combobox model
+<span class="nc" id="L482">	public class SiteComboBoxModel extends AbstractListModel&lt;String&gt; implements ComboBoxModel&lt;String&gt; {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		Object selection;
+
+		@Override
+		public String getElementAt(int index) {
+<span class="nc" id="L490">			return data.getSiteInfos().get(index);</span>
+		}
+
+		@Override
+		public int getSize() {
+<span class="nc" id="L495">			return data.getSiteInfos().size();</span>
+		}
+
+		@Override
+		public Object getSelectedItem() {
+<span class="nc" id="L500">			return selection;</span>
+		}
+
+		@Override
+		public void setSelectedItem(Object selection) {
+<span class="nc" id="L505">			this.selection = selection;</span>
+<span class="nc" id="L506">		}</span>
+
+	}
+
+	// verify the new web site
+	public class Checker extends SwingWorker&lt;Boolean, String&gt; {
+
+		String siteIndexURL;
+		JLabel status;
+		String siteName;
+		String siteAddress;
+
+<span class="nc" id="L518">		public Checker(String siteIndexURL, JLabel status, String siteName, String siteAddress) {</span>
+<span class="nc" id="L519">			this.siteIndexURL = siteIndexURL;</span>
+<span class="nc" id="L520">			this.status = status;</span>
+<span class="nc" id="L521">			this.siteName = siteName;</span>
+<span class="nc" id="L522">			this.siteAddress = siteAddress;</span>
+<span class="nc" id="L523">		}</span>
+
+		@Override
+		protected Boolean doInBackground() throws Exception {
+<span class="nc" id="L527">			publish(&quot;Validating the new site (time out: &quot; + READ_TIMEOUT / 1000 + &quot; s)&quot;);</span>
+			try {
+<span class="nc" id="L529">				URL url = new URL(siteIndexURL);</span>
+				// if the InputStream can be opened, then it's verified
+<span class="nc" id="L531">				URLConnection conn = url.openConnection();</span>
+<span class="nc" id="L532">				conn.setConnectTimeout(CONN_TIMEOUT);</span>
+<span class="nc" id="L533">				conn.setReadTimeout(READ_TIMEOUT);</span>
+<span class="nc" id="L534">				conn.connect();</span>
+
+				// write the site into sites.xml and re-parse it
+<span class="nc" id="L537">				TemplateFileOperation.writeSiteXML(siteName, siteAddress);</span>
+<span class="nc" id="L538">				TemplateFileOperation.parseSiteXML(data);</span>
+
+<span class="nc" id="L540">				publish(&quot;has been added to the site list successfully&quot;);</span>
+<span class="nc" id="L541">				Thread.sleep(1000);</span>
+<span class="nc" id="L542">				publish(&quot;&quot;);</span>
+<span class="nc" id="L543">				return true;</span>
+<span class="nc" id="L544">			} catch (MalformedURLException e) {</span>
+				// if the URL format is invalid, shows the err msg
+<span class="nc" id="L546">				publish(&quot;the URL is invalid&quot;);</span>
+<span class="nc" id="L547">				JOptionPane.showMessageDialog(parent, &quot;Invalid URL&quot;);</span>
+<span class="nc" id="L548">				Thread.sleep(1000);</span>
+<span class="nc" id="L549">				publish(&quot;&quot;);</span>
+<span class="nc" id="L550">			} catch (IOException e) {</span>
+				// if it's unable to open the input stream, shows the err msg
+<span class="nc" id="L552">				publish(CONNECTION_ERROR);</span>
+<span class="nc" id="L553">				JOptionPane.showMessageDialog(parent, CONNECTION_ERROR);</span>
+<span class="nc" id="L554">				Thread.sleep(1000);</span>
+<span class="nc" id="L555">				publish(&quot;&quot;);</span>
+<span class="nc" id="L556">			} catch (TransformerFactoryConfigurationError e) {</span>
+<span class="nc" id="L557">				e.printStackTrace();</span>
+			} finally {
+<span class="nc" id="L559">				;</span>
+<span class="nc" id="L560">			}</span>
+<span class="nc" id="L561">			return false;</span>
+		}
+
+		@Override
+		protected void process(final List&lt;String&gt; chunks) {
+<span class="nc bnc" id="L566" title="All 2 branches missed.">			for (final String string : chunks) {</span>
+<span class="nc" id="L567">				status.setText(string);</span>
+<span class="nc" id="L568">				status.repaint();</span>
+<span class="nc bnc" id="L569" title="All 2 branches missed.">				if (string.equals(&quot;Validating the new site (time out: &quot; + READ_TIMEOUT / 1000 + &quot; s)&quot;)) {</span>
+					// when validating the site, disable all the buttons and change the cursor
+<span class="nc" id="L571">					disableAll();</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">				} else if (string.equals(&quot;has been added to the site list successfully&quot;)) {</span>
+					// refresh the site bar
+<span class="nc" id="L574">					siteList.setModel(new SiteComboBoxModel());</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">				} else if (string.equals(&quot;&quot;)) {</span>
+					// after verification, enable all buttons
+<span class="nc" id="L577">					enableAll();</span>
+				}
+<span class="nc" id="L579">			}</span>
+<span class="nc" id="L580">		}</span>
+
+	}
+
+	// download index.xml or templates
+	public class Downloader extends SwingWorker&lt;File, String&gt; {
+
+		private String type;
+		private String myURL;
+		private String fileName;
+		private JLabel status;
+
+<span class="nc" id="L592">		public Downloader(String myURL, String fileName, JLabel status, String type) {</span>
+<span class="nc" id="L593">			this.type = type;</span>
+<span class="nc" id="L594">			this.myURL = myURL;</span>
+<span class="nc" id="L595">			this.fileName = fileName;</span>
+<span class="nc" id="L596">			this.status = status;</span>
+<span class="nc" id="L597">		}</span>
+
+		@Override
+		protected File doInBackground() throws Exception {
+<span class="nc" id="L601">			File temp = null;</span>
+			// if downloading index.xml
+<span class="nc bnc" id="L603" title="All 2 branches missed.">			if (type.equals(D_TYPE_INDEX)) {</span>
+				try {
+					// approximately 60s (?)
+<span class="nc" id="L606">					publish(&quot;Connecting to the site (time out: &quot; + READ_TIMEOUT / 1000 + &quot; s)&quot;);</span>
+<span class="nc" id="L607">					temp = TemplateFileOperation.download(myURL, fileName, CONN_TIMEOUT, READ_TIMEOUT);</span>
+<span class="nc" id="L608">					publish(&quot;index.xml is downloaded successfully&quot;);</span>
+					// is it necessary to sleep for 100ms for showing the msg (?)
+<span class="nc" id="L610">					data.clearSitesData();</span>
+<span class="nc" id="L611">					Thread.sleep(100);</span>
+<span class="nc" id="L612">					publish(&quot;Updating index&quot;);</span>
+<span class="nc" id="L613">					Thread.sleep(100);</span>
+					// I want to tell user that the index is up to date,
+					// but logically it's not guaranteed within 100ms
+					// I tried to put it into process function, but it
+					// doesn't work
+					// any suggestions(?)
+<span class="nc" id="L619">					publish(&quot;index is up to date&quot;);</span>
+<span class="nc" id="L620">					Thread.sleep(1000);</span>
+<span class="nc" id="L621">					publish(&quot;&quot;);</span>
+<span class="nc" id="L622">				} catch (IOException e) {</span>
+<span class="nc" id="L623">					publish(CONNECTION_ERROR);</span>
+<span class="nc" id="L624">					JOptionPane.showMessageDialog(parent, CONNECTION_ERROR);</span>
+<span class="nc" id="L625">					publish(&quot;&quot;);</span>
+<span class="nc" id="L626">				}</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">			} else if (type.equals(D_TYPE_TEMPLATE)) {</span>
+				// similar to the 'index', except for the msg
+				try {
+<span class="nc" id="L630">					publish(&quot;Connecting to the site (time out: &quot; + READ_TIMEOUT / 1000 + &quot; s)&quot;);</span>
+<span class="nc" id="L631">					temp = TemplateFileOperation.download(myURL, fileName, CONN_TIMEOUT, READ_TIMEOUT);</span>
+<span class="nc" id="L632">					templates = TemplateFileOperation.findTemplateFiles(TEMPLATE_FOLDER);</span>
+<span class="nc" id="L633">					publish(&quot;template is downloaded successfully&quot;);</span>
+<span class="nc" id="L634">					Thread.sleep(100);</span>
+<span class="nc" id="L635">					publish(&quot;Updating template list&quot;);</span>
+<span class="nc" id="L636">					Thread.sleep(100);</span>
+<span class="nc" id="L637">					publish(&quot;template list is up to date&quot;);</span>
+<span class="nc" id="L638">					Thread.sleep(100);</span>
+<span class="nc" id="L639">					publish(&quot;&quot;);</span>
+<span class="nc" id="L640">				} catch (IOException e) {</span>
+<span class="nc" id="L641">					publish(CONNECTION_ERROR);</span>
+<span class="nc" id="L642">					JOptionPane.showMessageDialog(parent, CONNECTION_ERROR);</span>
+<span class="nc" id="L643">					publish(&quot;&quot;);</span>
+<span class="nc" id="L644">				}</span>
+			}
+<span class="nc" id="L646">			return temp;</span>
+		}
+
+		@Override
+		protected void process(final List&lt;String&gt; chunks) {
+<span class="nc bnc" id="L651" title="All 2 branches missed.">			for (final String string : chunks) {</span>
+				// repaint the status first
+<span class="nc" id="L653">				status.setText(string);</span>
+<span class="nc" id="L654">				status.repaint();</span>
+<span class="nc bnc" id="L655" title="All 2 branches missed.">				if (string.equals(&quot;Connecting to the site (time out: &quot; + READ_TIMEOUT / 1000 + &quot; s)&quot;)) {</span>
+<span class="nc" id="L656">					disableAll();</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">				} else if (string.equals(&quot;Updating index&quot;)) {</span>
+					// after downloading the index.xml successfully, it's parsed
+					try {
+<span class="nc" id="L660">						data = new AddingPanelData();</span>
+<span class="nc" id="L661">						TemplateFileOperation.parseIndexXML(indexFile, data);</span>
+<span class="nc" id="L662">						TemplateFileOperation.parseSiteXML(data);</span>
+<span class="nc" id="L663">					} catch (SAXException e) {</span>
+<span class="nc" id="L664">						e.printStackTrace();</span>
+<span class="nc" id="L665">					} catch (IOException e) {</span>
+<span class="nc" id="L666">						e.printStackTrace();</span>
+<span class="nc" id="L667">					}</span>
+					// refresh the table
+<span class="nc" id="L669">					((AvailableTreeTableModel) availableTreeTable.getTreeTableModel()).resetRoot(data.getRoot());</span>
+<span class="nc" id="L670">					availableTreeTable.expandPath(availableTreeTable.getPathForRow(0));</span>
+<span class="nc" id="L671">					siteList.setModel(new SiteComboBoxModel());</span>
+<span class="nc" id="L672">					siteList.getEditor().setItem(data.getSiteInfo());</span>
+					try {
+<span class="nc" id="L674">						pagePane.setPage(TemplateAddingPanel.class.getResource(BLANK_PAGE));</span>
+<span class="nc" id="L675">					} catch (IOException ex) {</span>
+<span class="nc" id="L676">						Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L677">					}</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">				} else if (string.equals(&quot;template is downloaded successfully&quot;)) {</span>
+<span class="nc" id="L679">					availableTreeTable.revalidate();</span>
+<span class="nc" id="L680">					availableTreeTable.repaint();</span>
+<span class="nc bnc" id="L681" title="All 2 branches missed.">				} else if (string.equals(&quot;Updating template list&quot;)) {</span>
+					// update the template panel (local templates)
+<span class="nc" id="L683">					templatePanel.updateTemplates();</span>
+<span class="nc bnc" id="L684" title="All 2 branches missed.">				} else if (string.equals(CONNECTION_ERROR)) {</span>
+<span class="nc" id="L685">					enableAll();</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">				} else if (string.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L687">					enableAll();</span>
+				}
+<span class="nc" id="L689">			}</span>
+<span class="nc" id="L690">		}</span>
+	}
+
+	// loading the HTML page
+	public class PageLoader extends SwingWorker&lt;Boolean, String&gt; {
+
+		String URLString;
+
+<span class="nc" id="L698">		public PageLoader(String URLString) {</span>
+<span class="nc" id="L699">			this.URLString = URLString;</span>
+<span class="nc" id="L700">		}</span>
+
+		@Override
+		protected Boolean doInBackground() throws Exception {
+			try {
+<span class="nc" id="L705">				publish(&quot;Loading the description page...&quot;);</span>
+<span class="nc" id="L706">			} catch (Exception e) {</span>
+<span class="nc" id="L707">				e.printStackTrace();</span>
+<span class="nc" id="L708">			}</span>
+<span class="nc" id="L709">			return null;</span>
+		}
+
+		protected void process(final List&lt;String&gt; chunks) {
+<span class="nc bnc" id="L713" title="All 2 branches missed.">			for (final String string : chunks) {</span>
+<span class="nc bnc" id="L714" title="All 2 branches missed.">				if (string.equals(&quot;Loading the description page...&quot;)) {</span>
+					try {
+						try {
+<span class="nc" id="L717">							pagePane.setPage(new URL(URLString));</span>
+<span class="nc" id="L718">						} catch (Exception e) {</span>
+<span class="nc" id="L719">							pagePane.setPage(TemplateAddingPanel.class.getResource(NO_DESC_PAGE));</span>
+<span class="nc" id="L720">						}</span>
+						// repaint the page
+<span class="nc" id="L722">						desPane.getViewport().revalidate();</span>
+<span class="nc" id="L723">						desPane.getViewport().repaint();</span>
+<span class="nc" id="L724">					} catch (Exception e) {</span>
+<span class="nc" id="L725">						e.printStackTrace();</span>
+<span class="nc" id="L726">					}</span>
+				}
+<span class="nc" id="L728">			}</span>
+<span class="nc" id="L729">		}</span>
+	}
+
+	public void disableAll() {
+<span class="nc" id="L733">		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));</span>
+<span class="nc" id="L734">		siteAdd.setEnabled(false);</span>
+<span class="nc" id="L735">		siteUpdate.setEnabled(false);</span>
+<span class="nc" id="L736">		tempDownload.setEnabled(false);</span>
+<span class="nc" id="L737">		close.setEnabled(false);</span>
+<span class="nc" id="L738">	}</span>
+
+	public void enableAll() {
+<span class="nc" id="L741">		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));</span>
+<span class="nc" id="L742">		siteAdd.setEnabled(true);</span>
+<span class="nc" id="L743">		siteUpdate.setEnabled(true);</span>
+<span class="nc" id="L744">		tempDownload.setEnabled(true);</span>
+<span class="nc" id="L745">		close.setEnabled(true);</span>
+<span class="nc" id="L746">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

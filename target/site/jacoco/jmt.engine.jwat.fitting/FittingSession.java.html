@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FittingSession.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.fitting</a> &gt; <span class="el_source">FittingSession.java</span></div><h1>FittingSession.java</h1><pre class="source lang-java linenums">package jmt.engine.jwat.fitting;
+
+import java.io.IOException;
+import java.util.zip.ZipOutputStream;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import jmt.engine.jwat.JwatSession;
+import jmt.engine.jwat.fitting.utils.ModelFitting;
+import jmt.gui.jwat.JWatModel;
+
+public class FittingSession extends JwatSession {
+	
+	public FittingSession() {
+<span class="nc" id="L16">		super(new ModelFitting());</span>
+<span class="nc" id="L17">	}</span>
+
+
+	protected FittingSession(JWatModel model) {
+<span class="nc" id="L21">		super(new ModelFitting());</span>
+		// TODO Auto-generated constructor stub
+<span class="nc" id="L23">	}</span>
+
+	@Override
+	public void appendXMLResults(Document doc, Element root, ZipOutputStream zos) {
+		// TODO Auto-generated method stub		
+<span class="nc" id="L28">	}</span>
+
+	@Override
+	public void copySession(JwatSession newSession) {
+		// TODO Auto-generated method stub		
+<span class="nc" id="L33">	}</span>
+
+	@Override
+	public void resetSession() {
+<span class="nc" id="L37">		model.resetModel();		</span>
+<span class="nc" id="L38">	}</span>
+
+	@Override
+	public void saveResultsFile(Document doc, Element root, ZipOutputStream zos)
+			throws IOException {
+		// TODO Auto-generated method stub		
+<span class="nc" id="L44">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

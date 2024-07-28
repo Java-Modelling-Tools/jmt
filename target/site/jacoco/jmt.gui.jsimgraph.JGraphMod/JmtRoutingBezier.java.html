@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtRoutingBezier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">JmtRoutingBezier.java</span></div><h1>JmtRoutingBezier.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.JGraphMod;
+
+import jmt.gui.jsimgraph.UtilPoint;
+import jmt.gui.jsimgraph.definitions.JMTArc;
+import jmt.gui.jsimgraph.definitions.JMTPath;
+import org.jgraph.graph.*;
+
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+
+ * @author Emma Bortone
+ * Date: 24-March-2020
+ * Time: 14.57.00
+
+ * This function returns a list containing the routing points for a Bezier edge.
+ * A Bezier conneciton is a path is composed of several arcs
+ * The list contains the source, target and control points for each arc of the path.
+ */
+<span class="nc" id="L41">public class JmtRoutingBezier implements Edge.Routing {</span>
+
+	private static final long serialVersionUID = 1L;
+
+	public List&lt;Point2D&gt; route(GraphLayoutCache cache, EdgeView edgeView) {
+<span class="nc" id="L46">		JMTPath path = ((JmtEdgeView) edgeView).getPath();</span>
+<span class="nc" id="L47">		List&lt;Point2D&gt; list = new ArrayList&lt;Point2D&gt;();</span>
+
+<span class="nc" id="L49">		int n = edgeView.getPointCount();</span>
+<span class="nc" id="L50">		Point2D from = (Point2D) edgeView.getPoint(0);</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">		if (edgeView.getSource() instanceof PortView) {</span>
+<span class="nc" id="L52">			from = (Point2D) ((PortView) edgeView.getSource()).getLocation();</span>
+		}
+<span class="nc" id="L54">		Point2D to = (Point2D) edgeView.getPoint(n - 1);</span>
+<span class="nc" id="L55">		CellView trg = edgeView.getTarget();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">		if (trg instanceof PortView) {</span>
+<span class="nc" id="L57">			to = (Point2D) ((PortView) trg).getLocation();</span>
+		}
+
+<span class="nc bnc" id="L60" title="All 4 branches missed.">		if (from != null &amp;&amp; to != null) {</span>
+
+<span class="nc" id="L62">			int nbArcs = path.getArcsNb();</span>
+			Point2D sourceArc, controlPointSource, targetArc, controlPointTarget;
+
+			// for every arc in the path except the last one :
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			for (int i = 0; i &lt; nbArcs - 1; i++) {</span>
+<span class="nc" id="L67">				sourceArc = UtilPoint.addPoints(path.getArc(i).getSource(),from);</span>
+<span class="nc" id="L68">				targetArc = UtilPoint.addPoints(path.getArc(i).getTarget(),from);</span>
+<span class="nc" id="L69">				controlPointSource = UtilPoint.addPoints(path.getArc(i).getArcPoints().get(0),sourceArc);</span>
+<span class="nc" id="L70">				controlPointTarget = UtilPoint.addPoints(path.getArc(i).getArcPoints().get(1),targetArc);</span>
+
+<span class="nc" id="L72">				list.add(sourceArc);</span>
+<span class="nc" id="L73">				list.add(controlPointSource);</span>
+<span class="nc" id="L74">				list.add(controlPointTarget);</span>
+<span class="nc" id="L75">				list.add(targetArc);</span>
+
+			}
+			//for last arc
+<span class="nc" id="L79">			sourceArc = UtilPoint.addPoints(path.getArc(nbArcs-1).getSource(),from);</span>
+<span class="nc" id="L80">			targetArc = UtilPoint.addPoints(path.getArc(nbArcs-1).getTarget(),to);</span>
+<span class="nc" id="L81">			controlPointSource = UtilPoint.addPoints(path.getArc(nbArcs-1).getArcPoints().get(0),sourceArc);</span>
+<span class="nc" id="L82">			controlPointTarget = UtilPoint.addPoints(path.getArc(nbArcs-1).getArcPoints().get(1),targetArc);</span>
+
+<span class="nc" id="L84">			list.add(sourceArc);</span>
+<span class="nc" id="L85">			list.add(controlPointSource);</span>
+<span class="nc" id="L86">			list.add(controlPointTarget);</span>
+<span class="nc" id="L87">			list.add(targetArc);</span>
+		}
+<span class="nc" id="L89">		return list;</span>
+	}
+
+	public int getPreferredLineStyle(EdgeView edgeView) {
+<span class="nc" id="L93">		return GraphConstants.STYLE_BEZIER;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

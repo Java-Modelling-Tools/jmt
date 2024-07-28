@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SampleMeanVar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">SampleMeanVar.java</span></div><h1>SampleMeanVar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * SampleMeanVar.java
+ *
+ * Created on 19 ottobre 2002, 14.56
+ */
+package jmt.engine.math;
+
+/**
+ *
+ * @author  Federico Granata
+ */
+public class SampleMeanVar {
+	protected double sum;// sum of all data
+	protected double smean;//sample mean of all data
+	protected double svar;//sample variance of data
+	protected double n;//number of data
+	protected double max;//the greatest sample of all data inserted
+	protected double min;//the smallest sample of all data inserted
+	protected double S;// sum of (sample - mean)^2
+	protected double confInt;
+
+	/** Creates a new instance of SampleMeanVar */
+<span class="nc" id="L41">	public SampleMeanVar() {</span>
+<span class="nc" id="L42">		sum = 0;</span>
+<span class="nc" id="L43">		smean = 0;</span>
+<span class="nc" id="L44">		svar = 0;</span>
+<span class="nc" id="L45">		n = 0;</span>
+<span class="nc" id="L46">		max = 0;</span>
+<span class="nc" id="L47">		min = 0;</span>
+<span class="nc" id="L48">		S = 0;</span>
+<span class="nc" id="L49">		confInt = 0;</span>
+<span class="nc" id="L50">	}</span>
+
+	/** Creates a new instance of SampleMeanVar calculating the parameters with
+	 * the initializing data sequence
+	 *  @param data the initial data sequence;
+	 */
+<span class="nc" id="L56">	public SampleMeanVar(double[] data) {</span>
+<span class="nc" id="L57">		sum = 0;</span>
+<span class="nc" id="L58">		smean = 0;</span>
+<span class="nc" id="L59">		svar = 0;</span>
+<span class="nc" id="L60">		n = 0;</span>
+<span class="nc" id="L61">		max = 0;</span>
+<span class="nc" id="L62">		min = 0;</span>
+<span class="nc" id="L63">		S = 0;</span>
+<span class="nc" id="L64">		confInt = 0;</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">		for (double element : data) {</span>
+<span class="nc" id="L66">			putNewSample(element);</span>
+		}
+<span class="nc" id="L68">	}</span>
+
+	/** initialize a new SampleMeanVar with parameters all zero
+	 */
+	public void initialize() {
+<span class="nc" id="L73">		sum = 0;</span>
+<span class="nc" id="L74">		smean = 0;</span>
+<span class="nc" id="L75">		svar = 0;</span>
+<span class="nc" id="L76">		n = 0;</span>
+<span class="nc" id="L77">		max = 0;</span>
+<span class="nc" id="L78">		min = 0;</span>
+<span class="nc" id="L79">		S = 0;</span>
+<span class="nc" id="L80">		confInt = 0;</span>
+<span class="nc" id="L81">	}</span>
+
+	/** update the sample mean &amp; variance with the new value it uses stable
+	 *  algorithms
+	 *  @param  newValue
+	 */
+	public void putNewSample(double newValue) {
+<span class="nc" id="L88">		calcVar(newValue);</span>
+		// computes the maximum and the minimum value of the sequence
+<span class="nc" id="L90">		max = Math.max(max, newValue);</span>
+<span class="nc" id="L91">		min = Math.min(min, newValue);</span>
+<span class="nc" id="L92">	}</span>
+
+	/** computes the new mean using a more stable algorithm
+	 *  @param newValue the new element to be added to the sequence
+	 */
+	protected void calcMean(double newValue) {
+<span class="nc" id="L98">		n++;</span>
+<span class="nc" id="L99">		smean += (newValue - smean) / n;</span>
+<span class="nc" id="L100">	}</span>
+
+	/** computes the new sample variance using a stable algorithm
+	 *  it also computes the mean with the stable algorithm.
+	 *  @param newValue the new element to be added to the sequence
+	 */
+	protected void calcVar(double newValue) {
+		double y;
+		double z;
+<span class="nc" id="L109">		n++;</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (n &gt; 1) {</span>
+<span class="nc" id="L111">			y = newValue - smean;</span>
+<span class="nc" id="L112">			z = y / n;</span>
+<span class="nc" id="L113">			smean += z;</span>
+<span class="nc" id="L114">			S += (n - 1) * y * z;</span>
+<span class="nc" id="L115">			svar = S / (n - 1);</span>
+		} else {
+<span class="nc" id="L117">			smean = newValue;</span>
+<span class="nc" id="L118">			S = 0;</span>
+<span class="nc" id="L119">			svar = 0;</span>
+		}
+<span class="nc" id="L121">	}</span>
+
+	/** get the sample mean
+	 *  @return the actual sample mean
+	 */
+	public double getMean() {
+<span class="nc" id="L127">		return smean;</span>
+	}
+
+	/** get the sample variance
+	 *  @return the actual sample variance
+	 */
+	public double getVar() {
+<span class="nc" id="L134">		return svar;</span>
+	}
+
+	/** get the greatest value
+	 *  @return the actual max value
+	 */
+	public double getMax() {
+<span class="nc" id="L141">		return max;</span>
+	}
+
+	/** get the smallest value
+	 *  @return the actual min value
+	 */
+	public double getMin() {
+<span class="nc" id="L148">		return min;</span>
+	}
+
+	private void calcConfInt(double perc) {
+<span class="nc" id="L152">		double alfa = (1 - (perc / 100));</span>
+<span class="nc" id="L153">		double t = TStudent.ICDF(alfa, (int) n);</span>
+<span class="nc" id="L154">		confInt = t * Math.sqrt(svar / n);</span>
+<span class="nc" id="L155">	}</span>
+
+	/** get the actual conf int
+	 * it is 0 if the variance has not been calculated
+	 *  @param  perc    the percentile required
+	 *  @return the confidence interval requested
+	 */
+	public double getConfInt(double perc) {
+<span class="nc" id="L163">		calcConfInt(perc);</span>
+<span class="nc" id="L164">		return confInt;</span>
+	}
+
+	/** creates a string with the calculated parameters of the sequence monitored
+	 *  by SampleMeanVar
+	 *  @return a string
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L173">		StringBuffer buf = new StringBuffer();</span>
+<span class="nc" id="L174">		buf.append(getClass().getName());</span>
+<span class="nc" id="L175">		calcConfInt(90);</span>
+<span class="nc" id="L176">		buf.append(&quot;\n--------------------------&quot;);</span>
+<span class="nc" id="L177">		buf.append(&quot;\nNumber of samples : &quot; + n);</span>
+<span class="nc" id="L178">		buf.append(&quot;\nUpper limit 90%   : &quot; + (smean + confInt));</span>
+<span class="nc" id="L179">		buf.append(&quot;\nSample mean       : &quot; + smean);</span>
+<span class="nc" id="L180">		buf.append(&quot;\nLower limit 90%   : &quot; + (smean - confInt));</span>
+<span class="nc" id="L181">		buf.append(&quot;\nSample variance   : &quot; + svar);</span>
+<span class="nc" id="L182">		buf.append(&quot;\nLargest Sample    : &quot; + max);</span>
+<span class="nc" id="L183">		buf.append(&quot;\nSmallest Sample   : &quot; + min);</span>
+<span class="nc" id="L184">		return buf.toString();</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

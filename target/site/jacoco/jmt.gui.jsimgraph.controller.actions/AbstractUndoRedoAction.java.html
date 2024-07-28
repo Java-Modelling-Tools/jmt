@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractUndoRedoAction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller.actions</a> &gt; <span class="el_source">AbstractUndoRedoAction.java</span></div><h1>AbstractUndoRedoAction.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller.actions;
+
+import java.util.Vector;
+
+import jmt.gui.jsimgraph.controller.Mediator;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 3-set-2003
+ * Time: 10.01.01
+
+ */
+
+/**
+ * An abstract class grouping functionalities common to Undo and Redo action.
+ * These kind of action are a bit tricky because we want their displayed name to contain a
+ * description of the edit that will be redone. A way to do this is maintaining a list
+ * of all created instances and scanning through it at every update.&lt;br&gt;
+ * That said, the main function of this class is to provide a means to update the state of all
+ * Undo/redo actions through its static method &lt;code&gt;updateAll()&lt;/code&gt;
+ */
+public abstract class AbstractUndoRedoAction extends AbstractJmodelAction {
+
+	private static final long serialVersionUID = 1L;
+<span class="nc" id="L44">	protected static Vector&lt;AbstractUndoRedoAction&gt; instances = new Vector&lt;AbstractUndoRedoAction&gt;(); //a list holding all the instances of this action</span>
+<span class="nc" id="L45">	protected static int instanceCount = 0; //local copy of instances.size();</span>
+
+	public AbstractUndoRedoAction(String name, Mediator mediator) {
+<span class="nc" id="L48">		super(name, mediator);</span>
+<span class="nc" id="L49">		instances.add(this);</span>
+<span class="nc" id="L50">		instanceCount++;</span>
+<span class="nc" id="L51">	}</span>
+
+	/**
+	 * Update the state (name &amp; enabled) of this instance.
+	 * To be overridden in subclasses
+	 */
+	public abstract void update();
+
+	/**
+	 * Update the state (name &amp; enabled) of all instances
+	 */
+	public static void updateAll() {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		for (int i = 0; i &lt; instanceCount; i++) {</span>
+<span class="nc" id="L64">			instances.get(i).update();</span>
+		}
+<span class="nc" id="L66">	}</span>
+
+	/**
+	 * Removes this action from the update list.
+	 * Should be called before deleting all references to an &lt;code&gt;ActionRedo&lt;/code&gt;
+	 */
+	public void dispose() {
+<span class="nc" id="L73">		instanceCount--;</span>
+<span class="nc" id="L74">		instances.remove(this);</span>
+<span class="nc" id="L75">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

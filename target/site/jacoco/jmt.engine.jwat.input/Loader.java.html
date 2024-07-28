@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Loader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.input</a> &gt; <span class="el_source">Loader.java</span></div><h1>Loader.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jwat.input;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+import jmt.engine.jwat.JwatSession;
+import jmt.engine.jwat.ProgressStatusListener;
+import jmt.engine.jwat.workloadAnalysis.utils.FormatFileReader;
+import jmt.gui.jwat.JWATConstants;
+
+<span class="nc" id="L32">public class Loader implements JWATConstants {</span>
+
+	public static int calcNumOfObs(String filePath) throws FileNotFoundException, IOException {
+<span class="nc" id="L35">		int numObs = 0;</span>
+<span class="nc" id="L36">		BufferedReader reader = new BufferedReader(new FileReader(filePath));</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">		while (reader.readLine() != null) {</span>
+<span class="nc" id="L38">			numObs++;</span>
+		}
+<span class="nc" id="L40">		reader.close();</span>
+<span class="nc" id="L41">		return numObs;</span>
+	}
+
+	public static void readData(String filePath, Parameter param, ProgressShow prShow, ProgressStatusListener pStatusList) {
+<span class="nc" id="L45">		InputLoader loads = null;</span>
+		VariableMapping[] map;
+
+		//Initializing the object necessary to load data.
+<span class="nc" id="L49">		map = new VariableMapping[param.getNumVar()];</span>
+
+<span class="nc" id="L51">		int[] varType = param.getVarType();</span>
+
+		//Creo mappings
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		for (int i = 0; i &lt; map.length; i++) {</span>
+<span class="nc bnc" id="L55" title="All 4 branches missed.">			switch (varType[i]) {</span>
+			case Parameter.NUMBER:
+<span class="nc" id="L57">				map[i] = null;</span>
+<span class="nc" id="L58">				break;</span>
+			case Parameter.DATE:
+<span class="nc" id="L60">				map[i] = new DataMapping();</span>
+<span class="nc" id="L61">				break;</span>
+			case Parameter.STRING:
+<span class="nc" id="L63">				map[i] = new StringMapping();</span>
+				break;
+			}
+		}
+		try {
+<span class="nc bnc" id="L68" title="All 4 branches missed.">			switch (param.getSampleMethod()) {</span>
+			case Parameter.ALL_INPUT:
+<span class="nc" id="L70">				loads = new AllInputLoader(param, filePath, map, prShow);</span>
+<span class="nc" id="L71">				break;</span>
+			case Parameter.INTERVAL_INPUT:
+<span class="nc" id="L73">				loads = new IntervalInputLoader(param, filePath, map, prShow);</span>
+<span class="nc" id="L74">				break;</span>
+			case Parameter.RANDOM_INPUT:
+<span class="nc" id="L76">				loads = new RndInputLoader(param, filePath, map, prShow);</span>
+				break;
+			}
+<span class="nc" id="L79">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L80">			pStatusList.statusEvent(new EventFinishAbort(&quot;Loading aborted. File not found.&quot;));</span>
+<span class="nc" id="L81">		}</span>
+<span class="nc" id="L82">		loads.addStatusListener(pStatusList);</span>
+<span class="nc" id="L83">		loads.start();</span>
+<span class="nc" id="L84">	}</span>
+
+	public static Parameter loadParameter(File demoPath, String demoName) throws FileNotFoundException, IOException {
+<span class="nc" id="L87">		FormatFileReader form = new FormatFileReader(new File(demoPath, demoName + &quot;Format.jwatformat&quot;).getAbsolutePath());</span>
+
+<span class="nc" id="L89">		boolean[] varSelected = new boolean[form.getNumVars()];</span>
+<span class="nc" id="L90">		String[] varName = new String[form.getNumVars()];</span>
+<span class="nc" id="L91">		String[] regularExp = new String[form.getNumVars()];</span>
+<span class="nc" id="L92">		String[] tokenExp = new String[form.getNumVars()];</span>
+<span class="nc" id="L93">		int[] varType = new int[form.getNumVars()];</span>
+
+<span class="nc" id="L95">		int options[] = new int[] { Loader.calcNumOfObs(new File(demoPath, demoName + &quot;Data.jwat&quot;).getAbsolutePath()) };</span>
+
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		for (int i = 0; i &lt; form.getNumVars(); i++) {</span>
+<span class="nc" id="L98">			varSelected[i] = true;</span>
+<span class="nc" id="L99">			varType[i] = form.getType();</span>
+<span class="nc" id="L100">			varName[i] = form.getName();</span>
+<span class="nc" id="L101">			regularExp[i] = form.getRegExpr();</span>
+<span class="nc" id="L102">			tokenExp[i] = form.getDelimiters();</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			if (tokenExp[i].length() == 0) {</span>
+<span class="nc" id="L104">				tokenExp[i] = null;</span>
+			}
+<span class="nc" id="L106">			form.next();</span>
+		}
+
+<span class="nc" id="L109">		return new Parameter(varSelected, varType, regularExp, tokenExp, varName, Parameter.ALL_INPUT, null, options, null, null);</span>
+	}
+
+	/**
+	 * This function reads a specific session from an XML file
+	 * 
+	 * @param filePath
+	 */
+	public static void loadSession(String fileName, ProgressShow prShow, ProgressStatusListener pStatusList, JwatSession session) {
+		try {
+<span class="nc" id="L119">			SessionLoader sLoader = new SessionLoader(fileName, prShow);</span>
+<span class="nc" id="L120">			sLoader.addStatusListener(pStatusList);</span>
+<span class="nc" id="L121">			sLoader.start();</span>
+<span class="nc" id="L122">		} catch (IOException e) {</span>
+<span class="nc" id="L123">			pStatusList.statusEvent(new EventFinishAbort(&quot;Loading session failed.&quot;));</span>
+<span class="nc" id="L124">		}</span>
+<span class="nc" id="L125">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 1
 Variable 0
 0
@@ -7,3 +8,14 @@ Variable 0
 ([+-])?\d+([.]\d+)?
 
 
+=======
+1
+Variable 0
+0
+1
+
+
+([+-])?\d+([.]\d+)?
+
+
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)

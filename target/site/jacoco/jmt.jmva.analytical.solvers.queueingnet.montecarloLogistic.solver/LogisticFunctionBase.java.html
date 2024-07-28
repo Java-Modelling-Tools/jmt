@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogisticFunctionBase.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver</a> &gt; <span class="el_source">LogisticFunctionBase.java</span></div><h1>LogisticFunctionBase.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.SafeFunction;
+
+/**
+ * Extension of the SafFunction base class. Provides basic, reusable structure of logistic functions
+ */
+public abstract class LogisticFunctionBase extends SafeFunction {
+
+	protected DoubleMatrix1D u_stat;
+<span class="nc" id="L14">	protected double v_stat = 0;</span>
+	protected DoubleMatrix1D x_stat;
+	protected DoubleMatrix2D hess_stat;
+
+	public LogisticFunctionBase(int ndim) {
+<span class="nc" id="L19">		super(ndim);</span>
+<span class="nc" id="L20">	}</span>
+
+	public abstract void calculate_stationary_point() throws InternalErrorException;
+
+	public abstract void calculate_hessian() throws InternalErrorException;
+
+<span class="nc" id="L26">	public DoubleMatrix1D getU_stat() { return u_stat.copy(); }</span>
+
+<span class="nc" id="L28">	public double getV_stat() { return v_stat; }</span>
+
+<span class="nc" id="L30">	public DoubleMatrix1D getX_stat() { return x_stat.copy(); }</span>
+
+<span class="nc" id="L32">	public DoubleMatrix2D getHess_stat() { return hess_stat.copy(); }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

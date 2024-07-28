@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Exponential.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.distributions</a> &gt; <span class="el_source">Exponential.java</span></div><h1>Exponential.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.distributions;
+
+import javax.swing.ImageIcon;
+
+import jmt.gui.common.JMTImageLoader;
+
+/**
+ * &lt;p&gt;Title: Exponential Distribution&lt;/p&gt;
+ * &lt;p&gt;Description: Exponential distribution data structure&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 27-giu-2005
+ *         Time: 11.47.50
+ */
+public class Exponential extends Distribution {
+
+	/**
+	 * Constructs a new Exponential Distribution
+	 */
+	public Exponential() {
+<span class="fc" id="L39">		super(&quot;Exponential&quot;, &quot;jmt.engine.random.Exponential&quot;, &quot;jmt.engine.random.ExponentialPar&quot;, &quot;Exponential distribution&quot;);</span>
+<span class="fc" id="L40">		hasMean = true;</span>
+<span class="fc" id="L41">		hasC = false;</span>
+<span class="fc" id="L42">		isNestable = true;</span>
+<span class="fc" id="L43">	}</span>
+
+	/**
+	 * Used to set parameters of this distribution
+	 * @return distribution parameters
+	 */
+	@Override
+	protected Parameter[] setParameters() {
+		// Creates parameter array
+<span class="fc" id="L52">		Parameter[] parameters = new Parameter[1];</span>
+
+		// Sets parameter lambda
+<span class="fc" id="L55">		parameters[0] = new Parameter(&quot;lambda&quot;, &quot;\u03BB&quot;, Double.class, new Double(1.0));</span>
+		// Checks value of lambda must be greater than 0
+<span class="fc" id="L57">		parameters[0].setValueChecker(new ValueChecker() {</span>
+			public boolean checkValue(Object value) {
+<span class="fc" id="L59">				Double d = (Double) value;</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">				if (d.doubleValue() &gt; 0.0) {</span>
+<span class="fc" id="L61">					return true;</span>
+				} else {
+<span class="nc" id="L63">					return false;</span>
+				}
+			}
+		});
+
+<span class="fc" id="L68">		return parameters;</span>
+	}
+
+	/**
+	 * Sets illustrating figure in distribution panel
+	 * @return illustrating figure
+	 */
+	@Override
+	protected ImageIcon setImage() {
+<span class="fc" id="L77">		return JMTImageLoader.loadImage(&quot;Exponential&quot;);</span>
+	}
+
+	/**
+	 * Returns this distribution's short description
+	 * @return distribution's short description
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L86">		return &quot;exp(&quot; + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + &quot;)&quot;;</span>
+	}
+
+	/**
+	 * Sets the mean for this distribution
+	 * @param value mean value
+	 */
+	@Override
+	public void setMean(double value) {
+		// mean = 1 / lambda
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">		if (getParameter(0).setValue(new Double(1 / value))) {</span>
+<span class="fc" id="L97">			mean = value;</span>
+		}
+<span class="fc" id="L99">	}</span>
+
+	/**
+	 * This method is called whenever a parameter changes and &lt;code&gt;hasMean&lt;/code&gt; or
+	 * &lt;code&gt;hasC&lt;/code&gt; is true
+	 */
+	@Override
+	public void updateCM() {
+<span class="fc" id="L107">		mean = 1 / ((Double) getParameter(0).getValue()).doubleValue();</span>
+<span class="fc" id="L108">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

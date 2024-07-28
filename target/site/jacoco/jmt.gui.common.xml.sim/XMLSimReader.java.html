@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLSimReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim</a> &gt; <span class="el_source">XMLSimReader.java</span></div><h1>XMLSimReader.java</h1><pre class="source lang-java linenums">/**
+ * Refactored replacement for the legacy {@code XMLReader}, reading simulation model data from XML
+ * using a two-phase Parse then Map pipeline (DTO intermediate representation).
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim;
+
+import jmt.common.xml.XSDSchemaLoader;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.XMLArchiver;
+import jmt.gui.common.xml.XMLConstantNames;
+import jmt.gui.common.xml.XMLLoader;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.mapper.SimDescriptorMapper;
+import jmt.gui.common.xml.sim.parsers.NodeParser;
+import jmt.gui.common.xml.sim.parsers.SimParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.io.File;
+
+public class XMLSimReader implements XMLConstantNames {
+    private XMLSimReader() {
+        /* This utility class should not be instantiated */
+    }
+
+    public static boolean loadModel(String fileName, CommonModel model) {
+<span class="nc" id="L30">        Document doc = XMLLoader.loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        if (doc == null) return false;</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (doc.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() != 0) {</span>
+<span class="nc" id="L33">            parseXML(doc.getDocumentElement(), model);</span>
+<span class="nc" id="L34">            return true;</span>
+<span class="nc bnc" id="L35" title="All 2 branches missed.">        } else if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {</span>
+<span class="nc" id="L36">            Element simRoot = XMLArchiver.getSimFromArchiveDocument(doc);</span>
+<span class="nc bnc" id="L37" title="All 2 branches missed.">            if (simRoot != null) {</span>
+<span class="nc" id="L38">                parseXML(simRoot, model);</span>
+<span class="nc" id="L39">                return true;</span>
+            }
+        }
+<span class="nc" id="L42">        return false;</span>
+    }
+
+    public static boolean loadModel(File xmlFile, CommonModel model) {
+<span class="nc" id="L46">        return loadModel(xmlFile.getAbsolutePath(), model);</span>
+    }
+
+    public static void parseXML(Document document, CommonModel model) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">        if (document == null) return;</span>
+<span class="nc" id="L51">        parseXML(document.getDocumentElement(), model);</span>
+<span class="nc" id="L52">    }</span>
+
+    public static void parseXML(Element root, CommonModel model) {
+<span class="pc bpc" id="L55" title="2 of 4 branches missed.">        if (root == null || model == null) return;</span>
+        SimDescriptor descriptor;
+<span class="fc" id="L57">        String tagName = root.getTagName();</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (XML_NODE.equals(tagName)) {</span>
+<span class="nc" id="L60">            descriptor = new SimDescriptor();</span>
+<span class="nc" id="L61">            NodeParser nodeParser = new NodeParser();</span>
+<span class="nc" id="L62">            descriptor.addNode(nodeParser.parse(root));</span>
+<span class="nc" id="L63">        } else {</span>
+<span class="fc" id="L64">            SimParser parser = new SimParser();</span>
+<span class="fc" id="L65">            descriptor = parser.parse(root);</span>
+        }
+
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (root.getParentNode() instanceof Element) {</span>
+<span class="fc" id="L69">            Element parent = (Element) root.getParentNode();</span>
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">            if (XML_ARCHIVE_DOCUMENT_ROOT.equals(parent.getTagName())) {</span>
+<span class="fc" id="L71">                descriptor.setArchiveName(parent.getAttribute(XML_A_ROOT_NAME));</span>
+<span class="fc" id="L72">                descriptor.setArchiveTimestamp(parent.getAttribute(XML_A_ARCHIVE_TIMESTAMP));</span>
+            }
+        }
+
+        // In-Place mapping on model
+<span class="fc" id="L77">        SimDescriptorMapper mapper = new SimDescriptorMapper(descriptor, model);</span>
+<span class="fc" id="L78">        mapper.mapToModel();</span>
+<span class="fc" id="L79">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

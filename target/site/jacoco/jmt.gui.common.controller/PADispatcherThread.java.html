@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PADispatcherThread.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.controller</a> &gt; <span class="el_source">PADispatcherThread.java</span></div><h1>PADispatcherThread.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.controller;
+
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
+import jmt.framework.gui.graph.MeasureValue;
+import jmt.gui.common.definitions.*;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.panels.parametric.PAProgressWindow;
+import jmt.gui.common.panels.parametric.PAResultsWindow;
+import jmt.gui.common.xml.XMLLoader;
+import jmt.gui.common.xml.results.XMLResultsReader;
+import jmt.gui.common.xml.sim.XMLSimWriter;
+import org.w3c.dom.Document;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * &lt;p&gt;
+ * Title: PADispatcherThread
+ * &lt;/p&gt;
+ * &lt;p&gt;
+ * Description: This thread is responsible for dispatching several simulations.
+ * If a simulation max time has been specified, an inner thread will be used to
+ * stop simulation after that time. We do not rely on engine method as it does
+ * not appear to work properly.
+ * &lt;/p&gt;
+ *
+ * @author Francesco D'Aquino Date: 29-dic-2005 Time: 9.58.49
+ *
+ * Fixed by Bertoli Marco
+ */
+public class PADispatcherThread extends Thread implements AbortMeasure {
+
+	private SimulationDefinition simd;
+	private GuiInterface gui;
+	private PAProgressWindow progressWindow;
+	private boolean stopped;
+	private int currentStep;
+
+<span class="nc" id="L66">	private Map&lt;Integer, PASimulation&gt; active_simulations = new HashMap&lt;&gt;();</span>
+	private ExecutorService exec;
+	private PAResultsModel parametricAnalysisResultsModel;
+	private CountDownLatch results_latch;
+	private CountDownLatch set_results_latch;
+
+	private StoredResultsModel[] simulation_results;
+
+	/**
+	 * Construct a new Parametric Analysis Dispatcher Thread
+	 * @param gui reference to current gui object (can be JSIMMain or Mediator)
+	 * @param simd Reference to the simulation definition
+	 */
+<span class="nc" id="L79">	public PADispatcherThread(GuiInterface gui, SimulationDefinition simd, PAProgressWindow papw) {</span>
+<span class="nc" id="L80">		this.setName(&quot;PADispatcherThread&quot;);</span>
+<span class="nc" id="L81">		progressWindow = papw;</span>
+<span class="nc" id="L82">		this.simd = simd;</span>
+<span class="nc" id="L83">		this.gui = gui;</span>
+		// Avoids hanging the system during execution
+<span class="nc" id="L85">		this.setPriority(Thread.MIN_PRIORITY);</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Pauses current simulation only if it was already started
+	 */
+	public void pauseSimulation() {
+<span class="nc" id="L92">		Set&lt;Entry&lt;Integer, PASimulation&gt;&gt; entrySet = active_simulations.entrySet();</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		for (Entry&lt;Integer, PASimulation&gt; entry : entrySet) {</span>
+<span class="nc" id="L94">			PASimulation sim = entry.getValue();</span>
+<span class="nc" id="L95">			sim.pause();</span>
+<span class="nc" id="L96">		}</span>
+<span class="nc" id="L97">		gui.changeSimActionsState(true, false, true);</span>
+<span class="nc" id="L98">		progressWindow.pause();</span>
+<span class="nc" id="L99">	}</span>
+
+	/**
+	 * Stops current simulation, forcing abort of all measures,
+	 * only if it was already started
+	 */
+	public void stopSimulation() {
+<span class="nc" id="L106">		exec.shutdownNow();</span>
+
+<span class="nc" id="L108">		Set&lt;Entry&lt;Integer, PASimulation&gt;&gt; entrySet = active_simulations.entrySet();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		for (Entry&lt;Integer, PASimulation&gt; entry : entrySet) {</span>
+<span class="nc" id="L110">			PASimulation sim = entry.getValue();</span>
+<span class="nc" id="L111">			sim.stopSimulation();</span>
+<span class="nc" id="L112">		}</span>
+
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		while (results_latch.getCount() &gt; 0) {</span>
+<span class="nc" id="L115">			results_latch.countDown();</span>
+		}
+
+		try {
+<span class="nc" id="L119">			set_results_latch.await();</span>
+<span class="nc" id="L120">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L121">			e.printStackTrace();</span>
+<span class="nc" id="L122">		}</span>
+
+<span class="nc" id="L124">		stopped = true;</span>
+<span class="nc" id="L125">		progressWindow.stop();</span>
+<span class="nc" id="L126">	}</span>
+
+	/**
+	 * Restarts current simulation, forcing abort of all measures, only if it
+	 * was already started
+	 */
+	public void restartSimulation() {
+<span class="nc" id="L133">		Set&lt;Entry&lt;Integer, PASimulation&gt;&gt; entrySet = active_simulations.entrySet();</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		for (Entry&lt;Integer, PASimulation&gt; entry : entrySet) {</span>
+<span class="nc" id="L135">			PASimulation sim = entry.getValue();</span>
+<span class="nc" id="L136">			sim.restart();</span>
+<span class="nc" id="L137">		}</span>
+
+<span class="nc" id="L139">		gui.changeSimActionsState(false, true, true);</span>
+<span class="nc" id="L140">		progressWindow.restart();</span>
+<span class="nc" id="L141">	}</span>
+
+	/**
+	 * Aborts a measure, given its index
+	 * 
+	 * @param index
+	 *            index of the measure to be aborted
+	 */
+	public void abortMeasure(int index) {
+<span class="nc" id="L150">		Set&lt;Entry&lt;Integer, PASimulation&gt;&gt; entrySet = active_simulations.entrySet();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		for (Entry&lt;Integer, PASimulation&gt; entry : entrySet) {</span>
+<span class="nc" id="L152">			PASimulation sim = entry.getValue();</span>
+<span class="nc" id="L153">			sim.abortMeasureAtRefresh(index);</span>
+<span class="nc" id="L154">		}</span>
+<span class="nc" id="L155">	}</span>
+
+	@Override
+	public void run() {
+<span class="nc" id="L159">		File simulationFile = null;</span>
+<span class="nc" id="L160">		ParametricAnalysisDefinition pad = simd.getParametricAnalysisModel();</span>
+<span class="nc" id="L161">		pad.createValuesSet();</span>
+<span class="nc" id="L162">		int steps = pad.getNumberOfSteps();</span>
+<span class="nc" id="L163">		int parallelism = simd.getWhatIfParallelism();</span>
+
+<span class="nc" id="L165">		results_latch = new CountDownLatch(steps);</span>
+<span class="nc" id="L166">		set_results_latch = new CountDownLatch(1);</span>
+<span class="nc" id="L167">		parametricAnalysisResultsModel = new PAResultsModel((CommonModel) simd);</span>
+<span class="nc" id="L168">		exec = Executors.newFixedThreadPool(parallelism);</span>
+<span class="nc" id="L169">		simulation_results = new StoredResultsModel[steps];</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		for (currentStep = 0; currentStep &lt; steps; currentStep++) {</span>
+<span class="nc" id="L172">			pad.changeModel(currentStep);</span>
+			try {
+<span class="nc" id="L174">				simulationFile = File.createTempFile(&quot;~JModelSimulation-&quot; + currentStep, &quot;.xml&quot;);</span>
+<span class="nc" id="L175">				simulationFile.deleteOnExit();</span>
+<span class="nc" id="L176">			} catch (IOException e) {</span>
+<span class="nc" id="L177">				e.printStackTrace();</span>
+<span class="nc" id="L178">			}</span>
+<span class="nc" id="L179">			XMLSimWriter.writeXML(simulationFile, (CommonModel) simd);</span>
+
+<span class="nc" id="L181">			DispatcherJSIMschema simulator = new DispatcherJSIMschema(simulationFile);</span>
+<span class="nc" id="L182">			simulator.setParametricStep(currentStep);</span>
+<span class="nc" id="L183">			SimSolver ss = new SimSolver(simulator, currentStep, results_latch);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			if (simd.getMaximumDuration().doubleValue() &gt; 0) {</span>
+<span class="nc" id="L185">				ss.setTimer(new TimerThread(simulator, simd.getMaximumDuration().doubleValue()));</span>
+			}
+
+<span class="nc" id="L188">			exec.execute(ss);</span>
+		}
+
+		try {
+<span class="nc" id="L192">			results_latch.await();</span>
+<span class="nc" id="L193">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L194">			e.printStackTrace();</span>
+<span class="nc" id="L195">		}</span>
+
+<span class="nc" id="L197">		boolean hasResults = false;</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">		for (StoredResultsModel results : simulation_results) {</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			if (results == null) {</span>
+<span class="nc" id="L200">				continue;</span>
+			}
+<span class="nc bnc" id="L202" title="All 2 branches missed.">			for (int i = 0; i &lt; results.getMeasureNumber(); i++) {</span>
+<span class="nc" id="L203">				hasResults = true;</span>
+<span class="nc" id="L204">				Vector&lt;MeasureValue&gt; thisResult = results.getValues(i);</span>
+<span class="nc" id="L205">				int measureState = results.getMeasureState(i);</span>
+<span class="nc" id="L206">				MeasureValue value = thisResult.get(0);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				boolean valid = (measureState == MeasureDefinition.MEASURE_SUCCESS);</span>
+<span class="nc" id="L208">				parametricAnalysisResultsModel.addSample(results.getName(i), value.getLowerBound(),</span>
+<span class="nc" id="L209">						value.getMeanValue(), value.getUpperBound(), valid);</span>
+			}
+		}
+
+<span class="nc" id="L213">		set_results_latch.countDown();</span>
+
+<span class="nc" id="L215">		pad.restoreOriginalValues();</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">		if (!stopped) {</span>
+<span class="nc" id="L217">			progressWindow.finished();</span>
+<span class="nc" id="L218">			progressWindow.stopAnimation();</span>
+		} else {
+<span class="nc" id="L220">			progressWindow.stop();</span>
+		}
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		if (hasResults) {</span>
+			// Sets the parametric analysis model results
+<span class="nc" id="L225">			simd.setSimulationResults(parametricAnalysisResultsModel);</span>
+<span class="nc" id="L226">			PAResultsWindow resWin = new PAResultsWindow(simd, gui.getFileName());</span>
+<span class="nc" id="L227">			gui.setResultsWindow(resWin);</span>
+<span class="nc" id="L228">			gui.showResultsWindow();</span>
+		}
+<span class="nc" id="L230">		gui.changeSimActionsState(true, false, false);</span>
+<span class="nc" id="L231">		exec.shutdown();</span>
+<span class="nc" id="L232">	}</span>
+
+	class SimSolver implements Runnable {
+		private DispatcherJSIMschema simulator;
+		private TimerThread timer;
+		private int step;
+		private CountDownLatch latch;
+
+<span class="nc" id="L240">		public SimSolver(DispatcherJSIMschema simulator, int step, CountDownLatch latch) {</span>
+<span class="nc" id="L241">			this.simulator = simulator;</span>
+<span class="nc" id="L242">			this.step = step;</span>
+<span class="nc" id="L243">			this.latch = latch;</span>
+<span class="nc" id="L244">		}</span>
+
+		public void setTimer(TimerThread timer) {
+<span class="nc" id="L247">			this.timer = timer;</span>
+<span class="nc" id="L248">		}</span>
+
+		@Override
+		public void run() {
+			try {
+<span class="nc" id="L253">				PASimulation PASim = new PASimulation(simulator);</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">				if (timer != null) {</span>
+<span class="nc" id="L255">					PASim.setTimer(timer);</span>
+<span class="nc" id="L256">					timer.start();</span>
+				}
+<span class="nc" id="L258">				active_simulations.put(step, PASim);</span>
+<span class="nc" id="L259">				simulator.solveModel();</span>
+<span class="nc" id="L260">				active_simulations.remove(step);</span>
+<span class="nc" id="L261">			} catch (OutOfMemoryError err) {</span>
+<span class="nc" id="L262">				simulator.abortAllMeasures();</span>
+<span class="nc" id="L263">				simulator.killSimulation();</span>
+<span class="nc" id="L264">				progressWindow.stop();</span>
+<span class="nc" id="L265">				progressWindow.dispose();</span>
+<span class="nc" id="L266">				gui.showErrorMessage(&quot;Out of memory error. Try to run Java Virtual Machine with more heap size (-Xmx&lt;num&gt;m)&quot;);</span>
+<span class="nc" id="L267">			} catch (InterruptedException ex) {</span>
+				// interrupted by stop simulation
+<span class="nc" id="L269">				return;</span>
+<span class="nc" id="L270">			} catch (Exception ex) {</span>
+<span class="nc" id="L271">				simulator.abortAllMeasures();</span>
+<span class="nc" id="L272">				simulator.killSimulation();</span>
+<span class="nc" id="L273">				gui.handleException(ex);</span>
+<span class="nc" id="L274">			}</span>
+
+<span class="nc" id="L276">			File output = simulator.getSimulation().getOutputFile();</span>
+<span class="nc" id="L277">			output.deleteOnExit();</span>
+
+<span class="nc" id="L279">			Document doc = XMLLoader.loadXML(output.getAbsolutePath());</span>
+<span class="nc" id="L280">			StoredResultsModel results = new StoredResultsModel();</span>
+<span class="nc" id="L281">			XMLResultsReader.parseXML(doc, results);</span>
+<span class="nc" id="L282">			simulation_results[step] = results;</span>
+
+<span class="nc" id="L284">			progressWindow.incrementStepNumber();</span>
+
+<span class="nc bnc" id="L286" title="All 2 branches missed.">			if (timer != null) {</span>
+<span class="nc" id="L287">				timer.kill();</span>
+			}
+<span class="nc" id="L289">			latch.countDown();</span>
+<span class="nc" id="L290">		}</span>
+	}
+
+	class PASimulation {
+		private DispatcherJSIMschema simulator;
+		private TimerThread timer;
+
+<span class="nc" id="L297">		public PASimulation(DispatcherJSIMschema simulator) {</span>
+<span class="nc" id="L298">			this.simulator = simulator;</span>
+<span class="nc" id="L299">		}</span>
+
+		public void abortMeasureAtRefresh(int index) {
+<span class="nc" id="L302">			simulator.abortMeasureAtRefresh(index);</span>
+<span class="nc" id="L303">		}</span>
+
+		public void stopSimulation() {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			if (timer != null) {</span>
+<span class="nc" id="L307">				timer.kill();</span>
+			}
+<span class="nc" id="L309">			simulator.abortAllMeasures();</span>
+<span class="nc" id="L310">			simulator.killSimulation();</span>
+<span class="nc" id="L311">		}</span>
+
+		public void restart() {
+<span class="nc bnc" id="L314" title="All 2 branches missed.">			if (timer != null) {</span>
+<span class="nc" id="L315">				timer.restart();</span>
+			}
+<span class="nc" id="L317">			simulator.restartSim();</span>
+<span class="nc" id="L318">		}</span>
+
+		public void setTimer(TimerThread timer) {
+<span class="nc" id="L321">			this.timer = timer;</span>
+<span class="nc" id="L322">		}</span>
+
+		public void pause() {
+<span class="nc bnc" id="L325" title="All 2 branches missed.">			if (timer != null) {</span>
+<span class="nc" id="L326">				timer.pause();</span>
+			}
+<span class="nc" id="L328">			simulator.pauseSim();</span>
+<span class="nc" id="L329">		}</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

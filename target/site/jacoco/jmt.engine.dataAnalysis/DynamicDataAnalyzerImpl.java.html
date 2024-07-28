@@ -1,0 +1,1186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DynamicDataAnalyzerImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis</a> &gt; <span class="el_source">DynamicDataAnalyzerImpl.java</span></div><h1>DynamicDataAnalyzerImpl.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.dataAnalysis;
+
+import jmt.engine.math.DoubleArrayList;
+import jmt.engine.math.Printer;
+import jmt.engine.math.Spectrum;
+import jmt.engine.math.TStudent;
+import jmt.engine.math.WeightedMeanVar;
+import Jama.Matrix;
+
+/**
+ * This class performs dynamic data analysis: it can remove the initial
+ *  transient period and performs calculation of variance and confidence
+ *	interval of the sample mean of a sequence. &lt;br&gt;It is robust to data correlation.
+ *  &lt;br&gt;&lt;br&gt;
+ *	See:&lt;br&gt;
+ * (1) K. Pawlikowski, &quot;Steady­State Simulation of Queueing Processes: A Survey
+ *	of Problems and Solutions&quot;, ACM Computing Surveys 22, 2 (1990), pp. 122--170
+ *
+ *
+ * @version Modified 7/02/2003
+ * @author  Federico Granata
+ * @author Bertoli Marco - Bugfixing statistical part (R5 and Schruben) 18-11-2005
+ */
+
+public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
+
+	private static final boolean DEBUG = false;
+	private static final boolean ZERODEBUG = false;
+
+	protected SimParameters parameters;
+
+	/**number of batches */
+<span class="nc" id="L51">	protected int numBatch = 128;</span>
+	/**number of samples per batch */
+<span class="nc" id="L53">	protected int batchLen = 8;</span>
+
+	/**mean of batches */
+	protected double[] batchMean;
+	/**mean of batches weighted */
+	protected double[] weightBatchMean;
+
+	/**the estimated mean */
+<span class="nc" id="L61">	protected double extMean = 0;</span>
+	/**the estimated variance */
+<span class="nc" id="L63">	protected double extVar = 0;</span>
+	/**the estimated confidence intervals */
+<span class="nc" id="L65">	protected double confInt = 0;</span>
+	/**the estimated instantaneous value */
+<span class="nc" id="L67">	private double lastIntervalAvg = 0;</span>
+
+	/**the sum of samples of the last batch */
+	protected double sumLastBatch;
+	/**actual number of samples */
+<span class="nc" id="L72">	protected int nSamples = 0;</span>
+	/**maximum number of data to be collected */
+	protected int maxData;
+
+	/**constant chosen to reduce bias of variance estimator */
+	protected double C1;
+	/**degrees of freedom of the t-distribution */
+	protected int C2;
+
+	/**the quantile required for the confidence interval*/
+	protected double alfa;
+	/**maximum amplitude of confidence interval*/
+	protected double precision;
+
+	//protected DoubleArrayList initData = new DoubleArrayList();
+	/**starting data, not steady state*/
+	protected DoubleArrayList initData;
+	/**starting weights, not steady state*/
+	protected DoubleArrayList initWeight;
+
+	//-------------------------STATE OF COMPUTATION---------------------------------//
+
+	/**Transient period has been deleted or not*/
+<span class="nc" id="L95">	protected boolean deleted = false;</span>
+	/** initialized = true if the system is in steady state*/
+	protected boolean initialized;
+	/** end = true if the analysis has been completed (successfully or not)*/
+	protected boolean end;
+	/** success = true if the analysis is successful, the required precision has
+	been met*/
+	protected boolean success;
+	/** heuristic = true if the heuristic rule for startup period is successful.*/
+<span class="nc" id="L104">	protected boolean heuristic = false;</span>
+
+	//-------------------------end STATE OF COMPUTATION-----------------------------//
+
+	/**number of discarded data in deleting transient period    */
+	protected int discarded;
+	/**number of data that are replaced when detect initial
+	test fails.*/
+	protected int initial;
+
+	//during test for stationarity, delta old observations will
+	//be replaced by new ones
+	protected int delta;
+
+	/**number of points of the polyfit */
+<span class="nc" id="L119">	protected int K = numBatch / 4;</span>
+
+	// why numbatch/4 ? --&gt; the signal spectral is computed using as the mean of two samples
+	// therefore:
+	// divide for 2, because having numbatch batches, we consider numbatch / 2
+	// divide again for 2, because we want to use only the first half of the spectral
+	// (the second half is sigmetric)
+
+	/**the order of the polynomial*/
+<span class="nc" id="L128">	protected int polyOrder = 2;</span>
+
+	/**
+	 * First estimate of transient length: this
+	 * number of samples is identified by the heuristic test
+	 */
+<span class="nc" id="L134">	public int eurDisc = 0;</span>
+
+	/**batches used to delete transient*/
+<span class="nc" id="L137">	DoubleArrayList miniB = new DoubleArrayList();</span>
+	/**batches used to delete transient*/
+<span class="nc" id="L139">	DoubleArrayList miniW = new DoubleArrayList();</span>
+
+<span class="nc" id="L141">	int initSamples = 0;</span>
+
+	double[] arrayData;
+
+	/**minimum length (number of samples) of transient period */
+<span class="nc" id="L146">	int minSamples = 0;</span>
+	/**sums of samples*/
+<span class="nc" id="L148">	double sumS = 0;</span>
+	/**sums of weights.*/
+<span class="nc" id="L150">	double sumW = 0;</span>
+
+	/**index of the batch*/
+	int batch;
+
+	//-----------------------NULL TEST HYPOTHESIS----------------------------------------//
+
+	//NULL TEST is used to identify and stop all measures that are
+	//very close to 0.0 (such measures cause troubles to the analyzer)
+
+	//true if the analyzer must control whether the mean value is 0.0
+<span class="nc" id="L161">	private boolean nullTestEnabled = true;</span>
+	//true if null test has determined that this measure is equal to zero
+<span class="nc" id="L163">	private boolean measureIsZero = false;</span>
+
+	//contains the mean and the variance computed during the test
+<span class="nc" id="L166">	private WeightedMeanVar nullTestData = new WeightedMeanVar();</span>
+
+	//the quantile required for the confidence interval of nullTest
+<span class="nc" id="L169">	private double nullTestAlfa = 0.005;</span>
+
+	//to save time and resources, null test is not made for each sample, but repeated
+	//every nullTestPeriod samples (testRate is equal to nullTestPeriod/maxData)
+<span class="nc" id="L173">	private double nullTestRate = 0.01;</span>
+	//to save time and resources, null test is repeated every nullTestPeriod samples
+	private int nullTestPeriod;
+
+	//If measure is zero, this is the value of the upper limit of confidence interval
+<span class="nc" id="L178">	private double nullMeasure_upperLimit = 0.0;</span>
+
+	//--------------------end NULL TEST HYPOTHESIS----------------------------------------//
+
+	//constant (instead of computing the same expression at each time)
+<span class="nc" id="L183">	private final double sqrt_45 = Math.sqrt(45);</span>
+	private double lastSampleWeight;
+	private double lastWeight;
+
+	/** Creates a new DynamicDataAnalyzer
+	 *  @param alfa the quantile required for the confidence interval
+	 *  @param precision maximum amplitude of confidence interval (precision = maxamplitude / mean )
+	 *  @param maxData maximum number of data to be analyzed (at least 5000)
+	 */
+<span class="nc" id="L192">	public DynamicDataAnalyzerImpl(double alfa, double precision, int maxData) {</span>
+<span class="nc bnc" id="L193" title="All 10 branches missed.">		if (alfa &lt;= 0 || alfa &gt;= 1 || precision &lt;= 0 || precision &gt;= 1 || maxData &lt; 5000) {</span>
+<span class="nc" id="L194">			throw new IllegalArgumentException(&quot;Wrong Dynamic analyzer parameter  &quot; + alfa + &quot;  &quot; + precision + &quot;  &quot; + maxData);</span>
+		}
+
+<span class="nc" id="L197">		batchMean = new double[numBatch];</span>
+<span class="nc" id="L198">		weightBatchMean = new double[numBatch];</span>
+<span class="nc" id="L199">		this.maxData = maxData;</span>
+<span class="nc" id="L200">		this.alfa = alfa;</span>
+<span class="nc" id="L201">		this.precision = precision;</span>
+<span class="nc" id="L202">		initialized = false;</span>
+<span class="nc" id="L203">		end = false;</span>
+<span class="nc" id="L204">		success = false;</span>
+<span class="nc" id="L205">		initData = new DoubleArrayList();</span>
+<span class="nc" id="L206">		initWeight = new DoubleArrayList();</span>
+
+<span class="nc bnc" id="L208" title="All 2 branches missed.">		if (nullTestEnabled) {</span>
+			//initializes nullTestPeriod (the period of null test repetition)
+<span class="nc" id="L210">			nullTestPeriod = (int) (nullTestRate * maxData);</span>
+		}
+<span class="nc" id="L212">	}</span>
+
+	/**
+	 * Adds the new sample to the statistic.
+	 * @param newSample the new sample
+	 * @param weight the weight of the newSample, if it is not needed put 1.
+	 * @return true if the computation of confidence interval has finished (i.e. if the
+	 * confidence interval is smaller than the one required by
+	 * the user, or if the analyzed data are too many), false otherwise
+	 */
+	public synchronized boolean addSample(double newSample, double weight) {
+
+		//DEK (Federico Granata)
+		// why /5 ???  --&gt; see documentation
+<span class="nc" id="L226">		int index = nSamples / 5;</span>
+
+<span class="nc" id="L228">		nSamples++;</span>
+<span class="nc" id="L229">		lastSampleWeight = lastSampleWeight + (newSample * weight);</span>
+<span class="nc" id="L230">		lastWeight = lastWeight + weight;</span>
+
+		//Measures which are often equal to zero are problematic for the
+		//dynamic analyzer: in fact, in such cases, Schruben test for stationarity
+		//may have no success.
+		//For this reason a null test can be done in order to recognize if
+		//a measure is almost always 0.
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">		if (nullTestEnabled) {</span>
+
+			//updates mean and var
+<span class="nc" id="L241">			nullTestData.putNewSample(newSample, weight);</span>
+
+			//nullTest must be repeated every nullTestPeriod samples
+<span class="nc bnc" id="L244" title="All 2 branches missed.">			if (nSamples % nullTestPeriod == 0) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">				if (nullTest()) {</span>
+					//null test is true (the measure is almost always equal to 0.0)
+<span class="nc" id="L247">					end = true;</span>
+<span class="nc" id="L248">					success = true;</span>
+<span class="nc" id="L249">					measureIsZero = true;</span>
+<span class="nc" id="L250">					return end;</span>
+				}
+			}
+		}
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		if (!deleted) {</span>
+
+			//transient not deleted
+<span class="nc" id="L258">			double temp = newSample * weight;</span>
+
+<span class="nc" id="L260">			sumS += temp;</span>
+<span class="nc" id="L261">			sumW += weight;</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">			if (index &lt; miniB.getSize()) {</span>
+<span class="nc" id="L263">				miniB.set(index, miniB.get(index) + temp);</span>
+<span class="nc" id="L264">				miniW.set(index, miniW.get(index) + weight);</span>
+			} else {
+				//adds at the end of the list
+<span class="nc" id="L267">				miniB.add(temp);</span>
+<span class="nc" id="L268">				miniW.add(weight);</span>
+			}
+
+		}
+
+		/*
+		TRANSIENT DETECTION
+		When computation starts, transient must be detected: to do this,
+		an heuristic rule is applied.
+
+		The heuristic rule R5 approximately detects the length of transient, that is the number
+		of observations to be deleted
+
+		Then Shruben test is applied.
+		If the sequence is stationary, transient is finished. Otherwise a part
+		of the sequence is discarded, new data are collected and Shruben test is applied
+		one more time.
+
+		This iteration goes on until a stationary sequence is found.
+		During this iteration, if the max number of data is reached, simulation is aborted.
+
+		 */
+
+		// transient not detected
+		// initialized becomes true only after Schruben test has been passed
+<span class="nc bnc" id="L293" title="All 2 branches missed.">		if (!initialized) {</span>
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">			if (nSamples &gt;= maxData * 0.5) {</span>
+				// too many samples: ends analysis
+<span class="nc" id="L297">				end = true;</span>
+<span class="nc" id="L298">				initialized = false;</span>
+<span class="nc" id="L299">				return end;</span>
+			}
+
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			if (!heuristic) {</span>
+				//heuristic rule for transient detection has not finished yet
+<span class="nc" id="L304">				heuristicR5(newSample, weight);</span>
+			} else {
+				// heuristic = true  --&gt; heuristic rule has finished,
+				// computing a first approximation
+				// of the number of observations to be deleted
+
+				// now schruben test must be applied
+<span class="nc" id="L311">				schrubenTest(newSample, weight);</span>
+			}
+
+			//initialized = true  --&gt; transient already detected
+<span class="nc bnc" id="L315" title="All 2 branches missed.">		} else if (nSamples &gt; maxData) {</span>
+			//too many samples: ends simulation
+<span class="nc" id="L317">			end = true;</span>
+<span class="nc" id="L318">			success = false;</span>
+
+		} else {
+
+<span class="nc bnc" id="L322" title="All 2 branches missed.">			if (!deleted) {</span>
+				//transient detected but not deleted yet
+
+<span class="nc bnc" id="L325" title="All 2 branches missed.">				if (nSamples &gt;= minSamples) {</span>
+					//min number of samples respected
+
+					//Apply the heuristic rule MSR5 to discard the most biased samples of the
+					//time series. It minimizes the Mean Square Error.
+<span class="nc bnc" id="L330" title="All 2 branches missed.">					if (deleteTransient()) {</span>
+
+						//transient deleted
+<span class="nc bnc" id="L333" title="All 4 branches missed.">						if ((batch == numBatch - 1) &amp;&amp; (nSamples % batchLen == 0)) {</span>
+
+							//Applies the spectral test to generate the Confidence Intervals.
+							//true if the precision has been reached
+<span class="nc" id="L337">							end = HWtest();</span>
+
+						} else {
+<span class="nc" id="L340">							end = false;</span>
+						}
+
+					} else {
+						//transient not deleted yet
+<span class="nc" id="L345">						end = false;</span>
+					}
+				}
+
+			} else {
+				//transient detected and deleted
+
+<span class="nc" id="L352">				batchMean[batch] += newSample * weight;</span>
+<span class="nc" id="L353">				weightBatchMean[batch] += weight;</span>
+
+<span class="nc bnc" id="L355" title="All 2 branches missed.">				if (nSamples % batchLen == 0) {</span>
+<span class="nc" id="L356">					batchMean[batch] /= weightBatchMean[batch];</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">					if (batch == (numBatch - 1)) {</span>
+<span class="nc" id="L358">						end = HWtest();</span>
+						if (DEBUG) {
+							System.out.println(&quot;extMean = &quot; + extMean + &quot; samples = &quot; + nSamples);
+						}
+					} else {
+<span class="nc" id="L363">						batch++;</span>
+					}
+				} else {
+<span class="nc" id="L366">					end = false;</span>
+				}
+			}
+		}
+
+<span class="nc" id="L371">		return end;</span>
+		//end = true if max number of data has been reached or if HWtest has been passed or if
+		//transient has not been deleted
+	}
+
+	/**
+	 * It uses the heuristic rule R5.
+	 * Inserts a new value of the sequence, and approximately detects the initial
+	 * transient period.
+	 * &lt;br&gt;See
+	 * &lt;br&gt;
+	 *  K. Pawlikowski
+	 * &quot;Steady­State Simulation of Queueing Processes: A Survey of Problems and
+	 * Solutions&quot; ACM Computing Surveys 22, 2 (1990), pp. 122--170.
+	 */
+	protected boolean heuristicR5(double newSample, double Weight) {
+
+		// Rule R5:
+		// &quot; The initial transient period is over after n observations,
+		// if the time series x1, x2, ..., xn
+		// crosses the mean X(n) k times.&quot;
+
+		// actual number of crosses
+<span class="nc" id="L394">		int counter = 0;</span>
+
+		//TODO: this may be changed (see Granata's master thesis)
+		// number of times that the time series initData should cross the initMean
+		// to determine the end of transient
+<span class="nc" id="L399">		int overTimes = 40;</span>
+
+		// actual mean of the initial samples.
+<span class="nc" id="L402">		double mean = sumS / sumW;</span>
+
+<span class="nc" id="L404">		initData.add(newSample);</span>
+<span class="nc" id="L405">		initWeight.add(Weight);</span>
+<span class="nc" id="L406">		initSamples++;</span>
+
+		//apply the heuristic rule for initial transient detection
+		//heuristic test R5
+
+		//number of &quot;for&quot; cycles (uses a variable, instead of computing initData.getSize() for
+		//each repetition
+<span class="nc" id="L413">		int repeat_until = initData.getSize() - 1;</span>
+
+		//curr and next correspond to observation x(i) and x(i+1)
+		//initializes curr with the first element
+<span class="nc" id="L417">		double curr = initData.get(0);</span>
+		double next;
+
+		//counts the number of crosses
+<span class="nc bnc" id="L421" title="All 2 branches missed.">		for (int i = 0; i &lt; repeat_until; i++) {</span>
+<span class="nc" id="L422">			next = initData.get(i + 1);</span>
+
+<span class="nc bnc" id="L424" title="All 8 branches missed.">			if (((curr &gt;= mean) &amp;&amp; (next &lt;= mean)) || ((curr &lt;= mean) &amp;&amp; (next &gt;= mean))) {</span>
+				//cross --&gt; increase counter
+<span class="nc" id="L426">				counter++;</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">				if (counter &gt;= overTimes) {</span>
+					// if number of crosses &gt;= overtimes exit from the cycle
+<span class="nc" id="L429">					break;</span>
+				}
+			}
+
+<span class="nc" id="L433">			curr = next;</span>
+		}
+
+<span class="nc bnc" id="L436" title="All 2 branches missed.">		if (counter &gt;= overTimes) {</span>
+			//heuristic rule has finished
+
+			//initial transient detected all data to be discarded
+<span class="nc" id="L440">			eurDisc = initSamples;</span>
+<span class="nc" id="L441">			heuristic = true;</span>
+
+			// when rule R5 finishes the number of initial samples is used
+			// to estimate the initial transient length
+			// (we need a part already steady of the sequence, because we need to
+			// compute its variance)
+
+			// (an enormous number without any sense!!!!) (caused OutOfMemory too)
+<span class="nc" id="L449">			initial = eurDisc * eurDisc / 10;</span>
+
+<span class="nc bnc" id="L451" title="All 2 branches missed.">			if (initial &gt; 5000) {</span>
+<span class="nc" id="L452">				initial = 5000;</span>
+			}
+
+<span class="nc bnc" id="L455" title="All 2 branches missed.">			if (eurDisc &lt; initial) {</span>
+<span class="nc" id="L456">				delta = eurDisc / 2;</span>
+			} else {
+<span class="nc" id="L458">				initData.delFirst(eurDisc - initial);</span>
+<span class="nc" id="L459">				initWeight.delFirst(eurDisc - initial);</span>
+<span class="nc" id="L460">				delta = initial / 2;</span>
+			}
+			// Pawlikowski said that this must be around 200, larger values can help
+			// euristic R5 problems, but will also reject legittimate measures
+<span class="nc bnc" id="L464" title="All 2 branches missed.">			if (delta &gt; 200) {</span>
+<span class="nc" id="L465">				delta = 200;</span>
+			}
+
+<span class="nc" id="L468">			initData.ensureCapacity(initial);</span>
+<span class="nc" id="L469">			initWeight.ensureCapacity(initial);</span>
+
+<span class="nc" id="L471">			minSamples = initial * 2;</span>
+
+<span class="nc" id="L473">			numBatch = 1 &lt;&lt; ((int) Math.ceil((Math.log(Math.sqrt(initial / 2))) / Math.log(2)));</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">			if (numBatch &lt; 64) {</span>
+<span class="nc" id="L475">				numBatch = 64;</span>
+			}
+<span class="nc" id="L477">			batchLen = (int) Math.ceil(initial / ((double) numBatch * 2));</span>
+
+			//during test for stationarity, delta old observations will
+			//be replaced by new ones
+			//delta = initSamples / 2;
+<span class="nc" id="L482">			arrayData = new double[delta];</span>
+<span class="nc" id="L483">			initSamples = 0;</span>
+
+		} else {
+<span class="nc" id="L486">			heuristic = false;</span>
+		}
+<span class="nc" id="L488">		return heuristic;</span>
+	}
+
+	/** inserts a new value of the sequence, and detects when the initial
+	 *  transient period has ended.
+	 */
+	protected boolean schrubenTest(double newSample, double Weight) {
+
+		//
+		// test has been made stronger: on one hand, a stronger test requires more
+		// samples to delete the transient (therefore the transient deletion phase
+		// is longer).
+		// On the other hand, after a stronger test, simulation will start computing the
+		// confidence interval from a state nearer to the steady state: this makes
+		// faster the next phase, which is typically more critical.
+
+		// The test is Two-sided
+
+		//significance of the test for stationarity
+		//float alfaT = (float) 0.05;
+<span class="nc" id="L508">		float alfaT = (float) 0.001;</span>
+
+<span class="nc" id="L510">		double var, mean, sum = 0, parSum = 0;</span>
+<span class="nc" id="L511">		double sumWeigths = 0;</span>
+<span class="nc" id="L512">		double[] C = new double[2];</span>
+
+		//internal array used to contain an arraylist, for speed
+
+<span class="nc" id="L516">		initData.add(newSample);</span>
+<span class="nc" id="L517">		initWeight.add(Weight);</span>
+<span class="nc" id="L518">		initSamples++;</span>
+		//a.calcMeanStable(newSample);
+
+		//append observations to the tested sequence
+		//when init samples
+<span class="nc bnc" id="L523" title="All 2 branches missed.">		if (initSamples == minSamples) {</span>
+			//now the array is full
+<span class="nc" id="L525">			arrayData = initData.toArray(0, delta);</span>
+<span class="nc" id="L526">			mean = 0;</span>
+
+			//for (int i = 0; i &lt; initData.getSize(); i++) {
+			//	mean += initData.get(i) * initWeight.get(i);
+			//	sumWeigths += initWeight.get(i);
+			//}
+
+<span class="nc" id="L533">			int size = initData.getSize();</span>
+			double tempWeight;
+<span class="nc bnc" id="L535" title="All 2 branches missed.">			for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L536">				tempWeight = initWeight.get(i);</span>
+<span class="nc" id="L537">				mean += initData.get(i) * tempWeight;</span>
+<span class="nc" id="L538">				sumWeigths += tempWeight;</span>
+			}
+
+<span class="nc" id="L541">			mean /= sumWeigths;</span>
+<span class="nc" id="L542">			int k = minSamples - numBatch * batchLen - 1;</span>
+<span class="nc" id="L543">			batchMean = new double[numBatch];</span>
+
+<span class="nc bnc" id="L545" title="All 2 branches missed.">			for (int i = 0; i &lt; numBatch; i++) {</span>
+<span class="nc" id="L546">				double weight = 0;</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">				for (int j = 0; j &lt; batchLen; j++) {</span>
+<span class="nc" id="L548">					batchMean[i] += initData.get(k + j);</span>
+<span class="nc" id="L549">					weight += initWeight.get(k + j);</span>
+				}
+<span class="nc" id="L551">				batchMean[i] /= weight;</span>
+<span class="nc" id="L552">				k += batchLen;</span>
+			}
+
+			//computes the variance using the last collected observations
+<span class="nc" id="L556">			var = batchLen * calcVar(batchMean, 0, numBatch, batchMean.length / 4, 2);</span>
+
+			// computes the degrees of freedom of the tStudent distribution (used in the
+			// estimation of variance and confidence intervals)
+			// and a constant used to depolarize the variance estimator
+<span class="nc" id="L561">			C = calcConstants(batchMean.length / 4, 2);</span>
+
+			//prepares the test for stationarity
+
+<span class="nc bnc" id="L565" title="All 2 branches missed.">			for (int j = 1; j &lt; arrayData.length; j++) {</span>
+<span class="nc" id="L566">				parSum += arrayData[j];</span>
+<span class="nc" id="L567">				sum += j * delta * (1 - ((double) j / (double) delta)) * (mean - (parSum / j));</span>
+			}
+
+			//double num = (Math.sqrt(45) * sum);
+<span class="nc" id="L571">			double num = (sqrt_45 * sum);</span>
+
+<span class="nc" id="L573">			double den = (Math.pow(delta, 1.5) * Math.sqrt(numBatch * var));</span>
+
+<span class="nc" id="L575">			double T = 0;</span>
+<span class="nc" id="L576">			T = num / den;</span>
+
+			// the sign of the initial bias is difficult to predict
+			// then prepare data for a two-sided test (less powerful)
+<span class="nc" id="L580">			T = Math.abs(T);</span>
+
+			//otherwise use T = - T; if a positive bias is suspected
+
+			//t is the upper (1-alfa) critical point from the t-distribution
+			//with k=C[1] degrees of freedom
+<span class="nc" id="L586">			double t = TStudent.tStudent(alfaT, C[1], false);</span>
+
+			//stationarity test
+<span class="nc bnc" id="L589" title="All 2 branches missed.">			if (T &lt;= t) {</span>
+				//transitory ended after discarded samples
+
+<span class="nc" id="L592">				initialized = true;</span>
+<span class="nc" id="L593">				initSamples = 0;</span>
+<span class="nc" id="L594">				minSamples = discarded * 2;</span>
+<span class="nc" id="L595">				initData.clear();</span>
+<span class="nc" id="L596">				initWeight.clear();</span>
+			} else {
+				//after each unsuccessfully test for stationarity, delta old
+				//observations are discarded: they will be replaced by new ones
+
+<span class="nc" id="L601">				discarded += delta;</span>
+<span class="nc" id="L602">				initData.delFirst(delta - 1);</span>
+<span class="nc" id="L603">				initWeight.delFirst(delta - 1);</span>
+<span class="nc" id="L604">				initSamples -= delta;</span>
+			}
+		}
+<span class="nc" id="L607">		return initialized;</span>
+	}
+
+	/**
+	 * Apply the heuristic rule MSR5 to discard the most biased samples of the
+	 * time series. It minimizes the Mean Square Error.
+	 *
+	 */
+	protected boolean deleteTransient() {
+
+<span class="nc" id="L617">		double sumB = 0;</span>
+<span class="nc" id="L618">		double sumW = 0;</span>
+<span class="nc" id="L619">		double min = Double.MAX_VALUE;</span>
+<span class="nc" id="L620">		double z = 0;</span>
+<span class="nc" id="L621">		int d = 0;</span>
+		double y;
+<span class="nc" id="L623">		double mean = 0;</span>
+<span class="nc" id="L624">		double oldMean = 0;</span>
+<span class="nc" id="L625">		double sumSquare = 0;</span>
+<span class="nc" id="L626">		int data = miniB.getSize();</span>
+		//int index = miniB.getSize() / 2;
+<span class="nc" id="L628">		int index = data / 2;</span>
+
+		//coefficients for the last part of data.
+<span class="nc" id="L631">		sumB = miniB.get(data - 1);</span>
+<span class="nc" id="L632">		sumW = miniW.get(data - 1);</span>
+<span class="nc" id="L633">		oldMean = sumB / sumW;</span>
+
+		double miniW_elem, miniB_elem;
+
+<span class="nc bnc" id="L637" title="All 2 branches missed.">		for (int i = data - 2; i &gt; index; i--) {</span>
+
+			//element i-th
+<span class="nc" id="L640">			miniB_elem = miniB.get(i);</span>
+			//element i-th
+<span class="nc" id="L642">			miniW_elem = miniW.get(i);</span>
+
+<span class="nc" id="L644">			sumB += miniB_elem;</span>
+<span class="nc" id="L645">			sumW += miniW_elem;</span>
+<span class="nc" id="L646">			y = (miniB_elem / miniW_elem) - oldMean;</span>
+<span class="nc" id="L647">			mean = oldMean + (miniW_elem * y / sumW);</span>
+<span class="nc" id="L648">			sumSquare += miniW_elem * y * y - miniW_elem * miniW_elem * y * y / sumW;</span>
+<span class="nc" id="L649">			oldMean = mean;</span>
+		}
+		//coefficients for the first part of data
+<span class="nc bnc" id="L652" title="All 2 branches missed.">		for (int i = index; i &gt;= 0; i--) {</span>
+
+			//element i-th
+<span class="nc" id="L655">			miniB_elem = miniB.get(i);</span>
+			//element i-th
+<span class="nc" id="L657">			miniW_elem = miniW.get(i);</span>
+
+<span class="nc" id="L659">			sumW += miniW_elem;</span>
+<span class="nc" id="L660">			y = (miniB_elem / miniW_elem) - oldMean;</span>
+<span class="nc" id="L661">			mean = oldMean + (miniW_elem * y / sumW);</span>
+<span class="nc" id="L662">			sumSquare += miniW_elem * y * y - miniW_elem * miniW_elem * y * y / sumW;</span>
+<span class="nc" id="L663">			oldMean = mean;</span>
+<span class="nc" id="L664">			z = sumSquare / sumW;</span>
+<span class="nc bnc" id="L665" title="All 2 branches missed.">			if (z &lt; min) {</span>
+				// find the minimum z
+<span class="nc" id="L667">				min = z;</span>
+<span class="nc" id="L668">				d = i;</span>
+			}
+		}
+
+		// if (d - 1 &lt;= nSamples / (5 * 5)) {
+<span class="nc bnc" id="L673" title="All 2 branches missed.">		if (d - 1 &lt;= nSamples / (25)) {</span>
+			//the initial warm up period is short
+			//cannot apply the algorithm to a sequence too polarized...
+<span class="nc" id="L676">			discarded = d * 5;</span>
+<span class="nc" id="L677">			deleted = true;</span>
+<span class="nc" id="L678">			miniB.delFirst(d);</span>
+<span class="nc" id="L679">			miniW.delFirst(d);</span>
+
+<span class="nc" id="L681">			nSamples = miniB.getSize() * 5;</span>
+
+			//heuristic to build the &quot;optimal&quot; number of batches.
+			//numBatches is nearest 2 power to sqrt(nSamples)
+<span class="nc" id="L685">			numBatch = 1 &lt;&lt; ((int) Math.ceil((Math.log(Math.sqrt(nSamples))) / Math.log(2)));</span>
+<span class="nc bnc" id="L686" title="All 2 branches missed.">			if (numBatch &lt; 64) {</span>
+<span class="nc" id="L687">				numBatch = 64;</span>
+			}
+<span class="nc" id="L689">			batchLen = 5 * (int) Math.ceil(miniB.getSize() / (double) numBatch);</span>
+<span class="nc" id="L690">			batch = (nSamples - 1) / batchLen;</span>
+
+<span class="nc" id="L692">			int k = 0;</span>
+<span class="nc" id="L693">			batchMean = new double[numBatch];</span>
+<span class="nc" id="L694">			weightBatchMean = new double[numBatch];</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">			for (int i = 0; i &lt; miniB.getSize(); i++) {</span>
+<span class="nc" id="L696">				batchMean[k] += miniB.get(i);</span>
+<span class="nc" id="L697">				weightBatchMean[k] += miniW.get(i);</span>
+<span class="nc bnc" id="L698" title="All 2 branches missed.">				if (((i + 1) % (batchLen / 5)) == 0) {</span>
+<span class="nc" id="L699">					batchMean[k] /= weightBatchMean[k];</span>
+<span class="nc" id="L700">					k++;</span>
+				}
+			}
+<span class="nc" id="L703">			miniB.clear();</span>
+<span class="nc" id="L704">			miniW.clear();</span>
+<span class="nc" id="L705">			return deleted;</span>
+		} else {
+			//transient cannot be deleted
+<span class="nc" id="L708">			deleted = false;</span>
+<span class="nc" id="L709">			minSamples += discarded;</span>
+<span class="nc" id="L710">			return deleted;</span>
+		}
+	}
+
+	/**
+	 * Applies the spectral test to generate the Confidence Intervals.
+	 *
+	 * &lt;br&gt;
+	 * See:
+	 * &lt;br&gt;
+	 *
+	 * P. Heidelberger,Peter D. Welch
+	 * &lt;br&gt;&quot;A spectral method for confidence interval generation and run length
+	 * control in simulations&quot;
+	 *
+	 *
+	 * @return true if the precision requirement is reached. false if not.
+	 */
+	protected boolean HWtest() {
+		//computes the mean
+<span class="nc" id="L730">		sumS = 0;</span>
+<span class="nc" id="L731">		sumW = 0;</span>
+<span class="nc bnc" id="L732" title="All 2 branches missed.">		for (int i = 0; i &lt; numBatch; i++) {</span>
+<span class="nc" id="L733">			sumS += batchMean[i] * weightBatchMean[i];</span>
+<span class="nc" id="L734">			sumW += weightBatchMean[i];</span>
+		}
+<span class="nc" id="L736">		extMean = sumS / sumW;</span>
+
+<span class="nc" id="L738">		calcVar();</span>
+<span class="nc" id="L739">		calcConfInterval();</span>
+<span class="nc bnc" id="L740" title="All 2 branches missed.">		if (precision &gt; confInt / extMean) {</span>
+			//simulation ended with success
+<span class="nc" id="L742">			end = true;</span>
+
+<span class="nc" id="L744">			success = true;</span>
+		} else {
+<span class="nc bnc" id="L746" title="All 2 branches missed.">			if (batch == (numBatch - 1)) {</span>
+				//optimal number of batches
+<span class="nc" id="L748">				int log2 = 1;</span>
+<span class="nc" id="L749">				log2 = 1 &lt;&lt; ((int) Math.ceil((Math.log(Math.sqrt(nSamples))) / Math.log(2)));</span>
+<span class="nc bnc" id="L750" title="All 2 branches missed.">				if (log2 &lt; 64) {</span>
+<span class="nc" id="L751">					log2 = 64;</span>
+				}
+<span class="nc bnc" id="L753" title="All 2 branches missed.">				if (log2 &gt; numBatch) {</span>
+					//doubles the number of batches
+<span class="nc" id="L755">					numBatch = numBatch * 2;</span>
+<span class="nc" id="L756">					double[] tempBatch = new double[numBatch];</span>
+<span class="nc" id="L757">					batch++;</span>
+
+					try {
+<span class="nc" id="L760">						System.arraycopy(batchMean, 0, tempBatch, 0, batchMean.length);</span>
+<span class="nc" id="L761">					} catch (Exception e) {</span>
+<span class="nc" id="L762">						System.out.println(e);</span>
+<span class="nc" id="L763">						System.out.println(batchMean.length + &quot;  &quot; + tempBatch.length);</span>
+<span class="nc" id="L764">					}</span>
+
+<span class="nc" id="L766">					batchMean = tempBatch;</span>
+<span class="nc" id="L767">					tempBatch = new double[numBatch];</span>
+<span class="nc" id="L768">					System.arraycopy(weightBatchMean, 0, tempBatch, 0, weightBatchMean.length);</span>
+<span class="nc" id="L769">					weightBatchMean = tempBatch;</span>
+<span class="nc" id="L770">				} else {</span>
+					//rebatch in n/2 batch of size batchLen
+<span class="nc" id="L772">					int half = numBatch / 2;</span>
+<span class="nc" id="L773">					batch = half;</span>
+<span class="nc bnc" id="L774" title="All 2 branches missed.">					for (int i = 0; i &lt; half; i++) {</span>
+<span class="nc" id="L775">						batchMean[i] = (batchMean[2 * i] * weightBatchMean[2 * i] + batchMean[2 * i + 1] * weightBatchMean[2 * i + 1])</span>
+								/ (weightBatchMean[2 * i] + weightBatchMean[2 * i + 1]);
+<span class="nc" id="L777">						weightBatchMean[i] = (weightBatchMean[2 * i] + weightBatchMean[2 * i + 1]) / 2;</span>
+					}
+<span class="nc bnc" id="L779" title="All 2 branches missed.">					for (int i = half; i &lt; numBatch; i++) {</span>
+<span class="nc" id="L780">						batchMean[i] = 0;</span>
+<span class="nc" id="L781">						weightBatchMean[i] = 0;</span>
+					}
+<span class="nc" id="L783">					batchLen *= 2;</span>
+
+				}
+
+			}
+		}
+<span class="nc" id="L789">		return end;</span>
+	}
+
+	/**
+	 *updates the variance
+	 */
+	protected void calcVar() {
+		double[] C;
+<span class="nc" id="L797">		double[] tempBatch = new double[numBatch];</span>
+<span class="nc" id="L798">		K = numBatch / 4;</span>
+<span class="nc" id="L799">		C = calcConstants(K, polyOrder);</span>
+<span class="nc" id="L800">		C1 = C[0];</span>
+<span class="nc" id="L801">		C2 = (int) C[1];</span>
+<span class="nc" id="L802">		System.arraycopy(batchMean, 0, tempBatch, 0, numBatch);</span>
+<span class="nc" id="L803">		extVar = calcVar(tempBatch, 0, batch, K, polyOrder);</span>
+<span class="nc" id="L804">	}</span>
+
+	/** creates a string of the principals parameters calculated
+	 *  @return the string
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L811">		StringBuffer buf = new StringBuffer();</span>
+<span class="nc" id="L812">		buf.append(getClass().getName());</span>
+<span class="nc" id="L813">		buf.append(&quot;\n-------------------------&quot;);</span>
+<span class="nc" id="L814">		buf.append(&quot;\nAnalysis &quot;);</span>
+<span class="nc bnc" id="L815" title="All 2 branches missed.">		if (success) {</span>
+<span class="nc" id="L816">			buf.append(&quot;\nSuccessfully completed.\n&quot;);</span>
+		} else {
+<span class="nc" id="L818">			buf.append(&quot;\nUnsuccessfully completed.\n&quot;);</span>
+		}
+<span class="nc" id="L820">		buf.append(&quot;\nSamples analyzed : &quot; + (nSamples + discarded));</span>
+<span class="nc" id="L821">		buf.append(&quot;\nSamples used : &quot; + nSamples);</span>
+<span class="nc" id="L822">		buf.append(&quot;\n&quot;);</span>
+<span class="nc" id="L823">		buf.append(&quot;\nUpper limit : &quot; + Printer.print(extMean + confInt, 6));</span>
+<span class="nc" id="L824">		buf.append(&quot;\nMean value  : &quot; + Printer.print(extMean, 6));</span>
+<span class="nc" id="L825">		buf.append(&quot;\nLower limit : &quot; + Printer.print(extMean - confInt, 6));</span>
+<span class="nc" id="L826">		buf.append(&quot;\nCI Width : &quot; + Printer.print(confInt / extMean, 4) + &quot; required : &quot; + precision);</span>
+<span class="nc" id="L827">		buf.append(&quot;\n&quot;);</span>
+<span class="nc" id="L828">		buf.append(&quot;\nWith probablity : &quot; + ((1 - alfa) * 100) + &quot;%&quot;);</span>
+<span class="nc" id="L829">		buf.append(&quot;\nDiscarded samples :  &quot; + discarded);</span>
+<span class="nc" id="L830">		buf.append(&quot;\nEstimated variance : &quot; + Printer.print(getVar(), 6));</span>
+<span class="nc" id="L831">		buf.append(&quot;\nLast batch size : &quot; + batchLen);</span>
+<span class="nc" id="L832">		buf.append(&quot;\nNumber of Batches : &quot; + numBatch);</span>
+<span class="nc" id="L833">		return buf.toString();</span>
+	}
+
+	/** number of samples elaborated up to now
+	 * @return number of samples
+	 */
+	public int getSamples() {
+<span class="nc" id="L840">		return nSamples + discarded;</span>
+	}
+
+	/** gets the mean estimated of the monitored data stream
+	 * @return the mean
+	 */
+	public double getMean() {
+<span class="nc bnc" id="L847" title="All 2 branches missed.">		if (isZero()) {</span>
+<span class="nc" id="L848">			return 0;</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">		} else if (initialized) {</span>
+<span class="nc" id="L850">			return extMean;</span>
+		} else {
+<span class="nc" id="L852">			return 0;</span>
+		}
+	}
+
+	/** gets the variance estimated of the monitored data stream
+	 * @return the variance
+	 */
+	public double getVar() {
+<span class="nc bnc" id="L860" title="All 4 branches missed.">		if (end &amp;&amp; initialized) {</span>
+<span class="nc" id="L861">			return extVar;</span>
+		} else {
+<span class="nc" id="L863">			return 0;</span>
+		}
+	}
+
+	/** gets the half width confidence interval estimated of the monitored data
+	 *  stream.
+	 * @return the confidence interval requested
+	 */
+	public double getConfInt() {
+<span class="nc bnc" id="L872" title="All 4 branches missed.">		if (confInt != 0 &amp;&amp; initialized) {</span>
+<span class="nc" id="L873">			return confInt;</span>
+		} else {
+<span class="nc" id="L875">			return 0;</span>
+		}
+	}
+
+	/** true if the analysis is successful
+	 * @return true if the analysis respect all'users requests
+	 */
+	public boolean getSuccess() {
+<span class="nc" id="L883">		return success;</span>
+	}
+
+	/** calculates the variance through Heidelberger &amp; Welch method, if the data
+	 *  are the means of batches of size batchLen, the variance must be multiplied
+	 *  by batchLen.
+	 *
+	 *  @param  data        array containing the sequence of data
+	 *  @param  start       the starting sample
+	 *  @param  n           number of data of the sequence to be estimated
+	 *  @param  K           number of points used in the polynomial fitting
+	 *                      must be &lt;= n/4, typically is 25, 50
+	 *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
+	 *                      of the spectrum of data typically is 2 or 3.
+	 *  @return the estimated variance
+	 */
+	public double calcVar(double[] data, int start, int n, int K, int polyOrder) {
+
+<span class="nc" id="L901">		K = Math.min(K, n / 4);</span>
+		double[] C;
+<span class="nc" id="L903">		double[] fn = new double[K];</span>
+<span class="nc" id="L904">		double[] J = new double[K];</span>
+		double[] intData;
+<span class="nc" id="L906">		double[] polyCoeff = new double[polyOrder + 1];</span>
+
+<span class="nc bnc" id="L908" title="All 2 branches missed.">		if (n &lt; 4 * K) {</span>
+<span class="nc" id="L909">			throw new Error(&quot;number of data must be at least 4 times K: &quot; + data.length);</span>
+		}
+
+<span class="nc" id="L912">		intData = Spectrum.periodogramOfReal(data, start, n);</span>
+<span class="nc bnc" id="L913" title="All 2 branches missed.">		for (int i = 0; i &lt; K; i++) {</span>
+<span class="nc" id="L914">			fn[i] = ((4 * ((double) i + 1)) - 1) / (2 * (double) n);</span>
+<span class="nc" id="L915">			J[i] = (Math.log((intData[((2 * (i + 1)) - 1)] + intData[(2 * (i + 1))]) / 2)) + 0.270;</span>
+		}
+		//polynomial fitting
+<span class="nc" id="L918">		polyCoeff = PolyFit.fit(K, fn, J, polyOrder);</span>
+		/*this function could be eliminated if the fit it is calculated through
+		 * the normal equation algorithm, because the (AA')^-1 it is created and
+		 * calculated to fit. But if the calculation is done through other
+		 * algorithms then you have to do with this function.
+		 */
+<span class="nc" id="L924">		C = calcConstants(K, polyOrder);</span>
+<span class="nc" id="L925">		return C[0] * Math.exp(polyCoeff[0]);</span>
+	}
+
+	/** computes the degrees of freedom of the tStudent distribution used in the
+	 * estimation of variance and confidence intervals C2,
+	 * and a constant used to depolarize the variance estimator
+	 * @param K number of points of the polyfit
+	 * @param polyOrder the order of the polynomial
+	 * @return the double array of dimension 2, at first position it is C1
+	 * and at second C2
+	 */
+	public double[] calcConstants(int K, int polyOrder) {
+<span class="nc" id="L937">		double constants[] = new double[2];</span>
+<span class="nc" id="L938">		double sigmaQ = calcEstimatorVar(K, polyOrder);//computes the variance</span>
+		//of the estimator of the variance
+<span class="nc" id="L940">		constants[0] = Math.exp(-sigmaQ / 2);//C1</span>
+<span class="nc" id="L941">		constants[1] = Math.round((float) Math.rint(2 / (Math.exp(sigmaQ) - 1)));</span>
+		//C2
+<span class="nc" id="L943">		return constants;</span>
+	}
+
+	/**
+	 * computes the variance of the estimator of the variance
+	 */
+	protected double calcEstimatorVar(int K, int polyOrder) {
+<span class="nc" id="L950">		Matrix X = new Matrix(K, polyOrder + 1);</span>
+<span class="nc" id="L951">		Matrix Xt = new Matrix(polyOrder + 1, K);</span>
+<span class="nc" id="L952">		Matrix square = new Matrix(K, K);</span>
+<span class="nc bnc" id="L953" title="All 2 branches missed.">		for (int i = 0; i &lt; K; i++) {</span>
+<span class="nc bnc" id="L954" title="All 2 branches missed.">			for (int j = 0; j &lt;= polyOrder; j++) {</span>
+<span class="nc" id="L955">				X.set(i, j, (Math.pow((4 * ((double) i + 1) - 1) / (2 * (double) K), j)));</span>
+			}
+		}
+<span class="nc" id="L958">		Xt = X.transpose();</span>
+<span class="nc" id="L959">		square = Xt.times(X);</span>
+<span class="nc" id="L960">		square = square.inverse();</span>
+		//System.out.println(&quot;calcConst &quot;+square.get(0,0));
+<span class="nc" id="L962">		return (.645 * square.get(0, 0));</span>
+	}
+
+	/**
+	 * updates the conf intervals
+	 */
+	protected void calcConfInterval() {
+<span class="nc" id="L969">		double t = TStudent.ICDF(alfa, C2);</span>
+<span class="nc" id="L970">		confInt = t * Math.sqrt(extVar / numBatch);</span>
+<span class="nc" id="L971">	}</span>
+
+	/**  gets the actual requested precision of the analyzer
+	 *
+	 * @return  the precision
+	 */
+	public double getPrecision() {
+<span class="nc" id="L978">		return precision;</span>
+	}
+
+	/**  gets the actual requested alpha of the analyzer
+	 *
+	 * @return  the alpha
+	 */
+	public double getAlfa() {
+<span class="nc" id="L986">		return alfa;</span>
+	}
+
+	/** gets the maximum number of samples that can be analyzed.
+	 *
+	 * @return maxData
+	 */
+	public int getMaxData() {
+<span class="nc" id="L994">		return maxData;</span>
+	}
+
+	/** gets the number of discarded data.
+	 *
+	 * @return discarded data
+	 */
+	public int getDiscarded() {
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">		if (deleted) {</span>
+<span class="nc" id="L1003">			return discarded;</span>
+		} else {
+<span class="nc" id="L1005">			return 0;</span>
+		}
+	}
+
+	/**
+	 * Gets the batch means. If the data is not over the transient period
+	 * returns null.
+	 * @return batch means
+	 */
+	public synchronized double[] getData() {
+<span class="nc bnc" id="L1015" title="All 2 branches missed.">		if (initialized) {</span>
+<span class="nc" id="L1016">			double[] data = new double[batch];</span>
+			if (DEBUG) {
+				System.out.println(&quot;batch = &quot; + batch);
+				System.out.println(&quot;data.length = &quot; + data.length);
+				System.out.println(&quot;batchMean.length = &quot; + batchMean.length);
+				for (double element : batchMean) {
+					System.out.print(element + &quot;  &quot;);
+				}
+				System.out.println(&quot;&quot;);
+			}
+<span class="nc" id="L1026">			System.arraycopy(batchMean, 0, data, 0, batch);</span>
+<span class="nc" id="L1027">			return data;</span>
+		} else {
+<span class="nc" id="L1029">			return null;</span>
+		}
+	}
+
+	/**
+	 * Verifies whether the measure is almost always equal to zero
+	 * @return true if the measure is almost always equal to zero
+	 */
+	protected boolean nullTest() {
+		/*
+		To test whether the population mean has a specific value, 0, against
+		the one-sided alternative that it is &gt; 0, the confidence
+		interval is converted to hypothesis-test form.
+
+		The test is a one-sample t-test, and it is defined as:
+
+		Null Hypothesis: mean = 0;
+		Alternative Hypothesis: mean &gt; 0;
+
+		Test Statistic: T = (mean - 0) / sqrt(var / nSamples)
+
+		Reject the null hypothesis if
+		    |T| &gt; t
+		where t is the upper critical value of the t-distribution with (N - 1) degrees
+		of freedom and with confidence coefficient equal to (1 - nullTestAlfa)
+		 */
+
+		//oneSided t-test  --&gt;  t(2*alfa, N)
+		//twoSided t-test  --&gt;  t(alfa, N)
+		//this method uses the two-sides test: make alfa * 2 because we want one-side test
+<span class="nc" id="L1059">		double t = TStudent.ICDF((2 * nullTestAlfa), nSamples);</span>
+<span class="nc" id="L1060">		double mean = nullTestData.getMean();</span>
+<span class="nc" id="L1061">		double var = nullTestData.getVar();</span>
+<span class="nc" id="L1062">		double T = 0.0;</span>
+<span class="nc bnc" id="L1063" title="All 4 branches missed.">		if (mean == 0.0 || Math.sqrt(var) / mean &lt; 1e-6) {</span>
+			//the null hypothesis is true
+<span class="nc" id="L1065">			measureIsZero = true;</span>
+
+			//upper limit
+<span class="nc" id="L1068">			nullMeasure_upperLimit = 0.0;</span>
+		} else {
+<span class="nc" id="L1070">			T = mean / (Math.sqrt(var / nSamples));</span>
+<span class="nc bnc" id="L1071" title="All 2 branches missed.">			if (T &lt; t) {</span>
+				//the null hypothesis is true
+<span class="nc" id="L1073">				measureIsZero = true;</span>
+
+				//upper limit
+
+				// we found that T &lt; t with confidence coefficient equal to (1 - nullTestAlfa)
+				// T = mean / sqrt(var / nSamples)
+				// then mean &lt; t * sqrt(var / nSamples)
+<span class="nc" id="L1080">				nullMeasure_upperLimit = t * (Math.sqrt(var / nSamples));</span>
+			} else {
+				//the null hypothesis is false
+<span class="nc" id="L1083">				measureIsZero = false;</span>
+
+				//upper limit
+<span class="nc" id="L1086">				nullMeasure_upperLimit = 0.0;</span>
+			}
+		}
+
+		if (ZERODEBUG) {
+			System.out.println(&quot;Number of samples: &quot; + nSamples);
+			System.out.println(&quot;t: &quot; + Double.toString(t));
+			System.out.println(&quot;T: &quot; + Double.toString(T));
+			System.out.println(&quot;Mean: &quot; + Double.toString(nullTestData.getMean()));
+			System.out.println(&quot;Var: &quot; + Double.toString(nullTestData.getVar()));
+			System.out.println(&quot;Null hypothesis is &quot; + measureIsZero);
+		}
+
+<span class="nc" id="L1099">		return measureIsZero;</span>
+	}
+
+	/**
+	 * Returns true if null test has found out that this measure is zero
+	 * @return true if null test has found out that this measure is zero
+	 */
+	public boolean isZero() {
+<span class="nc" id="L1107">		return measureIsZero;</span>
+	}
+
+	/**
+	 * This method should be called only if mean is equal to zero (@see isZero()), that is
+	 * when nullTest() returns true. 
+	 * @return the upper limit of confidence interval when mean is equal to 0.0
+	 */
+	public double getNullMeasure_upperLimit() {
+<span class="nc" id="L1116">		return nullMeasure_upperLimit;</span>
+	}
+
+	/**
+	 * Gets the estimated mean, even if the confidence requirements
+	 * have not been reached
+	 * @return the estimated mean
+	 */
+	public double estimatedMean() {
+<span class="nc bnc" id="L1125" title="All 2 branches missed.">		if (success) {</span>
+			//the measure computation was successful
+			//returns the mean computed by the main estimator
+<span class="nc" id="L1128">			return getMean();</span>
+		}
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">		if (nullTestEnabled) {</span>
+			//the measure was not successful
+			//returns the mean estimated by the null test, even if the confidence requirements
+			//have not been reached
+<span class="nc" id="L1134">			return nullTestData.getMean();</span>
+		}
+<span class="nc" id="L1136">		return 0.0;</span>
+	}
+
+	/**
+	 * Stops the measuring process
+	 * @param success value to be reported by getSuccess()
+	 */
+	public synchronized void stopMeasure(boolean success) {
+<span class="nc" id="L1144">		this.end = true;</span>
+<span class="nc" id="L1145">		this.success = success;</span>
+<span class="nc" id="L1146">	}</span>
+
+	/**
+	 * Sets the reference to the class containing simulation
+	 * parameters. The parameters are updated with the passed values.
+	 *
+	 * @param parameters
+	 */
+	public void setParameters(SimParameters parameters) {
+<span class="nc" id="L1155">		this.parameters = parameters;</span>
+
+		//set parameters
+
+		//batches: number and size
+<span class="nc" id="L1160">		numBatch = parameters.getNumBatch();</span>
+<span class="nc" id="L1161">		batchLen = parameters.getBatchLen();</span>
+
+		//null test: test accuracy and test rate
+<span class="nc" id="L1164">		nullTestAlfa = parameters.getNullTestAlfa();</span>
+<span class="nc" id="L1165">		nullTestRate = parameters.getNullTestRate();</span>
+		//initializes nullTestPeriod (the period of null test repetition)
+<span class="nc" id="L1167">		nullTestPeriod = (int) (nullTestRate * maxData);</span>
+
+<span class="nc" id="L1169">	}</span>
+
+	@Override
+	public double getLastIntervalAvg() {
+<span class="nc bnc" id="L1173" title="All 2 branches missed.">		if (lastWeight == 0.0) {</span>
+<span class="nc" id="L1174">			lastWeight = 0.0;</span>
+<span class="nc" id="L1175">			lastSampleWeight = 0.0;</span>
+<span class="nc" id="L1176">			return lastIntervalAvg;</span>
+		} else {
+<span class="nc" id="L1178">			lastIntervalAvg = lastSampleWeight / lastWeight;</span>
+<span class="nc" id="L1179">			lastWeight = 0.0;</span>
+<span class="nc" id="L1180">			lastSampleWeight = 0.0;</span>
+<span class="nc" id="L1181">			return lastIntervalAvg;</span>
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

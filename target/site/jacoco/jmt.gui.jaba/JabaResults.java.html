@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JabaResults.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba</a> &gt; <span class="el_source">JabaResults.java</span></div><h1>JabaResults.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jaba;
+
+import java.awt.geom.Area;
+import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.Vector;
+
+import jmt.engine.jaba.DPoint;
+import jmt.engine.jaba.convexHull3d.HullFace;
+
+/**
+ * Created by IntelliJ IDEA. User: Andrea Date: 14-ott-2005 Time: 12.22.46 To
+ * change this template use File | Settings | File Templates.
+ */
+<span class="nc" id="L33">public class JabaResults {</span>
+
+<span class="nc" id="L35">	private Vector&lt;Object&gt; saturationSectors = new Vector&lt;Object&gt;();</span>
+<span class="nc" id="L36">	private DPoint equiUtilizationPoint = null;</span>
+	private Vector&lt;Point2D&gt; allConvex;
+	private Vector&lt;Point2D&gt; allDominants;
+	private Vector&lt;Point2D&gt; dominants;
+	private Vector&lt;Point2D&gt; filtDominants;
+	private Vector&lt;Point2D&gt; filtConvex;
+	private Vector&lt;Point2D&gt; filtDominates;
+	private Vector&lt;Point2D&gt; points;
+	private Vector&lt;Point2D&gt; dominates;
+	private Area filteredArea;
+	private Vector&lt;Point2D&gt; convex;
+	private Vector&lt;Point2D&gt; allPoints;
+	private ArrayList&lt;DPoint&gt;[] util;
+	private ArrayList&lt;HullFace&gt; faces;
+
+	public void setSaturationSectors(Vector&lt;Object&gt; results) {
+<span class="nc" id="L52">		this.saturationSectors = results;</span>
+<span class="nc" id="L53">	}</span>
+
+	public void setEquiUtilizationPoint(DPoint b) {
+<span class="nc" id="L56">		equiUtilizationPoint = b;</span>
+<span class="nc" id="L57">	}</span>
+
+	public DPoint getEquiUtilizationPoint() {
+<span class="nc" id="L60">		return equiUtilizationPoint;</span>
+	}
+
+	public Vector&lt;Object&gt; getSaturationSectors() {
+<span class="nc" id="L64">		return saturationSectors;</span>
+	}
+
+	public boolean hasResults() {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		if (saturationSectors.size() &gt; 0) {</span>
+<span class="nc" id="L69">			return true;</span>
+		} else {
+<span class="nc" id="L71">			return false;</span>
+		}
+	}
+
+	public Vector&lt;Point2D&gt; getAllDominants() {
+<span class="nc" id="L76">		return this.allDominants;</span>
+	}
+
+	public void setAllConvex(Vector&lt;Point2D&gt; allConvex) {
+<span class="nc" id="L80">		this.allConvex = allConvex;</span>
+<span class="nc" id="L81">	}</span>
+
+	public void setAllDominants(Vector&lt;Point2D&gt; allDominants) {
+<span class="nc" id="L84">		this.allDominants = allDominants;</span>
+
+<span class="nc" id="L86">	}</span>
+
+	public void setDominants(Vector&lt;Point2D&gt; dominants) {
+<span class="nc" id="L89">		this.dominants = dominants;</span>
+
+<span class="nc" id="L91">	}</span>
+
+	public void setFiltDominats(Vector&lt;Point2D&gt; filtDominants) {
+<span class="nc" id="L94">		this.filtDominants = filtDominants;</span>
+
+<span class="nc" id="L96">	}</span>
+
+	public void setFiltConvex(Vector&lt;Point2D&gt; filtConvex) {
+<span class="nc" id="L99">		this.filtConvex = filtConvex;</span>
+
+<span class="nc" id="L101">	}</span>
+
+	public void setFiltDominates(Vector&lt;Point2D&gt; filtDominates) {
+<span class="nc" id="L104">		this.filtDominates = filtDominates;</span>
+
+<span class="nc" id="L106">	}</span>
+
+	public void setPoints(Vector&lt;Point2D&gt; points) {
+<span class="nc" id="L109">		this.points = points;</span>
+
+<span class="nc" id="L111">	}</span>
+
+	public void setDominates(Vector&lt;Point2D&gt; dominates) {
+<span class="nc" id="L114">		this.dominates = dominates;</span>
+
+<span class="nc" id="L116">	}</span>
+
+	public void setFilteredArea(Area filteredArea) {
+<span class="nc" id="L119">		this.filteredArea = filteredArea;</span>
+
+<span class="nc" id="L121">	}</span>
+
+	public Vector&lt;Point2D&gt; getAllConvex() {
+<span class="nc" id="L124">		return allConvex;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getDominants() {
+<span class="nc" id="L128">		return dominants;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getFiltDominants() {
+<span class="nc" id="L132">		return filtDominants;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getFiltConvex() {
+<span class="nc" id="L136">		return filtConvex;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getFiltDominates() {
+<span class="nc" id="L140">		return filtDominates;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getPoints() {
+<span class="nc" id="L144">		return points;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getDominates() {
+<span class="nc" id="L148">		return dominates;</span>
+	}
+
+	public Area getFilteredArea() {
+<span class="nc" id="L152">		return filteredArea;</span>
+	}
+
+	public Vector&lt;Point2D&gt; getConvex() {
+<span class="nc" id="L156">		return convex;</span>
+	}
+
+	public void setConvex(Vector&lt;Point2D&gt; convex) {
+<span class="nc" id="L160">		this.convex = convex;</span>
+<span class="nc" id="L161">	}</span>
+
+	public Vector&lt;Point2D&gt; getAllPoints() {
+<span class="nc" id="L164">		return allPoints;</span>
+	}
+	
+	public void setAllPoints(Vector&lt;Point2D&gt; allPoints) {
+<span class="nc" id="L168">		this.allPoints = allPoints;</span>
+<span class="nc" id="L169">	}</span>
+
+	public void setUtilization(ArrayList&lt;DPoint&gt;[] util) {
+<span class="nc" id="L172">		this.util = util;</span>
+<span class="nc" id="L173">	}</span>
+	
+	public ArrayList&lt;DPoint&gt;[] getUtilization() {
+<span class="nc" id="L176">		return util;</span>
+	}
+	
+	public ArrayList&lt;HullFace&gt; getFaces() {
+<span class="nc" id="L180">		return faces;</span>
+	}
+
+	public void setFaces(ArrayList&lt;HullFace&gt; cHullFaces) {
+<span class="nc" id="L184">		this.faces = cHullFaces;</span>
+<span class="nc" id="L185">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

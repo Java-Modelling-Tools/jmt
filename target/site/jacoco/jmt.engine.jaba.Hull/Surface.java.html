@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Surface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba.Hull</a> &gt; <span class="el_source">Surface.java</span></div><h1>Surface.java</h1><pre class="source lang-java linenums">// Copyright (C) Chris Pudney, The University of Western Australia, 1998.
+// All rights reserved.
+//  
+// Permission to use, copy, modify and distribute this software and its
+// documentation only for the purposes of teaching and research is hereby
+// granted without fee, provided that the above copyright notice and this
+// permission notice appear in all copies of this software/documentation
+// and that you do not sell the software.  No commercial use or
+// distribution of the software is permitted without the consent of the
+// copyright owners.  Commercial licensing is available by contacting the
+// author(s).
+// 
+// THIS SOFTWARE/DOCUMENTATION IS PROVIDED WITH NO WARRANTY, EXPRESS OR
+// IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTY OF MERCHANTABILITY OR
+// FITNESS FOR A PARTICULAR PURPOSE.
+package jmt.engine.jaba.Hull;
+
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Vector;
+
+/**
+ * A class representing a surface.
+ *
+ * @author  Chris Pudney &lt;cpudney@alphapharm.pharm.uwa.edu.au&gt;
+ * @version 1.1
+ */
+public class Surface {
+	/**
+	 * The list of polygonal faces defining the surface.
+	 */
+	private Vector&lt;Polygon&gt; faces;
+
+	/**
+	 * Construct a surface containing no faces.
+	 */
+<span class="nc" id="L37">	public Surface() {</span>
+<span class="nc" id="L38">		faces = new Vector&lt;Polygon&gt;();</span>
+<span class="nc" id="L39">	}</span>
+
+	/**
+	 * Construct a surface given a list of faces.
+	 *
+	 * @param f  the list of faces
+	 */
+<span class="nc" id="L46">	public Surface(Vector&lt;Polygon&gt; f) {</span>
+<span class="nc" id="L47">		faces = f;</span>
+<span class="nc" id="L48">	}</span>
+
+	/**
+	 * Get the faces of a surfaces.
+	 *
+	 * @return The vector of polygons that make up the surface.
+	 */
+	public Vector&lt;Polygon&gt; getFaces() {
+<span class="nc" id="L56">		return faces;</span>
+	}
+
+	/**
+	 * Set the faces of a surfaces.
+	 */
+	public void setFaces(Vector&lt;Polygon&gt; f) {
+<span class="nc" id="L63">		faces = f;</span>
+<span class="nc" id="L64">	}</span>
+
+	/**
+	 * Get the vertices of a surface.
+	 *
+	 * @return The vector of vertices that make up a surface.
+	 */
+	public Vector&lt;Vertex&gt; getVertices() {
+<span class="nc" id="L72">		Vector&lt;Vertex&gt; vertices = new Vector&lt;Vertex&gt;();</span>
+
+		// Get the vertices of each face
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		for (Polygon polygon : faces) {</span>
+<span class="nc" id="L76">			Vector&lt;Vertex&gt; face_verts = polygon.getVertices();</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			for (Vertex vertex : face_verts) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">				if (vertices.indexOf(vertex) == -1) {</span>
+<span class="nc" id="L79">					vertices.addElement(vertex);</span>
+				}
+<span class="nc" id="L81">			}</span>
+<span class="nc" id="L82">		}</span>
+<span class="nc" id="L83">		return vertices;</span>
+	}
+
+	/**
+	 * Write an OFF file that describes a surface.  OFF files can be viewed
+	 * using Geomview http://www.geom.umn.edu/software/download/geomview.html
+	 *
+	 * @param pw A PrintWriter for the file
+	 */
+	public void writeOFF(PrintWriter pw) throws IOException {
+		/* Write header */
+<span class="nc" id="L94">		pw.println(&quot;OFF&quot;);</span>
+<span class="nc" id="L95">		Vector&lt;Vertex&gt; vertices = getVertices();</span>
+<span class="nc" id="L96">		pw.println(vertices.size() + &quot; &quot; + &quot; &quot; + faces.size() + &quot; &quot; + (3 * faces.size()));</span>
+
+		/* Write vertex list */
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		for (Vertex vertex : vertices) {</span>
+<span class="nc" id="L100">			int[] c = vertex.getCoords();</span>
+<span class="nc" id="L101">			pw.println(c[0] + &quot; &quot; + c[1] + &quot; &quot; + c[2]);</span>
+<span class="nc" id="L102">		}</span>
+
+		/* Write polygon list */
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (Polygon polygon : faces) {</span>
+<span class="nc" id="L106">			Vector&lt;Vertex&gt; pV = polygon.getVertices();</span>
+<span class="nc" id="L107">			pw.print(pV.size());</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			for (Vertex vertex : pV) {</span>
+<span class="nc" id="L109">				pw.print(&quot; &quot; + vertices.indexOf(vertex));</span>
+<span class="nc" id="L110">			}</span>
+<span class="nc" id="L111">			pw.println();</span>
+<span class="nc" id="L112">		}</span>
+<span class="nc" id="L113">	}</span>
+
+	/**
+	 * Returns a string describing a surface.
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L120">		String s = new String();</span>
+
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		for (Polygon polygon : faces) {</span>
+<span class="nc" id="L123">			s += polygon + &quot;\n&quot;;</span>
+<span class="nc" id="L124">		}</span>
+<span class="nc" id="L125">		return s;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

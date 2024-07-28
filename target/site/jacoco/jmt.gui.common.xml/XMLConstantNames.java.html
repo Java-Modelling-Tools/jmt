@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLConstantNames.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">XMLConstantNames.java</span></div><h1>XMLConstantNames.java</h1><pre class="source lang-java linenums">package jmt.gui.common.xml;
+
+import jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchRoutingParameter;
+import jmt.engine.random.EmpiricalEntry;
+import jmt.gui.common.CommonConstants;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
+ */
+public interface XMLConstantNames {
+
+    String VAL_ZERO = &quot;0&quot;;
+    String VAL_ONE = &quot;1&quot;;
+    String VAL_TRUE_STRING = &quot;true&quot;;
+    String VAL_NULL_STRING = &quot;null&quot;;
+    String STATION_TYPE_UNKNOWN = &quot;UNKNOWN&quot;;
+    String XML_A_MEASURE_ALPHA = &quot;alpha&quot;;
+    String XML_A_PARAMETER_ARRAY = &quot;array&quot;;
+    String XML_ARCHIVE_DOCUMENT_ROOT = &quot;archive&quot;;
+    String XML_A_ARCHIVE_TIMESTAMP = &quot;timestamp&quot;;
+    String DROP_XML_BAS_BLOCKING = &quot;BAS blocking&quot;;
+    String STRAT_VACATION_BERNOULLI = &quot;BernoulliVacationStrategy&quot;;
+    String PARAM_BLOCK = &quot;block&quot;;
+    String XML_E_REGION = &quot;blockingRegion&quot;;
+    String PARAM_CAPACITIES = &quot;capacities&quot;;
+    String XML_CLASS = &quot;class&quot;;
+    String XML_E_CLASSCONSTRAINT = &quot;classConstraint&quot;;
+    String PARAM_CLASSES = &quot;Classes&quot;;
+    String XML_E_CLASSMEMORYCONSTRAINT = &quot;classMemoryConstraint&quot;;
+    String XML_A_STATION_SECTION_CLASSNAME = &quot;className&quot;;
+    String XML_A_PARAMETER_CLASSPATH = &quot;classPath&quot;;
+    String XML_A_SUBPARAMETER_CLASSPATH = &quot;classPath&quot;;
+    String XML_E_CLASSPOPULATION = &quot;classPopulation&quot;;
+    String XML_E_CLASSSIZE = &quot;classSize&quot;;
+    String XML_E_CLASSDUEDATE = &quot;classSoftDeadline&quot;;
+    String XML_E_STATION_DUE_DATES = &quot;classSoftDeadlines&quot;;
+    String CLASSNAME_CLASSSWITCH = &quot;ClassSwitch&quot;;
+    String XML_E_CLASSWEIGHT = &quot;classWeight&quot;;
+    String XML_E_CONNECTION = &quot;connection&quot;;
+    String XML_A_CLASS_CUSTOMERS = &quot;customers&quot;;
+    String XML_A_CLASS_CACHEMISSCLASS = &quot;cacheMissClass&quot;;
+    String XML_A_CLASS_CACHEHITCLASS = &quot;cacheHitClass&quot;;
+    String XML_A_CLASS_TYPE_OPEN = &quot;open&quot;;
+    String XML_A_CLASS_TYPE_CLOSED = &quot;closed&quot;;
+    String CLASSNAME_DELAY = &quot;Delay&quot;;
+    String XML_E_STATION_DELAY_OFF = &quot;delayOff&quot;;
+    String XML_A_ROOT_DISABLESTATISTIC = &quot;disableStatisticStop&quot;;
+    String STRAT_DPS = &quot;DPS&quot;;
+    String XML_DROP = &quot;drop&quot;;
+    String DROP_XML_DROP = &quot;drop&quot;;
+    String PARAM_DROP_RULES = &quot;dropRules&quot;;
+    String XML_E_DROPRULES = &quot;dropRules&quot;;
+    String PARAM_DROP_STRATEGIES = &quot;dropStrategies&quot;;
+    String XML_A_DROPRULE_DROP = &quot;dropThisClass&quot;;
+    String XML_A_CLASS_DUE_DATE = &quot;dueDate&quot;;
+    String STRAT_EDD = &quot;EDD&quot;;
+    String STRAT_EDF = &quot;EDF&quot;;
+    String PARAM_EMPIRICAL_ENTRY = &quot;EmpiricalEntry&quot;;
+    String CLASSNAME_ENABLING = &quot;Enabling&quot;;
+    String PARAM_ENABLING_CONDITIONS = &quot;enablingConditions&quot;;
+    String CLASSNAME_ENABLING_SERVER = &quot;EnablingServer&quot;;
+    String STRAT_EPS = &quot;EPS&quot;;
+    String STRAT_EXHAUSTIVE_POLLING = &quot;ExhaustivePollingGetStrategy&quot;;
+    String CLASSNAME_EXHAUSTIVEPSERVER = &quot;ExhaustivePollingServer&quot;;
+    String STRAT_FCFSPR = &quot;FCFSPR&quot;;
+    String PARAM_FCFS_STRATEGY = &quot;FCFSstrategy&quot;;
+    String CLASSNAME_FIRING = &quot;Firing&quot;;
+    String PARAM_FIRING_OUTCOMES = &quot;firingOutcomes&quot;;
+    String PARAM_FIRING_PRIORITIES = &quot;firingPriorities&quot;;
+    String PARAM_FIRING_WEIGHTS = &quot;firingWeights&quot;;
+    String CLASSNAME_FORK = &quot;Fork&quot;;
+    String PARAM_FORK_STRATEGY = &quot;ForkStrategy&quot;;
+    String STRAT_GATED_POLLING = &quot;GatedPollingGetStrategy&quot;;
+    String CLASSNAME_GATEDPSERVER = &quot;GatedPollingServer&quot;;
+    String XML_E_GLOBALCONSTRAINT = &quot;globalConstraint&quot;;
+    String XML_E_GLOBALMEMORYCONSTRAINT = &quot;globalMemoryConstraint&quot;;
+    String STRAT_GPS = &quot;GPS&quot;;
+    String XML_GROUP = &quot;group&quot;;
+    String XML_E_GROUPCLASS = &quot;groupClass&quot;;
+    String XML_E_GROUPCLASSLIST = &quot;groupClassList&quot;;
+    String XML_E_GROUPCONSTRAINT = &quot;groupConstraint&quot;;
+    String XML_E_GROUPMEMORYCONSTRAINT = &quot;groupMemoryConstraint&quot;;
+    String STRAT_HEAD = &quot;Head&quot;;
+    String STRAT_HEAD_STRATEGY = &quot;HeadStrategy&quot;;
+    String VALIDATION_DYNAMIC_FEATURE_ID = &quot;http://apache.org/xml/features/validation/dynamic&quot;;
+    String SCHEMA_VALIDATION_FEATURE_ID = &quot;http://apache.org/xml/features/validation/schema&quot;;
+    String EXTERNAL_SCHEMA_LOCATION_PROPERTY_ID = &quot;http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation&quot;;
+    String NAMESPACES_FEATURE_ID = &quot;http://xml.org/sax/features/namespaces&quot;;
+    String VALIDATION_FEATURE_ID = &quot;http://xml.org/sax/features/validation&quot;;
+    String PARAM_IMPATIENCE = &quot;Impatience&quot;;
+    String PARAM_INHIBITING_CONDITIONS = &quot;inhibitingConditions&quot;;
+    String XML_A_MEASURE_ISSERVERTYPE = &quot;isServerType&quot;;
+    String XML_BOOLEAN_CLASS = &quot;java.lang.Boolean&quot;;
+    String XML_INTEGER_CLASS = &quot;java.lang.Integer&quot;;
+    String XML_STRING_CLASS = &quot;java.lang.String&quot;;
+    String PARAM_IS_SIMPLIFIED_FORK = &quot;isSimplifiedFork&quot;;
+    String ENGINE_PS_STRATEGY = &quot;jmt.engine.NetStrategies.PSStrategy&quot;;
+    String ENGINE_ROUTING_CLASS_SWITCH_GUI = &quot;jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchRoutingStrategy&quot;;
+    String ENGINE_ROUTING_CLASS_SWITCH = &quot;jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchStrategy&quot;;
+    String ENGINE_SERVICE_STRATEGY = &quot;jmt.engine.NetStrategies.ServiceStrategy&quot;;
+    String ENGINE_DISTR_CONTAINER = &quot;jmt.engine.random.DistributionContainer&quot;;
+    String XML_JOB_CLASS = &quot;jobClass&quot;;
+    String XML_A_GROUPCLASS_CLASS = XML_JOB_CLASS;
+    String XML_A_CLASSMEMORYCONSTRAINT_CLASS = XML_JOB_CLASS;
+    String XML_A_CLASSCONSTRAINT_CLASS = XML_JOB_CLASS;
+    String XML_A_CLASSDUEDATE_CLASS = XML_JOB_CLASS;
+    String XML_A_CLASSWEIGHT_CLASS = XML_JOB_CLASS;
+    String XML_A_CLASSSIZE_CLASS = XML_JOB_CLASS;
+    String XML_A_DROPRULE_CLASS = XML_JOB_CLASS;
+    String XML_JOB_GROUP = &quot;jobGroup&quot;;
+    String XML_A_GROUPCLASS_GROUP = XML_JOB_GROUP;
+    String XML_A_GROUPCONSTRAINT_GROUP = XML_JOB_GROUP;
+    String XML_A_GROUPMEMORYCONSTRAINT_GROUP = XML_JOB_GROUP;
+    String CLASSNAME_SINK = &quot;JobSink&quot;;
+    String PARAM_JOBS_PER_LINK = &quot;jobsPerLink&quot;;
+    String CLASSNAME_JOIN = &quot;Join&quot;;
+    String STRAT_LCFSPR = &quot;LCFSPR&quot;;
+    String STRAT_LEPT = &quot;LEPT&quot;;
+    String STRAT_LIMITED_POLLING = &quot;LimitedPollingGetStrategy&quot;;
+    String CLASSNAME_LKPSERVER = &quot;LimitedPollingServer&quot;;
+    String CLASSNAME_LINKAGE = &quot;Linkage&quot;;
+    String STRAT_LJF = &quot;LJF&quot;;
+    String XML_A_ROOT_LOGDECIMALSEPARATOR = &quot;logDecimalSeparator&quot;;
+    String XML_A_ROOT_LOGDELIM = &quot;logDelimiter&quot;;
+    String XML_LOG_B_EXECTIMESTAMP = &quot;logExecTimestamp&quot;;
+    String XML_A_MEASURE_LOG = &quot;logFile&quot;;
+    String XML_LOG_FILENAME = &quot;logfileName&quot;;
+    String XML_LOG_FILEPATH = &quot;logfilePath&quot;;
+    String XML_LOG_B_JOBCLASS = &quot;logJobClass&quot;;
+    String XML_LOG_B_JOBID = &quot;logJobID&quot;;
+    String XML_LOG_B_LOGGERNAME = &quot;logLoggerName&quot;;
+    String XML_A_ROOT_LOGPATH = &quot;logPath&quot;;
+    String XML_A_ROOT_LOGREPLACE = &quot;logReplaceMode&quot;;
+    String XML_LOG_B_TIMEANYCLS = &quot;logTimeAnyClass&quot;;
+    String XML_LOG_B_TIMESAMECLS = &quot;logTimeSameClass&quot;;
+    String XML_LOG_B_TIMESTAMP = &quot;logTimeStamp&quot;;
+    String CLASSNAME_LOGGER = &quot;LogTunnel&quot;;
+    String LOGGER_PARAM_PATH = &quot;path&quot;;
+    String LOGGER_PARAM_AUTO_APPEND = &quot;autoAppend&quot;;
+    String LOGGER_PARAM_DELIM = &quot;delim&quot;;
+    String LOGGER_PARAM_DECIMAL_SEPARATOR = &quot;decimalSeparator&quot;;
+    String XML_A_PARAMETER_MAP = &quot;map&quot;;
+    String XML_A_ROOT_MAXEVENTS = &quot;maxEvents&quot;;
+    String XML_A_GLOBALCONSTRAINT_MAXJOBS = &quot;maxJobs&quot;;
+    String PARAM_MAX_JOBS = &quot;maxJobs&quot;;
+    String XML_A_CLASSCONSTRAINT_MAXJOBS = &quot;maxJobsPerClass&quot;;
+    String XML_A_GROUPCONSTRAINT_MAXJOBS = &quot;maxJobsPerGroup&quot;;
+    String XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY = &quot;maxMemory&quot;;
+    String XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY = &quot;maxMemoryPerClass&quot;;
+    String XML_A_GROUPMEMORYCONSTRAINT_MAXMEMORY = &quot;maxMemoryPerGroup&quot;;
+    String PARAM_MAX_RUNNING = &quot;maxRunning&quot;;
+    String XML_A_ROOT_MAXSAMPLES = &quot;maxSamples&quot;;
+    String XML_A_ROOT_SIMULATED = &quot;maxSimulated&quot;;
+    String XML_A_ROOT_DURATION = &quot;maxTime&quot;;
+    String XML_E_MEASURE = &quot;measure&quot;;
+    String MEASURE_TYPE_FIRING_THROUGHPUT = &quot;Firing Throughput&quot;;
+    String MEASURE_TYPE_FIRE_FREQUENCY = &quot;Fire Frequency&quot;;
+    String MEASURE_TYPE_FX = &quot;FX&quot;;
+    String PARAM_MODE_NAMES = &quot;modeNames&quot;;
+    String XML_A_STATION_NAME = &quot;name&quot;;
+    String XML_A_MEASURE_NAME = &quot;name&quot;;
+    String XML_A_CLASS_NAME = &quot;name&quot;;
+    String XML_A_PARAMETER_NAME = &quot;name&quot;;
+    String XML_A_ROOT_NAME = &quot;name&quot;;
+    String XML_A_SUBPARAMETER_NAME = &quot;name&quot;;
+    String XML_A_REGION_NAME = &quot;name&quot;;
+    String XML_NODE = &quot;node&quot;;
+    String XML_A_REGIONNODE_NAME = &quot;nodeName&quot;;
+    String XML_A_MEASURE_NODETYPE = &quot;nodeType&quot;;
+    String XML_A_MEASURE_NUMOFSERVERTYPES = &quot;numberOfServerTypes&quot;;
+    String PARAM_NUMBERS = &quot;Numbers&quot;;
+    String PARAM_NUMBERS_OF_SERVERS = &quot;numbersOfServers&quot;;
+    String PARAM_NUM_REQUIRED = &quot;numRequired&quot;;
+    String XML_E_PARAMETER = &quot;parameter&quot;;
+    String XML_A_MEASURE_PARENTSTATION = &quot;parentStation&quot;;
+    String XML_A_ROOT_POLLING = &quot;polling&quot;;
+    String PARAM_POLLING_K_VALUE = &quot;pollingKValue&quot;;
+    String XML_A_CLASSPOPULATION_POPULATION = &quot;population&quot;;
+    String STRAT_PR = &quot;PR&quot;;
+    String XML_A_MEASURE_PRECISION = &quot;precision&quot;;
+    String CLASSNAME_PREEMPTIVESERVER = &quot;PreemptiveServer&quot;;
+    String XML_E_PRELOAD = &quot;preload&quot;;
+    String XML_A_CLASS_PRIORITY = &quot;priority&quot;;
+    String STRAT_PRIORITY = &quot;Priority&quot;;
+    String XML_A_STATION_SECTION_PS_PRIORITY = &quot;psPriority&quot;;
+    String PARAM_PS_PRIORITY_USED = &quot;PSPriorityUsed&quot;;
+    String CLASSNAME_PSSERVER = &quot;PSServer&quot;;
+    String CLASSNAME_PSSERVER_PRIORITY = &quot;PSServerPriority&quot;;
+    String PARAM_PUT_STRATEGIES = &quot;putStrategies&quot;;
+    String STRAT_QBPS = &quot;QBPS&quot;;
+    String XML_E_STATION_QUANTUM_SIZE = &quot;quantumSize&quot;;
+    String XML_E_QUANTA_SIZE = &quot;quantaSize&quot;;
+    String XML_E_STATION_QUANTUM_SWITCHOVER_TIME = &quot;quantumSwitchoverTime&quot;;
+    String XML_E_QUANTUM_SWITCHOVER_TIME_ELEMENT = &quot;quantumSwitchoverTime&quot;;
+    String CLASSNAME_QUEUE = &quot;Queue&quot;;
+    String PARAM_QUEUE_PUT_STRATEGY = &quot;QueuePutStrategy&quot;;
+    String STRAT_RAND = &quot;Rand&quot;;
+    String CLASSNAME_SOURCE = &quot;RandomSource&quot;;
+    String STRAT_RAND_STRATEGY = &quot;RandStrategy&quot;;
+    String XML_E_PARAMETER_REFCLASS = &quot;refClass&quot;;
+    String XML_A_CLASSPOPULATION_NAME = &quot;refClass&quot;;
+    String XML_A_MEASURE_STATION = &quot;referenceNode&quot;;
+    String XML_A_CLASS_REFSOURCE = &quot;referenceSource&quot;;
+    String XML_A_MEASURE_CLASS = &quot;referenceUserClass&quot;;
+    String XML_REFNODE = &quot;refNode&quot;;
+    String NODETYPE_REGION = &quot;region&quot;;
+    String XML_E_REGIONNODE = &quot;regionNode&quot;;
+    String PARAM_RESOURCE_CONDITIONS = &quot;resourceConditions&quot;;
+    String DROP_XML_RETRIAL = &quot;retrial&quot;;
+    String PARAM_RETRIAL_DISTRIBUTIONS = &quot;retrialDistributions&quot;;
+    String CLASSNAME_ROUTER = &quot;Router&quot;;
+    String XML_E_STATION_SECTION = &quot;section&quot;;
+    String XML_A_ROOT_SEED = &quot;seed&quot;;
+    String CLASSNAME_SEMAPHORE = &quot;Semaphore&quot;;
+    String STRAT_SEPT = &quot;SEPT&quot;;
+    String CLASSNAME_SERVER = &quot;Server&quot;;
+    String XML_A_MEASURE_SERVERTYPE = &quot;serverType&quot;;
+    String XML_E_SERVER_TYPE = &quot;serverTypes&quot;;
+    String PARAM_SERVER_TYPES_COMPATIBILITIES = &quot;serverTypesCompatibilities&quot;;
+    String PARAM_SERVICE_STRATEGY = &quot;ServiceStrategy&quot;;
+    String PARAM_SERVICE_TIME_STRATEGY = &quot;ServiceTimeStrategy&quot;;
+    String SERVICE_TIME_STRATEGY_CLASS = &quot;jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy&quot;;
+    String SERVICE_STRATEGY_CLASS = &quot;jmt.engine.NetStrategies.ServiceStrategy&quot;;
+    String CLASSNAME_TUNNEL = &quot;ServiceTunnel&quot;;
+    String PARAM_SERVICE_WEIGHTS = &quot;serviceWeights&quot;;
+    String XML_E_STATION_SET_UP = &quot;setUp&quot;;
+    String XML_DOCUMENT_ROOT = &quot;sim&quot;;
+    String XML_DOCUMENT_XSD = &quot;SIMmodeldefinition.xsd&quot;;
+    String PARAM_SIZE = &quot;size&quot;;
+    String XML_A_CLASSSIZE_SIZE = &quot;size&quot;;
+    String STRAT_SJF = &quot;SJF&quot;;
+    String XML_SOFT_DEADLINE = &quot;softDeadline&quot;;
+    String XML_A_CLASS_SOFT_DEADLINE = XML_SOFT_DEADLINE;
+    String XML_E_SOFT_DEADLINE_ELEMENT = XML_SOFT_DEADLINE;
+    String XML_A_CLASSDUEDATE_DUEDATE = XML_SOFT_DEADLINE;
+    String XML_A_CONNECTION_SOURCE = &quot;source&quot;;
+    String STRAT_SRPT = &quot;SRPT&quot;;
+    String NODETYPE_STATION = &quot;station&quot;;
+    String XML_A_PRELOADSTATION_NAME = &quot;stationName&quot;;
+    String XML_E_STATIONPOPULATIONS = &quot;stationPopulations&quot;;
+    String CLASSNAME_STORAGE = &quot;Storage&quot;;
+    String XML_E_SUBPARAMETER = &quot;subParameter&quot;;
+    String STRAT_TAIL = &quot;Tail&quot;;
+    String STRAT_TAIL_STRATEGY = &quot;TailStrategy&quot;;
+    String XML_A_CONNECTION_TARGET = &quot;target&quot;;
+    String STRAT_TBS = &quot;TBS&quot;;
+    String XML_E_MAPREDUCE = &quot;template_mapreduce&quot;;
+    String CLASSNAME_TERMINAL = &quot;Terminal&quot;;
+    String PARAM_THRESHOLD = &quot;threshold&quot;;
+    String CLASSNAME_TIMING = &quot;Timing&quot;;
+    String PARAM_TIMING_STRATEGIES = &quot;timingStrategies&quot;;
+    String PARAM_TOTAL_CAPACITY = &quot;totalCapacity&quot;;
+    String XML_A_MEASURE_TYPE = &quot;type&quot;;
+    String XML_A_CLASS_TYPE = &quot;type&quot;;
+    String XML_A_REGION_TYPE = &quot;type&quot;;
+    String XML_E_CLASS = &quot;userClass&quot;;
+    String STRAT_VACATION_IDLE = &quot;VacationWhenIdleStrategy&quot;;
+    String XML_E_PARAMETER_VALUE = &quot;value&quot;;
+    String XML_E_SUBPARAMETER_VALUE = &quot;value&quot;;
+    String XML_A_MEASURE_VERBOSE = &quot;verbose&quot;;
+    String DROP_XML_WAITING_QUEUE = &quot;waiting queue&quot;;
+    String XML_A_CLASSWEIGHT_WEIGHT = &quot;weight&quot;;
+    String XML_XSI_NO_NAMESPACE_SCHEMA_LOCATION = &quot;xsi:noNamespaceSchemaLocation&quot;;
+    String XML_XMLNS_XSI = &quot;xmlns:xsi&quot;;
+    String XML_XSI_SCHEMA_LOCATION_URI = &quot;http://www.w3.org/2001/XMLSchema-instance&quot;;
+
+    // --- Strategy Class Name Constants ---
+    String STRAT_TAIL_STRAT = &quot;TailStrategy&quot;;
+    String STRAT_HEAD_STRAT = &quot;HeadStrategy&quot;;
+    String STRAT_RAND_STRAT = &quot;RandStrategy&quot;;
+    String STRAT_SJF_STRAT = &quot;SJFStrategy&quot;;
+    String STRAT_LJF_STRAT = &quot;LJFStrategy&quot;;
+    String STRAT_SEPT_STRAT = &quot;SEPTStrategy&quot;;
+    String STRAT_LEPT_STRAT = &quot;LEPTStrategy&quot;;
+    String STRAT_FCFSPR_STRAT = &quot;FCFSPRStrategy&quot;;
+    String STRAT_LCFSPR_STRAT = &quot;LCFSPRStrategy&quot;;
+    String STRAT_SRPT_STRAT = &quot;SRPTStrategy&quot;;
+    String STRAT_EDD_STRAT = &quot;EDDStrategy&quot;;
+    String STRAT_EDF_STRAT = &quot;EDFStrategy&quot;;
+
+    String STRAT_EPS_STRAT = &quot;EPSStrategy&quot;;
+    String STRAT_QBPS_STRAT = &quot;QBPSStrategy&quot;;
+    String STRAT_GPS_STRAT = &quot;GPSStrategy&quot;;
+    String STRAT_DPS_STRAT = &quot;DPSStrategy&quot;;
+
+    // --- Priority Strategy Class Name Constants ---
+    String STRAT_TAIL_STRAT_PRI = &quot;TailStrategyPriority&quot;;
+    String STRAT_HEAD_STRAT_PRI = &quot;HeadStrategyPriority&quot;;
+    String STRAT_RAND_STRAT_PRI = &quot;RandStrategyPriority&quot;;
+    String STRAT_SJF_STRAT_PRI = &quot;SJFStrategyPriority&quot;;
+    String STRAT_LJF_STRAT_PRI = &quot;LJFStrategyPriority&quot;;
+    String STRAT_SEPT_STRAT_PRI = &quot;SEPTStrategyPriority&quot;;
+    String STRAT_LEPT_STRAT_PRI = &quot;LEPTStrategyPriority&quot;;
+    String STRAT_FCFSPR_STRAT_PRI = &quot;FCFSPRStrategyPriority&quot;;
+    String STRAT_LCFSPR_STRAT_PRI = &quot;LCFSPRStrategyPriority&quot;;
+    String STRAT_SRPT_STRAT_PRI = &quot;SRPTStrategyPriority&quot;;
+    String STRAT_EDD_STRAT_PRI = &quot;EDDStrategyPriority&quot;;
+    String STRAT_EDF_STRAT_PRI = &quot;EDFStrategyPriority&quot;;
+    String STRAT_TBS_STRAT_PRI = &quot;TBSStrategyPriority&quot;;
+    String ZERO_SERVICE_TIME_STRATEGY = &quot;ZeroServiceTimeStrategy&quot;;
+    String DISABLED_SERVICE_TIME_STRATEGY = &quot;DisabledServiceTimeStrategy&quot;;
+    String LOAD_DEPENDENT_STRATEGY = &quot;LoadDependentStrategy&quot;;
+    String CP_LOAD_DEPENDENT_STRATEGY = &quot;jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy&quot;;
+    String LD_PARAMETER = &quot;LDParameter&quot;;
+    String CP_LD_PARAMETER = &quot;jmt.engine.NetStrategies.ServiceStrategies.LDParameter&quot;;
+    String PARAM_FROM = &quot;from&quot;;
+    String PARAM_FUNCTION = &quot;function&quot;;
+    String PARAM_MEAN = &quot;mean&quot;;
+    String PARAM_DISTR = &quot;distr&quot;;
+    String CP_DISTRIBUTION = &quot;jmt.engine.random.Distribution&quot;;
+    String CP_DISTRIBUTION_CONTAINER = &quot;jmt.engine.random.DistributionContainer&quot;;
+    String PARAM_DISTR_PAR = &quot;distrPar&quot;;
+
+    String PREFIX_ENABLING = &quot;enabling&quot;;
+    String PREFIX_INHIBITING = &quot;inhibiting&quot;;
+    String PREFIX_RESOURCE = &quot;resource&quot;;
+    String SUFFIX_CONDITION = &quot;Condition&quot;;
+
+    String CP_TRANSITION_MATRIX = &quot;jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix&quot;;
+    String CP_TRANSITION_VECTOR = &quot;jmt.engine.NetStrategies.TransitionUtilities.TransitionVector&quot;;
+
+    String STR_ZERO_STRATEGY = &quot;ZeroStrategy&quot;;
+    String STR_DISABLED_STRATEGY = &quot;DisabledStrategy&quot;;
+    String STR_LOAD_DEPENDENT = &quot;LoadDependent&quot;;
+    String XML_DOUBLE_CLASS = &quot;java.lang.Double&quot;;
+    String CP_FORK_STRATEGY = &quot;jmt.engine.NetStrategies.ForkStrategy&quot;;
+    String XML_E_EMPIRICAL_ENTRY_ARRAY = &quot;EmpiricalEntryArray&quot;;
+    String CP_OUTPATH = &quot;jmt.engine.NetStrategies.ForkStrategies.OutPath&quot;;
+    String XML_E_OUTPATH_ENTRY = &quot;OutPathEntry&quot;;
+    String XML_E_OUT_UNIT_PROBABILITY = &quot;outUnitProbability&quot;;
+    String XML_E_JOBS_PER_LINK_DIS = &quot;JobsPerLinkDis&quot;;
+    String XML_E_NUMBER_OF_BRANCHES = &quot;Number of Branches&quot;;
+    String XML_E_CLASS_JOB_NUM_ARRAY = &quot;ClassJobNumArray&quot;;
+    String CP_CLASS_JOB_NUM = &quot;jmt.engine.NetStrategies.ForkStrategies.ClassJobNum&quot;;
+    String XML_A_NUMBER_OF_JOBS = &quot;numberOfJobs&quot;;
+
+    String STRAT_EPS_STRAT_PRI = &quot;EPSStrategyPriority&quot;;
+    String STRAT_GPS_STRAT_PRI = &quot;GPSStrategyPriority&quot;;
+    String STRAT_DPS_STRAT_PRI = &quot;DPSStrategyPriority&quot;;
+    String STRAT_QBPS_STRAT_PRI = &quot;QBPSStrategyPriority&quot;;
+
+    String STRATEGIES_BASE = &quot;jmt.engine.NetStrategies.&quot;;
+    String CP_PS = STRATEGIES_BASE + &quot;PSStrategies.&quot;;
+    String CP_QUEUE_PUT = STRATEGIES_BASE + &quot;QueuePutStrategies.&quot;;
+    String CP_SERVICE = STRATEGIES_BASE + &quot;ServiceStrategies.&quot;;
+    String CP_VACATION = STRATEGIES_BASE + &quot;VacationStrategies.&quot;;
+    String CP_TRANSITION = STRATEGIES_BASE + &quot;TransitionUtilities.&quot;;
+    String CP_SERVICE_STRAT = STRATEGIES_BASE + &quot;ServiceStrategy&quot;;
+    String CP_QUEUE_PUT_STRAT = STRATEGIES_BASE + &quot;QueuePutStrategy&quot;;
+
+
+    String QUEUE_GET_SUFFIX = &quot;QueueGetStrategies.&quot;;
+    String QUEUE_PUT_SUFFIX = &quot;QueuePutStrategies.&quot;;
+    String PS_SUFFIX = &quot;PSStrategies.&quot;;
+    String SERVICE_SUFFIX = &quot;ServiceStrategies.&quot;;
+    String VACATION_SUFFIX = &quot;VacationStrategies.&quot;;
+    String TRANSITION_SUFFIX = &quot;TransitionUtilities.&quot;;
+
+    String ROUTING_SUFFIX = &quot;RoutingStrategies.&quot;;
+<span class="fc" id="L365">    String EMPIRICAL_ENTRY_CLASS = EmpiricalEntry.class.getName();</span>
+    String EMPIRICAL_ENTRY_ARRAY = &quot;EmpiricalEntryArray&quot;;
+    String LD_ROUTING_PARAM_CLASS = STRATEGIES_BASE + ROUTING_SUFFIX + &quot;LoadDependentRoutingParameter&quot;;
+    String WEIGHT_ENTRY = &quot;WeightEntry&quot;;
+    String WEIGHT_ENTRY_CLASS = STRATEGIES_BASE + ROUTING_SUFFIX + WEIGHT_ENTRY;
+<span class="fc" id="L370">    String CS_ROUTING_PARAM_CLASS = ClassSwitchRoutingParameter.class.getName();</span>
+
+    String XML_E_ROUTING_STRATEGY = &quot;RoutingStrategy&quot;;
+    String XML_A_PROBABILITY = &quot;probability&quot;;
+    String XML_MEASURE_NAME_SEPARATOR = &quot;_&quot;;
+
+    String STR_EMPIRICAL = &quot;Empirical&quot;;
+    String STR_PROBABILITIES = &quot;Probabilities&quot;;
+    String STR_POWER_OF_K = &quot;PowerOfK&quot;;
+    String STR_WEIGHTED_ROUND_ROBIN = &quot;WeightedRoundRobin&quot;;
+    String STR_ROUND_ROBIN = &quot;RoundRobinStrategy&quot;;
+    String STR_CLASS_SWITCH = &quot;ClassSwitch&quot;;
+    String STR_SHORTEST_QUEUE = &quot;ShortestQueue&quot;;
+    String STR_SHORTEST_RESPONSE_TIME = &quot;ShortestResponseTime&quot;;
+    String STR_FASTEST_SERVICE = &quot;FastestService&quot;;
+
+    String XML_E_LD_ROUTING_PARAM = &quot;LoadDependentRoutingParameter&quot;;
+    String XML_A_FROM = &quot;from&quot;;
+    String XML_A_K = &quot;k&quot;;
+    String XML_A_WITH_MEMORY = &quot;withMemory&quot;;
+    String XML_E_WEIGHT_ENTRY_ARRAY = &quot;WeightEntryArray&quot;;
+    String XML_A_WEIGHT = &quot;weight&quot;;
+    String XML_E_CS_ROUTING_PARAM_ARRAY = &quot;ClassSwitchRoutingParameterArray&quot;;
+    String XML_E_CS_ROUTING_PARAM = &quot;ClassSwitchRoutingParameter&quot;;
+
+
+    final class Maps {
+
+        private Maps() {
+        }
+
+        public static final Map&lt;String, String&gt; DROP_RULES;
+        public static final Map&lt;String, String&gt; DROP_RULES_REVERSE;
+        public static final Map&lt;String, String&gt; QUEUE_PUT_MAPPING;
+        public static final Map&lt;String, String&gt; PRIORITY_QUEUE_PUT_MAPPING;
+        public static final Map&lt;String, String&gt; PS_STRATEGIES_MAPPING;
+        public static final Map&lt;String, String&gt; PRIORITY_PS_STRATEGIES_MAPPING;
+        public static final Map&lt;String, String&gt; POLLING_TYPE_MAPPING;
+
+        static {
+            // --- Drop rules ---
+<span class="fc" id="L411">            Map&lt;String, String&gt; drop = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L412">            drop.put(DROP_XML_DROP, CommonConstants.FINITE_DROP);</span>
+<span class="fc" id="L413">            drop.put(DROP_XML_BAS_BLOCKING, CommonConstants.FINITE_BLOCK);</span>
+<span class="fc" id="L414">            drop.put(DROP_XML_WAITING_QUEUE, CommonConstants.FINITE_WAITING);</span>
+<span class="fc" id="L415">            drop.put(DROP_XML_RETRIAL, CommonConstants.FINITE_RETRIAL);</span>
+<span class="fc" id="L416">            DROP_RULES = Collections.unmodifiableMap(drop);</span>
+
+<span class="fc" id="L418">            Map&lt;String, String&gt; dropRev = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L419">            drop.forEach((xmlVal, modelVal) -&gt; dropRev.put(modelVal, xmlVal));</span>
+<span class="fc" id="L420">            DROP_RULES_REVERSE = Collections.unmodifiableMap(dropRev);</span>
+
+            // --- Queue put strategies (standard) ---
+<span class="fc" id="L423">            Map&lt;String, String&gt; qPut = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L424">            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS, STRAT_TAIL_STRAT);</span>
+<span class="fc" id="L425">            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS, STRAT_HEAD_STRAT);</span>
+<span class="fc" id="L426">            qPut.put(CommonConstants.QUEUE_STRATEGY_RAND, STRAT_RAND_STRAT);</span>
+<span class="fc" id="L427">            qPut.put(CommonConstants.QUEUE_STRATEGY_SJF, STRAT_SJF_STRAT);</span>
+<span class="fc" id="L428">            qPut.put(CommonConstants.QUEUE_STRATEGY_LJF, STRAT_LJF_STRAT);</span>
+<span class="fc" id="L429">            qPut.put(CommonConstants.QUEUE_STRATEGY_SEPT, STRAT_SEPT_STRAT);</span>
+<span class="fc" id="L430">            qPut.put(CommonConstants.QUEUE_STRATEGY_LEPT, STRAT_LEPT_STRAT);</span>
+<span class="fc" id="L431">            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, STRAT_FCFSPR_STRAT);</span>
+<span class="fc" id="L432">            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, STRAT_LCFSPR_STRAT);</span>
+<span class="fc" id="L433">            qPut.put(CommonConstants.QUEUE_STRATEGY_SRPT, STRAT_SRPT_STRAT);</span>
+<span class="fc" id="L434">            qPut.put(CommonConstants.QUEUE_STRATEGY_EDD, STRAT_EDD_STRAT);</span>
+<span class="fc" id="L435">            qPut.put(CommonConstants.QUEUE_STRATEGY_EDF, STRAT_EDF_STRAT);</span>
+<span class="fc" id="L436">            QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPut);</span>
+
+            // --- Queue put strategies (priority variants) ---
+<span class="fc" id="L439">            Map&lt;String, String&gt; qPutPri = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L440">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS, STRAT_TAIL_STRAT_PRI);</span>
+<span class="fc" id="L441">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS, STRAT_HEAD_STRAT_PRI);</span>
+<span class="fc" id="L442">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_RAND, STRAT_RAND_STRAT_PRI);</span>
+<span class="fc" id="L443">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SJF, STRAT_SJF_STRAT_PRI);</span>
+<span class="fc" id="L444">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LJF, STRAT_LJF_STRAT_PRI);</span>
+<span class="fc" id="L445">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SEPT, STRAT_SEPT_STRAT_PRI);</span>
+<span class="fc" id="L446">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LEPT, STRAT_LEPT_STRAT_PRI);</span>
+<span class="fc" id="L447">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, STRAT_FCFSPR_STRAT_PRI);</span>
+<span class="fc" id="L448">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, STRAT_LCFSPR_STRAT_PRI);</span>
+<span class="fc" id="L449">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SRPT, STRAT_SRPT_STRAT_PRI);</span>
+<span class="fc" id="L450">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDD, STRAT_EDD_STRAT_PRI);</span>
+<span class="fc" id="L451">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDF, STRAT_EDF_STRAT_PRI);</span>
+<span class="fc" id="L452">            qPutPri.put(CommonConstants.QUEUE_STRATEGY_TBS, STRAT_TBS_STRAT_PRI);</span>
+<span class="fc" id="L453">            PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPutPri);</span>
+
+            // --- PS strategies ---
+<span class="fc" id="L456">            Map&lt;String, String&gt; ps = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L457">            ps.put(CommonConstants.QUEUE_STRATEGY_PS, STRAT_EPS_STRAT);</span>
+<span class="fc" id="L458">            ps.put(CommonConstants.QUEUE_STRATEGY_QBPS, STRAT_QBPS_STRAT);</span>
+<span class="fc" id="L459">            ps.put(CommonConstants.QUEUE_STRATEGY_GPS, STRAT_GPS_STRAT);</span>
+<span class="fc" id="L460">            ps.put(CommonConstants.QUEUE_STRATEGY_DPS, STRAT_DPS_STRAT);</span>
+<span class="fc" id="L461">            PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(ps);</span>
+
+<span class="fc" id="L463">            Map&lt;String, String&gt; psPri = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L464">            psPri.put(CommonConstants.QUEUE_STRATEGY_PS, STRAT_EPS_STRAT_PRI);</span>
+<span class="fc" id="L465">            psPri.put(CommonConstants.QUEUE_STRATEGY_GPS, STRAT_GPS_STRAT_PRI);</span>
+<span class="fc" id="L466">            psPri.put(CommonConstants.QUEUE_STRATEGY_DPS, STRAT_DPS_STRAT_PRI);</span>
+<span class="fc" id="L467">            psPri.put(CommonConstants.QUEUE_STRATEGY_QBPS, STRAT_QBPS_STRAT_PRI);</span>
+<span class="fc" id="L468">            PRIORITY_PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(psPri);</span>
+
+            // --- Polling type ---
+<span class="fc" id="L471">            Map&lt;String, String&gt; polling = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L472">            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED, CLASSNAME_LKPSERVER);</span>
+<span class="fc" id="L473">            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED, CLASSNAME_GATEDPSERVER);</span>
+<span class="fc" id="L474">            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE, CLASSNAME_EXHAUSTIVEPSERVER);</span>
+<span class="fc" id="L475">            POLLING_TYPE_MAPPING = Collections.unmodifiableMap(polling);</span>
+<span class="fc" id="L476">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

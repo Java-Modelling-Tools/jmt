@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultiVariateStudentT.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions</a> &gt; <span class="el_source">MultiVariateStudentT.java</span></div><h1>MultiVariateStudentT.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions;
+
+import java.util.Arrays;
+import java.util.Date;
+
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+import cern.jet.random.ChiSquare;
+import cern.jet.random.engine.MersenneTwister64;
+import jmt.engine.math.Gamma;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+
+/**
+ * Multivariate student t. Implemented with an embedded MVG and a chi-squared
+ * multiplier
+ */
+public class MultiVariateStudentT implements MultiVariateRealDistribution {
+
+	private DoubleMatrix1D mean;
+	private DoubleMatrix2D cov;
+	private DoubleMatrix2D covInv;
+	private double NC;
+	private Algebra A;
+	private int ndim;
+	private int df;
+	private ChiSquare ScalarX2;
+	private MultiVariateGaussian MVG;
+
+	/**
+	 * Multivariate student t constructor. Covariance matrix needs to be square.
+	 * Length of mean vector needs to be the same size as of covariance. degree of
+	 * freedom needs to be positive integer
+	 * 
+	 * @param mean double vector representing the mean
+	 * @param cov  covariance matrix
+	 * @param df   degree of freedom
+	 * @param seed integer seed
+	 * @throws InternalErrorException
+	 */
+<span class="nc" id="L44">	public MultiVariateStudentT(double[] mean, double[][] cov, int df, int seed) throws InternalErrorException {</span>
+<span class="nc" id="L45">		this.df = df;</span>
+<span class="nc" id="L46">		double[] zero_mean = new double[mean.length];</span>
+<span class="nc" id="L47">		Arrays.fill(zero_mean, 0.);</span>
+<span class="nc" id="L48">		MVG = new MultiVariateGaussian(zero_mean, cov, seed);</span>
+<span class="nc" id="L49">		this.mean = new DenseDoubleMatrix1D(mean);</span>
+
+<span class="nc" id="L51">		this.ndim = this.mean.size();</span>
+<span class="nc" id="L52">		Date date = new Date();</span>
+<span class="nc" id="L53">		this.ScalarX2 = new ChiSquare(df, new MersenneTwister64(date.hashCode() + seed));</span>
+<span class="nc" id="L54">		A = new Algebra();</span>
+
+<span class="nc" id="L56">		this.cov = new DenseDoubleMatrix2D(cov);</span>
+<span class="nc" id="L57">		this.covInv = this.A.inverse(this.cov);</span>
+
+<span class="nc" id="L59">		this.NC = this.A.det(this.cov);</span>
+<span class="nc" id="L60">		this.NC *= Math.pow(Math.PI * df, ndim);</span>
+<span class="nc" id="L61">		this.NC = Math.pow(this.NC, 0.5);</span>
+<span class="nc" id="L62">		this.NC *= Gamma.gamma(0.5 * df);</span>
+<span class="nc" id="L63">		this.NC /= Gamma.gamma(0.5 * (df + ndim));</span>
+<span class="nc" id="L64">	}</span>
+
+	/**
+	 * Constructor with default seed = 0
+	 * 
+	 * @param mean mean vector
+	 * @param cov  covariance square array
+	 * @param df   degree of freedom
+	 * @throws InternalErrorException
+	 */
+	public MultiVariateStudentT(double[] mean, double[][] cov, int df) throws InternalErrorException {
+<span class="nc" id="L75">		this(mean, cov, df, 0);</span>
+<span class="nc" id="L76">	}</span>
+
+	/**
+	 * Copy constructor with default seed = 0
+	 * 
+	 * @param MVST
+	 * @throws InternalErrorException
+	 */
+	public MultiVariateStudentT(MultiVariateStudentT MVST) throws InternalErrorException {
+<span class="nc" id="L85">		this(MVST.mean.toArray(), MVST.cov.toArray(), MVST.df);</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Copy constructor with specified seed
+	 * 
+	 * @param MVST
+	 * @param seed
+	 * @throws InternalErrorException
+	 */
+	public MultiVariateStudentT(MultiVariateStudentT MVST, int seed) throws InternalErrorException {
+<span class="nc" id="L96">		this(MVST.mean.toArray(), MVST.cov.toArray(), MVST.df, seed);</span>
+<span class="nc" id="L97">	}</span>
+
+	@Override
+	public MultiVariateRealDistribution copy() throws InternalErrorException {
+<span class="nc" id="L101">		return new MultiVariateStudentT(this);</span>
+	}
+
+	@Override
+	public MultiVariateRealDistribution copy(int seed) throws InternalErrorException {
+<span class="nc" id="L106">		return new MultiVariateStudentT(this, seed);</span>
+	}
+
+	public double[] getSample() {
+<span class="nc" id="L110">		DoubleMatrix1D x = new DenseDoubleMatrix1D(MVG.getSample());</span>
+<span class="nc" id="L111">		double u = this.ScalarX2.nextDouble();</span>
+<span class="nc" id="L112">		u = u / df;</span>
+<span class="nc" id="L113">		u = Math.sqrt(u);</span>
+<span class="nc" id="L114">		x.assign(Functions.div(u));</span>
+<span class="nc" id="L115">		x.assign(this.mean, Functions.plus);</span>
+<span class="nc" id="L116">		return x.toArray();</span>
+	}
+
+	public int getDim() {
+<span class="nc" id="L120">		return ndim;</span>
+	}
+
+	public double[] getMean() {
+<span class="nc" id="L124">		return mean.toArray();</span>
+	}
+
+	public double[][] getCovariance() {
+<span class="nc" id="L128">		return cov.toArray();</span>
+	}
+
+	public int getDF() {
+<span class="nc" id="L132">		return df;</span>
+	}
+
+	public double pdf(double[] point) throws InternalErrorException {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if (ndim == 0)</span>
+<span class="nc" id="L137">			return 1.0;</span>
+
+<span class="nc" id="L139">		DoubleMatrix1D x = new DenseDoubleMatrix1D(point);</span>
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		for (int i = 0; i &lt; this.ndim; i++) {</span>
+<span class="nc" id="L142">			x.set(i, x.get(i) - this.mean.get(i));</span>
+		}
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if (x.size() != this.ndim)</span>
+<span class="nc" id="L146">			throw new InternalErrorException(&quot;Dimensionality of point needs to be same as distribution!&quot;);</span>
+
+<span class="nc" id="L148">		DoubleMatrix1D e = this.A.mult(this.covInv, x);</span>
+
+<span class="nc" id="L150">		double p = this.A.mult(x, e);</span>
+<span class="nc" id="L151">		p /= df;</span>
+<span class="nc" id="L152">		p += 1;</span>
+<span class="nc" id="L153">		p = Math.pow(p, -.5 * (df + ndim));</span>
+<span class="nc" id="L154">		p /= this.NC;</span>
+<span class="nc" id="L155">		return p;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

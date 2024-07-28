@@ -1,0 +1,696 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArrayUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.data</a> &gt; <span class="el_source">ArrayUtils.java</span></div><h1>ArrayUtils.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.data;
+
+import java.awt.Color;
+import java.util.Arrays;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 16.46.05
+
+
+ Modified by Bertoli Marco 18-may-2006
+ Modified by Kourosh 18/11/2013 I added a new resize method for the color array.
+ */
+
+/**
+ * Assorted array mangling stuff.&lt;br&gt;
+ * &lt;li&gt;&lt;code&gt;resize&lt;/code&gt; methods return a resized copy of an array, preserving data where possible and padding with a specified value
+ * &lt;li&gt;&lt;code&gt;copy&lt;/code&gt; methods perform a deep copy of an array. They come in two flavors: one that copies into an existing array (that must have been properly initialized) and one that creates the copy from scratch
+ * &lt;li&gt;&lt;code&gt;delete&lt;/code&gt; methods delete an element in an array, returning a reduced-size copy in which following elements have been shifted to fill the gap. For multidim arrays shallow copy is performed when possible - ie do not assume the new array to be independent from the old one
+ * &lt;li&gt;&lt;code&gt;toCSV&lt;/code&gt; and &lt;code&gt;fromCSV&lt;/code&gt; methods input/output single rows as Strings of comma-separated values.
+ * &lt;li&gt;&lt;code&gt;toString&lt;/code&gt; methods return a somewhat useful String representation of an array.
+ * &lt;p&gt;&lt;b&gt;&lt;i&gt;NOTE:&lt;/i&gt;&lt;/b&gt; &lt;code&gt;fromCSV&lt;/code&gt; uses the new regex String splitting methods introduced in 1.4. For use in pre-1.4 JDKs it must be rewritten using StringTokenizer.
+ *
+ */
+public class ArrayUtils {
+
+	private ArrayUtils() {
+	}
+
+	/**
+	 * Resizes an array, preserving data and padding as needed
+	 */
+	public static int[] resize(int[] array, int newsize, int padding) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if (newsize &lt; 0) {</span>
+<span class="nc" id="L55">			throw new RuntimeException(&quot;newsize must be &gt;=0&quot;);</span>
+		}
+<span class="nc" id="L57">		int oldsize = array.length;</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (newsize == oldsize) {</span>
+<span class="nc" id="L59">			return array;</span>
+		}
+
+<span class="nc" id="L62">		int[] newArray = new int[newsize];</span>
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		int count = (oldsize &lt; newsize ? oldsize : newsize);</span>
+
+<span class="nc" id="L66">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		if (padding != 0) {</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			for (int i = count; i &lt; newsize; i++) {</span>
+<span class="nc" id="L70">				newArray[i] = padding;</span>
+			}
+		}
+
+<span class="nc" id="L74">		return newArray;</span>
+	}
+
+	/**
+	 * Resizes an array, preserving data and padding as needed
+	 */
+	public static Color[] resize(Color[] array, int newsize) {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		if (newsize &lt; 0) {</span>
+<span class="nc" id="L82">			throw new RuntimeException(&quot;newsize must be &gt;=0&quot;);</span>
+		}
+<span class="nc" id="L84">		int oldsize = array.length;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		if (newsize == oldsize) {</span>
+<span class="nc" id="L86">			return array;</span>
+		}
+
+<span class="nc" id="L89">		Color[] newArray = new Color[newsize];</span>
+
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		int count = (oldsize &lt; newsize ? oldsize : newsize);</span>
+
+<span class="nc" id="L93">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+<span class="nc" id="L95">		return newArray;</span>
+	}
+
+	/**
+	 * Resizes an array, preserving data and padding as needed
+	 */
+	public static double[] resize(double[] array, int newsize, double padding) {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (newsize &lt; 0) {</span>
+<span class="nc" id="L103">			throw new RuntimeException(&quot;newsize must be &gt;=0&quot;);</span>
+		}
+<span class="nc" id="L105">		int oldsize = array.length;</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">		if (newsize == oldsize) {</span>
+<span class="nc" id="L107">			return array;</span>
+		}
+<span class="nc" id="L109">		double[] newArray = new double[newsize];</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		int count = (oldsize &lt; newsize ? oldsize : newsize);</span>
+<span class="nc" id="L111">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (padding != 0.0) {</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			for (int i = count; i &lt; newsize; i++) {</span>
+<span class="nc" id="L115">				newArray[i] = padding;</span>
+			}
+		}
+
+<span class="nc" id="L119">		return newArray;</span>
+	}
+
+	/**
+	 * Resizes an array, preserving data and padding as needed
+	 */
+	public static String[] resize(String[] array, int newsize, String padding) {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if (newsize &lt; 0) {</span>
+<span class="nc" id="L127">			throw new RuntimeException(&quot;newsize must be &gt;=0&quot;);</span>
+		}
+<span class="nc" id="L129">		int oldsize = array.length;</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (newsize == oldsize) {</span>
+<span class="nc" id="L131">			return array;</span>
+		}
+
+<span class="nc" id="L134">		String[] newArray = new String[newsize];</span>
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		int count = (oldsize &lt; newsize ? oldsize : newsize);</span>
+<span class="nc" id="L137">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		if (padding != null) {</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			for (int i = count; i &lt; newsize; i++) {</span>
+<span class="nc" id="L141">				newArray[i] = padding;</span>
+			}
+		}
+
+<span class="nc" id="L145">		return newArray;</span>
+	}
+
+	/**
+	 * Resizes a 2-dimensional array preserving data and padding as needed
+	 */
+	public static double[][] resize2(double[][] array, int newsize1, int newsize2, double padding) {
+<span class="nc bnc" id="L152" title="All 4 branches missed.">		if (newsize1 &lt; 0 || newsize2 &lt; 0) {</span>
+<span class="nc" id="L153">			throw new RuntimeException(&quot;newsizes must be &gt;=0&quot;);</span>
+		}
+
+<span class="nc" id="L156">		int oldsize1 = array.length;</span>
+<span class="nc" id="L157">		int oldsize2 = array[0].length;</span>
+
+<span class="nc bnc" id="L159" title="All 4 branches missed.">		if (oldsize1 == newsize1 &amp;&amp; oldsize2 == newsize2) {</span>
+<span class="nc" id="L160">			return array;</span>
+		}
+
+		//1st dimension
+
+<span class="nc" id="L165">		double[][] newArray = new double[newsize1][];</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		int count = (oldsize1 &lt; newsize1 ? oldsize1 : newsize1);</span>
+<span class="nc" id="L168">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+		//2nd dimension
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L172">			newArray[i] = resize(array[i], newsize2, padding);</span>
+		}
+
+		// fill in nulls
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		for (int i = count; i &lt; newsize1; i++) {</span>
+<span class="nc" id="L177">			newArray[i] = new double[newsize2];</span>
+		}
+
+		//pad
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		if (padding != 0.0) {</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">			for (int i = count; i &lt; newsize1; i++) {</span>
+<span class="nc" id="L183">				Arrays.fill(newArray[i], padding);</span>
+			}
+		}
+
+<span class="nc" id="L187">		return newArray;</span>
+	}
+
+	/**
+	 * Resizes a 3-dimensional array with variable sizes preserving data and padding as needed
+	 */
+	public static double[][][] resize3var(double[][][] array, int newsize1, int newsize2, int[] newsize3, double padding) {
+<span class="nc bnc" id="L194" title="All 4 branches missed.">		if (newsize1 &lt; 0 || newsize2 &lt; 0) {</span>
+<span class="nc" id="L195">			throw new RuntimeException(&quot;newsizes must be &gt;=0&quot;);</span>
+		}
+
+<span class="nc" id="L198">		int oldsize1 = array.length;</span>
+
+		//1st dimension
+<span class="nc" id="L201">		double[][][] newArray = new double[newsize1][][];</span>
+
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		int count = (oldsize1 &lt; newsize1 ? oldsize1 : newsize1);</span>
+<span class="nc" id="L204">		System.arraycopy(array, 0, newArray, 0, count);</span>
+
+		//2nd &amp; 3rd dimension
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		for (int i = 0; i &lt; count; i++) {</span>
+<span class="nc" id="L208">			newArray[i] = resize2(array[i], newsize2, newsize3[i], padding);</span>
+		}
+
+		// fill in nulls
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		for (int i = count; i &lt; newsize1; i++) {</span>
+<span class="nc" id="L213">			newArray[i] = new double[newsize2][newsize3[i]];</span>
+		}
+
+		//pad
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		if (padding != 0.0) {</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">			for (int i = count; i &lt; newsize1; i++) {</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">				for (int j = 0; j &lt; newsize2; j++) {</span>
+<span class="nc" id="L220">					Arrays.fill(newArray[i][j], padding);</span>
+				}
+			}
+		}
+
+<span class="nc" id="L225">		return newArray;</span>
+	}
+
+	public static String[] copy(String[] array) {
+<span class="nc" id="L229">		String[] newArray = new String[array.length];</span>
+<span class="nc" id="L230">		System.arraycopy(array, 0, newArray, 0, array.length);</span>
+<span class="nc" id="L231">		return newArray;</span>
+	}
+
+	public static double[] copy(double[] array) {
+<span class="nc" id="L235">		double[] newArray = new double[array.length];</span>
+<span class="nc" id="L236">		System.arraycopy(array, 0, newArray, 0, array.length);</span>
+<span class="nc" id="L237">		return newArray;</span>
+	}
+
+	public static int[] copy(int[] array) {
+<span class="nc" id="L241">		int[] newArray = new int[array.length];</span>
+<span class="nc" id="L242">		System.arraycopy(array, 0, newArray, 0, array.length);</span>
+<span class="nc" id="L243">		return newArray;</span>
+	}
+
+	/* all multidim copy methods written explicitly to avoid some call overhead.
+	Multidim copiers correctly handle non-square arrays */
+
+	/**
+	 * @return a deep copy of &lt;code&gt;array&lt;/code&gt;
+	 */
+	public static double[][] copy2(double[][] array) {
+		int len1, len2;
+<span class="nc" id="L254">		len1 = array.length;</span>
+<span class="nc" id="L255">		double[][] newArray = new double[len1][];</span>
+<span class="nc" id="L256">		System.arraycopy(array, 0, newArray, 0, len1);</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L258">			len2 = array[i].length;</span>
+<span class="nc" id="L259">			newArray[i] = new double[len2];</span>
+<span class="nc" id="L260">			System.arraycopy(array[i], 0, newArray[i], 0, len2);</span>
+		}
+
+<span class="nc" id="L263">		return newArray;</span>
+	}
+
+	/**
+	 * @return a deep copy of &lt;code&gt;array&lt;/code&gt;
+	 */
+	public static double[][][] copy3(double[][][] array) {
+
+		int len1, len2, len3;
+<span class="nc" id="L272">		len1 = array.length;</span>
+<span class="nc" id="L273">		double[][][] newArray = new double[len1][][];</span>
+<span class="nc" id="L274">		System.arraycopy(array, 0, newArray, 0, len1);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L276">			len2 = array[i].length;</span>
+<span class="nc" id="L277">			newArray[i] = new double[len2][];</span>
+<span class="nc" id="L278">			System.arraycopy(array[i], 0, newArray[i], 0, len2);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">			for (int j = 0; j &lt; len2; j++) {</span>
+<span class="nc" id="L280">				len3 = array[i][j].length;</span>
+<span class="nc" id="L281">				newArray[i][j] = new double[len3];</span>
+<span class="nc" id="L282">				System.arraycopy(array[i][j], 0, newArray[i][j], 0, len3);</span>
+			}
+		}
+
+<span class="nc" id="L286">		return newArray;</span>
+	}
+
+	public static double[][][] copy3per2(double[][][] array3, double[][] factor) {
+<span class="nc" id="L290">		double[][][] newArray = new double[array3.length][][];</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">		for (int i = 0; i &lt; array3.length; i++) {</span>
+<span class="nc" id="L292">			newArray[i] = new double[array3[i].length][];</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">			if (i &lt; factor.length) {</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">				for (int j = 0; j &lt; array3[i].length; j++) {</span>
+<span class="nc" id="L295">					newArray[i][j] = new double[array3[i][j].length];</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">					if (j &lt; factor[i].length) {</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">						for (int k = 0; k &lt; array3[i][j].length; k++) {</span>
+<span class="nc" id="L298">							newArray[i][j][k] = array3[i][j][k] * factor[i][j];</span>
+						}
+					} else {
+<span class="nc" id="L301">						return copy3(array3);</span>
+					}
+				}
+			} else {
+<span class="nc" id="L305">				return copy3(array3);</span>
+			}
+		}
+<span class="nc" id="L308">		return newArray;</span>
+	}
+
+	public static void copy(String[] from, String[] to) {
+<span class="nc" id="L312">		System.arraycopy(from, 0, to, 0, from.length);</span>
+<span class="nc" id="L313">	}</span>
+
+	public static void copy(double[] from, double[] to) {
+<span class="nc" id="L316">		System.arraycopy(from, 0, to, 0, from.length);</span>
+<span class="nc" id="L317">	}</span>
+
+	public static void copy(int[] from, int[] to) {
+<span class="nc" id="L320">		System.arraycopy(from, 0, to, 0, from.length);</span>
+<span class="nc" id="L321">	}</span>
+
+	public static void copy2(double[][] from, double[][] to) {
+		int len1, len2;
+<span class="nc" id="L325">		len1 = from.length;</span>
+<span class="nc" id="L326">		System.arraycopy(from, 0, to, 0, len1);</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L328">			len2 = from[i].length;</span>
+<span class="nc" id="L329">			System.arraycopy(from[i], 0, to[i], 0, len2);</span>
+		}
+<span class="nc" id="L331">	}</span>
+
+	public static void copy3(double[][][] from, double[][][] to) {
+		int len1, len2, len3;
+<span class="nc" id="L335">		len1 = from.length;</span>
+<span class="nc" id="L336">		System.arraycopy(from, 0, to, 0, len1);</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L338">			len2 = from[i].length;</span>
+<span class="nc" id="L339">			System.arraycopy(from[i], 0, to[i], 0, len2);</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">			for (int j = 0; j &lt; len2; j++) {</span>
+<span class="nc" id="L341">				len3 = from[i][j].length;</span>
+<span class="nc" id="L342">				System.arraycopy(from[i][j], 0, to[i][j], 0, len3);</span>
+			}
+		}
+<span class="nc" id="L345">	}</span>
+
+	public static String[] delete(String[] arr, int idx) {
+<span class="nc" id="L348">		int newlen = arr.length - 1;</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">		if (newlen &lt; 0) {</span>
+<span class="nc" id="L350">			throw new IllegalArgumentException(&quot;cannot delete from an empty array&quot;);</span>
+		}
+<span class="nc" id="L352">		String[] res = new String[newlen];</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">		if (idx &gt; 0) {</span>
+<span class="nc" id="L354">			System.arraycopy(arr, 0, res, 0, idx);</span>
+		}
+<span class="nc bnc" id="L356" title="All 2 branches missed.">		if (idx &lt; newlen) {</span>
+<span class="nc" id="L357">			System.arraycopy(arr, idx + 1, res, idx, newlen - idx);</span>
+		}
+<span class="nc" id="L359">		return res;</span>
+	}
+
+	public static int[] delete(int[] arr, int idx) {
+<span class="nc" id="L363">		int newlen = arr.length - 1;</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">		if (newlen &lt; 0) {</span>
+<span class="nc" id="L365">			throw new IllegalArgumentException(&quot;cannot delete from an empty array&quot;);</span>
+		}
+<span class="nc" id="L367">		int[] res = new int[newlen];</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">		if (idx &gt; 0) {</span>
+<span class="nc" id="L369">			System.arraycopy(arr, 0, res, 0, idx);</span>
+		}
+<span class="nc bnc" id="L371" title="All 2 branches missed.">		if (idx &lt; (newlen)) {</span>
+<span class="nc" id="L372">			System.arraycopy(arr, idx + 1, res, idx, newlen - idx);</span>
+		}
+<span class="nc" id="L374">		return res;</span>
+	}
+
+	public static double[] delete(double[] arr, int idx) {
+<span class="nc" id="L378">		int newlen = arr.length - 1;</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">		if (newlen &lt; 0) {</span>
+<span class="nc" id="L380">			throw new IllegalArgumentException(&quot;cannot delete from an empty array&quot;);</span>
+		}
+<span class="nc" id="L382">		double[] res = new double[newlen];</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">		if (idx &gt; 0) {</span>
+<span class="nc" id="L384">			System.arraycopy(arr, 0, res, 0, idx);</span>
+		}
+<span class="nc bnc" id="L386" title="All 2 branches missed.">		if (idx &lt; (newlen)) {</span>
+<span class="nc" id="L387">			System.arraycopy(arr, idx + 1, res, idx, newlen - idx);</span>
+		}
+<span class="nc" id="L389">		return res;</span>
+	}
+
+	public static double[][] delete2_1(double[][] arr, int idx) {
+<span class="nc" id="L393">		int newlen = arr.length - 1;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">		if (newlen &lt; 0) {</span>
+<span class="nc" id="L395">			throw new IllegalArgumentException(&quot;cannot delete from an empty array&quot;);</span>
+		}
+<span class="nc" id="L397">		double[][] res = new double[newlen][];</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">		if (idx &gt; 0) {</span>
+<span class="nc" id="L399">			System.arraycopy(arr, 0, res, 0, idx);</span>
+		}
+<span class="nc bnc" id="L401" title="All 2 branches missed.">		if (idx &lt; (newlen)) {</span>
+<span class="nc" id="L402">			System.arraycopy(arr, idx + 1, res, idx, newlen - idx);</span>
+		}
+<span class="nc" id="L404">		return res;</span>
+	}
+
+	public static double[][] delete2_2(double[][] arr, int idx) {
+<span class="nc bnc" id="L408" title="All 2 branches missed.">		for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L409">			arr[i] = delete(arr[i], idx);</span>
+		}
+<span class="nc" id="L411">		return arr;</span>
+	}
+
+	public static double[][][] delete3_1(double[][][] arr, int idx) {
+<span class="nc" id="L415">		int newlen = arr.length - 1;</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">		if (newlen &lt; 0) {</span>
+<span class="nc" id="L417">			throw new IllegalArgumentException(&quot;cannot delete from an empty array&quot;);</span>
+		}
+<span class="nc" id="L419">		double[][][] res = new double[newlen][][];</span>
+<span class="nc bnc" id="L420" title="All 2 branches missed.">		if (idx &gt; 0) {</span>
+<span class="nc" id="L421">			System.arraycopy(arr, 0, res, 0, idx);</span>
+		}
+<span class="nc bnc" id="L423" title="All 2 branches missed.">		if (idx &lt; (newlen)) {</span>
+<span class="nc" id="L424">			System.arraycopy(arr, idx + 1, res, idx, newlen - idx);</span>
+		}
+<span class="nc" id="L426">		return res;</span>
+	}
+
+	public static double[][][] delete3_2(double[][][] arr, int idx) {
+<span class="nc bnc" id="L430" title="All 2 branches missed.">		for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc" id="L431">			arr[i] = delete2_1(arr[i], idx);</span>
+		}
+<span class="nc" id="L433">		return arr;</span>
+	}
+
+	public static double[][][] delete3_3(double[][][] arr, int idx) {
+<span class="nc bnc" id="L437" title="All 2 branches missed.">		for (int i = 0; i &lt; arr.length; i++) {</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">			for (int j = 0; j &lt; arr[i].length; j++) {</span>
+<span class="nc" id="L439">				arr[i][j] = delete(arr[i][j], idx);</span>
+			}
+		}
+<span class="nc" id="L442">		return arr;</span>
+	}
+
+	/** for each i,j result[i][j] = array[i][index2][j-1] */
+	public static double[][] extract13(double[][][] array, int index2) {
+<span class="nc" id="L447">		int len1 = array.length;</span>
+<span class="nc" id="L448">		double[][] res = new double[len1][];</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L450">			res[i] = array[i][index2];</span>
+		}
+<span class="nc" id="L452">		return res;</span>
+	}
+
+	/** for each i result[i] = array[i][index2] */
+	public static double[] extract1(double[][] array, int index2) {
+<span class="nc" id="L457">		int len = array.length;</span>
+<span class="nc" id="L458">		double[] res = new double[len];</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">		for (int i = 0; i &lt; len; i++) {</span>
+<span class="nc" id="L460">			res[i] = array[i][index2];</span>
+		}
+<span class="nc" id="L462">		return res;</span>
+	}
+
+	/** create an empty double[len1][len2] */
+	public static double[][] makeFilled(int len1, int len2, double val) {
+<span class="nc bnc" id="L467" title="All 2 branches missed.">		boolean fill = (val != 0);</span>
+<span class="nc" id="L468">		double[][] res = new double[len1][];</span>
+<span class="nc bnc" id="L469" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L470">			res[i] = new double[len2];</span>
+<span class="nc bnc" id="L471" title="All 2 branches missed.">			if (fill) {</span>
+<span class="nc" id="L472">				Arrays.fill(res[i], val);</span>
+			}
+		}
+<span class="nc" id="L475">		return res;</span>
+	}
+
+	/** for each i result[i][index2] = array[i] */
+	public static void insert1(double[][] result, double[] array, int index2) {
+<span class="nc bnc" id="L480" title="All 2 branches missed.">		for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="nc" id="L481">			result[i][index2] = array[i];</span>
+		}
+<span class="nc" id="L483">	}</span>
+
+	/** for each i result[i]=(int)array[i] */
+	public static int[] toInt(double[] arr) {
+<span class="nc" id="L487">		int len = arr.length;</span>
+<span class="nc" id="L488">		int[] res = new int[len];</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">		for (int i = 0; i &lt; len; i++) {</span>
+<span class="nc" id="L490">			res[i] = (int) arr[i];</span>
+		}
+<span class="nc" id="L492">		return res;</span>
+	}
+
+	public static String toCSV(double[] array) {
+<span class="nc bnc" id="L496" title="All 2 branches missed.">		if (array.length == 0) {</span>
+<span class="nc" id="L497">			return &quot;&quot;;</span>
+		}
+<span class="nc" id="L499">		StringBuffer s = new StringBuffer();</span>
+
+<span class="nc" id="L501">		s.append(Double.toString(array[0]));</span>
+
+<span class="nc bnc" id="L503" title="All 2 branches missed.">		for (int i = 1; i &lt; array.length; i++) {</span>
+<span class="nc" id="L504">			s.append(&quot;;&quot;).append(Double.toString(array[i]));</span>
+		}
+<span class="nc" id="L506">		return s.toString();</span>
+	}
+
+	public static String toCSV3_2(double[][][] array, int index1, int index3) {
+<span class="nc" id="L510">		int len2 = array[index1].length;</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">		if (len2 == 0) {</span>
+<span class="nc" id="L512">			return &quot;&quot;;</span>
+		}
+<span class="nc" id="L514">		StringBuffer s = new StringBuffer();</span>
+
+<span class="nc" id="L516">		s.append(Double.toString(array[index1][0][index3]));</span>
+
+<span class="nc bnc" id="L518" title="All 2 branches missed.">		for (int i = 1; i &lt; len2; i++) {</span>
+<span class="nc" id="L519">			s.append(&quot;;&quot;).append(Double.toString(array[index1][i][index3]));</span>
+		}
+<span class="nc" id="L521">		return s.toString();</span>
+	}
+
+	public static boolean fromCSV(double[] array, String str) {
+<span class="nc" id="L525">		String[] tokens = str.split(&quot;;&quot;);</span>
+<span class="nc" id="L526">		int ntok = tokens.length;</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">		if (ntok != array.length) {</span>
+<span class="nc" id="L528">			return false;</span>
+		}
+<span class="nc bnc" id="L530" title="All 2 branches missed.">		for (int i = 0; i &lt; ntok; i++) {</span>
+<span class="nc" id="L531">			array[i] = Double.parseDouble(tokens[i]);</span>
+		}
+<span class="nc" id="L533">		return true;</span>
+	}
+
+	/**
+	 * Extract a double[] given a string separated by ';'
+	 * @param str input string
+	 * @return double array
+	 * &lt;br&gt;
+	 * Author: Bertoli Marco
+	 */
+	public static double[] fromCSV(String str) {
+<span class="nc" id="L544">		String[] tokens = str.split(&quot;;&quot;);</span>
+<span class="nc" id="L545">		double[] out = new double[tokens.length];</span>
+<span class="nc bnc" id="L546" title="All 2 branches missed.">		for (int i = 0; i &lt; out.length; i++) {</span>
+<span class="nc" id="L547">			out[i] = Double.parseDouble(tokens[i]);</span>
+		}
+<span class="nc" id="L549">		return out;</span>
+	}
+
+	public static boolean fromCSV3_2(double[][][] array, int index1, int index3, String str) {
+<span class="nc" id="L553">		String[] tokens = str.split(&quot;;&quot;);</span>
+<span class="nc" id="L554">		int ntok = tokens.length;</span>
+<span class="nc bnc" id="L555" title="All 2 branches missed.">		if (ntok != array[index1].length) {</span>
+<span class="nc" id="L556">			return false;</span>
+		}
+
+<span class="nc bnc" id="L559" title="All 2 branches missed.">		for (int i = 0; i &lt; ntok; i++) {</span>
+<span class="nc" id="L560">			array[index1][i][index3] = Double.parseDouble(tokens[i]);</span>
+		}
+<span class="nc" id="L562">		return true;</span>
+	}
+
+	/* good ol' Arrays only has 'em for 1 dimension...*/
+	public static boolean equals2(double[][] arr1, double[][] arr2) {
+<span class="nc" id="L567">		int len1 = arr1.length;</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">		if (len1 != arr2.length) {</span>
+<span class="nc" id="L569">			return false;</span>
+		}
+<span class="nc bnc" id="L571" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">			if (!Arrays.equals(arr1[i], arr2[i])) {</span>
+<span class="nc" id="L573">				return false;</span>
+			}
+		}
+<span class="nc" id="L576">		return true;</span>
+	}
+
+	public static boolean equals3(double[][][] arr1, double[][][] arr2) {
+<span class="nc" id="L580">		int len1 = arr1.length;</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">		if (len1 != arr2.length) {</span>
+<span class="nc" id="L582">			return false;</span>
+		}
+<span class="nc bnc" id="L584" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc bnc" id="L585" title="All 2 branches missed.">			if (!equals2(arr1[i], arr2[i])) {</span>
+<span class="nc" id="L586">				return false;</span>
+			}
+		}
+<span class="nc" id="L589">		return true;</span>
+	}
+
+	public static String toString(Object[] array) {
+<span class="nc" id="L593">		StringBuffer s = new StringBuffer(&quot;[ &quot;);</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">		for (Object element : array) {</span>
+<span class="nc bnc" id="L595" title="All 2 branches missed.">			if (element == null) {</span>
+<span class="nc" id="L596">				s.append(&quot;null&quot;);</span>
+			} else {
+<span class="nc" id="L598">				s.append(element.toString());</span>
+			}
+<span class="nc" id="L600">			s.append(&quot; &quot;);</span>
+		}
+<span class="nc" id="L602">		s.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L604">		return s.toString();</span>
+	}
+
+	public static String toString(int[] array) {
+<span class="nc" id="L608">		StringBuffer s = new StringBuffer(&quot;[ &quot;);</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">		for (int element : array) {</span>
+<span class="nc" id="L610">			s.append(element).append(&quot; &quot;);</span>
+		}
+<span class="nc" id="L612">		s.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L614">		return s.toString();</span>
+	}
+
+	public static String toString(double[] array) {
+<span class="nc" id="L618">		StringBuffer s = new StringBuffer(&quot;[ &quot;);</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">		for (double element : array) {</span>
+<span class="nc" id="L620">			s.append(element).append(&quot; &quot;);</span>
+		}
+<span class="nc" id="L622">		s.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L624">		return s.toString();</span>
+	}
+
+	public static String toString2(double[][] array) {
+<span class="nc" id="L628">		StringBuffer s = new StringBuffer(&quot;[ &quot;);</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">		for (double[] element : array) {</span>
+<span class="nc" id="L630">			s.append(toString(element)).append(&quot; &quot;);</span>
+		}
+<span class="nc" id="L632">		s.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L634">		return s.toString();</span>
+	}
+
+	public static String toString3(double[][][] array) {
+<span class="nc" id="L638">		StringBuffer s = new StringBuffer(&quot;[ &quot;);</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">		for (double[][] element : array) {</span>
+<span class="nc" id="L640">			s.append(toString2(element)).append(&quot; &quot;);</span>
+		}
+<span class="nc" id="L642">		s.append(&quot;]&quot;);</span>
+
+<span class="nc" id="L644">		return s.toString();</span>
+	}
+
+	/**
+	 * array[n]-&gt;result[n+1], where
+	 *
+	 * result[0]=0
+	 * and
+	 * for i=(0..n-1) result[i]=array[i-1]
+	 *
+	 */
+	public static double[] prepend0(double[] array) {
+<span class="nc" id="L656">		int len = array.length;</span>
+<span class="nc" id="L657">		double[] res = new double[len + 1];</span>
+<span class="nc" id="L658">		System.arraycopy(array, 0, res, 1, len);</span>
+<span class="nc" id="L659">		return res;</span>
+	}
+
+	/**
+	 * Copies a 2D array in a 3D one. Given source[i][j] elements are copied in
+	 * position dest[i][j][k] where k is a given index.
+	 * &lt;br&gt;
+	 * Author: Bertoli Marco
+	 * @param source source 2D array
+	 * @param dest destination 3D array
+	 * @param k third coordinate to be left unchanged
+	 */
+	public static void copy2to3(double[][] source, double[][][] dest, int k) {
+<span class="nc bnc" id="L672" title="All 2 branches missed.">		for (int i = 0; i &lt; source.length; i++) {</span>
+<span class="nc bnc" id="L673" title="All 2 branches missed.">			for (int j = 0; j &lt; source[i].length; j++) {</span>
+<span class="nc" id="L674">				dest[i][j][k] = source[i][j];</span>
+			}
+		}
+<span class="nc" id="L677">	}</span>
+
+	/**
+	 * Given an array &lt;em&gt;A&lt;/em&gt; and a number &lt;em&gt;n&lt;/em&gt; returns the product &lt;em&gt;A*n&lt;/em&gt;
+	 * &lt;br&gt;
+	 * Author: Bertoli Marco
+	 * @param source source array &lt;em&gt;A&lt;/em&gt;
+	 * @param num number to be multiplied &lt;em&gt;n&lt;/em&gt;
+	 * @return a new array with multiplied value
+	 */
+	public static double[] multiply(double[] source, double num) {
+<span class="nc" id="L688">		double[] ret = new double[source.length];</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">		for (int i = 0; i &lt; ret.length; i++) {</span>
+<span class="nc" id="L690">			ret[i] = source[i] * num;</span>
+		}
+<span class="nc" id="L692">		return ret;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

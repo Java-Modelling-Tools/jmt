@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PerformanceIndices2DGraph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.graphs</a> &gt; <span class="el_source">PerformanceIndices2DGraph.java</span></div><h1>PerformanceIndices2DGraph.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jaba.graphs;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.Rectangle2D;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+
+import jmt.engine.jaba.DPoint;
+import jmt.engine.jaba.FinalSect2D;
+import jmt.gui.jaba.JabaModel;
+import jmt.gui.jaba.cartesian.CartesianPositivePlane;
+import jmt.gui.jaba.label.YAxisPlacer;
+
+/**
+ * This graph shows the behaviour of the utilization of the resources.
+ * 
+ * @author Sebastiano Spicuglia
+ * 
+ */
+public class PerformanceIndices2DGraph extends JabaGraph implements
+		MouseListener, MouseMotionListener {
+
+	private static final long serialVersionUID = 1L;
+
+	private static final double EPSILON = 0.01;
+
+	private static final int GRAPH_LEFT_MARGIN = 60;
+	private static final int GRAPH_BOTTOM_MARGIN = 30;
+	private static final int GRAPH_RIGHT_MARGIN = 150;
+	private static final int GRAPH_TOP_MARGIN = 50;
+
+<span class="nc" id="L63">	private static final BasicStroke LINES = new BasicStroke(1);</span>
+<span class="nc" id="L64">	private static final BasicStroke BOLD_LINES = new BasicStroke(2);</span>
+<span class="nc" id="L65">	private static final BasicStroke DOTTED_LINES = new BasicStroke(1, 1, 1, 1,</span>
+			new float[] { 2f }, 1);
+<span class="nc" id="L67">	private static final BasicStroke DOTTED_LINES2 = new BasicStroke(2, BasicStroke.CAP_BUTT, 1, 1,</span>
+			new float[] { 8f, 8f }, 1);
+
+<span class="nc" id="L70">	private static final Color BGCOLOR = Color.WHITE;</span>
+<span class="nc" id="L71">	private static final Color LINES_COLOR = Color.BLACK;</span>
+<span class="nc" id="L72">	private static final Color TOOL_TIP_COLOR = new Color(255, 255, 128);</span>
+
+<span class="nc" id="L74">	private static final DecimalFormat FORMATTER = new DecimalFormat(&quot;0.00&quot;);</span>
+
+	private CartesianPositivePlane plane;
+
+<span class="nc" id="L78">	private int index = 0;</span>
+
+<span class="nc" id="L80">	private Color defaultColors[] = { Color.BLUE, Color.GREEN, Color.MAGENTA,</span>
+			Color.ORANGE, Color.RED };
+	// This flag avoids lines change color when we repaint
+	// even if data have not changed ( e.g. when we show
+	// the coords of points)
+
+	private boolean showStation[];
+	private Rectangle stationLabels[];
+<span class="nc" id="L88">	private ArrayList&lt;Color&gt; stationColors = new ArrayList&lt;Color&gt;();</span>
+
+	private JabaModel data;
+
+	private int yMaxValue;
+
+	private DPoint tooltip;
+
+	public PerformanceIndices2DGraph(JabaModel data) {
+<span class="nc" id="L97">		super();</span>
+
+<span class="nc" id="L99">		this.data = data;</span>
+
+<span class="nc" id="L101">		showStation = new boolean[data.getStations()];</span>
+<span class="nc" id="L102">		stationLabels = new Rectangle[data.getStations()];</span>
+
+<span class="nc" id="L104">		Random colorGen = new Random();</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int i = 0; i &lt; data.getStations(); i++) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			if (i &lt; defaultColors.length) {</span>
+<span class="nc" id="L107">				stationColors.add(defaultColors[i]);</span>
+			} else {
+				// The probability of white is
+				// (1/255)^3, I rely on probability....
+<span class="nc" id="L111">				stationColors.add(new Color(colorGen.nextInt(256), colorGen</span>
+<span class="nc" id="L112">						.nextInt(256), colorGen.nextInt(256)));</span>
+			}
+<span class="nc" id="L114">			showStation[i] = true;</span>
+		}
+
+<span class="nc" id="L117">		this.updateYMaxValue();</span>
+
+<span class="nc" id="L119">		this.setBorder(BorderFactory.createEtchedBorder());</span>
+<span class="nc" id="L120">		this.setBackground(BGCOLOR);</span>
+
+<span class="nc" id="L122">		addMouseListener(this);</span>
+<span class="nc" id="L123">		addMouseMotionListener(this);</span>
+<span class="nc" id="L124">	}</span>
+
+	private void updateYMaxValue() {
+<span class="nc bnc" id="L127" title="All 4 branches missed.">		switch (index) {</span>
+		case 0:
+<span class="nc" id="L129">			yMaxValue = 1;</span>
+<span class="nc" id="L130">			break;</span>
+		case 1:
+<span class="nc" id="L132">			plane.draw(&quot;% &quot; + data.getClassNames()[0], &quot;Throughput&quot;);</span>
+<span class="nc" id="L133">			break;</span>
+		case 2:
+<span class="nc" id="L135">			plane.draw(&quot;% &quot; + data.getClassNames()[0], &quot;Response time&quot;);</span>
+			break;
+		}
+<span class="nc" id="L138">	}</span>
+
+	public void paint(Graphics g) {
+<span class="nc" id="L141">		super.paint(g);</span>
+
+		Graphics2D g2;
+		DPoint graphOrigin;
+
+<span class="nc" id="L146">		g2 = (Graphics2D) g;</span>
+<span class="nc" id="L147">		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,</span>
+				RenderingHints.VALUE_ANTIALIAS_ON);
+
+<span class="nc" id="L150">		g2.setColor(LINES_COLOR);</span>
+		try {
+<span class="nc" id="L152">			graphOrigin = new DPoint(GRAPH_LEFT_MARGIN, getHeight()</span>
+					- GRAPH_BOTTOM_MARGIN);
+<span class="nc" id="L154">			plane = new CartesianPositivePlane(</span>
+					g2,
+					graphOrigin,
+<span class="nc" id="L157">					(int) (getWidth() - GRAPH_LEFT_MARGIN - GRAPH_RIGHT_MARGIN),</span>
+<span class="nc" id="L158">					(int) (getHeight() - GRAPH_TOP_MARGIN - GRAPH_BOTTOM_MARGIN),</span>
+					1, yMaxValue);
+<span class="nc" id="L160">		} catch (Exception e) {</span>
+<span class="nc" id="L161">			return;</span>
+<span class="nc" id="L162">		}</span>
+
+<span class="nc" id="L164">		g2.setStroke(DOTTED_LINES);</span>
+<span class="nc" id="L165">		ArrayList&lt;DPoint&gt; valuesOnX = new ArrayList&lt;DPoint&gt;();</span>
+<span class="nc" id="L166">		Vector&lt;Object&gt; sectors = data.getResults().getSaturationSectors();</span>
+<span class="nc bnc" id="L167" title="All 4 branches missed.">		for (int i = 0; i &lt; sectors.size() &amp;&amp; sectors.size() != 1; i++) {</span>
+			FinalSect2D sect;// Current sector
+<span class="nc" id="L169">			sect = (FinalSect2D) sectors.get(i);</span>
+<span class="nc" id="L170">			plane.drawProjectionOnTheXAxis(new DPoint(sect.getBeta1(),</span>
+					yMaxValue));
+<span class="nc" id="L172">			valuesOnX.add(new DPoint(sect.getBeta1(), sect.getBeta11()));</span>
+		}
+<span class="nc" id="L174">		g2.setStroke(LINES);</span>
+
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		if (!valuesOnX.contains(new DPoint(1, 0)))</span>
+<span class="nc" id="L177">			valuesOnX.add(new DPoint(1, 0));</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		if (!valuesOnX.contains(new DPoint(0, 0)))</span>
+<span class="nc" id="L179">			valuesOnX.add(0, new DPoint(0, 0));</span>
+<span class="nc" id="L180">		plane.drawValuesOnXAxis(valuesOnX);</span>
+
+		ArrayList&lt;DPoint&gt;[] util;
+<span class="nc" id="L183">		util = data.getResults().getUtilization();</span>
+<span class="nc" id="L184">		ArrayList&lt;DPoint&gt; valuesOnLeftY = new ArrayList&lt;DPoint&gt;();</span>
+<span class="nc" id="L185">		ArrayList&lt;DPoint&gt; valuesOnRightY = new ArrayList&lt;DPoint&gt;();</span>
+<span class="nc" id="L186">		g2.setStroke(BOLD_LINES);</span>
+
+<span class="nc" id="L188">		int numOfSectors = util[0].size() / 2;</span>
+<span class="nc" id="L189">		int numOfSaturatedStationPerSector[] = new int[numOfSectors];</span>
+		
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		for (int j = 0; j &lt; data.getStationNames().length; j++) {</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">			if (!showStation[j])</span>
+<span class="nc" id="L193">				continue;</span>
+<span class="nc" id="L194">			g.setColor(stationColors.get(j));</span>
+			int i;
+<span class="nc bnc" id="L196" title="All 2 branches missed.">			for (i = 0; i &lt; util[j].size(); i = i + 2) {</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				if (i == 0) {</span>
+<span class="nc" id="L198">					valuesOnLeftY.add(util[j].get(i));</span>
+				}
+				//If the station j is saturated
+<span class="nc bnc" id="L201" title="All 2 branches missed.">				if (Math.abs(util[j].get(i).getY() - util[j].get(i + 1).getY()) &lt; EPSILON &amp;&amp;</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">						Math.abs(util[j].get(i).getY() - 1) &lt; EPSILON) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">					if (numOfSaturatedStationPerSector[i/2]&gt;=1)</span>
+<span class="nc" id="L204">						g2.setStroke(DOTTED_LINES2);</span>
+<span class="nc" id="L205">					numOfSaturatedStationPerSector[i/2] = numOfSaturatedStationPerSector[i/2]+1;</span>
+				}
+<span class="nc" id="L207">				plane.drawSegment(util[j].get(i), util[j].get(i + 1));</span>
+<span class="nc" id="L208">				g2.setStroke(BOLD_LINES);</span>
+			}
+<span class="nc" id="L210">			i = i - 2;</span>
+<span class="nc" id="L211">			valuesOnRightY.add(util[j].get(i + 1));</span>
+		}
+		// g2.setColor(Color.BLACK);
+		// plane.drawSegment(new DPoint(0, 1), new DPoint(1, 1));
+<span class="nc" id="L215">		g2.setStroke(LINES);</span>
+
+<span class="nc" id="L217">		drawSummary(g, stationColors);</span>
+
+<span class="nc" id="L219">		g.setColor(Color.BLACK);</span>
+		{// we always draw certain points
+<span class="nc bnc" id="L221" title="All 2 branches missed.">			if (!valuesOnLeftY.contains(new DPoint(0, 1)))</span>
+<span class="nc" id="L222">				valuesOnLeftY.add(new DPoint(0, 1));</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">			if (!valuesOnRightY.contains(new DPoint(1, 1)))</span>
+<span class="nc" id="L224">				valuesOnRightY.add(new DPoint(1, 1));</span>
+		}
+<span class="nc" id="L226">		plane.drawValuesOnYAxis(valuesOnLeftY);</span>
+
+		{// we draw the last points in another axis
+			ArrayList&lt;String&gt; labels;
+			ArrayList&lt;DPoint&gt; truePoints;
+			YAxisPlacer placer;
+<span class="nc" id="L232">			DecimalFormat formatter = new DecimalFormat(&quot;0.000&quot;);</span>
+<span class="nc" id="L233">			labels = new ArrayList&lt;String&gt;();</span>
+<span class="nc" id="L234">			truePoints = new ArrayList&lt;DPoint&gt;();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			for (int i = 0; i &lt; valuesOnRightY.size(); i++) {</span>
+<span class="nc" id="L236">				labels.add(formatter.format(valuesOnRightY.get(i).getY()));</span>
+<span class="nc" id="L237">				truePoints.add(plane.getTruePoint(valuesOnRightY.get(i)));</span>
+			}
+<span class="nc" id="L239">			placer = new YAxisPlacer(labels, truePoints);</span>
+<span class="nc" id="L240">			placer.place((Graphics2D) g, plane.getTrueX(1) + 10);</span>
+<span class="nc" id="L241">			plane.drawSegment(new DPoint(1, 0), new DPoint(1, 1));</span>
+		}
+
+<span class="nc" id="L244">		plane.draw(&quot;% &quot; + data.getClassNames()[0], &quot;Utilization&quot;);</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">		if (tooltip != null) {</span>
+<span class="nc" id="L247">			DPoint graphPoint = plane.getGraphPointFromTruePoint(tooltip);</span>
+<span class="nc" id="L248">			String content = FORMATTER.format(graphPoint.getX()) + &quot;, &quot;</span>
+<span class="nc" id="L249">					+ FORMATTER.format(graphPoint.getY());</span>
+<span class="nc" id="L250">			Rectangle2D bounds = g.getFontMetrics().getStringBounds(content, g);</span>
+<span class="nc" id="L251">			g.setColor(TOOL_TIP_COLOR);</span>
+<span class="nc" id="L252">			g.fillRect((int) tooltip.getX(), (int) tooltip.getY()</span>
+<span class="nc" id="L253">					- (int) bounds.getHeight() + 1, (int) bounds.getWidth(),</span>
+<span class="nc" id="L254">					(int) bounds.getHeight() + 2);</span>
+<span class="nc" id="L255">			g.setColor(Color.BLACK);</span>
+<span class="nc" id="L256">			g.drawString(content, (int) tooltip.getX(), (int) tooltip.getY());</span>
+		}
+<span class="nc" id="L258">		g.dispose();</span>
+<span class="nc" id="L259">		this.revalidate();</span>
+<span class="nc" id="L260">		this.repaint();</span>
+<span class="nc" id="L261">	}</span>
+
+	private void drawSummary(Graphics g, ArrayList&lt;Color&gt; stationColors) {
+<span class="nc" id="L264">		int xBase = this.getWidth() - GRAPH_RIGHT_MARGIN + 60;</span>
+<span class="nc" id="L265">		int yBase = 30;</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">		for (int i = 0; i &lt; data.getStationNames().length; i++) {</span>
+<span class="nc" id="L267">			stationLabels[i] = new Rectangle(xBase, yBase</span>
+<span class="nc" id="L268">					- (g.getFontMetrics().getHeight() / 2), 8, 8);</span>
+<span class="nc" id="L269">			g.setColor(stationColors.get(i));</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">			if (showStation[i]) {</span>
+<span class="nc" id="L271">				g.fillRect(xBase, yBase - (g.getFontMetrics().getHeight() / 2),</span>
+						8, 8);
+			} else {
+<span class="nc" id="L274">				g.setColor(Color.BLACK);</span>
+<span class="nc" id="L275">				g.drawRect(xBase, yBase - (g.getFontMetrics().getHeight() / 2),</span>
+						8, 8);
+			}
+<span class="nc" id="L278">			g.setColor(Color.BLACK);</span>
+<span class="nc" id="L279">			g.drawString(data.getStationNames()[i], xBase + 10, yBase);</span>
+<span class="nc" id="L280">			stationLabels[i] = new Rectangle(xBase, yBase</span>
+<span class="nc" id="L281">					- (g.getFontMetrics().getHeight() / 2),</span>
+<span class="nc" id="L282">					(int) (xBase + 10 + g.getFontMetrics()</span>
+<span class="nc" id="L283">							.getStringBounds(data.getStationNames()[i], g)</span>
+<span class="nc" id="L284">							.getWidth()), 8);</span>
+<span class="nc" id="L285">			yBase += 15;</span>
+		}
+<span class="nc" id="L287">	}</span>
+
+	public void drawIndex(int index) {
+<span class="nc" id="L290">		this.index = index;</span>
+<span class="nc" id="L291">		repaint();</span>
+<span class="nc" id="L292">	}</span>
+
+	public void mouseClicked(MouseEvent ev) {
+<span class="nc bnc" id="L295" title="All 2 branches missed.">		if (ev.getButton() == MouseEvent.BUTTON3) {</span>
+<span class="nc" id="L296">			super.rightClick(ev);</span>
+<span class="nc" id="L297">			return;</span>
+		}
+<span class="nc" id="L299">		DPoint test = this.adjustMousePoint(ev.getX(), ev.getY());</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">		for (int i = 0; i &lt; data.getStationNames().length; i++) {</span>
+<span class="nc bnc" id="L301" title="All 4 branches missed.">			if (stationLabels[i] != null &amp;&amp; stationLabels[i].contains(test)) {</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">				showStation[i] = !showStation[i];</span>
+<span class="nc" id="L303">				repaint();</span>
+			}
+		}
+<span class="nc" id="L306">	}</span>
+
+	public void mouseEntered(MouseEvent arg0) {
+<span class="nc" id="L309">	}</span>
+
+	public void mouseExited(MouseEvent arg0) {
+<span class="nc" id="L312">	}</span>
+
+	public void mousePressed(MouseEvent arg0) {
+<span class="nc" id="L315">	}</span>
+
+	public void mouseReleased(MouseEvent arg0) {
+<span class="nc" id="L318">	}</span>
+
+	public void mouseDragged(MouseEvent e) {
+<span class="nc" id="L321">	}</span>
+
+	public void mouseMoved(MouseEvent ev) {
+		ArrayList&lt;DPoint&gt;[] util;
+<span class="nc" id="L325">		util = data.getResults().getUtilization();</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		for (int j = 0; j &lt; data.getStationNames().length; j++) {</span>
+<span class="nc" id="L328">			DPoint test = this.adjustMousePoint(ev.getX(), ev.getY());</span>
+<span class="nc bnc" id="L329" title="All 4 branches missed.">			if (stationLabels[j] != null &amp;&amp; stationLabels[j].contains(test)) {</span>
+<span class="nc" id="L330">				setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));</span>
+<span class="nc" id="L331">				return;</span>
+			}
+			int i;
+<span class="nc bnc" id="L334" title="All 2 branches missed.">			for (i = 0; i &lt; util[j].size(); i = i + 2) {</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">				if (!showStation[j])</span>
+<span class="nc" id="L336">					continue;</span>
+<span class="nc" id="L337">				DPoint pointA = plane.getTruePoint(util[j].get(i));</span>
+<span class="nc" id="L338">				DPoint pointB = plane.getTruePoint(util[j].get(i + 1));</span>
+
+<span class="nc" id="L340">				Polygon rect = new Polygon();</span>
+<span class="nc" id="L341">				rect.addPoint((int) pointA.getX(), (int) pointA.getY() - 16);</span>
+<span class="nc" id="L342">				rect.addPoint((int) pointA.getX(), (int) pointA.getY() + 16);</span>
+<span class="nc" id="L343">				rect.addPoint((int) pointB.getX(), (int) pointB.getY() - 16);</span>
+<span class="nc" id="L344">				rect.addPoint((int) pointB.getX(), (int) pointB.getY() + 16);</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">				if (rect.contains(test)) {</span>
+<span class="nc" id="L346">					tooltip = test;</span>
+<span class="nc" id="L347">					repaint();</span>
+<span class="nc" id="L348">					return;</span>
+				}
+			}
+		}
+<span class="nc" id="L352">		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">		if (tooltip != null) {</span>
+<span class="nc" id="L354">			tooltip = null;</span>
+<span class="nc" id="L355">			repaint();</span>
+		}
+<span class="nc" id="L357">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

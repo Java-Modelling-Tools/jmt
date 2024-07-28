@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMVA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.amva</a> &gt; <span class="el_source">AMVA.java</span></div><h1>AMVA.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.amva;
+
+/**
+ * This class implements the abstract superclass for approximate MVA algorithms
+ * for solving multi-closed models
+ * 
+ * @author Abhimanyu Chugh
+ *
+ */
+public abstract class AMVA extends SolverMulti {
+<span class="nc" id="L11">	public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);</span>
+<span class="nc" id="L12">	protected double tolerance = DEFAULT_TOLERANCE;</span>
+<span class="nc" id="L13">	protected int MAX_ITERATIONS = Integer.MAX_VALUE;</span>
+	protected int[] clsPopulation;
+<span class="nc" id="L15">	protected int iterations = 0; // algorithm iterations</span>
+
+	public AMVA(int classes, int stations, int[] classPopulation) {
+<span class="nc" id="L18">		super(classes, stations);</span>
+<span class="nc" id="L19">		this.clsPopulation = classPopulation;</span>
+<span class="nc" id="L20">		this.scQueueLen = new double[stations];</span>
+<span class="nc" id="L21">	}</span>
+
+	/**
+	 * check whether the given tolerance is valid or not
+	 * 
+	 * @param tolerance
+	 * @return a Double if valid, otherwise null
+	 */
+	public static Double validateTolerance(String tolerance) {
+		try {
+<span class="nc" id="L31">			return Double.parseDouble(tolerance);</span>
+<span class="nc" id="L32">		} catch (Exception ex) {</span>
+<span class="nc" id="L33">			return null;</span>
+		}
+	}
+
+	public void setTolerance(double tolerance) {
+<span class="nc" id="L38">		this.tolerance = tolerance;</span>
+<span class="nc" id="L39">	}</span>
+
+	public void setMaxIterations(int maxIterations) {
+<span class="nc" id="L42">		MAX_ITERATIONS = maxIterations;</span>
+<span class="nc" id="L43">	}</span>
+
+	public int getIterations() {
+<span class="nc" id="L46">		return iterations;</span>
+	}
+
+	/**
+	 * Returns the number of jobs in the system
+	 * 
+	 * @return the total number of jobs
+	 */
+	public double getTotNumJobs() {
+<span class="nc" id="L55">		return sysNumJobs;</span>
+	}
+
+	@Override
+	public void solve() {
+		// tests if all the resources, stations, are load independent
+<span class="nc" id="L61">		boolean loadIndep = true;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			if (type[i] == LD) {</span>
+<span class="nc" id="L64">				loadIndep = false;</span>
+<span class="nc" id="L65">				break;</span>
+			}
+		}
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if (loadIndep) {</span>
+<span class="nc" id="L70">			solveLI();</span>
+		} else {
+<span class="nc" id="L72">			solveLD();</span>
+		}
+<span class="nc" id="L74">	}</span>
+
+	private void solveLD() {
+		// TODO Auto-generated method stub
+		// still needs to be implemented
+<span class="nc" id="L79">	}</span>
+
+	public void solveLI() {
+<span class="nc" id="L82">		double[][] scQueueLensWithOneLessCustomer = new double[stations][classes];</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">				if (stations == 0) {</span>
+<span class="nc" id="L87">					queueLen[k][c] = 0;</span>
+				} else {
+<span class="nc" id="L89">					queueLen[k][c] = clsPopulation[c] / (double) stations;</span>
+				}
+			}
+		}
+
+<span class="nc" id="L94">		int iterations = 0;</span>
+<span class="nc" id="L95">		double[][] oldQueueLen = new double[stations][classes];</span>
+
+		while (true) {
+<span class="nc" id="L98">			iterations++;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L101">					oldQueueLen[k][c] = queueLen[k][c];</span>
+				}
+			}
+
+<span class="nc" id="L105">			scQueueLensWithOneLessCustomer = getQueueLensWithOneLessCustomer();</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L108">				clsRespTime[c] = 0;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L110">					double demand = (servTime[k][c][0] * visits[k][c]);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">					if (type[k] == Solver.DELAY) {</span>
+<span class="nc" id="L112">						residenceTime[k][c] = demand;</span>
+					} else {
+<span class="nc" id="L114">						residenceTime[k][c] = demand * (1 + scQueueLensWithOneLessCustomer[k][c]);</span>
+					}
+<span class="nc" id="L116">					clsRespTime[c] += residenceTime[k][c];</span>
+				}
+<span class="nc bnc" id="L118" title="All 2 branches missed.">				if (clsRespTime[c] == 0) {</span>
+<span class="nc" id="L119">					clsThroughput[c] = 0;</span>
+				} else {
+<span class="nc" id="L121">					clsThroughput[c] = clsPopulation[c] / (double) clsRespTime[c];</span>
+				}
+			}
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L126">					queueLen[k][c] = clsThroughput[c] * residenceTime[k][c];</span>
+				}
+			}
+			// Check convergence criteria
+<span class="nc bnc" id="L130" title="All 4 branches missed.">			if (iterations &gt;= MAX_ITERATIONS || maxDiff(oldQueueLen, queueLen) &lt; tolerance) {</span>
+<span class="nc" id="L131">				break;</span>
+			}
+		}
+
+<span class="nc" id="L135">		this.iterations = iterations;</span>
+<span class="nc" id="L136">		sysResponseTime = 0;</span>
+<span class="nc" id="L137">		sysNumJobs = 0;</span>
+<span class="nc" id="L138">		sysThroughput = 0;</span>
+
+		// calculate aggregate measures
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L142">			clsNumJobs[c] = 0;</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L144">				throughput[k][c] = clsThroughput[c] * visits[k][c];</span>
+<span class="nc" id="L145">				utilization[k][c] = throughput[k][c] * servTime[k][c][0];</span>
+<span class="nc" id="L146">				clsNumJobs[c] += queueLen[k][c];</span>
+			}
+<span class="nc" id="L148">			sysResponseTime += clsRespTime[c];</span>
+<span class="nc" id="L149">			sysNumJobs += clsNumJobs[c];</span>
+		}
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L152">			scResidTime[k] = 0;</span>
+<span class="nc" id="L153">			scQueueLen[k] = 0;</span>
+<span class="nc" id="L154">			scThroughput[k] = 0;</span>
+<span class="nc" id="L155">			scUtilization[k] = 0;</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L157">				scResidTime[k] += residenceTime[k][c];</span>
+<span class="nc" id="L158">				scQueueLen[k] += queueLen[k][c];</span>
+<span class="nc" id="L159">				scThroughput[k] += throughput[k][c];</span>
+<span class="nc" id="L160">				scUtilization[k] += utilization[k][c];</span>
+			}
+		}
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		if (sysResponseTime != 0) {</span>
+<span class="nc" id="L164">			sysThroughput = sysNumJobs / sysResponseTime;</span>
+		}
+<span class="nc" id="L166">	}</span>
+
+	// method to compute station queue lengths with one less customer
+	// array[k][c], where c is the class of the omitted customer and k the station
+	protected abstract double[][] getQueueLensWithOneLessCustomer();
+
+	/**
+	 * returns the max difference between the old queue lengths and the current
+	 * queue lengths of each station
+	 * 
+	 * @param scOldQueueLens     the old queue lengths to compare with current queue
+	 *                           lengths (scCurrentQueueLens)
+	 * @param scCurrentQueueLens the current queue lengths used for comparison
+	 * @return the max difference
+	 */
+	protected double maxDiff(double[] scOldQueueLens, double[] scCurrentQueueLens) {
+<span class="nc" id="L182">		double maxDiff = 0;</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		for (int k = 0; k &lt; scOldQueueLens.length; k++) {</span>
+<span class="nc" id="L184">			double currDiff = Math.abs((scOldQueueLens[k] - scCurrentQueueLens[k]) / scCurrentQueueLens[k]);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			if (currDiff &gt; maxDiff) {</span>
+<span class="nc" id="L186">				maxDiff = currDiff;</span>
+			}
+		}
+<span class="nc" id="L189">		return maxDiff;</span>
+	}
+
+	/**
+	 * returns the max difference between the old queue lengths and the current
+	 * queue lengths of each station and class
+	 * 
+	 * @param oldQueueLens     the old queue lengths to compare with current queue
+	 *                         lengths (scCurrentQueueLens)
+	 * @param currentQueueLens the current queue lengths used for comparison
+	 * @return the max difference
+	 */
+	protected double maxDiff(double[][] oldQueueLens, double[][] currentQueueLens) {
+<span class="nc" id="L202">		double maxDiff = 0;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		for (int k = 0; k &lt; oldQueueLens.length; k++) {</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L205">				double currDiff = Math.abs((oldQueueLens[k][c] - currentQueueLens[k][c]) / currentQueueLens[k][c]);</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">				if (currDiff &gt; maxDiff) {</span>
+<span class="nc" id="L207">					maxDiff = currDiff;</span>
+				}
+			}
+		}
+<span class="nc" id="L211">		return maxDiff;</span>
+	}
+
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		// only closed class - no saturation problem
+<span class="nc" id="L217">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

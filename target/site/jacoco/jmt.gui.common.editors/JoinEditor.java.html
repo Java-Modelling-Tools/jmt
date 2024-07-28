@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JoinEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">JoinEditor.java</span></div><h1>JoinEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.FlowLayout;
+import java.util.Map;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.panels.WarningScrollTable;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+
+public class JoinEditor extends JSplitPane implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+	private int requiredNum;
+	private Map&lt;Object, Integer&gt; firingMix;
+	private StationDefinition stations;
+	private Object stationKey, classKey;
+	private ClassDefinition classes;
+
+<span class="nc" id="L58">	private JPanel joinPane = new JPanel();</span>
+<span class="nc" id="L59">	private JSpinner jNumField = new JSpinner();</span>
+<span class="nc" id="L60">	private JTextArea descrTextPane = new JTextArea(&quot;&quot;);</span>
+<span class="nc" id="L61">	private JScrollPane descrPane = new JScrollPane();</span>
+<span class="nc" id="L62">	private JTextArea noOptLabel = new JTextArea(&quot;No options available for this join strategy&quot;);</span>
+<span class="nc" id="L63">	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);</span>
+<span class="nc" id="L64">	private MixTable mixTable = new MixTable();</span>
+	private WarningScrollTable mixPane;
+
+<span class="nc" id="L67">	public JoinEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {</span>
+<span class="nc" id="L68">		setOrientation(JSplitPane.VERTICAL_SPLIT);</span>
+<span class="nc" id="L69">		setDividerSize(3);</span>
+<span class="nc" id="L70">		setBorder(new EmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L71">		setResizeWeight(0.5);</span>
+<span class="nc" id="L72">		setData(sd, cd, stationKey, classKey);</span>
+<span class="nc" id="L73">		initComponents();</span>
+<span class="nc" id="L74">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L77">		mixPane = new WarningScrollTable(mixTable, WARNING_CLASS);</span>
+<span class="nc" id="L78">		mixPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Join Options&quot;));</span>
+<span class="nc" id="L79">		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Join Options&quot;));</span>
+<span class="nc" id="L80">		noOptLabel.setOpaque(false);</span>
+<span class="nc" id="L81">		noOptLabel.setEditable(false);</span>
+<span class="nc" id="L82">		noOptLabel.setLineWrap(true);</span>
+<span class="nc" id="L83">		noOptLabel.setWrapStyleWord(true);</span>
+<span class="nc" id="L84">		descrTextPane.setOpaque(false);</span>
+<span class="nc" id="L85">		descrTextPane.setEditable(false);</span>
+<span class="nc" id="L86">		descrTextPane.setLineWrap(true);</span>
+<span class="nc" id="L87">		descrTextPane.setWrapStyleWord(true);</span>
+<span class="nc" id="L88">		descrPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Description&quot;));</span>
+<span class="nc" id="L89">		descrPane.setViewportView(descrTextPane);</span>
+<span class="nc" id="L90">		joinPane.setLayout(new FlowLayout());</span>
+<span class="nc" id="L91">		JLabel text = new JLabel(&quot;Number of Required Tasks:&quot;);</span>
+<span class="nc" id="L92">		jNumField.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L93">		jNumField.addChangeListener(new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L96">				Integer i = (Integer) jNumField.getValue();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">				if (i.intValue() &lt; 1) {</span>
+<span class="nc" id="L98">					i = new Integer(1);</span>
+<span class="nc" id="L99">					jNumField.setValue(i);</span>
+				}
+<span class="nc" id="L101">				JoinStrategy js = (JoinStrategy) stations.getJoinStrategy(stationKey, classKey);</span>
+<span class="nc" id="L102">				js.setRequiredNum(i);</span>
+<span class="nc" id="L103">			}</span>
+		});
+<span class="nc" id="L105">		joinPane.add(text);</span>
+<span class="nc" id="L106">		joinPane.add(jNumField);</span>
+<span class="nc" id="L107">		joinPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Join Options&quot;));</span>
+<span class="nc" id="L108">		setLeftComponent(descrPane);</span>
+<span class="nc" id="L109">	}</span>
+
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+<span class="nc" id="L112">		JoinStrategy js = (JoinStrategy) sd.getJoinStrategy(stationKey, classKey);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (js == null) {</span>
+<span class="nc" id="L114">			descrTextPane.setText(&quot;&quot;);</span>
+<span class="nc" id="L115">			emptyPane();</span>
+		} else {
+<span class="nc" id="L117">			descrTextPane.setText(js.getDescription());</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">			if (js instanceof PartialJoin) {</span>
+<span class="nc" id="L119">				createDetails(js, sd, stationKey, classKey);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">			} else if (js instanceof GuardJoin) {</span>
+<span class="nc" id="L121">				createFiringMixDetails(js, sd, cd, stationKey, classKey);</span>
+			} else {
+<span class="nc" id="L123">				emptyPane();</span>
+			}
+		}
+<span class="nc" id="L126">		doLayout();</span>
+<span class="nc" id="L127">	}</span>
+
+	private void emptyPane() {
+<span class="nc" id="L130">		setRightComponent(noOptLabelPanel);</span>
+<span class="nc" id="L131">		requiredNum = 0;</span>
+<span class="nc" id="L132">		firingMix = null;</span>
+<span class="nc" id="L133">	}</span>
+
+	private void createDetails(JoinStrategy js, StationDefinition sd, Object stationKey, Object classKey) {
+<span class="nc" id="L136">		requiredNum = js.getRequiredNum();</span>
+<span class="nc" id="L137">		firingMix = null;</span>
+<span class="nc" id="L138">		stations = sd;</span>
+<span class="nc" id="L139">		this.stationKey = stationKey;</span>
+<span class="nc" id="L140">		this.classKey = classKey;</span>
+<span class="nc" id="L141">		jNumField.setValue(requiredNum);</span>
+<span class="nc" id="L142">		setRightComponent(joinPane);</span>
+<span class="nc" id="L143">	}</span>
+
+	private void createFiringMixDetails(JoinStrategy js, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+<span class="nc" id="L146">		requiredNum = 0;</span>
+<span class="nc" id="L147">		firingMix = ((GuardJoin) js).getGuard();</span>
+<span class="nc" id="L148">		stations = sd;</span>
+<span class="nc" id="L149">		classes = cd;</span>
+<span class="nc" id="L150">		this.stationKey = stationKey;</span>
+<span class="nc" id="L151">		this.classKey = classKey;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		if (firingMix.isEmpty()) {</span>
+<span class="nc" id="L153">			setupFiringMixJoin();</span>
+		}
+<span class="nc" id="L155">		setRightComponent(mixPane);</span>
+<span class="nc" id="L156">	}</span>
+
+	private void setupFiringMixJoin() {
+<span class="nc" id="L159">		firingMix.clear();</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		for (Object o : classes.getClassKeys()) {</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			if (o == classKey) {</span>
+<span class="nc" id="L162">				firingMix.put(o, 1);</span>
+			} else {
+<span class="nc" id="L164">				firingMix.put(o, 0);</span>
+			}
+<span class="nc" id="L166">		}</span>
+<span class="nc" id="L167">	}</span>
+
+	public void stopEditing() {
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		if (mixTable.getCellEditor() != null) {</span>
+<span class="nc" id="L171">			mixTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc" id="L173">	}</span>
+
+	protected class MixTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L179">		public MixTable() {</span>
+<span class="nc" id="L180">			setModel(new MixTableModel());</span>
+<span class="nc" id="L181">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L182">			setDefaultRenderer(Object.class, new DisabledCellRenderer());</span>
+<span class="nc" id="L183">			sizeColumns();</span>
+<span class="nc" id="L184">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L185">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L186">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L189" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L190">				getColumnModel().getColumn(i).setMinWidth(((MixTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L192">		}</span>
+
+	}
+
+<span class="nc" id="L196">	protected class MixTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L199">		private String[] columnNames = new String[] { &quot;Class&quot;, &quot;Required Tasks&quot; };</span>
+<span class="nc" id="L200">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L201">		public int[] columnSizes = new int[] { 80, 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			if (classes.getClassKeys() != null) {</span>
+<span class="nc" id="L205">				return classes.getClassKeys().size();</span>
+			} else {
+<span class="nc" id="L207">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L212">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L217">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L222">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L227">			int rowClassType = classes.getClassType(indexToKey(rowIndex));</span>
+<span class="nc" id="L228">			int classType = classes.getClassType(classKey);</span>
+<span class="nc bnc" id="L229" title="All 4 branches missed.">			return (columnIndex == 1) &amp;&amp; (rowClassType == classType);</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			if (firingMix == null) {</span>
+<span class="nc" id="L234">				return null;</span>
+			}
+<span class="nc bnc" id="L236" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L237">				return classes.getClassName(indexToKey(rowIndex));</span>
+<span class="nc bnc" id="L238" title="All 4 branches missed.">			} else if (columnIndex == 1 &amp;&amp; isCellEditable(rowIndex, columnIndex)) {</span>
+<span class="nc" id="L239">				return firingMix.get(indexToKey(rowIndex));</span>
+			} else {
+<span class="nc" id="L241">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L247" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L249">					Integer value = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">					if (value &gt;= 0) {</span>
+<span class="nc" id="L251">						firingMix.put(indexToKey(rowIndex), value);</span>
+					}
+<span class="nc" id="L253">				} catch (NumberFormatException e) {</span>
+
+<span class="nc" id="L255">				}</span>
+			}
+<span class="nc" id="L257">		}</span>
+
+		private Object indexToKey(int index) {
+<span class="nc" id="L260">			return classes.getClassKeys().get(index);</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

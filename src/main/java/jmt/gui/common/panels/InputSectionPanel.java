@@ -21,10 +21,15 @@ package jmt.gui.common.panels;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+<<<<<<< HEAD
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
+=======
+import java.util.*;
+import java.util.List;
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -96,7 +101,12 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 	protected static final Object[] serverPSQueuePriorityPolicies = {
 			QUEUE_STRATEGY_PS,
 			QUEUE_STRATEGY_DPS,
+<<<<<<< HEAD
 			QUEUE_STRATEGY_GPS
+=======
+			QUEUE_STRATEGY_GPS,
+			QUEUE_STRATEGY_QBPS
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	};
 
 	protected  static final Object[] serverPreemptiveQueuePolicies = {
@@ -731,6 +741,15 @@ public class InputSectionPanel extends WizardPanel implements CommonConstants {
 			Object classKey = getClassKeyFromRow(rowIndex);
 			if (columnIndex == COLUMN_QUEUE_POLICY) {
 				String policy = (String) aValue;
+<<<<<<< HEAD
+=======
+				if (Objects.equals(policy, "QBPS")){
+					if (data.getQuantumSize(stationKey) == 0.0) {
+						JOptionPane.showMessageDialog(InputSectionPanel.this, "Please set the quantum size for the QBPS queue policy.", "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+				}
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 				data.setQueueStrategy(stationKey, classKey, policy);
 				if (policy.equals(QUEUE_STRATEGY_PS)) {
 					data.setServiceWeight(stationKey, classKey, Defaults.getAsDouble("serviceWeight"));

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Job.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov</a> &gt; <span class="el_source">Job.java</span></div><h1>Job.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmarkov;
+
+import jmt.jmarkov.Queues.Processor;
+
+public class Job implements Cloneable {
+
+	private int jobId;
+	//creationTime: when this object is created (when the previous one enters the queue)
+	private double creationTime;
+	//in the creation of the job it is assigned
+	private double enteringQueueTime;
+	//the time which the job start to get service 
+	private double enteringCpuTime;
+	//ending of the service
+	private double systemExitTime;
+	//nextEvent: this can be equal to enteringQueueTime or enteringCpu or 0-&gt;if the job exit the system
+	private double nextEventTime;
+	//
+	private int currentStateType;
+	//if there are at least two server name(id) of the server
+	private int processorId;
+
+	private Processor processor;
+
+	public static final int CURRENT_STATE_CREATED = 0;//created but not enter the Q
+	public static final int CURRENT_STATE_IN_QUEUE = 1;//wait for an empty CPU	
+	public static final int CURRENT_STATE_IN_CPU = 2;//it is running in the cpu
+	public static final int CURRENT_STATE_EXIT_SYSTEM = 3;//job has serviced and exit from the system
+	public static final int CURRENT_STATE_ANIMATION = 4;//job has serviced and exit from the system
+
+	@Override
+	public Object clone() {
+		// TODO Auto-generated method stub
+<span class="nc" id="L52">		Object clone = null;</span>
+		try {
+<span class="nc" id="L54">			clone = super.clone();</span>
+<span class="nc" id="L55">		} catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L56">			e.printStackTrace();</span>
+<span class="nc" id="L57">		}</span>
+<span class="nc" id="L58">		return clone;</span>
+
+	}
+
+	public Job(int jobId, double time) {
+<span class="nc" id="L63">		super();</span>
+<span class="nc" id="L64">		setCreationTime(time);</span>
+<span class="nc" id="L65">		setNextEventTime(0);</span>
+<span class="nc" id="L66">		setJobId(jobId);</span>
+<span class="nc" id="L67">		processor = null;</span>
+<span class="nc" id="L68">	}</span>
+
+	private void setCreationTime(double creationTime) {
+<span class="nc" id="L71">		this.creationTime = creationTime;</span>
+<span class="nc" id="L72">		setCurrentStateType(CURRENT_STATE_CREATED);</span>
+<span class="nc" id="L73">	}</span>
+
+	//in the creation of the job it is assigned
+	public void setEnteringQueueTime(double enteringQueueTime) {
+<span class="nc" id="L77">		this.enteringQueueTime = enteringQueueTime;</span>
+<span class="nc" id="L78">		setNextEventTime(enteringQueueTime);</span>
+<span class="nc" id="L79">	}</span>
+
+	public void setEnteringCpuTime(double enteringCpuTime, Processor newProcessor) {
+<span class="nc" id="L82">		this.enteringCpuTime = enteringCpuTime;</span>
+<span class="nc" id="L83">		setCurrentStateType(CURRENT_STATE_IN_CPU);</span>
+<span class="nc" id="L84">		setProcessor(newProcessor);</span>
+<span class="nc" id="L85">		setProcessorId(processor.getProcesserId());</span>
+<span class="nc" id="L86">	}</span>
+
+	public void setSystemExitTime(double exitingSystem) {
+<span class="nc" id="L89">		this.systemExitTime = exitingSystem;</span>
+<span class="nc" id="L90">		setNextEventTime(exitingSystem);</span>
+<span class="nc" id="L91">	}</span>
+
+	public void setStateEnterQueue() {
+<span class="nc" id="L94">		setCurrentStateType(CURRENT_STATE_IN_QUEUE);</span>
+<span class="nc" id="L95">		setNextEventTime(Double.MAX_VALUE);</span>
+<span class="nc" id="L96">	}</span>
+
+	public void setStateExitSystem() {
+<span class="nc" id="L99">		setCurrentStateType(CURRENT_STATE_EXIT_SYSTEM);</span>
+<span class="nc" id="L100">		setNextEventTime(Double.MAX_VALUE);</span>
+<span class="nc" id="L101">		processor = null;</span>
+<span class="nc" id="L102">	}</span>
+
+	private void setNextEventTime(double nextEventTime) {
+<span class="nc" id="L105">		this.nextEventTime = nextEventTime;</span>
+<span class="nc" id="L106">	}</span>
+
+	private void setCurrentStateType(int currentStateType) {
+<span class="nc" id="L109">		this.currentStateType = currentStateType;</span>
+<span class="nc" id="L110">	}</span>
+
+	private void setProcessorId(int processorId) {
+<span class="nc" id="L113">		this.processorId = processorId;</span>
+<span class="nc" id="L114">	}</span>
+
+	private void setProcessor(Processor processor) {
+<span class="nc" id="L117">		this.processor = processor;</span>
+<span class="nc" id="L118">	}</span>
+
+	public double getCreationTime() {
+<span class="nc" id="L121">		return creationTime;</span>
+	}
+
+	public double getEnteringQueueTime() {
+<span class="nc" id="L125">		return enteringQueueTime;</span>
+	}
+
+	public double getEnteringCpuTime() {
+<span class="nc" id="L129">		return enteringCpuTime;</span>
+	}
+
+	public double getSystemExitTime() {
+<span class="nc" id="L133">		return systemExitTime;</span>
+	}
+
+	public double getNextEventTime() {
+<span class="nc" id="L137">		return nextEventTime;</span>
+	}
+
+	public int getCurrentStateType() {
+<span class="nc" id="L141">		return currentStateType;</span>
+	}
+
+	public int getProcessorId() {
+<span class="nc" id="L145">		return processorId;</span>
+	}
+
+	public Processor getProcessor() {
+<span class="nc" id="L149">		return processor;</span>
+	}
+
+	public int getJobId() {
+<span class="nc" id="L153">		return jobId;</span>
+	}
+
+	private void setJobId(int jobId) {
+<span class="nc" id="L157">		this.jobId = jobId;</span>
+<span class="nc" id="L158">	}</span>
+
+	public void setAnimationTime(double animationTime) {
+<span class="nc" id="L161">		setNextEventTime(animationTime);</span>
+<span class="nc" id="L162">		setCurrentStateType(Job.CURRENT_STATE_ANIMATION);</span>
+<span class="nc" id="L163">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

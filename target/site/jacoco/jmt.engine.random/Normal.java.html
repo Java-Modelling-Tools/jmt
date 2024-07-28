@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Normal.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">Normal.java</span></div><h1>Normal.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.math.Probability;
+
+/**
+ * 
+ * This is the Normal distribution (see the constructor
+ * description for its pdf definition).
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Fabrizio Frontera - ffrontera@yahoo.it
+ * @author Modified by Stefano Omini, 7/5/2004
+ * @author Modified by Bertoli Marco, 8/9/2005
+ * 
+ */
+public class Normal extends AbstractDistribution implements Distribution {
+
+	/**
+	 * This is the constructor. It creates a new normal distribution which is
+	 * defined from pdf:
+	 * &lt;pre&gt;               1                   (x-m)^2
+	 * pdf(x) = -------------- * exp (- ----------- )
+	 *           sqrt(2*pi)*v              2v^2&lt;/pre&gt;
+	 * where v^2 is the variance and m is the mean of the distribution
+	 * pi is the pi-greco constant.
+	 */
+<span class="nc" id="L47">	public Normal() {</span>
+<span class="nc" id="L48">	}</span>
+
+	/**
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the normal distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the probability distribution function evaluated in x.
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L61">			double variance = ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();</span>
+<span class="nc" id="L62">			double SQRT_INV = 1.0 / Math.sqrt(2.0 * Math.PI * variance);</span>
+<span class="nc" id="L63">			double mean = ((NormalPar) p).getMean();</span>
+<span class="nc" id="L64">			double diff = x - mean;</span>
+<span class="nc" id="L65">			return SQRT_INV * Math.exp(-(diff * diff) / (2.0 * variance));</span>
+		} else {
+<span class="nc" id="L67">			throw new IncorrectDistributionParameterException(&quot;Remember: standardDeviation must be gtz&quot;);</span>
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the normal distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the cumulative distribution function evaluated in x.
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L82">			double mean = ((NormalPar) p).getMean();</span>
+<span class="nc" id="L83">			double variance = ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();</span>
+<span class="nc" id="L84">			return Probability.normal(mean, variance, x);</span>
+		} else {
+<span class="nc" id="L86">			throw new IncorrectDistributionParameterException(&quot;Remember: standardDeviation must be gtz&quot;);</span>
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the normal distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L100">			return ((NormalPar) p).getMean();</span>
+		} else {
+<span class="nc" id="L102">			throw new IncorrectDistributionParameterException(&quot;Remember: standardDeviation must be gtz&quot;);</span>
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
+	 *
+	 * @param p parameter of the normal distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic variance of the distribution.
+	 */
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L116">			return ((NormalPar) p).getStandardDeviation() * ((NormalPar) p).getStandardDeviation();</span>
+		} else {
+<span class="nc" id="L118">			throw new IncorrectDistributionParameterException(&quot;Remember: standardDeviation must be gtz&quot;);</span>
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the next number distributed
+	 * according to the distribution parameter.
+	 *
+	 * @param p parameter of the normal distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the next random number of this distribution.
+	 */
+	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L132">			double mean = ((NormalPar) p).getMean();</span>
+<span class="nc" id="L133">			double standardDeviation = ((NormalPar) p).getStandardDeviation();</span>
+			// Uses polar Box-Muller transformation.
+<span class="nc" id="L135">			double U1 = engine.raw();</span>
+<span class="nc" id="L136">			double U2 = engine.raw();</span>
+<span class="nc" id="L137">			double z = Math.sqrt(-2.0 * Math.log(U1)) * Math.cos(2 * Math.PI * U2);</span>
+<span class="nc" id="L138">			double ret = mean + standardDeviation * z;</span>
+			// If generated number is in the past, reruns this method
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			return (ret &gt; 0.0) ? ret : nextRand(p);</span>
+		} else {
+<span class="nc" id="L142">			throw new IncorrectDistributionParameterException(&quot;Remember: standardDeviation must be gtz&quot;);</span>
+		}
+	}
+
+} // end Normal
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

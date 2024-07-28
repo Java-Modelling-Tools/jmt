@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnhancedVector.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.dataStructures</a> &gt; <span class="el_source">EnhancedVector.java</span></div><h1>EnhancedVector.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.dataStructures;
+
+import java.util.ArrayList;
+import java.util.Stack;
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+
+/**
+ * This class extends the ArrayList&lt;Integer&gt; object class by adding several useful
+ * methods for operations encountered when dealing with the algorithms that
+ * compute the normalising constants.
+ *
+ * @author Michail Makaronidis, 2010, 
+ * @author amended by Jack Bradshaw 2012.
+ * 
+ * Amendments: No longer implements comparable, to allow subclasses to do so
+ */
+public class EnhancedVector extends ArrayList&lt;Integer&gt; implements Comparable&lt;EnhancedVector&gt; {
+
+    //TODO: More efficient implementation of several functions here. Special properties (i.e. zeroVector, containsMinusOne, etc) can be produced during every access, and not be the result of element-by-element search.
+
+    private static final long serialVersionUID = 1L;
+    // This stack holds the &quot;positions&quot; of the elenents that have been altered.
+<span class="nc" id="L42">    private Stack&lt;Integer&gt; positions = new Stack&lt;Integer&gt;();</span>
+    // This stack holds the &quot;deltas&quot; of alterations corresponding to each position.
+<span class="nc" id="L44">    private Stack&lt;Integer&gt; deltas = new Stack&lt;Integer&gt;();</span>
+
+    /**
+     * Creates an empty EnhancedVector object.
+     */
+    public EnhancedVector() {
+<span class="nc" id="L50">        super();</span>
+<span class="nc" id="L51">    }</span>
+
+    /**
+     * Creates an EnhancedVector with content equal to the given matrix.
+     *
+     * @param A The matrix containing the vector elements
+     */
+    public EnhancedVector(Integer[] A) {
+<span class="nc" id="L59">        super();</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        for (Integer el : A) {</span>
+<span class="nc" id="L61">            this.add(el);</span>
+        }
+<span class="nc" id="L63">    }</span>
+    
+    /**
+     * Creates an EnhancedVector with content equal to the given matrix.
+     *
+     * @param A The matrix containing the vector elements
+     */
+    public EnhancedVector(int[] A) {
+<span class="nc" id="L71">        super();</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">        for (Integer el : A) {</span>
+<span class="nc" id="L73">            this.add(el);</span>
+        }
+<span class="nc" id="L75">    }</span>
+
+    /**
+     * Creates a new EnhancedVector of specific lenth, where
+     * all elements are equal to a specific value.
+     *
+     * @param k The value of all elements
+     * @param length The length of the EnhancedVector
+     */
+<span class="nc" id="L84">    public EnhancedVector(int k, int length) {</span>
+<span class="nc" id="L85">        this.clear();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">        for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L87">            this.add(k);</span>
+        }
+<span class="nc" id="L89">    }</span>
+
+    /**
+     * This method decides whether all elements of the EnhancedVector are equal
+     * to zero (hence, a zero vector).
+     * @return True if it is a zero vector, false otherwise
+     */
+    public boolean isZeroVector() {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        for (Integer el : this) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">            if (el != 0) {</span>
+<span class="nc" id="L99">                return false;</span>
+            }
+<span class="nc" id="L101">        }</span>
+<span class="nc" id="L102">        return true;</span>
+    }
+
+    /**
+     * Checks whether a value of -1 is contained in the EnhancedVector.
+     * @return True if -1 is contained, else false.
+     */
+    public boolean containsMinusOne() {
+<span class="nc" id="L110">        return this.contains(-1);</span>
+    }
+
+    /**
+     * This method returns the index of the first non-zero EnhancedVector 
+     * element. Throws exception when used on a zero vector.
+     *
+     * @return The index of the first non-zero EnhancedVector element
+     * @throws InternalErrorException Thrown when used on a zero vector
+     */
+    public int findFirstNonZeroElement() throws InternalErrorException {
+<span class="nc" id="L121">        int i = 0;</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        for (Integer k : this) {</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">            if (k &gt; 0) {</span>
+<span class="nc" id="L124">                return i;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">            } else if (k &lt; 0) {</span>
+<span class="nc" id="L126">                return i;</span>
+            }
+<span class="nc" id="L128">            i++;</span>
+<span class="nc" id="L129">        }</span>
+<span class="nc" id="L130">        throw new InternalErrorException(&quot;Internal Error: Called findFirstNonZeroElement() on a zero vector!&quot;);</span>
+    }
+
+    /**
+     * Returns the number in a specific index of the EnhancedVector as a BigRational object.
+     * @param index The position's index
+     * @return The number in that position as a BigRational
+     */
+    public BigRational getAsBigRational(int index) {
+<span class="nc" id="L139">        return new BigRational(this.get(index));</span>
+    }
+
+    /**
+     * This method returns the sum of all EnhancedVector elements.
+     *
+     * @return The sum
+     */
+    public int sum() {
+<span class="nc" id="L148">        int sum = 0;</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">        for (Integer el : this) {</span>
+<span class="nc" id="L150">            sum += el;</span>
+<span class="nc" id="L151">        }</span>
+<span class="nc" id="L152">        return sum;</span>
+    }
+
+    /**
+     * This method alters the element at a position by adding a specific delta.
+     * @param i The index of the position (starts from 0)
+     * @param delta The delta added
+     */
+    private void alterElementAt(int i, Integer delta) {
+<span class="nc" id="L161">        int prevValue = this.get(i);</span>
+<span class="nc" id="L162">        int newValue = prevValue + delta;</span>
+<span class="nc" id="L163">        this.set(i, newValue);</span>
+<span class="nc" id="L164">    }</span>
+
+    /**
+     * This method dereases the element at a position by 1.
+     * @param s The index of the position (starts from 1)
+     */
+    public void minusOne(int s) {
+<span class="nc bnc" id="L171" title="All 2 branches missed.">        if (s != 0) {</span>
+<span class="nc" id="L172">            this.alterElementAt(s - 1, -1);</span>
+        }
+<span class="nc" id="L174">        positions.push(s);</span>
+<span class="nc" id="L175">        deltas.push(-1);</span>
+<span class="nc" id="L176">    }</span>
+
+    /**
+     * This method increases the element at a position by 1.
+     * @param k The index of the position (starts from 1)
+     */
+    public void plusOne(int k) {
+<span class="nc bnc" id="L183" title="All 2 branches missed.">        if (k != 0) {</span>
+<span class="nc" id="L184">            this.alterElementAt(k - 1, 1);</span>
+        }
+<span class="nc" id="L186">        positions.push(k);</span>
+<span class="nc" id="L187">        deltas.push(+1);</span>
+<span class="nc" id="L188">    }</span>
+
+    /**
+     * This method restores the last alteration made to the EnhancedVector. If
+     * no alteration has been made, the method terminates silently.
+     */
+    public void restore() {
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        if (!positions.empty()) {</span>
+<span class="nc" id="L196">            int lastPos = positions.pop();</span>
+<span class="nc" id="L197">            int lastDelta = deltas.pop();</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (lastPos != 0) {</span>
+<span class="nc" id="L199">                this.alterElementAt(lastPos - 1, -lastDelta);</span>
+            }
+        }
+<span class="nc" id="L202">    }</span>
+
+    /**
+     * This method is used to count the elements of the EnhancedVvector that are 
+     * equal to zero.
+     *
+     * @return The number of zero elements
+     */
+    public int countZeroElements() {
+<span class="nc" id="L211">        int count = 0;</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        for (Integer el : this) {</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">            if (el == 0) {</span>
+<span class="nc" id="L214">                count++;</span>
+            }
+<span class="nc" id="L216">        }</span>
+<span class="nc" id="L217">        return count;</span>
+    }
+
+    /**
+     * This method copies the current EnhancedVector to a new one. Position and 
+     * delta stacks are disregarded.
+     *
+     * @param destination The EnhancedVector to which the current one is copied
+     */
+    protected void copyTo(EnhancedVector destination) {
+<span class="nc" id="L227">        destination.clear();</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for (Integer el : this) {</span>
+<span class="nc" id="L229">            destination.add(el);</span>
+<span class="nc" id="L230">        }</span>
+
+        //TODO: Copy stack as well?
+<span class="nc" id="L233">    }</span>
+
+    /**
+     * This method copies a source EnhancedVector to the current one. Position
+     * and delta stacks are disregarded.
+     *
+     * @param source The EnhancedVector from which the elements are copied
+     */
+    protected void fillFromMyVector(EnhancedVector source) {
+<span class="nc" id="L242">        this.clear();</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        for (Integer el : source) {</span>
+<span class="nc" id="L244">            this.add(el);</span>
+<span class="nc" id="L245">        }</span>
+<span class="nc" id="L246">    }</span>
+
+    /**
+     * This method returns the maximum element of an EnhancedVector
+     *
+     * @return The maximum element
+     * @throws OperationNotSupportedException Thrown when evaluation of the maximum element is requested on an empty vector
+     */
+    public int max() throws OperationNotSupportedException {
+        int max;
+<span class="nc bnc" id="L256" title="All 2 branches missed.">        if (this.size() &gt; 0) {</span>
+<span class="nc" id="L257">            max = this.get(0);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">            for (int el : this) {</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                if (el &gt; max) {</span>
+<span class="nc" id="L260">                    max = el;</span>
+                }
+<span class="nc" id="L262">            }</span>
+        } else {
+<span class="nc" id="L264">            throw new OperationNotSupportedException(&quot;Cannot define max for an empty vector!&quot;);</span>
+        }
+<span class="nc" id="L266">        return max;</span>
+    }
+
+    /**
+     * This method returns the minimum element of an EnhancedVector
+     *
+     * @return The minimum element
+     * @throws OperationNotSupportedException Thrown when evaluation of the minimum element is requested on an empty vector
+     */
+    public int min() throws OperationNotSupportedException {
+        int min;
+<span class="nc bnc" id="L277" title="All 2 branches missed.">        if (this.size() &gt; 0) {</span>
+<span class="nc" id="L278">            min = this.get(0);</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">            for (int el : this) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">                if (el &lt; min) {</span>
+<span class="nc" id="L281">                    min = el;</span>
+                }
+<span class="nc" id="L283">            }</span>
+        } else {
+<span class="nc" id="L285">            throw new OperationNotSupportedException(&quot;Cannot define min for an empty vector!&quot;);</span>
+        }
+<span class="nc" id="L287">        return min;</span>
+    }
+
+    /**
+     * This method is like the equals() method, with the only diferrence that it
+     * only check the elements of the EnhancedVectors and does not consider the
+     * previous alterations held in the two stacks.
+     *
+     * @param o The object to which
+     * @return
+     */
+    public synchronized boolean equalsIgnoreHistory(Object o) {
+<span class="nc" id="L299">        return this.toString().equals(o.toString());</span>
+    }
+
+    /**
+     * Compares two EnhancedVector objects according to the sum of their elements.
+     * elements. If they have the same sum, then the one with the
+     * leftmost non-zero is the smaller.
+     *
+     * @param o The other EnhancedVector object
+     * @return -1 if this &lt; o, 0 if this = o, 1 if this &gt; o
+     */
+    @Override
+    public int compareTo(EnhancedVector o) {
+<span class="nc" id="L312">        EnhancedVector v1 = this;</span>
+<span class="nc" id="L313">        EnhancedVector v2 = o;</span>
+
+<span class="nc bnc" id="L315" title="All 2 branches missed.">        if (v1.size() &lt; v2.size()) {</span>
+<span class="nc" id="L316">            return 1;</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">        } else if (v1.size() &gt; v2.size()) {</span>
+<span class="nc" id="L318">            return -1;</span>
+        } else {
+            // Vectors have the same length
+            // Check 1: Lower sum ==&gt; Greater vector
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            if (v1.sum() &lt; v2.sum()) {</span>
+<span class="nc" id="L323">                return -1;</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">            } else if (v1.sum() &gt; v2.sum()) {</span>
+<span class="nc" id="L325">                return 1;</span>
+            } else {
+                // Vectors have same length and same sum
+                // Check 2: Greater leftmost element ==&gt; Greater vector
+<span class="nc bnc" id="L329" title="All 2 branches missed.">                for (int i = 0; i &lt; v1.size(); i++) {</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">                    if (v1.get(i) &gt; v2.get(i)) {</span>
+<span class="nc" id="L331">                        return -1;</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">                    } else if  (v1.get(i)&lt; v2.get(i)) {</span>
+<span class="nc" id="L333">                        return 1;</span>
+                    }
+                }
+                // If control reaches this point, then the vector are the same
+<span class="nc" id="L337">                return 0;</span>
+            }
+        }
+    }
+
+    /**
+     * This method returns a copy of the current EnhancedVector object. Position
+     * and delta stacks are disregarded.
+     *
+     * @return Copy of the initial EnhancedVector object.
+     */
+    public EnhancedVector copy() {
+<span class="nc" id="L349">        EnhancedVector c = new EnhancedVector();</span>
+<span class="nc" id="L350">        this.copyTo(c);</span>
+<span class="nc" id="L351">        return c;</span>
+    }
+
+    /**
+     * Adds two vectors. The vectors must be of the same size.
+     * @param b Vector to add
+     * @return The result of the addition
+     */
+    public EnhancedVector addVec(EnhancedVector b) {
+<span class="nc" id="L360">        EnhancedVector a = this.copy();</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">        if (a.size() == b.size()) {</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">            for (int i = 0; i &lt; a.size(); i++) {</span>
+<span class="nc" id="L363">                a.set(i, a.get(i) + b.get(i));</span>
+            }
+<span class="nc" id="L365">            return a;</span>
+        } else {
+<span class="nc" id="L367">            throw new UnsupportedOperationException(&quot;Cannot add vectors of different size.&quot;);</span>
+        }
+    }
+
+    /**
+     * @author Jack Bradshaw
+     * Subtracts two vectors. The vectors must be of the same size.
+     * @param b Vector to add
+     * @return The result of the subtraction
+     */
+    public EnhancedVector subVec(EnhancedVector b) {
+<span class="nc" id="L378">        EnhancedVector a = this.copy();</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">        if (a.size() == b.size()) {</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">            for (int i = 0; i &lt; a.size(); i++) {</span>
+<span class="nc" id="L381">                a.set(i, a.get(i) - b.get(i));</span>
+            }
+<span class="nc" id="L383">            return a;</span>
+        } else {
+<span class="nc" id="L385">            throw new UnsupportedOperationException(&quot;Cannot add vectors of different size.&quot;);</span>
+        }
+    }
+    /**
+     * @author Jack Bradshaw
+     * Prints the vector.
+     */
+    public void print() {
+<span class="nc" id="L393">    	String newLine = System.getProperty(&quot;line.separator&quot;);</span>
+<span class="nc" id="L394">    	System.out.print(&quot;[&quot;);</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">    	for (int i = 0; i &lt; this.size(); i++) {</span>
+<span class="nc" id="L396">    		System.out.print(this.get(i) + &quot; &quot;);</span>
+    	}
+<span class="nc" id="L398">    	System.out.print(&quot;]&quot; + newLine);</span>
+<span class="nc" id="L399">    }</span>
+
+	 /**
+	 * @author Jack Bradshaw
+     * This method is used to count the elements of the EnhancedVvector that are 
+     * greater than zero.
+     *
+     * @return The number of non-zero elements
+     */
+    public int countNonZeroElements() {
+<span class="nc" id="L409">        int count = 0;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">        for (Integer el : this) {</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">            if (el &gt; 0) {</span>
+<span class="nc" id="L412">                count++;</span>
+            }
+<span class="nc" id="L414">        }</span>
+<span class="nc" id="L415">        return count;</span>
+    }
+
+    /**
+     * @author Haixiao Su
+     * This method is used to decide whether the vector contains all ones.
+     *
+     * @return whether the vector contains all ones.
+     */
+    public boolean isOneVector() {
+<span class="nc bnc" id="L425" title="All 2 branches missed.">        for (Integer i : this) {</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">            if (i != 1) {</span>
+<span class="nc" id="L427">                return false;</span>
+            }
+<span class="nc" id="L429">        }</span>
+<span class="nc" id="L430">        return true;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

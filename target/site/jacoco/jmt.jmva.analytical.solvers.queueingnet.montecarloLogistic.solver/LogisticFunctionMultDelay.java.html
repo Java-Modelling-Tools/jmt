@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogisticFunctionMultDelay.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver</a> &gt; <span class="el_source">LogisticFunctionMultDelay.java</span></div><h1>LogisticFunctionMultDelay.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
+
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.jet.math.Functions;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * Implements the Logistic Function for delay + single server networks under the multiplicative transform
+ */
+public class LogisticFunctionMultDelay extends LogisticFunctionDelay {
+
+	public LogisticFunctionMultDelay(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D delays, double epsilon, MathContext MC) throws InternalErrorException {
+<span class="nc" id="L22">		super(ndim, population, demands, delays, epsilon, MC);</span>
+<span class="nc" id="L23">	}</span>
+
+	public LogisticFunctionMultDelay(int ndim, int[] population, double[][] demands, double[] delays, double epsilon) throws InternalErrorException {
+<span class="nc" id="L26">		super(ndim, population, demands, delays, epsilon, MathContext.DECIMAL128);</span>
+<span class="nc" id="L27">	}</span>
+
+	/*Copy constructor*/
+	public LogisticFunctionMultDelay(LogisticFunctionMultDelay LFD) throws InternalErrorException {
+<span class="nc" id="L31">		super(LFD);</span>
+<span class="nc" id="L32">	}</span>
+
+	@Override
+	public Function copy() throws InternalErrorException {
+<span class="nc" id="L36">		return new LogisticFunctionMultDelay(this);</span>
+	}
+
+	@Override
+	protected BigDecimal safeEvaluate(double[] point) throws InternalErrorException {
+		DoubleMatrix1D x;
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (point.length == 1)</span>
+<span class="nc" id="L43">			x = new DenseDoubleMatrix1D(0);</span>
+		else
+<span class="nc" id="L45">			x = new DenseDoubleMatrix1D(Arrays.copyOfRange(point, 1, K));</span>
+
+<span class="nc" id="L47">		DoubleMatrix1D ex = x.copy();</span>
+<span class="nc" id="L48">		ex.assign(Functions.exp);</span>
+<span class="nc" id="L49">		double x0 = point[0];</span>
+<span class="nc" id="L50">		double ex0 = Math.exp(x0);</span>
+
+<span class="nc" id="L52">		double h = (1+epsilon*N)*x.zSum() - ex0 + K*(1+epsilon*N)*x0;</span>
+
+<span class="nc" id="L54">		DoubleMatrix1D y = ex.copy();</span>
+<span class="nc" id="L55">		y.assign(Functions.plus(1));</span>
+<span class="nc" id="L56">		y.assign(Functions.log);</span>
+<span class="nc" id="L57">		h -= y.zSum()*N;</span>
+
+<span class="nc" id="L59">		y = new DenseDoubleMatrix1D(K);</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		for (int k=0; k&lt;K-1; k++) {</span>
+<span class="nc" id="L61">			y.set(k,1.);</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			for (int i=k+1; i&lt;K-1; i++)</span>
+<span class="nc" id="L63">				y.set(k, y.get(k)*(1+ex.get(i)));</span>
+<span class="nc" id="L64">			y.set(k, y.get(k)*ex.get(k));</span>
+		}
+<span class="nc" id="L66">		y.set(K-1,1.);</span>
+
+<span class="nc" id="L68">		y = A.mult(A.transpose(demands), y.copy());</span>
+<span class="nc" id="L69">		y.assign(Functions.mult(ex0));</span>
+
+<span class="nc" id="L71">		double g = 1.;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++)</span>
+<span class="nc" id="L73">			g *= 1+ex.get(i);</span>
+<span class="nc" id="L74">		DoubleMatrix1D z = delays.copy();</span>
+<span class="nc" id="L75">		z.assign(Functions.mult(g));</span>
+<span class="nc" id="L76">		y.assign(z, Functions.plus);</span>
+<span class="nc" id="L77">		y.assign(Functions.log);</span>
+<span class="nc" id="L78">		h += A.mult(pop, y);</span>
+
+<span class="nc" id="L80">		y = ex.copy();</span>
+<span class="nc" id="L81">		y.assign(Functions.plus(1));</span>
+<span class="nc" id="L82">		y.assign(Functions.log);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++)</span>
+<span class="nc" id="L84">			y.set(i, y.get(i)*(i-K)*(1+N*epsilon));</span>
+<span class="nc" id="L85">		h += y.zSum();</span>
+
+<span class="nc bnc" id="L87" title="All 4 branches missed.">		if (Double.isInfinite(h) || Double.isNaN(h))</span>
+<span class="nc" id="L88">			return BigDecimal.ZERO;</span>
+
+<span class="nc" id="L90">		return MiscMathsFunctions.exp(h, this.MC);</span>
+	}
+
+	public void calculate_stationary_point() {
+<span class="nc" id="L94">		super.calculate_stationary_point();</span>
+<span class="nc" id="L95">		x_stat = Utils.logistic_transform_mult(u_stat, v_stat);</span>
+<span class="nc" id="L96">	}</span>
+
+	public void calculate_hessian() {
+<span class="nc" id="L99">		super.calculate_hessian(); //calculate in additive</span>
+		// transform it into multiplicative form
+<span class="nc" id="L101">		DoubleMatrix2D J = Utils.compute_JacobianAdd2Mult(u_stat,v_stat);</span>
+<span class="nc" id="L102">		DoubleMatrix2D hess_add = hess_stat.copy();</span>
+<span class="nc" id="L103">		hess_stat = this.A.mult(this.A.transpose(J), hess_add);</span>
+<span class="nc" id="L104">		hess_stat = this.A.mult(hess_stat, J);</span>
+<span class="nc" id="L105">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

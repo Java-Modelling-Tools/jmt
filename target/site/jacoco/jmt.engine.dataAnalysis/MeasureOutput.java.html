@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MeasureOutput.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis</a> &gt; <span class="el_source">MeasureOutput.java</span></div><h1>MeasureOutput.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.dataAnalysis;
+
+import java.io.File;
+
+/**
+ * A measure output object is used to print a measure value(s). it is an abstract class,
+ * whose methods should be overridden to implement the way in which each kind of measure
+ * should be written on the output stream.
+ * @author Francesco Radaelli, Marco Bertoli
+ */
+public abstract class MeasureOutput {
+
+	protected Measure measure;
+
+	/** Creates a new instance of MeasureOutput class.
+	 * @param measure Reference to the measure to be written as output.
+	 */
+<span class="nc" id="L36">	public MeasureOutput(Measure measure) {</span>
+<span class="nc" id="L37">		this.measure = measure;</span>
+<span class="nc" id="L38">		measure.setOutput(this);</span>
+<span class="nc" id="L39">	}</span>
+
+	/** Overrides this method to implement the way in which each measure
+	 * should be written on an output stream. This method is called for every
+	 * sample.
+	 * @param sample the measure sample
+	 * @param weight the sample weight
+	 */
+	public abstract void write(double sample, double weight);
+
+	/** Overrides this method to implement the way in which the final measure
+	 * should be written on an output stream. This method is called at the end of
+	 * a measure.
+	 */
+	public abstract void finalizeMeasure();
+	
+	/**
+	 * Returns the output file for this measure output
+	 * @return a reference to the output file
+	 */
+	public abstract File getOutputFile();
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

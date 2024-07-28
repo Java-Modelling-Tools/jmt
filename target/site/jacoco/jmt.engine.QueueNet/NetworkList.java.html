@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetworkList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">NetworkList.java</span></div><h1>NetworkList.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import java.util.LinkedList;
+import java.util.ListIterator;
+
+/** This class implements a network list. Note that only classes of QueueNet
+ * package can add or remove objects to/from the list.
+ * @author Francesco Radaelli, Bertoli Marco
+ */
+public class NetworkList {
+
+	private LinkedList&lt;QueueNetwork&gt; networks;
+
+	/** Creates a new instance of NetworkList object
+	 */
+<span class="nc" id="L34">	NetworkList() {</span>
+<span class="nc" id="L35">		networks = new LinkedList&lt;QueueNetwork&gt;();</span>
+<span class="nc" id="L36">	}</span>
+
+	/** Adds a new network to the list.
+	 * @param Network Reference to the NetWork to be added.
+	 */
+	void add(QueueNetwork network) {
+<span class="nc" id="L42">		networks.add(network);</span>
+<span class="nc" id="L43">	}</span>
+
+	/** Removes a network from the list.
+	 * @param Network Reference to the Network to be removed.
+	 */
+	void remove(QueueNetwork network) {
+<span class="nc" id="L49">		networks.remove(network);</span>
+<span class="nc" id="L50">	}</span>
+
+	/** Gets first network in the list.
+	 * @return First network in the list.
+	 */
+	public QueueNetwork getFirst() {
+<span class="nc" id="L56">		return networks.getFirst();</span>
+	}
+
+	/** Gets last network in the list.
+	 * @return Last network in the list.
+	 */
+	public QueueNetwork getLast() {
+<span class="nc" id="L63">		return networks.getLast();</span>
+	}
+
+	/** Gets i-th network in the list.
+	 * @return Index-th network in the list.
+	 */
+	public QueueNetwork get(int index) {
+<span class="nc" id="L70">		return networks.get(index);</span>
+	}
+
+	/** Gets the network in the list, if it exists, which has the specified Name.
+	 * @return The network called &quot;Name&quot;. Returns Null if it does not exist.
+	 */
+	public QueueNetwork get(String name) {
+<span class="nc" id="L77">		ListIterator&lt;QueueNetwork&gt; iterator = networks.listIterator();</span>
+		QueueNetwork jc;
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		while (iterator.hasNext()) {</span>
+<span class="nc" id="L80">			jc = iterator.next();</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			if (jc.getName().compareTo(name) == 0) {</span>
+<span class="nc" id="L82">				return jc;</span>
+			}
+		}
+<span class="nc" id="L85">		return null;</span>
+	}
+
+	/** Gets list size.
+	 * @return Number of networks in the list.
+	 */
+	public int size() {
+<span class="nc" id="L92">		return networks.size();</span>
+	}
+
+	/**
+	 * Gets a list iterator
+	 *
+	 */
+	public ListIterator&lt;QueueNetwork&gt; listIterator() {
+<span class="nc" id="L100">		return networks.listIterator();</span>
+	}
+
+	/**Returns the index in this list of the first
+	 * occurrence of the specified element, or -1
+	 * if the List does not contain this element.
+	 */
+
+	int indexOf(QueueNetwork network) {
+<span class="nc" id="L109">		return networks.indexOf(network);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

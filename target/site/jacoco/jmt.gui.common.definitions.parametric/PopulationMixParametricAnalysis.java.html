@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PopulationMixParametricAnalysis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.parametric</a> &gt; <span class="el_source">PopulationMixParametricAnalysis.java</span></div><h1>PopulationMixParametricAnalysis.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.definitions.parametric;
+
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+
+/**
+ * &lt;p&gt;Title: PopulationMixParametricAnalysis&lt;/p&gt;
+ * &lt;p&gt;Description: this class is used to describe a parametric analysis where
+ * the varied parameter is the population mix between two closed classes.It
+ * adds the &lt;code &gt;classKey&lt;/code&gt; field used to keep the key of
+ * the Job-Class whose service time will be varied. This type of parametric
+ * simulation is available only when there are exactly two closed classes.&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 14-dic-2005
+ *         Time: 11.51.51
+ */
+public class PopulationMixParametricAnalysis extends ParametricAnalysisDefinition {
+<span class="nc" id="L42">	private final double FROM = 1;</span>
+<span class="nc" id="L43">	private final double TO = 0;</span>
+
+	private Object classKey;
+	private Object otherClassKey;
+	private int popValue;
+	private ValuesTable values;
+
+<span class="nc" id="L50">	public PopulationMixParametricAnalysis(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {</span>
+<span class="nc" id="L51">		type = PA_TYPE_POPULATION_MIX;</span>
+<span class="nc" id="L52">		classDef = cd;</span>
+<span class="nc" id="L53">		stationDef = sd;</span>
+<span class="nc" id="L54">		simDef = simd;</span>
+<span class="nc" id="L55">		classKey = cd.getClosedClassKeys().get(0);</span>
+<span class="nc" id="L56">		otherClassKey = cd.getClosedClassKeys().get(1);</span>
+<span class="nc" id="L57">		setDefaultInitialValue();</span>
+<span class="nc" id="L58">		setDefaultFinalValue();</span>
+<span class="nc" id="L59">		popValue = cd.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L60">		numberOfSteps = searchForAvailableSteps();</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L62">			numberOfSteps = MAX_STEP_NUMBER;</span>
+		}
+<span class="nc" id="L64">	}</span>
+
+	/**
+	 * Gets the class key of the job class whose number of jobs will be
+	 * increased.
+	 * @return the key of the class whose number of jobs will be increased
+	 */
+	@Override
+	public Object getReferenceClass() {
+<span class="nc" id="L73">		return classKey;</span>
+	}
+
+	/**
+	 * Sets the class whose number of jobs will be increased.
+	 * @param classKey the key of the class whose number of job will be
+	 *        increased
+	 */
+	public void setReferenceClass(Object classKey) {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if (this.classKey != classKey) {</span>
+<span class="nc" id="L83">			simDef.setSaveChanged();</span>
+		}
+<span class="nc" id="L85">		this.classKey = classKey;</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Sets default initial value
+	 */
+	public void setDefaultInitialValue() {
+<span class="nc" id="L92">		double pop = classDef.getClassPopulation(classKey).doubleValue();</span>
+<span class="nc" id="L93">		double totalPop = classDef.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L94">		initialValue = 0;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		if (totalPop &gt; 0) {</span>
+<span class="nc" id="L96">			initialValue = pop / totalPop;</span>
+		}
+<span class="nc" id="L98">	}</span>
+
+	/**
+	 * Sets default final value
+	 */
+	public void setDefaultFinalValue() {
+<span class="nc" id="L104">		finalValue = TO;</span>
+<span class="nc" id="L105">	}</span>
+
+	/**
+	 * Gets the type of parametric analysis
+	 *
+	 * @return the type of parametric analysis
+	 */
+	@Override
+	public String getType() {
+<span class="nc" id="L114">		return type;</span>
+	}
+
+	/**
+	 * returns the set of values that the varying parameter will assume
+	 * @return a structure containing the set of values that the varying parameter will assume
+	 */
+	public Object getValuesSet() {
+<span class="nc" id="L122">		return values;</span>
+	}
+
+	/**
+	 * Changes the model preparing it for the next step
+	 *
+	 */
+	@Override
+	public void changeModel(int step) {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">		if (step &gt;= numberOfSteps) {</span>
+<span class="nc" id="L132">			return;</span>
+		}
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (values != null) {</span>
+<span class="nc" id="L135">			int refPop = (int) values.getValue(classKey, step);</span>
+<span class="nc" id="L136">			int otherClassPop = classDef.getTotalClosedClassPopulation() - refPop;</span>
+<span class="nc" id="L137">			classDef.setClassPopulation(classKey, new Integer(refPop));</span>
+<span class="nc" id="L138">			classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));</span>
+<span class="nc" id="L139">			simDef.manageJobs();</span>
+		}
+<span class="nc" id="L141">	}</span>
+
+	/**
+	 * Gets the maximum number of steps compatible with the model definition and the type of parametric analysis.
+	 *
+	 * @return the maximum number of steps
+	 */
+	@Override
+	public int searchForAvailableSteps() {
+<span class="nc" id="L150">		float diff = Math.abs((float) initialValue - (float) finalValue);</span>
+<span class="nc" id="L151">		int steps = ((int) (classDef.getTotalClosedClassPopulation() * diff)) + 1;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		return (steps &lt; 2) ? 2 : steps;</span>
+	}
+
+	/**
+	 * Finds the set of possible values of the population on which the
+	 * simulation may be iterated on.
+	 *
+	 */
+	@Override
+	public void createValuesSet() {
+<span class="nc" id="L162">		Vector&lt;Object&gt; closeClasses = classDef.getClosedClassKeys();</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		otherClassKey = (closeClasses.get(0) != classKey) ? closeClasses.get(0) : closeClasses.get(1);</span>
+<span class="nc" id="L164">		int totalPop = classDef.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L165">		int initialClassPop = (int) Math.round(totalPop * initialValue);</span>
+<span class="nc" id="L166">		int initialOtherClassPop = totalPop - initialClassPop;</span>
+<span class="nc" id="L167">		values = new ValuesTable(classDef, closeClasses, numberOfSteps);</span>
+<span class="nc" id="L168">		double p = 0;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if (totalPop &gt; 0) {</span>
+<span class="nc" id="L170">			p = (finalValue - initialValue) / (numberOfSteps - 1) * totalPop;</span>
+		}
+<span class="nc" id="L172">		double sum = 0;</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="nc" id="L174">			double increment = (int) Math.round(sum);</span>
+<span class="nc" id="L175">			double value = initialClassPop + increment;</span>
+<span class="nc" id="L176">			double otherValue = initialOtherClassPop - increment;</span>
+<span class="nc" id="L177">			values.setValue(classKey, value);</span>
+<span class="nc" id="L178">			values.setValue(otherClassKey, otherValue);</span>
+<span class="nc" id="L179">			sum += p;</span>
+		}
+<span class="nc" id="L181">		originalValues = new Vector(2);</span>
+<span class="nc" id="L182">		int thisClassPop = classDef.getClassPopulation(classKey).intValue();</span>
+<span class="nc" id="L183">		int otherClassPop = totalPop - thisClassPop;</span>
+<span class="nc" id="L184">		((Vector&lt;Integer&gt;) originalValues).add(new Integer(thisClassPop));</span>
+<span class="nc" id="L185">		((Vector&lt;Integer&gt;) originalValues).add(new Integer(otherClassPop));</span>
+<span class="nc" id="L186">	}</span>
+
+	/**
+	 * Restore the original values of population
+	 */
+	@Override
+	public void restoreOriginalValues() {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">		if (originalValues != null) {</span>
+<span class="nc" id="L194">			Vector vals = (Vector) originalValues;</span>
+<span class="nc" id="L195">			int thisClassPop = ((Integer) vals.get(0)).intValue();</span>
+<span class="nc" id="L196">			int otherClassPop = ((Integer) vals.get(1)).intValue();</span>
+<span class="nc" id="L197">			classDef.setClassPopulation(classKey, new Integer(thisClassPop));</span>
+<span class="nc" id="L198">			classDef.setClassPopulation(otherClassKey, new Integer(otherClassPop));</span>
+<span class="nc" id="L199">			simDef.manageJobs();</span>
+		}
+<span class="nc" id="L201">	}</span>
+
+	/**
+	 * Checks if the PA model is still coherent with simulation model definition. If
+	 * the &lt;code&gt;autocorrect&lt;/code&gt; variable is set to true, if the PA model is no more
+	 * valid but it can be corrected it will be changed.
+	 *
+	 * @param autocorrect if true the PA model will be autocorrected 
+	 *
+	 * @return 0 - If the PA model is still valid &lt;br&gt;
+	 *          1 - If the PA model is no more valid, but it will be corrected &lt;br&gt;
+	 *          2 - If the PA model can be no more used
+	 */
+	@Override
+	public int checkCorrectness(boolean autocorrect) {
+<span class="nc" id="L216">		int code = 0;</span>
+<span class="nc" id="L217">		Vector&lt;Object&gt; closeClasses = classDef.getClosedClassKeys();</span>
+<span class="nc" id="L218">		int totalPop = classDef.getTotalClosedClassPopulation();</span>
+<span class="nc bnc" id="L219" title="All 4 branches missed.">		if (closeClasses.size() != 2 || totalPop &lt; 1) {</span>
+<span class="nc" id="L220">			code = 2; //This PA model can be no more used</span>
+		} else {
+			//if one of the two classes was changed..
+<span class="nc bnc" id="L223" title="All 4 branches missed.">			if (!closeClasses.contains(classKey) || !closeClasses.contains(otherClassKey)) {</span>
+<span class="nc" id="L224">				code = 1;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">				if (autocorrect) {</span>
+<span class="nc" id="L226">					classKey = closeClasses.get(0);</span>
+<span class="nc" id="L227">					otherClassKey = closeClasses.get(1);</span>
+<span class="nc" id="L228">					setDefaultInitialValue();</span>
+<span class="nc" id="L229">					setDefaultFinalValue();</span>
+<span class="nc" id="L230">					numberOfSteps = searchForAvailableSteps();</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">					if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L232">						numberOfSteps = MAX_STEP_NUMBER;</span>
+					}
+				}
+			} else {
+				//else, if the total number of jobs has changed re - calculate the number of steps
+<span class="nc bnc" id="L237" title="All 2 branches missed.">				if (popValue != totalPop) {</span>
+<span class="nc" id="L238">					code = 1;</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">					if (autocorrect) {</span>
+<span class="nc" id="L240">						setDefaultInitialValue();</span>
+<span class="nc" id="L241">						setDefaultFinalValue();</span>
+<span class="nc" id="L242">						numberOfSteps = searchForAvailableSteps();</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">						if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L244">							numberOfSteps = MAX_STEP_NUMBER;</span>
+						}
+<span class="nc" id="L246">						popValue = totalPop;</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L251">		return code;</span>
+	}
+
+	/**
+	 * Returns the values assumed by the varying parameter
+	 *
+	 * @return a Vector containing the values assumed by the varying parameter
+	 */
+	@Override
+	public Vector&lt;Number&gt; getParameterValues() {
+<span class="nc" id="L261">		Vector&lt;Number&gt; assumedValues = new Vector&lt;Number&gt;(numberOfSteps);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">		for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="nc" id="L263">			double tempThisClassPop = values.getValue(classKey, i);</span>
+<span class="nc" id="L264">			double tempOtherClassPop = values.getValue(otherClassKey, i);</span>
+<span class="nc" id="L265">			double sum = tempThisClassPop + tempOtherClassPop;</span>
+<span class="nc" id="L266">			double val = 0;</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">			if (sum &gt; 0) {</span>
+<span class="nc" id="L268">				val = tempThisClassPop / sum;</span>
+			}
+<span class="nc" id="L270">			assumedValues.add(new Double(val));</span>
+		}
+<span class="nc" id="L272">		return assumedValues;</span>
+	}
+
+	/**
+	 * Get the reference class name
+	 *
+	 * @return the name of the class
+	 */
+	@Override
+	public String getReferenceClassName() {
+<span class="nc" id="L282">		return classDef.getClassName(classKey);</span>
+	}
+
+	/**
+	 * Gets a TreeMap containing for each property its value. The supported properties are
+	 * defined as constants inside this class.
+	 * @return a TreeMap containing the value for each property
+	 */
+	@Override
+	public Map&lt;String, String&gt; getProperties() {
+<span class="nc" id="L292">		TreeMap&lt;String, String&gt; properties = new TreeMap&lt;String, String&gt;();</span>
+<span class="nc" id="L293">		properties.put(TYPE_PROPERTY, getType());</span>
+<span class="nc" id="L294">		properties.put(FROM_PROPERTY, Double.toString(initialValue));</span>
+<span class="nc" id="L295">		properties.put(TO_PROPERTY, Double.toString(finalValue));</span>
+<span class="nc" id="L296">		properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));</span>
+<span class="nc" id="L297">		properties.put(REFERENCE_CLASS_PROPERTY, classDef.getClassName(classKey));</span>
+<span class="nc" id="L298">		return properties;</span>
+	}
+
+	/**
+	 * Sets the value for the specified property
+	 *
+	 * @param propertyName the name of the property to be set. The supported properties are: &lt;br&gt;
+	 * - FROM_PROPERTY  &lt;br&gt;
+	 * - TO_PROPERTY  &lt;br&gt;
+	 * - STEPS_PROPERTY &lt;br&gt;
+	 * - REFERENCE_CLASS_PROPERTY
+	 * @param value the value to be set
+	 */
+	@Override
+	public void setProperty(String propertyName, String value) {
+<span class="nc bnc" id="L313" title="All 2 branches missed.">		if (propertyName.equals(FROM_PROPERTY)) {</span>
+<span class="nc" id="L314">			initialValue = Double.parseDouble(value);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">		} else if (propertyName.equals(TO_PROPERTY)) {</span>
+<span class="nc" id="L316">			finalValue = Double.parseDouble(value);</span>
+<span class="nc bnc" id="L317" title="All 2 branches missed.">		} else if (propertyName.equals(STEPS_PROPERTY)) {</span>
+<span class="nc" id="L318">			numberOfSteps = Integer.parseInt(value);</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">			if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L320">				numberOfSteps = MAX_STEP_NUMBER;</span>
+			}
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		} else if (propertyName.equals(REFERENCE_CLASS_PROPERTY)) {</span>
+<span class="nc" id="L323">			classKey = classDef.getClassByName(value);</span>
+<span class="nc" id="L324">			Vector&lt;Object&gt; closedClasses = classDef.getClosedClassKeys();</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">			otherClassKey = (closedClasses.get(0) != classKey) ? closedClasses.get(0) : closedClasses.get(1);</span>
+		}
+<span class="nc" id="L327">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

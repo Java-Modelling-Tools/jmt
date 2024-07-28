@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimSystem.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.simEngine</a> &gt; <span class="el_source">SimSystem.java</span></div><h1>SimSystem.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.simEngine;
+
+import java.util.Hashtable;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetSystem;
+
+/**
+ * This is the system class which manages the simulation. All
+ * the members of this class are static, so there is no need to
+ * create an instance of this class.
+ */
+<span class="nc" id="L36">public class SimSystem {</span>
+
+	private static final boolean DEBUG = false;
+
+	// Private data members
+	private List&lt;SimEntity&gt; entities; // The current entity list
+
+	private EventQueue future; // The future event queue
+
+	private EventQueue deferred; // The deferred event queue
+
+	private EventQueue timing; // The timing event queue
+
+	private double clock; // Holds the current global simulation time
+	private boolean running; // Tells whether the run() member been called yet
+	private NumberFormat nf;
+
+	// cache for the entity IDs
+<span class="nc" id="L54">	private Hashtable&lt;Integer,SimEntity&gt; entityIdHash = new Hashtable&lt;Integer,SimEntity&gt;();</span>
+	// cache for the entity Names
+<span class="nc" id="L56">	private Hashtable&lt;String,SimEntity&gt; entityNameHash = new Hashtable&lt;String,SimEntity&gt;();</span>
+
+	private NetSystem netSystem;
+	//
+	// Public library interface
+	//
+
+	// Initializes system
+	/** Initializes the system, this function works as a
+	 * constructor, and should be called at the start of any simulation
+	 * program. It comes in several flavours depending on what context
+	 * the simulation is running.&lt;P&gt;
+	 * This is the simplest, and should be used for standalone simulations
+	 * It sets up trace output to a file in the current directory called
+	 * `tracefile'
+	 */
+	public void initialize() {
+<span class="nc" id="L73">		entities = new ArrayList&lt;SimEntity&gt;();</span>
+
+		// future = new ListEventQueue();
+		// future = new CircularEventQueue();
+		// future = new SuperEventQueue();
+<span class="nc" id="L78">		future = new HybridEventQueue();</span>
+
+<span class="nc" id="L80">		deferred = new ListEventQueue();</span>
+
+<span class="nc" id="L82">		timing = new TimingEventQueue();</span>
+<span class="nc" id="L83">		((TimingEventQueue) timing).setEngine(netSystem.getEngine());</span>
+
+<span class="nc" id="L85">		clock = 0.0;</span>
+<span class="nc" id="L86">		running = false;</span>
+
+		// Set the default number format
+<span class="nc" id="L89">		nf = NumberFormat.getInstance();</span>
+<span class="nc" id="L90">		nf.setMaximumFractionDigits(4);</span>
+<span class="nc" id="L91">		nf.setMinimumFractionDigits(2);</span>
+<span class="nc" id="L92">	}</span>
+
+	/** Returns the number format used for generating
+	 * times in trace lines
+	 */
+	public NumberFormat getNumberFormat() {
+<span class="nc" id="L98">		return nf;</span>
+	}
+
+	// The two standard predicates
+	/** A standard predicate that matches any event. */
+<span class="nc" id="L103">	static final public SimAnyP SIM_ANY = new SimAnyP();</span>
+	/** A standard predicate that does not match any events. */
+<span class="nc" id="L105">	static final public SimNoneP SIM_NONE = new SimNoneP();</span>
+
+	// Public access methods
+
+	/** Get the current simulation time.
+	 * @return The simulation time
+	 */
+	public double clock() {
+<span class="nc" id="L113">		return clock;</span>
+	}
+
+	/** A different name for &lt;tt&gt;SimSystem.clock()&lt;/tt&gt;.
+	 * @return The current simulation time
+	 */
+	public double getClock() {
+<span class="nc" id="L120">		return clock;</span>
+	}
+
+	/** Gets the current number of entities in the simulation
+	 * @return A count of entities
+	 */
+	public int getNumEntities() {
+<span class="nc" id="L127">		return entities.size();</span>
+	}
+
+	/** Finds an entity by its id number.
+	 * @param id The entity's unique id number
+	 * @return A reference to the entity, or null if it could not be found
+	 */
+	final public SimEntity getEntity(int id) {
+<span class="nc" id="L135">		SimEntity found = entityIdHash.get(id);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if (found == null) {</span>
+<span class="nc" id="L137">			System.out.println(&quot;SimSystem: could not find entity &quot; + id);</span>
+		}
+<span class="nc" id="L139">		return found;</span>
+	}
+
+	/** Finds an entity by its name.
+	 * @param name The entity's name
+	 * @return A reference to the entity, or null if it could not be found
+	 */
+	public SimEntity getEntity(String name) {
+<span class="nc" id="L147">		SimEntity found = entityNameHash.get(name);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if (found == null) {</span>
+<span class="nc" id="L149">			System.out.println(&quot;SimSystem: could not find entity &quot; + name);</span>
+		}
+<span class="nc" id="L151">		return found;</span>
+	}
+
+	/** Adds a new entity to the simulation.
+	 * This is now done automatically in the SimEntity constructor,
+	 * so there is no need to call this explicitly.
+	 * @param e A reference to the new entity
+	 */
+	public void add(SimEntity e) {
+		SimEvent evt;
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		if (running()) {</span>
+			/* Post an event to make this entity */
+<span class="nc" id="L163">			evt = new SimEvent(SimEvent.CREATE, clock, e.getId(), 0, 0, e);</span>
+<span class="nc" id="L164">			future.add(evt);</span>
+		} else {
+<span class="nc" id="L166">			e.setId(entities.size());</span>
+<span class="nc" id="L167">			entities.add(e);</span>
+<span class="nc" id="L168">			entityIdHash.put(e.getId(), e);</span>
+<span class="nc" id="L169">			entityNameHash.put(e.getName(), e);</span>
+		}
+<span class="nc" id="L171">	}</span>
+
+	/** Adds a new entity to the simulation, when the simulation is running.
+	 * Note this is an internal method and should not be called from
+	 * user simulations. Use &lt;tt&gt;add()&lt;/tt&gt; instead to add entities
+	 * on the fly.
+	 * @param e A reference to the new entity
+	 */
+	synchronized void addEntityDynamically(SimEntity e) {
+<span class="nc" id="L180">		e.setId(entities.size());</span>
+<span class="nc" id="L181">		entities.add(e);</span>
+<span class="nc" id="L182">		entityIdHash.put(e.getId(), e);</span>
+<span class="nc" id="L183">		entityNameHash.put(e.getName(), e);</span>
+<span class="nc" id="L184">		e.start();</span>
+<span class="nc" id="L185">	}</span>
+
+	/**
+	 * Starts the simulation running, by calling the start() method of each entity.
+	 * Of course this should be called after all the entities have been setup and added,
+	 * and their ports linked.
+	 */
+	public void runStart() {
+		SimEntity ent;
+<span class="nc" id="L194">		running = true;</span>
+		// Start all the entities' threads
+		if (DEBUG) {
+			System.out.println(&quot;SimSystem: Starting entities&quot;);
+		}
+<span class="nc bnc" id="L199" title="All 2 branches missed.">		for (Iterator&lt;SimEntity&gt; it = entities.iterator(); it.hasNext();) {</span>
+<span class="nc" id="L200">			ent = it.next();</span>
+<span class="nc" id="L201">			ent.start();</span>
+		}
+<span class="nc" id="L203">	}</span>
+
+	/**
+	 * Runs one tick of the simulation: the system looks for events in the future queue.
+	 * @return &lt;tt&gt;false&lt;/tt&gt; if there are no more future events to be processed
+	 */
+	public boolean runTick() throws NetException {
+<span class="nc" id="L210">		double now = 0.0;</span>
+<span class="nc bnc" id="L211" title="All 4 branches missed.">		if (future.size() &gt; 0 &amp;&amp; timing.size() &gt; 0) {</span>
+<span class="nc" id="L212">			now = Math.min(future.peek().eventTime(), timing.peek().eventTime());</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		} else if (future.size() &gt; 0) {</span>
+<span class="nc" id="L214">			now = future.peek().eventTime();</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		} else if (timing.size() &gt; 0) {</span>
+<span class="nc" id="L216">			now = timing.peek().eventTime();</span>
+		} else {
+<span class="nc" id="L218">			running = false;</span>
+<span class="nc" id="L219">			return false;</span>
+		}
+
+<span class="nc" id="L222">		SimEvent event = null;</span>
+<span class="nc bnc" id="L223" title="All 4 branches missed.">		while (future.size() &gt; 0 &amp;&amp; future.peek().eventTime() == now) {</span>
+<span class="nc" id="L224">			event = future.pop();</span>
+<span class="nc" id="L225">			processEvent(event);</span>
+		}
+<span class="nc bnc" id="L227" title="All 4 branches missed.">		while (timing.size() &gt; 0 &amp;&amp; timing.peek().eventTime() == now) {</span>
+<span class="nc" id="L228">			future.add(timing.pop());</span>
+<span class="nc bnc" id="L229" title="All 4 branches missed.">			while (future.size() &gt; 0 &amp;&amp; future.peek().eventTime() == now) {</span>
+<span class="nc" id="L230">				event = future.pop();</span>
+<span class="nc" id="L231">				processEvent(event);</span>
+			}
+		}
+<span class="nc" id="L234">		return true;</span>
+	}
+
+	/** Stops the simulation, by calling the poison() method of each SimEntity.
+	 */
+	public void runStop() {
+		SimEntity ent;
+		// Attempt to kill all the entity threads
+<span class="nc bnc" id="L242" title="All 2 branches missed.">		for (Iterator&lt;SimEntity&gt; it = entities.iterator(); it.hasNext();) {</span>
+<span class="nc" id="L243">			ent = it.next();</span>
+<span class="nc" id="L244">			ent.poison();</span>
+		}
+		if (DEBUG) {
+			System.out.println(&quot;Exiting SimSystem.run()&quot;);
+		}
+<span class="nc" id="L249">	}</span>
+
+	//
+	// Package level methods
+	//
+
+	boolean running() {
+<span class="nc" id="L256">		return running;</span>
+	}
+
+	// Entity helper methods
+
+	synchronized RemoveToken hold(int src, double delay) {
+<span class="nc" id="L262">		SimEvent e = new SimEvent(SimEvent.HOLD_DONE, clock + delay, src);</span>
+<span class="nc" id="L263">		future.add(e);</span>
+<span class="nc" id="L264">		return new RemoveToken(e);</span>
+	}
+
+	synchronized RemoveToken send(int src, int dest, double delay, int tag, Object data) {
+<span class="nc" id="L268">		SimEvent e = new SimEvent(SimEvent.SEND, clock + delay, src, dest, tag, data);</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		if ((tag &amp; NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {</span>
+<span class="nc" id="L270">			timing.add(e);</span>
+		} else {
+<span class="nc" id="L272">			future.add(e);</span>
+		}
+<span class="nc" id="L274">		return new RemoveToken(e);</span>
+	}
+
+	/**
+	 * Given a remove token, this method will remove a future or deferred simulation event
+	 * @param token the remove token
+	 * @return true if the event was found and removed, false otherwise.
+	 */
+	synchronized boolean remove(RemoveToken token) {
+<span class="nc" id="L283">		SimEvent e = token.getEvent();</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">		if (token.isDeferred()) {</span>
+<span class="nc" id="L285">			return deferred.remove(e);</span>
+		} else {
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			if ((e.getTag() &amp; NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {</span>
+<span class="nc" id="L288">				return timing.remove(e);</span>
+			} else {
+<span class="nc" id="L290">				return future.remove(e);</span>
+			}
+		}
+	}
+
+	synchronized void wait(int src) {
+
+<span class="nc" id="L297">	}</span>
+
+	synchronized int waiting(int d, SimPredicate p) {
+<span class="nc" id="L300">		SimEvent ev = null;</span>
+<span class="nc" id="L301">		int w = 0;</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">		for (Object element : deferred) {</span>
+<span class="nc" id="L303">			ev = (SimEvent) element;</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">			if (ev.getDest() == d) {</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">				if (p.match(ev)) {</span>
+<span class="nc" id="L306">					w++;</span>
+				}
+			}
+<span class="nc" id="L309">		}</span>
+<span class="nc" id="L310">		return w;</span>
+	}
+
+	// Extract the first event whose destination is `src` on the
+	// deferred queue, matched by the `predicate`. And then put it
+	// into the `src`'s event buffer
+	synchronized void select(int src, SimPredicate p) {
+<span class="nc" id="L317">		SimEvent ev = null;</span>
+<span class="nc" id="L318">		boolean found = false;</span>
+
+		// retrieve + remove event with dest == src
+<span class="nc bnc" id="L321" title="All 4 branches missed.">		for (Iterator&lt;SimEvent&gt; it = deferred.iterator(); it.hasNext() &amp;&amp; !found;) {</span>
+<span class="nc" id="L322">			ev = it.next();</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">			if (ev.getDest() == src) {</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">				if (p.match(ev)) {</span>
+<span class="nc" id="L325">					deferred.remove(ev);</span>
+<span class="nc" id="L326">					found = true;</span>
+				}
+			}
+		}
+
+<span class="nc bnc" id="L331" title="All 2 branches missed.">		if (found) {</span>
+<span class="nc" id="L332">			entities.get(src).setEvbuf((SimEvent) ev.clone());</span>
+		} else {
+<span class="nc" id="L334">			entities.get(src).setEvbuf(null);</span>
+		}
+<span class="nc" id="L336">	}</span>
+
+	// Cancel the first event whose source is `src` on the
+	// future queue, matched by the `predicate`. Remove it and put it
+	// into the `src`'s event buffer
+	synchronized void cancel(int src, SimPredicate p) {
+<span class="nc" id="L342">		SimEvent ev = null;</span>
+<span class="nc" id="L343">		boolean found = false;</span>
+
+		// retrieves + remove event with dest == src
+<span class="nc bnc" id="L346" title="All 4 branches missed.">		for (Iterator&lt;SimEvent&gt; it = future.iterator(); it.hasNext() &amp;&amp; !found;) {</span>
+<span class="nc" id="L347">			ev = it.next();</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">			if (ev.getSrc() == src) {</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">				if (p.match(ev)) {</span>
+<span class="nc" id="L350">					it.remove();</span>
+<span class="nc" id="L351">					found = true;</span>
+				}
+			}
+		}
+
+<span class="nc bnc" id="L356" title="All 2 branches missed.">		if (found) {</span>
+<span class="nc" id="L357">			entities.get(src).setEvbuf((SimEvent) ev.clone());</span>
+		} else {
+<span class="nc" id="L359">			entities.get(src).setEvbuf(null);</span>
+		}
+<span class="nc" id="L361">	}</span>
+
+	RemoveToken putback(SimEvent ev) {
+<span class="nc" id="L364">		deferred.add(ev);</span>
+<span class="nc" id="L365">		return new RemoveToken(ev, true);</span>
+	}
+
+	//
+	// Private internal methods
+	//
+	// When ticks run to the nearest event in future/timing queue, call this to process it.
+	private void processEvent(SimEvent e) throws NetException {
+		int dest, src;
+		SimEntity destEnt;
+
+		// Update the system's clock
+<span class="nc bnc" id="L377" title="All 2 branches missed.">		if (e.eventTime() &lt; clock) {</span>
+<span class="nc" id="L378">			throw new NetException(&quot;SimSystem: Error - past event detected!\n&quot; + &quot;Time: &quot; + clock + &quot;, event time: &quot;</span>
+<span class="nc" id="L379">					+ e.eventTime() + &quot;, event type: &quot; + e.getType() + future);</span>
+		}
+<span class="nc" id="L381">		clock = e.eventTime();</span>
+
+		// Ok now process it
+<span class="nc bnc" id="L384" title="All 5 branches missed.">		switch (e.getType()) {</span>
+
+		case (SimEvent.SEND):
+			// Checks for matching wait
+<span class="nc" id="L388">			dest = e.getDest();</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">			if (dest &lt; 0) {</span>
+<span class="nc" id="L390">				throw new NetException(&quot;SimSystem: Error - attempt to send to a null entity&quot;);</span>
+			} else {
+<span class="nc" id="L392">				destEnt = entities.get(dest);</span>
+				//if the entity is WAITING for an event, check if there is a predicate.
+<span class="nc bnc" id="L394" title="All 2 branches missed.">				if (destEnt.getState() == SimEntity.WAITING) {</span>
+<span class="nc" id="L395">					SimPredicate p = destEnt.getWaitingPred();</span>
+
+<span class="nc bnc" id="L397" title="All 2 branches missed.">					if (p == null) {</span>
+						//the entity was waiting for a generic predicate
+<span class="nc" id="L399">						destEnt.setEvbuf((SimEvent) e.clone());</span>
+<span class="nc" id="L400">						destEnt.setState(SimEntity.RUNNABLE);</span>
+						try {
+<span class="nc" id="L402">							destEnt.execute();</span>
+<span class="nc" id="L403">						} catch (NetException e1) {</span>
+<span class="nc" id="L404">							abort();</span>
+<span class="nc" id="L405">							throw e1;</span>
+<span class="nc" id="L406">						}</span>
+					} else {
+						//the entity was waiting for events with a specified predicate
+						//this event matches with such predicate??
+<span class="nc bnc" id="L410" title="All 2 branches missed.">						if (destEnt.getWaitingPred().match(e)) {</span>
+<span class="nc" id="L411">							p = null;</span>
+<span class="nc" id="L412">							destEnt.setEvbuf((SimEvent) e.clone());</span>
+<span class="nc" id="L413">							destEnt.setState(SimEntity.RUNNABLE);</span>
+							try {
+<span class="nc" id="L415">								destEnt.execute();</span>
+<span class="nc" id="L416">							} catch (NetException e1) {</span>
+<span class="nc" id="L417">								abort();</span>
+<span class="nc" id="L418">								throw e1;</span>
+<span class="nc" id="L419">							}</span>
+						} else {
+							//the event does not match with the predicate, so it is put in the deferred queue
+<span class="nc" id="L422">							destEnt.simPutback(e);</span>
+						}
+					}
+<span class="nc" id="L425">				} else {</span>
+					//if the entity is not WAITING the event is put in the deferred queue
+<span class="nc" id="L427">					deferred.add(e);</span>
+				}
+			}
+<span class="nc" id="L430">			break;</span>
+
+		case (SimEvent.ENULL):
+<span class="nc" id="L433">			throw new NetException(&quot;SimSystem: Error - event has a null type&quot;);</span>
+
+		case (SimEvent.CREATE):
+<span class="nc" id="L436">			SimEntity newe = (SimEntity) e.getData();</span>
+<span class="nc" id="L437">			addEntityDynamically(newe);</span>
+<span class="nc" id="L438">			break;</span>
+
+		case (SimEvent.HOLD_DONE):
+<span class="nc" id="L441">			src = e.getSrc();</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">			if (src &lt; 0) {</span>
+<span class="nc" id="L443">				throw new NetException(&quot;SimSystem: Error - NULL entity holding&quot;);</span>
+			} else {
+<span class="nc" id="L445">				entities.get(src).setState(SimEntity.RUNNABLE);</span>
+<span class="nc" id="L446">				entities.get(src).restart();</span>
+			}
+			break;
+		}
+<span class="nc" id="L450">	}</span>
+
+	/**
+	 * Aborts the simulation!
+	 *
+	 */
+	public void abort() {
+<span class="nc" id="L457">		running = false;</span>
+		if (DEBUG) {
+			System.out.println(&quot;Simulation Aborted&quot;);
+		}
+<span class="nc" id="L461">	}</span>
+
+	public void setNetSystem(NetSystem netSystem) {
+<span class="nc" id="L464">		this.netSystem = netSystem;</span>
+<span class="nc" id="L465">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

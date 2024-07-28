@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwitchoverTimesTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">SwitchoverTimesTable.java</span></div><h1>SwitchoverTimesTable.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.table.editors.CheckBoxCellEditor;
+import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Exponential;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ServiceStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.util.Arrays;
+
+public class SwitchoverTimesTable extends JTable implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	protected Object stationKey;
+	protected StationDefinition data;
+	protected ClassDefinition classData;
+	protected Container panel;
+	protected ImagedComboBoxCellEditorFactory classEditor;
+	protected SwitchoverDistributionsTableModel tableModel;
+	protected boolean[] bulkSelected;
+
+	/**
+	 * This field is used to initialize elements shown on Service type selection - Bertoli Marco
+	 */
+<span class="nc" id="L62">	protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO, SERVICE_DISABLED };</span>
+
+<span class="nc" id="L64">	JButton editButton = new JButton(&quot;Edit&quot;);</span>
+
+	//editing of arrival time distribution
+<span class="nc" id="L67">	protected AbstractAction editDistribution = new AbstractAction(&quot;Edit&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L72">			putValue(Action.SHORT_DESCRIPTION, &quot;Edits Service Time Distribution&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L76">			SwitchoverTimesTable serviceTable = SwitchoverTimesTable.this;</span>
+			// ---- Bertoli Marco ----
+<span class="nc" id="L78">			int index = serviceTable.getSelectedRow();</span>
+<span class="nc bnc" id="L79" title="All 4 branches missed.">			if (index &gt;= 0 &amp;&amp; index &lt; serviceTable.getRowCount()) {</span>
+<span class="nc" id="L80">				Object fromClassKey = getFromClass(index);</span>
+<span class="nc" id="L81">				Object toClassKey = getToClass(index);</span>
+<span class="nc" id="L82">				Object service = data.getSwitchoverTimeDistribution(stationKey, getFromClass(index), getToClass(index));</span>
+				// If it is a Distribution, shows Distribution Editor
+<span class="nc bnc" id="L84" title="All 2 branches missed.">				if (service instanceof Distribution) {</span>
+<span class="nc" id="L85">					DistributionsEditor editor = DistributionsEditor.getInstance(panel.getParent(), (Distribution) service);</span>
+					// Sets editor window title
+<span class="nc" id="L87">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(fromClassKey) + &quot; to &quot;</span>
+<span class="nc" id="L88">							+ classData.getClassName(toClassKey) + &quot; Switchover Time Distribution...&quot;);</span>
+					// Shows editor window
+<span class="nc" id="L90">					editor.show();</span>
+					// Sets new Distribution to selected class
+<span class="nc" id="L92">					data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, editor.getResult());</span>
+
+					// Updates table view. This is needed as Distribution is not contained
+					// into edited cell (but in its left one)
+<span class="nc" id="L96">					serviceTable.repaint();</span>
+<span class="nc" id="L97">				}</span>
+				// Otherwise shows LDStrategy Editor
+				else {
+<span class="nc" id="L100">					LDStrategyEditor editor = LDStrategyEditor.getInstance(panel.getParent(), (LDStrategy) service);</span>
+					// Sets editor window title
+<span class="nc" id="L102">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(fromClassKey) + &quot; to &quot;</span>
+<span class="nc" id="L103">							+ classData.getClassName(toClassKey) + &quot; Load Dependent Switchover Time Strategy...&quot;);</span>
+					// Shows editor window
+<span class="nc" id="L105">					editor.show();</span>
+<span class="nc" id="L106">					serviceTable.repaint();</span>
+				}
+			}
+			// ---- end ----
+<span class="nc" id="L110">		}</span>
+
+	};
+
+<span class="nc" id="L114">	int[] columnSizes = new int[] { 5, 35, 35, 55, 100, 15 };</span>
+
+<span class="nc" id="L116">	public SwitchoverTimesTable(StationDefinition sd, ClassDefinition cd, Object stationKey, Container panel) {</span>
+<span class="nc" id="L117">		this.stationKey = stationKey;</span>
+<span class="nc" id="L118">		this.panel = panel;</span>
+<span class="nc" id="L119">		this.classEditor = new ImagedComboBoxCellEditorFactory(cd);</span>
+
+<span class="nc" id="L121">		int classes = cd.getClassKeys().size();</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (classes &gt; 0) {</span>
+<span class="nc" id="L123">			this.bulkSelected = new boolean[classes * (classes - 1)];</span>
+		} else {
+<span class="nc" id="L125">			this.bulkSelected = new boolean[0];</span>
+		}
+<span class="nc" id="L127">		Arrays.fill(this.bulkSelected, false);</span>
+
+<span class="nc" id="L129">		classEditor.setData(cd);</span>
+<span class="nc" id="L130">		data = sd;</span>
+<span class="nc" id="L131">		classData = cd;</span>
+
+<span class="nc" id="L133">		tableModel = new SwitchoverDistributionsTableModel();</span>
+
+<span class="nc" id="L135">		setModel(tableModel);</span>
+<span class="nc" id="L136">		sizeColumns();</span>
+<span class="nc" id="L137">		setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L138">		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L139">		getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L140">	}</span>
+
+	@Override
+	public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		if (column == 0) {</span>
+<span class="nc" id="L145">			return CheckBoxCellEditor.getRendererInstance();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">		} if (column == 1) {</span>
+<span class="nc" id="L147">			return classEditor.getRenderer();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		}  else if (column == 2) {</span>
+<span class="nc" id="L149">			return classEditor.getRenderer();</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		} else if (column == 3) {</span>
+<span class="nc" id="L151">			return ComboBoxCellEditor.getRendererInstance();</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		} else if (column == 5) {</span>
+<span class="nc" id="L153">			return new DisabledButtonCellRenderer(editButton);</span>
+		} else {
+<span class="nc" id="L155">			return super.getCellRenderer(row, column);</span>
+		}
+	}
+
+	@Override
+	public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		if (column == 0) {</span>
+<span class="nc" id="L162">			return CheckBoxCellEditor.getEditorInstance();</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		} else if (column == 3) {</span>
+<span class="nc" id="L164">			return ComboBoxCellEditor.getEditorInstance(serviceType);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		} else if (column == 5) {</span>
+<span class="nc" id="L166">			return new ButtonCellEditor(new JButton(editDistribution));</span>
+		} else {
+<span class="nc" id="L168">			return super.getCellEditor(row, column);</span>
+		}
+	}
+
+	private void sizeColumns() {
+<span class="nc bnc" id="L173" title="All 4 branches missed.">		for (int i = 0; i &lt; columnSizes.length &amp;&amp; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L174">			this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);</span>
+		}
+<span class="nc" id="L176">	}</span>
+
+	/**
+	 * Model used to modify switchover time distributions
+	 */
+<span class="nc" id="L181">	protected class SwitchoverDistributionsTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L185">		protected String[] columnNames = new String[] { &quot;Bulk Edit&quot;, &quot;Class From&quot;, &quot;Class To&quot;, &quot;Strategy&quot;, &quot;Switchover Time Distribution&quot;, &quot;&quot; };</span>
+<span class="nc" id="L186">		private final Class&lt;?&gt;[] columnClasses = new Class[] { Object.class, String.class, String.class, String.class, String.class, Object.class };</span>
+
+		public int getRowCount() {
+<span class="nc" id="L189">			int classes = classData.getClassKeys().size();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">			if (classes &gt; 0) {</span>
+<span class="nc" id="L191">				return classes * (classes - 1);</span>
+			}
+<span class="nc" id="L193">			return 0;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L197">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L202">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L207">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L212">			Object fromClassKey = getFromClass(rowIndex);</span>
+<span class="nc" id="L213">			Object toClassKey = getToClass(rowIndex);</span>
+<span class="nc" id="L214">			Object currentDist = data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey);</span>
+<span class="nc bnc" id="L215" title="All 4 branches missed.">			if (columnIndex == 0 || columnIndex == 3) {</span>
+<span class="nc" id="L216">				return true;</span>
+			} else {
+<span class="nc bnc" id="L218" title="All 6 branches missed.">				return columnIndex == 5 &amp;&amp; !(currentDist instanceof ZeroStrategy) &amp;&amp; !(currentDist instanceof DisabledStrategy);</span>
+			}
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L223">			Object fromClassKey = getFromClass(rowIndex);</span>
+<span class="nc" id="L224">			Object toClassKey = getToClass(rowIndex);</span>
+<span class="nc bnc" id="L225" title="All 6 branches missed.">			switch (columnIndex) {</span>
+			case (0):
+<span class="nc" id="L227">				return bulkSelected[rowIndex];</span>
+			case (1):
+<span class="nc" id="L229">				return fromClassKey;</span>
+			case (2):
+<span class="nc" id="L231">				return toClassKey;</span>
+			case (3):
+				// Checks if current service section is load dependent or independent
+<span class="nc bnc" id="L234" title="All 2 branches missed.">				if (data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof LDStrategy) {</span>
+<span class="nc" id="L235">					return SERVICE_LOAD_DEPENDENT;</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">				} else if (data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof ZeroStrategy) {</span>
+<span class="nc" id="L237">					return SERVICE_ZERO;</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">				} else if (data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof DisabledStrategy) {</span>
+<span class="nc" id="L239">					return SERVICE_DISABLED;</span>
+				} else {
+<span class="nc" id="L241">					return SERVICE_LOAD_INDEPENDENT;</span>
+				}
+			case (4):
+<span class="nc" id="L244">				return data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey);</span>
+			}
+<span class="nc" id="L246">			return null;</span>
+		}
+
+		/**Puts edited values to the underlying data structure for model implementation*/
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L252">			Object fromClassKey = getFromClass(rowIndex);</span>
+<span class="nc" id="L253">			Object toClassKey = getToClass(rowIndex);</span>
+<span class="nc bnc" id="L254" title="All 3 branches missed.">			switch (columnIndex) {</span>
+			// Load dependency
+			case (0):
+<span class="nc" id="L257">				bulkSelected[rowIndex] = (boolean) aValue;</span>
+<span class="nc" id="L258">			repaint();</span>
+<span class="nc" id="L259">			break;</span>
+			case (3):
+<span class="nc bnc" id="L261" title="All 2 branches missed.">				if (((String) aValue).equals(SERVICE_LOAD_DEPENDENT)) {</span>
+					// Puts a Load Dependent Service Strategy only if previously it was different
+<span class="nc bnc" id="L263" title="All 2 branches missed.">					if (!(data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof LDStrategy)) {</span>
+<span class="nc" id="L264">						data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, new LDStrategy());</span>
+					}
+<span class="nc bnc" id="L266" title="All 2 branches missed.">				} else if (((String) aValue).equals(SERVICE_ZERO)) {</span>
+					// Puts a Zero Service Time Strategy only if previously it was different
+<span class="nc bnc" id="L268" title="All 2 branches missed.">					if (!(data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof ZeroStrategy)) {</span>
+<span class="nc" id="L269">						data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, new ZeroStrategy());</span>
+					}
+<span class="nc bnc" id="L271" title="All 2 branches missed.">				} else if (((String) aValue).equals(SERVICE_DISABLED)) {</span>
+					// Puts a Disabled Service Time Strategy only if previously it was different
+<span class="nc bnc" id="L273" title="All 2 branches missed.">					if (!(data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof DisabledStrategy)) {</span>
+<span class="nc" id="L274">						data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, new DisabledStrategy());</span>
+					}
+				} else {
+					// Puts the default service strategy only if previously it was different
+<span class="nc bnc" id="L278" title="All 2 branches missed.">					if (!(data.getSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey) instanceof Distribution)) {</span>
+<span class="nc" id="L279">						Object distribution = new Exponential();</span>
+<span class="nc" id="L280">						data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, distribution);</span>
+					}
+				}
+<span class="nc" id="L283">			repaint();</span>
+			}
+<span class="nc" id="L285">		}</span>
+
+	}
+
+	private Object getFromClass(int rowIndex) {
+<span class="nc" id="L290">		int classCount = classData.getClassKeys().size();</span>
+<span class="nc" id="L291">		int fromIndex = rowIndex / (classCount - 1);</span>
+<span class="nc" id="L292">		return classData.getClassKeys().get(fromIndex);</span>
+	}
+
+	private Object getToClass(int rowIndex) {
+<span class="nc" id="L296">		int classCount = classData.getClassKeys().size();</span>
+<span class="nc" id="L297">		int fromIndex = rowIndex / (classCount - 1);</span>
+<span class="nc" id="L298">		int toIndex = rowIndex % (classCount - 1);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		if (toIndex &gt;= fromIndex) {</span>
+<span class="nc" id="L300">			toIndex += 1;</span>
+		}
+<span class="nc" id="L302">		return classData.getClassKeys().get(toIndex);</span>
+	}
+
+	public void applyBulkSelected(ServiceStrategy dist) {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">		for (int i = 0; i &lt; bulkSelected.length; i++) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">			if (bulkSelected[i]) {</span>
+<span class="nc" id="L308">				Object fromClassKey = getFromClass(i);</span>
+<span class="nc" id="L309">				Object toClassKey = getToClass(i);</span>
+<span class="nc" id="L310">				data.setSwitchoverTimeDistribution(stationKey, fromClassKey, toClassKey, dist.clone());</span>
+			}
+		}
+<span class="nc" id="L313">		repaint();</span>
+<span class="nc" id="L314">	}</span>
+
+	protected class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+<span class="nc" id="L322">		public DisabledButtonCellRenderer(JButton jbutt) {</span>
+<span class="nc" id="L323">			super(jbutt);</span>
+<span class="nc" id="L324">			button = jbutt;</span>
+<span class="nc" id="L325">		}</span>
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L329" title="All 2 branches missed.">			if (table.isCellEditable(row, column)) {</span>
+<span class="nc" id="L330">				button.setEnabled(true);</span>
+			} else {
+<span class="nc" id="L332">				button.setEnabled(false);</span>
+			}
+<span class="nc" id="L334">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

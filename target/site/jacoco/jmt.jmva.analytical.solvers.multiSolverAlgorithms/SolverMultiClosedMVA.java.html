@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverMultiClosedMVA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.multiSolverAlgorithms</a> &gt; <span class="el_source">SolverMultiClosedMVA.java</span></div><h1>SolverMultiClosedMVA.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
+
+import jmt.jmva.analytical.solvers.SolverMulti;
+
+import java.util.Arrays;
+import java.util.Map;
+
+import static jmt.jmva.analytical.solvers.utilities.MVAPopulationUtil.*;
+
+/**
+ * Solves a multiclass closed model, using MVA algorithm.
+ * @author  Federico Granata, Stefano Omini
+ */
+public class SolverMultiClosedMVA extends SolverMulti {
+
+<span class="nc" id="L34">	public final boolean DEBUG = false;</span>
+
+	//array of population for every class
+	private int[] population;
+
+	//sum af all populations
+<span class="nc" id="L40">	private int totPop = 0;</span>
+
+<span class="nc" id="L42">	private int maxIndex = -1;</span>
+
+	//number of states
+<span class="nc" id="L45">	private int memory = 1;</span>
+
+	// all populations required for MVA algorithm
+	private int[][] populations;
+
+	// demands vector
+	private double[][] demand;
+
+	// Map of population vector to queue length vector
+	private Map&lt;Integer, double[][]&gt; Q;
+	// TODO: maybe use array instead of a map
+
+	// Maximum population
+	private int maxPop;
+
+	// queue length time proportions
+	// for the final population with lastClass-1
+	// needed for calculating utilisations of last closed class
+	private double[][] lastClassPc;
+
+	/** Creates new SolverMultiClosedMVA
+	 *  @param  stations    number of service centers
+	 *  @param  classes     number of classes
+	 */
+	public SolverMultiClosedMVA(int classes, int stations) {
+<span class="nc" id="L70">		super(classes, stations);</span>
+<span class="nc" id="L71">		population = new int[classes];</span>
+<span class="nc" id="L72">	}</span>
+
+	//TODO: warning, it cannot handle classes with zero jobs
+	/** initializes the Multi class solver with the system parameters.
+	 * @param  n   array of names of the service centers.
+	 * @param  t   array of types (LD or LI) of the service centers.
+	 * @param  s   matrix of service time of the service centers.
+	 * @param  v   matrix of visits to the service centers.
+	 * @param pop  array of populations of each class
+	 * @return true if the operation is completed with success
+	 */
+	public boolean input(String[] n, int[] t, double[][][] s, double[][] v, int[] pop) {
+<span class="nc" id="L84">		maxPop = 0;</span>
+<span class="nc" id="L85">		int lastClass = classes - 1;</span>
+
+<span class="nc bnc" id="L87" title="All 8 branches missed.">		if ((n.length != stations) || (t.length != stations) || (s.length != stations) || (v.length != stations)) {</span>
+<span class="nc" id="L88">			return false; // wrong input.</span>
+		}
+
+<span class="nc" id="L91">		System.arraycopy(n, 0, name, 0, stations);</span>
+<span class="nc" id="L92">		System.arraycopy(t, 0, type, 0, stations);</span>
+
+		//OLD
+		//for (int c = 0; c &lt; classes; c++)
+		//	totPop += pop[c];
+
+		//NEW
+		//@author Stefano Omini
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			if (pop[c] &gt; 0) {</span>
+<span class="nc" id="L102">				totPop += pop[c];</span>
+			} else {
+<span class="nc" id="L104">				System.out.println(&quot;Error: class population must be greater than 0.&quot;);</span>
+<span class="nc" id="L105">				return false;</span>
+			}
+
+		}
+		//end NEW
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+			//DEK (Federico Granata) 26-09-2003
+			//for (int j = 0; j &lt; classes; j++)
+			//	servTime[i][j] = new double[totPop];
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if (t[i] == LD) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L117">					servTime[i][j] = new double[totPop+1];</span>
+				}
+			} else {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L121">					servTime[i][j] = new double[1];</span>
+					//end
+				}
+			}
+		}
+
+<span class="nc" id="L127">		System.arraycopy(pop, 0, population, 0, pop.length);</span>
+		//finds out the class with maximum population
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+			//OLD
+			//if (population[c] &gt; maxPop) {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			if (population[c] &gt;= maxPop) {</span>
+<span class="nc" id="L133">				maxPop = population[c];</span>
+<span class="nc" id="L134">				maxIndex = c;</span>
+			}
+		}
+
+		//moves in the last position the class with maximum population
+		//TODO: why? (to optimize the memory consumption moving intelligently on the state space)
+<span class="nc" id="L140">		population[lastClass] = pop[maxIndex];</span>
+<span class="nc" id="L141">		population[maxIndex] = pop[lastClass];</span>
+
+		//computes the number of states
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (c != maxIndex) {</span>
+<span class="nc" id="L146">				memory *= (pop[c] + 1);</span>
+			}
+		}
+
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L151">			System.arraycopy(v[i], 0, visits[i], 0, lastClass);</span>
+<span class="nc" id="L152">			visits[i][lastClass] = v[i][maxIndex];</span>
+<span class="nc" id="L153">			visits[i][maxIndex] = v[i][lastClass];</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			if (type[i] == LD) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">				for (int j = 0; j &lt; lastClass; j++) {</span>
+<span class="nc" id="L156">					System.arraycopy(s[i][j], 0, servTime[i][j], 1, s[i][j].length);</span>
+				}
+<span class="nc" id="L158">				System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 1, s[i][maxIndex].length);</span>
+<span class="nc" id="L159">				System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 1, s[i][lastClass].length);</span>
+
+			}
+			else {
+<span class="nc bnc" id="L163" title="All 2 branches missed.">				for (int j = 0; j &lt; lastClass; j++) {</span>
+<span class="nc" id="L164">					System.arraycopy(s[i][j], 0, servTime[i][j], 0, s[i][j].length);</span>
+				}
+<span class="nc" id="L166">				System.arraycopy(s[i][maxIndex], 0, servTime[i][lastClass], 0, s[i][maxIndex].length);</span>
+<span class="nc" id="L167">				System.arraycopy(s[i][lastClass], 0, servTime[i][maxIndex], 0, s[i][lastClass].length);</span>
+			}
+
+
+		}
+<span class="nc" id="L172">		lastClassPc = new double[stations][totPop+1];</span>
+
+<span class="nc" id="L174">		populations = generatePopulations(population);</span>
+<span class="nc" id="L175">		computeDemands();</span>
+<span class="nc" id="L176">		initialiseQueueMap();</span>
+<span class="nc" id="L177">		return true;</span>
+	}
+
+	//NEW
+	//@author Stefano Omini
+
+	/**
+	 * A system is said to have sufficient capacity to process a given load
+	 * &lt;tt&gt;lambda&lt;/tt&gt; if no service center is saturated as a result of the combined loads
+	 * of all the classes.
+	 * &lt;br&gt;
+	 * Must be implemented to create a multi class model solver.
+	 * &lt;br&gt;
+	 * WARNING: This method should be called before solving the system.
+	 * @return true if sufficient capacity exists for the given workload, false otherwise
+	 *
+	 *
+	 */
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		//only closed class: no saturation
+<span class="nc" id="L198">		return true;</span>
+	}
+
+	//end NEW
+
+	/**
+	 * Solves the model
+	 * &lt;br&gt;
+	 * &quot;input(...)&quot; method must have been called before solving the model!!&lt;br&gt;&lt;br&gt;
+	 */
+	@Override
+	public void solve() {
+<span class="nc" id="L210">		long startTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">		for (int i = 1; i &lt; populations.length; i++) {</span>
+<span class="nc" id="L212">			computeResidenceTime(populations[i]);</span>
+<span class="nc" id="L213">			computeThroughput(populations[i]);</span>
+<span class="nc" id="L214">			computeMeanQueueLengths(populations[i]);</span>
+		}
+<span class="nc" id="L216">		computeFinalThroughputAndQueueLen();</span>
+<span class="nc" id="L217">		computeUtilisation();</span>
+<span class="nc" id="L218">		computeStationParams();</span>
+<span class="nc" id="L219">		restoreClassOrder();</span>
+<span class="nc" id="L220">		computeSystemParams();</span>
+<span class="nc" id="L221">		long endTime = System.currentTimeMillis();</span>
+		//System.out.println((double)(endTime - startTime)/1000);
+<span class="nc" id="L223">	}</span>
+
+
+	/**
+	 * Initialises a map of population to an array of queue lengths, Qk, for load independent stations
+	 * and an array of proportion of times, pk(j|n), for load dependent stations
+	 */
+	private void initialiseQueueMap() {
+<span class="nc" id="L231">		Q = getNewEmptyQueueMapNonPriority(populations, maxPop, totPop, type);</span>
+<span class="nc" id="L232">	}</span>
+
+	/**
+	 * Computes demands for each station and customer class for load independent stations
+	 */
+	private void computeDemands() {
+<span class="nc" id="L238">		demand = new double[stations][classes];</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">				if (type[m] == LD) {</span>
+<span class="nc" id="L242">					demand[m][c] = visits[m][c] * servTime[m][c][1];</span>
+				} else {
+<span class="nc" id="L244">					demand[m][c] = visits[m][c] * servTime[m][c][0];</span>
+				}
+			}
+		}
+<span class="nc" id="L248">	}</span>
+
+	/**
+	 * Computes the total number of customers for a particular population
+	 * @param pop - population array, number of customers in each customer class
+	 * @return the total number of customers
+	 */
+	private int numberOfCustomers(int[] pop) {
+<span class="nc" id="L256">		int nCust = 0;</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L258">			nCust += pop[i];</span>
+		}
+<span class="nc" id="L260">		return nCust;</span>
+	}
+
+	/**
+	 * Computes the residence time for Load Independent stations
+	 * @param c - customer class
+	 * @param m - service station
+	 * @param pop - population array
+	 */
+	private void computeResidenceTimeLI(int c, int m, int[] pop) {
+<span class="nc" id="L270">		pop[c]--;</span>
+<span class="nc" id="L271">		residenceTime[m][c] = demand[m][c] * (1.0 + Q.get(popHashCode(pop, maxPop))[m][0]);</span>
+<span class="nc" id="L272">		pop[c]++;</span>
+<span class="nc" id="L273">	}</span>
+
+	/**
+	 * Computes the residence time for Load Dependent stations
+	 * @param c - customer class
+	 * @param m - service station
+	 * @param pop - population array
+	 * @param nCust - total number of customers in pop
+	 */
+	private void computeResidenceTimeLD(int c, int m, int[] pop, int nCust) {
+		double residTimeSum;
+<span class="nc" id="L284">		pop[c]--;</span>
+<span class="nc" id="L285">		residTimeSum = 0;</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">		for (int i = 1; i &lt;= nCust; i++) {</span>
+<span class="nc" id="L287">			residTimeSum += (i * servTime[m][c][i]) * Q.get(popHashCode(pop, maxPop))[m][i-1];</span>
+		}
+<span class="nc" id="L289">		residenceTime[m][c] = visits[m][c] * residTimeSum;</span>
+<span class="nc" id="L290">		pop[c]++;</span>
+<span class="nc" id="L291">	}</span>
+
+	/**
+	 * Computes the residence times for all stations and classes
+	 * @param pop - population array
+	 */
+	private void computeResidenceTime(int[] pop) {
+<span class="nc" id="L298">		int nCust = numberOfCustomers(pop);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">				if (pop[c] &gt; 0) {</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">					if (type[m] == LI) computeResidenceTimeLI(c, m, pop);</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">					else if (type[m] == LD) computeResidenceTimeLD(c, m, pop, nCust);</span>
+<span class="nc" id="L304">					else residenceTime[m][c] = demand[m][c];</span>
+				}
+<span class="nc" id="L306">				else residenceTime[m][c] = 0;</span>
+			}
+		}
+<span class="nc" id="L309">	}</span>
+
+	/**
+	 * Computes throughput of each class
+	 * @param pop - population array
+	 */
+	private void computeThroughput(int[] pop) {
+		double residenceTimeSum;
+<span class="nc bnc" id="L317" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L318">			residenceTimeSum = 0;</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L320">				residenceTimeSum += residenceTime[m][c];</span>
+			}
+<span class="nc bnc" id="L322" title="All 4 branches missed.">			if (residenceTimeSum != 0 &amp;&amp; pop[c] &gt; 0) {</span>
+<span class="nc" id="L323">				clsThroughput[c] = pop[c] / residenceTimeSum;</span>
+			} else {
+<span class="nc" id="L325">				clsThroughput[c] = 0;</span>
+			}
+
+		}
+<span class="nc" id="L329">	}</span>
+
+	/**
+	 * Computes proportion of time the centre m has i customers present
+	 * given there are nCust customers in total. (Load Dependent stations)
+	 * @param m - service station
+	 * @param pop - population array
+	 * @param nCust - total number of customers
+	 */
+	private void computeTimeProportions(int m, int[] pop, int nCust) {
+<span class="nc" id="L339">		double pSum = 0;</span>
+		double cSum;
+<span class="nc" id="L341">		double[] tempQ = new double[totPop+1];</span>
+<span class="nc bnc" id="L342" title="All 2 branches missed.">		for (int i = 1; i &lt;= nCust; i++) {</span>
+<span class="nc" id="L343">			cSum = 0;</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">				if (pop[c] &gt; 0) {</span>
+<span class="nc" id="L346">					pop[c]--;</span>
+<span class="nc" id="L347">					cSum += (clsThroughput[c] * servTime[m][c][i]) * Q.get(popHashCode(pop, maxPop))[m][i-1];</span>
+<span class="nc" id="L348">					pop[c]++;</span>
+				}
+			}
+<span class="nc" id="L351">			tempQ[i] = cSum;</span>
+<span class="nc" id="L352">			pSum += cSum;</span>
+		}
+<span class="nc" id="L354">		tempQ[0] = 1 - pSum;</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		if (Arrays.equals(population, pop)) {</span>
+<span class="nc" id="L356">			lastClassPc[m] = Q.get(popHashCode(pop, maxPop))[m];</span>
+		}
+<span class="nc" id="L358">		Q.get(popHashCode(pop, maxPop))[m] = tempQ;</span>
+<span class="nc" id="L359">	}</span>
+
+	/**
+	 * Computes mean queue length of a station. (Load Independent Stations)
+	 * @param m - service station
+	 * @param pop - population array
+	 */
+	private void computeMeanQueueLength(int m, int[] pop) {
+<span class="nc" id="L367">		double queueLengthSum = 0;</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L369">			queueLengthSum += clsThroughput[c] * residenceTime[m][c];</span>
+		}
+<span class="nc" id="L371">		Q.get(popHashCode(pop, maxPop))[m][0] = queueLengthSum;</span>
+<span class="nc" id="L372">	}</span>
+
+	/**
+	 * Computes mean queue length of each station
+	 * @param pop - population array
+	 */
+	private void computeMeanQueueLengths(int[] pop) {
+<span class="nc" id="L379">		int nCust = numberOfCustomers(pop);</span>
+<span class="nc bnc" id="L380" title="All 2 branches missed.">		for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">			if (type[m] == LD) computeTimeProportions(m, pop, nCust);</span>
+<span class="nc" id="L382">			else computeMeanQueueLength(m, pop);</span>
+		}
+<span class="nc" id="L384">	}</span>
+
+	/**
+	 * Computes stations specific parameters after MVA has terminated
+	 */
+	private void computeStationParams() {
+<span class="nc bnc" id="L390" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L392">				scThroughput[m] += throughput[m][c];</span>
+<span class="nc" id="L393">				scUtilization[m] += utilization[m][c];</span>
+<span class="nc" id="L394">				scResidTime[m] += residenceTime[m][c];</span>
+<span class="nc" id="L395">				scQueueLen[m] += queueLen[m][c];</span>
+			}
+		}
+<span class="nc" id="L398">	}</span>
+
+	private void computeFinalThroughputAndQueueLen() {
+<span class="nc bnc" id="L401" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L403">				throughput[m][c] = clsThroughput[c] * visits[m][c];</span>
+<span class="nc" id="L404">				queueLen[m][c] = clsThroughput[c] * residenceTime[m][c];</span>
+			}
+		}
+<span class="nc" id="L407">	}</span>
+
+	private void computeUtilisation() {
+		int c;
+<span class="nc bnc" id="L411" title="All 2 branches missed.">		for (c = 0; c &lt; classes-1; c++) {</span>
+<span class="nc" id="L412">			population[c]--;</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L414">				utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">				if (type[m] == LD) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">					for (int n = 1; n &lt;= totPop; n++) {</span>
+<span class="nc" id="L417">						utilization[m][c] += demand[m][c] * clsThroughput[c] * Q.get(popHashCode(population,maxPop))[m][n-1];</span>
+					}
+<span class="nc" id="L419">					population[c]++;</span>
+				}
+			}
+<span class="nc" id="L422">			population[c]++;</span>
+		}
+<span class="nc bnc" id="L424" title="All 2 branches missed.">		for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L425">			utilization[m][c] = throughput[m][c] * servTime[m][c][0]; // Umc=Xmc*Smc</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">			if (type[m] == LD) {</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">				for (int n = 1; n &lt;= totPop; n++) {</span>
+<span class="nc" id="L428">					utilization[m][c] += demand[m][c] * clsThroughput[c] * lastClassPc[m][n-1];</span>
+				}
+			}
+		}
+
+<span class="nc" id="L433">	}</span>
+
+	/**
+	 * Restores class order for correct output of computed parameters
+	 */
+	private void restoreClassOrder() {
+		double temp;
+<span class="nc" id="L440">		int lastClass = classes - 1;</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">		for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L442">			temp = throughput[m][maxIndex];</span>
+<span class="nc" id="L443">			throughput[m][maxIndex] = throughput[m][lastClass];</span>
+<span class="nc" id="L444">			throughput[m][lastClass] = temp;</span>
+<span class="nc" id="L445">			temp = utilization[m][maxIndex];</span>
+<span class="nc" id="L446">			utilization[m][maxIndex] = utilization[m][lastClass];</span>
+<span class="nc" id="L447">			utilization[m][lastClass] = temp;</span>
+<span class="nc" id="L448">			temp = queueLen[m][maxIndex];</span>
+<span class="nc" id="L449">			queueLen[m][maxIndex] = queueLen[m][lastClass];</span>
+<span class="nc" id="L450">			queueLen[m][lastClass] = temp;</span>
+<span class="nc" id="L451">			temp = residenceTime[m][maxIndex];</span>
+<span class="nc" id="L452">			residenceTime[m][maxIndex] = residenceTime[m][lastClass];</span>
+<span class="nc" id="L453">			residenceTime[m][lastClass] = temp;</span>
+		}
+<span class="nc" id="L455">	}</span>
+
+	/**
+	 * Computes system parameters after MVA has terminated
+	 */
+	private void computeSystemParams() {
+<span class="nc" id="L461">		sysResponseTime = 0;</span>
+<span class="nc" id="L462">		sysNumJobs = 0;</span>
+
+<span class="nc bnc" id="L464" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">			for (int m = 0; m &lt; stations; m++) {</span>
+<span class="nc" id="L466">				clsRespTime[c] += residenceTime[m][c];</span>
+<span class="nc" id="L467">				sysNumJobs += queueLen[m][c];</span>
+			}
+<span class="nc" id="L469">			sysResponseTime += clsRespTime[c];</span>
+		}
+
+<span class="nc" id="L472">		sysThroughput = sysNumJobs / sysResponseTime;</span>
+<span class="nc" id="L473">	}</span>
+
+
+	/** generates a string with all the calculated indices.
+	 * @return the string
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L481">		return super.toString();</span>
+//		if (!intermediate_results) {
+//			//if intermediate results have not been saved, do not write them!
+//			return super.toString();
+//		}
+//		StringBuffer buf = new StringBuffer();
+//		buf.append(&quot;\n------------------------------------&quot;);
+//		buf.append(&quot;\nAnalysis with MVA Multiclass: intermediate results&quot;);
+//		buf.append(&quot;\n\n&quot;);
+//		return buf.toString();
+	}
+
+
+	public static int[] pprod(int[] N) {
+<span class="nc" id="L495">		int[] state = new int[N.length];</span>
+<span class="nc" id="L496">		Arrays.fill(state, 0);</span>
+<span class="nc" id="L497">		return state;</span>
+	}
+
+	public static boolean pprod(int[] n, int[] N) {
+<span class="nc" id="L501">		int L = N.length;</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">		for (int i=0; i&lt;L; i++) {</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">			if (n[i]!=N[i]) {</span>
+<span class="nc" id="L504">				n[i]++;</span>
+<span class="nc" id="L505">				return true;</span>
+			}
+		}
+<span class="nc" id="L508">		return false;</span>
+	}
+
+	public static void main(String[] args) {
+<span class="nc" id="L512">		int[] N = new int[]{2,4, 3};</span>
+<span class="nc" id="L513">		int[] s = pprod(N);</span>
+<span class="nc" id="L514">		System.out.println(&quot;(&quot; + s[0] + &quot;, &quot; + s[1] + &quot;, &quot; + s[2] + &quot;)&quot;);</span>
+		do {
+<span class="nc" id="L516">			pprod(s, N);</span>
+<span class="nc" id="L517">			System.out.println(&quot;(&quot; + s[0] + &quot;, &quot; + s[1] + &quot;, &quot; + s[2] + &quot;)&quot;);</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">		} while (!Arrays.equals(s, N));</span>
+<span class="nc" id="L519">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

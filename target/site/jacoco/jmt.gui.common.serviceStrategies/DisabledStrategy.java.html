@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DisabledStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.serviceStrategies</a> &gt; <span class="el_source">DisabledStrategy.java</span></div><h1>DisabledStrategy.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.serviceStrategies;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; DisabledStrategy&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description: This is a special service strategy that raises a warning when a job requires service.&lt;/b&gt; 
+ * 
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 04-nov-2017
+ * &lt;b&gt;Time:&lt;/b&gt; 18.05.40&lt;/p&gt;
+ * @author Giuliano Casale
+ * @version 1.0
+ */
+<span class="nc" id="L31">public class DisabledStrategy implements ServiceStrategy {</span>
+
+	/**
+	 * Returns engine classpath for Disabled Service strategy
+	 * @return engine classpath for Disabled Service strategy
+	 */
+	public static String getEngineClassPath() {
+<span class="fc" id="L38">		return &quot;jmt.engine.NetStrategies.ServiceStrategies.DisabledServiceTimeStrategy&quot;;</span>
+	}
+
+	/**
+	 * Clones this strategy. In this case it simply returns a new DisabledStrategy
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public DisabledStrategy clone() {
+<span class="nc" id="L47">		return new DisabledStrategy();</span>
+	}
+
+	/**
+	 * Returns the value of this strategy
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L56">		return &quot;Unspecified&quot;;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

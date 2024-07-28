@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DispatcherThread.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.controller</a> &gt; <span class="el_source">DispatcherThread.java</span></div><h1>DispatcherThread.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.controller;
+
+import java.awt.Cursor;
+import java.io.File;
+
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
+import jmt.gui.common.definitions.AbortMeasure;
+import jmt.gui.common.definitions.GuiInterface;
+import jmt.gui.common.definitions.ResultsModel;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.panels.ResultsWindow;
+import jmt.gui.jsimgraph.controller.Mediator;
+import jmt.gui.jsimgraph.controller.ModelSnapshot;
+import jmt.gui.jsimgraph.controller.SimulationStateChecker;
+import jmt.jmch.wizard.panels.AnimationPanel;
+
+/**
+ * &lt;p&gt;Title: Dispatcher Thread&lt;/p&gt;
+ * &lt;p&gt;Description: This thread is responsible for dispatching simulation. If simulation max time has
+ * been specified, an inner thread will be used to stop simulation after that time. We do not rely
+ * on engine method as it does not appear to work properly.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 8-set-2005
+ *         Time: 11.40.46
+ *
+ * Modified by Francesco D'Aquino 9/11/2005
+ */
+public class DispatcherThread extends Thread implements AbortMeasure {
+
+	private SimulationStateChecker simStateChecker;
+	private DispatcherJSIMschema simulator;
+	private GuiInterface gui;
+	private SimulationDefinition sd;
+<span class="nc" id="L53">	private TimerThread timer = null;</span>
+<span class="nc" id="L54">	private PollerThread poller = null;</span>
+	private ResultsModel results;
+
+	/**
+	 * Construct a new Dispatcher Thread
+	 * @param gui reference to current gui object (can be JSIMMain or Mediator)
+	 * @param sd Reference to Simulation Definition data structure
+	 */
+<span class="nc" id="L62">	public DispatcherThread(GuiInterface gui, SimulationDefinition sd) {</span>
+<span class="nc" id="L63">		this.setName(&quot;DispatcherThread&quot;);</span>
+<span class="nc" id="L64">		this.gui = gui;</span>
+<span class="nc" id="L65">		this.sd = sd;</span>
+<span class="nc" id="L66">		this.results = (ResultsModel) sd.getSimulationResults();</span>
+<span class="nc" id="L67">		poller = new PollerThread(sd.getPollingInterval().doubleValue(), this);</span>
+		// Avoids hanging the system during execution
+<span class="nc" id="L69">		this.setPriority(Thread.MIN_PRIORITY);</span>
+<span class="nc" id="L70">	}</span>
+
+	/**
+	 * Run method. This method will simply start simulation, it is designed to be called only
+	 * after startSimulation has been called.
+	 */
+	@Override
+	public void run() {
+<span class="nc" id="L78">		timer.start();</span>
+<span class="nc" id="L79">		poller.start();</span>
+		try {
+<span class="nc" id="L81">			simulator.solveModel();</span>
+<span class="nc" id="L82">		} catch (OutOfMemoryError err) {</span>
+<span class="nc" id="L83">			simulator.abortAllMeasures();</span>
+<span class="nc" id="L84">			simulator.killSimulation();</span>
+<span class="nc" id="L85">			gui.showErrorMessage(&quot;Out of memory error. Try to run Java Virtual Machine with more heap size (-Xmx&lt;num&gt;m)&quot;);</span>
+<span class="nc" id="L86">		} catch (Exception ex) {</span>
+<span class="nc" id="L87">			simulator.abortAllMeasures();</span>
+<span class="nc" id="L88">			simulator.killSimulation();</span>
+<span class="nc" id="L89">			gui.handleException(ex);</span>
+<span class="nc" id="L90">		}</span>
+<span class="nc" id="L91">		timer.kill();</span>
+<span class="nc" id="L92">		gui.changeSimActionsState(true, false, false);</span>
+<span class="nc" id="L93">		results.refresh(1.0, timer.getElapsedTime());</span>
+
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		if(gui instanceof AnimationPanel){ //---Lorenzo Torri---</span>
+<span class="nc" id="L96">			gui.simulationFinished();</span>
+		}
+
+		// Removes output file, if it was created.
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		if (simulator.getOutputFile() != null) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			if (!simulator.getOutputFile().delete()) {</span>
+<span class="nc" id="L102">				simulator.getOutputFile().deleteOnExit();</span>
+			}
+		}
+<span class="nc" id="L105">	}</span>
+
+	/**
+	 * This method starts simulation, given simulation XML file
+	 * @param simulationFile file where simulation model is stored
+	 */
+	public void startSimulation(File simulationFile) {
+<span class="nc" id="L112">		simulator = new DispatcherJSIMschema(simulationFile);</span>
+		// ----------- Francesco D'Aquino ---------------
+		// If animation is enabled creates a simStateChecker
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (sd.isAnimationEnabled()) {</span>
+<span class="nc" id="L116">			simStateChecker = new SimulationStateChecker((Mediator) gui, simulator);</span>
+		}
+		// ----------- end Francesco D'Aquino -----------
+		// If needed sets simulation seed
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if (!sd.getUseRandomSeed().booleanValue()) {</span>
+<span class="nc" id="L121">			simulator.setSimulationSeed(sd.getSimulationSeed().longValue());</span>
+		}
+<span class="nc" id="L123">		timer = new TimerThread(simulator, sd.getMaximumDuration().doubleValue());</span>
+<span class="nc" id="L124">		gui.changeSimActionsState(false, true, true);</span>
+<span class="nc" id="L125">		start();</span>
+<span class="nc" id="L126">	}</span>
+
+	/**
+	 * Pauses current simulation only if it was already started
+	 */
+	public void pauseSimulation() {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		if (simulator != null) {</span>
+<span class="nc" id="L133">			timer.pause();</span>
+<span class="nc" id="L134">			gui.changeSimActionsState(true, false, true);</span>
+<span class="nc" id="L135">			simulator.pauseSim();</span>
+		}
+<span class="nc" id="L137">	}</span>
+
+	/**
+	 * Stops current simulation, forcing abort of all measures,
+	 * only if it was already started
+	 */
+	public void stopSimulation() {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		if (simulator != null) {</span>
+<span class="nc" id="L145">			timer.kill();</span>
+<span class="nc" id="L146">			simulator.abortAllMeasures();</span>
+		}
+<span class="nc" id="L148">	}</span>
+
+	/**
+	 * Restarts current simulation, forcing abort of all measures,
+	 * only if it was already started
+	 */
+	public void restartSimulation() {
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		if (simulator != null) {</span>
+<span class="nc" id="L156">			timer.restart();</span>
+<span class="nc" id="L157">			gui.changeSimActionsState(false, true, true);</span>
+<span class="nc" id="L158">			simulator.restartSim();</span>
+		}
+<span class="nc" id="L160">	}</span>
+
+	/**
+	 * Aborts a measure, given its index
+	 * @param index index of the measure to be aborted
+	 */
+	public void abortMeasure(int index) {
+<span class="nc" id="L167">		simulator.abortMeasureAtRefresh(index);</span>
+<span class="nc" id="L168">	}</span>
+
+	/**
+	 * Inner thread used to poll
+	 */
+	protected class PollerThread extends Thread {
+		protected long interval;
+		protected DispatcherThread dispatcher;
+<span class="nc" id="L176">		protected boolean initialized = false;</span>
+
+<span class="nc" id="L178">		public PollerThread(double seconds, DispatcherThread dispatcher) {</span>
+<span class="nc" id="L179">			this.setName(&quot;PollerThread&quot;);</span>
+<span class="nc" id="L180">			interval = Math.round(seconds * 1000);</span>
+<span class="nc" id="L181">			this.dispatcher = dispatcher;</span>
+<span class="nc" id="L182">		}</span>
+
+		@Override
+		public void run() {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">			if (gui instanceof Mediator) {</span>
+<span class="nc" id="L187">				((Mediator) gui).setGraphCursor(new Cursor(Cursor.WAIT_CURSOR));</span>
+			}
+			// While simulation is not finished, polls at given intervals
+<span class="nc bnc" id="L190" title="All 2 branches missed.">			while (!dispatcher.simulator.isFinished()) {</span>
+				// Waits to collect results until simulation is really started
+<span class="nc bnc" id="L192" title="All 4 branches missed.">				while (!dispatcher.simulator.isStarted() &amp;&amp; !dispatcher.simulator.isFinished()) {</span>
+					try {
+<span class="nc" id="L194">						sleep(500);</span>
+<span class="nc" id="L195">					} catch (InterruptedException ex) {</span>
+<span class="nc" id="L196">						System.err.println(&quot;Unexpected InterruptException in PollerThread&quot;);</span>
+<span class="nc" id="L197">					}</span>
+				}
+				// If it is first poll, initialize Results data structure
+<span class="nc bnc" id="L200" title="All 2 branches missed.">				if (!initialized) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">					if (gui instanceof Mediator) {</span>
+<span class="nc" id="L202">						((Mediator) gui).setGraphCursor(new Cursor(Cursor.DEFAULT_CURSOR));</span>
+					}
+<span class="nc" id="L204">					dispatcher.simulator.refreshTempMeasures();</span>
+<span class="nc" id="L205">					dispatcher.results.setTempMeasures(dispatcher.simulator.getTempMeasures(),</span>
+<span class="nc" id="L206">							dispatcher.simulator.checkSimProgress(), timer.getElapsedTime());</span>
+<span class="nc" id="L207">					initialized = true;</span>
+					// Sets ResultsWindow
+<span class="nc" id="L209">					ResultsWindow rw = new ResultsWindow(sd, dispatcher, gui.getFileName());</span>
+<span class="nc" id="L210">					gui.setResultsWindow(rw);</span>
+					// Moves it to lower right corner if animation is enabled
+<span class="nc bnc" id="L212" title="All 2 branches missed.">					if (sd.isAnimationEnabled()) {</span>
+<span class="nc" id="L213">						rw.moveToLowerRightCorner();</span>
+					}
+					// Shows it
+<span class="nc" id="L216">					gui.showResultsWindow();</span>
+<span class="nc" id="L217">				}</span>
+				// If it is next one, refresh stored tempMeasures (if simulation is started and not paused)
+<span class="nc bnc" id="L219" title="All 2 branches missed.">				else if (!dispatcher.simulator.isPaused()) {</span>
+<span class="nc" id="L220">					dispatcher.simulator.refreshTempMeasures();</span>
+<span class="nc" id="L221">					double progress = dispatcher.simulator.checkSimProgress();</span>
+					// Progress is the biggest between simulation progress and timer progress
+<span class="nc bnc" id="L223" title="All 2 branches missed.">					if (timer.getElapsedPercentage() &gt; progress) {</span>
+<span class="nc" id="L224">						progress = timer.getElapsedPercentage();</span>
+					}
+<span class="nc" id="L226">					dispatcher.results.refresh(progress, timer.getElapsedTime());</span>
+					// ------------ Francesco D'Aquino -------------------
+<span class="nc bnc" id="L228" title="All 2 branches missed.">					if (sd.isAnimationEnabled()) {</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">						if (!simStateChecker.isInitialized()) {</span>
+<span class="nc" id="L230">							simStateChecker.initialize();</span>
+						}
+<span class="nc" id="L232">						ModelSnapshot tmpServersContent = (ModelSnapshot) simStateChecker.getServersContent().clone();</span>
+<span class="nc" id="L233">						ModelSnapshot tmpServersUtilization = (ModelSnapshot) simStateChecker.getServersUtilization().clone();</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">						if (!dispatcher.simulator.isFinished()) {//SPIC</span>
+<span class="nc" id="L235">							simStateChecker.getModelState();</span>
+						}//SPIC
+<span class="nc bnc" id="L237" title="All 2 branches missed.">						if (dispatcher.simulator.isFinished()) {</span>
+<span class="nc" id="L238">							simStateChecker.setServersContent(tmpServersContent);</span>
+<span class="nc" id="L239">							simStateChecker.setServersUtilization(tmpServersUtilization);</span>
+						}
+						//simStateChecker.print();
+						try {
+<span class="nc" id="L243">							simStateChecker.forceDraw();</span>
+<span class="nc" id="L244">						} catch (Exception e) {</span>
+							// Ignores
+<span class="nc" id="L246">						}</span>
+					}
+					// -------------end Francesco D'Aquino ---------------
+				}
+
+				// Waits for polling interval
+				try {
+<span class="nc" id="L253">					sleep(interval);</span>
+<span class="nc" id="L254">				} catch (InterruptedException ex) {</span>
+<span class="nc" id="L255">					System.out.println(&quot;Error: Poller thread interrupted unexpectedly...&quot;);</span>
+<span class="nc" id="L256">				}</span>
+			}
+			// Simulation is finished
+<span class="nc" id="L259">		}</span>
+	}
+
+	public void notifyDetectedMalformedReplayerFile(String msg) {
+<span class="nc" id="L263">		results.detectedMalformedReplayerFile(msg);</span>
+<span class="nc" id="L264">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

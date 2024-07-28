@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Poisson.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.discrete</a> &gt; <span class="el_source">Poisson.java</span></div><h1>Poisson.java</h1><pre class="source lang-java linenums">package jmt.engine.random.discrete;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.Parameter;
+
+import java.util.function.Function;
+
+import static jmt.engine.math.Arithmetic.factorial;
+
+public class Poisson extends DiscreteDistribution {
+    private double lambda;
+
+    // Constructor with NO parameter, because the XML initialized the distribution parameter through Parameter.
+    public Poisson() {
+<span class="nc" id="L15">        super();</span>
+<span class="nc" id="L16">    }</span>
+
+<span class="nc" id="L18">    public Poisson(double lambda) throws IncorrectDistributionParameterException {</span>
+<span class="nc bnc" id="L19" title="All 2 branches missed.">        if (lambda &lt;= 0) {</span>
+<span class="nc" id="L20">            throw new IncorrectDistributionParameterException(&quot;lambda should be positive.&quot;);</span>
+        }
+<span class="nc" id="L22">        this.lambda = lambda;</span>
+<span class="nc" id="L23">        outdated();</span>
+<span class="nc" id="L24">        this.cached = true;</span>
+<span class="nc" id="L25">    }</span>
+
+    public Poisson(Double lambda) throws IncorrectDistributionParameterException {
+<span class="nc" id="L28">        this(lambda.doubleValue());</span>
+<span class="nc" id="L29">    }</span>
+
+    public boolean updatePar(double lambda) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L32" title="All 2 branches missed.">        if (lambda &lt;= 0) {</span>
+<span class="nc" id="L33">            throw new IncorrectDistributionParameterException(&quot;lambda should be positive.&quot;);</span>
+        }
+<span class="nc" id="L35">        outdated();</span>
+<span class="nc" id="L36">        this.lambda = lambda;</span>
+<span class="nc" id="L37">        this.cached = true;</span>
+<span class="nc" id="L38">        return true;</span>
+    }
+
+    @Override
+    public boolean updatePar(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L43" title="All 4 branches missed.">        if (p instanceof PoissonPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L44">            return updatePar(((PoissonPar) p).getLambda());</span>
+        }
+<span class="nc" id="L46">        return false;</span>
+    }
+
+    @Override
+    public int getUpper() {
+<span class="nc" id="L51">        final int UPPER_BOUND_FACTOR = 100;</span>
+<span class="nc" id="L52">        return (int) (lambda * UPPER_BOUND_FACTOR);</span>
+    }
+
+    @Override
+    public int getlower() {
+<span class="nc" id="L57">        return 0;</span>
+    }
+
+    protected &lt;T&gt; T unboxParameter(Parameter p, Function&lt;Double, T&gt; function) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L61" title="All 4 branches missed.">        if (p instanceof PoissonPar &amp;&amp; p.check()) {</span>
+<span class="nc" id="L62">            return function.apply(((PoissonPar) p).getLambda());</span>
+        } else {
+<span class="nc" id="L64">            throw new IncorrectDistributionParameterException(</span>
+                    &quot;Error: lambda should be greater than zero\n&quot; +
+                            &quot;Error: the Parameter must be the `PoissonPar`&quot;);
+        }
+    }
+
+    protected int checkCached(int value) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (cached) {</span>
+<span class="nc" id="L72">            return value;</span>
+        }
+<span class="nc" id="L74">        return -1;</span>
+    }
+
+    protected double checkCached(double value) {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (cached) {</span>
+<span class="nc" id="L79">            return value;</span>
+        }
+<span class="nc" id="L81">        return -1.0;</span>
+    }
+
+    protected int nextRand(double lambda) {
+        // Knuth's algorithm for Poisson distribution
+<span class="nc" id="L86">        double L = Math.exp(-lambda);</span>
+<span class="nc" id="L87">        double p = 1.0;</span>
+<span class="nc" id="L88">        int k = 0;</span>
+        do {
+<span class="nc" id="L90">            ++k;</span>
+<span class="nc" id="L91">            p *= engine.raw();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">        } while (p &gt; L);</span>
+<span class="nc" id="L93">        return k - 1;</span>
+    }
+
+    @Override
+    public int nextRand() {
+<span class="nc" id="L98">        return checkCached(nextRand(lambda));</span>
+    }
+
+    @Override
+    public int nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L103">        return unboxParameter(p, this::nextRand);</span>
+    }
+
+    protected double pmf(double lambda, int x) {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        if (x &lt; 0) {</span>
+<span class="nc" id="L108">            return 0.0;</span>
+        }
+<span class="nc" id="L110">        return Math.pow(lambda, x) * Math.exp(-lambda) / factorial(x);</span>
+    }
+
+    @Override
+    public double pmf(int x) {
+<span class="nc" id="L115">        return checkCached(pmf(lambda, x));</span>
+    }
+
+    @Override
+    public double pmf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L120">        return unboxParameter(p, lambdaValue -&gt; pmf(lambdaValue, x));</span>
+    }
+
+    protected double cdf(double lambda, int x) {
+<span class="nc bnc" id="L124" title="All 2 branches missed.">        if (x &lt; 0) {</span>
+<span class="nc" id="L125">            return 0.0;</span>
+        }
+<span class="nc" id="L127">        double sum = 0.0;</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">        for (int k = 0; k &lt;= x; k++) {</span>
+<span class="nc" id="L129">            sum += pmf(lambda, k);</span>
+        }
+<span class="nc" id="L131">        return sum;</span>
+    }
+
+    @Override
+    public double cdf(int x) {
+<span class="nc" id="L136">        return checkCached(cdf(lambda, x));</span>
+    }
+
+    @Override
+    public double cdf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L141">        return unboxParameter(p, lambdaValue -&gt; cdf(lambdaValue, x));</span>
+    }
+
+    protected double theorMean(double lambda) {
+<span class="nc" id="L145">        return lambda;</span>
+    }
+
+    @Override
+    public double theorMean() {
+<span class="nc" id="L150">        return checkCached(theorMean(lambda));</span>
+    }
+
+    @Override
+    public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L155">        return unboxParameter(p, this::theorMean);</span>
+    }
+
+    protected double theorVariance(double lambda) {
+<span class="nc" id="L159">        return lambda;</span>
+    }
+
+    @Override
+    public double theorVariance() {
+<span class="nc" id="L164">        return checkCached(theorVariance(lambda));</span>
+    }
+
+    @Override
+    public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L169">        return unboxParameter(p, this::theorVariance);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

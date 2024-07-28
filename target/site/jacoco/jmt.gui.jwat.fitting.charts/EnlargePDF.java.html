@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnlargePDF.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.fitting.charts</a> &gt; <span class="el_source">EnlargePDF.java</span></div><h1>EnlargePDF.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ 
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jwat.fitting.charts;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+
+import jmt.engine.jwat.fitting.utils.ModelFitting;
+import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
+import jmt.gui.jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;
+import jmt.gui.jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileFilter;
+import ptolemy.plot.Plot;
+
+public class EnlargePDF extends Plot implements MouseListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// Zoom factor for zoom-in / zoom-out
+	public static final double PLOT_ZOOM_FACTOR = 0.5;
+
+<span class="nc" id="L52">	private PlotPopup pop = new PlotPopup();</span>
+	private ModelFitting model;
+	private double[] data;
+
+<span class="nc" id="L56">	public EnlargePDF(ModelFitting model) {</span>
+<span class="nc" id="L57">		this.setConnected(false, 1);</span>
+<span class="nc" id="L58">		this.setMarksStyle(&quot;various&quot;, 1);</span>
+<span class="nc" id="L59">		this.setColors(new Color[] {Color.BLUE});</span>
+<span class="nc" id="L60">		this.model = model;</span>
+<span class="nc" id="L61">		this.data = model.getListObservations();</span>
+		
+<span class="nc" id="L63">		this.model.addOnChangeVariableValue(new ChangeVariableListener() {</span>
+			public void onChangeVariableValues() {
+<span class="nc" id="L65">				drawGraph();</span>
+<span class="nc" id="L66">			}</span>
+		});
+<span class="nc" id="L68">		this.addMouseListener(this);</span>
+<span class="nc" id="L69">		drawGraph();</span>
+<span class="nc" id="L70">	}</span>
+
+	private void drawGraph() {
+<span class="nc" id="L73">		double[] freq_y = new double[Math.round(data.length/10)];</span>
+
+<span class="nc" id="L75">		this.clear(true);</span>
+<span class="nc" id="L76">		this.setConnected(false, 1);</span>
+<span class="nc" id="L77">		this.setMarksStyle(&quot;various&quot;, 1);</span>
+<span class="nc" id="L78">		this.setColors(new Color[] {Color.BLUE});</span>
+		
+<span class="nc" id="L80">		setXRange(0, data[data.length-1]+1);</span>
+<span class="nc" id="L81">		setYRange(0, 1);</span>
+		
+		//build the count of frequencies
+<span class="nc" id="L84">		int j=0;</span>
+<span class="nc" id="L85">		double bucket_dim = data[data.length-1] / Math.round(data.length/10);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		for (int i=0;i&lt;freq_y.length;i++) {</span>
+			
+<span class="nc bnc" id="L88" title="All 4 branches missed.">			while ((data[j] &lt; (i+1)*bucket_dim) &amp;&amp; (data[j] &gt;= i*bucket_dim)) {</span>
+<span class="nc" id="L89">				freq_y[i]++;</span>
+<span class="nc" id="L90">				j++;</span>
+			}
+			
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			if (i&lt;(freq_y.length-1))</span>
+<span class="nc" id="L94">				freq_y[i] /= data.length;</span>
+			
+			//System.out.println(&quot;Bucket from &quot;+ i*bucket_dim + &quot; to &quot; + (i+1)*bucket_dim + &quot; Percentage: &quot; + freq_y[i]);
+		}
+<span class="nc" id="L98">		freq_y[freq_y.length-1]++;</span>
+<span class="nc" id="L99">		freq_y[freq_y.length-1] /= data.length;</span>
+		//******************************
+	
+		//Draw graph
+		//Draw reference line
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		for (int i = 0; i &lt; freq_y.length; i++) {</span>
+<span class="nc" id="L105">			addPoint(1, ((i+1)*bucket_dim + i*bucket_dim)/2, freq_y[i], true); </span>
+		}
+
+<span class="nc" id="L108">		fillPlot();</span>
+<span class="nc" id="L109">	}</span>
+
+	public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if (e.getButton() == MouseEvent.BUTTON3) {</span>
+<span class="nc" id="L113">			pop.show(EnlargePDF.this, e.getX(), e.getY());</span>
+		}
+<span class="nc" id="L115">	}</span>
+
+	public void mousePressed(MouseEvent e) {
+<span class="nc" id="L118">	}</span>
+
+	public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L121">	}</span>
+
+	public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L124">	}</span>
+
+	public void mouseExited(MouseEvent e) {
+<span class="nc" id="L127">	}</span>
+
+	public class PlotPopup extends JPopupMenu {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		public JMenuItem restore;
+		public JMenuItem zoomIn;
+		public JMenuItem zoomOut;
+		public JMenuItem saveAs;
+
+<span class="nc" id="L139">		public PlotPopup() {</span>
+<span class="nc" id="L140">			restore = new JMenuItem(&quot;Original view&quot;);</span>
+<span class="nc" id="L141">			zoomIn = new JMenuItem(&quot;Zoom in&quot;);</span>
+<span class="nc" id="L142">			zoomOut = new JMenuItem(&quot;Zoom out&quot;);</span>
+<span class="nc" id="L143">			saveAs = new JMenuItem(&quot;Save as...&quot;);</span>
+
+<span class="nc" id="L145">			this.add(restore);</span>
+<span class="nc" id="L146">			this.add(zoomIn);</span>
+<span class="nc" id="L147">			this.add(zoomOut);</span>
+<span class="nc" id="L148">			this.addSeparator();</span>
+<span class="nc" id="L149">			this.add(saveAs);</span>
+<span class="nc" id="L150">			addListeners();</span>
+<span class="nc" id="L151">		}</span>
+
+		private void addListeners() {
+<span class="nc" id="L154">			restore.addActionListener(new AbstractAction() {</span>
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L161">					fillPlot();</span>
+<span class="nc" id="L162">				}</span>
+			});
+
+<span class="nc" id="L165">			zoomIn.addActionListener(new AbstractAction() {</span>
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					// Gets maximum and minimum values
+<span class="nc" id="L173">					double[] XBounds = getXAutoRange();</span>
+<span class="nc" id="L174">					double[] YBounds = getYAutoRange();</span>
+
+<span class="nc" id="L176">					double[] xRange = getXRange();</span>
+<span class="nc" id="L177">					double[] yRange = getYRange();</span>
+<span class="nc" id="L178">					double width = xRange[1] - xRange[0];</span>
+<span class="nc" id="L179">					double height = yRange[1] - yRange[0];</span>
+<span class="nc" id="L180">					double newWidth = (xRange[1] - xRange[0]) * PLOT_ZOOM_FACTOR;</span>
+<span class="nc" id="L181">					double newHeight = (yRange[1] - yRange[0]) * PLOT_ZOOM_FACTOR;</span>
+<span class="nc" id="L182">					double newXMin = xRange[0] + (width - newWidth) / 2;</span>
+					//The next 7 lines check that the new range is valid
+<span class="nc bnc" id="L184" title="All 2 branches missed.">					if (newXMin &lt; XBounds[0]) {</span>
+<span class="nc" id="L185">						newXMin = XBounds[0];</span>
+					}
+<span class="nc" id="L187">					double newXMax = xRange[0] + (width - newWidth) / 2 + newWidth;</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">					if (newXMax &gt; XBounds[1]) {</span>
+<span class="nc" id="L189">						newXMax = XBounds[1];</span>
+					}
+<span class="nc" id="L191">					double newYMin = yRange[0] + (height - newHeight) / 2;</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">					if (newYMin &lt; YBounds[0]) {</span>
+<span class="nc" id="L193">						newYMin = YBounds[0];</span>
+					}
+<span class="nc" id="L195">					double newYMax = yRange[0] + (height - newHeight) / 2 + newHeight;</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">					if (newYMax &gt; YBounds[1]) {</span>
+<span class="nc" id="L197">						newYMax = YBounds[1];</span>
+					}
+<span class="nc" id="L199">					setXRange(newXMin, newXMax);</span>
+<span class="nc" id="L200">					setYRange(newYMin, newYMax);</span>
+<span class="nc" id="L201">					EnlargePDF.this.repaint();</span>
+<span class="nc" id="L202">				}</span>
+			});
+
+<span class="nc" id="L205">			zoomOut.addActionListener(new AbstractAction() {</span>
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+					// Gets maximum and minimum values
+<span class="nc" id="L213">					double[] XBounds = getXAutoRange();</span>
+<span class="nc" id="L214">					double[] YBounds = getYAutoRange();</span>
+
+<span class="nc" id="L216">					double[] xRange = getXRange();</span>
+<span class="nc" id="L217">					double[] yRange = getYRange();</span>
+<span class="nc" id="L218">					double width = xRange[1] - xRange[0];</span>
+<span class="nc" id="L219">					double height = yRange[1] - yRange[0];</span>
+<span class="nc" id="L220">					double newWidth = (xRange[1] - xRange[0]) / PLOT_ZOOM_FACTOR;</span>
+<span class="nc" id="L221">					double newHeight = (yRange[1] - yRange[0]) / PLOT_ZOOM_FACTOR;</span>
+<span class="nc" id="L222">					double newXMin = xRange[0] + (width - newWidth) / 2;</span>
+					//The next 7 lines check that the new range is valid
+<span class="nc bnc" id="L224" title="All 2 branches missed.">					if (newXMin &lt; XBounds[0]) {</span>
+<span class="nc" id="L225">						newXMin = XBounds[0];</span>
+					}
+<span class="nc" id="L227">					double newXMax = xRange[0] + (width - newWidth) / 2 + newWidth;</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">					if (newXMax &gt; XBounds[1]) {</span>
+<span class="nc" id="L229">						newXMax = XBounds[1];</span>
+					}
+<span class="nc" id="L231">					double newYMin = yRange[0] + (height - newHeight) / 2;</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">					if (newYMin &lt; YBounds[0]) {</span>
+<span class="nc" id="L233">						newYMin = YBounds[0];</span>
+					}
+<span class="nc" id="L235">					double newYMax = yRange[0] + (height - newHeight) / 2 + newHeight;</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">					if (newYMax &gt; YBounds[1]) {</span>
+<span class="nc" id="L237">						newYMax = YBounds[1];</span>
+					}
+<span class="nc" id="L239">					setXRange(newXMin, newXMax);</span>
+<span class="nc" id="L240">					setYRange(newYMin, newYMax);</span>
+<span class="nc" id="L241">					EnlargePDF.this.repaint();</span>
+<span class="nc" id="L242">				}</span>
+			});
+
+<span class="nc" id="L245">			saveAs.addActionListener(new AbstractAction() {</span>
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L252">					PlotImagesFileFilter PNGfilter = new PlotImagesFileFilter(&quot;.png&quot;, &quot;Portable Network Graphics images&quot;);</span>
+<span class="nc" id="L253">					PlotImagesFileFilter EPSfilter = new PlotImagesFileFilter(&quot;.eps&quot;, &quot;Encapsulated Post Script images&quot;);</span>
+<span class="nc" id="L254">					PlotImagesFileChooser fileChooser = new PlotImagesFileChooser(PNGfilter);</span>
+<span class="nc" id="L255">					fileChooser.setFileFilter(PNGfilter);</span>
+<span class="nc" id="L256">					fileChooser.addChoosableFileFilter(EPSfilter);</span>
+<span class="nc" id="L257">					int r = fileChooser.showSaveDialog(EnlargePDF.this);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">					if (r == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L259">						File file = fileChooser.getSelectedFile();</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">						if (fileChooser.getFileFilter().equals(EPSfilter)) {</span>
+<span class="nc" id="L261">							EnlargePDF plot = EnlargePDF.this;</span>
+							try {
+<span class="nc" id="L263">								FileOutputStream fileStream = new FileOutputStream(file);</span>
+<span class="nc" id="L264">								plot.export(fileStream);</span>
+<span class="nc" id="L265">								fileStream.close();</span>
+<span class="nc" id="L266">							} catch (FileNotFoundException fnf) {</span>
+<span class="nc" id="L267">								JOptionPane.showMessageDialog(fileChooser, &quot;File not found&quot;, &quot;JMT - Error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L268">							} catch (IOException ioe) {</span>
+<span class="nc" id="L269">								JOptionPane.showMessageDialog(fileChooser, &quot;I/O exception&quot;, &quot;JMT - Error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L270">							}</span>
+<span class="nc" id="L271">						} else {</span>
+<span class="nc" id="L272">							EnlargePDF plot = EnlargePDF.this;</span>
+<span class="nc" id="L273">							BufferedImage image = plot.exportImage();</span>
+							try {
+<span class="nc" id="L275">								BufferedImage originalImage = convertType(image, BufferedImage.TYPE_INT_RGB);</span>
+<span class="nc" id="L276">								ImageIO.write(originalImage, &quot;png&quot;, file);</span>
+<span class="nc" id="L277">								ImageIO.createImageOutputStream(file).close();</span>
+<span class="nc" id="L278">							} catch (IOException fnf) {</span>
+<span class="nc" id="L279">								JOptionPane.showMessageDialog(null, &quot;File not found&quot;);</span>
+<span class="nc" id="L280">							}</span>
+						}
+					}
+<span class="nc" id="L283">				}</span>
+
+			});
+<span class="nc" id="L286">		}</span>
+
+		BufferedImage convertType(BufferedImage src, int targetType) {
+<span class="nc bnc" id="L289" title="All 2 branches missed.">			if (src.getType() == targetType) {</span>
+<span class="nc" id="L290">				return src;</span>
+			}
+<span class="nc" id="L292">			BufferedImage tgt = new BufferedImage(src.getWidth(), src.getHeight(), targetType);</span>
+<span class="nc" id="L293">			Graphics2D g = tgt.createGraphics();</span>
+<span class="nc" id="L294">			g.drawRenderedImage(src, null);</span>
+<span class="nc" id="L295">			g.dispose();</span>
+<span class="nc" id="L296">			return tgt;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

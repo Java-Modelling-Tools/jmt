@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Polynomial.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">Polynomial.java</span></div><h1>Polynomial.java</h1><pre class="source lang-java linenums">/*
+Copyright © 1999 CERN - European Organization for Nuclear Research.
+Permission to use, copy, modify, distribute and sell this software and its documentation for any purpose
+is hereby granted without fee, provided that the above copyright notice appear in all copies and
+that both that copyright notice and this permission notice appear in supporting documentation.
+CERN makes no representations about the suitability of this software for any purpose.
+It is provided &quot;as is&quot; without expressed or implied warranty.
+*/
+package jmt.engine.math;
+
+/**
+ * Polynomial functions.
+ */
+public class Polynomial extends Constants {
+	/**
+	 * Makes this class non instantiable, but still let's others inherit from it.
+	 */
+<span class="nc" id="L18">	protected Polynomial() {</span>
+<span class="nc" id="L19">	}</span>
+
+	/**
+	 * Evaluates the given polynomial of degree &lt;tt&gt;N&lt;/tt&gt; at &lt;tt&gt;x&lt;/tt&gt;, assuming coefficient of N is 1.0.
+	 * Otherwise same as &lt;tt&gt;polevl()&lt;/tt&gt;.
+	 * &lt;pre&gt;
+	 *                     2          N
+	 * y  =  C  + C x + C x  +...+ C x
+	 *        0    1     2          N
+	 *
+	 * where C  = 1 and hence is omitted from the array.
+	 *        N
+	 *
+	 * Coefficients are stored in reverse order:
+	 *
+	 * coef[0] =  C  , ..., coef[N-1] = C  .
+	 *            N-1                   0
+	 *
+	 * Calling arguments are otherwise the same as polevl().
+	 * &lt;/pre&gt;
+	 * In the interest of speed, there are no checks for out of bounds arithmetic.
+	 *
+	 * @param x argument to the polynomial.
+	 * @param coef the coefficients of the polynomial.
+	 * @param N the degree of the polynomial.
+	 */
+	public static double p1evl(double x, double coef[], int N) throws ArithmeticException {
+		double ans;
+
+<span class="nc" id="L48">		ans = x + coef[0];</span>
+
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		for (int i = 1; i &lt; N; i++) {</span>
+<span class="nc" id="L51">			ans = ans * x + coef[i];</span>
+		}
+
+<span class="nc" id="L54">		return ans;</span>
+	}
+
+	/**
+	 * Evaluates the given polynomial of degree &lt;tt&gt;N&lt;/tt&gt; at &lt;tt&gt;x&lt;/tt&gt;.
+	 * &lt;pre&gt;
+	 *                     2          N
+	 * y  =  C  + C x + C x  +...+ C x
+	 *        0    1     2          N
+	 *
+	 * Coefficients are stored in reverse order:
+	 *
+	 * coef[0] =  C  , ..., coef[N] = C  .
+	 *            N                   0
+	 * &lt;/pre&gt;
+	 * In the interest of speed, there are no checks for out of bounds arithmetic.
+	 *
+	 * @param x argument to the polynomial.
+	 * @param coef the coefficients of the polynomial.
+	 * @param N the degree of the polynomial.
+	 */
+	public static double polevl(double x, double coef[], int N) throws ArithmeticException {
+		double ans;
+<span class="fc" id="L77">		ans = coef[0];</span>
+
+<span class="fc bfc" id="L79" title="All 2 branches covered.">		for (int i = 1; i &lt;= N; i++) {</span>
+<span class="fc" id="L80">			ans = ans * x + coef[i];</span>
+		}
+
+<span class="fc" id="L83">		return ans;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

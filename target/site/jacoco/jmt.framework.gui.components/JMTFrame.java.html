@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JMTFrame.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.components</a> &gt; <span class="el_source">JMTFrame.java</span></div><h1>JMTFrame.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.framework.gui.components;
+
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Locale;
+
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+
+import jmt.framework.gui.controller.Manager;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; JMTFrame&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A generic frame with some enhancements to be used by JMT.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 23/gen/07
+ * &lt;b&gt;Time:&lt;/b&gt; 16:32:34&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class JMTFrame extends JFrame {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final String DEFAULT_LOOK_AND_FEEL = &quot;com.jgoodies.looks.plastic.Plastic3DLookAndFeel&quot;;
+<span class="fc" id="L49">	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;</span>
+<span class="fc" id="L50">	private static final Locale PLATFORM_DEFAULT_LOCALE = Locale.getDefault();</span>
+
+	/** 
+	 * Auto manage closing operation
+	 * @see #canBeClosed() to check if window will be closed
+	 * @see #doClose() to implement a custom behaviour before window closing
+	 */
+	public static final int AUTO_MANAGE_ON_CLOSE = 255;
+
+	// Window adapter used for automatic window management
+	private WindowAdapter adapter;
+
+	// Sets the default look and feel and locale
+	static {
+		try {
+<span class="fc" id="L65">			UIManager.setLookAndFeel(DEFAULT_LOOK_AND_FEEL);</span>
+<span class="nc" id="L66">		} catch (Exception ulafe) {</span>
+<span class="nc" id="L67">			ulafe.printStackTrace();</span>
+<span class="fc" id="L68">		}</span>
+
+<span class="fc" id="L70">		Locale.setDefault(DEFAULT_LOCALE);</span>
+<span class="fc" id="L71">	}</span>
+	
+	/**
+	 * @return the platform default locale, that is different from the application one.
+	 */
+	public static Locale getPlatformDefaultLocale() {
+<span class="fc" id="L77">		return PLATFORM_DEFAULT_LOCALE;</span>
+	}
+
+	/**
+	 * Builds a JMTFrame and initialize it. Automatic management is disabled.
+	 */
+	public JMTFrame() {
+<span class="nc" id="L84">		this(false);</span>
+<span class="nc" id="L85">	}</span>
+
+	/**
+	 * @return true iff this frame can be closed. Please override this method to
+	 * create save on exit behaviours
+	 * @see JMTFrame#AUTO_MANAGE_ON_CLOSE
+	 */
+	public boolean canBeClosed() {
+<span class="nc" id="L93">		return true;</span>
+	}
+
+	/**
+	 * Builds a new JMTframe
+	 * @param autoManage true if this frame must be monitored to tell if JVM has to be terminated
+	 */
+<span class="nc" id="L100">	public JMTFrame(boolean autoManage) {</span>
+<span class="nc" id="L101">		init(autoManage);</span>
+<span class="nc" id="L102">	}</span>
+
+	/**
+	 * Builds a new JMTframe
+	 * @param autoManage true if this frame must be monitored to tell if JVM has to be terminated
+	 * @param title title of the window
+	 */
+	public JMTFrame(boolean autoManage, String title) {
+<span class="nc" id="L110">		super(title);</span>
+<span class="nc" id="L111">		init(autoManage);</span>
+<span class="nc" id="L112">	}</span>
+
+	/**
+	 * Initialize JMTFrame
+	 */
+	private void init(final boolean autoManage) {
+		// Supports automatic manage to avoid blocked JVMs without open windows.
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if (autoManage) {</span>
+			// Adds support for Manager to avoid blocked JVM without windows.
+<span class="nc" id="L121">			Manager.addWindow(this);</span>
+		}
+
+<span class="nc" id="L124">		adapter = new WindowAdapter() {</span>
+			/* (non-Javadoc)
+			 * @see java.awt.event.WindowAdapter#windowClosed(java.awt.event.WindowEvent)
+			 */
+			@Override
+			public void windowClosed(WindowEvent e) {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">				if (autoManage) {</span>
+<span class="nc" id="L131">					Manager.exit(JMTFrame.this);</span>
+				}
+<span class="nc" id="L133">			}</span>
+
+			/* (non-Javadoc)
+			 * @see java.awt.event.WindowAdapter#windowClosing(java.awt.event.WindowEvent)
+			 */
+			@Override
+			public void windowClosing(WindowEvent e) {
+<span class="nc" id="L140">				close();</span>
+<span class="nc" id="L141">			}</span>
+		};
+		// Auto manage as default
+<span class="nc" id="L144">		this.setDefaultCloseOperation(AUTO_MANAGE_ON_CLOSE);</span>
+<span class="nc" id="L145">	}</span>
+
+	/**
+	 * Centers this window on the screen
+	 */
+	public void centerWindow() {
+<span class="nc" id="L151">		centerWindow(getWidth(), getHeight());</span>
+<span class="nc" id="L152">	}</span>
+
+	/**
+	 * Puts this window in screen lower right corner
+	 */
+	public void moveToLowerRightCorner() {
+<span class="nc" id="L158">		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L159">		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());</span>
+<span class="nc" id="L160">		int xOffset = screenSize.width - insets.right - getWidth();</span>
+<span class="nc" id="L161">		int yOffset = screenSize.height - insets.bottom - getHeight();</span>
+
+<span class="nc" id="L163">		setBounds(xOffset, yOffset, getWidth(), getHeight());</span>
+<span class="nc" id="L164">	}</span>
+
+	/**
+	 * Sets size of this window and centers it on the screen
+	 * @param width width of the window
+	 * @param height height of the window
+	 */
+	public void centerWindow(int width, int height) {
+		//size of the screen
+<span class="nc" id="L173">		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();</span>
+
+		//reads insets given by taskbar
+<span class="nc" id="L176">		Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());</span>
+<span class="nc" id="L177">		int availableWidth = screenSize.width - insets.left - insets.right;</span>
+<span class="nc" id="L178">		int availableHeight = screenSize.height - insets.top - insets.bottom;</span>
+		
+		//avoids to draw above taskbar
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		if (width &gt; availableWidth) {</span>
+<span class="nc" id="L182">			width = availableWidth;</span>
+		}
+
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		if (height &gt; availableHeight) {</span>
+<span class="nc" id="L186">			height = availableHeight;</span>
+		}
+
+		//gets dimensions of the screen to center window
+<span class="nc" id="L190">		int xOffset = insets.left + (availableWidth - width) / 2;</span>
+<span class="nc" id="L191">		int yOffset = insets.top + (availableHeight - height) / 2;</span>
+
+<span class="nc" id="L193">		setBounds(xOffset, yOffset, width, height);</span>
+<span class="nc" id="L194">	}</span>
+
+	/**
+	 * Closes this window. (after checking if window can be closed).
+	 * @return true if window was closed, false otherwise
+	 * @see #canBeClosed() to check if window will be closed
+	 * @see #doClose() to implement a custom behaviour before window closing
+	 */
+	public final boolean close() {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		if (canBeClosed()) {</span>
+<span class="nc" id="L204">			doClose();</span>
+<span class="nc" id="L205">			this.dispose();</span>
+<span class="nc" id="L206">			return true;</span>
+		}
+<span class="nc" id="L208">		return false;</span>
+	}
+
+	/**
+	 * Override this method to implement a custom behaviour before windows dispose
+	 * @see #canBeClosed()
+	 * @see JMTFrame#AUTO_MANAGE_ON_CLOSE
+	 */
+	protected void doClose() {
+<span class="nc" id="L217">	}</span>
+
+	/**
+	 * Sets default operation to be performed when what-if window is closed.
+	 * @see WindowConstants#DISPOSE_ON_CLOSE
+	 * @see WindowConstants#DO_NOTHING_ON_CLOSE
+	 * @see JFrame#EXIT_ON_CLOSE
+	 * @see JMTFrame#AUTO_MANAGE_ON_CLOSE
+	 */
+	@Override
+	public void setDefaultCloseOperation(int operation) {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		if (operation == JMTFrame.AUTO_MANAGE_ON_CLOSE) {</span>
+<span class="nc" id="L229">			super.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);</span>
+<span class="nc" id="L230">			this.addWindowListener(adapter);</span>
+		} else {
+<span class="nc" id="L232">			super.setDefaultCloseOperation(operation);</span>
+<span class="nc" id="L233">			this.removeWindowListener(adapter);</span>
+		}
+<span class="nc" id="L235">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

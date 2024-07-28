@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MersenneTwister.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.engine</a> &gt; <span class="el_source">MersenneTwister.java</span></div><h1>MersenneTwister.java</h1><pre class="source lang-java linenums">/*
+ * MersenneTwister.java
+ *
+ *
+ * Created on 13 novembre 2002, 17.57
+ */
+
+package jmt.engine.random.engine;
+
+/** This is a Java version of the Mersenne Twister.
+ * Coded by Takuji Nishimura and Makoto Matsu.
+ * &lt;br&gt;
+ * &lt;br&gt;Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+ *  All rights reserved.
+ * &lt;br&gt;&lt;br&gt;
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *  &lt;br&gt;
+ *    1. Redistributions of source code must retain the above Copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *  &lt;br&gt;
+ *   2. Redistributions in binary form must reproduce the above Copyright
+ *      notice, this list of conditions and the following disclaimer in the
+ *      documentation and/or other materials provided with the distribution.
+ *  &lt;br&gt;
+ *   3. The names of its contributors may not be used to endorse or promote
+ *      products derived from this software without specific prior written
+ *      permission.
+ *   &lt;br&gt;&lt;br&gt;
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *  &lt;br&gt;
+ *  &lt;br&gt;
+ * Any feedback is very welcome.&lt;br&gt;
+ * http://www.math.keio.ac.jp/matumoto/emt.html&lt;br&gt;
+ * email: matumoto@math.keio.ac.jp&lt;br&gt;
+ * &lt;br&gt;
+ *
+ * @author (translated in java by) Federico Granata
+ */
+public class MersenneTwister extends RandomEngine {
+
+	private int mti;
+<span class="nc" id="L54">	private int[] mt = new int[N]; /* set initial seeds: N = 624 words */</span>
+
+	/* Period parameters */
+	private static final int N = 624;
+	private static final int M = 397;
+
+	private static final int MATRIX_A = 0x9908b0df;
+	/* constant vector a */
+	private static final int UPPER_MASK = 0x80000000;
+	/* most significant w-r bits */
+	private static final int LOWER_MASK = 0x7fffffff;
+	/* least significant r bits */
+
+	/* for tempering */
+	private static final int TEMPERING_MASK_B = 0x9d2c5680;
+	private static final int TEMPERING_MASK_C = 0xefc60000;
+
+	private static final int mag0 = 0x0;
+	private static final int mag1 = MATRIX_A;
+	//private static final int[] mag01=new int[] {0x0, MATRIX_A};
+	/* mag01[x] = x * MATRIX_A  for x=0,1 */
+
+	public static final int DEFAULT_SEED = 4357;
+
+	/** Creates a new instance of Prova */
+<span class="nc" id="L79">	public MersenneTwister() {</span>
+<span class="nc" id="L80">		init_genrand((long) (Math.random() * Long.MAX_VALUE));</span>
+<span class="nc" id="L81">	}</span>
+
+	/**
+	 * Constructor
+	 * @param seed seed used to generate the sequence
+	 */
+<span class="nc" id="L87">	public MersenneTwister(long seed) {</span>
+<span class="nc" id="L88">		init_genrand(seed);</span>
+<span class="nc" id="L89">	}</span>
+
+	public void setNewSeed(long seed) {
+<span class="nc" id="L92">		init_genrand(seed);</span>
+<span class="nc" id="L93">	}</span>
+
+	/** initializes mt[N] with a seed */
+	void init_genrand(long s) {
+<span class="nc" id="L97">		long internal = s &amp; 0xffffffffL;</span>
+<span class="nc" id="L98">		mt[0] = (int) internal;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		for (mti = 1; mti &lt; N; mti++) {</span>
+<span class="nc" id="L100">			internal = (0x6C078965L * (internal ^ (internal &gt;&gt; 30)) + mti);</span>
+			/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+			/* In the previous versions, MSBs of the seed affect   */
+			/* only MSBs of the array mt[].                        */
+			/* 2002/01/09 modified by Makoto Matsumoto             */
+<span class="nc" id="L105">			mt[mti] = (int) (internal &amp;= 0xffffffffL);</span>
+			/* for &gt;32 bit machines */
+		}
+<span class="nc" id="L108">	}</span>
+
+	/**
+	 * initialized by an array with array-length
+	 * @param init_key the array for initializing keys
+	 * @param key_length array length
+	 */
+	private void init_by_array(long[] init_key, int key_length) {
+		int i, j, k;
+<span class="nc" id="L117">		long[] internal = new long[N];</span>
+
+<span class="nc" id="L119">		internal[0] = 0x12BD6AAL &amp; 0xffffffffL;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		for (mti = 1; mti &lt; N; mti++) {</span>
+<span class="nc" id="L121">			internal[mti] = (0x6C078965L * (internal[mti - 1] ^ (internal[mti - 1] &gt;&gt; 30)) + mti);</span>
+			/* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
+			/* In the previous versions, MSBs of the seed affect   */
+			/* only MSBs of the array mt[].                        */
+			/* 2002/01/09 modified by Makoto Matsumoto             */
+<span class="nc" id="L126">			internal[mti] &amp;= 0xffffffffL;</span>
+			/* for &gt;32 bit machines */
+			//System.out.println(Long.toHexString(mt[mti]));
+		}
+
+<span class="nc" id="L131">		i = 1;</span>
+<span class="nc" id="L132">		j = 0;</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		k = (N &gt; key_length ? N : key_length);</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		for (; k &gt; 0; k--) {</span>
+<span class="nc" id="L135">			internal[i] = (internal[i] ^ ((internal[i - 1] ^ (internal[i - 1] &gt;&gt;&gt; 30)) * 0x19660DL)) + init_key[j] + j;</span>
+			/* non linear */
+<span class="nc" id="L137">			internal[i] &amp;= 0xffffffffL;</span>
+			/* for WORDSIZE &gt; 32 machines */
+<span class="nc" id="L139">			i++;</span>
+<span class="nc" id="L140">			j++;</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			if (i &gt;= N) {</span>
+<span class="nc" id="L142">				internal[0] = internal[N - 1];</span>
+<span class="nc" id="L143">				i = 1;</span>
+			}
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (j &gt;= key_length) {</span>
+<span class="nc" id="L146">				j = 0;</span>
+			}
+		}
+<span class="nc bnc" id="L149" title="All 2 branches missed.">		for (k = N - 1; k &gt; 0; k--) {</span>
+<span class="nc" id="L150">			internal[i] = (internal[i] ^ ((internal[i - 1] ^ (internal[i - 1] &gt;&gt;&gt; 30)) * 0x5D588B65L)) - i; /* non linear */</span>
+<span class="nc" id="L151">			internal[i] &amp;= 0xffffffffL;</span>
+			/* for WORDSIZE &gt; 32 machines */
+<span class="nc" id="L153">			i++;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			if (i &gt;= N) {</span>
+<span class="nc" id="L155">				internal[0] = internal[N - 1];</span>
+<span class="nc" id="L156">				i = 1;</span>
+			}
+		}
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		for (i = 1; i &lt; N; i++) {</span>
+<span class="nc" id="L161">			mt[i] = (int) (internal[i] &amp; 0xffffffffL);</span>
+		}
+
+<span class="nc" id="L164">		mt[0] = 0x80000000; /* MSB is 1; assuring non-zero initial array */</span>
+<span class="nc" id="L165">	}</span>
+
+	/* generates a random number on [0,0xffffffff]-interval */
+	int genrand_int32() {
+		int y;
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		if (mti &gt;= N) { /* generate N words at one time */</span>
+			int kk;
+<span class="nc bnc" id="L173" title="All 2 branches missed.">			if (mti == N + 1) {</span>
+<span class="nc" id="L174">				init_genrand(0x1571L); /* a default initial seed is used */</span>
+			}
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			for (kk = 0; kk &lt; N - M; kk++) {</span>
+<span class="nc" id="L177">				y = (mt[kk] &amp; UPPER_MASK) | (mt[kk + 1] &amp; LOWER_MASK);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">				mt[kk] = mt[kk + M] ^ (y &gt;&gt;&gt; 1) ^ ((y &amp; 0x1) == 0 ? mag0 : mag1);</span>
+			}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">			for (; kk &lt; N - 1; kk++) {</span>
+<span class="nc" id="L181">				y = (mt[kk] &amp; UPPER_MASK) | (mt[kk + 1] &amp; LOWER_MASK);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">				mt[kk] = mt[kk + (M - N)] ^ (y &gt;&gt;&gt; 1) ^ ((y &amp; 0x1) == 0 ? mag0 : mag1);</span>
+			}
+<span class="nc" id="L184">			y = (mt[N - 1] &amp; UPPER_MASK) | (mt[0] &amp; LOWER_MASK);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			mt[N - 1] = mt[M - 1] ^ (y &gt;&gt;&gt; 1) ^ ((y &amp; 0x1) == 0 ? mag0 : mag1);</span>
+
+<span class="nc" id="L187">			mti = 0;</span>
+		}
+<span class="nc" id="L189">		y = mt[mti++];</span>
+
+		/* Tempering */
+<span class="nc" id="L192">		y ^= (y &gt;&gt;&gt; 11);</span>
+<span class="nc" id="L193">		y ^= (y &lt;&lt; 7) &amp; 0x9d2c5680;</span>
+<span class="nc" id="L194">		y ^= (y &lt;&lt; 15) &amp; 0xefc60000;</span>
+<span class="nc" id="L195">		y ^= (y &gt;&gt;&gt; 18);</span>
+
+<span class="nc" id="L197">		return y;</span>
+	}
+
+	/* generates a random number on [0,0x7fffffff]-interval */
+	private final int genrand_int31() {
+<span class="nc" id="L202">		return (genrand_int32() &gt;&gt;&gt; 1);</span>
+	}
+
+	/* generates a random number on [0,1]-real-interval */
+	private final double genrand_real1() {
+<span class="nc" id="L207">		int i = genrand_int32();</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">		if (i &gt; 0) {</span>
+<span class="nc" id="L209">			return i / 4294967295.0;</span>
+			/* divided by 2^32-1 */
+		} else {
+<span class="nc" id="L212">			return ((double) (i &amp; 0x7fffffff) + 0x80000000L) / 4294967295.0;</span>
+		}
+	}
+
+	/* generates a random number on [0,1)-real-interval */
+	private final double genrand_real2() {
+<span class="nc" id="L218">		int i = genrand_int32();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">		if (i &gt; 0) {</span>
+<span class="nc" id="L220">			return i / 4294967296.0;</span>
+			/* divided by 2^32 */
+		} else {
+<span class="nc" id="L223">			return ((double) (i &amp; 0x7fffffff) + 0x80000000L) / 4294967296.0;</span>
+		}
+	}
+
+	/* generates a random number on (0,1)-real-interval */
+	private final double genrand_real3() {
+<span class="nc" id="L229">		int i = genrand_int32();</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		if (i &gt; 0) {</span>
+<span class="nc" id="L231">			return (i + 0.5) / 4294967296.0;</span>
+			/* divided by 2^32 */
+		} else {
+<span class="nc" id="L234">			return (((double) (i &amp; 0x7fffffff) + 0x80000000L) + 0.5) / 4294967296.0;</span>
+		}
+	}
+
+	/* generates a random number on [0,1) with 53-bit resolution*/
+	private final double genrand_res53() {
+<span class="nc" id="L240">		long a = genrand_int32() &gt;&gt;&gt; 5, b = genrand_int32() &gt;&gt;&gt; 6;</span>
+<span class="nc" id="L241">		return (a * 67108864.0 + b) / 9007199254740992.0;</span>
+	}
+
+	/* These real versions are due to Isaku Wada, 2002/01/09 added */
+
+	/**
+	 * Returns a 64 bit uniformly distributed random number in the open unit
+	 * interval [0.0,1.0) (including 0.0 and excluding 1.0).
+	 */
+	@Override
+	public double nextDouble() {
+<span class="nc" id="L252">		return genrand_res53();</span>
+	}
+
+	/**
+	 *Returns a 32 bit uniformly distributed random number in the closed interval
+	 * [Integer.MIN_VALUE,Integer.MAX_VALUE]
+	 * (including Integer.MIN_VALUE and  Integer.MAX_VALUE)
+	 */
+	@Override
+	public int nextInt() {
+<span class="nc" id="L262">		return genrand_int32();</span>
+	}
+
+	/**
+	 *Returns a 32 bit uniformly distributed random number in the closed interval
+	 * [0,4294967295]
+	 * (including 0 and  4294967295)
+	 */
+	public long nextLong() {
+<span class="nc" id="L271">		int i = genrand_int32();</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (i &gt; 0) {</span>
+<span class="nc" id="L273">			return i;</span>
+		} else {
+<span class="nc" id="L275">			return (i &amp; 0x7fffffff) + 0x80000000L;</span>
+		}
+	}
+
+	/**
+	 *Returns a 64 bit uniformly distributed random number in the closed interval
+	 * [Long.MIN_VALUE,Long.MAX_VALUE]
+	 * (including Long.MIN_VALUE and  Long.MAX_VALUE)
+	 */
+	@Override
+	public long nextLong64() {
+<span class="nc" id="L286">		int i = genrand_int32();</span>
+<span class="nc" id="L287">		int j = genrand_int32();</span>
+		long n;
+<span class="nc bnc" id="L289" title="All 2 branches missed.">		if (i &gt; 0) {</span>
+<span class="nc" id="L290">			n = i;</span>
+<span class="nc" id="L291">			n &lt;&lt;= 32;</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">			if (j &gt; 0) {</span>
+<span class="nc" id="L293">				return n + j;</span>
+			} else {
+<span class="nc" id="L295">				return n + (j &amp; 0x7fffffff) + 0x80000000L;</span>
+			}
+		} else {//i &lt; 0
+<span class="nc" id="L298">			n = (i &amp; 0x7fffffff) + 0x80000000L;</span>
+<span class="nc" id="L299">			n &lt;&lt;= 32;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">			if (j &gt; 0) {</span>
+<span class="nc" id="L301">				return n + j;</span>
+			} else {
+<span class="nc" id="L303">				return n + (j &amp; 0x7fffffff) + 0x80000000L;</span>
+			}
+		}
+	}
+
+	/**
+	 * Returns a 32 bit uniformly distributed random number in the open unit
+	 * interval (0.0,1.0) (excluding 0.0 and 1.0).
+	 */
+	@Override
+	public double raw() {
+<span class="nc" id="L314">		return genrand_real3();</span>
+	}
+        
+        /**
+	 * Returns a 32 bit uniformly distributed random number in the open unit
+	 * interval [0.0,1.0) (including 0.0, excluding 1.0).
+	 */
+	@Override
+	public double raw2() {
+<span class="nc" id="L323">		return genrand_real3();</span>
+	}
+
+	/**
+	 * test
+	 */
+	public static void test() {
+		int integer;
+<span class="nc" id="L331">		MersenneTwister p = new MersenneTwister();</span>
+<span class="nc" id="L332">		long init[] = { 0x123L, 0x234L, 0x345L, 0x456L };</span>
+<span class="nc" id="L333">		p.init_by_array(init, init.length);</span>
+
+<span class="nc" id="L335">		System.out.println(&quot;\nINT:  &quot;);</span>
+		/*
+		for (int i =0; i&lt; 1000; i++) {
+		    integer = p.genrand_int32();
+		    if (integer &gt; 0)
+		        System.out.print(integer+&quot; &quot;);
+		    else
+		        System.out.print(((long) (integer &amp; 0x7fffffff) + 0x80000000L) + &quot; &quot;);
+		    if (i%5 == 4)
+		        System.out.println();
+		}*/
+
+<span class="nc bnc" id="L347" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L348">			System.out.print(p.nextLong() + &quot; &quot;);</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L350">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L354">		System.out.println(&quot;\nDOUBLE [0,1):  &quot;);</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L356">			System.out.print(p.genrand_real2() + &quot; &quot;);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L358">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L362">		p.init_genrand(723);</span>
+<span class="nc" id="L363">		System.out.println(&quot;\nINT:  &quot;);</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L365">			integer = p.genrand_int32();</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">			if (integer &gt; 0) {</span>
+<span class="nc" id="L367">				System.out.print(integer + &quot; &quot;);</span>
+			} else {
+<span class="nc" id="L369">				System.out.print(((integer &amp; 0x7fffffff) + 0x80000000L) + &quot; &quot;);</span>
+			}
+<span class="nc bnc" id="L371" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L372">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L376">		System.out.println(&quot;\nDOUBLE [0,1]:  &quot;);</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L378">			System.out.print(p.genrand_real1() + &quot; &quot;);</span>
+<span class="nc bnc" id="L379" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L380">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L384">		System.out.println(&quot;\nDOUBLE [0,1):  &quot;);</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L386">			System.out.print(p.genrand_real2() + &quot; &quot;);</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L388">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L392">		System.out.println(&quot;\nDOUBLE (0,1):  &quot;);</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L394">			System.out.print(p.genrand_real3() + &quot; &quot;);</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L396">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L400">		System.out.println(&quot;\nDOUBLE 64 [0,1):  &quot;);</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">		for (int i = 0; i &lt; 1000; i++) {</span>
+<span class="nc" id="L402">			System.out.print(p.genrand_res53() + &quot; &quot;);</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">			if (i % 5 == 4) {</span>
+<span class="nc" id="L404">				System.out.println();</span>
+			}
+		}
+
+<span class="nc" id="L408">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

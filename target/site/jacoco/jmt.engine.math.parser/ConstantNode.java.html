@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConstantNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math.parser</a> &gt; <span class="el_source">ConstantNode.java</span></div><h1>ConstantNode.java</h1><pre class="source lang-java linenums">/**
+  * Copyright 2006 Bertoli Marco
+
+  *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+
+  *  http://www.apache.org/licenses/LICENSE-2.0
+
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+package jmt.engine.math.parser;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; ConstantNode&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A constant value node
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 08/dic/06
+ * &lt;b&gt;Time:&lt;/b&gt; 15:35:24&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class ConstantNode implements ExpressionNode {
+	/** List of built-in constant names */
+<span class="nc" id="L30">	public static final String[] CONSTANTS = new String[] { &quot;pi&quot;, &quot;e&quot; };</span>
+	/** List of built-in constant values */
+<span class="nc" id="L32">	public static final double[] VALUES = new double[] { Math.PI, Math.E };</span>
+	/** Value of the constant */
+	protected double constant;
+	/** Name of the constant. Only if it is built-in */
+	protected String name;
+	/** An empty array with children */
+<span class="nc" id="L38">	protected ExpressionNode[] children = new ExpressionNode[0];</span>
+
+	/**
+	 * Builds a constant node
+	 * @param constant constant to be put in node
+	 */
+<span class="nc" id="L44">	public ConstantNode(double constant) {</span>
+<span class="nc" id="L45">		this.constant = constant;</span>
+<span class="nc" id="L46">		name = null;</span>
+<span class="nc" id="L47">	}</span>
+
+	/**
+	 * Builds a constant node, with an unique constant
+	 * @param name name of the constant in the CONSTANTS array
+	 */
+<span class="nc" id="L53">	public ConstantNode(String name) {</span>
+<span class="nc" id="L54">		this.name = name;</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		for (int i = 0; i &lt; CONSTANTS.length; i++) {</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">			if (CONSTANTS[i].equals(name)) {</span>
+<span class="nc" id="L57">				constant = VALUES[i];</span>
+<span class="nc" id="L58">				return;</span>
+			}
+		}
+<span class="nc" id="L61">		throw new IllegalArgumentException(&quot;Unrecognized constant&quot;);</span>
+	}
+
+	/**
+	 * Builds a constant node, with an unique constant
+	 * @param pos position of the constant in the CONSTANTS array
+	 * @see ConstantNode#CONSTANTS
+	 */
+<span class="nc" id="L69">	public ConstantNode(int pos) {</span>
+<span class="nc" id="L70">		this.name = CONSTANTS[pos];</span>
+<span class="nc" id="L71">		this.constant = VALUES[pos];</span>
+<span class="nc" id="L72">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#count()
+	 */
+	public int count() {
+<span class="nc" id="L78">		return 1;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getDepth()
+	 */
+	public int getDepth() {
+<span class="nc" id="L85">		return 1; // This is a leaf node</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getSubtype()
+	 */
+	public String getSubtype() {
+		// Checks if this is integer or double
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if (Math.floor(constant) == constant) {</span>
+<span class="nc" id="L94">			return Long.toString(Math.round(constant));</span>
+		} else {
+<span class="nc" id="L96">			return Double.toString(constant);</span>
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getType()
+	 */
+	public int getType() {
+<span class="nc" id="L104">		return ExpressionNode.CONSTANT_NODE;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getValue()
+	 */
+	public double getValue() {
+<span class="nc" id="L111">		return constant;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#setVariable(java.lang.String, double)
+	 */
+	public void setVariable(String name, double value) {
+		// Nothing to be done here...
+<span class="nc" id="L119">	}</span>
+
+	/* (non-Javadoc)
+	 * @see org.mbertoli.jfep.ExpressionNode#getChildrenNodes()
+	 */
+	public ExpressionNode[] getChildrenNodes() {
+<span class="nc" id="L125">		return children;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+<span class="nc" id="L133">		return new ConstantNode(constant);</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		if (name == null) {</span>
+<span class="nc" id="L142">			return getSubtype();</span>
+		} else {
+<span class="nc" id="L144">			return name;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

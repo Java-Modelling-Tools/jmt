@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TotalStationCapacityParametricAnalysis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.parametric</a> &gt; <span class="el_source">TotalStationCapacityParametricAnalysis.java</span></div><h1>TotalStationCapacityParametricAnalysis.java</h1><pre class="source lang-java linenums">package jmt.gui.common.definitions.parametric;
+
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
+
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+
+/**
+ * &lt;p&gt;Title: TotalStationCapacityParametricAnalysis&lt;/p&gt;
+ * &lt;p&gt;Description: this class is used to describe a parametric analysis where the
+ * varied parameter is the total capacity inside a station. It
+ * adds the &lt;code &gt;stationKey&lt;/code&gt; field, used to keep the key of the station whose total capacity will be varied &lt;/p&gt;.
+ *
+ * @author Xinyu Gao
+ *         Date: 20-June-2023
+ *         Time: XXXX
+ */
+
+public class TotalStationCapacityParametricAnalysis extends ParametricAnalysisDefinition {
+<span class="nc" id="L27">    private final double FROM_ALL = 100;</span>
+<span class="nc" id="L28">    private final double TO_ALL = 120;</span>
+<span class="nc" id="L29">    private final double INCREMENT_SINGLE = 4;</span>
+<span class="nc" id="L30">    private final int STEPS = 10; //must be &lt; than ParametricAnalysis.MAX_NUMBER_OF_STEPS</span>
+<span class="nc" id="L31">    private final boolean SINGLE_CLASS = false;</span>
+
+    private Object stationKey;
+    private Object values;
+
+<span class="nc" id="L36">    public TotalStationCapacityParametricAnalysis(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {</span>
+<span class="nc" id="L37">        type = PA_TYPE_TOTAL_CAPACITY;</span>
+<span class="nc" id="L38">        classDef = cd;</span>
+<span class="nc" id="L39">        stationDef = sd;</span>
+<span class="nc" id="L40">        simDef = simd;</span>
+<span class="nc" id="L41">        ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+<span class="nc" id="L42">        stationKey = checker.checkForTotalStationCapacityParametricAnalysisAvailableStations().get(0);</span>
+
+<span class="nc" id="L44">        double mean = stationDef.getStationQueueCapacity(stationKey).doubleValue();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        if(mean &lt; 1) { mean = 1; }</span>
+<span class="nc" id="L46">        initialValue = mean;</span>
+<span class="nc" id="L47">        finalValue = mean * INCREMENT_SINGLE;</span>
+<span class="nc" id="L48">    }</span>
+
+    /**
+     * Sets the default initial Value
+     */
+    public void setDefaultInitialValue() {
+<span class="nc" id="L54">        double mean = stationDef.getStationQueueCapacity(stationKey).doubleValue();</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if(mean &lt; 1) { mean = 1; }</span>
+<span class="nc" id="L56">        initialValue = mean;</span>
+<span class="nc" id="L57">    }</span>
+
+    /**
+     * Sets default final value
+     */
+    public void setDefaultFinalValue() {
+<span class="nc" id="L63">        double mean = stationDef.getStationQueueCapacity(stationKey).doubleValue();</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        if(mean &lt; 1) { mean = 1; }</span>
+<span class="nc" id="L65">        finalValue = mean * INCREMENT_SINGLE;</span>
+<span class="nc" id="L66">    }</span>
+
+    /**
+     * Gets the class key of the job class whose number of servers will be
+     * increased. If the simulation is not single class, the &lt;code&gt; null &lt;/code&gt;
+     * value will be returned
+     * @return the key of the class whose number of servers will be increased if the
+     *         parametric analysis is single class, &lt;code&gt; null &lt;/code&gt; otherwise.
+     */
+    @Override
+<span class="nc" id="L76">    public Object getReferenceClass() { return null; }</span>
+
+    /**
+     * Get the reference class name
+     *
+     * @return the name of the class
+     */
+    @Override
+<span class="nc" id="L84">    public String getReferenceClassName() { return null; }</span>
+
+    /**
+     * Gets a TreeMap containing for each property its value. The supported properties are
+     * defined as constants inside this class.
+     * @return a TreeMap containing the value for each property
+     */
+    @Override
+    public Map&lt;String, String&gt; getProperties() {
+<span class="nc" id="L93">        TreeMap&lt;String, String&gt; properties = new TreeMap&lt;String, String&gt;();</span>
+<span class="nc" id="L94">        properties.put(FROM_PROPERTY, Double.toString(initialValue));</span>
+<span class="nc" id="L95">        properties.put(TO_PROPERTY, Double.toString(finalValue));</span>
+<span class="nc" id="L96">        properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));</span>
+<span class="nc" id="L97">        properties.put(REFERENCE_STATION_PROPERTY, stationDef.getStationName(stationKey));</span>
+<span class="nc" id="L98">        return properties;</span>
+    }
+
+    /**
+     * Sets the value for the specified property. The supported properties are: &lt;br&gt;
+     * - TO_PROPERTY  &lt;br&gt;
+     * - FROM_PROPERTY &lt;br&gt;
+     * - STEPS_PROPERTY &lt;br&gt;
+     * - REFERENCE_STATION_PROPERTY &lt;br&gt;
+     * @param propertyName the name of the property to be set
+     * @param value the value to be set
+     */
+    @Override
+    public void setProperty(String propertyName, String value) {
+<span class="nc bnc" id="L112" title="All 2 branches missed.">        if (propertyName.equals(TO_PROPERTY)) {</span>
+<span class="nc" id="L113">            finalValue = Double.parseDouble(value);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        } else if (propertyName.equals(FROM_PROPERTY)) {</span>
+<span class="nc" id="L115">            initialValue = Double.parseDouble(value);</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">        } else if (propertyName.equals(STEPS_PROPERTY)) {</span>
+<span class="nc" id="L117">            numberOfSteps = Integer.parseInt(value);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L119">                numberOfSteps = MAX_STEP_NUMBER;</span>
+            }
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        } else if (propertyName.equals(REFERENCE_STATION_PROPERTY)) {</span>
+<span class="nc" id="L122">            stationKey = stationDef.getStationByName(value);</span>
+        }
+<span class="nc" id="L124">    }</span>
+
+    /**
+     * Gets the station key whose total capacity will be varied
+     * @return the key of the station whose total capacity will be varied
+     */
+    public Object getReferenceStation() {
+<span class="nc" id="L131">        return stationKey;</span>
+    }
+
+    /**
+     * Gets name of the whose total capacity will be varied
+     * @return the key of the station whose total capacity will be varied
+     */
+    public String getReferenceStationName() {
+<span class="nc" id="L139">        return stationDef.getStationName(stationKey);</span>
+    }
+
+    /**
+     * Sets the station whose total capacity will be varied
+     * @param stationKey the station whose total capacity will be varied
+     */
+    public void setReferenceStation(Object stationKey) {
+<span class="nc" id="L147">        this.stationKey = stationKey;</span>
+<span class="nc" id="L148">    }</span>
+
+    /**
+     * Gets the type of parametric analysis
+     *
+     * @return the type of parametric analysis
+     */
+    @Override
+    public String getType() {
+<span class="nc" id="L157">        return type;</span>
+    }
+
+    /**
+     * Changes the model preparing it for the next step
+     *
+     */
+    @Override
+    public void changeModel(int step) {
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        if (step &gt;= numberOfSteps) {</span>
+<span class="nc" id="L167">            return;</span>
+        }
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if (values != null) {</span>
+<span class="nc" id="L170">            Double refST = (Double) ((Vector) values).get(step);</span>
+<span class="nc" id="L171">            stationDef.setStationQueueCapacity(stationKey, refST.intValue());</span>
+        }
+<span class="nc" id="L173">    }</span>
+
+    /**
+     * Gets the maximum number of steps compatible with the model definition and the type of parametric analysis.
+     *
+     * @return the maximum number of steps
+     */
+    @Override
+    public int searchForAvailableSteps() {
+<span class="nc" id="L182">        return Integer.MAX_VALUE;</span>
+    }
+
+    /**
+     * Finds the set of possible values of the parameter on which the
+     * simulation may be iterated on.
+     *
+     */
+    @Override
+    public void createValuesSet() {
+<span class="nc" id="L192">        double sum = 0;</span>
+<span class="nc" id="L193">        double increment = (finalValue - initialValue) / (double) (numberOfSteps - 1);</span>
+<span class="nc" id="L194">        values = new Vector(numberOfSteps);</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">        for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="nc" id="L196">            double value = initialValue + sum;</span>
+<span class="nc" id="L197">            double roundedValue = (double) Math.round(value);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            if (!((Vector&lt;Double&gt;) values).contains(roundedValue)) {</span>
+<span class="nc" id="L199">                ((Vector&lt;Double&gt;) values).add(new Double(roundedValue));</span>
+            }
+<span class="nc" id="L201">            sum += increment; //note that the increment may be &lt; 0</span>
+        }
+<span class="nc" id="L203">        int valuesSize = ((Vector&lt;Double&gt;) values).size();</span>
+<span class="nc" id="L204">        numberOfSteps = valuesSize;</span>
+<span class="nc" id="L205">        originalValues = new Double(initialValue);</span>
+<span class="nc" id="L206">    }</span>
+
+    /**
+     * Restore the original values of total capacity
+     */
+    @Override
+    public void restoreOriginalValues() {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (originalValues != null) {</span>
+<span class="nc" id="L214">            Double mean = (Double) originalValues;</span>
+<span class="nc" id="L215">            stationDef.setStationQueueCapacity(stationKey, mean.intValue());</span>
+        }
+<span class="nc" id="L217">    }</span>
+
+    /**
+     * Checks if the PA model is still coherent with simulation model definition. If
+     * the &lt;code&gt;autocorrect&lt;/code&gt; variable is set to true, if the PA model is no more
+     * valid but it can be corrected it will be changed.
+     *
+     * @param autocorrect if true the PA model will be autocorrected
+     *
+     * @return 0 - If the PA model is still valid &lt;br&gt;
+     *         1 - If the PA model is no more valid, but it will be corrected &lt;br&gt;
+     *         2 - If the PA model can be no more used
+     */
+    @Override
+    public int checkCorrectness(boolean autocorrect) {
+<span class="nc" id="L232">        int code = 0;</span>
+<span class="nc" id="L233">        ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);</span>
+<span class="nc" id="L234">        Vector&lt;Object&gt; availableStations = checker.checkForTotalStationCapacityParametricAnalysisAvailableStations();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (availableStations.isEmpty()) {</span>
+<span class="nc" id="L236">            code = 2; // -&gt; This type of PA is not available</span>
+        } else {
+            //if the reference station is no more available change reference station
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            if (!availableStations.contains(stationKey)) {</span>
+<span class="nc" id="L240">                code = 1;</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                if (autocorrect) {</span>
+<span class="nc" id="L242">                    stationKey = availableStations.get(0);</span>
+<span class="nc" id="L243">                    setDefaultInitialValue();</span>
+<span class="nc" id="L244">                    setDefaultFinalValue();</span>
+                }
+            }
+        }
+<span class="nc" id="L248">        return code;</span>
+    }
+
+    /**
+     * Returns the values assumed by the varying parameter
+     *
+     * @return a Vector containing the values assumed by the varying parameter
+     */
+    @Override
+    public Vector&lt;Number&gt; getParameterValues() {
+<span class="nc" id="L258">        return (Vector&lt;Number&gt;) values;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

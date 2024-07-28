@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModelFESCApproximator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical</a> &gt; <span class="el_source">ModelFESCApproximator.java</span></div><h1>ModelFESCApproximator.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmva.analytical;
+
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; ModelApproximator&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * This class is used to perform any form of FESC (Flow Equivalent Service Center)
+ * approximations before model solution.
+ * If needed, input model is alterated, than results are adjusted according to used
+ * approximation.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 04/apr/07
+ * &lt;b&gt;Time:&lt;/b&gt; 16:40:15&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class ModelFESCApproximator {
+	private static final int SKIP = -1;
+	private ExactModel inputModel;
+	private ExactModel outputModel;
+	private int iteration;
+	private int[] multipleServerList; // An array with mapping station -&gt; added delay for multiple server handling
+	private boolean multipleServerApproximated;
+
+	/**
+	 * Builds a new Model Approximator basing on given exact model
+	 * @param model input model
+	 * @param iteration iteration for what-if results
+	 */
+<span class="nc" id="L49">	public ModelFESCApproximator(ExactModel model, int iteration) {</span>
+<span class="nc" id="L50">		inputModel = model;</span>
+<span class="nc" id="L51">		this.iteration = iteration;</span>
+<span class="nc" id="L52">	}</span>
+
+	/**
+	 * This method will return approximate model that will be solved
+	 * @return the model that must be solved with 
+	 */
+	public ExactModel getModelToBeSolved() {
+<span class="nc" id="L59">		initApproximation();</span>
+<span class="nc" id="L60">		return outputModel;</span>
+	}
+
+	/**
+	 * This method will modify original model with the approximated results stored
+	 * @return original model with results
+	 */
+	public ExactModel processModelAfterSolution() {
+<span class="nc" id="L68">		postProcessApproximation();</span>
+<span class="nc" id="L69">		return inputModel;</span>
+	}
+
+	/**
+	 * This method will initialize every known approximation
+	 */
+	private void initApproximation() {
+		// Multiserver approximation
+<span class="nc bnc" id="L77" title="All 4 branches missed.">		if (inputModel.isMultipleServers() &amp;&amp; !inputModel.isOpen()) {</span>
+<span class="nc" id="L78">			multipleServerApproximated = true;</span>
+<span class="nc" id="L79">			outputModel = new ExactModel(inputModel);</span>
+			// Finds multi-server stations (will be replaced with station + delay)
+<span class="nc" id="L81">			multipleServerList = new int[inputModel.getStations()];</span>
+<span class="nc" id="L82">			int multipleCount = 0;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">			for (int i = 0; i &lt; multipleServerList.length; i++) {</span>
+<span class="nc bnc" id="L84" title="All 4 branches missed.">				if (inputModel.getStationServers()[i] &gt; 1 &amp;&amp; inputModel.getStationTypes()[i] != ExactConstants.STATION_DELAY) {</span>
+<span class="nc" id="L85">					multipleServerList[i] = inputModel.getStations() + multipleCount++;</span>
+				} else {
+<span class="nc" id="L87">					multipleServerList[i] = SKIP;</span>
+				}
+			}
+			// Adds delays
+<span class="nc" id="L91">			outputModel.resize(inputModel.getStations() + multipleCount, inputModel.getClasses());</span>
+<span class="nc" id="L92">			int[] stationTypes = outputModel.getStationTypes();</span>
+<span class="nc" id="L93">			String[] stationNames = outputModel.getStationNames();</span>
+<span class="nc" id="L94">			double[][][] serviceTimes = outputModel.getServiceTimes();</span>
+<span class="nc" id="L95">			double[][] visits = outputModel.getVisits();</span>
+<span class="nc" id="L96">			int[] stationServers = outputModel.getStationServers();</span>
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			for (int i = 0; i &lt; multipleServerList.length; i++) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">				if (multipleServerList[i] &gt; 0) {</span>
+<span class="nc" id="L100">					int delay = multipleServerList[i]; // Index of delay</span>
+<span class="nc" id="L101">					stationTypes[delay] = ExactConstants.STATION_DELAY;</span>
+<span class="nc" id="L102">					stationNames[delay] = stationNames[i] + &quot;_MULTISERVER_FESC&quot;; // This is used for debugging purposes</span>
+<span class="nc" id="L103">					visits[delay] = visits[i];</span>
+<span class="nc" id="L104">					int serverNum = stationServers[i];</span>
+					// Service time for station i is Si / n, while for delay is (n-1) / n * Si
+<span class="nc bnc" id="L106" title="All 2 branches missed.">					for (int cl = 0; cl &lt; inputModel.getClasses(); cl++) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">						for (int ld = 0; ld &lt; serviceTimes[i][cl].length; ld++) {</span>
+<span class="nc" id="L108">							serviceTimes[delay][cl][ld] = serviceTimes[i][cl][ld] * (serverNum - 1.0) / serverNum;</span>
+<span class="nc" id="L109">							serviceTimes[i][cl][ld] = serviceTimes[i][cl][ld] / serverNum;</span>
+						}
+					}
+<span class="nc" id="L112">					stationServers[i] = 1;</span>
+				}
+			}
+<span class="nc" id="L115">			outputModel.resetResults();</span>
+<span class="nc" id="L116">		} else {</span>
+<span class="nc" id="L117">			multipleServerApproximated = false;</span>
+<span class="nc" id="L118">			outputModel = inputModel;</span>
+		}
+<span class="nc" id="L120">	}</span>
+
+	/**
+	 * This method will post-process every known approximation
+	 */
+	private void postProcessApproximation() {
+		// Multiserver approximation
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		if (multipleServerApproximated) {</span>
+			/** Edited by Abhimanyu Chugh **/
+<span class="nc bnc" id="L129" title="All 2 branches missed.">			for (SolverAlgorithm alg : outputModel.getQueueLen().keySet()) {</span>
+<span class="nc" id="L130">				double[][] q = new double[inputModel.getStations()][inputModel.getClasses()];</span>
+<span class="nc" id="L131">				double[][] r = new double[inputModel.getStations()][inputModel.getClasses()];</span>
+<span class="nc" id="L132">				double[][] u = new double[inputModel.getStations()][inputModel.getClasses()];</span>
+<span class="nc" id="L133">				double[][] x = new double[inputModel.getStations()][inputModel.getClasses()];</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">				for (int st = 0; st &lt; inputModel.getStations(); st++) {</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">					for (int cl = 0; cl &lt; inputModel.getClasses(); cl++) {</span>
+<span class="nc" id="L136">						q[st][cl] = outputModel.getQueueLen(alg)[st][cl][iteration];</span>
+<span class="nc" id="L137">						r[st][cl] = outputModel.getResidTimes(alg)[st][cl][iteration];</span>
+<span class="nc" id="L138">						u[st][cl] = outputModel.getUtilization(alg)[st][cl][iteration] * inputModel.getStationServers()[st];</span>
+<span class="nc" id="L139">						x[st][cl] = outputModel.getThroughput(alg)[st][cl][iteration];</span>
+<span class="nc" id="L140">						int delay = multipleServerList[st];</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">						if (delay &gt; 0) {</span>
+<span class="nc" id="L142">							q[st][cl] += outputModel.getQueueLen(alg)[delay][cl][iteration];</span>
+<span class="nc" id="L143">							r[st][cl] += outputModel.getResidTimes(alg)[delay][cl][iteration];</span>
+						}
+					}
+				}
+<span class="nc" id="L147">				int algIterations = outputModel.getAlgIterations(alg)[iteration];</span>
+<span class="nc" id="L148">				inputModel.setResults(alg, algIterations, q, x, r, u, Double.NaN, iteration);</span>
+<span class="nc" id="L149">			}</span>
+<span class="nc" id="L150">			inputModel.setResultsBooleans(true);</span>
+			/** End **/
+		} else {
+			// Nothing to be done here....
+		}
+<span class="nc" id="L155">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

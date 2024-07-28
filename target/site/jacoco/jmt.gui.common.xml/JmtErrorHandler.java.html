@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtErrorHandler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">JmtErrorHandler.java</span></div><h1>JmtErrorHandler.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.xml;
+
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
+
+/**
+
+ * @author Max
+ * Date: 17-set-2003
+ * Time: 19.43.45
+
+ */
+<span class="nc" id="L32">public class JmtErrorHandler implements ErrorHandler {</span>
+
+	/**
+	 * Receive notification of a warning.
+	 *
+	 * &lt;p&gt;SAX parsers will use this method to report conditions that
+	 * are not errors or fatal errors as defined by the XML 1.0
+	 * recommendation.  The default behaviour is to take no action.&lt;/p&gt;
+	 *
+	 * &lt;p&gt;The SAX parser must continue to provide normal parsing events
+	 * after invoking this method: it should still be possible for the
+	 * application to process the document through to the end.&lt;/p&gt;
+	 *
+	 * &lt;p&gt;Filters may use this method to report other, non-XML warnings
+	 * as well.&lt;/p&gt;
+	 *
+	 * @param exception The warning information encapsulated in a
+	 *                  SAX parse exception.
+	 * @exception org.xml.sax.SAXException Any SAX exception, possibly
+	 *            wrapping another exception.
+	 * @see org.xml.sax.SAXParseException
+	 */
+	public void warning(SAXParseException exception) throws SAXException {
+<span class="nc" id="L55">		System.err.println(&quot;Warning: &quot; + exception.getMessage());</span>
+<span class="nc" id="L56">		throw exception;</span>
+	}
+
+	/**
+	 * Receive notification of a recoverable error.
+	 *
+	 * &lt;p&gt;This corresponds to the definition of &quot;error&quot; in section 1.2
+	 * of the W3C XML 1.0 Recommendation.  For example, a validating
+	 * parser would use this callback to report the violation of a
+	 * validity constraint.  The default behaviour is to take no
+	 * action.&lt;/p&gt;
+	 *
+	 * &lt;p&gt;The SAX parser must continue to provide normal parsing events
+	 * after invoking this method: it should still be possible for the
+	 * application to process the document through to the end.  If the
+	 * application cannot do so, then the parser should report a fatal
+	 * error even if the XML 1.0 recommendation does not require it to
+	 * do so.&lt;/p&gt;
+	 *
+	 * &lt;p&gt;Filters may use this method to report other, non-XML errors
+	 * as well.&lt;/p&gt;
+	 *
+	 * @param exception The error information encapsulated in a
+	 *                  SAX parse exception.
+	 * @exception org.xml.sax.SAXException Any SAX exception, possibly
+	 *            wrapping another exception.
+	 * @see org.xml.sax.SAXParseException
+	 */
+	public void error(SAXParseException exception) throws SAXException {
+<span class="nc" id="L85">		System.err.println(&quot;Error while parsing: &quot; + exception.getMessage());</span>
+<span class="nc" id="L86">		throw exception;</span>
+	}
+
+	/**
+	 * Receive notification of a non-recoverable error.
+	 *
+	 * &lt;p&gt;This corresponds to the definition of &quot;fatal error&quot; in
+	 * section 1.2 of the W3C XML 1.0 Recommendation.  For example, a
+	 * parser would use this callback to report the violation of a
+	 * well-formedness constraint.&lt;/p&gt;
+	 *
+	 * &lt;p&gt;The application must assume that the document is unusable
+	 * after the parser has invoked this method, and should continue
+	 * (if at all) only for the sake of collecting addition error
+	 * messages: in fact, SAX parsers are free to stop reporting any
+	 * other events once this method has been invoked.&lt;/p&gt;
+	 *
+	 * @param exception The error information encapsulated in a
+	 *                  SAX parse exception.
+	 * @exception org.xml.sax.SAXException Any SAX exception, possibly
+	 *            wrapping another exception.
+	 * @see org.xml.sax.SAXParseException
+	 */
+	public void fatalError(SAXParseException exception) throws SAXException {
+<span class="nc" id="L110">		System.err.println(&quot;Fatal error while parsing: &quot; + exception.getMessage());</span>
+<span class="nc" id="L111">		throw exception;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RECALSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet</a> &gt; <span class="el_source">RECALSolver.java</span></div><h1>RECALSolver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+
+/**
+ * This class implements the RECALSolver object, which computes the normalising
+ * constant for a network using the RECAL algorithm. A recursive approach is
+ * used.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class RECALSolver extends RecursiveSolver {
+
+	/**
+	 * Creates and initialises a RECALSolver object.
+	 *
+	 * @param qnm The QNModel object that we are working on
+	 * @throws InternalErrorException Thrown when the solver cannot be initialised
+	 */
+	public RECALSolver(QNModel qnm) throws InternalErrorException {
+<span class="nc" id="L43">		super(qnm);</span>
+<span class="nc" id="L44">	}</span>
+
+	/**
+	 * Computes any normalising constant using a simple recursion and taking
+	 * advantage of any already computed and stored value.
+	 *
+	 * @param m The MultiplicitiesVector
+	 * @param p The PopulationVector
+	 * @return The normalising constant as a BigRational object
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
+	 */
+	@Override
+	protected BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
+		// First we try to find if this value of G has been already computed and stored
+		// previously
+<span class="nc" id="L60">		BigRational toRet = recallG(m, p);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (toRet == null) {</span>
+			// This is the first time we computeNormalisingConstant this value
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			if (m.isZeroVector()) {</span>
+<span class="nc" id="L64">				toRet = initialConditionFor(p);</span>
+			} else {
+				// computeNormalisingConstant this G
+<span class="nc" id="L67">				int r = p.findFirstNonZeroElement();</span>
+
+				// Create N-Ir
+<span class="nc" id="L70">				p.minusOne(r + 1);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">				if (qnm.getDelay(r) != 0) {</span>
+<span class="nc" id="L72">					toRet = compute(m, p);</span>
+<span class="nc" id="L73">					toRet = toRet.multiply(qnm.getDelayAsBigRational(r));</span>
+				} else {
+<span class="nc" id="L75">					toRet = BigRational.ZERO;</span>
+				}
+
+<span class="nc bnc" id="L78" title="All 2 branches missed.">				for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">					if (m.get(k) &gt; 0) {</span>
+						// Create Δm+1k
+<span class="nc" id="L81">						m.plusOne(k + 1);</span>
+<span class="nc" id="L82">						BigRational toAdd = compute(m, p);</span>
+						// restore Δm
+<span class="nc" id="L84">						m.restore();</span>
+<span class="nc" id="L85">						BigRational mulFactor = qnm.getDemandAsBigRational(k, r);</span>
+<span class="nc" id="L86">						mulFactor = mulFactor.multiply(new BigRational(m.get(k) /* + qnm.multiplicities.get(k)-1 */));</span>
+<span class="nc" id="L87">						toAdd = toAdd.multiply(mulFactor);</span>
+<span class="nc" id="L88">						toRet = toRet.add(toAdd);</span>
+					}
+				}
+				// restore N
+<span class="nc" id="L92">				p.restore();</span>
+				// divide by Nr
+<span class="nc" id="L94">				toRet = toRet.divide(new BigRational(p.get(r)));</span>
+			}
+			// Store for future use (add to Gmap)
+<span class="nc" id="L97">			storeG(m, p, toRet);</span>
+		}
+<span class="nc" id="L99">		return toRet;</span>
+	}
+
+	/**
+	 * Prints a short welcome message that says which solver is used.
+	 */
+	@Override
+	public void printWelcome() {
+<span class="nc" id="L107">		System.out.println(&quot;Using RECAL (recursive)&quot;);</span>
+<span class="nc" id="L108">	}</span>
+
+	/**
+	 * Computes the normalising constant for the specified QNModel.
+	 *
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
+	 */
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException {
+<span class="nc" id="L118">		totalTimer.start();</span>
+<span class="nc" id="L119">		MultiplicitiesVector m = qnm.getMultiplicitiesVector();</span>
+<span class="nc" id="L120">		PopulationVector p = qnm.getPopulationVector();</span>
+
+<span class="nc" id="L122">		G = compute(m, p);</span>
+<span class="nc" id="L123">		totalTimer.pause();</span>
+<span class="nc" id="L124">		memUsage = MemoryUsageUtils.memoryUsage();</span>
+<span class="nc" id="L125">		qnm.setNormalisingConstant(G);</span>
+<span class="nc" id="L126">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

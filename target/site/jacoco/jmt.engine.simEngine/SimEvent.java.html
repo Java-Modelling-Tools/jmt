@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimEvent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.simEngine</a> &gt; <span class="el_source">SimEvent.java</span></div><h1>SimEvent.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.simEngine;
+
+/**
+ * This class represents events which are passed between the entities
+ * in the simulation.
+ */
+
+public class SimEvent implements Cloneable {
+	// Private data members
+	private int etype; // internal event type
+	public double time; // simulation time in which event should occur
+	private int entSrc; // id of entity which scheduled event
+	private int entDst; // id of entity which event will be sent to
+	private int tag; // the user defined type of event
+	private Object data; // any data the event is carrying
+	/** This field should never be set explicitly. it is used by the EventQueue for ordering purposes. */
+	int internalOrdering;
+
+	//
+	// Public library interface
+	//
+
+	// Internal event types
+
+	//initial value when the event has just been created
+	static final int ENULL = 0;
+	//the event is a message to another entity
+	static final int SEND = 1;
+	//used to let an entity know that its waiting time has finished
+	static final int HOLD_DONE = 2;
+	//this event creates dynamically a new entity
+	static final int CREATE = 3;
+
+	// Constructors
+	/** Constructor, create a blank event. Useful for fetching events
+	 * using methods such as &lt;tt&gt;SimEntity.simWait(ev)&lt;/tt&gt;.
+	 */
+<span class="nc" id="L56">	public SimEvent() {</span>
+<span class="nc" id="L57">		etype = ENULL;</span>
+<span class="nc" id="L58">		this.time = -1.0;</span>
+<span class="nc" id="L59">		entSrc = -1;</span>
+<span class="nc" id="L60">		entDst = -1;</span>
+<span class="nc" id="L61">		this.tag = -1;</span>
+<span class="nc" id="L62">		data = null;</span>
+<span class="nc" id="L63">	}</span>
+
+	// Package level constructors
+<span class="nc" id="L66">	SimEvent(int evtype, double time, int src, int dest, int tag, Object edata) {</span>
+<span class="nc" id="L67">		etype = evtype;</span>
+<span class="nc" id="L68">		this.time = time;</span>
+<span class="nc" id="L69">		entSrc = src;</span>
+<span class="nc" id="L70">		entDst = dest;</span>
+<span class="nc" id="L71">		this.tag = tag;</span>
+<span class="nc" id="L72">		data = edata;</span>
+<span class="nc" id="L73">	}</span>
+
+<span class="nc" id="L75">	SimEvent(int evtype, double time, int src) {</span>
+<span class="nc" id="L76">		etype = evtype;</span>
+<span class="nc" id="L77">		this.time = time;</span>
+<span class="nc" id="L78">		entSrc = src;</span>
+<span class="nc" id="L79">		entDst = -1;</span>
+<span class="nc" id="L80">		this.tag = -1;</span>
+<span class="nc" id="L81">		data = null;</span>
+<span class="nc" id="L82">	}</span>
+
+	// Public access methods
+	/** Get the unique id number of the entity which is the destination of this event.
+	 * @return the id number
+	 */
+	public int getDest() {
+<span class="nc" id="L89">		return entDst;</span>
+	}
+
+	/** Get the unique id number of the entity which scheduled this event.
+	 * @return the id number
+	 */
+	public int getSrc() {
+<span class="nc" id="L96">		return entSrc;</span>
+	}
+
+	/** Get the simulation time which this event was scheduled for.
+	 * @return The simulation time
+	 */
+	public double eventTime() {
+<span class="nc" id="L103">		return time;</span>
+	}
+
+	/** Get the user-defined tag in this event
+	 * @return The tag
+	 */
+	public int type() {
+<span class="nc" id="L110">		return tag;</span>
+	} // The user defined type
+
+	/** Get the unique id number of the entity which scheduled this event.
+	 * @return the id number
+	 */
+	public int scheduledBy() {
+<span class="nc" id="L117">		return entSrc;</span>
+	}
+
+	/** Get the user-defined tag in this event.
+	 * @return The tag
+	 */
+	public int getTag() {
+<span class="nc" id="L124">		return tag;</span>
+	}
+
+	/** Get the data passed in this event.
+	 * @return A reference to the data
+	 */
+	public Object getData() {
+<span class="nc" id="L131">		return data;</span>
+	}
+
+	// Public modifying methods
+	/** Create an exact copy of this event.
+	 * @return A reference to the copy
+	 */
+	@Override
+	public Object clone() {
+<span class="nc" id="L140">		return new SimEvent(etype, time, entSrc, entDst, tag, data);</span>
+	}
+
+	/** Set the source entity of this event.
+	 * @param s The unique id number of the entity
+	 */
+	public void setSrc(int s) {
+<span class="nc" id="L147">		entSrc = s;</span>
+<span class="nc" id="L148">	}</span>
+
+	/** Set the destination entity of this event.
+	 * @param d The unique id number of the entity
+	 */
+	public void setDest(int d) {
+<span class="nc" id="L154">		entDst = d;</span>
+<span class="nc" id="L155">	}</span>
+
+	//
+	// Package level methods
+	//
+
+	int getType() {
+<span class="nc" id="L162">		return etype;</span>
+	} // The internal type
+
+	void copy(SimEvent ev) {
+<span class="nc" id="L166">		entDst = ev.getDest();</span>
+<span class="nc" id="L167">		entSrc = ev.getSrc();</span>
+<span class="nc" id="L168">		time = ev.eventTime();</span>
+<span class="nc" id="L169">		etype = ev.getType();</span>
+<span class="nc" id="L170">		tag = ev.getTag();</span>
+<span class="nc" id="L171">		data = ev.getData();</span>
+<span class="nc" id="L172">	}</span>
+
+	/**
+	 * Returns a string representation of the object. In general, the
+	 * &lt;code&gt;toString&lt;/code&gt; method returns a string that
+	 * &quot;textually represents&quot; this object. The result should
+	 * be a concise but informative representation that is easy for a
+	 * person to read.
+	 * It is recommended that all subclasses override this method.
+	 * &lt;p&gt;
+	 * The &lt;code&gt;toString&lt;/code&gt; method for class &lt;code&gt;Object&lt;/code&gt;
+	 * returns a string consisting of the name of the class of which the
+	 * object is an instance, the at-sign character `&lt;code&gt;@&lt;/code&gt;', and
+	 * the unsigned hexadecimal representation of the hash code of the
+	 * object. In other words, this method returns a string equal to the
+	 * value of:
+	 * &lt;blockquote&gt;
+	 * &lt;pre&gt;
+	 * getClass().getName() + '@' + Integer.toHexString(hashCode())
+	 * &lt;/pre&gt;&lt;/blockquote&gt;
+	 *
+	 * @return  a string representation of the object.
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L197">		return &quot;type = &quot; + etype + &quot;; time = &quot; + time + &quot;; src = &quot; + entSrc + &quot;; dest = &quot; + entDst + &quot;; tag = &quot; + tag + &quot;; data = &quot; + data + &quot;\n&quot;;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

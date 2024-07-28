@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MMQueuesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.wizard.panels.markovPanel</a> &gt; <span class="el_source">MMQueuesPanel.java</span></div><h1>MMQueuesPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmch.wizard.panels.markovPanel;
+
+import java.util.ArrayList;
+
+import javax.swing.AbstractButton;
+
+import jmt.framework.gui.components.JMTToolBar;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.gui.common.JMTImageLoader;
+import jmt.jmch.Constants;
+import jmt.jmch.wizard.actionsWizard.AbstractMCHAction;
+import jmt.jmch.wizard.actionsWizard.Help;
+import jmt.jmch.wizard.actionsWizard.PauseSimulation;
+import jmt.jmch.wizard.actionsWizard.StartSimulation;
+import jmt.jmch.wizard.actionsWizard.StopSimulation;
+import jmt.jmch.wizard.panels.JMCHWizardPanel;
+import jmt.jmch.wizard.MainWizard;
+
+/**
+ * Panel of the main Wizard for the Markov chains.
+ *
+ * @author Lorenzo Torri
+ * Date: 15-apr-2024
+ * Time: 14.29
+ */
+public class MMQueuesPanel extends JMCHWizardPanel{
+    /*
+     * This class does not have all the features of the panel as in the AnimationPanel, because I had to re-use the MMQueues.java file.
+     * For example there is no JMenu in here, since it was already defined in MMQueues
+     */
+
+    private String selectedMethod;
+    private MMQueues mq;
+
+    //---- abstract actions for the toolbar
+    private AbstractMCHAction start;
+    private AbstractMCHAction pause;
+    private AbstractMCHAction stop;
+    private AbstractMCHAction openHelp;
+
+    private HoverHelp help;
+
+<span class="nc" id="L60">    public MMQueuesPanel(MainWizard main, String selectedMethod){</span>
+<span class="nc" id="L61">        this.parent = main;</span>
+<span class="nc" id="L62">        this.selectedMethod = selectedMethod;</span>
+        
+<span class="nc" id="L64">        help = main.getHoverHelp();</span>
+
+<span class="nc" id="L66">        start = new StartSimulation(this);</span>
+<span class="nc" id="L67">        pause = new PauseSimulation(this);</span>
+<span class="nc" id="L68">        stop = new StopSimulation(this);</span>
+<span class="nc" id="L69">        openHelp = new Help(this);</span>
+
+<span class="nc" id="L71">        pause.setEnabled(false);</span>
+<span class="nc" id="L72">        stop.setEnabled(false);</span>
+
+<span class="nc" id="L74">        createToolbar();</span>
+        
+<span class="nc" id="L76">        mq = new MMQueues(main, this, selectedMethod);</span>
+<span class="nc" id="L77">        this.add(mq);</span>
+<span class="nc" id="L78">    }</span>
+
+    @Override
+    public String getName() {
+        String name;
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        if (selectedMethod == &quot;mm1&quot;) {</span>
+<span class="nc" id="L84">			name = &quot;M/M/1&quot;;</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">		} else if (selectedMethod == &quot;mm1k&quot;) {</span>
+<span class="nc" id="L86">			name = &quot;M/M/1/k&quot;;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		} else if (selectedMethod == &quot;mmn Finite Capacity Station&quot;) {</span>
+<span class="nc" id="L88">			name = &quot;M/M/n&quot;;</span>
+		} else{
+<span class="nc" id="L90">			name = &quot;M/M/n/k&quot;;</span>
+		}
+<span class="nc" id="L92">        return name;</span>
+    }
+
+    /**
+	 * Update the toolbar for the Scheduling Window
+	 */
+    protected void createToolbar() {
+<span class="nc" id="L99">        JMTToolBar toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());	</span>
+
+        //first add all the icons with their actions
+<span class="nc" id="L102">        AbstractMCHAction[] actions = new AbstractMCHAction[] {start, pause, stop, null, openHelp}; // Builds an array with all actions	</span>
+<span class="nc" id="L103">        toolbar.populateToolbar(actions);</span>
+<span class="nc" id="L104">        ArrayList&lt;AbstractButton&gt; buttons = new ArrayList&lt;AbstractButton&gt;(); //create a list of AbstractButtons for the helpLabel</span>
+<span class="nc" id="L105">		buttons.addAll(toolbar.populateToolbar(actions));</span>
+
+        //add help for each Action/JComboBox with helpLabel
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		for (int i = 0; i &lt; buttons.size(); i++) {</span>
+<span class="nc" id="L109">			AbstractButton button = buttons.get(i);</span>
+<span class="nc" id="L110">			help.addHelp(button, Constants.HELP_BUTTONS_MARKOV[i]);</span>
+		}
+		  
+<span class="nc" id="L113">		parent.setToolBar(toolbar);</span>
+<span class="nc" id="L114">	}</span>
+
+    @Override
+    public boolean canGoBack() {
+<span class="nc" id="L118">		return true;</span>
+	}
+
+    @Override
+    public void startAnimation() {
+<span class="nc" id="L123">        start.setEnabled(false);</span>
+<span class="nc" id="L124">        pause.setEnabled(true);</span>
+<span class="nc" id="L125">        stop.setEnabled(true);</span>
+<span class="nc" id="L126">        mq.playBActionPerformed();</span>
+<span class="nc" id="L127">    }</span>
+
+    @Override
+    public void pauseAnimation() {
+<span class="nc" id="L131">        start.setEnabled(false);</span>
+<span class="nc" id="L132">        pause.setEnabled(false);</span>
+<span class="nc" id="L133">        stop.setEnabled(true);</span>
+<span class="nc" id="L134">        mq.pauseBActionPerformed();</span>
+<span class="nc" id="L135">    }</span>
+
+    @Override
+    public void stopAnimation() {
+<span class="nc" id="L139">        start.setEnabled(true);</span>
+<span class="nc" id="L140">        pause.setEnabled(false);</span>
+<span class="nc" id="L141">        stop.setEnabled(false);</span>
+<span class="nc" id="L142">        mq.stopBActionPerformed();</span>
+<span class="nc" id="L143">    }</span>
+
+    @Override
+    public void setLastPanel(){
+<span class="nc" id="L147">        parent.setLastPanel(Constants.PANEL_MARKOV);</span>
+<span class="nc" id="L148">    }</span>
+
+    @Override
+    public void lostFocus() { 
+<span class="nc" id="L152">        setLastPanel();</span>
+<span class="nc" id="L153">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

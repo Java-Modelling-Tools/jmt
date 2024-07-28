@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SelectedActionButtonChangeListener.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.listeners</a> &gt; <span class="el_source">SelectedActionButtonChangeListener.java</span></div><h1>SelectedActionButtonChangeListener.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.framework.gui.listeners;
+
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.AbstractButton;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; SelectedActionChangeListener&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A property change listener that will reflect the status of an action on a button and vice versa.
+ * This is used to implement selected state in actions.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 31/gen/07
+ * &lt;b&gt;Time:&lt;/b&gt; 16:59:17&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class SelectedActionButtonChangeListener implements PropertyChangeListener, ChangeListener {
+	private AbstractJMTAction action;
+	private AbstractButton button;
+
+	/**
+	 * Adds a selected change listener between target action and target button
+	 * @param action action to be linked
+	 * @param button button to be linked
+	 */
+<span class="nc" id="L47">	public SelectedActionButtonChangeListener(AbstractJMTAction action, AbstractButton button) {</span>
+<span class="nc" id="L48">		this.action = action;</span>
+<span class="nc" id="L49">		this.button = button;</span>
+<span class="nc" id="L50">		action.addPropertyChangeListener(this);</span>
+<span class="nc" id="L51">		button.addChangeListener(this);</span>
+<span class="nc" id="L52">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+	 */
+	public void propertyChange(PropertyChangeEvent evt) {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		if (evt.getPropertyName().equals(AbstractJMTAction.PROPERTY_SELECTED)) {</span>
+			// Action was changed
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			if (button.isSelected() != action.isSelected()) {</span>
+<span class="nc" id="L61">				button.setSelected(action.isSelected());</span>
+			}
+		}
+<span class="nc" id="L64">	}</span>
+
+	/* (non-Javadoc)
+	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+	 */
+	public void stateChanged(ChangeEvent e) {
+		// Button was changed
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if (e.getSource() == button) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (action.isSelected() != button.isSelected()) {</span>
+<span class="nc" id="L73">				action.setSelected(button.isSelected());</span>
+			}
+		}
+<span class="nc" id="L76">	}</span>
+
+	/**
+	 * Removes this listener from action and button
+	 */
+	public void remove() {
+<span class="nc" id="L82">		action.removePropertyChangeListener(this);</span>
+<span class="nc" id="L83">		button.removeChangeListener(this);</span>
+<span class="nc" id="L84">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

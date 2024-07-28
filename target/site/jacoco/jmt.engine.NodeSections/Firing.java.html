@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Firing.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Firing.java</span></div><h1>Firing.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.swing.JOptionPane;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.TransitionUtilities.FiringPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.ForkJobInfo;
+import jmt.engine.QueueNet.GlobalJobInfoList;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * &lt;p&gt;Title: Firing&lt;/p&gt;
+ * &lt;p&gt;Description: This class implements the firing section.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 15-07-2016
+ * Time: 21.00.00
+ */
+public class Firing extends OutputSection {
+
+	private TransitionMatrix[] firingOutcomes;
+	private TransitionMatrix[] enablingConditions;
+
+	private JobClassList jobClasses;
+	private JobInfoList nodeJobsList;
+	private GlobalJobInfoList netJobsList;
+	private List&lt;Job&gt;[] newJobLists;
+	private Iterator&lt;Job&gt;[] newJobIterators;
+	private String[] nodeNamePermutation;	
+
+	private boolean[] isForkJobNumWarningShown;
+
+	/**
+	 * Creates a new instance of the firing section.
+	 */
+<span class="nc" id="L70">	public Firing(TransitionMatrix[] firingOutcomes) {</span>
+<span class="nc" id="L71">		this.firingOutcomes = firingOutcomes;</span>
+<span class="nc" id="L72">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L76">		enablingConditions = ((Enabling) node.getSection(NodeSection.INPUT)).getEnablingConditions();</span>
+<span class="nc" id="L77">		jobClasses = getJobClasses();</span>
+<span class="nc" id="L78">		nodeJobsList = node.getJobInfoList();</span>
+<span class="nc" id="L79">		newJobLists = new List[jobClasses.size()];</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		for (int i = 0; i &lt; newJobLists.length; i++) {</span>
+<span class="nc" id="L81">			newJobLists[i] = new ArrayList&lt;Job&gt;();</span>
+		}
+<span class="nc" id="L83">		newJobIterators = new Iterator[jobClasses.size()];</span>
+<span class="nc" id="L84">		Arrays.fill(newJobIterators, null);</span>
+<span class="nc" id="L85">		nodeNamePermutation = firingOutcomes[0].keySet().toArray(new String[0]);		</span>
+<span class="nc" id="L86">		isForkJobNumWarningShown = new boolean[firingOutcomes.length];</span>
+<span class="nc" id="L87">		Arrays.fill(isForkJobNumWarningShown, false);</span>
+<span class="nc" id="L88">	}</span>
+
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc" id="L92">		Object data = message.getData();</span>
+<span class="nc" id="L93">		NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L94">		RandomEngine randomEngine = netSystem.getEngine();</span>
+
+<span class="nc bnc" id="L96" title="All 6 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+		{
+<span class="nc" id="L100">			netJobsList = getOwnerNode().getQueueNet().getJobInfoList();</span>
+<span class="nc" id="L101">			break;</span>
+		}
+
+		case NetEvent.EVENT_JOB:
+<span class="nc" id="L105">			return MSG_NOT_PROCESSED;</span>
+
+		case NetEvent.EVENT_ACK:
+<span class="nc" id="L108">			break;</span>
+
+		case NetEvent.EVENT_FIRING:
+		{
+<span class="nc" id="L112">			int modeIndex = ((FiringPacket) data).getModeIndex();</span>
+<span class="nc" id="L113">			String modeName = ((FiringPacket) data).getModeName();</span>
+<span class="nc" id="L114">			double[] totalLifetimes = ((FiringPacket) data).getTotalLifetimes();</span>
+<span class="nc" id="L115">			List&lt;ForkJobInfo&gt;[] forkJobInfoLists = ((FiringPacket) data).getForkJobInfoLists();</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L117">				int releasedJobNumberForClass = firingOutcomes[modeIndex].getTotal(i);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">				if (releasedJobNumberForClass &lt; forkJobInfoLists[i].size()) {</span>
+					// Reservoir Sampling
+<span class="nc" id="L120">					ForkJobInfo[] pickedForkJobInfos = new ForkJobInfo[releasedJobNumberForClass];</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">					for (int j = 0; j &lt; releasedJobNumberForClass; j++) {</span>
+<span class="nc" id="L122">						pickedForkJobInfos[j] = forkJobInfoLists[i].get(j);</span>
+					}
+<span class="nc bnc" id="L124" title="All 2 branches missed.">					for (int j = releasedJobNumberForClass; j &lt; forkJobInfoLists[i].size(); j++) {</span>
+<span class="nc" id="L125">						int k = (int) Math.floor(randomEngine.raw() * (j + 1));</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">						if (k &lt; releasedJobNumberForClass) {</span>
+<span class="nc" id="L127">							pickedForkJobInfos[k] = forkJobInfoLists[i].get(j);</span>
+						}
+					}
+
+<span class="nc bnc" id="L131" title="All 2 branches missed.">					for (int j = 0; j &lt; releasedJobNumberForClass; j++) {</span>
+<span class="nc" id="L132">						ForkJob newForkJob = new ForkJob(jobClasses.get(i), pickedForkJobInfos[j]);</span>
+<span class="nc" id="L133">						newForkJob.initialize(netSystem);</span>
+<span class="nc" id="L134">						newJobLists[i].add(newForkJob);</span>
+					}
+<span class="nc" id="L136">					showForkJobNumWarning(modeIndex, modeName);</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">				} else if (releasedJobNumberForClass == forkJobInfoLists[i].size()) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">					for (int j = 0; j &lt; releasedJobNumberForClass; j++) {</span>
+<span class="nc" id="L139">						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));</span>
+<span class="nc" id="L140">						newForkJob.initialize(netSystem);</span>
+<span class="nc" id="L141">						newJobLists[i].add(newForkJob);</span>
+					}
+				} else {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">					for (int j = 0; j &lt; forkJobInfoLists[i].size(); j++) {</span>
+<span class="nc" id="L145">						ForkJob newForkJob = new ForkJob(jobClasses.get(i), forkJobInfoLists[i].get(j));</span>
+<span class="nc" id="L146">						newForkJob.initialize(netSystem);</span>
+<span class="nc" id="L147">						newJobLists[i].add(newForkJob);</span>
+					}
+
+<span class="nc" id="L150">					double averageEnteringTime = netSystem.getTime()</span>
+<span class="nc" id="L151">							- (totalLifetimes[i] / (releasedJobNumberForClass - forkJobInfoLists[i].size()));</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">					for (int j = forkJobInfoLists[i].size(); j &lt; releasedJobNumberForClass; j++) {</span>
+<span class="nc" id="L153">						Job newJob = new Job(jobClasses.get(i), netJobsList);</span>
+<span class="nc" id="L154">						newJob.initialize(netSystem);</span>
+<span class="nc" id="L155">						updateVisitPath(newJob);</span>
+<span class="nc" id="L156">						newJob.setSystemEnteringTime(averageEnteringTime);</span>
+<span class="nc" id="L157">						newJobLists[i].add(newJob);</span>
+					}
+				}
+
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				if (forkJobInfoLists[i].size() &gt; 0) {</span>
+					// Durstenfeld Shuffle
+<span class="nc bnc" id="L163" title="All 2 branches missed.">					for (int j = newJobLists[i].size() - 1; j &gt; 0; j--) {</span>
+<span class="nc" id="L164">						int k = (int) Math.floor(randomEngine.raw() * (j + 1));</span>
+<span class="nc" id="L165">						Job newJob = (Job) newJobLists[i].get(j);</span>
+<span class="nc" id="L166">						newJobLists[i].set(j, newJobLists[i].get(k));</span>
+<span class="nc" id="L167">						newJobLists[i].set(k, newJob);</span>
+					}
+				}
+<span class="nc" id="L170">				newJobIterators[i] = newJobLists[i].iterator();</span>
+			}
+
+			// Durstenfeld Shuffle
+<span class="nc bnc" id="L174" title="All 2 branches missed.">			for (int i = nodeNamePermutation.length - 1; i &gt; 0; i--) {</span>
+<span class="nc" id="L175">				int j = (int) Math.floor(randomEngine.raw() * (i + 1));</span>
+<span class="nc" id="L176">				String nodeName = nodeNamePermutation[i];</span>
+<span class="nc" id="L177">				nodeNamePermutation[i] = nodeNamePermutation[j];</span>
+<span class="nc" id="L178">				nodeNamePermutation[j] = nodeName;</span>
+			}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">			for (String nodeName : nodeNamePermutation) {</span>
+<span class="nc" id="L181">				int releasedJobNumberToNode = firingOutcomes[modeIndex].getTotal(nodeName);</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">				if (releasedJobNumberToNode &lt;= 0) {</span>
+<span class="nc" id="L183">					continue;</span>
+				}
+<span class="nc" id="L185">				send(NetEvent.EVENT_JOB_RELEASE, null, 0.0, NodeSection.INPUT, netSystem.getNode(nodeName));</span>
+<span class="nc" id="L186">				Job[] jobPermutation = new Job[releasedJobNumberToNode];                </span>
+<span class="nc" id="L187">				int index = 0;</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">				for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L189">					int releasedJobNumber = firingOutcomes[modeIndex].getEntry(nodeName, i);</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">					for (int j = 0; j &lt; releasedJobNumber; j++) {</span>
+<span class="nc" id="L191">						Job job = newJobIterators[i].next();</span>
+<span class="nc" id="L192">						jobPermutation[index] = job;</span>
+<span class="nc" id="L193">						index++;</span>
+					}
+				}
+
+				// Durstenfeld Shuffle
+<span class="nc bnc" id="L198" title="All 2 branches missed.">				for (int i = jobPermutation.length - 1; i &gt; 0; i--) {</span>
+<span class="nc" id="L199">					int j = (int) Math.floor(randomEngine.raw() * (i + 1));</span>
+<span class="nc" id="L200">					Job job = jobPermutation[i];</span>
+<span class="nc" id="L201">					jobPermutation[i] = jobPermutation[j];</span>
+<span class="nc" id="L202">					jobPermutation[j] = job;</span>
+				}
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">				for (int i = 0; i &lt; jobPermutation.length; i++) {</span>
+<span class="nc" id="L206">					Job job = jobPermutation[i];</span>
+<span class="nc" id="L207">					JobInfo jobInfo = new JobInfo(job);</span>
+<span class="nc" id="L208">					jobsList.produceJob(jobInfo);</span>
+<span class="nc" id="L209">					nodeJobsList.produceJob(jobInfo);</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">					if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L211">						int jobClassId = job.getJobClass().getId();</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">						if (enablingConditions[modeIndex].getTotal(jobClassId) &lt;= forkJobInfoLists[jobClassId].size()) {</span>
+<span class="nc" id="L213">							netJobsList.addJob(job);</span>
+						} else {
+<span class="nc" id="L215">							netJobsList.produceJob(job);</span>
+						}
+					}
+<span class="nc" id="L218">					send(job, 0.0, netSystem.getNode(nodeName));</span>
+				}
+<span class="nc" id="L220">				send(NetEvent.EVENT_JOB_FINISH, null, 0.0, NodeSection.INPUT, netSystem.getNode(nodeName));</span>
+			}
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">			for (int i = 0; i &lt; newJobLists.length; i++) {</span>
+<span class="nc" id="L224">				newJobLists[i].clear();</span>
+			}
+<span class="nc" id="L226">			Arrays.fill(newJobIterators, null);</span>
+<span class="nc" id="L227">			break;</span>
+		}
+
+		case NetEvent.EVENT_STOP:
+<span class="nc" id="L231">			break;</span>
+
+		default:
+<span class="nc" id="L234">			return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L237">		return MSG_PROCESSED;</span>
+	}
+
+	/**
+	 * Shows the fork job number warning.
+	 */
+	private void showForkJobNumWarning(int modeIndex, final String modeName) {
+<span class="nc bnc" id="L244" title="All 2 branches missed.">		if (!isForkJobNumWarningShown[modeIndex]) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {</span>
+<span class="nc" id="L246">				System.out.println(&quot;JSIMengine - Warning: &quot; + getOwnerNode().getName()</span>
+						+ &quot; failed to maintain the equilibrium between input and output tasks in &quot;
+						+ modeName + &quot;.&quot;);
+			} else {
+<span class="nc" id="L250">				new Thread(new Runnable() {</span>
+					@Override
+					public void run() {
+						try {
+<span class="nc" id="L254">							Thread.sleep(800);</span>
+<span class="nc" id="L255">						} catch (InterruptedException e) {</span>
+<span class="nc" id="L256">						}</span>
+<span class="nc" id="L257">						JOptionPane.showMessageDialog(null, getOwnerNode().getName()</span>
+								+ &quot; failed to maintain the equilibrium between input and output tasks in &quot;
+								+ modeName + &quot;.&quot;, &quot;JSIMengine - Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L260">					}</span>
+<span class="nc" id="L261">				}).start();</span>
+			}
+<span class="nc" id="L263">			isForkJobNumWarningShown[modeIndex] = true;</span>
+		}
+<span class="nc" id="L265">	}</span>
+
+	/**
+	 * Gets the firing outcomes of this section.
+	 * @return the firing outcomes of this section.
+	 */
+	public TransitionMatrix[] getFiringOutcomes() {
+<span class="nc" id="L272">		return firingOutcomes;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

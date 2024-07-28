@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SparseBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks</a> &gt; <span class="el_source">SparseBlock.java</span></div><h1>SparseBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks;
+
+import jmt.jmva.analytical.solvers.basis.Basis;
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+
+/**
+ * This class implements the blocks that make up the SparseBlockMatrx objects.
+ * 
+ * A linear data structure is used to reduce the memory requirement.
+ * 
+ * @author Jack Bradshaw
+ *
+ */
+public class SparseBlock {
+
+	private BigRational[] values;
+	private int[] columns;
+	
+	private Basis basis;
+	
+	private int rows;
+	private int cols;
+	
+	private Position position;
+		
+<span class="nc" id="L28">	public SparseBlock(CoMoMBasis basis, Position position, int rows, int cols) {</span>
+<span class="nc" id="L29">		values = new BigRational[rows];</span>
+<span class="nc" id="L30">		columns = new int[rows];</span>
+		
+<span class="nc" id="L32">		this.position = position;</span>
+		
+<span class="nc" id="L34">		this.basis = basis;</span>
+		
+<span class="nc" id="L36">		this.rows = rows;</span>
+<span class="nc" id="L37">		this.cols = cols;</span>
+<span class="nc" id="L38">	}</span>
+
+	public void write(int row, int col, BigRational value) {
+<span class="nc" id="L41">		values[row] = value.copy();</span>
+<span class="nc" id="L42">		columns[row] = col;</span>
+<span class="nc" id="L43">	}</span>
+
+	public BigRational get(int row, int col) {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if (columns[row] == col) {</span>
+<span class="nc" id="L47">			return values[row];</span>
+		} else {
+<span class="nc" id="L49">			return BigRational.ZERO;</span>
+		}
+	}
+	
+	public void multiply(BigRational[] result) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		 for (int i = 0; i &lt; rows; i++) {</span>
+<span class="nc" id="L55">			 result[position.row + i] = result[position.row + i].add(basis.getNewValue(position.col + columns[i]).multiply(values[i]));</span>
+		 }
+<span class="nc" id="L57">	} </span>
+
+	public void solve(BigRational[] rhs) {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		for (int i = 0; i &lt; rows; i++) {</span>
+<span class="nc" id="L61">			 rhs[position.row + i] = rhs[position.row + i].add((basis.getNewValue(position.col + columns[i]).multiply(values[i])).negate());</span>
+		} 		
+<span class="nc" id="L63">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

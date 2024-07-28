@@ -1,0 +1,879 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphArrivalPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.trafficAnalysis.panels</a> &gt; <span class="el_source">GraphArrivalPanel.java</span></div><h1>GraphArrivalPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.trafficAnalysis.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.engine.jwat.VariableNumber;
+import jmt.engine.jwat.trafficAnalysis.BurstEngine;
+import jmt.engine.jwat.trafficAnalysis.ModelTrafficAnalysis;
+import jmt.engine.jwat.trafficAnalysis.OnResetModel;
+import jmt.engine.jwat.trafficAnalysis.OnSetParametersListener;
+import jmt.engine.jwat.trafficAnalysis.TrafficAnalysisSession;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jwat.trafficAnalysis.utils.NewPlot;
+
+/**
+ * &lt;p&gt;Title: Graph Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to display JMVA what-if analysis
+ * results in a graph. Number of allowed lines in graph is determined
+ * by &lt;code&gt;graph.getColors().length&lt;/code&gt;. Modify it to allow more lines.&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 1-giu-2006
+ *         Time: 11.01.29
+ */
+public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L74">	public static final String[] INDICES_TYPES = { &quot;Years&quot;, &quot;Months&quot;, &quot;Days&quot;, &quot;Hours&quot;, &quot;Minutes&quot; };</span>
+	public static final String DESCRIPTION_GRAPH = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Arrival values&lt;/b&gt;&quot;
+			+ &quot;&lt;/font&gt;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Select granularity to plot the arrival rate. Left-click and drag on the graph to zoom &quot;
+			+ &quot;it, right-click to save it in EPS or PNG format.&lt;/body&gt;&lt;/html&gt;&quot;;
+
+	// Plot
+	private NewPlot graph;
+	// Performance index selector
+	private JComboBox index;
+	// Bounds for graph
+	private JSpinner Xmin;
+	private JSpinner Xmax;
+	private JSpinner Ymin;
+	private JSpinner Ymax;
+	// Tells if spinner update is forced. This is needed to avoid that updates made by
+	// code will be interpreted as updated made by user.
+<span class="nc" id="L90">	private boolean forcedUpdate = false;</span>
+	// Table used to select performance indices to be plotted
+	private JTable table;
+	// Scrollpane used for table
+	private JScrollPane tableScrollPane;
+	// Dimension of bounds spinners
+<span class="nc" id="L96">	static final Dimension DIM_SPINNER = new Dimension((int)(95 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling));</span>
+	// Current performance index
+<span class="nc" id="L98">	private String currentIndex = &quot;Years&quot;;</span>
+	private MainJwatWizard ew;
+	private Vector columnHeads;
+	private Vector&lt;Vector&lt;Comparable&gt;&gt; rows;
+	private JPanel left;
+	private JPanel mainPanel;
+	private double[] res;
+<span class="nc" id="L105">	private boolean minute = false;</span>
+<span class="nc" id="L106">	private boolean month = false;</span>
+<span class="nc" id="L107">	private boolean day = false;</span>
+<span class="nc" id="L108">	private boolean hour = false;</span>
+<span class="nc" id="L109">	private boolean year = false;</span>
+	private long nYear;
+	private long nMonth;
+	private long nDay;
+	private long nHour;
+<span class="nc" id="L114">	private long nMinute = 0;</span>
+	private VariableNumber v;
+	private SpinnerDateModel Sp1;
+	private SpinnerDateModel Sp2;
+	Vector&lt;double[]&gt; ArrDay;
+	Vector&lt;double[]&gt; ArrYear;
+	Vector&lt;double[]&gt; ArrMonth;
+	Vector&lt;double[]&gt; ArrHour;
+	Vector&lt;double[]&gt; ArrMinute;
+<span class="nc" id="L123">	private BurstEngine engine = null;</span>
+
+	/**
+	 * Builds a new GraphPanel, given an exact model data structure
+	 * @param model reference to data structure
+	 */
+<span class="nc" id="L129">	public GraphArrivalPanel(MainJwatWizard ew) {</span>
+<span class="nc" id="L130">		this.ew = ew;</span>
+<span class="nc" id="L131">		((TrafficAnalysisSession) ew.getSession()).addSetParamsListener(new OnSetParametersListener() {</span>
+
+			public void ParamsSet() {
+<span class="nc" id="L134">				GraphArrivalPanel.this.removeAll();</span>
+<span class="nc" id="L135">				engine = ((TrafficAnalysisSession) GraphArrivalPanel.this.ew.getSession()).getEngine();</span>
+<span class="nc" id="L136">				initGraphics();</span>
+<span class="nc" id="L137">				calcGran();</span>
+<span class="nc" id="L138">				paintIndex(1);</span>
+<span class="nc" id="L139">			}</span>
+
+		});
+<span class="nc" id="L142">		((ModelTrafficAnalysis) ew.getModel()).addResetModelListener(new OnResetModel() {</span>
+
+			public void modelReset() {
+<span class="nc" id="L145">				GraphArrivalPanel.this.removeAll();</span>
+<span class="nc" id="L146">			}</span>
+		});
+<span class="nc" id="L148">	}</span>
+
+	/**
+	 * Initialize GUI of this panel
+	 */
+	private void initGraphics() {
+<span class="nc" id="L154">		setLayout(new BorderLayout(10, 10));</span>
+<span class="nc" id="L155">		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));</span>
+<span class="nc" id="L156">		mainPanel = new JPanel(new BorderLayout(5, 5));</span>
+<span class="nc" id="L157">		mainPanel.setBorder(BorderFactory.createEtchedBorder());</span>
+
+		// Adds description label
+<span class="nc" id="L160">		JLabel descrLabel = new JLabel(DESCRIPTION_GRAPH);</span>
+<span class="nc" id="L161">		add(descrLabel, BorderLayout.NORTH);</span>
+<span class="nc" id="L162">		add(mainPanel, BorderLayout.CENTER);</span>
+
+		// Creates left panel with options
+<span class="nc" id="L165">		left = new JPanel(new BorderLayout(3, 3));</span>
+		// Adds performance index selection
+<span class="nc" id="L167">		JPanel indexPanel = new JPanel();</span>
+<span class="nc" id="L168">		JLabel pIndex = new JLabel(&quot;Granularity: &quot;);</span>
+<span class="nc" id="L169">		index = new JComboBox(INDICES_TYPES);</span>
+<span class="nc" id="L170">		pIndex.setLabelFor(index);</span>
+<span class="nc" id="L171">		indexPanel.add(pIndex);</span>
+<span class="nc" id="L172">		indexPanel.add(index);</span>
+<span class="nc" id="L173">		left.add(indexPanel, BorderLayout.NORTH);</span>
+		// Adds panel for bounds selection
+<span class="nc" id="L175">		JPanel boundsPanel = new JPanel();</span>
+<span class="nc" id="L176">		Box b = Box.createHorizontalBox();</span>
+<span class="nc" id="L177">		b.add(Box.createHorizontalStrut(5));</span>
+<span class="nc" id="L178">		b.add(new JLabel(&quot;Xmin: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L179">		Xmin = new JSpinner();</span>
+<span class="nc" id="L180">		Xmin.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L181">		b.add(Xmin);</span>
+<span class="nc" id="L182">		b.add(Box.createHorizontalStrut(5));</span>
+<span class="nc" id="L183">		b.add(new JLabel(&quot;Xmax: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L184">		Xmax = new JSpinner();</span>
+<span class="nc" id="L185">		Xmax.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L186">		b.add(Xmax);</span>
+<span class="nc" id="L187">		Box b1 = Box.createHorizontalBox();</span>
+<span class="nc" id="L188">		b1.add(Box.createHorizontalStrut(5));</span>
+<span class="nc" id="L189">		b1.add(new JLabel(&quot;Ymin: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L190">		Ymin = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L191">		Ymin.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L192">		b1.add(Ymin);</span>
+<span class="nc" id="L193">		b1.add(Box.createHorizontalStrut(5));</span>
+<span class="nc" id="L194">		b1.add(new JLabel(&quot;Ymax: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L195">		Ymax = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L196">		Ymax.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L197">		b1.add(Ymax);</span>
+<span class="nc" id="L198">		Box vb = Box.createVerticalBox();</span>
+<span class="nc" id="L199">		vb.add(b);</span>
+<span class="nc" id="L200">		vb.add(b1);</span>
+<span class="nc" id="L201">		left.add(vb, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L203">		mainPanel.add(left, BorderLayout.WEST);</span>
+
+		// Puts graph in the right panel
+		// Creates label for X-axis
+<span class="nc" id="L207">		String xLabel = &quot;&quot;;</span>
+<span class="nc" id="L208">		graph = new NewPlot();</span>
+<span class="nc" id="L209">		xLabel = &quot;Time&quot;;</span>
+<span class="nc" id="L210">		graph.setXLabel(currentIndex);</span>
+<span class="nc" id="L211">		graph.setXRange(0, 0);</span>
+<span class="nc" id="L212">		graph.setYLabel(&quot;Job / s&quot;);</span>
+<span class="nc" id="L213">		mainPanel.add(graph, BorderLayout.CENTER);</span>
+<span class="nc" id="L214">		columnHeads = new Vector();</span>
+<span class="nc" id="L215">		columnHeads.add(&quot; &quot;);</span>
+<span class="nc" id="L216">		columnHeads.add(&quot;Time&quot;);</span>
+<span class="nc" id="L217">		columnHeads.add(&quot;Job / s&quot;);</span>
+<span class="nc" id="L218">		table = new JTable(rows, columnHeads);</span>
+
+<span class="nc" id="L220">		tableScrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L221">		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));</span>
+<span class="nc" id="L222">		left.add(tableScrollPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L223">		updateSpinners();</span>
+<span class="nc" id="L224">		addActions();</span>
+<span class="nc" id="L225">	}</span>
+
+	public void calcGran() {
+<span class="nc" id="L228">		v = ((ModelTrafficAnalysis) ew.getModel()).getMatrix().getVariables()[0];</span>
+<span class="nc" id="L229">		currentIndex = checkGranularity(v);</span>
+<span class="nc" id="L230">		index.setSelectedItem(currentIndex);</span>
+<span class="nc" id="L231">	}</span>
+
+	/**
+	 * Is the method invoked to set the values in the table
+	 */
+	public void setTable(int j) {
+<span class="nc" id="L237">		rows = new Vector&lt;Vector&lt;Comparable&gt;&gt;();</span>
+<span class="nc" id="L238">		DecimalFormat df = new DecimalFormat(&quot;0.00000000&quot;);</span>
+<span class="nc" id="L239">		int f = 0;</span>
+		Vector&lt;Comparable&gt; line;
+<span class="nc" id="L241">		Date d = null;</span>
+		double[] temp;
+<span class="nc" id="L243">		List&lt;String&gt; l = new Vector&lt;String&gt;();</span>
+
+		String s;
+<span class="nc bnc" id="L246" title="All 6 branches missed.">		switch (j) {</span>
+		case 0:
+<span class="nc" id="L248">			res = new double[ArrYear.size()];</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">			for (int i = 0; i &lt; ArrYear.size(); i++) {</span>
+<span class="nc" id="L250">				line = new Vector&lt;Comparable&gt;();</span>
+<span class="nc" id="L251">				temp = ArrYear.get(i);</span>
+<span class="nc" id="L252">				d = new Date((long) temp[0]);</span>
+<span class="nc" id="L253">				line.add(new Integer(f));</span>
+<span class="nc" id="L254">				f++;</span>
+<span class="nc" id="L255">				s = new String(&quot;&quot; + d.getYear());</span>
+<span class="nc" id="L256">				line.add(s);</span>
+<span class="nc" id="L257">				l.add(s);</span>
+<span class="nc" id="L258">				line.add(new Double(df.format(temp[1] / 31104000)));</span>
+<span class="nc" id="L259">				res[i] = temp[1] / 31104000;</span>
+<span class="nc" id="L260">				rows.add(line);</span>
+			}
+<span class="nc" id="L262">			temp = ArrYear.get(0);</span>
+<span class="nc" id="L263">			d = new Date((long) temp[0]);</span>
+<span class="nc" id="L264">			s = new String(&quot;&quot; + d.getYear());</span>
+<span class="nc" id="L265">			graph.setXLabel(currentIndex + &quot; from &quot; + s);</span>
+<span class="nc" id="L266">			break;</span>
+		case 1:
+<span class="nc" id="L268">			res = new double[ArrMonth.size()];</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">			for (int i = 0; i &lt; ArrMonth.size(); i++) {</span>
+<span class="nc" id="L270">				line = new Vector&lt;Comparable&gt;();</span>
+<span class="nc" id="L271">				temp = ArrMonth.get(i);</span>
+<span class="nc" id="L272">				d = new Date((long) temp[0]);</span>
+<span class="nc" id="L273">				line.add(new Integer(f));</span>
+<span class="nc" id="L274">				f++;</span>
+<span class="nc" id="L275">				s = new String(d.getMonth() + &quot;/&quot; + d.getYear());</span>
+<span class="nc" id="L276">				line.add(s);</span>
+<span class="nc" id="L277">				l.add(s);</span>
+<span class="nc" id="L278">				line.add(new Double(df.format(temp[1] / 2592000)));</span>
+<span class="nc" id="L279">				res[i] = temp[1] / 2592000;</span>
+<span class="nc" id="L280">				rows.add(line);</span>
+			}
+<span class="nc" id="L282">			temp = ArrMonth.get(0);</span>
+<span class="nc" id="L283">			d = new Date((long) temp[0]);</span>
+<span class="nc" id="L284">			s = new String(d.getMonth() + &quot;/&quot; + d.getYear());</span>
+<span class="nc" id="L285">			graph.setXLabel(currentIndex + &quot; from &quot; + s);</span>
+<span class="nc" id="L286">			break;</span>
+		case 2:
+<span class="nc" id="L288">			res = new double[ArrDay.size()];</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">			for (int i = 0; i &lt; ArrDay.size(); i++) {</span>
+<span class="nc" id="L290">				line = new Vector&lt;Comparable&gt;();</span>
+<span class="nc" id="L291">				temp = ArrDay.get(i);</span>
+<span class="nc" id="L292">				d = new Date((long) temp[0]);</span>
+<span class="nc" id="L293">				line.add(new Integer(f));</span>
+<span class="nc" id="L294">				f++;</span>
+<span class="nc" id="L295">				s = new String(d.getDate() + &quot;/&quot; + d.getMonth() + &quot;/&quot; + d.getYear());</span>
+<span class="nc" id="L296">				line.add(s);</span>
+<span class="nc" id="L297">				l.add(s);</span>
+<span class="nc" id="L298">				line.add(new Double(df.format(temp[1] / 86400)));</span>
+<span class="nc" id="L299">				res[i] = temp[1] / 86400;</span>
+<span class="nc" id="L300">				rows.add(line);</span>
+			}
+<span class="nc" id="L302">			temp = ArrDay.get(0);</span>
+<span class="nc" id="L303">			d = new Date((long) temp[0]);</span>
+<span class="nc" id="L304">			s = new String(d.getDate() + &quot;/&quot; + d.getMonth() + &quot;/&quot; + d.getYear());</span>
+<span class="nc" id="L305">			graph.setXLabel(currentIndex + &quot; from &quot; + s);</span>
+<span class="nc" id="L306">			break;</span>
+		case 3:
+<span class="nc" id="L308">			res = new double[ArrHour.size()];</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">			for (int i = 0; i &lt; ArrHour.size(); i++) {</span>
+<span class="nc" id="L310">				line = new Vector&lt;Comparable&gt;();</span>
+<span class="nc" id="L311">				temp = ArrHour.get(i);</span>
+<span class="nc" id="L312">				d = new Date((long) temp[0]);</span>
+<span class="nc" id="L313">				line.add(new Integer(f));</span>
+<span class="nc" id="L314">				f++;</span>
+<span class="nc" id="L315">				SimpleDateFormat dfo = new SimpleDateFormat(&quot;dd/MM/yyyy HH.00&quot;);</span>
+<span class="nc" id="L316">				s = dfo.format(d);</span>
+<span class="nc" id="L317">				line.add(s);</span>
+<span class="nc" id="L318">				l.add(s);</span>
+<span class="nc" id="L319">				line.add(new Double(df.format(temp[1] / 3600)));</span>
+<span class="nc" id="L320">				res[i] = temp[1] / 3600;</span>
+<span class="nc" id="L321">				rows.add(line);</span>
+			}
+<span class="nc" id="L323">			temp = ArrHour.get(0);</span>
+<span class="nc" id="L324">			d = new Date((long) temp[0]);</span>
+<span class="nc" id="L325">			SimpleDateFormat dfo = new SimpleDateFormat(&quot;dd/MM/yyyy HH.00&quot;);</span>
+<span class="nc" id="L326">			s = dfo.format(d);</span>
+<span class="nc" id="L327">			graph.setXLabel(currentIndex + &quot; from &quot; + s);</span>
+<span class="nc" id="L328">			break;</span>
+		case 4:
+<span class="nc" id="L330">			res = new double[ArrMinute.size()];</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">			for (int i = 0; i &lt; ArrMinute.size(); i++) {</span>
+<span class="nc" id="L332">				line = new Vector&lt;Comparable&gt;();</span>
+<span class="nc" id="L333">				temp = ArrMinute.get(i);</span>
+<span class="nc" id="L334">				d = new Date((long) temp[0]);</span>
+<span class="nc" id="L335">				line.add(new Integer(f));</span>
+<span class="nc" id="L336">				f++;</span>
+<span class="nc" id="L337">				SimpleDateFormat dfoM = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm&quot;);</span>
+<span class="nc" id="L338">				s = dfoM.format(d);</span>
+<span class="nc" id="L339">				line.add(s);</span>
+<span class="nc" id="L340">				l.add(s);</span>
+<span class="nc" id="L341">				line.add(new Double(df.format(temp[1] / 60)));</span>
+<span class="nc" id="L342">				res[i] = temp[1] / 60;</span>
+<span class="nc" id="L343">				rows.add(line);</span>
+			}
+<span class="nc" id="L345">			temp = ArrMinute.get(0);</span>
+<span class="nc" id="L346">			d = new Date((long) temp[0]);</span>
+<span class="nc" id="L347">			SimpleDateFormat dfoM = new SimpleDateFormat(&quot;dd/MM/yyyy HH:mm&quot;);</span>
+<span class="nc" id="L348">			s = dfoM.format(d);</span>
+<span class="nc" id="L349">			s = new String(d.getDate() + &quot;/&quot; + d.getMonth() + &quot;/&quot; + d.getYear() + &quot; &quot; + d.getHours() + &quot;.&quot; + d.getMinutes());</span>
+<span class="nc" id="L350">			graph.setXLabel(currentIndex + &quot; from &quot; + s);</span>
+			break;
+		}
+<span class="nc" id="L353">		Xmin.setModel(new SpinnerListModel(l));</span>
+<span class="nc" id="L354">		Xmax.setModel(new SpinnerListModel(l));</span>
+<span class="nc" id="L355">		Xmax.setValue(l.get(l.size() - 1));</span>
+<span class="nc" id="L356">		left.remove(tableScrollPane);</span>
+
+<span class="nc" id="L358">		table = new JTable(rows, columnHeads);</span>
+<span class="nc" id="L359">		table.setEnabled(false);</span>
+<span class="nc" id="L360">		table.getColumnModel().getColumn(0).setMaxWidth(30);</span>
+<span class="nc" id="L361">		table.getColumnModel().getColumn(1).setPreferredWidth(65);</span>
+<span class="nc" id="L362">		table.getColumnModel().getColumn(2).setPreferredWidth(65);</span>
+<span class="nc" id="L363">		table.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L364">		tableScrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L365">		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));</span>
+<span class="nc" id="L366">		left.add(tableScrollPane, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L368">		mainPanel.updateUI();</span>
+<span class="nc" id="L369">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the number of minutes in the log (Variable)
+	 */
+	private void ArrNumMinute() {
+<span class="nc" id="L375">		ArrMinute = new Vector&lt;double[]&gt;();</span>
+		double i[];
+<span class="nc" id="L377">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L378">		cal.setTime(new Date((long) v.getValue(0)));</span>
+<span class="nc" id="L379">		Calendar cal2 = Calendar.getInstance();</span>
+<span class="nc" id="L380">		int y = 0;</span>
+<span class="nc" id="L381">		boolean k = false;</span>
+<span class="nc" id="L382">		int z = 0;</span>
+<span class="nc" id="L383">		cal2.setTimeInMillis((long) v.getValue(z));</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">		while (z &lt; v.Size()) {</span>
+<span class="nc bnc" id="L385" title="All 4 branches missed.">			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L386" title="All 4 branches missed.">					&amp;&amp; cal.get(Calendar.DATE) == cal2.get(Calendar.DATE) &amp;&amp; cal.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">					&amp;&amp; cal.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE)) {</span>
+<span class="nc" id="L388">				y++;</span>
+			} else {
+<span class="nc" id="L390">				k = false;</span>
+<span class="nc" id="L391">				i = new double[2];</span>
+<span class="nc" id="L392">				i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L393">				i[1] = y;</span>
+<span class="nc" id="L394">				ArrMinute.addElement(i);</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">				if (cal.get(Calendar.MINUTE) == 59 &amp;&amp; cal.get(Calendar.HOUR_OF_DAY) != 23) {</span>
+<span class="nc" id="L396">					cal.roll(Calendar.HOUR_OF_DAY, true);</span>
+				}
+<span class="nc bnc" id="L398" title="All 4 branches missed.">				if (cal.get(Calendar.MINUTE) == 59 &amp;&amp; cal.get(Calendar.HOUR_OF_DAY) == 23) {</span>
+<span class="nc" id="L399">					cal.roll(Calendar.HOUR_OF_DAY, true);</span>
+<span class="nc" id="L400">					cal.roll(Calendar.DAY_OF_YEAR, true);</span>
+				}
+<span class="nc" id="L402">				cal.roll(Calendar.MINUTE, true);</span>
+<span class="nc bnc" id="L403" title="All 4 branches missed.">				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L404" title="All 2 branches missed.">						&amp;&amp; cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)</span>
+<span class="nc bnc" id="L405" title="All 4 branches missed.">						&amp;&amp; cal.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY) &amp;&amp; cal.get(Calendar.MINUTE) == cal2.get(Calendar.MINUTE)) {</span>
+<span class="nc" id="L406">					y = 1;</span>
+				} else {
+<span class="nc" id="L408">					y = 0;</span>
+<span class="nc" id="L409">					k = true;</span>
+				}
+			}
+<span class="nc bnc" id="L412" title="All 2 branches missed.">			if (k != true) {</span>
+<span class="nc" id="L413">				z++;</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">				if (z &lt; v.Size()) {</span>
+<span class="nc" id="L415">					cal2.setTimeInMillis((long) v.getValue(z));</span>
+				}
+			}
+		}
+<span class="nc" id="L419">		i = new double[2];</span>
+<span class="nc" id="L420">		i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L421">		i[1] = y;</span>
+<span class="nc" id="L422">		ArrMinute.addElement(i);</span>
+<span class="nc" id="L423">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the number of hours in the log (Variable)
+	 */
+	private void ArrNumHour() {
+<span class="nc" id="L429">		ArrHour = new Vector&lt;double[]&gt;();</span>
+		double i[];
+<span class="nc" id="L431">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L432">		cal.setTime(new Date((long) v.getValue(0)));</span>
+<span class="nc" id="L433">		Calendar cal2 = Calendar.getInstance();</span>
+<span class="nc" id="L434">		int y = 0;</span>
+<span class="nc" id="L435">		int z = 0;</span>
+<span class="nc" id="L436">		boolean k = false;</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">		while (z &lt; v.Size()) {</span>
+<span class="nc" id="L438">			cal2.setTimeInMillis((long) v.getValue(z));</span>
+<span class="nc bnc" id="L439" title="All 4 branches missed.">			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">					&amp;&amp; cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">					&amp;&amp; cal.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)) {</span>
+<span class="nc" id="L442">				y++;</span>
+			} else {
+<span class="nc" id="L444">				k = false;</span>
+<span class="nc" id="L445">				i = new double[2];</span>
+<span class="nc" id="L446">				i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L447">				i[1] = y;</span>
+<span class="nc" id="L448">				ArrHour.addElement(i);</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">				if (cal.get(Calendar.HOUR_OF_DAY) == 23) {</span>
+<span class="nc" id="L450">					cal.roll(Calendar.DAY_OF_YEAR, true);</span>
+				}
+<span class="nc" id="L452">				cal.roll(Calendar.HOUR_OF_DAY, true);</span>
+<span class="nc bnc" id="L453" title="All 4 branches missed.">				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">						&amp;&amp; cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)</span>
+<span class="nc bnc" id="L455" title="All 2 branches missed.">						&amp;&amp; cal.get(Calendar.HOUR_OF_DAY) == cal2.get(Calendar.HOUR_OF_DAY)) {</span>
+<span class="nc" id="L456">					y = 1;</span>
+				} else {
+<span class="nc" id="L458">					y = 0;</span>
+<span class="nc" id="L459">					k = true;</span>
+				}
+			}
+<span class="nc bnc" id="L462" title="All 2 branches missed.">			if (k != true) {</span>
+<span class="nc" id="L463">				z++;</span>
+			}
+		}
+<span class="nc" id="L466">		i = new double[2];</span>
+<span class="nc" id="L467">		i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L468">		i[1] = y;</span>
+<span class="nc" id="L469">		ArrHour.addElement(i);</span>
+<span class="nc" id="L470">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the number of days in the log (Variable)
+	 */
+	private void ArrNumDay() {
+<span class="nc" id="L476">		ArrDay = new Vector&lt;double[]&gt;();</span>
+		double i[];
+<span class="nc" id="L478">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L479">		cal.setTimeInMillis((long) v.getValue(0));</span>
+<span class="nc" id="L480">		Calendar cal2 = Calendar.getInstance();</span>
+<span class="nc" id="L481">		int y = 0;</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">		for (int z = 0; z &lt; v.Size(); z++) {</span>
+<span class="nc" id="L483">			cal2.setTimeInMillis((long) v.getValue(z));</span>
+<span class="nc bnc" id="L484" title="All 4 branches missed.">			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L485" title="All 2 branches missed.">					&amp;&amp; cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) {</span>
+<span class="nc" id="L486">				y++;</span>
+			} else {
+<span class="nc" id="L488">				i = new double[2];</span>
+<span class="nc" id="L489">				i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L490">				i[1] = y;</span>
+<span class="nc" id="L491">				ArrDay.addElement(i);</span>
+<span class="nc" id="L492">				cal.roll(Calendar.DAY_OF_YEAR, true);</span>
+<span class="nc bnc" id="L493" title="All 4 branches missed.">				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">						&amp;&amp; cal.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) {</span>
+<span class="nc" id="L495">					y = 1;</span>
+				} else {
+<span class="nc" id="L497">					y = 0;</span>
+				}
+			}
+		}
+<span class="nc" id="L501">		i = new double[2];</span>
+<span class="nc" id="L502">		i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L503">		i[1] = y;</span>
+<span class="nc" id="L504">		ArrDay.addElement(i);</span>
+<span class="nc" id="L505">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the number of months in the log (Variable)
+	 */
+	private void ArrNumMonth() {
+<span class="nc" id="L511">		ArrMonth = new Vector&lt;double[]&gt;();</span>
+		double i[];
+<span class="nc" id="L513">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L514">		Calendar cal2 = Calendar.getInstance();</span>
+<span class="nc" id="L515">		cal.setTimeInMillis((long) v.getValue(0));</span>
+<span class="nc" id="L516">		int y = 0;</span>
+<span class="nc" id="L517">		boolean k = false;</span>
+<span class="nc" id="L518">		int z = 0;</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">		while (z &lt; v.Size()) {</span>
+<span class="nc" id="L520">			cal2.setTimeInMillis((long) v.getValue(z));</span>
+<span class="nc bnc" id="L521" title="All 4 branches missed.">			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)) {</span>
+<span class="nc" id="L522">				y++;</span>
+			} else {
+<span class="nc" id="L524">				k = false;</span>
+<span class="nc" id="L525">				i = new double[2];</span>
+<span class="nc" id="L526">				i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L527">				i[1] = y;</span>
+<span class="nc" id="L528">				ArrMonth.addElement(i);</span>
+<span class="nc" id="L529">				cal.roll(Calendar.MONTH, true);</span>
+<span class="nc bnc" id="L530" title="All 4 branches missed.">				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &amp;&amp; cal.get(Calendar.MONTH) == cal2.get(Calendar.MONTH)) {</span>
+<span class="nc" id="L531">					y = 1;</span>
+				} else {
+<span class="nc" id="L533">					y = 0;</span>
+<span class="nc" id="L534">					k = false;</span>
+				}
+			}
+<span class="nc bnc" id="L537" title="All 2 branches missed.">			if (k != true) {</span>
+<span class="nc" id="L538">				z++;</span>
+			}
+		}
+<span class="nc" id="L541">		i = new double[2];</span>
+<span class="nc" id="L542">		i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L543">		i[1] = y;</span>
+<span class="nc" id="L544">		ArrMonth.addElement(i);</span>
+<span class="nc" id="L545">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the number of years in the log (Variable)
+	 */
+	private void ArrNumYear() {
+<span class="nc" id="L551">		ArrYear = new Vector&lt;double[]&gt;();</span>
+		double i[];
+<span class="nc" id="L553">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L554">		Calendar cal2 = Calendar.getInstance();</span>
+<span class="nc" id="L555">		cal.setTimeInMillis((long) v.getValue(0));</span>
+<span class="nc" id="L556">		int y = 0;</span>
+<span class="nc" id="L557">		int z = 0;</span>
+<span class="nc" id="L558">		boolean k = false;</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">		while (z &lt; v.Size()) {</span>
+<span class="nc" id="L560">			cal2.setTimeInMillis((long) v.getValue(z));</span>
+<span class="nc bnc" id="L561" title="All 2 branches missed.">			if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)) {</span>
+<span class="nc" id="L562">				y++;</span>
+			} else {
+<span class="nc" id="L564">				k = false;</span>
+<span class="nc" id="L565">				i = new double[2];</span>
+<span class="nc" id="L566">				i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L567">				i[1] = y;</span>
+<span class="nc" id="L568">				ArrYear.addElement(i);</span>
+<span class="nc" id="L569">				cal.roll(Calendar.YEAR, true);</span>
+<span class="nc bnc" id="L570" title="All 2 branches missed.">				if (cal.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)) {</span>
+<span class="nc" id="L571">					y = 1;</span>
+				} else {
+<span class="nc" id="L573">					y = 0;</span>
+<span class="nc" id="L574">					k = true;</span>
+				}
+			}
+<span class="nc bnc" id="L577" title="All 2 branches missed.">			if (k != true) {</span>
+<span class="nc" id="L578">				z++;</span>
+			}
+		}
+<span class="nc" id="L581">		i = new double[2];</span>
+<span class="nc" id="L582">		i[0] = cal.getTimeInMillis();</span>
+<span class="nc" id="L583">		i[1] = y;</span>
+<span class="nc" id="L584">		ArrYear.addElement(i);</span>
+<span class="nc" id="L585">	}</span>
+
+	/**
+	 * Is the method invoked to calculate the best graph to show at the beginning and to calculate the suitable granularity of time 
+	 * @param v is the variable object
+	 */
+
+	private String checkGranularity(VariableNumber v) {
+<span class="nc" id="L593">		String r = null;</span>
+<span class="nc" id="L594">		this.year = false;</span>
+<span class="nc" id="L595">		this.month = false;</span>
+<span class="nc" id="L596">		this.day = false;</span>
+<span class="nc" id="L597">		this.minute = false;</span>
+<span class="nc" id="L598">		this.hour = false;</span>
+<span class="nc" id="L599">		Calendar cal = Calendar.getInstance();</span>
+<span class="nc" id="L600">		Calendar cal2 = Calendar.getInstance();</span>
+
+<span class="nc" id="L602">		long temp = (long) v.getValue(v.Size() - 1) - (long) v.getValue(0);</span>
+<span class="nc" id="L603">		cal2.setTimeInMillis((long) v.getValue(v.Size() - 1));</span>
+<span class="nc" id="L604">		cal.setTimeInMillis((long) v.getValue(0));</span>
+
+<span class="nc" id="L606">		long year = 1;</span>
+<span class="nc" id="L607">		long month = 1;</span>
+
+		//If the first and last date have a different month or year, I calculate the number of months and years of difference
+<span class="nc bnc" id="L610" title="All 4 branches missed.">		if (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH) || cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {</span>
+			// ?  It doesn't work --&gt; it counts + years of the existing ones and the roll function doesn't increase the year !!!
+<span class="nc bnc" id="L612" title="All 4 branches missed.">			while (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH) || cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {</span>
+<span class="nc bnc" id="L613" title="All 2 branches missed.">				if (cal.get(Calendar.MONTH) != cal2.get(Calendar.MONTH)) {</span>
+<span class="nc" id="L614">					month++;</span>
+				}
+<span class="nc bnc" id="L616" title="All 2 branches missed.">				if (cal.get(Calendar.YEAR) != cal2.get(Calendar.YEAR)) {</span>
+<span class="nc" id="L617">					year++;</span>
+				}
+<span class="nc" id="L619">				cal.roll(Calendar.MONTH, true);</span>
+			}
+		}
+<span class="nc" id="L622">		long minute = temp / (1000 * 60);</span>
+<span class="nc" id="L623">		long hour = minute / 60;</span>
+<span class="nc" id="L624">		long day = hour / 24;</span>
+
+<span class="nc bnc" id="L626" title="All 4 branches missed.">		if (year &gt; 1 &amp;&amp; year &lt; 559) {</span>
+<span class="nc" id="L627">			this.year = true;</span>
+<span class="nc" id="L628">			ArrNumYear();</span>
+<span class="nc" id="L629">			nYear = year;</span>
+		}
+<span class="nc bnc" id="L631" title="All 4 branches missed.">		if (month &gt; 1 &amp;&amp; month &lt; 559) {</span>
+<span class="nc" id="L632">			this.month = true;</span>
+<span class="nc" id="L633">			ArrNumMonth();</span>
+<span class="nc" id="L634">			nMonth = month;</span>
+		}
+<span class="nc bnc" id="L636" title="All 4 branches missed.">		if (day &gt; 1 &amp;&amp; day &lt; 559) {</span>
+<span class="nc" id="L637">			this.day = true;</span>
+<span class="nc" id="L638">			ArrNumDay();</span>
+<span class="nc" id="L639">			nDay = day;</span>
+		}
+<span class="nc bnc" id="L641" title="All 4 branches missed.">		if (hour &gt; 1 &amp;&amp; hour &lt; 559) {</span>
+<span class="nc" id="L642">			this.hour = true;</span>
+<span class="nc" id="L643">			ArrNumHour();</span>
+<span class="nc" id="L644">			nHour = hour;</span>
+		}
+<span class="nc bnc" id="L646" title="All 4 branches missed.">		if (minute &gt; 1 &amp;&amp; minute &lt; 559) {</span>
+<span class="nc" id="L647">			this.minute = true;</span>
+<span class="nc" id="L648">			ArrNumMinute();</span>
+<span class="nc" id="L649">			nMinute = minute;</span>
+		}
+<span class="nc bnc" id="L651" title="All 4 branches missed.">		if (year &gt; 1 &amp;&amp; r == null) {</span>
+<span class="nc" id="L652">			return r = &quot;Years&quot;;</span>
+		}
+<span class="nc bnc" id="L654" title="All 4 branches missed.">		if (month &gt; 1 &amp;&amp; r == null) {</span>
+<span class="nc" id="L655">			return r = &quot;Months&quot;;</span>
+		}
+<span class="nc bnc" id="L657" title="All 4 branches missed.">		if (day &gt; 1 &amp;&amp; r == null) {</span>
+<span class="nc" id="L658">			return r = &quot;Days&quot;;</span>
+		}
+<span class="nc bnc" id="L660" title="All 4 branches missed.">		if (hour &gt; 1 &amp;&amp; r == null) {</span>
+<span class="nc" id="L661">			return r = &quot;Hours&quot;;</span>
+		}
+<span class="nc bnc" id="L663" title="All 2 branches missed.">		if (r == null) {</span>
+<span class="nc" id="L664">			return r = &quot;Minutes&quot;;</span>
+		}
+<span class="nc" id="L666">		return r;</span>
+	}
+
+	/**
+	 * Updates values in spinners used to select ranges to be shown in graph
+	 */
+	private void updateSpinners() {
+		// Check for special value used if graph is empty
+<span class="nc bnc" id="L674" title="All 2 branches missed.">		if (graph.getXRange()[0] != Double.MAX_VALUE) {</span>
+<span class="nc" id="L675">			Ymin.setValue(new Double(graph.getYRange()[0]));</span>
+<span class="nc" id="L676">			Ymax.setValue(new Double(graph.getYRange()[1]));</span>
+		} else {
+<span class="nc" id="L678">			Ymin.setValue(new Double(0.0));</span>
+<span class="nc" id="L679">			Ymax.setValue(new Double(0.0));</span>
+		}
+<span class="nc" id="L681">	}</span>
+
+	/**
+	 * Used when a spinne value is updated
+	 */
+	private void setBounds() {
+		double xmin, xmax, ymin, ymax;
+		Object val;
+<span class="nc" id="L689">		String val1 = (String) Xmin.getValue();</span>
+<span class="nc" id="L690">		Vector v = (Vector) ((SpinnerListModel) Xmin.getModel()).getList();</span>
+<span class="nc" id="L691">		xmin = v.indexOf(val1) + 1;</span>
+<span class="nc" id="L692">		String val2 = (String) Xmax.getValue();</span>
+<span class="nc" id="L693">		Vector v2 = (Vector) ((SpinnerListModel) Xmax.getModel()).getList();</span>
+<span class="nc" id="L694">		xmax = v2.indexOf(val2) + 1;</span>
+<span class="nc" id="L695">		val = Ymin.getValue();</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L697">			ymin = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L699">			ymin = graph.getYRange()[0];</span>
+		}
+<span class="nc" id="L701">		val = Ymax.getValue();</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L703">			ymax = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L705">			ymax = graph.getYRange()[1];</span>
+		}
+
+		// Sets bounds
+<span class="nc" id="L709">		graph.setXRange(xmin, xmax);</span>
+<span class="nc" id="L710">		graph.setYRange(ymin, ymax);</span>
+<span class="nc" id="L711">		graph.repaint();</span>
+<span class="nc" id="L712">	}</span>
+
+	/**
+	 * This function must be called each time selected performance
+	 * index changes
+	 */
+	private void updateIndex() {
+<span class="nc" id="L719">		String current = (String) index.getSelectedItem();</span>
+<span class="nc" id="L720">		currentIndex = current;</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">		if (((ModelTrafficAnalysis) ew.getModel()).getMatrix() != null) {</span>
+<span class="nc" id="L722">			paintIndex(1);</span>
+		}
+<span class="nc" id="L724">		graph.repaint();</span>
+<span class="nc" id="L725">	}</span>
+
+	/**
+	 * Adds action listeners to GUI components
+	 */
+	private void addActions() {
+		// Listener used for bounds spinners
+<span class="nc" id="L732">		ChangeListener boundsListener = new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L734" title="All 2 branches missed.">				if (!forcedUpdate) {</span>
+<span class="nc" id="L735">					setBounds();</span>
+<span class="nc" id="L736">					updateSpinners();</span>
+				}
+<span class="nc" id="L738">			}</span>
+		};
+<span class="nc" id="L740">		Xmin.addChangeListener(boundsListener);</span>
+<span class="nc" id="L741">		Xmax.addChangeListener(boundsListener);</span>
+<span class="nc" id="L742">		Ymin.addChangeListener(boundsListener);</span>
+<span class="nc" id="L743">		Ymax.addChangeListener(boundsListener);</span>
+		// Listener for index selection comboBox
+<span class="nc" id="L745">		index.addActionListener(new ActionListener() {</span>
+
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L748" title="All 4 branches missed.">				if ((((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == &quot;Years&quot; &amp;&amp; !year</span>
+<span class="nc bnc" id="L749" title="All 4 branches missed.">						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == &quot;Months&quot; &amp;&amp; !month</span>
+<span class="nc bnc" id="L750" title="All 4 branches missed.">						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == &quot;Days&quot; &amp;&amp; !day</span>
+<span class="nc bnc" id="L751" title="All 4 branches missed.">						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == &quot;Hours&quot; &amp;&amp; !hour</span>
+<span class="nc bnc" id="L752" title="All 4 branches missed.">						|| ((String) ((JComboBox) arg0.getSource()).getSelectedItem()) == &quot;Minutes&quot; &amp;&amp; !minute)</span>
+<span class="nc bnc" id="L753" title="All 2 branches missed.">						&amp;&amp; ((ModelTrafficAnalysis) ew.getModel()).getMatrix() != null) {</span>
+<span class="nc" id="L754">					error();</span>
+<span class="nc" id="L755">					return;</span>
+				}
+<span class="nc" id="L757">				updateIndex();</span>
+<span class="nc" id="L758">			}</span>
+
+		});
+
+		// Adds a listener to the graph to detect zoom events
+<span class="nc" id="L763">		graph.addRescaleListener(new NewPlot.RescaleListener() {</span>
+
+			public void Rescaled() {
+<span class="nc" id="L766">				forcedUpdate = true;</span>
+<span class="nc" id="L767">				updateSpinners();</span>
+<span class="nc" id="L768">				forcedUpdate = false;</span>
+<span class="nc" id="L769">			}</span>
+
+		});
+<span class="nc" id="L772">	}</span>
+
+	private void error() {
+<span class="nc" id="L775">		JOptionPane.showMessageDialog(this, &quot;The log file is too small or too big for this granuarity&quot;, &quot;Error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L776">	}</span>
+
+	/**
+	 * Paints performance index at specified row
+	 * @param rowNum row number of index to be painted
+	 */
+	public void paintIndex(int rowNum) {
+		//Years 
+<span class="nc bnc" id="L784" title="All 4 branches missed.">		if (currentIndex.equals(INDICES_TYPES[0]) &amp;&amp; year) {</span>
+<span class="nc" id="L785">			graph.clear(rowNum);</span>
+<span class="nc" id="L786">			setTable(0);</span>
+<span class="nc" id="L787">			double[] xAxis = new double[res.length];</span>
+<span class="nc" id="L788">			int z = 0;</span>
+<span class="nc bnc" id="L789" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L790">				xAxis[i] = z;</span>
+<span class="nc" id="L791">				z++;</span>
+			}
+<span class="nc" id="L793">			graph.setXAxis(xAxis);</span>
+<span class="nc" id="L794">			graph.draw(rowNum, res);</span>
+		}
+		// Months
+<span class="nc bnc" id="L797" title="All 4 branches missed.">		if (currentIndex.equals(INDICES_TYPES[1]) &amp;&amp; month) {</span>
+<span class="nc" id="L798">			graph.clear(rowNum);</span>
+<span class="nc" id="L799">			setTable(1);</span>
+<span class="nc" id="L800">			double[] xAxis = new double[res.length];</span>
+<span class="nc" id="L801">			int z = 0;</span>
+<span class="nc bnc" id="L802" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L803">				xAxis[i] = z;</span>
+<span class="nc" id="L804">				z++;</span>
+			}
+<span class="nc" id="L806">			graph.setXAxis(xAxis);</span>
+<span class="nc" id="L807">			graph.draw(rowNum, res);</span>
+		}
+		//Days
+<span class="nc bnc" id="L810" title="All 4 branches missed.">		if (currentIndex.equals(INDICES_TYPES[2]) &amp;&amp; day) {</span>
+<span class="nc" id="L811">			graph.clear(rowNum);</span>
+<span class="nc" id="L812">			setTable(2);</span>
+<span class="nc" id="L813">			double[] xAxis = new double[res.length];</span>
+<span class="nc" id="L814">			int z = 0;</span>
+<span class="nc bnc" id="L815" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L816">				xAxis[i] = z;</span>
+<span class="nc" id="L817">				z++;</span>
+			}
+<span class="nc" id="L819">			graph.setXAxis(xAxis);</span>
+<span class="nc" id="L820">			graph.draw(rowNum, res);</span>
+		}
+		//Hours
+<span class="nc bnc" id="L823" title="All 4 branches missed.">		if (currentIndex.equals(INDICES_TYPES[3]) &amp;&amp; hour) {</span>
+<span class="nc" id="L824">			graph.clear(rowNum);</span>
+<span class="nc" id="L825">			setTable(3);</span>
+<span class="nc" id="L826">			double[] xAxis = new double[res.length];</span>
+<span class="nc" id="L827">			int z = 0;</span>
+<span class="nc bnc" id="L828" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L829">				xAxis[i] = z;</span>
+<span class="nc" id="L830">				z++;</span>
+			}
+<span class="nc" id="L832">			graph.setXAxis(xAxis);</span>
+<span class="nc" id="L833">			graph.draw(rowNum, res);</span>
+		}
+		//Minutes
+<span class="nc bnc" id="L836" title="All 4 branches missed.">		if (currentIndex.equals(INDICES_TYPES[4]) &amp;&amp; minute) {</span>
+<span class="nc" id="L837">			graph.clear(rowNum);</span>
+<span class="nc" id="L838">			setTable(4);</span>
+<span class="nc" id="L839">			double[] xAxis = new double[res.length];</span>
+<span class="nc" id="L840">			int z = 0;</span>
+<span class="nc bnc" id="L841" title="All 2 branches missed.">			for (int i = 0; i &lt; res.length; i++) {</span>
+<span class="nc" id="L842">				xAxis[i] = z;</span>
+<span class="nc" id="L843">				z++;</span>
+			}
+<span class="nc" id="L845">			graph.setXAxis(xAxis);</span>
+<span class="nc" id="L846">			graph.draw(rowNum, res);</span>
+		}
+
+		// Resets view
+<span class="nc" id="L850">		autosizeGraph();</span>
+<span class="nc" id="L851">	}</span>
+
+	/**
+	 * AutoResizes graph window
+	 */
+	private void autosizeGraph() {
+<span class="nc" id="L857">		graph.fillPlot();</span>
+<span class="nc" id="L858">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L865">		return &quot;Arrival Values&quot;;</span>
+	}
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L870">		ew.setCurrentPanel(TRAFFIC_GRAPHARRIVAL_PANEL);</span>
+<span class="nc" id="L871">	}</span>
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L875">		ew.setLastPanel(TRAFFIC_GRAPHARRIVAL_PANEL);</span>
+<span class="nc" id="L876">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SmallPDF.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.fitting.charts</a> &gt; <span class="el_source">SmallPDF.java</span></div><h1>SmallPDF.java</h1><pre class="source lang-java linenums">package jmt.gui.jwat.fitting.charts;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+import jmt.engine.jwat.fitting.FittingAlgorithm;
+import jmt.engine.jwat.fitting.utils.ModelFitting;
+import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
+
+public class SmallPDF extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+<span class="nc" id="L24">	private ModelFitting model = null;</span>
+	private FittingAlgorithm engfitting;
+<span class="nc" id="L26">	public static int PARETO = 0;</span>
+<span class="nc" id="L27">	public static int EXPO = 1;</span>
+<span class="nc" id="L28">	private int distribution = PARETO;</span>
+
+<span class="nc" id="L30">	public SmallPDF(ModelFitting model, FittingAlgorithm engfitting) {</span>
+<span class="nc" id="L31">		setCursor(new Cursor(Cursor.HAND_CURSOR));</span>
+<span class="nc" id="L32">		setToolTipText(&quot;Double click to enlarge this graph&quot;);</span>
+<span class="nc" id="L33">		this.model = model;</span>
+<span class="nc" id="L34">		this.engfitting = engfitting;</span>
+<span class="nc" id="L35">		setSize(102, 122);</span>
+		//Su panel grafico
+<span class="nc" id="L37">		addMouseListener(new MouseAdapter() {</span>
+			// Creates new windows with enlarged graph
+			@Override
+			public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">				if (e.getClickCount() == 2) {</span>
+					// Creates and sets up new window
+<span class="nc" id="L43">					final JFrame plotFrame = new JFrame();</span>
+
+<span class="nc" id="L45">					JWatWorkloadManager.addJMTWindow(plotFrame);</span>
+<span class="nc" id="L46">					plotFrame.addWindowListener(new WindowAdapter() {</span>
+						@Override
+						public void windowClosing(WindowEvent e) {
+<span class="nc" id="L49">							JWatWorkloadManager.exit(plotFrame);</span>
+<span class="nc" id="L50">						}</span>
+
+						@Override
+						public void windowClosed(WindowEvent e) {
+<span class="nc" id="L54">							JWatWorkloadManager.exit(plotFrame);</span>
+<span class="nc" id="L55">						}</span>
+					});
+					//plotFrame.setResizable(false);
+<span class="nc" id="L58">					plotFrame.setSize(400, 400);</span>
+<span class="nc" id="L59">					plotFrame.setContentPane(new EnlargePDF(SmallPDF.this.model));</span>
+
+<span class="nc" id="L61">					plotFrame.setTitle(&quot;PDF function of the selected variable&quot;);</span>
+					
+<span class="nc" id="L63">					plotFrame.setVisible(true);</span>
+				}
+<span class="nc" id="L65">			}</span>
+		});
+<span class="nc" id="L67">	}</span>
+
+	@Override
+	public void paintComponent(Graphics g) {
+<span class="nc" id="L71">		double[] x = model.getListObservations();</span>
+<span class="nc" id="L72">		double[] freq_y = new double[Math.round(x.length/10)];</span>
+		
+<span class="nc" id="L74">		super.paintComponent(g);</span>
+<span class="nc" id="L75">		g.setColor(Color.WHITE);</span>
+<span class="nc" id="L76">		g.fillRect(0, 0, 202, 202);</span>
+		//Draw Border
+<span class="nc" id="L78">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L79">		g.drawRect(0, 0, 202, 202);</span>
+		//Draw gray lines\
+<span class="nc" id="L81">		Graphics2D g1 = (Graphics2D) g;</span>
+<span class="nc" id="L82">		g1.setColor(Color.LIGHT_GRAY);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		for (int i = 1; i &lt; 9; i++) {</span>
+<span class="nc" id="L84">			g1.drawLine(1, 1 + (i * (202 / 9)), 201, 1 + (i * (202 / 9)));</span>
+<span class="nc" id="L85">			g1.drawLine(1 + (i * (202 / 9)), 1, 1 + (i * (202 / 9)), 202);</span>
+		}
+<span class="nc" id="L87">		g1.setColor(Color.BLACK);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		for (int i = 1; i &lt; 9; i++) {</span>
+<span class="nc" id="L89">			g1.drawLine(1, 1 + (i * (202 / 9)), 6, 1 + (i * (202 / 9)));</span>
+<span class="nc" id="L90">			g1.drawLine(1 + (i * (202 / 9)), 1, 1 + (i * (202 / 9)), 6);</span>
+<span class="nc" id="L91">			g1.drawLine(197, 1 + (i * (202 / 9)), 202, 1 + (i * (202 / 9)));</span>
+<span class="nc" id="L92">			g1.drawLine(1 + (i * (202 / 9)), 198, 1 + (i * (202 / 9)), 202);</span>
+		}
+		
+		//build the count of frequencies
+<span class="nc" id="L96">		int j=0;</span>
+<span class="nc" id="L97">		double bucket_dim = x[x.length-1] / Math.round(x.length/10);</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		for (int i=0;i&lt;freq_y.length;i++) {</span>
+			
+<span class="nc bnc" id="L100" title="All 4 branches missed.">			while ((x[j] &lt; (i+1)*bucket_dim) &amp;&amp; (x[j] &gt;= i*bucket_dim)) {</span>
+<span class="nc" id="L101">				freq_y[i]++;</span>
+<span class="nc" id="L102">				j++;</span>
+			}
+			
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			if (i&lt;(freq_y.length-1))</span>
+<span class="nc" id="L106">				freq_y[i] /= x.length;</span>
+			
+			//System.out.println(&quot;Bucket from &quot;+ i*bucket_dim + &quot; to &quot; + (i+1)*bucket_dim + &quot; Percentage: &quot; + freq_y[i]);
+		}
+<span class="nc" id="L110">		freq_y[freq_y.length-1]++;</span>
+<span class="nc" id="L111">		freq_y[freq_y.length-1] /= x.length;</span>
+		//******************************
+	
+		//Draw graph
+		//Draw reference line
+<span class="nc" id="L116">		g.setColor(Color.BLUE);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		for (int i = 0; i &lt; freq_y.length; i++) {</span>
+			//System.out.println(&quot;x: &quot; + Math.round((((i+1)*bucket_dim + i*bucket_dim)/2)/x[x.length-1] * 200) + &quot; y: &quot; + (int) Math.round(freq_y[i] * 200));
+<span class="nc" id="L119">			g.fillOval((int) Math.round(((((i+1)*bucket_dim + i*bucket_dim)/2)/x[x.length-1])* 200),</span>
+<span class="nc" id="L120">					200 - (int) Math.round(freq_y[i] * 200), 5, 5);</span>
+		}
+
+<span class="nc" id="L123">}</span>
+
+
+	public void setDistribution(int dis) {
+<span class="nc" id="L127">		distribution = dis;</span>
+<span class="nc" id="L128">		repaint();</span>
+<span class="nc" id="L129">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

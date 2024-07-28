@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PowerOfKRouting.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.routingStrategies</a> &gt; <span class="el_source">PowerOfKRouting.java</span></div><h1>PowerOfKRouting.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.routingStrategies;
+
+/**
+ * Power of K Routing Strategy
+ * @author Vaibhav Krishnakumar
+ */
+public class PowerOfKRouting extends RoutingStrategy {
+
+	private static final String POK_DESC = &quot;k random stations are chosen from those connected to the current one. &quot;
+			+ &quot;Jobs are routed to the station with the smallest queue length amongst these k (number of jobs, current value).&quot;;
+	private static final String POK_WITH_MEM_DESC = &quot;k random stations are chosen from those connected to the current one. &quot;
+			+ &quot;Their queue lengths are recorded in a local \&quot;memory\&quot; array. &quot;
+			+ &quot;Jobs are routed to the node with the smallest queue length in the memory (number of jobs).&quot;;
+
+	// Set default value of k to 2
+<span class="fc" id="L34">	private Integer k = 2;</span>
+	// Set default memory disabled
+<span class="fc" id="L36">	private Boolean withMemory = false;</span>
+
+<span class="fc" id="L38">	public PowerOfKRouting() {</span>
+<span class="fc" id="L39">		updateDescription();</span>
+<span class="fc" id="L40">	}</span>
+
+	private void updateDescription() {
+<span class="fc bfc" id="L43" title="All 2 branches covered.">		description = withMemory ? POK_WITH_MEM_DESC : POK_DESC;</span>
+<span class="fc" id="L44">	}</span>
+
+	@Override
+	public String getName() {
+<span class="fc" id="L48">		return &quot;Power of k&quot;;</span>
+	}
+
+	@Override
+	public PowerOfKRouting clone() {
+<span class="fc" id="L53">		PowerOfKRouting pr = new PowerOfKRouting();</span>
+<span class="fc" id="L54">		pr.setK(k);</span>
+<span class="fc" id="L55">		pr.setWithMemory(withMemory);</span>
+<span class="fc" id="L56">		return pr;</span>
+	}
+
+	@Override
+	public String getClassPath() {
+<span class="fc" id="L61">		return &quot;jmt.engine.NetStrategies.RoutingStrategies.PowerOfKRoutingStrategy&quot;;</span>
+	}
+
+	@Override
+	public boolean isModelStateDependent() {
+<span class="nc" id="L66">		return true;</span>
+	}
+
+	@Override
+	public void addStation(Object stationKey) {
+<span class="fc" id="L71">	}</span>
+
+	@Override
+	public void removeStation(Object stationKey) {
+<span class="nc" id="L75">	}</span>
+
+	public Integer getK() {
+<span class="fc" id="L78">		return k;</span>
+	}
+
+	public void setK(Integer k) {
+<span class="fc" id="L82">		this.k = k;</span>
+<span class="fc" id="L83">	}</span>
+
+	public Boolean isWithMemory() {
+<span class="fc" id="L86">		return withMemory;</span>
+	}
+
+	public void setWithMemory(Boolean withMemory) {
+<span class="fc" id="L90">		this.withMemory = withMemory;</span>
+<span class="fc" id="L91">		updateDescription();</span>
+<span class="fc" id="L92">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

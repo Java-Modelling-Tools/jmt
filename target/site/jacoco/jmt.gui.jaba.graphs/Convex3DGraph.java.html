@@ -1,0 +1,1256 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Convex3DGraph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.graphs</a> &gt; <span class="el_source">Convex3DGraph.java</span></div><h1>Convex3DGraph.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jaba.graphs;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Stroke;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+
+import jmt.engine.graphic.Matrix4;
+import jmt.engine.graphic.ScreenProjector;
+import jmt.engine.graphic.Vector4;
+import jmt.engine.jaba.convexHull3d.HullEdge;
+import jmt.engine.jaba.convexHull3d.HullFace;
+import jmt.engine.jaba.convexHull3d.HullVertex;
+import jmt.gui.jaba.JabaModel;
+import jmt.gui.jaba.JabaWizard;
+
+/**
+ * This is a panel which draws the Convex Hull diagram, given the pre-computed
+ * set of faces.
+ * 
+ * @author Andrea Zoppi
+ * @author Sebastiano Spicuglia
+ */
+
+public class Convex3DGraph extends JabaGraph implements ComponentListener,
+		MouseListener, MouseMotionListener, MouseWheelListener {
+<span class="nc" id="L63">	protected static final Font FONT = new Font(&quot;Arial Narrow&quot;, Font.PLAIN, 10);</span>
+
+	protected static final long serialVersionUID = 1L;
+
+<span class="nc" id="L67">	protected ScreenProjector prj = new ScreenProjector();</span>
+
+<span class="nc" id="L69">	protected static final Color BGCOLOR = Color.WHITE;</span>
+<span class="nc" id="L70">	private static final Color DARK_RED = new Color(128, 0, 0);</span>
+<span class="nc" id="L71">	private static final Color DARK_GREEN = new Color(0, 128, 0);</span>
+<span class="nc" id="L72">	private static final Color DARK_BLUE = new Color(0, 0, 128);</span>
+
+
+	// protected JabaModel data;//PRODUCTION SOLUTION
+	// protected JabaWizard mainWin;//PRODUCTION SOLUTION
+<span class="nc" id="L77">	private static final BasicStroke DOTTED = new BasicStroke(1, 1, 1, 1,</span>
+			new float[] { 2f }, 1);
+	protected JFrame mainWin; // PROTOTYPE SOLUTION
+
+	// Rendering options.
+<span class="nc" id="L82">	protected boolean enableCustomZoom = false;</span>
+<span class="nc" id="L83">	protected boolean enableDebugInfo = false;</span>
+<span class="nc" id="L84">	protected boolean enableDebugEdges = false;</span>
+
+<span class="nc" id="L86">	protected boolean enableCoplanarEdges = true;</span>
+<span class="nc" id="L87">	protected boolean enableInternalVertices = false;</span>
+<span class="nc" id="L88">	protected boolean enableVisibleEdges = true;</span>
+<span class="nc" id="L89">	protected boolean enableHiddenEdges = false;</span>
+<span class="nc" id="L90">	protected boolean enableVisibleFaces = true;</span>
+<span class="nc" id="L91">	protected boolean enableHiddenFaces = false;</span>
+<span class="nc" id="L92">	protected boolean enableHullVerticesLabels = true;</span>
+<span class="nc" id="L93">	protected boolean enableTransparentFaces = false;</span>
+
+	// Viewing parameters.
+<span class="nc" id="L96">	protected Vector4 axisPrjX = Vector4.createPoint3D(1.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L97">	protected Vector4 axisPrjY = Vector4.createPoint3D(0.0f, 1.0f, 0.0f);</span>
+<span class="nc" id="L98">	protected Vector4 axisPrjZ = Vector4.createPoint3D(0.0f, 0.0f, 1.0f);</span>
+<span class="nc" id="L99">	protected Vector4 axisLabelX = Vector4.createPoint3D(1.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L100">	protected Vector4 axisLabelY = Vector4.createPoint3D(0.0f, 1.0f, 0.0f);</span>
+<span class="nc" id="L101">	protected Vector4 axisLabelZ = Vector4.createPoint3D(0.0f, 0.0f, 1.0f);</span>
+<span class="nc" id="L102">	protected Vector4 originPrj = Vector4.createPoint3D(0.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L103">	protected Vector4 forward = Vector4.Z_AXIS_REV;</span>
+	protected float screenW;
+	protected float screenH;
+	protected float halfW;
+	protected float halfH;
+	protected float aspect;
+<span class="nc" id="L109">	protected float rotY = (float) Math.toRadians(45.0f); // vertical rotation</span>
+															// angle
+<span class="nc" id="L111">	protected float rotX = (float) Math.toRadians(45.0f); // head pitch angle</span>
+<span class="nc" id="L112">	protected float rotYdelta = 0.0f;</span>
+<span class="nc" id="L113">	protected float rotXdelta = 0.0f;</span>
+<span class="nc" id="L114">	protected float zoomFactor = 1.0f;</span>
+
+	// Mouse state.
+<span class="nc" id="L117">	protected boolean mouseLeft = false;</span>
+<span class="nc" id="L118">	protected boolean mouseRight = false;</span>
+<span class="nc" id="L119">	protected Point mouseStart = new Point(0, 0);</span>
+<span class="nc" id="L120">	protected Point mouseEnd = new Point(0, 0);</span>
+<span class="nc" id="L121">	protected Point mouseDelta = new Point(0, 0);</span>
+<span class="nc" id="L122">	protected MouseMode mouseMode = MouseMode.NONE;</span>
+
+	// Convex hull data
+	protected static final float VISIBILITY_EPSILON = 0.0f; // -0.001f;
+	protected static final float COPLANAR_EPSILON = 0.001f;
+
+<span class="nc" id="L128">	private static final Color SELECTED_STATION_COLOR = Color.GREEN;</span>
+
+	protected HashSet&lt;HullVertex&gt; allVerticesSet;
+<span class="nc" id="L131">	protected HullVertex[] allVerticesArray = null;</span>
+	protected ArrayList&lt;HullFace&gt; faces;
+
+	// Convex hull primitives sets
+<span class="nc" id="L135">	protected HashSet&lt;HullEdge&gt; hullEdgesSet = new HashSet&lt;HullEdge&gt;();</span>
+<span class="nc" id="L136">	protected HashSet&lt;PointData&gt; hullVerticesSet = new HashSet&lt;PointData&gt;();</span>
+
+<span class="nc" id="L138">	protected HashSet&lt;HullFace&gt; visibleFacesSet = new HashSet&lt;HullFace&gt;();</span>
+<span class="nc" id="L139">	protected HashSet&lt;HullFace&gt; hiddenFacesSet = new HashSet&lt;HullFace&gt;();</span>
+<span class="nc" id="L140">	protected HashSet&lt;HullEdge&gt; visibleEdgesSet = new HashSet&lt;HullEdge&gt;();</span>
+<span class="nc" id="L141">	protected HashSet&lt;HullEdge&gt; hiddenEdgesSet = new HashSet&lt;HullEdge&gt;();</span>
+<span class="nc" id="L142">	protected HashSet&lt;PointData&gt; visibleVerticesSet = new HashSet&lt;PointData&gt;();</span>
+<span class="nc" id="L143">	protected HashSet&lt;PointData&gt; hiddenVerticesSet = new HashSet&lt;PointData&gt;();</span>
+<span class="nc" id="L144">	protected HashSet&lt;PointData&gt; verticesInsideSet = new HashSet&lt;PointData&gt;();</span>
+
+	// Convex hull primitives arrays (extracted from sets)
+<span class="nc" id="L147">	protected HullEdge[] hullEdgesArray = null;</span>
+<span class="nc" id="L148">	protected PointData[] hullVerticesArray = null;</span>
+<span class="nc" id="L149">	protected HullFace[] hullFacesArray = null;</span>
+
+<span class="nc" id="L151">	protected HullFace[] visibleFacesArray = null;</span>
+<span class="nc" id="L152">	protected HullFace[] hiddenFacesArray = null;</span>
+<span class="nc" id="L153">	protected HullEdge[] visibleEdgesArray = null;</span>
+<span class="nc" id="L154">	protected HullEdge[] hiddenEdgesArray = null;</span>
+<span class="nc" id="L155">	protected PointData[] visibleVerticesArray = null;</span>
+<span class="nc" id="L156">	protected PointData[] hiddenVerticesArray = null;</span>
+<span class="nc" id="L157">	protected PointData[] verticesInsideArray = null;</span>
+
+	// Sorted vertices arrays
+	protected PointData[] sortedVisibleVertices;
+	protected PointData[] sortedHiddenVertices;
+	protected PointData[] sortedVerticesInside;
+
+	// Information for solid centering and scaling.
+<span class="nc" id="L165">	protected float maxVertexDistance = 1.0f;</span>
+<span class="nc" id="L166">	protected Vector4 centroid = Vector4.createPoint3D(0.0f, 0.0f, 0.0f);</span>
+
+	// Internal eye rototranslation matrix.
+<span class="nc" id="L169">	protected Matrix4 eyeRT = Matrix4.createIdentity();</span>
+
+	private String[] classNames;
+
+	private String selectedStation;
+
+	/**
+	 * Keeps points coordinates both as world coords and as projected screen
+	 * coords. Each point has its own ID for further operations.
+	 * 
+	 * @author Andrea Zoppi
+	 */
+	protected static class PointData implements Comparable&lt;PointData&gt; {
+<span class="nc" id="L182">		public Vector4 worldPos = null;</span>
+<span class="nc" id="L183">		public Vector4 screenPos = null;</span>
+<span class="nc" id="L184">		public HullVertex vertex = null;</span>
+
+<span class="nc" id="L186">		public PointData(Vector4 worldPos, Vector4 screenPos, HullVertex vertex) {</span>
+<span class="nc" id="L187">			this.worldPos = worldPos;</span>
+<span class="nc" id="L188">			this.screenPos = screenPos;</span>
+<span class="nc" id="L189">			this.vertex = vertex;</span>
+<span class="nc" id="L190">		}</span>
+
+		@Override
+		public int hashCode() {
+<span class="nc" id="L194">			return vertex.hashCode();</span>
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			if (this == obj)</span>
+<span class="nc" id="L200">				return true;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (obj == null)</span>
+<span class="nc" id="L202">				return false;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			if (getClass() != obj.getClass())</span>
+<span class="nc" id="L204">				return false;</span>
+<span class="nc" id="L205">			PointData other = (PointData) obj;</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (vertex == null) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				if (other.vertex != null)</span>
+<span class="nc" id="L208">					return false;</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">			} else if (!vertex.equals(other.vertex))</span>
+<span class="nc" id="L210">				return false;</span>
+<span class="nc" id="L211">			return true;</span>
+		}
+
+		public int compareTo(PointData o) {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">			if (this.screenPos.w() &gt; o.screenPos.w()) {</span>
+<span class="nc" id="L216">				return 1;</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			} else if (this.screenPos.w() &lt; o.screenPos.w()) {</span>
+<span class="nc" id="L218">				return -1;</span>
+			} else {
+<span class="nc" id="L220">				return 0;</span>
+			}
+		}
+	}
+
+	/**
+	 * Mouse action modes.
+	 */
+<span class="nc" id="L228">	protected enum MouseMode {</span>
+<span class="nc" id="L229">		NONE, ROTATE_VIEW, MOVE_VERTEX;</span>
+	}
+
+	public boolean getEnableDebugInfo() {
+<span class="nc" id="L233">		return enableDebugInfo;</span>
+	}
+
+	public void setEnableDebugInfo(boolean enableDebugInfo) {
+<span class="nc" id="L237">		this.enableDebugInfo = enableDebugInfo;</span>
+<span class="nc" id="L238">	}</span>
+
+	public boolean getEnableDebugEdges() {
+<span class="nc" id="L241">		return enableDebugEdges;</span>
+	}
+
+	public void setEnableDebugEdges(boolean enableDebugEdges) {
+<span class="nc" id="L245">		this.enableDebugEdges = enableDebugEdges;</span>
+<span class="nc" id="L246">	}</span>
+
+	public boolean getEnableCustomZoom() {
+<span class="nc" id="L249">		return enableCustomZoom;</span>
+	}
+
+	public void setEnableCustomZoom(boolean enableCustomZoom) {
+<span class="nc" id="L253">		this.enableCustomZoom = enableCustomZoom;</span>
+<span class="nc" id="L254">	}</span>
+
+	public boolean getEnableInternalVertices() {
+<span class="nc" id="L257">		return enableInternalVertices;</span>
+	}
+
+	public void setEnableInternalVertices(boolean enableInternalVertices) {
+<span class="nc" id="L261">		this.enableInternalVertices = enableInternalVertices;</span>
+<span class="nc" id="L262">	}</span>
+
+	public boolean getEnableCoplanarEdges() {
+<span class="nc" id="L265">		return enableCoplanarEdges;</span>
+	}
+
+	public void setEnableCoplanarEdges(boolean enableCoplanarEdges) {
+<span class="nc" id="L269">		this.enableCoplanarEdges = enableCoplanarEdges;</span>
+<span class="nc" id="L270">	}</span>
+
+	public boolean getEnableVisibleEdges() {
+<span class="nc" id="L273">		return enableVisibleEdges;</span>
+	}
+
+	public void setEnableVisibleEdges(boolean enableVisibleEdges) {
+<span class="nc" id="L277">		this.enableVisibleEdges = enableVisibleEdges;</span>
+<span class="nc" id="L278">	}</span>
+
+	public boolean getEnableHiddenEdges() {
+<span class="nc" id="L281">		return enableHiddenEdges;</span>
+	}
+
+	public void setEnableHiddenEdges(boolean enableHiddenEdges) {
+<span class="nc" id="L285">		this.enableHiddenEdges = enableHiddenEdges;</span>
+<span class="nc" id="L286">	}</span>
+
+	public boolean getEnableVisibleFaces() {
+<span class="nc" id="L289">		return enableVisibleFaces;</span>
+	}
+
+	public void setEnableVisibleFaces(boolean enableVisibleFaces) {
+<span class="nc" id="L293">		this.enableVisibleFaces = enableVisibleFaces;</span>
+<span class="nc" id="L294">	}</span>
+
+	public boolean getEnableHiddenFaces() {
+<span class="nc" id="L297">		return enableHiddenFaces;</span>
+	}
+
+	public void setEnableHiddenFaces(boolean enableHiddenFaces) {
+<span class="nc" id="L301">		this.enableHiddenFaces = enableHiddenFaces;</span>
+<span class="nc" id="L302">	}</span>
+
+	public boolean getEnableHullVerticesLabels() {
+<span class="nc" id="L305">		return enableHullVerticesLabels;</span>
+	}
+
+	public void setEnableHullVerticesLabels(boolean enableHullVerticesLabels) {
+<span class="nc" id="L309">		this.enableHullVerticesLabels = enableHullVerticesLabels;</span>
+<span class="nc" id="L310">	}</span>
+
+	public boolean getEnableTransparentFaces() {
+<span class="nc" id="L313">		return enableTransparentFaces;</span>
+	}
+
+	public void setEnableTransparentFaces(boolean enableTransparentFaces) {
+<span class="nc" id="L317">		this.enableTransparentFaces = enableTransparentFaces;</span>
+<span class="nc" id="L318">	}</span>
+
+	public float getZoomFactor() {
+<span class="nc" id="L321">		return zoomFactor;</span>
+	}
+
+	public void setZoomFactor(float zoomFactor) {
+<span class="nc" id="L325">		this.zoomFactor = zoomFactor;</span>
+<span class="nc" id="L326">	}</span>
+
+	/**
+	 * Check if the face is visible or not. Due to the convex solid property, a
+	 * positive dot product means that the face has the normal in the same
+	 * direction of the sight, thus it is not visible because there exist faces
+	 * which cover the sight of the analyzed one.
+	 * 
+	 * @param faces
+	 *            Faces to split.
+	 * @param forward
+	 *            Viewing direction.
+	 */
+	protected void splitByVisibility(Vector4 forward) {
+<span class="nc" id="L340">		forward = forward.unit();</span>
+<span class="nc" id="L341">		visibleFacesSet.clear();</span>
+<span class="nc" id="L342">		hiddenFacesSet.clear();</span>
+<span class="nc" id="L343">		visibleEdgesSet.clear();</span>
+<span class="nc" id="L344">		hiddenEdgesSet.clear();</span>
+<span class="nc" id="L345">		visibleVerticesSet.clear();</span>
+<span class="nc" id="L346">		hiddenVerticesSet.clear();</span>
+<span class="nc" id="L347">		hullEdgesSet.clear();</span>
+<span class="nc" id="L348">		hullVerticesSet.clear();</span>
+<span class="nc" id="L349">		maxVertexDistance = 1.0f;</span>
+<span class="nc" id="L350">		centroid.set(Vector4.createPoint3D(0.0f, 0.0f, 0.0f));</span>
+<span class="nc" id="L351">		float[] max = { 0.0f, 0.0f, 0.0f };</span>
+<span class="nc" id="L352">		float[] min = { 0.0f, 0.0f, 0.0f };</span>
+
+<span class="nc" id="L354">		int size = faces.size();</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L356">			HullFace face = faces.get(i);</span>
+
+<span class="nc" id="L358">			Vector4 normal = face.getNormal();</span>
+<span class="nc" id="L359">			HullEdge[] edges = face.getEdges();</span>
+<span class="nc" id="L360">			HullVertex[] vertices = face.getVertices();</span>
+
+<span class="nc" id="L362">			float facing = normal.dot(forward);</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">			boolean isVisible = (facing &lt;= VISIBILITY_EPSILON);</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">			if (isVisible) {</span>
+<span class="nc" id="L365">				visibleFacesSet.add(face);</span>
+			} else {
+<span class="nc" id="L367">				hiddenFacesSet.add(face);</span>
+			}
+<span class="nc" id="L369">			face.setShade(facing);</span>
+
+			// Create unique and visibility sets
+<span class="nc bnc" id="L372" title="All 2 branches missed.">			for (int j = 0; j &lt; edges.length; j++) {</span>
+<span class="nc" id="L373">				HullEdge e = edges[j];</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">				if (isVisible) {</span>
+<span class="nc" id="L375">					visibleEdgesSet.add(e);</span>
+
+					// Fix edges flagged as hidden but actually visible
+<span class="nc bnc" id="L378" title="All 2 branches missed.">					if (hiddenEdgesSet.contains(e)) {</span>
+<span class="nc" id="L379">						hiddenEdgesSet.remove(e);</span>
+					}
+<span class="nc bnc" id="L381" title="All 2 branches missed.">				} else if (!visibleEdgesSet.contains(e)) {</span>
+					// Add only if no other faces have already claimed the edge
+					// visibility.
+<span class="nc" id="L384">					hiddenEdgesSet.add(e);</span>
+				}
+<span class="nc bnc" id="L386" title="All 2 branches missed.">				if (hullEdgesSet.add(e)) {</span>
+				}
+			}
+<span class="nc bnc" id="L389" title="All 2 branches missed.">			for (int j = 0; j &lt; vertices.length; j++) {</span>
+<span class="nc" id="L390">				HullVertex v = vertices[j];</span>
+<span class="nc" id="L391">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L392">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L393">				PointData p = new PointData(worldPos, screenPos, v);</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">				if (isVisible) {</span>
+<span class="nc" id="L395">					visibleVerticesSet.add(p);</span>
+
+					// Fix vertices flagged as hidden but actually visible
+<span class="nc bnc" id="L398" title="All 2 branches missed.">					if (hiddenVerticesSet.contains(p)) {</span>
+<span class="nc" id="L399">						hiddenVerticesSet.remove(p);</span>
+					}
+<span class="nc bnc" id="L401" title="All 2 branches missed.">				} else if (!visibleVerticesSet.contains(p)) {</span>
+					// Add only if no other faces have already claimed the
+					// vertex visibility.
+<span class="nc" id="L404">					hiddenVerticesSet.add(p);</span>
+				}
+<span class="nc bnc" id="L406" title="All 4 branches missed.">				if (p.vertex.getID() &gt;= 0 &amp;&amp; hullVerticesSet.add(p)) {</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">					if (v.x() &gt; max[0]) {</span>
+<span class="nc" id="L408">						max[0] = v.x();</span>
+					}
+<span class="nc bnc" id="L410" title="All 2 branches missed.">					if (v.y() &gt; max[1]) {</span>
+<span class="nc" id="L411">						max[1] = v.y();</span>
+					}
+<span class="nc bnc" id="L413" title="All 2 branches missed.">					if (v.z() &gt; max[2]) {</span>
+<span class="nc" id="L414">						max[2] = v.z();</span>
+					}
+<span class="nc bnc" id="L416" title="All 2 branches missed.">					if (v.x() &lt; min[0]) {</span>
+<span class="nc" id="L417">						min[0] = v.x();</span>
+					}
+<span class="nc bnc" id="L419" title="All 2 branches missed.">					if (v.y() &lt; min[1]) {</span>
+<span class="nc" id="L420">						min[1] = v.y();</span>
+					}
+<span class="nc bnc" id="L422" title="All 2 branches missed.">					if (v.z() &lt; min[2]) {</span>
+<span class="nc" id="L423">						min[2] = v.z();</span>
+					}
+				}
+			}
+		}
+
+		// Centering and scaling
+<span class="nc" id="L430">		centroid.x((max[0] + min[0]) * 0.5f * zoomFactor);</span>
+<span class="nc" id="L431">		centroid.y((max[1] + min[1]) * 0.5f * zoomFactor);</span>
+<span class="nc" id="L432">		centroid.z((max[2] + min[2]) * 0.5f * zoomFactor);</span>
+<span class="nc" id="L433">		max[0] -= min[0];</span>
+<span class="nc" id="L434">		max[1] -= min[1];</span>
+<span class="nc" id="L435">		max[2] -= min[2];</span>
+<span class="nc" id="L436">		maxVertexDistance = 0.5f * (float) Math.sqrt(max[0] * max[0] + max[1]</span>
+				* max[1] + max[2] * max[2]);
+<span class="nc" id="L438">		centroid.divSelf(maxVertexDistance * zoomFactor);</span>
+
+		// Build the verticesInside set.
+<span class="nc" id="L441">		verticesInsideSet.clear();</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">		for (int i = 0; i &lt; allVerticesArray.length; i++) {</span>
+<span class="nc" id="L443">			HullVertex v = allVerticesArray[i];</span>
+<span class="nc" id="L444">			PointData p = new PointData(null, null, v); // Dummy PointData, just</span>
+														// to check the HashSet
+<span class="nc bnc" id="L446" title="All 2 branches missed.">			if (!hullVerticesSet.contains(p)) {</span>
+<span class="nc" id="L447">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L448">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L449">				p = new PointData(worldPos, screenPos, v);</span>
+<span class="nc" id="L450">				verticesInsideSet.add(p);</span>
+			}
+		}
+
+		// TODO: Remove useless vertices
+
+		// Convert sets into arrays for easy modifies
+<span class="nc" id="L457">		hullEdgesArray = hullEdgesSet</span>
+<span class="nc" id="L458">				.toArray(new HullEdge[hullEdgesSet.size()]);</span>
+<span class="nc" id="L459">		hullVerticesArray = hullVerticesSet</span>
+<span class="nc" id="L460">				.toArray(new PointData[hullVerticesSet.size()]);</span>
+<span class="nc" id="L461">		hullFacesArray = this.faces.toArray(new HullFace[this.faces.size()]);</span>
+
+<span class="nc" id="L463">		visibleFacesArray = visibleFacesSet</span>
+<span class="nc" id="L464">				.toArray(new HullFace[visibleFacesSet.size()]);</span>
+<span class="nc" id="L465">		hiddenFacesArray = hiddenFacesSet.toArray(new HullFace[hiddenFacesSet</span>
+<span class="nc" id="L466">				.size()]);</span>
+<span class="nc" id="L467">		visibleEdgesArray = visibleEdgesSet</span>
+<span class="nc" id="L468">				.toArray(new HullEdge[visibleEdgesSet.size()]);</span>
+<span class="nc" id="L469">		hiddenEdgesArray = hiddenEdgesSet.toArray(new HullEdge[hiddenEdgesSet</span>
+<span class="nc" id="L470">				.size()]);</span>
+<span class="nc" id="L471">		visibleVerticesArray = visibleVerticesSet</span>
+<span class="nc" id="L472">				.toArray(new PointData[visibleVerticesSet.size()]);</span>
+<span class="nc" id="L473">		hiddenVerticesArray = hiddenVerticesSet</span>
+<span class="nc" id="L474">				.toArray(new PointData[hiddenVerticesSet.size()]);</span>
+<span class="nc" id="L475">		verticesInsideArray = verticesInsideSet</span>
+<span class="nc" id="L476">				.toArray(new PointData[verticesInsideSet.size()]);</span>
+
+		// Sort sets into separate arrays
+<span class="nc" id="L479">		sortedVisibleVertices = visibleVerticesArray.clone();</span>
+<span class="nc" id="L480">		Arrays.sort(sortedVisibleVertices);</span>
+<span class="nc" id="L481">		sortedHiddenVertices = hiddenVerticesArray.clone();</span>
+<span class="nc" id="L482">		Arrays.sort(sortedHiddenVertices);</span>
+<span class="nc" id="L483">		sortedVerticesInside = verticesInsideArray.clone();</span>
+<span class="nc" id="L484">		Arrays.sort(sortedVisibleVertices);</span>
+
+<span class="nc" id="L486">		countFaceVertices();</span>
+<span class="nc" id="L487">	}</span>
+
+	protected void countFaceVertices() {
+		/*
+		 * Per ogni faccia faccia.contatore = 0; faccia.marcata = false;
+		 * 
+		 * Per ogni vertice  convex hull Per ogni faccia Se vertice  faccia
+		 * incrementaFaccia(faccia) Per ogni faccia faccia.marcata = false
+		 */
+
+		// Reset vertex counters and marks
+<span class="nc bnc" id="L498" title="All 2 branches missed.">		for (int fi = 0; fi &lt; hullFacesArray.length; fi++) {</span>
+<span class="nc" id="L499">			HullFace f = hullFacesArray[fi];</span>
+<span class="nc" id="L500">			f.setNumCoplanarVertices(0);</span>
+		}
+
+		// Start propagating the number of vertices per face
+<span class="nc bnc" id="L504" title="All 2 branches missed.">		for (int vi = 0; vi &lt; hullVerticesArray.length; vi++) {</span>
+			// Cleanup marked bits
+<span class="nc bnc" id="L506" title="All 2 branches missed.">			for (int fi = 0; fi &lt; hullFacesArray.length; fi++) {</span>
+<span class="nc" id="L507">				HullFace f = hullFacesArray[fi];</span>
+<span class="nc" id="L508">				f.setMarked(false);</span>
+			}
+
+<span class="nc bnc" id="L511" title="All 2 branches missed.">			for (int fi = 0; fi &lt; hullFacesArray.length; fi++) {</span>
+<span class="nc" id="L512">				HullVertex v = hullVerticesArray[vi].vertex;</span>
+<span class="nc" id="L513">				HullFace f = hullFacesArray[fi];</span>
+
+				// Start color propagation
+<span class="nc bnc" id="L516" title="All 2 branches missed.">				if (v.getID() == f.getVertex(0).getID()</span>
+<span class="nc bnc" id="L517" title="All 2 branches missed.">						|| v.getID() == f.getVertex(1).getID()</span>
+<span class="nc bnc" id="L518" title="All 2 branches missed.">						|| v.getID() == f.getVertex(2).getID()) {</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">					if (!f.isMarked()) {</span>
+<span class="nc" id="L520">						incrementFaceCounter(f);</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L525">	}</span>
+
+	protected void incrementFaceCounter(HullFace face) {
+		/*
+		 * faccia.contatore++ faccia.marcata = true
+		 * 
+		 * Per ogni spigolo  faccia Per ogni faccia adiacente  spigolo Se
+		 * adiacente != questa &amp;&amp; adiacente coplanare faccia &amp;&amp;
+		 * !adiacente.marcata incrementaFaccia(adiacente)
+		 */
+
+		// Increment the counter and set as marked
+<span class="nc" id="L537">		face.setNumCoplanarVertices(1 + face.getNumCoplanarVertices());</span>
+<span class="nc" id="L538">		face.setMarked(true);</span>
+
+<span class="nc bnc" id="L540" title="All 2 branches missed.">		for (int ei = 0; ei &lt; 3; ei++) {</span>
+<span class="nc" id="L541">			HullEdge e = face.getEdge(ei);</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">			for (int ai = 0; ai &lt; 2; ai++) {</span>
+<span class="nc" id="L543">				HullFace adj = e.getFace(ai);</span>
+				/*
+				 * if ( face.volumeSign( adj.getVertex( 0 ) ) == 0 &amp;&amp;
+				 * face.volumeSign( adj.getVertex( 1 ) ) == 0 &amp;&amp;
+				 * face.volumeSign( adj.getVertex( 2 ) ) == 0 &amp;&amp;
+				 * !face.isMarked() ) { incrementFaceCounter( adj ); }
+				 */
+<span class="nc bnc" id="L550" title="All 4 branches missed.">				if (!adj.isMarked() &amp;&amp; face.isCoplanar(adj)) {</span>
+<span class="nc" id="L551">					incrementFaceCounter(adj);</span>
+				}
+			}
+		}
+<span class="nc" id="L555">	}</span>
+
+<span class="nc" id="L557">	public Convex3DGraph(JabaModel data, JabaWizard mainWin) {</span>
+
+<span class="nc" id="L559">		this.setBackground(BGCOLOR);</span>
+
+<span class="nc" id="L561">		this.addComponentListener(this);</span>
+<span class="nc" id="L562">		this.addMouseListener(this);</span>
+<span class="nc" id="L563">		this.addMouseMotionListener(this);</span>
+<span class="nc" id="L564">		this.addMouseWheelListener(this);</span>
+
+<span class="nc" id="L566">		this.classNames = data.getClassNames();</span>
+<span class="nc" id="L567">		this.faces = data.getResults().getFaces();</span>
+<span class="nc" id="L568">		this.mainWin = mainWin;</span>
+<span class="nc" id="L569">		this.allVerticesSet = data.getHullVertices();</span>
+<span class="nc" id="L570">		this.allVerticesArray = allVerticesSet</span>
+<span class="nc" id="L571">				.toArray(new HullVertex[allVerticesSet.size()]);</span>
+
+<span class="nc" id="L573">		this.setBorder(BorderFactory.createEtchedBorder());</span>
+<span class="nc" id="L574">		this.setBackground(BGCOLOR);</span>
+
+<span class="nc" id="L576">		repaint();</span>
+<span class="nc" id="L577">	}</span>
+
+	@Override
+	public void paint(Graphics graphics) {
+<span class="nc" id="L581">		super.paint(graphics);</span>
+<span class="nc" id="L582">		Graphics2D g = (Graphics2D) graphics;</span>
+//		 g.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );
+
+<span class="nc" id="L585">		updateProjection();</span>
+
+		// Draw 3D grids
+<span class="nc" id="L588">		drawGrids(g, 1.0f, 10, false, false, false);</span>
+
+<span class="nc" id="L590">		g.setFont(FONT);</span>
+
+		// Draw hidden faces
+<span class="nc bnc" id="L593" title="All 2 branches missed.">		if (enableHiddenFaces) {</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">			for (int i = 0; i &lt; hiddenFacesArray.length; i++) {</span>
+<span class="nc" id="L595">				HullFace f = hiddenFacesArray[i];</span>
+<span class="nc" id="L596">				HullVertex v = f.getVertex(0);</span>
+<span class="nc" id="L597">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L598">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L599">				PointData p1 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L601">				v = f.getVertex(1);</span>
+<span class="nc" id="L602">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L603">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L604">				PointData p2 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L606">				v = f.getVertex(2);</span>
+<span class="nc" id="L607">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L608">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L609">				PointData p3 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L611">				drawFace(g, p1, p2, p3, f);</span>
+			}
+		}
+
+		// Draw visible faces
+<span class="nc bnc" id="L616" title="All 2 branches missed.">		if (enableVisibleFaces) {</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">			for (int i = 0; i &lt; visibleFacesArray.length; i++) {</span>
+<span class="nc" id="L618">				HullFace f = visibleFacesArray[i];</span>
+<span class="nc" id="L619">				HullVertex v = f.getVertex(0);</span>
+<span class="nc" id="L620">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L621">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L622">				PointData p1 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L624">				v = f.getVertex(1);</span>
+<span class="nc" id="L625">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L626">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L627">				PointData p2 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L629">				v = f.getVertex(2);</span>
+<span class="nc" id="L630">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L631">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L632">				PointData p3 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L634">				drawFace(g, p1, p2, p3, f);</span>
+			}
+		}
+
+		// Draw hidden edges
+<span class="nc bnc" id="L639" title="All 2 branches missed.">		if (enableHiddenEdges) {</span>
+<span class="nc bnc" id="L640" title="All 2 branches missed.">			for (int i = 0; i &lt; hiddenEdgesArray.length; i++) {</span>
+<span class="nc" id="L641">				HullEdge e = hiddenEdgesArray[i];</span>
+<span class="nc" id="L642">				HullVertex v = e.getEndPoint(0);</span>
+<span class="nc" id="L643">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L644">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L645">				PointData p1 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L647">				v = e.getEndPoint(1);</span>
+<span class="nc" id="L648">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L649">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L650">				PointData p2 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L652">				drawEdge(g, p1, p2, e, false);</span>
+			}
+		}
+
+		// Draw hidden hull vertices
+<span class="nc bnc" id="L657" title="All 2 branches missed.">		for (int i = 0; i &lt; sortedHiddenVertices.length; i++) {</span>
+<span class="nc" id="L658">			PointData p = sortedHiddenVertices[i];</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">			if (p.vertex.getID() &gt;= 0) {</span>
+<span class="nc" id="L660">				drawVertex(g, p, false, true);</span>
+			}
+		}
+
+		// Draws points inside
+<span class="nc bnc" id="L665" title="All 2 branches missed.">		for (int i = 0; i &lt; sortedVerticesInside.length; i++) {</span>
+<span class="nc" id="L666">			PointData p = sortedVerticesInside[i];</span>
+<span class="nc bnc" id="L667" title="All 4 branches missed.">			if (enableInternalVertices || p.vertex.getName().equals(selectedStation) ) {</span>
+<span class="nc" id="L668">				drawVertex(g, p, false, false);</span>
+			}
+		}
+		
+
+<span class="nc" id="L673">		drawAxes(g, true);</span>
+
+		// Draw visible hull edges
+<span class="nc bnc" id="L676" title="All 2 branches missed.">		if (enableVisibleEdges) {</span>
+<span class="nc bnc" id="L677" title="All 2 branches missed.">			for (int i = 0; i &lt; visibleEdgesArray.length; i++) {</span>
+<span class="nc" id="L678">				HullEdge e = visibleEdgesArray[i];</span>
+<span class="nc" id="L679">				HullVertex v = e.getEndPoint(0);</span>
+<span class="nc" id="L680">				Vector4 worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L681">				Vector4 screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L682">				PointData p1 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L684">				v = e.getEndPoint(1);</span>
+<span class="nc" id="L685">				worldPos = Vector4.createPoint3D(v.x(), v.y(), v.z());</span>
+<span class="nc" id="L686">				screenPos = prj.project(worldPos);</span>
+<span class="nc" id="L687">				PointData p2 = new PointData(worldPos, screenPos, v);</span>
+
+<span class="nc" id="L689">				drawEdge(g, p1, p2, e, true);</span>
+			}
+		}
+
+		// Draw visible hull vertices
+<span class="nc bnc" id="L694" title="All 2 branches missed.">		for (int i = 0; i &lt; sortedVisibleVertices.length; i++) {</span>
+<span class="nc" id="L695">			PointData p = sortedVisibleVertices[i];</span>
+<span class="nc bnc" id="L696" title="All 2 branches missed.">			if (p.vertex.getID() &gt;= 0) {</span>
+<span class="nc" id="L697">				drawVertex(g, p, true, true);</span>
+			}
+		}
+
+		// DEBUG CODE
+
+<span class="nc bnc" id="L703" title="All 2 branches missed.">		if (enableDebugInfo) {</span>
+<span class="nc" id="L704">			g.setColor(Color.MAGENTA);</span>
+<span class="nc bnc" id="L705" title="All 4 branches missed.">			if (mouseStart != null &amp;&amp; mouseEnd != null) {</span>
+<span class="nc" id="L706">				g.drawLine(mouseStart.x, mouseStart.y, mouseEnd.x, mouseEnd.y);</span>
+			}
+
+<span class="nc" id="L709">			printViewState(g);</span>
+		}
+<span class="nc" id="L711">	}</span>
+
+	protected void drawAxes(Graphics2D g, boolean visible) {
+		// TODO: Draw axes based on visibility
+<span class="nc" id="L715">		Stroke tmp = g.getStroke();</span>
+<span class="nc" id="L716">		g.setStroke(DOTTED);</span>
+<span class="nc" id="L717">		g.setColor(DARK_RED);</span>
+		//In order to make the end of y-axis and its label as high as possible
+<span class="nc" id="L719">		int yOfYAxis = 0;</span>
+<span class="nc" id="L720">		int yOfYLabel = 5;</span>
+
+<span class="nc" id="L722">		g.drawLine((int) originPrj.x(), (int) originPrj.y(),</span>
+<span class="nc" id="L723">				(int) axisPrjX.x(), (int) axisPrjX.y());</span>
+<span class="nc" id="L724">		drawBorderString(g, classNames[0], (int) axisLabelX.x(),</span>
+<span class="nc" id="L725">				(int) axisLabelX.y(), DARK_RED, null);</span>
+<span class="nc" id="L726">		g.setColor(DARK_GREEN);</span>
+<span class="nc" id="L727">		g.drawLine((int) originPrj.x(), (int) originPrj.y(),</span>
+<span class="nc" id="L728">				(int) axisPrjY.x(), yOfYAxis);</span>
+<span class="nc" id="L729">		drawBorderString(g, classNames[1], (int) axisLabelY.x(),</span>
+				yOfYLabel, DARK_GREEN, null);
+<span class="nc" id="L731">		g.setColor(DARK_BLUE);</span>
+<span class="nc" id="L732">		g.drawLine((int) originPrj.x(), (int) originPrj.y(),</span>
+<span class="nc" id="L733">				(int) axisPrjZ.x(), (int) axisPrjZ.y());</span>
+<span class="nc" id="L734">		drawBorderString(g, classNames[2], (int) axisLabelZ.x(),</span>
+<span class="nc" id="L735">				(int) axisLabelZ.y(), DARK_BLUE, null);</span>
+<span class="nc" id="L736">		g.setStroke(tmp);</span>
+<span class="nc" id="L737">	}</span>
+
+	protected void drawBorderString(Graphics2D g, String s, int x, int y,
+			Color textColor, Color borderColor) {
+<span class="nc bnc" id="L741" title="All 2 branches missed.">		if (borderColor != null) {</span>
+<span class="nc" id="L742">			g.setColor(borderColor);</span>
+<span class="nc" id="L743">			g.drawString(s, x + 4, y + 4);</span>
+<span class="nc" id="L744">			g.drawString(s, x + 4, y + 6);</span>
+<span class="nc" id="L745">			g.drawString(s, x + 6, y + 4);</span>
+<span class="nc" id="L746">			g.drawString(s, x + 6, y + 6);</span>
+<span class="nc" id="L747">			g.drawString(s, x + 5, y + 4);</span>
+<span class="nc" id="L748">			g.drawString(s, x + 5, y + 6);</span>
+<span class="nc" id="L749">			g.drawString(s, x + 4, y + 5);</span>
+<span class="nc" id="L750">			g.drawString(s, x + 6, y + 5);</span>
+		}
+<span class="nc" id="L752">		g.setColor(textColor);</span>
+<span class="nc" id="L753">		g.drawString(s, x + 5, y + 5);</span>
+<span class="nc" id="L754">	}</span>
+
+	protected void drawGrids(Graphics2D g, float size, int numSegments,
+			boolean xEnable, boolean yEnable, boolean zEnable) {
+		// size *= 0.5f;
+<span class="nc" id="L759">		float delta = size / numSegments;</span>
+<span class="nc" id="L760">		float offset, limit = size;</span>
+<span class="nc" id="L761">		numSegments *= 2;</span>
+<span class="nc" id="L762">		Vector4 p = new Vector4();</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">		if (xEnable) {</span>
+<span class="nc" id="L764">			final Color lineColor = new Color(1.0f, 0.75f, 0.75f);</span>
+<span class="nc" id="L765">			g.setColor(lineColor);</span>
+<span class="nc" id="L766">			offset = -limit;</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">			for (int i = 0; i &lt;= numSegments; i++) {</span>
+<span class="nc" id="L768">				p.set(0.0f, offset, -limit, 1.0f);</span>
+<span class="nc" id="L769">				Vector4 s1 = prj.project(p);</span>
+<span class="nc" id="L770">				p.set(0.0f, offset, limit, 1.0f);</span>
+<span class="nc" id="L771">				Vector4 e1 = prj.project(p);</span>
+<span class="nc" id="L772">				p.set(0.0f, -limit, offset, 1.0f);</span>
+<span class="nc" id="L773">				Vector4 s2 = prj.project(p);</span>
+<span class="nc" id="L774">				p.set(0.0f, limit, offset, 1.0f);</span>
+<span class="nc" id="L775">				Vector4 e2 = prj.project(p);</span>
+<span class="nc" id="L776">				g.drawLine((int) s1.x(), (int) s1.y(), (int) e1.x(),</span>
+<span class="nc" id="L777">						(int) e1.y());</span>
+<span class="nc" id="L778">				g.drawLine((int) s2.x(), (int) s2.y(), (int) e2.x(),</span>
+<span class="nc" id="L779">						(int) e2.y());</span>
+<span class="nc" id="L780">				offset += delta;</span>
+			}
+		}
+<span class="nc bnc" id="L783" title="All 2 branches missed.">		if (yEnable) {</span>
+<span class="nc" id="L784">			final Color lineColor = new Color(0.75f, 1.0f, 0.75f);</span>
+<span class="nc" id="L785">			g.setColor(lineColor);</span>
+<span class="nc" id="L786">			offset = -limit;</span>
+<span class="nc bnc" id="L787" title="All 2 branches missed.">			for (int i = 0; i &lt;= numSegments; i++) {</span>
+<span class="nc" id="L788">				p.set(offset, 0.0f, -limit, 1.0f);</span>
+<span class="nc" id="L789">				Vector4 s1 = prj.project(p);</span>
+<span class="nc" id="L790">				p.set(offset, 0.0f, limit, 1.0f);</span>
+<span class="nc" id="L791">				Vector4 e1 = prj.project(p);</span>
+<span class="nc" id="L792">				p.set(-limit, 0.0f, offset, 1.0f);</span>
+<span class="nc" id="L793">				Vector4 s2 = prj.project(p);</span>
+<span class="nc" id="L794">				p.set(limit, 0.0f, offset, 1.0f);</span>
+<span class="nc" id="L795">				Vector4 e2 = prj.project(p);</span>
+<span class="nc" id="L796">				g.drawLine((int) s1.x(), (int) s1.y(), (int) e1.x(),</span>
+<span class="nc" id="L797">						(int) e1.y());</span>
+<span class="nc" id="L798">				g.drawLine((int) s2.x(), (int) s2.y(), (int) e2.x(),</span>
+<span class="nc" id="L799">						(int) e2.y());</span>
+<span class="nc" id="L800">				offset += delta;</span>
+			}
+		}
+<span class="nc bnc" id="L803" title="All 2 branches missed.">		if (zEnable) {</span>
+<span class="nc" id="L804">			final Color lineColor = new Color(0.75f, 0.75f, 1.0f);</span>
+<span class="nc" id="L805">			g.setColor(lineColor);</span>
+<span class="nc" id="L806">			offset = -limit;</span>
+<span class="nc bnc" id="L807" title="All 2 branches missed.">			for (int i = 0; i &lt;= numSegments; i++) {</span>
+<span class="nc" id="L808">				p.set(offset, -limit, 0.0f, 1.0f);</span>
+<span class="nc" id="L809">				Vector4 s1 = prj.project(p);</span>
+<span class="nc" id="L810">				p.set(offset, limit, 0.0f, 1.0f);</span>
+<span class="nc" id="L811">				Vector4 e1 = prj.project(p);</span>
+<span class="nc" id="L812">				p.set(-limit, offset, 0.0f, 1.0f);</span>
+<span class="nc" id="L813">				Vector4 s2 = prj.project(p);</span>
+<span class="nc" id="L814">				p.set(limit, offset, 0.0f, 1.0f);</span>
+<span class="nc" id="L815">				Vector4 e2 = prj.project(p);</span>
+<span class="nc" id="L816">				g.drawLine((int) s1.x(), (int) s1.y(), (int) e1.x(),</span>
+<span class="nc" id="L817">						(int) e1.y());</span>
+<span class="nc" id="L818">				g.drawLine((int) s2.x(), (int) s2.y(), (int) e2.x(),</span>
+<span class="nc" id="L819">						(int) e2.y());</span>
+<span class="nc" id="L820">				offset += delta;</span>
+			}
+		}
+<span class="nc" id="L823">	}</span>
+
+	protected void drawFace(Graphics2D g, PointData p1, PointData p2,
+			PointData p3, HullFace face) {
+<span class="nc bnc" id="L827" title="All 2 branches missed.">		boolean visible = face.getShade() &lt;= VISIBILITY_EPSILON;</span>
+		float shadeMult = (float) Math
+<span class="nc bnc" id="L829" title="All 2 branches missed.">				.sqrt((face.getShade() &lt;= VISIBILITY_EPSILON) ? -face</span>
+<span class="nc" id="L830">						.getShade() : (1.0f - face.getShade()));</span>
+<span class="nc" id="L831">		shadeMult = 0.5f + 0.5f * shadeMult;</span>
+<span class="nc" id="L832">		int[] x = new int[3];</span>
+<span class="nc" id="L833">		int[] y = new int[3];</span>
+<span class="nc" id="L834">		x[0] = (int) p1.screenPos.x();</span>
+<span class="nc" id="L835">		y[0] = (int) p1.screenPos.y();</span>
+<span class="nc" id="L836">		x[1] = (int) p2.screenPos.x();</span>
+<span class="nc" id="L837">		y[1] = (int) p2.screenPos.y();</span>
+<span class="nc" id="L838">		x[2] = (int) p3.screenPos.x();</span>
+<span class="nc" id="L839">		y[2] = (int) p3.screenPos.y();</span>
+
+<span class="nc" id="L841">		float fr = face.getColor().getRed() * shadeMult * (1.0f / 255);</span>
+<span class="nc" id="L842">		float fg = face.getColor().getGreen() * shadeMult * (1.0f / 255);</span>
+<span class="nc" id="L843">		float fb = face.getColor().getBlue() * shadeMult * (1.0f / 255);</span>
+<span class="nc" id="L844">		Color colorVisible = new Color(fr, fg, fb,</span>
+<span class="nc bnc" id="L845" title="All 2 branches missed.">				enableTransparentFaces ? 0.5f : 1.0f);</span>
+<span class="nc" id="L846">		final Color colorHidden = new Color(0.75f * shadeMult,</span>
+				0.75f * shadeMult, 0.75f * shadeMult,
+<span class="nc bnc" id="L848" title="All 2 branches missed.">				enableTransparentFaces ? 0.5f : 1.0f);</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">		g.setColor(visible ? colorVisible : colorHidden);</span>
+<span class="nc" id="L850">		g.fillPolygon(x, y, 3);</span>
+
+<span class="nc bnc" id="L852" title="All 2 branches missed.">		if (enableDebugInfo) {</span>
+			// Draw normals
+<span class="nc" id="L854">			Vector4 wc = new Vector4();</span>
+<span class="nc" id="L855">			wc.x(p1.worldPos.x() + p2.worldPos.x() + p3.worldPos.x());</span>
+<span class="nc" id="L856">			wc.y(p1.worldPos.y() + p2.worldPos.y() + p3.worldPos.y());</span>
+<span class="nc" id="L857">			wc.z(p1.worldPos.z() + p2.worldPos.z() + p3.worldPos.z());</span>
+<span class="nc" id="L858">			wc.w(1.0f);</span>
+<span class="nc" id="L859">			wc.multSelf(1.0f / 3.0f);</span>
+<span class="nc" id="L860">			Vector4 pc = prj.project(wc);</span>
+<span class="nc" id="L861">			Vector4 pn = prj.project(wc.add(face.getNormal()));</span>
+<span class="nc" id="L862">			g.setColor(Color.BLUE);</span>
+<span class="nc" id="L863">			g.drawLine((int) pc.x(), (int) pc.y(), (int) pn.x(), (int) pn.y());</span>
+		}
+<span class="nc" id="L865">	}</span>
+
+	protected void drawEdge(Graphics2D g, PointData p1, PointData p2,
+			HullEdge edge, boolean visible) {
+<span class="nc" id="L869">		final Color colorVisible = new Color(0.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L870">		final Color colorHidden = new Color(0.4f, 0.4f, 0.4f);</span>
+
+		// Check if the two adjacent faces are coplanar
+<span class="nc bnc" id="L873" title="All 4 branches missed.">		if (enableDebugEdges || !edge.getFace(0).isCoplanar(edge.getFace(1))) {</span>
+<span class="nc" id="L874">			int x1 = (int) p1.screenPos.x();</span>
+<span class="nc" id="L875">			int y1 = (int) p1.screenPos.y();</span>
+<span class="nc" id="L876">			int x2 = (int) p2.screenPos.x();</span>
+<span class="nc" id="L877">			int y2 = (int) p2.screenPos.y();</span>
+<span class="nc bnc" id="L878" title="All 2 branches missed.">			g.setColor(enableDebugEdges ? Color.MAGENTA</span>
+<span class="nc bnc" id="L879" title="All 2 branches missed.">					: (visible ? colorVisible : colorHidden));</span>
+<span class="nc" id="L880">			g.drawLine(x1, y1, x2, y2);</span>
+		}
+<span class="nc" id="L882">	}</span>
+
+	protected void drawVertex(Graphics2D g, PointData p, boolean visible,
+			boolean onHull) {
+<span class="nc" id="L886">		final Color colorVisible = new Color(0.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L887">		final Color colorHidden = new Color(0.4f, 0.4f, 0.4f);</span>
+<span class="nc" id="L888">		final Color bulletColor = new Color(0.0f, 0.8f, 0.0f);</span>
+
+<span class="nc" id="L890">		int x = (int) p.screenPos.x();</span>
+<span class="nc" id="L891">		int y = (int) p.screenPos.y();</span>
+<span class="nc bnc" id="L892" title="All 2 branches missed.">		g.setColor(visible ? colorVisible : colorHidden);</span>
+<span class="nc bnc" id="L893" title="All 2 branches missed.">		if (onHull) {</span>
+<span class="nc" id="L894">			g.fillOval(x - 4, y - 4, 9, 9);</span>
+<span class="nc bnc" id="L895" title="All 2 branches missed.">			if (p.vertex.getName().equals(selectedStation)) {</span>
+<span class="nc" id="L896">				g.setColor(SELECTED_STATION_COLOR);</span>
+			} else {
+<span class="nc bnc" id="L898" title="All 2 branches missed.">				g.setColor(visible ? bulletColor : Color.LIGHT_GRAY);</span>
+			}
+<span class="nc" id="L900">			g.fillOval(x - 2, y - 2, 5, 5);</span>
+
+<span class="nc bnc" id="L902" title="All 2 branches missed.">			if (enableHullVerticesLabels</span>
+<span class="nc bnc" id="L903" title="All 2 branches missed.">					|| p.vertex.getName().equals(selectedStation)) {</span>
+<span class="nc" id="L904">				String s = p.vertex.getName() + &quot; &quot; + p.worldPos.toString3D();</span>
+<span class="nc bnc" id="L905" title="All 2 branches missed.">				g.setColor(visible ? colorVisible : colorHidden);</span>
+<span class="nc bnc" id="L906" title="All 2 branches missed.">				if (p.vertex.getName().equals(selectedStation)) {</span>
+<span class="nc" id="L907">					g.setColor(SELECTED_STATION_COLOR);</span>
+				} else {
+<span class="nc" id="L909">					g.setColor(Color.BLACK);</span>
+				}
+<span class="nc" id="L911">				g.drawString(s, x + 5, y + 5);</span>
+<span class="nc" id="L912">			}</span>
+		} else {
+<span class="nc" id="L914">			g.fillOval(x - 4, y - 4, 9, 9);</span>
+<span class="nc bnc" id="L915" title="All 2 branches missed.">			if (p.vertex.getName().equals(selectedStation)) {</span>
+<span class="nc" id="L916">				g.setColor(SELECTED_STATION_COLOR);</span>
+<span class="nc" id="L917">				String s = p.vertex.getName() + &quot; &quot; + p.worldPos.toString3D();</span>
+<span class="nc bnc" id="L918" title="All 2 branches missed.">				g.setColor(visible ? colorVisible : colorHidden);</span>
+<span class="nc" id="L919">				g.setColor(SELECTED_STATION_COLOR);</span>
+<span class="nc" id="L920">				g.drawString(s, x + 5, y + 5);</span>
+<span class="nc" id="L921">			} else {</span>
+<span class="nc" id="L922">				g.setColor(Color.BLUE);</span>
+			}
+<span class="nc" id="L924">			g.fillOval(x - 2, y - 2, 5, 5);</span>
+		}
+<span class="nc" id="L926">	}</span>
+
+	/**
+	 * Formats a floating point value with the specified number of decimals.
+	 * 
+	 * @param value
+	 *            Value to convert into string.
+	 * @param decimals
+	 *            Number of decimals.
+	 * @return
+	 */
+	protected static String floatString(float value, int decimals) {
+<span class="nc bnc" id="L938" title="All 2 branches missed.">		String res = (value &gt;= 0 ? &quot; &quot; : &quot;&quot;) + String.valueOf(value);</span>
+<span class="nc" id="L939">		int point = res.indexOf(&quot;.&quot;) + 1;</span>
+<span class="nc bnc" id="L940" title="All 2 branches missed.">		if (decimals &lt; 0) {</span>
+<span class="nc" id="L941">			throw new InvalidParameterException(&quot;decimals &lt; 0&quot;);</span>
+<span class="nc bnc" id="L942" title="All 2 branches missed.">		} else if (decimals == 0) {</span>
+<span class="nc" id="L943">			return res.substring(0, point - 2);</span>
+		} else {
+<span class="nc bnc" id="L945" title="All 2 branches missed.">			while (res.length() - point &lt; decimals) {</span>
+<span class="nc" id="L946">				res += &quot;0&quot;;</span>
+			}
+<span class="nc bnc" id="L948" title="All 2 branches missed.">			if (res.length() - point &gt; decimals) {</span>
+<span class="nc" id="L949">				res = res.substring(0, point + decimals);</span>
+			}
+<span class="nc" id="L951">			return res;</span>
+		}
+	}
+
+	/**
+	 * Prints matrix coefficients in a human-readable manner.
+	 * 
+	 * @param g
+	 *            Graphics context.
+	 * @param m
+	 *            Matrix to print.
+	 * @param x
+	 *            Left coordinate.
+	 * @param y
+	 *            Top coordinate.
+	 * @param name
+	 *            Displayed matrix name.
+	 * @return The new Y coordinate after printing text lines.
+	 */
+	protected int printMatrix4(Graphics2D g, Matrix4 m, int x, int y,
+			String name) {
+<span class="nc" id="L972">		int fontSize = g.getFont().getSize();</span>
+<span class="nc" id="L973">		g.drawString(name + &quot; =&quot;, x, y);</span>
+<span class="nc" id="L974">		y += fontSize;</span>
+<span class="nc" id="L975">		g.drawString(&quot;[&quot;, x, y);</span>
+<span class="nc" id="L976">		y += fontSize;</span>
+<span class="nc bnc" id="L977" title="All 2 branches missed.">		for (int r = 0; r &lt; 4; r++) {</span>
+<span class="nc bnc" id="L978" title="All 2 branches missed.">			for (int c = 0; c &lt; 4; c++) {</span>
+<span class="nc" id="L979">				g.drawString(floatString(m.get(r, c), 6), x + 24 + (c * 75), y);</span>
+			}
+<span class="nc" id="L981">			y += fontSize;</span>
+		}
+<span class="nc" id="L983">		g.drawString(&quot;]&quot;, x, y);</span>
+<span class="nc" id="L984">		return y;</span>
+	}
+
+	/**
+	 * Prints useful internal data, such as rotation angles and transform
+	 * matrices.
+	 * 
+	 * @param g
+	 *            Graphics context.
+	 */
+	protected void printViewState(Graphics2D g) {
+<span class="nc" id="L995">		int y = 16;</span>
+<span class="nc" id="L996">		g.setColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L997">		g.setFont(FONT);</span>
+		// FontMetrics fm = g.getFontMetrics();
+<span class="nc" id="L999">		g.drawString(&quot;rotY = &quot; + floatString(rotY, 6) + &quot; rad&quot;, 16, y);</span>
+<span class="nc" id="L1000">		g.drawString(&quot;= &quot; + floatString((float) (rotY * 180 / Math.PI), 6)</span>
+				+ &quot;°&quot;, 110, y);
+<span class="nc" id="L1002">		y += 10;</span>
+<span class="nc" id="L1003">		g.drawString(&quot;rotX = &quot; + floatString(rotX, 6) + &quot; rad&quot;, 16, y);</span>
+<span class="nc" id="L1004">		g.drawString(&quot;= &quot; + floatString((float) (rotX * 180 / Math.PI), 6)</span>
+				+ &quot;°&quot;, 110, y);
+<span class="nc" id="L1006">		y += 16;</span>
+
+<span class="nc" id="L1008">		y = printMatrix4(g, prj.getModelView(), 16, y + 16, &quot;viewMatrix&quot;);</span>
+<span class="nc" id="L1009">		y = printMatrix4(g, prj.getProjection(), 16, y + 16, &quot;projMatrix&quot;);</span>
+<span class="nc" id="L1010">		y = printMatrix4(g, eyeRT, 16, y + 16, &quot;eyeRT&quot;);</span>
+<span class="nc" id="L1011">	}</span>
+
+	/**
+	 * Keeps a value within bounds.
+	 * 
+	 * @param min
+	 *            Minimum value.
+	 * @param value
+	 *            Value to check.
+	 * @param max
+	 *            Maximum value.
+	 * @return The clamped value.
+	 */
+	protected static float clamp(float min, float value, float max) {
+<span class="nc bnc" id="L1025" title="All 2 branches missed.">		if (value &lt; min) {</span>
+<span class="nc" id="L1026">			return min;</span>
+<span class="nc bnc" id="L1027" title="All 2 branches missed.">		} else if (value &gt; max) {</span>
+<span class="nc" id="L1028">			return max;</span>
+		} else {
+<span class="nc" id="L1030">			return value;</span>
+		}
+	}
+
+	/**
+	 * @return The internal ScreenProjector instance.
+	 */
+	public ScreenProjector getScreenProjector() {
+<span class="nc" id="L1038">		return prj;</span>
+	}
+
+	/**
+	 * Projects 3D points onto the screen and repaints the diagram.
+	 */
+	public void updateProjection() {
+<span class="nc" id="L1045">		final Vector4 nx = Vector4.createPoint3D(2.0f, 0.0f, 0.0f);</span>
+<span class="nc" id="L1046">		final Vector4 ny = Vector4.createPoint3D(0.0f, 2.0f, 0.0f);</span>
+<span class="nc" id="L1047">		final Vector4 nz = Vector4.createPoint3D(0.0f, 0.0f, 2.0f);</span>
+<span class="nc" id="L1048">		final Vector4 lx = Vector4.createPoint3D(1.7f, 0.0f, 0.0f);</span>
+<span class="nc" id="L1049">		final Vector4 ly = Vector4.createPoint3D(0.0f, 1.2f, 0.0f);</span>
+<span class="nc" id="L1050">		final Vector4 lz = Vector4.createPoint3D(0.0f, 0.0f, 1.7f);</span>
+
+<span class="nc bnc" id="L1052" title="All 2 branches missed.">		if (zoomFactor &gt; 1.0f) {</span>
+<span class="nc" id="L1053">			rotXdelta /= zoomFactor;</span>
+<span class="nc" id="L1054">			rotYdelta /= zoomFactor;</span>
+		}
+
+		// Keep pitch rotation between ±90°
+<span class="nc" id="L1058">		rotX = clamp((float) Math.toRadians(-89), rotX + rotXdelta,</span>
+<span class="nc" id="L1059">				(float) Math.toRadians(89));</span>
+
+		// Yaw rotation modulo 360°
+<span class="nc" id="L1062">		rotY -= rotYdelta;</span>
+<span class="nc bnc" id="L1063" title="All 2 branches missed.">		if (rotY &lt; 0) {</span>
+<span class="nc" id="L1064">			rotY += (2 * Math.PI);</span>
+		}
+<span class="nc" id="L1066">		rotY %= 2 * Math.PI;</span>
+
+<span class="nc" id="L1068">		rotXdelta = 0;</span>
+<span class="nc" id="L1069">		rotYdelta = 0;</span>
+
+<span class="nc" id="L1071">		Dimension size = getSize();</span>
+<span class="nc bnc" id="L1072" title="All 4 branches missed.">		if (size.width &lt; 32 || size.height &lt; 32) {</span>
+<span class="nc" id="L1073">			return;</span>
+		}
+<span class="nc" id="L1075">		screenW = size.width;</span>
+<span class="nc" id="L1076">		screenH = size.height;</span>
+<span class="nc" id="L1077">		halfW = screenW / 2;</span>
+<span class="nc" id="L1078">		halfH = screenH / 2;</span>
+<span class="nc" id="L1079">		aspect = screenW / screenH;</span>
+<span class="nc" id="L1080">		prj.setScreenSize(size);</span>
+<span class="nc" id="L1081">		prj.updateProjection();</span>
+
+<span class="nc" id="L1083">		Matrix4 mv = prj.getModelView();</span>
+<span class="nc bnc" id="L1084" title="All 2 branches missed.">		eyeRT = Matrix4.createScale(0.95f * (enableCustomZoom ? zoomFactor</span>
+<span class="nc" id="L1085">				: 1.0f));</span>
+<span class="nc" id="L1086">		eyeRT.multSelf(Matrix4.createRotationX(rotX));</span>
+<span class="nc" id="L1087">		eyeRT.multSelf(Matrix4.createRotationY(rotY));</span>
+<span class="nc" id="L1088">		eyeRT.multSelf(Matrix4.createTranslation(-centroid.x(), centroid.y(),</span>
+<span class="nc" id="L1089">				centroid.z()));</span>
+<span class="nc" id="L1090">		Vector4 eyePos = Vector4.createPoint3D(0.0f, 0.0f, 10.0f);</span>
+<span class="nc" id="L1091">		prj.lookAt(eyePos, Vector4.ORIGIN, false);</span>
+<span class="nc" id="L1092">		prj.push(mv.clone());</span>
+<span class="nc" id="L1093">		prj.push(eyeRT.clone());</span>
+<span class="nc" id="L1094">		mv.set(eyeRT.mult(mv));</span>
+
+<span class="nc" id="L1096">		originPrj = prj.project(Vector4.ORIGIN);</span>
+<span class="nc" id="L1097">		axisPrjX = prj.project(nx);</span>
+<span class="nc" id="L1098">		axisPrjY = prj.project(ny);</span>
+<span class="nc" id="L1099">		axisPrjZ = prj.project(nz);</span>
+<span class="nc" id="L1100">		axisLabelX = prj.project(lx);</span>
+<span class="nc" id="L1101">		axisLabelY = prj.project(ly);</span>
+<span class="nc" id="L1102">		axisLabelZ = prj.project(lz);</span>
+<span class="nc" id="L1103">		eyeRT.set(prj.pop());</span>
+
+<span class="nc bnc" id="L1105" title="All 2 branches missed.">		eyeRT.multSelf(Matrix4.createScale((aspect &lt; 1.0f ? aspect : 1.0f)</span>
+				/ maxVertexDistance));
+<span class="nc" id="L1107">		mv.set(eyeRT.mult(prj.pop()));</span>
+
+		// TODO: Project points here instead of inside of paint()
+
+<span class="nc" id="L1111">		forward = mv.getRow(Matrix4.Z_INDEX);</span>
+<span class="nc" id="L1112">		forward.normalize();</span>
+<span class="nc" id="L1113">		splitByVisibility(forward);</span>
+<span class="nc" id="L1114">	}</span>
+
+	public void componentHidden(ComponentEvent evt) {
+<span class="nc" id="L1117">	}</span>
+
+	public void componentMoved(ComponentEvent evt) {
+<span class="nc" id="L1120">	}</span>
+
+	public void componentResized(ComponentEvent evt) {
+<span class="nc" id="L1123">		repaint();</span>
+<span class="nc" id="L1124">	}</span>
+
+	public void componentShown(ComponentEvent evt) {
+<span class="nc" id="L1127">		repaint();</span>
+<span class="nc" id="L1128">	}</span>
+
+	public void mouseClicked(MouseEvent evt) {
+<span class="nc bnc" id="L1131" title="All 2 branches missed.">		if (evt.getButton() == MouseEvent.BUTTON2) {</span>
+			// TODO: Picking
+<span class="nc bnc" id="L1133" title="All 2 branches missed.">		} else if (evt.getButton() == MouseEvent.BUTTON3) {</span>
+<span class="nc" id="L1134">			rightClick(evt);</span>
+		}
+<span class="nc" id="L1136">		repaint();</span>
+<span class="nc" id="L1137">	}</span>
+
+	public void mouseEntered(MouseEvent evt) {
+<span class="nc" id="L1140">	}</span>
+
+	public void mouseExited(MouseEvent evt) {
+<span class="nc" id="L1143">	}</span>
+
+	public void mousePressed(MouseEvent evt) {
+<span class="nc bnc" id="L1146" title="All 3 branches missed.">		switch (evt.getButton()) {</span>
+		case MouseEvent.BUTTON1: {
+<span class="nc" id="L1148">			mouseLeft = true;</span>
+<span class="nc" id="L1149">			break;</span>
+		}
+		case MouseEvent.BUTTON2: {
+<span class="nc" id="L1152">			mouseRight = true;</span>
+			break;
+		}
+		}
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">		if (mouseMode == MouseMode.NONE) {</span>
+			// No action already set for mouse movements, so begin a new action.
+<span class="nc bnc" id="L1158" title="All 2 branches missed.">			if (mouseLeft) {</span>
+<span class="nc" id="L1159">				mouseMode = MouseMode.ROTATE_VIEW;</span>
+<span class="nc bnc" id="L1160" title="All 2 branches missed.">			} else if (mouseRight) {</span>
+<span class="nc" id="L1161">				mouseMode = MouseMode.MOVE_VERTEX;</span>
+			}
+			// This is the starting point for mouse tracking
+<span class="nc" id="L1164">			mouseStart.x = evt.getX();</span>
+<span class="nc" id="L1165">			mouseStart.y = evt.getY();</span>
+<span class="nc" id="L1166">			mouseEnd.x = mouseStart.x;</span>
+<span class="nc" id="L1167">			mouseEnd.y = mouseStart.y;</span>
+<span class="nc" id="L1168">			mouseDelta = new Point(0, 0);</span>
+		} else {
+			// This is the last mouse action, so keep track of it.
+<span class="nc" id="L1171">			mouseEnd.x = evt.getX();</span>
+<span class="nc" id="L1172">			mouseEnd.y = evt.getY();</span>
+<span class="nc" id="L1173">			mouseDelta = new Point(mouseEnd.x - mouseStart.x, mouseEnd.y</span>
+					- mouseStart.y);
+		}
+<span class="nc" id="L1176">		repaint();</span>
+<span class="nc" id="L1177">	}</span>
+
+	public void mouseReleased(MouseEvent evt) {
+<span class="nc bnc" id="L1180" title="All 3 branches missed.">		switch (evt.getButton()) {</span>
+		case MouseEvent.BUTTON1: {
+<span class="nc" id="L1182">			mouseLeft = false;</span>
+<span class="nc" id="L1183">			break;</span>
+		}
+		case MouseEvent.BUTTON2: {
+<span class="nc" id="L1186">			mouseRight = false;</span>
+			break;
+		}
+		}
+<span class="nc bnc" id="L1190" title="All 4 branches missed.">		if (!mouseLeft &amp;&amp; !mouseRight) {</span>
+<span class="nc" id="L1191">			mouseMode = MouseMode.NONE;</span>
+		}
+		// This is the last mouse action, so keep track of it.
+<span class="nc" id="L1194">		mouseEnd.x = evt.getX();</span>
+<span class="nc" id="L1195">		mouseEnd.y = evt.getY();</span>
+<span class="nc" id="L1196">		mouseDelta = new Point(mouseEnd.x - mouseStart.x, mouseEnd.y</span>
+				- mouseStart.y);
+<span class="nc" id="L1198">		repaint();</span>
+<span class="nc" id="L1199">	}</span>
+
+	public void mouseDragged(MouseEvent evt) {
+<span class="nc" id="L1202">		handleMovements(evt);</span>
+<span class="nc" id="L1203">	}</span>
+
+	public void mouseMoved(MouseEvent evt) {
+<span class="nc" id="L1206">		handleMovements(evt);</span>
+<span class="nc" id="L1207">	}</span>
+
+	protected void handleMovements(MouseEvent evt) {
+<span class="nc bnc" id="L1210" title="All 2 branches missed.">		if (mouseMode != MouseMode.NONE) {</span>
+			// This is the last mouse action, so keep track of it.
+<span class="nc" id="L1212">			mouseEnd.x = evt.getX();</span>
+<span class="nc" id="L1213">			mouseEnd.y = evt.getY();</span>
+<span class="nc" id="L1214">			mouseDelta = new Point(mouseEnd.x - mouseStart.x, mouseEnd.y</span>
+					- mouseStart.y);
+<span class="nc" id="L1216">			Dimension screenSize = prj.getScreenSize();</span>
+<span class="nc bnc" id="L1217" title="All 3 branches missed.">			switch (mouseMode) {</span>
+			case ROTATE_VIEW: {
+<span class="nc" id="L1219">				rotYdelta = (float) (mouseDelta.x * (Math.PI / screenSize.width));</span>
+<span class="nc" id="L1220">				rotXdelta = (float) (mouseDelta.y * (Math.PI / screenSize.height));</span>
+<span class="nc" id="L1221">				break;</span>
+			}
+			case MOVE_VERTEX: {
+				// TODO
+<span class="nc" id="L1225">				break;</span>
+			}
+			default: {
+				break;
+			}
+			}
+
+			// Mouse movement was processed, so keep track of a new movement.
+<span class="nc" id="L1233">			mouseStart.x = mouseEnd.x;</span>
+<span class="nc" id="L1234">			mouseStart.y = mouseEnd.y;</span>
+
+<span class="nc" id="L1236">			repaint();</span>
+		}
+<span class="nc" id="L1238">	}</span>
+
+	public void selectStation(String name) {
+<span class="nc" id="L1241">		selectedStation = name;</span>
+<span class="nc" id="L1242">		repaint();</span>
+<span class="nc" id="L1243">	}</span>
+
+	public void mouseWheelMoved(MouseWheelEvent evt) {
+<span class="nc bnc" id="L1246" title="All 2 branches missed.">		if (enableCustomZoom) {</span>
+<span class="nc" id="L1247">			int n = evt.getWheelRotation();</span>
+<span class="nc bnc" id="L1248" title="All 2 branches missed.">			zoomFactor *= ((n &lt; 0) ? (-n * 1.1f) : (n * 0.9f));</span>
+<span class="nc" id="L1249">			repaint();</span>
+		} else {
+			// TODO: Add super signal
+		}
+<span class="nc" id="L1253">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

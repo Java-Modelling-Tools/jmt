@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtOverlapping.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">JmtOverlapping.java</span></div><h1>JmtOverlapping.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jsimgraph.JGraphMod;
+
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Vector;
+
+import jmt.gui.jsimgraph.controller.Mediator;
+
+import org.jgraph.graph.DefaultGraphModel;
+import org.jgraph.graph.DefaultPort;
+import org.jgraph.graph.EdgeView;
+import org.jgraph.graph.GraphConstants;
+import org.jgraph.graph.GraphModel;
+
+/**
+ * &lt;p&gt;Title: JmtOverlapping &lt;/p&gt;
+ * @author Giuseppe De Cicco &amp; Fabio Granara
+ * 		Date: 15-nov-2006
+ * 
+ */
+public class JmtOverlapping {
+
+	private Mediator mediator;
+
+<span class="nc" id="L45">	public JmtOverlapping(Mediator mediator) {</span>
+<span class="nc" id="L46">		this.mediator = mediator;</span>
+<span class="nc" id="L47">	}</span>
+
+	public void avoidOverlappingCell(Object[] cells2) {
+<span class="nc" id="L50">		Object[] listEdges = null;</span>
+<span class="nc" id="L51">		ArrayList&lt;Object&gt; listEdges2 = new ArrayList&lt;Object&gt;();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		for (int i = 0; i &lt; cells2.length; i++) {</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">			if (!(cells2[i] instanceof JmtEdge)) {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">				if (cells2[i] instanceof BlockingRegion) {</span>
+<span class="nc" id="L55">					Object[] tmp = new Object[1];</span>
+<span class="nc" id="L56">					tmp[0] = cells2[i];</span>
+<span class="nc" id="L57">					Object[] children = mediator.getGraph().getDescendants(tmp);</span>
+<span class="nc" id="L58">					boolean passato = false;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">					for (Object element : children) {</span>
+<span class="nc bnc" id="L60" title="All 4 branches missed.">						if (element instanceof JmtCell &amp;&amp; !passato) {</span>
+<span class="nc" id="L61">							passato = true;</span>
+<span class="nc" id="L62">							cells2[i] = element;</span>
+						}
+					}
+				}
+<span class="nc" id="L66">				Object[] listEdgesIn = null;</span>
+<span class="nc" id="L67">				Object[] listEdgesOut = null;</span>
+<span class="nc" id="L68">				GraphModel graphmodel = mediator.getGraph().getModel();</span>
+<span class="nc" id="L69">				listEdgesIn = DefaultGraphModel.getEdges(graphmodel, cells2[i], true);</span>
+<span class="nc" id="L70">				listEdgesOut = DefaultGraphModel.getEdges(graphmodel, cells2[i], false);</span>
+
+<span class="nc bnc" id="L72" title="All 2 branches missed.">				for (int j = 0; j &lt; listEdgesIn.length; j++) {</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">					if (!listEdges2.contains(listEdgesIn[j])) {</span>
+<span class="nc" id="L74">						listEdges2.add(listEdgesIn[j]);</span>
+					}
+				}
+<span class="nc bnc" id="L77" title="All 2 branches missed.">				for (int j = 0; j &lt; listEdgesOut.length; j++) {</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">					if (!listEdges2.contains(listEdgesOut[j])) {</span>
+<span class="nc" id="L79">						listEdges2.add(listEdgesOut[j]);</span>
+					}
+				}
+			}
+		}
+
+<span class="nc" id="L85">		listEdges = listEdges2.toArray();</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		for (Object listEdge : listEdges) {</span>
+<span class="nc" id="L87">			Object[] celle = null;</span>
+<span class="nc" id="L88">			EdgeView edgeView = (EdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(listEdge, false);</span>
+<span class="nc" id="L89">			Rectangle2D rett = edgeView.getBounds();</span>
+<span class="nc" id="L90">			celle = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(rett.getBounds()));</span>
+<span class="nc" id="L91">			ArrayList&lt;Object&gt; celle2 = new ArrayList&lt;Object&gt;();</span>
+<span class="nc" id="L92">			JmtCell sourceOfEdge = (JmtCell) ((DefaultPort) ((JmtEdge) listEdge).getSource()).getParent();</span>
+<span class="nc" id="L93">			JmtCell targetOfEdge = (JmtCell) ((DefaultPort) ((JmtEdge) listEdge).getTarget()).getParent();</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">			for (int j = 0; j &lt; celle.length; j++) {</span>
+<span class="nc bnc" id="L95" title="All 6 branches missed.">				if (celle[j] instanceof JmtCell &amp;&amp; !(celle[j] == sourceOfEdge) &amp;&amp; !(celle[j] == targetOfEdge)) {</span>
+<span class="nc" id="L96">					celle2.add(celle[j]);</span>
+				}
+			}
+
+<span class="nc" id="L100">			Object[] cellsfinal = celle2.toArray();</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			for (Object element : cellsfinal) {</span>
+<span class="nc" id="L102">				Rectangle2D cellBound = GraphConstants.getBounds(((JmtCell) element).getAttributes());</span>
+<span class="nc" id="L103">				EdgeView viewtmp = (EdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(listEdge, false);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">				if (((JmtEdge) listEdge).intersects(viewtmp, cellBound)) {</span>
+//					System.out.println(&quot;JmtOverlapping -&gt; fct avoidOverlappingCell -&gt; IS BEZIER :&quot;+(((JmtEdge) listEdge).getIsBezier()));
+<span class="nc bnc" id="L106" title="All 2 branches missed.">					if  (!(((JmtEdge) listEdge).getIsBezier())) {</span>
+//						System.out.println(&quot;JmtOverlapping -&gt; fct avoidOverlappingCell -&gt; if intersects&quot;);
+<span class="nc" id="L108">						double vertexMinX = (int) cellBound.getMinX();</span>
+<span class="nc" id="L109">						double vertexMinY = (int) cellBound.getMinY();</span>
+<span class="nc" id="L110">						double vertexMaxX = (int) cellBound.getMaxX();</span>
+<span class="nc" id="L111">						double vertexMaxY = (int) cellBound.getMaxY();</span>
+<span class="nc" id="L112">						double vertexHeight = (int) cellBound.getHeight();</span>
+<span class="nc" id="L113">						double vertexWidth = (int) cellBound.getWidth();</span>
+<span class="nc" id="L114">						Rectangle cellBounds = cellBound.getBounds();</span>
+<span class="nc" id="L115">						ArrayList&lt;Point2D&gt; intersectionPoints = ((JmtEdge) listEdge).getIntersectionVertexPoint();</span>
+<span class="nc" id="L116">						boolean upperSideIntersaction = ((JmtEdge) listEdge).getUpperSideIntersaction();</span>
+<span class="nc" id="L117">						boolean lowerSideIntersaction = ((JmtEdge) listEdge).getLowerSideIntersaction();</span>
+<span class="nc" id="L118">						boolean leftSideIntersaction = ((JmtEdge) listEdge).getLeftSideIntersaction();</span>
+<span class="nc" id="L119">						boolean rightSideIntersaction = ((JmtEdge) listEdge).getRightSideIntersaction();</span>
+
+<span class="nc bnc" id="L121" title="All 4 branches missed.">						if (upperSideIntersaction &amp;&amp; lowerSideIntersaction) {</span>
+<span class="nc" id="L122">							Point2D tmp = (intersectionPoints.get(0));</span>
+<span class="nc" id="L123">							int valoreIntermedio = ((int) vertexMaxX - (int) (vertexWidth / 2));</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">							if ((int) tmp.getX() &lt; valoreIntermedio) {</span>
+<span class="nc" id="L125">								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);</span>
+<span class="nc" id="L126">								cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L127">								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+<span class="nc" id="L128">							} else {</span>
+<span class="nc" id="L129">								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);</span>
+<span class="nc" id="L130">								cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L131">								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+							}
+<span class="nc bnc" id="L133" title="All 4 branches missed.">						} else if (leftSideIntersaction &amp;&amp; rightSideIntersaction) {</span>
+<span class="nc" id="L134">							Point2D tmp = (intersectionPoints.get(0));</span>
+<span class="nc" id="L135">							int valoreIntermedio = ((int) vertexMaxY - (int) (vertexHeight / 2));</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">							if ((int) tmp.getY() &lt; valoreIntermedio) {</span>
+<span class="nc" id="L137">								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, true, false, false);</span>
+<span class="nc" id="L138">								cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L139">								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+<span class="nc" id="L140">							} else {</span>
+<span class="nc" id="L141">								Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, true, false, false, false);</span>
+<span class="nc" id="L142">								cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L143">								GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+							}
+<span class="nc bnc" id="L145" title="All 4 branches missed.">						} else if (upperSideIntersaction &amp;&amp; rightSideIntersaction) {</span>
+<span class="nc" id="L146">							Point2D tmp = (intersectionPoints.get(0));</span>
+<span class="nc" id="L147">							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);</span>
+<span class="nc" id="L148">							cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L149">							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+<span class="nc bnc" id="L150" title="All 4 branches missed.">						} else if (upperSideIntersaction &amp;&amp; leftSideIntersaction) {</span>
+<span class="nc" id="L151">							Point2D tmp = (intersectionPoints.get(0));</span>
+<span class="nc" id="L152">							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);</span>
+<span class="nc" id="L153">							cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L154">							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+<span class="nc bnc" id="L155" title="All 4 branches missed.">						} else if (lowerSideIntersaction &amp;&amp; rightSideIntersaction) {</span>
+<span class="nc" id="L156">							Point2D tmp = (intersectionPoints.get(1));</span>
+<span class="nc" id="L157">							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, false, true);</span>
+<span class="nc" id="L158">							cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L159">							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">						} else if (lowerSideIntersaction &amp;&amp; leftSideIntersaction) {</span>
+<span class="nc" id="L161">							Point2D tmp = (intersectionPoints.get(0));</span>
+<span class="nc" id="L162">							Point newPosition = findFreePosition((JmtEdge) listEdge, (JmtCell) element, cellBound, tmp, false, false, true, false);</span>
+<span class="nc" id="L163">							cellBounds.setLocation(newPosition);</span>
+<span class="nc" id="L164">							GraphConstants.setBounds(((JmtCell) element).getAttributes(), cellBounds);</span>
+						}
+					}
+				}
+			}
+		}
+<span class="nc" id="L170">	}</span>
+
+	public Point findFreePosition(JmtEdge edge, JmtCell vertex, Rectangle2D cellBound, Point2D tmp, boolean up, boolean down, boolean right, boolean left) {
+<span class="nc" id="L173">		double vertexMinX = (int) cellBound.getMinX();</span>
+<span class="nc" id="L174">		double vertexMinY = (int) cellBound.getMinY();</span>
+<span class="nc" id="L175">		double vertexMaxX = (int) cellBound.getMaxX();</span>
+<span class="nc" id="L176">		double vertexMaxY = (int) cellBound.getMaxY();</span>
+<span class="nc" id="L177">		double vertexHeight = (int) cellBound.getHeight();</span>
+<span class="nc" id="L178">		double vertexWidth = (int) cellBound.getWidth();</span>
+<span class="nc" id="L179">		Rectangle cellBounds = cellBound.getBounds();</span>
+<span class="nc" id="L180">		Point pointBack = null;</span>
+
+<span class="nc" id="L182">		Object[] latiIn = (DefaultGraphModel.getIncomingEdges(mediator.getGraph().getModel(), vertex));</span>
+<span class="nc" id="L183">		Object[] latiOut = (DefaultGraphModel.getOutgoingEdges(mediator.getGraph().getModel(), vertex));</span>
+<span class="nc" id="L184">		Vector&lt;Object&gt; handledEdges = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		if (latiIn.length &gt; 0) {</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">			for (Object element : latiIn) {</span>
+<span class="nc" id="L187">				handledEdges.add(element);</span>
+			}
+		}
+<span class="nc bnc" id="L190" title="All 2 branches missed.">		if (latiOut.length &gt; 0) {</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			for (Object element : latiOut) {</span>
+<span class="nc" id="L192">				handledEdges.add(element);</span>
+			}
+		}
+
+<span class="nc" id="L196">		Rectangle newRettDown = new Rectangle((int) vertexMinX, ((int) (tmp.getY() + 5)), (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L197">		Rectangle newRettRight = new Rectangle((int) (tmp.getX() + 5), (int) vertexMinY, (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L198">		int daScalare2 = (int) vertexMaxY - (int) tmp.getY();</span>
+<span class="nc" id="L199">		int pointYToMove2 = (int) vertexMinY - daScalare2;</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">		if (pointYToMove2 &lt; 0) {</span>
+<span class="nc" id="L201">			pointYToMove2 = (int) (tmp.getY() + 4);</span>
+		}
+<span class="nc" id="L203">		Rectangle newRettUp = new Rectangle((int) vertexMinX, pointYToMove2 - 10, (int) vertexWidth, (int) vertexHeight);</span>
+
+<span class="nc" id="L205">		int pointXToMove3 = (int) (vertexMaxX - tmp.getX());</span>
+<span class="nc" id="L206">		int point2XToMove3 = (int) (vertexMinX - pointXToMove3) - 12;</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		if (point2XToMove3 &lt; 0) {</span>
+<span class="nc" id="L208">			pointXToMove3 = (int) (tmp.getX() + 12);</span>
+		}
+<span class="nc" id="L210">		Rectangle newRettLeft = new Rectangle(point2XToMove3, (int) vertexMinY, (int) vertexWidth, (int) vertexHeight);</span>
+
+		//Begin if to move the vertex down
+<span class="nc bnc" id="L213" title="All 8 branches missed.">		if (down &amp;&amp; !up &amp;&amp; !right &amp;&amp; !left) {</span>
+            //System.out.println(&quot;JmtOverlapping findFreePosition Begin if to move the vertex down&quot;);
+
+<span class="nc" id="L216">			int pointYToMove = (int) (tmp.getY() + 3);</span>
+<span class="nc" id="L217">			Rectangle newRett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);</span>
+            //System.out.println(&quot;JmtOverlapping findFreePosition center newRett y:&quot;+newRett.getMinY());
+<span class="nc" id="L219">			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));</span>
+<span class="nc" id="L220">			Vector&lt;Object&gt; celle = new Vector&lt;Object&gt;();</span>
+            //System.out.println(&quot;JmtOverlapping findFreePosition celletmp.length&quot;+celletmp.length);
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp.length; x++) {</span>
+<span class="nc bnc" id="L223" title="All 6 branches missed.">				if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+                   // System.out.println(&quot;JmtOverlapping findFreePosition -&gt;&gt;&gt; !(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)&quot;);
+<span class="nc bnc" id="L225" title="All 2 branches missed.">					if (celletmp[x] instanceof JmtEdge) {</span>
+<span class="nc" id="L226">						JmtCell source = (JmtCell) ((DefaultPort) ((JmtEdge) celletmp[x]).getSource()).getParent();</span>
+<span class="nc" id="L227">						JmtCell target = (JmtCell) ((DefaultPort) ((JmtEdge) celletmp[x]).getTarget()).getParent();</span>
+<span class="nc" id="L228">						JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);</span>
+<span class="nc bnc" id="L229" title="All 6 branches missed.">						if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp[x])))</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">								&amp;&amp; ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {</span>
+<span class="nc" id="L231">							celle.add(celletmp[x]);</span>
+						}
+<span class="nc" id="L233">					} else {</span>
+<span class="nc" id="L234">						celle.add(celletmp[x]);</span>
+					}
+				}
+			}
+
+<span class="nc" id="L239">			Object[] celletmp3 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRettUp));</span>
+<span class="nc" id="L240">			Vector&lt;Object&gt; celle2 = new Vector&lt;Object&gt;();</span>
+          //  System.out.println(&quot;JmtOverlapping findFreePosition celletmp3.length&quot;+celletmp3.length);
+<span class="nc bnc" id="L242" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp3.length; x++) {</span>
+<span class="nc bnc" id="L243" title="All 6 branches missed.">				if (!(celletmp3[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp3[x])) &amp;&amp; !(celletmp3[x] == edge)) {</span>
+                  //  System.out.println(&quot;JmtOverlapping findFreePosition -&gt;&gt;&gt; !(celletmp3[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp3[x])) &amp;&amp; !(celletmp3[x] == edge)&quot;);
+<span class="nc bnc" id="L245" title="All 2 branches missed.">					if (celletmp3[x] instanceof JmtEdge) {</span>
+                      //  System.out.println(&quot;JmtOverlapping findFreePosition instanceof JmtEdge isbezier&quot;+ ((JmtEdge) celletmp3[x]).getIsBezier());
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                        if (!((JmtEdge) celletmp3[x]).getIsBezier()){</span>
+<span class="nc" id="L248">                            JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);</span>
+<span class="nc bnc" id="L249" title="All 6 branches missed.">                            if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp3[x])))</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                                    &amp;&amp; ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettUp)) {</span>
+<span class="nc" id="L251">                                celle2.add(celletmp3[x]);</span>
+                            }
+<span class="nc" id="L253">                        }</span>
+					} else {
+<span class="nc" id="L255">						celle2.add(celletmp3[x]);</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L260" title="All 4 branches missed.">			if (celle.size() &gt; 0 &amp;&amp; celle2.size() == 0) {</span>
+               // System.out.println(&quot;JmtOverlapping findFreePosition (celle.size() &gt; 0 &amp;&amp; celle2.size() == 0)&quot;);
+<span class="nc bnc" id="L262" title="All 4 branches missed.">				if (((int) newRettUp.getMinX() &lt; 20) || ((int) newRettUp.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L263">                    System.out.println(&quot;JmtOverlapping findFreePosition (int) cellBound.getMinY() : &quot;+(int) cellBound.getMinY());</span>
+<span class="nc" id="L264">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+               // System.out.println(&quot;JmtOverlapping findFreePosition newRettUp.getMinY() : &quot;+(int) newRettUp.getMinY());
+<span class="nc" id="L267">				return new Point((int) newRettUp.getMinX(), (int) newRettUp.getMinY());</span>
+
+
+
+<span class="nc bnc" id="L271" title="All 2 branches missed.">			} else if (celle.size() == 0) {</span>
+                //System.out.println(&quot;JmtOverlapping findFreePosition (celle.size() == 0)&quot;);
+                //System.out.println(&quot;JmtOverlapping findFreePosition (&quot;+celle.size()+&quot; == 0 &amp;&amp; celle2: &quot;+celle2.size());
+<span class="nc bnc" id="L274" title="All 4 branches missed.">				if (((int) newRettDown.getMinX() &lt; 20) || ((int) newRettDown.getMinY() &lt; 0)) {</span>
+                    //System.out.println(&quot;JmtOverlapping findFreePosition (int) cellBound.getMinY() : &quot;+(int) cellBound.getMinY());
+<span class="nc" id="L276">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+               // System.out.println(&quot;JmtOverlapping findFreePosition newRettDown.getMinY() : &quot;+(int) newRettDown.getMinY());
+<span class="nc" id="L279">				return new Point((int) newRettDown.getMinX(), (int) newRettDown.getMinY());</span>
+
+
+<span class="nc bnc" id="L282" title="All 4 branches missed.">			} else if (celle.size() &gt; 0 &amp;&amp; celle2.size() &gt; 0) {</span>
+                //System.out.println(&quot;JmtOverlapping findFreePosition (celle.size() &gt; 0 &amp;&amp; celle2.size() &gt; 0)&quot;);
+                //System.out.println(&quot;JmtOverlapping findFreePosition (&quot;+celle.size()+&quot; &gt; 0 &amp;&amp; &quot;+celle2.size()+&quot; &gt; 0)&quot;);
+               // System.out.println(&quot;JmtOverlapping findFreePosition (celle.size() &gt; 0 &amp;&amp; celle2.size() &gt; 0)&quot;);
+<span class="nc" id="L286">                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+			}
+
+            //System.out.println(&quot;JmtOverlapping findFreePosition celle.size() : &quot;+celle.size());
+<span class="nc bnc" id="L290" title="All 2 branches missed.">			while (celle.size() &gt; 0) {</span>
+<span class="nc" id="L291">				pointYToMove = pointYToMove + 59;</span>
+<span class="nc" id="L292">				Rectangle new2rett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L293">				Object[] celletmp2 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(new2rett));</span>
+<span class="nc" id="L294">				celle = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">				for (int x = 0; x &lt; celletmp2.length; x++) {</span>
+<span class="nc bnc" id="L296" title="All 6 branches missed.">					if (!(celletmp2[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp2[x] == edge)) {</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">						if (celletmp2[x] instanceof JmtEdge) {</span>
+<span class="nc" id="L298">							JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp2[x])), false);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">							if (((JmtEdge) celletmp2[x]).intersects(viewtmp, new2rett)) {</span>
+<span class="nc" id="L300">								celle.add(celletmp2[x]);</span>
+							}
+<span class="nc" id="L302">						} else {</span>
+<span class="nc" id="L303">							celle.add(celletmp2[x]);</span>
+						}
+					}
+				}
+<span class="nc" id="L307">			}</span>
+            //System.out.println(&quot;JmtOverlapping findFreePosition pointYToMove : &quot;+ pointYToMove);
+<span class="nc" id="L309">			pointBack = new Point((int) vertexMinX, pointYToMove);</span>
+            //System.out.println(&quot;JmtOverlapping findFreePosition PointBack y : &quot;+pointBack.getY());
+
+<span class="nc" id="L312">		} //End if to move the vertex down</span>
+
+		//Begin if to move the vertex up
+<span class="nc bnc" id="L315" title="All 8 branches missed.">		else if (!down &amp;&amp; up &amp;&amp; !right &amp;&amp; !left) {</span>
+<span class="nc" id="L316">			int daScalare = (int) vertexMaxY - (int) tmp.getY();</span>
+<span class="nc" id="L317">			int pointYToMove = (int) vertexMinY - daScalare;</span>
+<span class="nc" id="L318">			Rectangle newRett = new Rectangle((int) vertexMinX, pointYToMove, (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L319">			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));</span>
+<span class="nc" id="L320">			Vector&lt;Object&gt; celle = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp.length; x++) {</span>
+<span class="nc bnc" id="L322" title="All 6 branches missed.">				if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+<span class="nc" id="L323">					Object[] listEdgesIn = null;</span>
+<span class="nc" id="L324">					Object[] listEdgesOut = null;</span>
+<span class="nc" id="L325">					GraphModel graphmodel = mediator.getGraph().getModel();</span>
+<span class="nc" id="L326">					listEdgesIn = DefaultGraphModel.getEdges(graphmodel, vertex, true);</span>
+<span class="nc" id="L327">					listEdgesOut = DefaultGraphModel.getEdges(graphmodel, vertex, false);</span>
+<span class="nc" id="L328">					boolean edgeIn = false;</span>
+<span class="nc" id="L329">					boolean edgeOut = false;</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">					for (Object element : listEdgesIn) {</span>
+<span class="nc bnc" id="L331" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L332">							edgeIn = true;</span>
+						}
+					}
+<span class="nc bnc" id="L335" title="All 2 branches missed.">					for (Object element : listEdgesOut) {</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L337">							edgeIn = true;</span>
+						}
+					}
+<span class="nc bnc" id="L340" title="All 8 branches missed.">					if ((listEdgesIn.length == 0 &amp;&amp; listEdgesOut.length == 0) || (!edgeIn &amp;&amp; !edgeOut)) {</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">						if (celletmp[x] instanceof JmtEdge) {</span>
+<span class="nc" id="L342">							JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">							if (((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {</span>
+<span class="nc" id="L344">								celle.add(celletmp[x]);</span>
+							}
+<span class="nc" id="L346">						} else {</span>
+<span class="nc" id="L347">							celle.add(celletmp[x]);</span>
+						}
+					}
+				}
+			}
+
+<span class="nc" id="L353">			Object[] celletmp3 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRettDown));</span>
+<span class="nc" id="L354">			Vector&lt;Object&gt; celle2 = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp3.length; x++) {</span>
+<span class="nc bnc" id="L356" title="All 6 branches missed.">				if (!(celletmp3[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp3[x])) &amp;&amp; !(celletmp3[x] == edge)) {</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">					if (celletmp3[x] instanceof JmtEdge) {</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                        if (!((JmtEdge) celletmp3[x]).getIsBezier()) {</span>
+<span class="nc" id="L359">                            JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);</span>
+<span class="nc bnc" id="L360" title="All 6 branches missed.">                            if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp3[x])))</span>
+<span class="nc bnc" id="L361" title="All 2 branches missed.">                                    &amp;&amp; ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettDown)) {</span>
+<span class="nc" id="L362">                                celle2.add(celletmp3[x]);</span>
+                            }
+<span class="nc" id="L364">                        }</span>
+					} else {
+<span class="nc" id="L366">						celle2.add(celletmp3[x]);</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L371" title="All 4 branches missed.">			if (celle.size() &gt; 0 &amp;&amp; celle2.size() == 0) {</span>
+<span class="nc bnc" id="L372" title="All 4 branches missed.">				if (((int) newRettDown.getMinX() &lt; 20) || ((int) newRettDown.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L373">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L375">				return new Point((int) newRettDown.getMinX(), (int) newRettDown.getMinY());</span>
+
+
+<span class="nc bnc" id="L378" title="All 2 branches missed.">			} else if (celle.size() == 0) {</span>
+<span class="nc bnc" id="L379" title="All 4 branches missed.">				if (((int) newRettUp.getMinX() &lt; 20) || ((int) newRettUp.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L380">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L382">				return new Point((int) newRettUp.getMinX(), (int) newRettUp.getMinY());</span>
+
+
+<span class="nc bnc" id="L385" title="All 4 branches missed.">			} else if (celle.size() &gt; 0 &amp;&amp; celle2.size() &gt; 0) {</span>
+<span class="nc" id="L386">                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+			}
+<span class="nc" id="L388">			pointBack = new Point((int) vertexMinX, pointYToMove);</span>
+
+<span class="nc" id="L390">		} //End if to move the vertex up</span>
+
+		//Begin if to move the vertex right
+<span class="nc bnc" id="L393" title="All 8 branches missed.">		else if (!down &amp;&amp; !up &amp;&amp; !left &amp;&amp; right) {</span>
+<span class="nc" id="L394">			int pointXToMove = (int) (tmp.getX() + 12);</span>
+<span class="nc" id="L395">			Rectangle newRett = new Rectangle(pointXToMove, (int) vertexMinY, (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L396">			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));</span>
+<span class="nc" id="L397">			Vector&lt;Object&gt; celle = new Vector&lt;Object&gt;();</span>
+
+<span class="nc bnc" id="L399" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp.length; x++) {</span>
+<span class="nc bnc" id="L400" title="All 6 branches missed.">				if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+<span class="nc" id="L401">					Object[] listEdgesIn = null;</span>
+<span class="nc" id="L402">					Object[] listEdgesOut = null;</span>
+<span class="nc" id="L403">					GraphModel graphmodel = mediator.getGraph().getModel();</span>
+<span class="nc" id="L404">					listEdgesIn = DefaultGraphModel.getEdges(graphmodel, vertex, true);</span>
+<span class="nc" id="L405">					listEdgesOut = DefaultGraphModel.getEdges(graphmodel, vertex, false);</span>
+<span class="nc" id="L406">					boolean edgeIn = false;</span>
+<span class="nc" id="L407">					boolean edgeOut = false;</span>
+
+<span class="nc bnc" id="L409" title="All 2 branches missed.">					for (Object element : listEdgesIn) {</span>
+<span class="nc bnc" id="L410" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L411">							edgeIn = true;</span>
+						}
+					}
+<span class="nc bnc" id="L414" title="All 2 branches missed.">					for (Object element : listEdgesOut) {</span>
+<span class="nc bnc" id="L415" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L416">							edgeIn = true;</span>
+						}
+					}
+
+<span class="nc bnc" id="L420" title="All 8 branches missed.">					if ((listEdgesIn.length == 0 &amp;&amp; listEdgesOut.length == 0) || (!edgeIn &amp;&amp; !edgeOut)) {</span>
+<span class="nc bnc" id="L421" title="All 6 branches missed.">						if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">							if (celletmp[x] instanceof JmtEdge) {</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">								if (!(((JmtEdge) celletmp[x]).getIsBezier())) {</span>
+<span class="nc" id="L424">									JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);</span>
+<span class="nc bnc" id="L425" title="All 6 branches missed.">									if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp[x])))</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">											&amp;&amp; ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {</span>
+<span class="nc" id="L427">										celle.add(celletmp[x]);</span>
+									}
+<span class="nc" id="L429">								}</span>
+							} else {
+<span class="nc" id="L431">								celle.add(celletmp[x]);</span>
+							}
+						}
+					}
+				}
+			}
+
+<span class="nc" id="L438">			Object[] celletmp3 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRettLeft));</span>
+<span class="nc" id="L439">			Vector&lt;Object&gt; celle3 = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp3.length; x++) {</span>
+<span class="nc bnc" id="L441" title="All 6 branches missed.">				if (!(celletmp3[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp3[x])) &amp;&amp; !(celletmp3[x] == edge)) {</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">					if (celletmp3[x] instanceof JmtEdge) {</span>
+<span class="nc" id="L443">						JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp3[x])), false);</span>
+<span class="nc bnc" id="L444" title="All 6 branches missed.">						if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp3[x])))</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">								&amp;&amp; ((JmtEdge) celletmp3[x]).intersects(viewtmp, newRettLeft)) {</span>
+<span class="nc" id="L446">							celle3.add(celletmp3[x]);</span>
+						}
+<span class="nc" id="L448">					} else {</span>
+<span class="nc" id="L449">						celle3.add(celletmp3[x]);</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L454" title="All 4 branches missed.">			if (celle.size() &gt; 0 &amp;&amp; celle3.size() == 0) {</span>
+<span class="nc bnc" id="L455" title="All 4 branches missed.">				if (((int) cellBound.getMinX() &lt; 20) || ((int) cellBound.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L456">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L458">				return new Point((int) newRettLeft.getMinX(), (int) newRettLeft.getMinY());</span>
+
+
+<span class="nc bnc" id="L461" title="All 2 branches missed.">			} else if (celle.size() == 0) {</span>
+<span class="nc bnc" id="L462" title="All 4 branches missed.">				if (((int) cellBound.getMinX() &lt; 20) || ((int) cellBound.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L463">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L465">				return new Point((int) newRett.getMinX(), (int) newRett.getMinY());</span>
+
+
+<span class="nc bnc" id="L468" title="All 4 branches missed.">			} else if (celle.size() &gt; 0 &amp;&amp; celle3.size() &gt; 0) {</span>
+<span class="nc" id="L469">                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+			}
+<span class="nc" id="L471">			pointBack = new Point(pointXToMove, (int) vertexMinY);</span>
+<span class="nc" id="L472">		} //End if to move the vertex right</span>
+
+		//Begin if to move the vertex left
+<span class="nc bnc" id="L475" title="All 8 branches missed.">		else if (!down &amp;&amp; !up &amp;&amp; left &amp;&amp; !right) {</span>
+<span class="nc" id="L476">			int pointXToMove = (int) (vertexMaxX - tmp.getX());</span>
+<span class="nc" id="L477">			int point2XToMove = (int) (vertexMinX - pointXToMove) - 12;</span>
+<span class="nc bnc" id="L478" title="All 2 branches missed.">			if (point2XToMove &lt; 0) {</span>
+<span class="nc" id="L479">				point2XToMove = (int) (tmp.getX() + 12);</span>
+			}
+<span class="nc" id="L481">			Rectangle newRett = new Rectangle(point2XToMove, (int) vertexMinY, (int) vertexWidth, (int) vertexHeight);</span>
+<span class="nc" id="L482">			Object[] celletmp = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRett));</span>
+<span class="nc" id="L483">			Vector&lt;Object&gt; celle = new Vector&lt;Object&gt;();</span>
+
+<span class="nc bnc" id="L485" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp.length; x++) {</span>
+<span class="nc bnc" id="L486" title="All 6 branches missed.">				if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+<span class="nc" id="L487">					Object[] listEdgesIn = null;</span>
+<span class="nc" id="L488">					Object[] listEdgesOut = null;</span>
+<span class="nc" id="L489">					GraphModel graphmodel = mediator.getGraph().getModel();</span>
+<span class="nc" id="L490">					listEdgesIn = DefaultGraphModel.getEdges(graphmodel, vertex, true);</span>
+<span class="nc" id="L491">					listEdgesOut = DefaultGraphModel.getEdges(graphmodel, vertex, false);</span>
+<span class="nc" id="L492">					boolean edgeIn = false;</span>
+<span class="nc" id="L493">					boolean edgeOut = false;</span>
+
+<span class="nc bnc" id="L495" title="All 2 branches missed.">					for (Object element : listEdgesIn) {</span>
+<span class="nc bnc" id="L496" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L497">							edgeIn = true;</span>
+						}
+					}
+<span class="nc bnc" id="L500" title="All 2 branches missed.">					for (Object element : listEdgesOut) {</span>
+<span class="nc bnc" id="L501" title="All 4 branches missed.">						if (celletmp[x] instanceof JmtEdge &amp;&amp; element.equals(celletmp[x])) {</span>
+<span class="nc" id="L502">							edgeIn = true;</span>
+						}
+					}
+
+<span class="nc bnc" id="L506" title="All 8 branches missed.">					if ((listEdgesIn.length == 0 &amp;&amp; listEdgesOut.length == 0) || (!edgeIn &amp;&amp; !edgeOut)) {</span>
+<span class="nc bnc" id="L507" title="All 6 branches missed.">						if (!(celletmp[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp[x])) &amp;&amp; !(celletmp[x] == edge)) {</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">							if (celletmp[x] instanceof JmtEdge) {</span>
+<span class="nc bnc" id="L509" title="All 2 branches missed.">                                if ( !(((JmtEdge) celletmp[x]).getIsBezier()) ) {</span>
+<span class="nc" id="L510">									JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp[x])), false);</span>
+<span class="nc bnc" id="L511" title="All 6 branches missed.">									if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp[x])))</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">											&amp;&amp; ((JmtEdge) celletmp[x]).intersects(viewtmp, newRett)) {</span>
+<span class="nc" id="L513">										celle.add(celletmp[x]);</span>
+									}
+<span class="nc" id="L515">								}</span>
+							} else {
+<span class="nc" id="L517">								celle.add(celletmp[x]);</span>
+							}
+						}
+					}
+				}
+			}
+
+<span class="nc" id="L524">			Object[] celletmp4 = (mediator.getGraph()).getDescendants(mediator.getGraph().getRoots(newRettRight));</span>
+<span class="nc" id="L525">			Vector&lt;Object&gt; celle4 = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">			for (int x = 0; x &lt; celletmp4.length; x++) {</span>
+<span class="nc bnc" id="L527" title="All 6 branches missed.">				if (!(celletmp4[x] == vertex) &amp;&amp; !((vertex.getChildren()).contains(celletmp4[x])) &amp;&amp; !(celletmp4[x] == edge)) {</span>
+<span class="nc bnc" id="L528" title="All 2 branches missed.">					if (celletmp4[x] instanceof JmtEdge) {</span>
+<span class="nc" id="L529">						JmtEdgeView viewtmp = (JmtEdgeView) (mediator.getGraph().getGraphLayoutCache()).getMapping(((celletmp4[x])), false);</span>
+<span class="nc bnc" id="L530" title="All 6 branches missed.">						if (((handledEdges.size() == 0) || (handledEdges.size() &gt; 0 &amp;&amp; !handledEdges.contains(celletmp4[x])))</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">								&amp;&amp; ((JmtEdge) celletmp4[x]).intersects(viewtmp, newRettRight)) {</span>
+<span class="nc" id="L532">							celle4.add(celletmp4[x]);</span>
+						}
+<span class="nc" id="L534">					} else {</span>
+<span class="nc" id="L535">						celle4.add(celletmp4[x]);</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L540" title="All 4 branches missed.">			if (celle.size() &gt; 0 &amp;&amp; celle4.size() == 0) {</span>
+<span class="nc bnc" id="L541" title="All 4 branches missed.">				if (((int) newRettRight.getMinX() &lt; 20) || ((int) newRettRight.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L542">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L544">				return new Point((int) newRettRight.getMinX(), (int) newRettRight.getMinY());</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">			} else if (celle.size() == 0) {</span>
+<span class="nc bnc" id="L546" title="All 4 branches missed.">				if (((int) newRett.getMinX() &lt; 20) || ((int) newRett.getMinY() &lt; 0)) {</span>
+<span class="nc" id="L547">					return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+				}
+<span class="nc" id="L549">				return new Point((int) newRett.getMinX(), (int) newRett.getMinY());</span>
+<span class="nc bnc" id="L550" title="All 4 branches missed.">			} else if (celle.size() &gt; 0 &amp;&amp; celle4.size() &gt; 0) {</span>
+<span class="nc" id="L551">                return new Point((int) cellBound.getMinX(), (int) cellBound.getMinY());</span>
+			}
+
+<span class="nc" id="L554">			pointBack = new Point(point2XToMove, (int) vertexMinY);</span>
+		} //End if to move the vertex left
+
+<span class="nc" id="L557">		return pointBack;</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

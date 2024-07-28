@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WeightedMeanVar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">WeightedMeanVar.java</span></div><h1>WeightedMeanVar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.math;
+
+/**
+ *
+ * @author  Stefano Omini
+ */
+public class WeightedMeanVar {
+
+	protected double mean;//mean of all data ( E[x] )
+	protected double var;//variance of data
+
+	protected double max;//the greatest sample of all data inserted
+	protected double min;//the smallest sample of all data inserted
+
+	protected double expectedValueX2; // E[x^2]
+	protected double sumWeights;//sum of all weights
+	protected double sumSamples;//sum of all samples
+
+	/** Creates a new instance of SampleMeanVar */
+<span class="nc" id="L38">	public WeightedMeanVar() {</span>
+<span class="nc" id="L39">		mean = 0;</span>
+<span class="nc" id="L40">		var = 0;</span>
+
+<span class="nc" id="L42">		expectedValueX2 = 0;</span>
+
+<span class="nc" id="L44">		max = 0;</span>
+<span class="nc" id="L45">		min = 0;</span>
+
+<span class="nc" id="L47">		sumWeights = 0;</span>
+<span class="nc" id="L48">		sumSamples = 0;</span>
+<span class="nc" id="L49">	}</span>
+
+	/** Creates a new instance of SampleMeanVar */
+	public void initialize() {
+<span class="nc" id="L53">		mean = 0;</span>
+<span class="nc" id="L54">		var = 0;</span>
+
+<span class="nc" id="L56">		expectedValueX2 = 0;</span>
+
+<span class="nc" id="L58">		max = 0;</span>
+<span class="nc" id="L59">		min = 0;</span>
+
+<span class="nc" id="L61">		sumWeights = 0;</span>
+<span class="nc" id="L62">		sumSamples = 0;</span>
+<span class="nc" id="L63">	}</span>
+
+	/** Creates a new instance of SampleMeanVar calculating the parameters with
+	 * the initializing data sequence
+	 *  @param data the initial data sequence;
+	 */
+<span class="nc" id="L69">	public WeightedMeanVar(double[] data, double[] weight) {</span>
+<span class="nc" id="L70">		mean = 0;</span>
+<span class="nc" id="L71">		var = 0;</span>
+<span class="nc" id="L72">		expectedValueX2 = 0;</span>
+<span class="nc" id="L73">		max = 0;</span>
+<span class="nc" id="L74">		min = 0;</span>
+
+<span class="nc" id="L76">		sumWeights = 0;</span>
+<span class="nc" id="L77">		sumSamples = 0;</span>
+
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L80">			putNewSample(data[i], weight[i]);</span>
+		}
+<span class="nc" id="L82">	}</span>
+
+	/** Creates a new instance of SampleMeanVar calculating the parameters with
+	 * the initializing data sequence
+	 *  @param data the initial data sequence;
+	 */
+	public void initialize(double[] data, double[] weight) {
+
+<span class="nc" id="L90">		mean = 0;</span>
+<span class="nc" id="L91">		var = 0;</span>
+<span class="nc" id="L92">		max = 0;</span>
+<span class="nc" id="L93">		min = 0;</span>
+<span class="nc" id="L94">		expectedValueX2 = 0;</span>
+
+<span class="nc" id="L96">		sumWeights = 0;</span>
+<span class="nc" id="L97">		sumSamples = 0;</span>
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="nc" id="L100">			putNewSample(data[i], weight[i]);</span>
+		}
+<span class="nc" id="L102">	}</span>
+
+	/** update the sample mean &amp; variance with the new value it uses stable
+	 *  algorithms
+	 *  @param  newValue
+	 */
+	public void putNewSample(double newValue, double newWeight) {
+
+		// computes the maximum and the minimum value of the sequence
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		if (sumWeights == 0) {</span>
+			//it is the first value
+<span class="nc" id="L113">			max = newValue;</span>
+<span class="nc" id="L114">			min = newValue;</span>
+		} else {
+<span class="nc" id="L116">			max = Math.max(max, newValue);</span>
+<span class="nc" id="L117">			min = Math.min(min, newValue);</span>
+		}
+
+		//computes mean and var
+<span class="nc" id="L121">		calcMeanAndVar(newValue, newWeight);</span>
+
+<span class="nc" id="L123">	}</span>
+
+	/** computes the new sample variance using a stable algorithm
+	 *  it also computes the mean with the stable algorithm.
+	 *  @param newValue the new element to be added to the sequence
+	 */
+	protected void calcMeanAndVar(double newValue, double newWeight) {
+
+		//double oldMean = mean;
+		//double oldVar = var;
+<span class="nc" id="L133">		double oldSumWeights = sumWeights;</span>
+<span class="nc" id="L134">		double oldExpectedX2 = expectedValueX2;</span>
+
+<span class="nc" id="L136">		sumSamples += newValue * newWeight;</span>
+<span class="nc" id="L137">		sumWeights += newWeight;</span>
+
+		//new E[x^2]
+<span class="nc" id="L140">		expectedValueX2 = (oldExpectedX2 * oldSumWeights + newWeight * Math.pow(newValue, 2)) / sumWeights;</span>
+
+		//new E[x]
+<span class="nc" id="L143">		mean = sumSamples / sumWeights;</span>
+
+		//new var[x] (computed in this way: var[x] = E[x^2] - E[x]^2
+
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		if (oldSumWeights != 0) {</span>
+<span class="nc" id="L148">			var = Math.abs(expectedValueX2 - Math.pow(mean, 2));</span>
+		} else {
+			//it is the first sample, var = 0
+<span class="nc" id="L151">			var = 0;</span>
+		}
+<span class="nc" id="L153">	}</span>
+
+	/** get the sample mean
+	 *  @return the actual sample mean
+	 */
+	public double getMean() {
+<span class="nc" id="L159">		return mean;</span>
+	}
+
+	/** get the sample variance
+	 *  @return the actual sample variance
+	 */
+	public double getVar() {
+<span class="nc" id="L166">		return var;</span>
+	}
+
+	/** get the greatest value
+	 *  @return the actual max value
+	 */
+	public double getMax() {
+<span class="nc" id="L173">		return max;</span>
+	}
+
+	/** get the smallest value
+	 *  @return the actual min value
+	 */
+	public double getMin() {
+<span class="nc" id="L180">		return min;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

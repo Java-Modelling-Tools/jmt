@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BernoulliVacationStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.VacationStrategies</a> &gt; <span class="el_source">BernoulliVacationStrategy.java</span></div><h1>BernoulliVacationStrategy.java</h1><pre class="source lang-java linenums">package jmt.engine.NetStrategies.VacationStrategies;
+
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.VacationStrategy;
+import jmt.engine.random.Distribution;
+import jmt.engine.random.Parameter;
+import jmt.engine.random.engine.MersenneTwister;
+import jmt.engine.random.engine.RandomEngine;
+
+public class BernoulliVacationStrategy extends VacationWhenIdleStrategy {
+    private final double p;
+
+<span class="nc" id="L15">    private final RandomEngine rng = new MersenneTwister();</span>
+
+    public BernoulliVacationStrategy(Double p, Distribution vacationTimeDistr, Parameter vacationTimePar) throws NetException {
+<span class="nc" id="L18">        super(MULTIPLE_VACATION, vacationTimeDistr, vacationTimePar);</span>
+<span class="nc bnc" id="L19" title="All 4 branches missed.">        if (p &lt; 0.0 || p &gt; 1.0) {</span>
+<span class="nc" id="L20">            throw new NetException(&quot;Error in BernoulliVacationStrategy: Probability p must be in [0,1]&quot;);</span>
+        }
+<span class="nc" id="L22">        this.p = p;</span>
+<span class="nc" id="L23">    }</span>
+
+    @Override
+    public double nextVacationLength() throws NetException {
+<span class="nc" id="L27">        return super.nextVacationLength();</span>
+    }
+
+    public boolean nextRandBool() {
+<span class="nc bnc" id="L31" title="All 2 branches missed.">        return rng.raw() &lt;= p;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

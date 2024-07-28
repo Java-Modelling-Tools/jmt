@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConstMap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.data</a> &gt; <span class="el_source">ConstMap.java</span></div><h1>ConstMap.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.data;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; ConstMap&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A data structure suitable to create constant maps. Its values cannot be changed.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 09/ott/2008
+ *    &lt;b&gt;Time:&lt;/b&gt; 18:57:49&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public abstract class ConstMap&lt;K, V&gt; {
+
+<span class="fc" id="L38">	private Map&lt;K, V&gt; map = new LinkedHashMap&lt;K, V&gt;();</span>
+
+	/**
+	 * Fills this constant map with values. Call put method to fill.
+	 * @see #put(Object, Object)
+	 */
+	protected abstract void fill();
+
+<span class="fc" id="L46">	public ConstMap() {</span>
+<span class="fc" id="L47">		fill();</span>
+<span class="fc" id="L48">	}</span>
+
+	/**
+	 * Puts a value in this map. May be called only from the fill method.
+	 * @param key the key for the value
+	 * @param value the value
+	 */
+	protected void put(K key, V value) {
+<span class="fc" id="L56">		map.put(key, value);</span>
+<span class="fc" id="L57">	}</span>
+
+	/**
+	 * Returns a value in this map.
+	 * @param key the key for the value
+	 * @return the value
+	 */
+	public V get(Object key) {
+<span class="nc" id="L65">		return map.get(key);</span>
+	}
+
+	/**
+	 * Returns the key set of this map.
+	 * @return the key set
+	 */
+	public Set&lt;K&gt; keySet() {
+<span class="nc" id="L73">		return Collections.unmodifiableSet(map.keySet());</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

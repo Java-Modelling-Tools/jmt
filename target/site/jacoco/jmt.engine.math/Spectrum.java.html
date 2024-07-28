@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Spectrum.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">Spectrum.java</span></div><h1>Spectrum.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * Spectrum.java
+ *
+ * Created on 3 novembre 2002, 23.14
+ */
+
+package jmt.engine.math;
+
+/** This class perform spectral analysis and has also some useful functions for
+ *  DSP
+ *
+ * @author  Federico Granata
+ */
+<span class="nc" id="L32">public class Spectrum {</span>
+
+	/** periodogramOfReal
+	 * return the periodogram of a real sequence.
+	 *  @param data the data sequence
+	 *  @return the spectrum
+	 */
+	public static double[] periodogramOfReal(double[] data, int start, int n) {
+<span class="nc" id="L40">		double[] intData = new double[2 * n];</span>
+		double[] spectrum;
+
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		if (n &gt; data.length) {</span>
+<span class="nc" id="L44">			throw new Error(&quot;number of data must be &gt;= than n&quot;);</span>
+		}
+
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L48">			intData[2 * i] = data[i + start];</span>
+		}
+<span class="nc" id="L50">		intData = zeroPad(intData);</span>
+<span class="nc" id="L51">		FFT.transform(intData);</span>
+<span class="nc" id="L52">		spectrum = new double[intData.length / 2];</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		for (int i = 0; i &lt; spectrum.length; i++) {</span>
+<span class="nc" id="L54">			spectrum[i] = (Math.pow(intData[2 * i], 2) + Math.pow(intData[2 * i + 1], 2)) / n;</span>
+		}
+<span class="nc" id="L56">		return spectrum;</span>
+	}
+
+	/** given a sequence it return the same sequence padded with zeros to the
+	 *  nearest power of 2
+	 *  @param  the sequence to be padded
+	 *  @return the padded sequence
+	 */
+	public static double[] zeroPad(double[] data) {
+<span class="nc" id="L65">		int log = 0;</span>
+<span class="nc" id="L66">		int n = data.length;</span>
+		double[] intData;
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		for (int k = 1; k &lt; n; k *= 2, log++) {</span>
+			;
+		}
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if (n == (1 &lt;&lt; log)) {</span>
+<span class="nc" id="L73">			return data;</span>
+		} else {
+<span class="nc" id="L75">			intData = new double[(1 &lt;&lt; log)];</span>
+<span class="nc" id="L76">			System.arraycopy(data, 0, intData, 0, n);</span>
+<span class="nc" id="L77">			return intData;</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

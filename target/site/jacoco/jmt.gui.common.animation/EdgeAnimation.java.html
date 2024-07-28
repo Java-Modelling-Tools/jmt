@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EdgeAnimation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.animation</a> &gt; <span class="el_source">EdgeAnimation.java</span></div><h1>EdgeAnimation.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.animation;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
+import java.util.Vector;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 17-gen-2005
+ * Time: 13.55.01
+ * This class implements an animation for an edge of the graph that represents the queue net.
+ * Once the coords of the angles (which may only be straight angles)of that edge are set, the
+ * methods provide support for the output of this edge animation. This means that once the
+ * paint method is called, the bounding box for this animation is refreshed with the new frame.
+ */
+public class EdgeAnimation implements Animation, JobContainer {
+
+	//points this edge passes through
+	private Point[] anglePoints;
+
+	/**vector containing all of the jobs that currently are running on this edge of the
+	queue net*/
+<span class="nc" id="L45">	protected Vector&lt;JobAnimation&gt; jobAnimations = new Vector&lt;JobAnimation&gt;();</span>
+
+	//bounding box for this animation.
+	private Rectangle bounds;
+
+	//background image for this animation, typically the trace of the edge
+	private Image bgImage;
+
+	//icon toolkit to be used for renderization of the images.
+	private IconsToolkit toolkit;
+
+	/**Creates a new instance of Edgeanimation. This must be initialized with a set of points
+	 * which are coords of starting point of this edge, points where this edge turns with a
+	 * straight angle (which may be omitted in case this edge does not turn), and finally
+	 * ending point for this edge. All of the coords must be given in the real animation
+	 * resolution scale.
+	 * @param angles: coords of the angle points.
+	 * @param margin: width of border of this edge. Used to calculate boundingbox for this
+	 * animation from coords of the angle points
+	 */
+	public EdgeAnimation(Point[] angles, int margin) {
+<span class="nc" id="L66">		this(angles, margin, new DefaultIconsToolkit());</span>
+<span class="nc" id="L67">	}</span>
+
+	/**Creates a new instance of Edgeanimation. This must be initialized with a set of points
+	 * which are coords of starting point of this edge, points where this edge turns with a
+	 * straight angle (which may be omitted in case this edge does not turn), and finally
+	 * ending point for this edge. All of the coords must be given in the real animation
+	 * resolution scale.
+	 * @param angles: coords of the angle points.
+	 * @param margin: width of border of this edge. Used to calculate boundingbox for this
+	 * animation from coords of the angle points
+	 * @param toolkit: toolkit for customized renderization of this edge.
+	 */
+<span class="nc" id="L79">	public EdgeAnimation(Point[] angles, int margin, IconsToolkit toolkit) {</span>
+<span class="nc" id="L80">		anglePoints = angles;</span>
+<span class="nc" id="L81">		calculateBounds(margin);</span>
+<span class="nc" id="L82">		this.toolkit = toolkit;</span>
+<span class="nc" id="L83">		bgImage = toolkit.getEdgeIcon(bounds, angles);</span>
+<span class="nc" id="L84">	}</span>
+
+	/**Creates a new instance of Edgeanimation from another edge animation.
+	 * @param edge: edge to be copied.
+	 */
+	public EdgeAnimation(EdgeAnimation edge) {
+<span class="nc" id="L90">		this(edge.anglePoints, 10, edge.toolkit);</span>
+<span class="nc" id="L91">		Point[] angles = edge.anglePoints;</span>
+<span class="nc" id="L92">		int margin = (edge.bounds.width - Math.abs(angles[0].x - angles[angles.length - 1].x)) / 2;</span>
+<span class="nc" id="L93">		calculateBounds(margin);</span>
+<span class="nc" id="L94">		bgImage = toolkit.getEdgeIcon(bounds, anglePoints);</span>
+<span class="nc" id="L95">	}</span>
+
+	//calculates bounding box position and size from angle points coordinates.
+	private void calculateBounds(int margin) {
+<span class="nc" id="L99">		int maxX = -1, maxY = -1, minX = -1, minY = -1;</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		for (Point anglePoint : anglePoints) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">			if (maxX == -1) {</span>
+<span class="nc" id="L102">				maxX = anglePoint.x;</span>
+			}
+<span class="nc bnc" id="L104" title="All 2 branches missed.">			if (maxY == -1) {</span>
+<span class="nc" id="L105">				maxY = anglePoint.y;</span>
+			}
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			if (minX == -1) {</span>
+<span class="nc" id="L108">				minX = anglePoint.x;</span>
+			}
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			if (minY == -1) {</span>
+<span class="nc" id="L111">				minY = anglePoint.y;</span>
+			}
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			if (anglePoint.x &gt; maxX) {</span>
+<span class="nc" id="L114">				maxX = anglePoint.x;</span>
+			}
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			if (anglePoint.y &gt; maxY) {</span>
+<span class="nc" id="L117">				maxY = anglePoint.y;</span>
+			}
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if (anglePoint.x &lt; minX) {</span>
+<span class="nc" id="L120">				minX = anglePoint.x;</span>
+			}
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if (anglePoint.y &lt; minY) {</span>
+<span class="nc" id="L123">				minY = anglePoint.y;</span>
+			}
+		}
+<span class="nc" id="L126">		maxX += margin;</span>
+<span class="nc" id="L127">		minX -= margin;</span>
+<span class="nc" id="L128">		maxY += margin;</span>
+<span class="nc" id="L129">		minY -= margin;</span>
+<span class="nc" id="L130">		bounds = new Rectangle(minX, minY, maxX - minX, maxY - minY);</span>
+<span class="nc" id="L131">	}</span>
+
+	/*Converts current linear position to 2d coordinates for representing this job in the
+	animation. This way provides a simple way to calculate final coordinates of the image from
+	the speed value*/
+	private Point convertPositionToCoord(double position) {
+		//find between which couple of angle points the job must be placed
+<span class="nc" id="L138">		int firstPointIndex = 0;</span>
+<span class="nc" id="L139">		double length = 0;</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		for (firstPointIndex = 0; firstPointIndex &lt; anglePoints.length - 1; firstPointIndex++) {</span>
+			/*calculate distance between points and add result to the length formerly calculated
+			for comparison with position parameter*/
+<span class="nc" id="L143">			Point firstPoint = anglePoints[firstPointIndex], nextPoint = anglePoints[firstPointIndex + 1];</span>
+<span class="nc" id="L144">			double intervalEnd = length + getEuclideanDistance(firstPoint, nextPoint);</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (position &lt; intervalEnd) {</span>
+<span class="nc" id="L146">				return getPointOnSegment(firstPoint, nextPoint, position - length);</span>
+			} else {
+<span class="nc" id="L148">				length = intervalEnd;</span>
+			}
+		}
+		/*if execution gets here, job has exited this edge. Job must be routed to the
+		next component*/
+<span class="nc" id="L153">		return null;</span>
+	}
+
+	//calculates euclidean distance between two 2d coordinates
+	private double getEuclideanDistance(Point p0, Point p1) {
+		//if x or y are equal in both the given points, calculate distance more rapidly
+<span class="nc bnc" id="L159" title="All 2 branches missed.">		if (p0.getX() == p1.getX()) {</span>
+<span class="nc" id="L160">			return Math.abs(p0.getY() - p1.getY());</span>
+		}
+<span class="nc bnc" id="L162" title="All 2 branches missed.">		if (p0.getY() == p1.getY()) {</span>
+<span class="nc" id="L163">			return Math.abs(p0.getX() - p1.getX());</span>
+		}
+		//if points are on different x and y coords
+<span class="nc" id="L166">		return Math.sqrt(Math.pow(p0.getX() - p1.getX(), 2) + Math.pow(p0.getY() - p1.getY(), 2));</span>
+	}
+
+	//calculates coordinates of a point given distance from p0 on the segment p0-p1
+	private Point getPointOnSegment(Point p0, Point p1, double distanceFromP0) {
+		/*if the given points are on the same x or y coord, calculate resulting point in a more
+		efficient way*/
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		if (p0.getX() == p1.getX()) {</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">			if (p0.y &lt;= p1.y) {</span>
+<span class="nc" id="L175">				return new Point((int) p0.getX(), (int) (p0.getY() + distanceFromP0));</span>
+			} else {
+<span class="nc" id="L177">				return new Point((int) p0.getX(), (int) (p0.getY() - distanceFromP0));</span>
+			}
+		}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		if (p0.getY() == p1.getY()) {</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			if (p0.x &lt;= p1.x) {</span>
+<span class="nc" id="L182">				return new Point((int) (p0.getX() + distanceFromP0), (int) p0.getY());</span>
+			} else {
+<span class="nc" id="L184">				return new Point((int) (p0.getX() - distanceFromP0), (int) p0.getY());</span>
+			}
+		}
+		//else calculate a more accurate position
+<span class="nc" id="L188">		double euclDist = getEuclideanDistance(p0, p1);</span>
+<span class="nc" id="L189">		int xDist = (int) (((p1.getX() - p0.getX()) * distanceFromP0) / euclDist);</span>
+<span class="nc" id="L190">		int yDist = (int) (((p1.getY() - p0.getY()) * distanceFromP0) / euclDist);</span>
+<span class="nc" id="L191">		return new Point(xDist + (int) p0.getX(), yDist + (int) p0.getY());</span>
+	}
+
+	/**Puts another Job on this edge. The initial position is set to 0(e.g. the starting point
+	 * of this edge)
+	 * @param newJob: job to be added.
+	 */
+	public void addJob(JobAnimation newJob) {
+<span class="nc" id="L199">		jobAnimations.add(newJob);</span>
+<span class="nc" id="L200">		newJob.setPosition(0);</span>
+<span class="nc" id="L201">		newJob.setRepaint(true);</span>
+		//centers job to starting point of this edge
+<span class="nc" id="L203">		Rectangle jobSize = newJob.getBounds();</span>
+<span class="nc" id="L204">		Point p = new Point(anglePoints[0].x - jobSize.width / 2, anglePoints[0].y - jobSize.height / 2);</span>
+<span class="nc" id="L205">		newJob.getBounds().setLocation(p);</span>
+<span class="nc" id="L206">		newJob.resetTimeOfEntrance();</span>
+<span class="nc" id="L207">	}</span>
+
+	/**Refreshes appearence of the image to be rendered. In facts, recalculates all of the jobs'
+	 * new positions.*/
+	public void refresh() {
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		for (int i = 0; i &lt; jobAnimations.size(); i++) {</span>
+<span class="nc" id="L213">			JobAnimation ja = jobAnimations.get(i);</span>
+			//update position as time*speed
+<span class="nc" id="L215">			ja.setPosition((System.currentTimeMillis() - ja.getTimeOfEntrance()) * ja.getSpeed());</span>
+<span class="nc" id="L216">			Point p = convertPositionToCoord(ja.getPosition());</span>
+			//tests if this job should be painted outside bounding box of this edge
+<span class="nc bnc" id="L218" title="All 2 branches missed.">			if (p != null) {</span>
+<span class="nc bnc" id="L219" title="All 4 branches missed.">				boolean exceedsWidth = (p.getX() &gt;= bounds.x + bounds.width), exceedsHeight = (p.getY() &gt;= bounds.y + bounds.height);</span>
+<span class="nc bnc" id="L220" title="All 4 branches missed.">				if (exceedsWidth || exceedsHeight) {</span>
+<span class="nc" id="L221">					routeJob(ja);</span>
+				}
+				//set bounds of the job in order to be centered to the coords.
+<span class="nc" id="L224">				Rectangle r = ja.getBounds();</span>
+<span class="nc" id="L225">				p.setLocation(p.getX() - r.getWidth() / 2, p.getY() - r.getHeight() / 2);</span>
+<span class="nc" id="L226">				r.setLocation(p);</span>
+<span class="nc" id="L227">			} else {</span>
+<span class="nc" id="L228">				routeJob(ja);</span>
+			}
+		}
+<span class="nc" id="L231">	}</span>
+
+	//deletes job from local list of jobs to be rendered and routes it to the next element
+	//of the queue net.
+	private void routeJob(JobAnimation toDelete) {
+<span class="nc" id="L236">		int index = jobAnimations.indexOf(toDelete);</span>
+<span class="nc" id="L237">		jobAnimations.remove(index);</span>
+<span class="nc" id="L238">		toDelete.getNextElement().addJob(toDelete);</span>
+<span class="nc" id="L239">	}</span>
+
+	public void init() {
+<span class="nc" id="L242">	}</span>
+
+	public void paint(Graphics g, ImageObserver io) {
+<span class="nc" id="L245">		g.drawImage(bgImage, bounds.x, bounds.y, io);</span>
+<span class="nc" id="L246">	}</span>
+
+	public Image getBGImage() {
+<span class="nc" id="L249">		return bgImage;</span>
+	}
+
+	public void setBGImage(Image img) {
+<span class="nc" id="L253">		bgImage = img;</span>
+<span class="nc" id="L254">	}</span>
+
+	public void setBounds(Rectangle r) {
+<span class="nc" id="L257">		bounds = r;</span>
+<span class="nc" id="L258">		bgImage = toolkit.getEdgeIcon(bounds, anglePoints);</span>
+<span class="nc" id="L259">	}</span>
+
+	public Rectangle getBounds() {
+<span class="nc" id="L262">		return bounds;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

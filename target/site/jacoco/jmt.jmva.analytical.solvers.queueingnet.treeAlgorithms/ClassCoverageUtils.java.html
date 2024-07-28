@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassCoverageUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms</a> &gt; <span class="el_source">ClassCoverageUtils.java</span></div><h1>ClassCoverageUtils.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
+
+import java.util.TreeSet;
+
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+
+/**
+ * Implements functionality related to class coverage.
+ * @author Ben Homer, 2014.
+ */
+public class ClassCoverageUtils {
+	
+	/**
+	 * Enum to represent the 3 types of class coverages: fully-covered, partially-covered and non-covered,
+	 * as defined in the LamLien83 paper.
+	 */
+<span class="nc" id="L18">	public enum Covered { FULLY, PARTIALLY, NON };</span>
+
+	/** The queueing network model we are trying to solve. */
+	private QNModel qnm;
+	
+	/** Set containing all classes. */
+	public TreeSet&lt;Integer&gt; all;
+	
+	/** The local static instance. */
+	private static ClassCoverageUtils ccu;
+	
+	/**
+	 * Private constructor.
+	 * @param qnm The queueing network model we are trying to solve.
+	 */
+<span class="nc" id="L33">	private ClassCoverageUtils(QNModel qnm) {</span>
+<span class="nc" id="L34">		this.qnm = qnm;</span>
+<span class="nc" id="L35">		all = new TreeSet&lt;Integer&gt;();</span>
+<span class="nc bnc" id="L36" title="All 2 branches missed.">		for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc" id="L37">			all.add(r);</span>
+		}
+<span class="nc" id="L39">	}</span>
+	
+	/**
+	 * Creates a local instance of a ClassCoverageUtils object to be used.
+	 * @param qnm The queueing network model we are trying to solve.
+	 * @return The local ClassCoverageUtils instance.
+	 */
+	public static ClassCoverageUtils create(QNModel qnm) {
+<span class="nc" id="L47">		ccu = new ClassCoverageUtils(qnm);</span>
+<span class="nc" id="L48">		return ccu;</span>
+	}
+	
+	/**
+	 * Gets the local ClassCoverageUtils instance.
+	 * @return The local ClassCoverageUtils instance.
+	 */
+	public static ClassCoverageUtils inst() {
+<span class="nc" id="L56">		return ccu;</span>
+	}
+	
+	/**
+	 * With respect to a subset of stations (SUBNET),
+	 * a) a class of customers is fully covered if the stations that the class visits are a subset of SUBNET,
+	 * b) a class of customers is noncovered if the intersection between the stations that the class visits and SUBNET is empty,
+	 * c) a class of customers is partially covered if only some of the stations that the class visits are in SUBNET.
+	 * @param cls The class of customers.
+	 * @param subnet The subnetwork of stations.
+	 * @return An enum describing whether the class is fully, non or partially covered with respect to the subnetwork.
+	 */
+	public Covered getClassCoverage(int cls, TreeSet&lt;Integer&gt; subnet) {
+<span class="nc" id="L69">		TreeSet&lt;Integer&gt; stationsVisitedByClass = stationsVisitedByClass(cls);</span>
+<span class="nc" id="L70">		int count = 0;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		for (int k : stationsVisitedByClass) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (!subnet.contains(k)) {</span>
+<span class="nc" id="L73">				count++;</span>
+			}
+<span class="nc" id="L75">		}</span>
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if (count == stationsVisitedByClass.size()) {</span>
+<span class="nc" id="L78">			return Covered.NON;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		} else if (count &gt; 0) {</span>
+<span class="nc" id="L80">			return Covered.PARTIALLY;</span>
+		}
+<span class="nc" id="L82">		return Covered.FULLY;</span>
+	}
+
+	/** 
+	 * Gets the classes which are covered by subnet, with specified level of coverage.
+	 * @param cover The level of coverge we are looking for.
+	 * @param subnet The subnetwork of stations to examine.
+	 * */
+	public TreeSet&lt;Integer&gt; getCoveredClasses(Covered cover, TreeSet&lt;Integer&gt; subnet) {
+<span class="nc" id="L91">		TreeSet&lt;Integer&gt; classList = new TreeSet&lt;Integer&gt;();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		for (int c = 0; c &lt; qnm.R; c++) {</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			if (getClassCoverage(c, subnet) == cover) {</span>
+<span class="nc" id="L94">				classList.add(c);</span>
+			}
+		}
+
+<span class="nc" id="L98">		return classList;</span>
+	}
+
+	/**
+	 * Gets the stations which are visited by a certain class of customers.
+	 * (This corresponds to CENTERS(k) in the Lam/Lien 1983 paper).
+	 * @param cls The class of customers.
+	 * @return The stations which are visited by the specified class.
+	 */
+	private TreeSet&lt;Integer&gt; stationsVisitedByClass(int cls) {
+<span class="nc" id="L108">		TreeSet&lt;Integer&gt; st = new TreeSet&lt;Integer&gt;();</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">			if (qnm.getDemand(k, cls) &gt; 0) {</span>
+<span class="nc" id="L111">				st.add(k);</span>
+			}
+		}
+<span class="nc" id="L114">		return st;</span>
+	}
+	
+	/** 
+	 * Calculates the weight of a subnetwork by implementing equation (10) from the LamLien83 paper.
+	 * @param n The tree node to calculate the subnet weight at (subnet consists of all descendents).
+	 * @return The weight of the subnetwork.
+	 * */
+	public int calculateSubnetWeight(Node n) {
+<span class="nc" id="L123">		int weight = 0;</span>
+<span class="nc" id="L124">		TreeSet&lt;Integer&gt; partiallyCoveredClasses = n.pcs;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		for (int c = 0; c &lt; partiallyCoveredClasses.size(); c++) {</span>
+<span class="nc" id="L126">			TreeSet&lt;Integer&gt; stationsVisitedByClass = stationsVisitedByClass(c);</span>
+<span class="nc" id="L127">			stationsVisitedByClass.removeAll(n.stations);</span>
+<span class="nc" id="L128">			weight += stationsVisitedByClass.size();</span>
+		}
+
+<span class="nc" id="L131">		return weight;</span>
+	}
+
+	/**
+	 * Determines whether two subnetworks are overlapped for a particular class.
+	 * @param cls The class to check.
+	 * @param subnet1 The first subnetwork of stations.
+	 * @param subnet2 The second subnetwork of stations.
+	 * @return A boolean indicating whether the two subnetworks are overlapped for the specified class.
+	 */
+	@SuppressWarnings(&quot;unused&quot;)
+	private boolean isOverlapped(int cls, TreeSet&lt;Integer&gt; subnet1, TreeSet&lt;Integer&gt; subnet2) {
+<span class="nc" id="L143">		Covered c1 = getClassCoverage(cls, subnet1);</span>
+<span class="nc" id="L144">		Covered c2 = getClassCoverage(cls, subnet2);</span>
+<span class="nc bnc" id="L145" title="All 4 branches missed.">		return c1 == Covered.PARTIALLY &amp;&amp; c2 == Covered.PARTIALLY;</span>
+	}
+
+	/**
+	 * Gets the overlapped classes for the given subnetworks.
+	 * @param subnet1 The first subnetwork of stations.
+	 * @param subnet2 The second subnetwork of stations.
+	 * @return The set of overlapped classes.
+	 */
+	@SuppressWarnings(&quot;unused&quot;)
+	private TreeSet&lt;Integer&gt; getOverlappedClasses(TreeSet&lt;Integer&gt; subnet1, TreeSet&lt;Integer&gt; subnet2) {
+<span class="nc" id="L156">		TreeSet&lt;Integer&gt; c1 = getCoveredClasses(Covered.PARTIALLY, subnet1);</span>
+<span class="nc" id="L157">		TreeSet&lt;Integer&gt; c2 = getCoveredClasses(Covered.PARTIALLY, subnet2);</span>
+<span class="nc" id="L158">		c1.retainAll(c2);</span>
+<span class="nc" id="L159">		return c1;</span>
+	}
+	
+	/**
+	 * Contracts a population vector to the necessary size depending on partially covered classes in smallPcs.
+	 * @param largePopVec The population vector containing populations for each class in largePcs.
+	 * @param largePcs The set of partially covered classes corresponding to the largePopVec.
+	 * @param smallPcs The set of partially covered classes we want to find populations for.
+	 * @return The population vector containing populations for each class in smallPcs.
+	 */
+	public PopulationVector contract(
+		PopulationVector largePopVec,
+		TreeSet&lt;Integer&gt; largePcs,
+		TreeSet&lt;Integer&gt; smallPcs) {
+			
+<span class="nc" id="L174">		PopulationVector contracted = new PopulationVector(0, smallPcs.size());</span>
+<span class="nc" id="L175">		int smallIdx = 0;</span>
+<span class="nc" id="L176">		int largeIdx = 0;</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">		for (int k : largePcs) {</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			if (smallPcs.contains(k)) {</span>
+<span class="nc" id="L179">				contracted.set(smallIdx, largePopVec.get(largeIdx));</span>
+<span class="nc" id="L180">				smallIdx++;</span>
+			}
+<span class="nc" id="L182">			largeIdx++;</span>
+<span class="nc" id="L183">		}</span>
+		
+<span class="nc" id="L185">		return contracted;</span>
+	}
+	
+	/**
+	 * Expands a population vector to the necessary size depending on partially covered classes in newPcs.
+	 * @param oldPopVec The population vector.
+	 * @param oldPcs The old set of partially covered classes.
+	 * @param newPopVec The population vector containing max values for all classes in newPcs.
+	 * @param newPcs The news set of partially covered classes.
+	 * @return
+	 */
+	public PopulationVector expand(
+			PopulationVector oldPopVec,
+			TreeSet&lt;Integer&gt; oldPcs,
+			PopulationVector newPopVec,
+			TreeSet&lt;Integer&gt; newPcs) {
+		
+<span class="nc" id="L202">		Integer[] expanded = new Integer[newPcs.size()];</span>
+<span class="nc" id="L203">		int n = 0;</span>
+<span class="nc" id="L204">		int m = 0;</span>
+<span class="nc" id="L205">		int val = 0;</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">		for (Integer pcClass : newPcs) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">			if (oldPcs.contains(pcClass)) {</span>
+<span class="nc" id="L208">				val = oldPopVec.get(m);</span>
+<span class="nc" id="L209">				m++;</span>
+			} else {
+<span class="nc" id="L211">				val = newPopVec.get(pcClass);</span>
+			}
+			
+<span class="nc" id="L214">			expanded[n] = val;</span>
+<span class="nc" id="L215">			n++;</span>
+<span class="nc" id="L216">		}</span>
+		
+<span class="nc" id="L218">		return new PopulationVector(expanded);</span>
+	}
+	
+	/** Gets the index of the specified class in a set of classes.
+	 * @param cls The class to find the index of.
+	 * @param pcs The set of classes to find the class in.
+	 * @return The index.
+	 */
+	public int getIndex(int cls, TreeSet&lt;Integer&gt; pcs) {
+<span class="nc" id="L227">		int count = 0;</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		for (int p : pcs) {</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">			if (p == cls) {</span>
+<span class="nc" id="L230">				return count;</span>
+			}
+<span class="nc" id="L232">			count++;</span>
+<span class="nc" id="L233">		}</span>
+		
+<span class="nc" id="L235">		return -1;</span>
+	}
+	
+	/**
+	 * Finds the index of a class in one set (oldPcs) then calculates the classes
+	 * index in the new set (newPcs).
+	 * @param idx The index of the class.
+	 * @param oldPcs The set to find the class in initially.
+	 * @param newPcs The set for which an index is calculated.
+	 * @return The index of the class in newPcs.
+	 */
+	public int convertIndex(int idx, TreeSet&lt;Integer&gt; oldPcs, TreeSet&lt;Integer&gt; newPcs) {
+<span class="nc" id="L247">		int i = 0;</span>
+<span class="nc" id="L248">		int cls = -1;</span>
+<span class="nc bnc" id="L249" title="All 2 branches missed.">		for (int p : oldPcs) {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">			if (idx == i) {</span>
+<span class="nc" id="L251">				cls = p;</span>
+<span class="nc" id="L252">				break;</span>
+			}
+<span class="nc" id="L254">			i++;</span>
+<span class="nc" id="L255">		}</span>
+		
+<span class="nc" id="L257">		i = 0;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		for (int p : newPcs) {</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">			if (p == cls) {</span>
+<span class="nc" id="L260">				return i; </span>
+			}
+<span class="nc" id="L262">			i++;</span>
+<span class="nc" id="L263">		}</span>
+		
+<span class="nc" id="L265">		return -1;</span>
+	}
+	
+	/**
+	 * Returns the next permutation of a population vector to be used in the
+	 * convolution computation, given the current vector and the original start vector.
+	 * @param pv The current permutation of the vector.
+	 * @param orig The original/start permutation of the vector.
+	 * @return The next permutation of the vector.
+	 */
+    public PopulationVector nextPermutation(PopulationVector pv, PopulationVector orig) {
+<span class="nc bnc" id="L276" title="All 2 branches missed.">    	if (pv.isZeroVector()) {</span>
+<span class="nc" id="L277"> 			return null;</span>
+ 		}
+    	
+<span class="nc" id="L280">    	PopulationVector npv = pv.copy();</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed."> 		for (int i = pv.size()-1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L282"> 			int curr = npv.get(i);</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed."> 			if (curr &gt; 0) {</span>
+<span class="nc" id="L284"> 				npv.set(i, curr-1);</span>
+<span class="nc" id="L285"> 				break;</span>
+ 			}
+<span class="nc" id="L287"> 			npv.set(i, orig.get(i));</span>
+ 		}
+ 		
+<span class="nc" id="L290"> 		return npv;</span>
+    }
+    
+	/**
+	 * Returns the next permutation of a population vector to be used in the
+	 * convolution computation, given the current vector and the original start vector.
+	 * This version counts upwards instead of down.
+	 * @param pv The current permutation of the vector.
+	 * @param orig The original/start permutation of the vector.
+	 * @return The next permutation of the vector.
+	 */
+    public PopulationVector nextPermutationUpwards(PopulationVector pv, PopulationVector orig) {
+<span class="nc bnc" id="L302" title="All 2 branches missed.">    	if (pv.equals(orig)) {</span>
+<span class="nc" id="L303"> 			return null;</span>
+ 		}
+    	
+<span class="nc" id="L306">    	PopulationVector npv = pv.copy();</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed."> 		for (int i = pv.size()-1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L308"> 			int curr = npv.get(i);</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed."> 			if (curr != orig.get(i)) {</span>
+<span class="nc" id="L310"> 				npv.set(i, curr+1);</span>
+<span class="nc" id="L311"> 				break;</span>
+ 			}
+<span class="nc" id="L313"> 			npv.set(i, 0);</span>
+ 		}
+ 		
+<span class="nc" id="L316"> 		return npv;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

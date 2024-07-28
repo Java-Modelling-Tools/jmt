@@ -1,0 +1,784 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultsWindow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">ResultsWindow.java</span></div><h1>ResultsWindow.java</h1><pre class="source lang-java linenums">/**
+
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SpringLayout;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+
+import jmt.engine.log.JSimLogger;
+import jmt.framework.gui.components.JMTFrame;
+import jmt.framework.gui.graph.FastGraph;
+import jmt.framework.gui.graph.MeasureValue;
+import jmt.framework.gui.image.ImageLoader;
+import jmt.framework.gui.layouts.SpringUtilities;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.definitions.AbortMeasure;
+import jmt.gui.common.definitions.MeasureDefinition;
+import jmt.gui.common.definitions.ResultsConstants;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.editors.StatisticalOutputsWindow;
+
+/**
+ * &lt;p&gt;Title: Results Window&lt;/p&gt;
+ * &lt;p&gt;Description: Window to show simulation results.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 22-set-2005
+ *         Time: 15.10.52
+ *       
+ * Modified by Ashanka (Nov 09):
+ * Desc: Added the description of the Drop Rate
+ * 
+ * Modified by Ashanka (Nov 09):
+ * Desc: Appended the values of various measures to the tool tip.
+ * 
+ * Modified by Ashanka (May 2010): 
+ * Patch: Multi-Sink Perf. Index 
+ * Description: Added new Performance index for capturing 
+ * 				1. global response time (ResponseTime per Sink)
+ *              2. global throughput (Throughput per Sink)
+ *              each sink per class.
+ */
+public class ResultsWindow extends JMTFrame implements ResultsConstants {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L94">	private final String TITLE = &quot;Simulation Results&quot;;</span>
+
+	private SimulationDefinition sd;
+	private MeasureDefinition results;
+	private AbortMeasure abort;
+	private JButton start;
+	private JButton stop;
+	private JButton pause;
+	private JProgressBar progressBar;
+	// Used to format numbers
+<span class="nc" id="L104">	private static DecimalFormat decimalFormatNorm = new DecimalFormat(&quot;0.0000&quot;);</span>
+<span class="nc" id="L105">	private static DecimalFormat decimalFormatExp = new DecimalFormat(&quot;0.00E0&quot;);</span>
+<span class="nc" id="L106">	private JSimLogger logger = JSimLogger.getLogger(ResultsWindow.class);</span>
+
+	/**
+	 * Creates a new ResultsWindow
+	 * @param sd simulation definition data structure
+	 * @param fileName name of simulation file
+	 */
+<span class="nc" id="L113">	public ResultsWindow(SimulationDefinition sd, String fileName) {</span>
+<span class="nc" id="L114">		this.sd = sd;</span>
+<span class="nc" id="L115">		this.results = sd.getSimulationResults();</span>
+<span class="nc" id="L116">		this.updateTitle(fileName);</span>
+<span class="nc" id="L117">		initGUI();</span>
+<span class="nc" id="L118">	}</span>
+
+	/**
+	 * Creates a new ResultsWindow
+	 * @param sd simulation definition data structure
+	 * @param abort object used to implement abort button action
+	 * @param fileName name of simulation file
+	 */
+<span class="nc" id="L126">	public ResultsWindow(SimulationDefinition sd, AbortMeasure abort, String fileName) {</span>
+<span class="nc" id="L127">		this.sd = sd;</span>
+<span class="nc" id="L128">		this.results = sd.getSimulationResults();</span>
+<span class="nc" id="L129">		this.abort = abort;</span>
+<span class="nc" id="L130">		this.updateTitle(fileName);</span>
+<span class="nc" id="L131">		initGUI();</span>
+<span class="nc" id="L132">	}</span>
+
+	/**
+	 * Initialize all gui related stuff
+	 */
+	private void initGUI() {
+		// Sets default title, close operation and dimensions
+<span class="nc" id="L139">		this.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);</span>
+<span class="nc" id="L140">		this.setIconImage(JMTImageLoader.loadImage(&quot;Results&quot;).getImage());</span>
+<span class="nc" id="L141">		this.centerWindow(CommonConstants.MAX_GUI_WIDTH_JSIM_RESULTS, CommonConstants.MAX_GUI_HEIGHT_JSIM_RESULTS);</span>
+
+		// Creates all tabs
+<span class="nc" id="L144">		JTabbedPane mainPanel = new JTabbedPane();</span>
+<span class="nc" id="L145">		this.getContentPane().setLayout(new BorderLayout());</span>
+<span class="nc" id="L146">		this.getContentPane().add(mainPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L147">		addTabPane(mainPanel, SimulationDefinition.MEASURE_QL, DESCRIPTION_QUEUE_LENGTH, results.getQueueLengthMeasures());</span>
+<span class="nc" id="L148">		addTabPane(mainPanel, SimulationDefinition.MEASURE_QT, DESCRIPTION_QUEUE_TIME, results.getQueueTimeMeasures());</span>
+<span class="nc" id="L149">		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP, DESCRIPTION_RESPONSE_TIME, results.getResponseTimeMeasures());</span>
+<span class="nc" id="L150">		addTabPane(mainPanel, SimulationDefinition.MEASURE_RD, DESCRIPTION_RESIDENCE_TIME, results.getResidenceTimeMeasures());</span>
+<span class="nc" id="L151">		addTabPane(mainPanel, SimulationDefinition.MEASURE_AR, DESCRIPTION_ARRIVAL_RATE, results.getArrivalRateMeasures());</span>
+<span class="nc" id="L152">		addTabPane(mainPanel, SimulationDefinition.MEASURE_X, DESCRIPTION_THROUGHPUT, results.getThroughputMeasures());</span>
+<span class="nc" id="L153">		addTabPane(mainPanel, SimulationDefinition.MEASURE_U, DESCRIPTION_UTILIZATION, results.getUtilizationMeasures());</span>
+<span class="nc" id="L154">		addTabPane(mainPanel, SimulationDefinition.MEASURE_T, DESCRIPTION_TARDINESS, results.getTardinessMeasures());</span>
+<span class="nc" id="L155">		addTabPane(mainPanel, SimulationDefinition.MEASURE_E, DESCRIPTION_EARLINESS, results.getEarlinessMeasures());</span>
+<span class="nc" id="L156">		addTabPane(mainPanel, SimulationDefinition.MEASURE_L, DESCRIPTION_LATENESS, results.getLatenessMeasures());</span>
+<span class="nc" id="L157">		addTabPane(mainPanel, SimulationDefinition.MEASURE_EU, DESCRIPTION_EFFECTIVE_UTILIZATION, results.getEffectiveUtilizationMeasures());</span>
+<span class="nc" id="L158">		addTabPane(mainPanel, SimulationDefinition.MEASURE_DR, DESCRIPTION_DROP_RATE, results.getDropRateMeasures());</span>
+<span class="nc" id="L159">		addTabPane(mainPanel, SimulationDefinition.MEASURE_BR, DESCRIPTION_BALKING_RATE, results.getBalkingRateMeasures());</span>
+<span class="nc" id="L160">		addTabPane(mainPanel, SimulationDefinition.MEASURE_RN, DESCRIPTION_RENEGING_RATE, results.getRenegingRateMeasures());</span>
+<span class="nc" id="L161">		addTabPane(mainPanel, SimulationDefinition.MEASURE_RT, DESCRIPTION_RETRIAL_ATTEMPTS_RATE, results.getRetrialAttemptsRateMeasures());</span>
+<span class="nc" id="L162">		addTabPane(mainPanel, SimulationDefinition.MEASURE_OS, DESCRIPTION_RETRIAL_ORBIT_SIZE, results.getRetrialOrbitSizeMeasures());</span>
+<span class="nc" id="L163">		addTabPane(mainPanel, SimulationDefinition.MEASURE_OT, DESCRIPTION_RETRIAL_ORBIT_TIME, results.getRetrialOrbitTimeMeasures());</span>
+<span class="nc" id="L164">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_CN, DESCRIPTION_SYSTEM_CUSTOMER_NUMBER, results.getSystemCustomerNumberMeasures());</span>
+<span class="nc" id="L165">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RP, DESCRIPTION_SYSTEM_RESPONSE_TIME, results.getSystemResponseTimeMeasures());</span>
+<span class="nc" id="L166">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_X, DESCRIPTION_SYSTEM_THROUGHPUT, results.getSystemThroughputMeasures());</span>
+<span class="nc" id="L167">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_DR, DESCRIPTION_SYSTEM_DROP_RATE, results.getSystemDropRateMeasures());</span>
+<span class="nc" id="L168">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_BR, DESCRIPTION_SYSTEM_BALKING_RATE, results.getSystemBalkingRateMeasures());</span>
+<span class="nc" id="L169">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RN, DESCRIPTION_SYSTEM_RENEGING_RATE, results.getSystemRenegingRateMeasures());</span>
+<span class="nc" id="L170">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_RT, DESCRIPTION_SYSTEM_RETRIAL_ATTEMPTS_RATE, results.getSystemRetrialAttemptsRateMeasures());</span>
+<span class="nc" id="L171">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_P, DESCRIPTION_SYSTEM_POWER, results.getSystemPowerMeasures());</span>
+<span class="nc" id="L172">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_T, DESCRIPTION_SYSTEM_TARDINESS, results.getSystemTardinessMeasures());</span>
+<span class="nc" id="L173">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_E, DESCRIPTION_SYSTEM_EARLINESS, results.getSystemEarlinessMeasures());</span>
+<span class="nc" id="L174">		addTabPane(mainPanel, SimulationDefinition.MEASURE_S_L, DESCRIPTION_SYSTEM_LATENESS, results.getSystemLatenessMeasures());</span>
+<span class="nc" id="L175">		addTabPane(mainPanel, SimulationDefinition.MEASURE_RP_PER_SINK, DESCRIPTION_RESPONSE_TIME_PER_SINK, results.getResponsetimePerSinkMeasures());</span>
+<span class="nc" id="L176">		addTabPane(mainPanel, SimulationDefinition.MEASURE_X_PER_SINK, DESCRIPTION_THROUGHPUT_PER_SINK, results.getThroughputPerSinkMeasures());</span>
+<span class="nc" id="L177">		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_TW, DESCRIPTION_FCR_TOTAL_WEIGHT, results.getFCRTotalWeightMeasures());</span>
+<span class="nc" id="L178">		addTabPane(mainPanel, SimulationDefinition.MEASURE_FCR_MO, DESCRIPTION_FCR_MEMORY_OCCUPATION, results.getFCRMemoryOccupationMeasures());	</span>
+<span class="nc" id="L179">		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_CN, DESCRIPTION_FJ_CUSTOMER_NUMBER, results.getFJCustomerNumberMeasures());</span>
+<span class="nc" id="L180">		addTabPane(mainPanel, SimulationDefinition.MEASURE_FJ_RP, DESCRIPTION_FJ_RESPONSE_TIME, results.getFJResponseTimeMeasures());</span>
+<span class="nc" id="L181">		addTabPane(mainPanel, SimulationDefinition.MEASURE_FX, DESCRIPTION_FIRING_THROUGHPUT, results.getFiringThroughputMeasures());</span>
+<span class="nc" id="L182">		addTabPane(mainPanel, SimulationDefinition.MEASURE_NS, DESCRIPTION_NUMBER_OF_ACTIVE_SERVERS, results.getNumberOfActiveServersMeasures());</span>
+		// Creates bottom panel
+<span class="nc" id="L184">		JPanel bottomPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L185">		JToolBar toolbar = new JToolBar();</span>
+<span class="nc" id="L186">		toolbar.setFloatable(false);</span>
+<span class="nc" id="L187">		toolbar.setRollover(true);</span>
+<span class="nc" id="L188">		start = new JButton();</span>
+<span class="nc" id="L189">		toolbar.add(start);</span>
+<span class="nc" id="L190">		start.setVisible(false);</span>
+<span class="nc" id="L191">		pause = new JButton();</span>
+<span class="nc" id="L192">		toolbar.add(pause);</span>
+<span class="nc" id="L193">		pause.setVisible(false);</span>
+<span class="nc" id="L194">		stop = new JButton();</span>
+<span class="nc" id="L195">		toolbar.add(stop);</span>
+<span class="nc" id="L196">		stop.setVisible(false);</span>
+<span class="nc" id="L197">		bottomPanel.add(toolbar, BorderLayout.WEST);</span>
+<span class="nc" id="L198">		UIManager.put(&quot;ProgressBar.selectionForeground&quot;, Color.WHITE);</span>
+<span class="nc" id="L199">		progressBar = new JProgressBar();</span>
+<span class="nc" id="L200">		progressBar.setStringPainted(true);</span>
+<span class="nc" id="L201">		progressBar.setForeground(Color.BLUE);</span>
+<span class="nc" id="L202">		setProgressBar(results.getProgress(), results.getElapsedTime());		</span>
+<span class="nc" id="L203">		bottomPanel.add(progressBar, BorderLayout.CENTER);</span>
+		// Adds bottom panel
+<span class="nc" id="L205">		this.getContentPane().add(bottomPanel, BorderLayout.SOUTH);</span>
+
+		// Adds listener for progressBar
+<span class="nc" id="L208">		results.setProgressListener(new MeasureDefinition.ProgressListener() {</span>
+			public void progressChanged(double progress, long elapsedTime) {
+<span class="nc" id="L210">				setProgressBar(progress, elapsedTime);</span>
+<span class="nc" id="L211">			}</span>
+		});
+<span class="nc" id="L213">	}</span>
+
+	/**
+	 * Sets progress bar to specified value
+	 * @param progress progress of simulation
+	 * @param elapsedTime elapsed time of simulation
+	 */
+	private void setProgressBar(double progress, long elapsedTime) {
+<span class="nc" id="L221">		int percent = (int) Math.round(progress * 100);</span>
+<span class="nc" id="L222">		progressBar.setValue(percent);</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		if (percent &lt; 100) {</span>
+<span class="nc" id="L224">			progressBar.setString(percent + &quot;% of simulation performed...&quot;);</span>
+		} else {
+<span class="nc" id="L226">			progressBar.setString(&quot;Simulation Complete (Time Elapsed: &quot; + (double) (elapsedTime/100)/10 + &quot;s)&quot;);</span>
+		}
+<span class="nc" id="L228">	}</span>
+
+	/**
+	 * Sets action for toolbar buttons and displays them
+	 * @param startAction action associated with start simulation button
+	 * @param pauseAction action associated with pause simulation button
+	 * @param stopAction action associated with stop simulation button
+	 */
+	public void addButtonActions(AbstractAction startAction, AbstractAction pauseAction, AbstractAction stopAction) {
+<span class="nc" id="L237">		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L238">		Dimension iconSize = null;</span>
+<span class="nc bnc" id="L239" title="All 4 branches missed.">		if (screenSize.width &lt;= CommonConstants.MAX_SMALL_ICON_SCREEN_WIDTH</span>
+				&amp;&amp; screenSize.height &lt;= CommonConstants.MAX_SMALL_ICON_SCREEN_HEIGHT) {
+<span class="nc" id="L241">			iconSize = CommonConstants.SMALL_ICON_SIZE_TOOL_BAR;</span>
+		} else {
+<span class="nc" id="L243">			iconSize = CommonConstants.LARGE_ICON_SIZE_TOOL_BAR;</span>
+		}
+
+<span class="nc" id="L246">		start.setAction(startAction);</span>
+<span class="nc" id="L247">		start.setText(&quot;&quot;);</span>
+<span class="nc" id="L248">		start.setIcon(JMTImageLoader.loadImage(&quot;Sim&quot;, iconSize));</span>
+<span class="nc" id="L249">		start.setFocusPainted(false);</span>
+<span class="nc" id="L250">		start.setContentAreaFilled(false);</span>
+<span class="nc" id="L251">		start.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L252">		start.setRolloverIcon(JMTImageLoader.loadImage(&quot;Sim&quot;, ImageLoader.MODIFIER_ROLLOVER, iconSize));</span>
+<span class="nc" id="L253">		start.setPressedIcon(JMTImageLoader.loadImage(&quot;Sim&quot;, ImageLoader.MODIFIER_PRESSED, iconSize));</span>
+<span class="nc" id="L254">		start.setVisible(true);</span>
+
+<span class="nc" id="L256">		pause.setAction(pauseAction);</span>
+<span class="nc" id="L257">		pause.setText(&quot;&quot;);</span>
+<span class="nc" id="L258">		pause.setIcon(JMTImageLoader.loadImage(&quot;Pause&quot;, iconSize));</span>
+<span class="nc" id="L259">		pause.setFocusPainted(false);</span>
+<span class="nc" id="L260">		pause.setContentAreaFilled(false);</span>
+<span class="nc" id="L261">		pause.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L262">		pause.setRolloverIcon(JMTImageLoader.loadImage(&quot;Pause&quot;, ImageLoader.MODIFIER_ROLLOVER, iconSize));</span>
+<span class="nc" id="L263">		pause.setPressedIcon(JMTImageLoader.loadImage(&quot;Pause&quot;, ImageLoader.MODIFIER_PRESSED, iconSize));</span>
+<span class="nc" id="L264">		pause.setVisible(true);</span>
+
+<span class="nc" id="L266">		stop.setAction(stopAction);</span>
+<span class="nc" id="L267">		stop.setText(&quot;&quot;);</span>
+<span class="nc" id="L268">		stop.setIcon(JMTImageLoader.loadImage(&quot;Stop&quot;, iconSize));</span>
+<span class="nc" id="L269">		stop.setFocusPainted(false);</span>
+<span class="nc" id="L270">		stop.setContentAreaFilled(false);</span>
+<span class="nc" id="L271">		stop.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L272">		stop.setRolloverIcon(JMTImageLoader.loadImage(&quot;Stop&quot;, ImageLoader.MODIFIER_ROLLOVER, iconSize));</span>
+<span class="nc" id="L273">		stop.setPressedIcon(JMTImageLoader.loadImage(&quot;Stop&quot;, ImageLoader.MODIFIER_PRESSED, iconSize));</span>
+<span class="nc" id="L274">		stop.setVisible(true);</span>
+<span class="nc" id="L275">	}</span>
+
+	/**
+	 * Creates a new tabbed pane that shows specified measures and adds it to
+	 * specified JTabPane. If measures indices vector is null or empty no panel is added.
+	 * @param parent panel where newly created tab should be added
+	 * @param name name of the panel to be added
+	 * @param description description to be shown into the panel
+	 * @param indices array with all measures indices to be shown in this panel
+	 */
+	private void addTabPane(JTabbedPane parent, String name, String description, int[] indices) {
+		// If no measure are present, do not add corresponding tab
+<span class="nc bnc" id="L287" title="All 4 branches missed.">		if (indices != null &amp;&amp; indices.length &gt; 0) {</span>
+<span class="nc" id="L288">			JPanel tabPanel = new JPanel(new BorderLayout());</span>
+			// Adds margins
+<span class="nc" id="L290">			tabPanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.NORTH);</span>
+<span class="nc" id="L291">			tabPanel.add(Box.createVerticalStrut(BORDERSIZE), BorderLayout.SOUTH);</span>
+<span class="nc" id="L292">			tabPanel.add(Box.createHorizontalStrut(BORDERSIZE), BorderLayout.WEST);</span>
+<span class="nc" id="L293">			tabPanel.add(Box.createHorizontalStrut(BORDERSIZE), BorderLayout.EAST);</span>
+<span class="nc" id="L294">			JPanel mainpanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L295">			tabPanel.add(mainpanel, BorderLayout.CENTER);</span>
+			// Adds tab description
+<span class="nc" id="L297">			JPanel upperPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L298">			JLabel descrLabel = new JLabel(description);</span>
+<span class="nc" id="L299">			upperPanel.add(descrLabel, BorderLayout.NORTH);</span>
+<span class="nc" id="L300">			upperPanel.add(Box.createVerticalStrut(BORDERSIZE / 2), BorderLayout.SOUTH);</span>
+<span class="nc" id="L301">			mainpanel.add(upperPanel, BorderLayout.NORTH);</span>
+			// Adds panel with measures
+<span class="nc" id="L303">			JPanel scroll = new JPanel(new GridLayout(indices.length, 1, 1, 1));</span>
+			// Adds all measures to this panel
+<span class="nc bnc" id="L305" title="All 2 branches missed.">			for (int index : indices) {</span>
+<span class="nc" id="L306">				scroll.add(new MeasurePanel(results, index));</span>
+			}
+<span class="nc" id="L308">			mainpanel.add(new JScrollPane(scroll), BorderLayout.CENTER);</span>
+
+			// Adds tab to parent tabbed pane
+<span class="nc" id="L311">			parent.addTab(name, tabPanel);</span>
+		}
+<span class="nc" id="L313">	}</span>
+
+	/**
+	 * Helper method used to convert a double into a String avoiding too many decimals
+	 * @param d number to be converted
+	 * @return string representation of input number
+	 */
+	protected static String doubleToString(double d) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">		if (d == 0.0) {</span>
+<span class="nc" id="L322">			return &quot;0.0&quot;;</span>
+<span class="nc bnc" id="L323" title="All 4 branches missed.">		} else if (Math.abs(d) &gt;= 1e-2 &amp;&amp; Math.abs(d) &lt; 1e4) {</span>
+<span class="nc" id="L324">			return decimalFormatNorm.format(d);</span>
+		} else {
+<span class="nc" id="L326">			return decimalFormatExp.format(d);</span>
+		}
+	}
+
+	/**
+	 * Inner class to create a panel that holds a specified measure
+	 */
+	protected class MeasurePanel extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+
+		protected MeasureDefinition md;
+		protected int measureIndex;
+		protected JLabel icon;
+		protected JLabel msgLabel;
+		protected Vector&lt;MeasureValue&gt; values;
+		protected JTextField samples;
+		protected JTextField mean;
+		protected JTextField lower;
+		protected JTextField upper;
+		protected JButton abortButton;
+		protected FastGraph graph;
+		protected FastGraph popupGraph;
+		protected JSplitPane graphPanel;
+		protected JFrame popupFrame;
+		protected JTextArea textState;
+		private JButton hideLastIntervalAvgValueButton;
+		private JButton statisticalOutputsButton;
+		protected boolean lastIntervalAvgValueFlag;
+		private JTextArea textState2;
+
+<span class="nc" id="L357">		public MeasurePanel(MeasureDefinition md, int measureIndex) {</span>
+<span class="nc" id="L358">			this.md = md;</span>
+<span class="nc" id="L359">			this.measureIndex = measureIndex;</span>
+<span class="nc" id="L360">			values = md.getValues(measureIndex);</span>
+<span class="nc" id="L361">			createPanel();</span>
+<span class="nc" id="L362">			addListeners();</span>
+<span class="nc" id="L363">		}</span>
+
+		/**
+		 * Used to create the panel holding all measure's data
+		 */
+		protected void createPanel() {
+<span class="nc" id="L369">			this.setLayout(new BorderLayout(7, 7));</span>
+<span class="nc" id="L370">			this.setBorder(BorderFactory.createRaisedBevelBorder());</span>
+			// Sets correct icon for this measure
+<span class="nc" id="L372">			icon = new JLabel();</span>
+<span class="nc" id="L373">			icon.setIcon(JMTImageLoader.loadImage(IN_PROGRESS_IMAGE));</span>
+<span class="nc" id="L374">			add(icon, BorderLayout.WEST);</span>
+
+			//Adds mainPanel with all informations on this measure
+			JLabel label;
+			JTextField field;
+<span class="nc" id="L379">			JPanel mainPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L380">			JPanel dataPanel = new JPanel(new SpringLayout());</span>
+			// Station name
+<span class="nc" id="L382">			label = new JLabel();</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">			if (sd.isFCRMeasure(md.getMeasureType(measureIndex))) {</span>
+<span class="nc" id="L384">				label.setText(&quot;Region Name: &quot;);</span>
+			} else {
+<span class="nc" id="L386">				label.setText(&quot;Station Name: &quot;);</span>
+			}
+<span class="nc" id="L388">			field = new JTextField();</span>
+<span class="nc" id="L389">			field.setEditable(false);</span>
+<span class="nc" id="L390">			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));</span>
+<span class="nc" id="L391">			label.setLabelFor(field);</span>
+			// If measure is for a server type, use that for station name
+<span class="nc" id="L393">			String stationName = null;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">			if (measureIndex &lt; sd.getMeasureKeys().size()) {</span>
+<span class="nc" id="L395">				stationName = sd.getServerTypeStationName(sd.getMeasureServerTypeKey(sd.getMeasureKeys().get(measureIndex)));</span>
+			}
+<span class="nc bnc" id="L397" title="All 2 branches missed.">			if (stationName == null) {</span>
+<span class="nc" id="L398">				stationName = md.getStationName(measureIndex);</span>
+			}
+			// If station name is undefined, disables its fields
+<span class="nc bnc" id="L401" title="All 4 branches missed.">			if (stationName != null &amp;&amp; !stationName.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">				if (sd.isFJMeasure(md.getMeasureType(measureIndex))) {</span>
+<span class="nc" id="L403">					field.setText(stationName + &quot; (Fork Join)&quot;);</span>
+				} else {
+<span class="nc" id="L405">					field.setText(stationName);</span>
+				}
+<span class="nc" id="L407">				field.setToolTipText(&quot;Name of the station: &quot; + field.getText());</span>
+			} else {
+<span class="nc" id="L409">				field.setText(ALL_STATIONS);</span>
+<span class="nc" id="L410">				field.setToolTipText(&quot;This measure is referred to the entire network&quot;);</span>
+			}
+<span class="nc" id="L412">			dataPanel.add(label);</span>
+<span class="nc" id="L413">			dataPanel.add(field);</span>
+			// Class name
+<span class="nc" id="L415">			label = new JLabel();</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">			if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc" id="L417">				label.setText(&quot;Mode Name: &quot;);</span>
+			} else {
+<span class="nc" id="L419">				label.setText(&quot;Class Name: &quot;);</span>
+			}
+<span class="nc" id="L421">			field = new JTextField();</span>
+<span class="nc" id="L422">			field.setEditable(false);</span>
+<span class="nc" id="L423">			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));</span>
+<span class="nc" id="L424">			label.setLabelFor(field);</span>
+			// If class name is undefined, shows ALL_CLASSES constant
+<span class="nc" id="L426">			String className = md.getClassName(measureIndex);</span>
+<span class="nc bnc" id="L427" title="All 4 branches missed.">			if (className != null &amp;&amp; !className.equals(&quot;&quot;)) {</span>
+<span class="nc" id="L428">				field.setText(className);</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">				if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc" id="L430">					field.setToolTipText(&quot;Name of the mode: &quot; + field.getText());</span>
+				} else {
+<span class="nc" id="L432">					field.setToolTipText(&quot;Name of the class: &quot; + field.getText());</span>
+				}
+			} else {
+<span class="nc bnc" id="L435" title="All 2 branches missed.">				if (md.getMeasureType(measureIndex).equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc" id="L436">					field.setText(ResultsConstants.ALL_MODES);</span>
+<span class="nc" id="L437">					field.setToolTipText(&quot;This measure is an aggregate of every mode&quot;);</span>
+				} else {
+<span class="nc" id="L439">					field.setText(ResultsConstants.ALL_CLASSES);</span>
+<span class="nc" id="L440">					field.setToolTipText(&quot;This measure is an aggregate of every class&quot;);</span>
+				}
+			}
+<span class="nc" id="L443">			dataPanel.add(label);</span>
+<span class="nc" id="L444">			dataPanel.add(field);</span>
+			// Alpha/Precision
+<span class="nc" id="L446">			label = new JLabel(&quot;Conf.Int/Max Rel.Err: &quot;);</span>
+<span class="nc" id="L447">			field = new JTextField();</span>
+<span class="nc" id="L448">			field.setEditable(false);</span>
+<span class="nc" id="L449">			field.setMaximumSize(new Dimension(field.getMaximumSize().width, field.getMinimumSize().height));</span>
+<span class="nc" id="L450">			label.setLabelFor(field);</span>
+<span class="nc" id="L451">			field.setText(md.getAlpha(measureIndex) + &quot; / &quot; + md.getPrecision(measureIndex)); // AnalyzedSamples</span>
+<span class="nc" id="L452">			field.setToolTipText(&quot;Confidence Interval and Maximum Relative Error requested for this measure: &quot; + field.getText());</span>
+<span class="nc" id="L453">			dataPanel.add(label);</span>
+<span class="nc" id="L454">			dataPanel.add(field);</span>
+			// Analyzed samples
+<span class="nc" id="L456">			label = new JLabel(&quot;Analyzed samples: &quot;);</span>
+<span class="nc" id="L457">			samples = new JTextField();</span>
+<span class="nc" id="L458">			samples.setEditable(false);</span>
+<span class="nc" id="L459">			samples.setMaximumSize(new Dimension(samples.getMaximumSize().width, samples.getMinimumSize().height));</span>
+<span class="nc" id="L460">			label.setLabelFor(samples);</span>
+<span class="nc" id="L461">			samples.setText(&quot;&quot; + md.getAnalyzedSamples(measureIndex));</span>
+<span class="nc" id="L462">			samples.setToolTipText(&quot;Number of samples (observations) currently analyzed: &quot; + samples.getText());</span>
+<span class="nc" id="L463">			dataPanel.add(label);</span>
+<span class="nc" id="L464">			dataPanel.add(samples);</span>
+
+<span class="nc" id="L466">			MeasureValue lastValue = values.lastElement();</span>
+
+			// Lower Bound
+<span class="nc" id="L469">			label = new JLabel(&quot;Min: &quot;);</span>
+<span class="nc" id="L470">			lower = new JTextField(&quot;-&quot;);</span>
+<span class="nc" id="L471">			lower.setEditable(false);</span>
+<span class="nc" id="L472">			lower.setMaximumSize(new Dimension(lower.getMaximumSize().width, lower.getMinimumSize().height));</span>
+<span class="nc" id="L473">			label.setLabelFor(lower);</span>
+<span class="nc bnc" id="L474" title="All 4 branches missed.">			if (lastValue.getLowerBound() &gt; 0 &amp;&amp; !Double.isInfinite(lastValue.getLowerBound())) {</span>
+<span class="nc" id="L475">				lower.setText(doubleToString(lastValue.getLowerBound()));</span>
+			}
+<span class="nc" id="L477">			lower.setToolTipText(&quot;Minimum value of current confidence interval: &quot; + lower.getText());</span>
+<span class="nc" id="L478">			dataPanel.add(label);</span>
+<span class="nc" id="L479">			dataPanel.add(lower);</span>
+
+			// Upper Bound
+<span class="nc" id="L482">			label = new JLabel(&quot;Max: &quot;);</span>
+<span class="nc" id="L483">			upper = new JTextField(&quot;-&quot;);</span>
+<span class="nc" id="L484">			upper.setEditable(false);</span>
+<span class="nc" id="L485">			upper.setMaximumSize(new Dimension(upper.getMaximumSize().width, upper.getMinimumSize().height));</span>
+<span class="nc" id="L486">			label.setLabelFor(upper);</span>
+<span class="nc bnc" id="L487" title="All 4 branches missed.">			if (lastValue.getUpperBound() &gt; 0 &amp;&amp; !Double.isInfinite(lastValue.getUpperBound())) {</span>
+<span class="nc" id="L488">				upper.setText(doubleToString(lastValue.getUpperBound()));</span>
+			}
+<span class="nc" id="L490">			upper.setToolTipText(&quot;Maximum value of current confidence interval: &quot; + upper.getText());</span>
+<span class="nc" id="L491">			dataPanel.add(label);</span>
+<span class="nc" id="L492">			dataPanel.add(upper);</span>
+
+<span class="nc" id="L494">			SpringUtilities.makeCompactGrid(dataPanel, 3, 4, //rows, cols</span>
+					2, 2, //initX, initY
+					2, 2);//xPad, yPad
+<span class="nc" id="L497">			mainPanel.add(dataPanel, BorderLayout.CENTER);</span>
+
+			// Temp mean and abort button are in a separate panel
+<span class="nc" id="L500">			JPanel bottomPanel = new JPanel(new BorderLayout(7, 7));</span>
+<span class="nc" id="L501">			label = new JLabel(TEMP_MEAN);</span>
+<span class="nc" id="L502">			mean = new JTextField();</span>
+<span class="nc" id="L503">			mean.setEditable(false);</span>
+<span class="nc" id="L504">			mean.setToolTipText(&quot;Current mean value of this measure: &quot; + mean.getText());</span>
+<span class="nc" id="L505">			label.setLabelFor(mean);</span>
+<span class="nc" id="L506">			mean.setText(doubleToString((values.lastElement()).getMeanValue()));</span>
+<span class="nc" id="L507">			bottomPanel.add(label, BorderLayout.WEST);</span>
+<span class="nc" id="L508">			bottomPanel.add(mean, BorderLayout.CENTER);</span>
+<span class="nc" id="L509">			bottomPanel.add(new JLabel(&quot;Warning&quot;), BorderLayout.SOUTH);</span>
+			// AbortButton
+<span class="nc" id="L511">			abortButton = new JButton();</span>
+<span class="nc" id="L512">			abortButton.setText(&quot;Abort Measure&quot;);</span>
+<span class="nc" id="L513">			bottomPanel.add(abortButton, BorderLayout.EAST);</span>
+<span class="nc" id="L514">			msgLabel = new JLabel();</span>
+<span class="nc" id="L515">			msgLabel.setForeground(Color.RED);</span>
+<span class="nc" id="L516">			bottomPanel.add(msgLabel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L517">			bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));</span>
+
+<span class="nc" id="L519">			JPanel pivotPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L520">			JPanel abortAndHidePanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L521">			JPanel dummyPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L522">			hideLastIntervalAvgValueButton = new JButton(&quot;Hide instantaneous values&quot;);</span>
+
+<span class="nc" id="L524">			hideLastIntervalAvgValueButton.addActionListener(new ActionListener() {</span>
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L527" title="All 2 branches missed.">					if (hideLastIntervalAvgValueButton.getText().equals(</span>
+							&quot;Hide instantaneous values&quot;)) {
+<span class="nc" id="L529">						hideLastIntervalAvgValueButton</span>
+<span class="nc" id="L530">						.setText(&quot;Show instantaneous values&quot;);</span>
+					} else {
+<span class="nc" id="L532">						hideLastIntervalAvgValueButton</span>
+<span class="nc" id="L533">						.setText(&quot;Hide instantaneous values&quot;);</span>
+					}
+
+<span class="nc bnc" id="L536" title="All 2 branches missed.">					lastIntervalAvgValueFlag = !lastIntervalAvgValueFlag;</span>
+<span class="nc" id="L537">					graph.setHideLastInterval(lastIntervalAvgValueFlag);</span>
+<span class="nc bnc" id="L538" title="All 2 branches missed.">					if (popupGraph != null) {</span>
+<span class="nc" id="L539">						popupGraph.setHideLastInterval(lastIntervalAvgValueFlag);</span>
+					}
+<span class="nc" id="L541">				}</span>
+			});
+
+			//Creates button to display Statistical Results Window.
+<span class="nc" id="L545">			statisticalOutputsButton = new JButton(&quot;Statistics&quot;);</span>
+<span class="nc" id="L546">			statisticalOutputsButton.setToolTipText(&quot;Displays requested distribution&quot;);</span>
+<span class="nc" id="L547">			statisticalOutputsButton.setEnabled(false);</span>
+
+<span class="nc bnc" id="L549" title="All 2 branches missed.">			if (md.getLogFileName(measureIndex) == null) {</span>
+<span class="nc" id="L550">				statisticalOutputsButton.setVisible(false);</span>
+			}
+<span class="nc" id="L552">			statisticalOutputsButton.addActionListener(new ActionListener() {</span>
+				@Override
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L555">					File logFile = new File(results.getLogFileName(measureIndex));</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">					if (!logFile.isFile()) {</span>
+<span class="nc" id="L557">						JOptionPane.showMessageDialog(ResultsWindow.this,</span>
+<span class="nc" id="L558">								&quot;CSV file not found in path '&quot; + logFile.getAbsolutePath() + &quot;'.&quot;,</span>
+								&quot;Error&quot;, JOptionPane.ERROR_MESSAGE);
+					} else {
+<span class="nc" id="L561">						StatisticalOutputsWindow statistics = new StatisticalOutputsWindow(results, measureIndex);</span>
+<span class="nc" id="L562">						statistics.setVisible(true); </span>
+					}
+<span class="nc" id="L564">				}</span>
+			});
+<span class="nc" id="L566">			dummyPanel.add(new JLabel(&quot;   &quot;), BorderLayout.CENTER);</span>
+<span class="nc" id="L567">			dummyPanel.add(hideLastIntervalAvgValueButton, BorderLayout.EAST);</span>
+
+			//Adds the Statistical Results Button to the DummyPanel.
+<span class="nc" id="L570">			dummyPanel.add(statisticalOutputsButton, BorderLayout.WEST);</span>
+<span class="nc" id="L571">			dummyPanel.setBorder(BorderFactory.createEmptyBorder(0, 6, 6, 6));</span>
+
+<span class="nc" id="L573">			abortAndHidePanel.add(bottomPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L574">			abortAndHidePanel.add(dummyPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L575">			pivotPanel.add(mainPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L576">			pivotPanel.add(abortAndHidePanel, BorderLayout.SOUTH);</span>
+			// Pack text area in the north of the panel
+<span class="nc" id="L578">			JPanel pivotPanel2 = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L579">			pivotPanel2.add(pivotPanel, BorderLayout.NORTH);</span>
+			// Adds a textPanel to show state
+<span class="nc" id="L581">			textState = new JTextArea();</span>
+<span class="nc" id="L582">			textState.setEditable(false);</span>
+<span class="nc" id="L583">			textState.setLineWrap(true);</span>
+<span class="nc" id="L584">			textState.setWrapStyleWord(true);</span>
+<span class="nc" id="L585">			JPanel textStatePanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L586">			textStatePanel.add(textState, BorderLayout.SOUTH);</span>
+<span class="nc" id="L587">			textStatePanel.setBorder(BorderFactory.createEmptyBorder(</span>
+					BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2,
+					BORDERSIZE / 2));
+<span class="nc" id="L590">			pivotPanel2.add(textStatePanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L592">			textState2 = new JTextArea();</span>
+<span class="nc" id="L593">			textState2.setEditable(false);</span>
+<span class="nc" id="L594">			textState2.setLineWrap(true);</span>
+<span class="nc" id="L595">			textState2.setWrapStyleWord(true);</span>
+<span class="nc" id="L596">			JPanel textStatePanel2 = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L597">			textStatePanel2.add(textState2, BorderLayout.SOUTH);</span>
+<span class="nc" id="L598">			textStatePanel2.setBorder(BorderFactory.createEmptyBorder(</span>
+					BORDERSIZE / 2, BORDERSIZE / 2, BORDERSIZE / 2,
+					BORDERSIZE / 2));
+<span class="nc" id="L601">			pivotPanel2.add(textStatePanel2);</span>
+
+			// Sets a minimal size for text area panel
+<span class="nc" id="L604">			pivotPanel2.setMinimumSize(new Dimension((int)(320 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L605">			pivotPanel2.setPreferredSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));</span>
+
+			// Adds graph
+<span class="nc" id="L608">			graph = new FastGraph(values, md.getPollingInterval());</span>
+<span class="nc" id="L609">			graphPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,</span>
+					pivotPanel2, graph);
+<span class="nc" id="L611">			graphPanel.setOneTouchExpandable(true);</span>
+<span class="nc" id="L612">			graphPanel.setDividerLocation(600);</span>
+<span class="nc" id="L613">			graphPanel.setMinimumSize(new Dimension((int)(320 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L614">			graph.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L615">			graph.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(190 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L617">			add(graphPanel, BorderLayout.CENTER);</span>
+			// Sets icon image and abort button state
+<span class="nc" id="L619">			setCorrectState();</span>
+<span class="nc" id="L620">			graph.addMouseListener(new MouseAdapter() {</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L623">					graph.mouseClicked(e);</span>
+<span class="nc" id="L624">				}</span>
+			});
+<span class="nc" id="L626">		}</span>
+
+		/**
+		 * Adds listeners to this panel, to refresh measures and abort simulation
+		 */
+		protected void addListeners() {
+<span class="nc bnc" id="L632" title="All 2 branches missed.">			if (md.getMeasureState(measureIndex) == MeasureDefinition.MEASURE_IN_PROGRESS) {</span>
+<span class="nc" id="L633">				md.setMalformedReplayerFileListener(new MeasureDefinition.MalformedReplayerFileListener() {</span>
+					public void detectedError(String msg) {
+<span class="nc bnc" id="L635" title="All 2 branches missed.">						if (msgLabel != null) {</span>
+<span class="nc" id="L636">							msgLabel.setText(msg);</span>
+						}
+<span class="nc" id="L638">					}</span>
+				});
+
+				// If simulation is not finished, adds a measure listener
+<span class="nc" id="L642">				md.addMeasureListener(measureIndex, new MeasureDefinition.MeasureListener() {</span>
+					public void measureChanged(List&lt;MeasureValue&gt; measureValues, boolean finished) {
+						// Update graphics
+<span class="nc" id="L645">						graph.repaint();</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">						if (popupGraph != null) {</span>
+<span class="nc" id="L647">							popupGraph.repaint();</span>
+						}
+
+<span class="nc" id="L650">						MeasureValue lastValue = measureValues.get(measureValues.size() - 1);</span>
+
+						// Updates mean, lower, upper and samples
+<span class="nc bnc" id="L653" title="All 4 branches missed.">						if (lastValue.getLowerBound() &gt; 0 &amp;&amp; !Double.isInfinite(lastValue.getUpperBound())) {</span>
+<span class="nc" id="L654">							lower.setText(doubleToString(lastValue.getLowerBound()));</span>
+<span class="nc" id="L655">							lower.setToolTipText(&quot;Minimum value of current confidence interval: &quot; + lower.getText());</span>
+<span class="nc" id="L656">							upper.setText(doubleToString(lastValue.getUpperBound()));</span>
+<span class="nc" id="L657">							upper.setToolTipText(&quot;Maximum value of current confidence interval: &quot; + upper.getText());</span>
+						} else {
+<span class="nc" id="L659">							lower.setText(&quot;-&quot;);</span>
+<span class="nc" id="L660">							upper.setText(&quot;-&quot;);</span>
+						}
+
+<span class="nc" id="L663">						mean.setText(doubleToString(lastValue.getMeanValue()));</span>
+<span class="nc" id="L664">						mean.setToolTipText(&quot;Current mean value of this measure: &quot; + mean.getText());</span>
+<span class="nc" id="L665">						samples.setText(&quot;&quot; + md.getAnalyzedSamples(measureIndex));</span>
+<span class="nc" id="L666">						samples.setToolTipText(&quot;Number of samples (observations) currently analyzed: &quot; + samples.getText());</span>
+						// If finished is true, state was changed
+<span class="nc bnc" id="L668" title="All 2 branches missed.">						if (finished) {</span>
+<span class="nc" id="L669">							setCorrectState();</span>
+						}
+<span class="nc" id="L671">						repaint();</span>
+<span class="nc" id="L672">					}</span>
+				});
+
+				// Sets AbortButton action, only if abort is available
+<span class="nc bnc" id="L676" title="All 2 branches missed.">				if (abort != null) {</span>
+<span class="nc" id="L677">					abortButton.addActionListener(new ActionListener() {</span>
+						public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L679">							abortButton.setEnabled(false);</span>
+<span class="nc" id="L680">							abort.abortMeasure(measureIndex);</span>
+<span class="nc" id="L681">						}</span>
+					});
+				}
+			}
+
+			// Popups graph if graph window is double clicked
+<span class="nc" id="L687">			graph.addMouseListener(new MouseAdapter() {</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L690" title="All 2 branches missed.">					if (e.getClickCount() == 2) {</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">						if (popupFrame == null) {</span>
+<span class="nc" id="L692">							popupFrame = new JFrame();</span>
+<span class="nc" id="L693">							popupGraph = new FastGraph(values, md.getPollingInterval());</span>
+<span class="nc" id="L694">							popupFrame.getContentPane().add(popupGraph);</span>
+<span class="nc" id="L695">							popupFrame.setTitle(md.getName(measureIndex));</span>
+<span class="nc" id="L696">							popupFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);</span>
+<span class="nc" id="L697">							int width = 640, height = 480;</span>
+<span class="nc" id="L698">							Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L699">							popupFrame.setBounds((scrDim.width - width) / 2, (scrDim.height - height) / 2, width, height);</span>
+<span class="nc" id="L700">							popupGraph.addMouseListener(new MouseAdapter() {</span>
+								@Override
+								public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L703">									popupGraph.mouseClicked(e);</span>
+
+<span class="nc" id="L705">								}</span>
+							});
+						}
+<span class="nc" id="L708">						popupFrame.setVisible(true);</span>
+					}
+<span class="nc" id="L710">				}</span>
+			});
+<span class="nc" id="L712">		}</span>
+
+		/**
+		 * Sets correct state to icon and abort button
+		 */
+		protected void setCorrectState() {
+<span class="nc bnc" id="L718" title="All 5 branches missed.">			switch (md.getMeasureState(measureIndex)) {</span>
+			case MeasureDefinition.MEASURE_IN_PROGRESS:
+<span class="nc" id="L720">				icon.setIcon(JMTImageLoader.loadImage(IN_PROGRESS_IMAGE));</span>
+<span class="nc" id="L721">				icon.setToolTipText(IN_PROGRESS_TEXT);</span>
+<span class="nc" id="L722">				textState.setText(IN_PROGRESS_TEXT);</span>
+<span class="nc" id="L723">				icon.setToolTipText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L724">				textState.setText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L725">				abortButton.setEnabled(true);</span>
+<span class="nc" id="L726">				break;</span>
+			case MeasureDefinition.MEASURE_SUCCESS:
+<span class="nc" id="L728">				icon.setIcon(JMTImageLoader.loadImage(SUCCESS_IMAGE));</span>
+<span class="nc" id="L729">				icon.setToolTipText(SUCCESS_TEXT);</span>
+<span class="nc" id="L730">				textState.setText(SUCCESS_TEXT);</span>
+<span class="nc" id="L731">				icon.setToolTipText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L732">				textState.setText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L733">				abortButton.setEnabled(false);</span>
+				//Activates the Statistical Results Button.
+<span class="nc" id="L735">				statisticalOutputsButton.setEnabled(true);</span>
+<span class="nc" id="L736">				break;</span>
+			case MeasureDefinition.MEASURE_FAILED:
+<span class="nc" id="L738">				icon.setIcon(JMTImageLoader.loadImage(FAILED_IMAGE));</span>
+<span class="nc" id="L739">				icon.setToolTipText(FAILED_TEXT);</span>
+<span class="nc" id="L740">				textState.setText(FAILED_TEXT);</span>
+<span class="nc" id="L741">				icon.setToolTipText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L742">				textState.setText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L743">				abortButton.setEnabled(false);</span>
+				//Activates the Statistical Results Button.
+<span class="nc" id="L745">				statisticalOutputsButton.setEnabled(true);</span>
+<span class="nc" id="L746">				break;</span>
+			case MeasureDefinition.MEASURE_NO_SAMPLES:
+<span class="nc" id="L748">				icon.setIcon(JMTImageLoader.loadImage(NO_SAMPLES_IMAGE));</span>
+<span class="nc" id="L749">				icon.setToolTipText(NO_SAMPLES_TEXT);</span>
+<span class="nc" id="L750">				textState.setText(NO_SAMPLES_TEXT);</span>
+<span class="nc" id="L751">				icon.setToolTipText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L752">				textState.setText(FOR_GREEN_GRAPH);</span>
+<span class="nc" id="L753">				abortButton.setEnabled(false);</span>
+<span class="nc" id="L754">				mean.setText(&quot;-&quot;);</span>
+<span class="nc" id="L755">				graph.setVisible(false); // Hides graph if no samples were received</span>
+				break;
+			}
+<span class="nc bnc" id="L758" title="All 2 branches missed.">			if (md.getLogFileName(measureIndex) != null) {</span>
+<span class="nc" id="L759">				File file = new File(md.getLogFileName(measureIndex));</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">				if (file.isFile()) {</span>
+<span class="nc" id="L761">					statisticalOutputsButton.setVisible(true);</span>
+				} else {
+<span class="nc" id="L763">					logger.warn(String.format(&quot;Detail CSV file '%s' not found for performance index '%s'. Disabling statistic window.&quot;,</span>
+<span class="nc" id="L764">							file.getAbsolutePath(), md.getName(measureIndex)));</span>
+				}
+			}
+<span class="nc" id="L767">		}</span>
+
+	}
+
+	/**
+	 * Updates this window title adding the file name
+	 * @param filename the file name or null to remove it.
+	 */
+	public void updateTitle(String filename) {
+<span class="nc bnc" id="L776" title="All 2 branches missed.">		if (filename != null) {</span>
+<span class="nc" id="L777">			setTitle(TITLE + &quot; - &quot; + filename);</span>
+		} else {
+<span class="nc" id="L779">			setTitle(TITLE);</span>
+		}
+<span class="nc" id="L781">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

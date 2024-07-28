@@ -1,0 +1,423 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Edge.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.animation</a> &gt; <span class="el_source">Edge.java</span></div><h1>Edge.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmch.animation;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+/** 
+ * This class is needed to understand the direction where the edge is pointing based on the starting point and the finish point.
+ * It is also useful for painting the circle of the Job on top of the edge
+ */
+<span class="nc" id="L41">enum Direction{</span>
+<span class="nc" id="L42">	UP{</span>
+		@Override
+		public int direction() {
+<span class="nc" id="L45">			return -1;</span>
+		}
+	},
+<span class="nc" id="L48">	DOWN{</span>
+		@Override
+		public int direction() {
+<span class="nc" id="L51">			return 1;</span>
+		}
+	},
+<span class="nc" id="L54">	LEFT{</span>
+		@Override
+		public int direction() {
+<span class="nc" id="L57">			return -1;</span>
+		}
+	},
+<span class="nc" id="L60">	RIGHT{</span>
+		@Override
+		public int direction() {
+<span class="nc" id="L63">			return 1;</span>
+		}
+	};
+	
+	//method for understanding the direction 1 or -1
+	public abstract int direction();
+}
+
+/**
+ * Class for an edge in the animation. 
+ * Edges can only be straight from a start point to a finish point, so be careful when creating them, they must have either start.x = finish.x or start.y = finish.y
+ * When a job arrives to the finish point then it is routed to the next element associated to this edge.
+ *
+ * @author Lorenzo Torri
+ * Date: 26-mar-2024
+ * Time: 13.40
+ */
+public class Edge extends JComponent implements JobContainer{
+	private JPanel parent;
+	private AnimationClass animation;
+	
+	//--variables of the edge
+	private boolean centered;
+	private boolean isArrow;
+	private Point[] points;
+<span class="nc" id="L88">	private double speed = 1;</span>
+	
+	private List&lt;Job&gt; jobList;
+<span class="nc" id="L91">	private JobContainer nextContainer = null;</span>
+	
+	//for the probabilistic routing
+<span class="nc" id="L94">	private boolean paintPercentage = false;</span>
+<span class="nc" id="L95">	private int index = -1;</span>
+<span class="nc" id="L96">	private double percentage = 0.00;</span>
+
+	//for the nextEvent simulation
+<span class="nc" id="L99">	private boolean nextEvent = false;</span>
+<span class="nc" id="L100">	private int velocityFactor = 1;</span>
+
+	//for the highlight
+	private int counterHighLight;
+	private Timer timer;
+	private Color jobColor;
+<span class="nc" id="L106">	private boolean highlight = false;</span>
+	
+	/**
+	 * Constructor
+	 * @param animation, AnimationClass which the edge is part of
+	 * @param container, JPanel that contains this edge
+	 * @param centered, if the edge is y centered with respect to the JPanel or not
+	 * @param isArrow, if the edge is an arrow and not a simple line
+	 * @param points, points of the edge
+	 * @param next, JobContainer next to this edge
+	 */
+<span class="nc" id="L117">	public Edge(AnimationClass anim, JPanel container, boolean centered, boolean isArrow, Point[] points, JobContainer next) {</span>
+<span class="nc" id="L118">		this.animation = anim;</span>
+<span class="nc" id="L119">		this.parent = container;</span>
+<span class="nc" id="L120">		this.centered = centered;</span>
+<span class="nc" id="L121">		this.isArrow = isArrow;</span>
+<span class="nc" id="L122">		this.points = points;</span>
+<span class="nc" id="L123">		this.nextContainer = next;</span>
+		
+<span class="nc" id="L125">		jobList = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L126">	}</span>
+
+	/**
+	 * Constructor for Edges with higher speed
+	 * @param speed
+	 */
+	public Edge(AnimationClass anim, JPanel container, boolean centered, boolean isArrow, Point[] points, JobContainer next, int speed){
+<span class="nc" id="L133">		this(anim, container, centered, isArrow, points, next);</span>
+<span class="nc" id="L134">		this.speed = speed;</span>
+
+<span class="nc" id="L136">	}</span>
+	
+	public void paint(Graphics g) {
+<span class="nc" id="L139">		super.paint(g);</span>
+		
+<span class="nc" id="L141">		Graphics2D g2d = (Graphics2D) g;</span>
+			
+		//create a connection for each couple of adjacent points
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		for(int i = 0; i &lt; points.length - 1; i++) {</span>
+<span class="nc" id="L145">			Point start = points[i];</span>
+<span class="nc" id="L146">			Point finish = points[i+1];</span>
+			
+<span class="nc bnc" id="L148" title="All 2 branches missed.">			if(centered) {</span>
+<span class="nc" id="L149">				int heightPanel = parent.getHeight();	</span>
+<span class="nc" id="L150">				start.y = parent.getY() +(heightPanel)/2;</span>
+<span class="nc" id="L151">				finish.y = start.y;</span>
+			}
+			
+<span class="nc" id="L154">			Color chosenColor = Color.BLACK;</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">			if(highlight) {</span>
+<span class="nc" id="L156">				chosenColor = jobColor;</span>
+<span class="nc" id="L157">				g2d.setStroke(new BasicStroke(4));</span>
+<span class="nc" id="L158">				g2d.setColor(chosenColor);</span>
+<span class="nc" id="L159">				g2d.drawLine(start.x, start.y, finish.x, finish.y);	</span>
+<span class="nc" id="L160">				g2d.setStroke(new BasicStroke(1));</span>
+			}
+			else {
+<span class="nc" id="L163">				g.setColor(chosenColor);</span>
+<span class="nc" id="L164">				g.drawLine(start.x, start.y, finish.x, finish.y);	</span>
+			}	
+		}	
+		
+		//only if the routing policy with probability is chosen
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if(paintPercentage) {</span>
+<span class="nc" id="L170">			g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 10));</span>
+<span class="nc" id="L171">			DecimalFormat df = new DecimalFormat(&quot;#.##&quot;);</span>
+<span class="nc" id="L172">			String value = &quot;P&quot; + index + &quot;: &quot;+ df.format(percentage);</span>
+<span class="nc" id="L173">			Direction direction = getDirection(points[0], points[1]);</span>
+<span class="nc bnc" id="L174" title="All 4 branches missed.">			if(direction == Direction.UP || direction == Direction.DOWN) {</span>
+<span class="nc" id="L175">				g.drawString(value, points[0].x - 40,  points[0].y + direction.direction() * 15);</span>
+			}
+			else {
+<span class="nc" id="L178">				g.drawString(value, points[0].x - 10,  points[0].y + direction.direction() * 22);</span>
+			}
+		}
+
+		//only if the edge is an arrow (for now the arrow is only for a direction = right)
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		if(isArrow) {</span>
+<span class="nc" id="L184">			int[] xPoints = {points[points.length-1].x+5, points[points.length-1].x, points[points.length-1].x}; // x coordinates</span>
+<span class="nc" id="L185">		    int[] yPoints = {points[points.length-1].y, points[points.length-1].y-5, points[points.length-1].y+5};   // y coordinates</span>
+
+<span class="nc" id="L187">	        g2d.fillPolygon(xPoints, yPoints, 3); //draw the triangle</span>
+		}
+<span class="nc" id="L189">	}</span>
+	
+	/**
+	 * Method to paint the percentage near the edge. 
+	 * This method is useful for Routing Probabilistic policy
+	 * @param p percentage
+	 * @param index value of the i-th edge
+	 */
+	public void paintPercentage(double p, int index) {
+<span class="nc" id="L198">		paintPercentage = true;</span>
+<span class="nc" id="L199">		this.index = index;</span>
+<span class="nc" id="L200">		percentage = p;</span>
+<span class="nc" id="L201">	}</span>
+	
+	/** Method to understand the direction of the segment defined by two points */
+	public Direction getDirection(Point start, Point finish) {
+<span class="nc bnc" id="L205" title="All 2 branches missed.">		if(start.x == finish.x) { //two vertical points</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if(start.y &gt; finish.y) {</span>
+<span class="nc" id="L207">				return Direction.UP;</span>
+			}
+			else {
+<span class="nc" id="L210">				return Direction.DOWN;</span>
+			}
+		}
+		else { //two horizontal points
+<span class="nc bnc" id="L214" title="All 2 branches missed.">			if(start.x &gt; finish.x) {</span>
+<span class="nc" id="L215">				return Direction.LEFT;</span>
+			}
+			else {
+<span class="nc" id="L218">				return Direction.RIGHT;</span>
+			}
+		}
+	}
+
+	@Override
+	public void refresh() {
+<span class="nc" id="L225">		velocityFactor = animation.getVelocityFactor();</span>
+
+		//check for each job if it is still in the edge, if not route it to the next element, otherwise update its position
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		for(int i = 0; i &lt; jobList.size(); i++) {</span>
+			/*if(nextEvent &amp;&amp; animation instanceof MultipleQueueNetAnimation &amp;&amp; nextContainer instanceof Station){ //in nextEvent the edges between router and stations must forward all the jobs to the next station
+				routeJob(i);
+				continue;
+			}*/
+
+<span class="nc" id="L234">			Job j = jobList.get(i);</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			if(checkFinish(j, j.getFinalPos())) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">				if(j.getFinalPos() == points.length - 1) { //job travelled along all the edges </span>
+<span class="nc" id="L237">					routeJob(i);</span>
+				}
+				else {
+<span class="nc" id="L240">					j.setStartingPosition(points[j.getFinalPos()].x, points[j.getFinalPos()].y, getDirection(points[j.getFinalPos()], points[j.getFinalPos()+1]), j.getFinalPos() + 1); </span>
+				}			
+			}
+			else {
+<span class="nc" id="L244">				moveJob(j);</span>
+			}			
+		}	
+<span class="nc" id="L247">	}</span>
+	
+	/**
+	 * Method to update the current position of a job based on the direction of the edge
+	 * @param j Job that has to update its position inside the edge
+	 */
+	private void moveJob(Job j) {
+<span class="nc" id="L254">		Point current = j.getPosition();</span>
+<span class="nc bnc" id="L255" title="All 5 branches missed.">		switch(j.getDirection()) {</span>
+			case UP: 
+<span class="nc" id="L257">				j.updatePosition(current.x, current.y - speed * velocityFactor);</span>
+<span class="nc" id="L258">				break;</span>
+			case DOWN:
+<span class="nc" id="L260">				j.updatePosition(current.x, current.y + speed * velocityFactor);</span>
+<span class="nc" id="L261">				break;</span>
+			case RIGHT:
+<span class="nc" id="L263">				j.updatePosition(current.x + speed * velocityFactor, current.y);</span>
+<span class="nc" id="L264">				break;</span>
+			case LEFT:	
+<span class="nc" id="L266">				j.updatePosition(current.x - speed * velocityFactor, current.y);</span>
+				break;
+		}
+<span class="nc" id="L269">	}</span>
+	
+	/**
+	 * Check whether the Job has completed its path along the edge.
+	 * The check is performed based on the direction of the edge and on the position of the job
+	 * @param j Job to check
+	 * @param finalPos index of Points (the arrival point for the job moving in the segment)
+	 * @return boolean, true if the job has reached the finish point, false otherwise
+	 */
+	private boolean checkFinish(Job j, int finalPos) {
+<span class="nc" id="L279">		Point current = j.getPosition();</span>
+<span class="nc" id="L280">		Point finish = points[finalPos];</span>
+		//add to current half of the circleSize, in order to consider the center of the circle as the position of the job, and not the start drawing point
+<span class="nc" id="L282">		int circleSize = j.getCircleSize();</span>
+<span class="nc bnc" id="L283" title="All 5 branches missed.">		switch(j.getDirection()) {</span>
+			case LEFT:
+<span class="nc bnc" id="L285" title="All 2 branches missed.">				if(current.x + circleSize/2 &lt;= finish.x) {</span>
+<span class="nc" id="L286">					return true;</span>
+				}
+				break;
+			case RIGHT:
+<span class="nc bnc" id="L290" title="All 2 branches missed.">				if(current.x + circleSize/2 &gt;= finish.x) {</span>
+<span class="nc" id="L291">					return true;</span>
+				}
+				break;
+			case UP:
+<span class="nc bnc" id="L295" title="All 2 branches missed.">				if(current.y + circleSize/2 &lt;= finish.y) {</span>
+<span class="nc" id="L296">					return true;</span>
+				}
+				break;
+			case DOWN:
+<span class="nc bnc" id="L300" title="All 2 branches missed.">				if(current.y + circleSize/2 &gt;= finish.y) {</span>
+<span class="nc" id="L301">					return true;</span>
+				}
+				break;
+		}
+<span class="nc" id="L305">		return false;</span>
+	}
+	
+	@Override
+	public void addJob(JobContainer prec, Job newJob) {
+<span class="nc" id="L310">		newJob.setStartingPosition(points[0].x, points[0].y, getDirection(points[0], points[1]), 1); //when a new Job is added, then its position is the starting point of the edge</span>
+<span class="nc" id="L311">		jobList.add(newJob);</span>
+
+<span class="nc bnc" id="L313" title="All 4 branches missed.">		if(nextEvent &amp;&amp; (prec instanceof Source)) { //stop only when a new job is created</span>
+<span class="nc" id="L314">			animation.pause();</span>
+<span class="nc" id="L315">			animation.resetNextEvent();</span>
+		}
+		/*else if(nextEvent &amp;&amp; (prec instanceof Router)){ //in next step move direclty the jobs from the router to the stations
+			routeJob(jobList.size() - 1);
+		}*/
+<span class="nc" id="L320">	}</span>
+
+	/**
+	 * Route a job to the next JobContainer since it has arrived to the final point of the edge
+	 * @param i, index of the job inside the JobList of the edge
+	 */
+	public void routeJob(int i) {
+<span class="nc" id="L327">		Job job = jobList.remove(i);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">		if(nextContainer != null) {</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">			if(nextContainer instanceof Edge) {</span>
+<span class="nc" id="L330">				job.setOnEdge();</span>
+			}
+			else {
+<span class="nc" id="L333">				job.unsetOnEdge();</span>
+			}
+<span class="nc" id="L335">			nextContainer.addJob(this, job);	</span>
+		}
+		else {
+<span class="nc" id="L338">			job.unsetOnEdge();			</span>
+		}
+<span class="nc" id="L340">	}</span>
+
+	/** Set the Step simulation on */
+	public void nextEvent() {
+<span class="nc" id="L344">		nextEvent = true;</span>
+<span class="nc" id="L345">	}</span>
+
+	/** Set the Step simulation off */
+	public void resetNextEvent() {
+<span class="nc" id="L349">		nextEvent = false;</span>
+<span class="nc" id="L350">	}</span>
+
+	public double getSpeed() {
+<span class="nc" id="L353">		return speed;</span>
+	}
+
+	public void setSpeed(double sp){
+<span class="nc" id="L357">		speed = sp;</span>
+<span class="nc" id="L358">	}</span>
+
+
+	/* Methods for highlight */
+	public void highlightON(Color jobColor) {
+<span class="nc" id="L363">		counterHighLight = 0;</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">		if(timer != null) {</span>
+<span class="nc" id="L365">			timer.stop();</span>
+		}
+<span class="nc" id="L367">		timer = new Timer(300, new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L370">                highlight();</span>
+<span class="nc" id="L371">			}</span>
+        });
+		
+<span class="nc" id="L374">		this.jobColor = jobColor;</span>
+<span class="nc" id="L375">		timer.start();</span>
+<span class="nc" id="L376">	}</span>
+	
+	
+	public void highlight() {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">		if(counterHighLight &gt;= 3) {</span>
+<span class="nc" id="L381">			timer.stop();</span>
+<span class="nc" id="L382">			counterHighLight = 0;</span>
+<span class="nc" id="L383">			highlight = false;</span>
+		}
+		else {
+<span class="nc bnc" id="L386" title="All 2 branches missed.">			highlight = !highlight;</span>
+<span class="nc" id="L387">			counterHighLight++;</span>
+		}
+<span class="nc" id="L389">	}</span>
+
+	public int getTotalLength(){
+<span class="nc" id="L392">		int sum = 0;</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">		for(int i = 1; i &lt; points.length; i++){</span>
+<span class="nc" id="L394">			sum += Math.abs(points[i].y - points[i-1].y) + Math.abs(points[i].x - points[i-1].x); //Manhattan distance</span>
+		}
+<span class="nc" id="L396">		return sum;</span>
+	}
+
+	public void setXFinish(int xpos) {
+<span class="nc" id="L400">		points[points.length - 1].x = xpos;</span>
+<span class="nc" id="L401">	}</span>
+	
+	public void setXStart(int xpos) {
+<span class="nc" id="L404">		points[0].x = xpos;</span>
+<span class="nc" id="L405">	}</span>
+
+	public void setYFinish(int ypos) {
+<span class="nc" id="L408">		points[points.length - 1].y = ypos;</span>
+<span class="nc" id="L409">	}</span>
+	
+	public void setYStart(int ypos) {
+<span class="nc" id="L412">		points[0].y = ypos;</span>
+<span class="nc" id="L413">	}</span>
+
+	public void setYPoint(int ypos, int i) {
+<span class="nc" id="L416">		points[i].y = ypos;</span>
+<span class="nc" id="L417">	}</span>
+
+	public void setXPoint(int xpos, int i) {
+<span class="nc" id="L420">		points[i].x = xpos;</span>
+<span class="nc" id="L421">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

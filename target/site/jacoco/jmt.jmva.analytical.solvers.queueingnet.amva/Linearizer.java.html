@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Linearizer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.amva</a> &gt; <span class="el_source">Linearizer.java</span></div><h1>Linearizer.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.amva;
+
+/**
+ * This class implements the Linearizer and De Souza-Muntz Linearizer algorithms
+ * for solving multi-closed models
+ * 
+ * @author Abhimanyu Chugh
+ *
+ */
+public class Linearizer extends AMVA {
+	// boolean to decide which version of Linearizer to use
+	private boolean useDeSouzaMuntz;
+
+	public Linearizer(int classes, int stations, int[] classPopulation, boolean useDeSouzaMuntz) {
+<span class="nc" id="L15">		super(classes, stations, classPopulation);</span>
+<span class="nc" id="L16">		this.useDeSouzaMuntz = useDeSouzaMuntz;</span>
+		// MAX_ITERATIONS = 3;
+<span class="nc" id="L18">	}</span>
+
+	@Override
+	public void solveLI() {
+<span class="nc" id="L22">		double[][][] queueLengths = new double[classes + 1][stations][classes];</span>
+<span class="nc" id="L23">		double[][][] custFracDiffs = new double[stations][classes][classes];</span>
+
+		// Step 1: Initialisation
+<span class="nc bnc" id="L26" title="All 2 branches missed.">		for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L27" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">				if (stations &gt; 0) {</span>
+<span class="nc" id="L29">					queueLengths[0][k][c] = clsPopulation[c] / (double) stations;</span>
+				}
+<span class="nc bnc" id="L31" title="All 2 branches missed.">				for (int j = 1; j &lt; classes + 1; j++) {</span>
+<span class="nc" id="L32">					custFracDiffs[k][c][j - 1] = 0;</span>
+<span class="nc" id="L33">					int clsPop = clsPopulation[c];</span>
+<span class="nc bnc" id="L34" title="All 2 branches missed.">					if (c == j - 1) {</span>
+<span class="nc" id="L35">						clsPop--;</span>
+					}
+<span class="nc bnc" id="L37" title="All 2 branches missed.">					if (stations &gt; 0) {</span>
+<span class="nc" id="L38">						queueLengths[j][k][c] = clsPop / (double) stations;</span>
+					}
+				}
+			}
+		}
+
+<span class="nc" id="L44">		int iterations = 1;</span>
+<span class="nc" id="L45">		LinearizerCoreAlgorithm coreResult = null;</span>
+<span class="nc" id="L46">		LinearizerCoreAlgorithm[] coreResults = new LinearizerCoreAlgorithm[classes + 1];</span>
+<span class="nc" id="L47">		double[][] scCustFracDiffs = null;</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">		for (int c = 0; c &lt; classes + 1; c++) {</span>
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if (useDeSouzaMuntz) {</span>
+<span class="nc" id="L50">				coreResults[c] = new DeSouzaMuntzLinearizerCoreAlgorithm(c - 1);</span>
+<span class="nc" id="L51">				scCustFracDiffs = new double[stations][classes];</span>
+			} else {
+<span class="nc" id="L53">				coreResults[c] = new LinearizerCoreAlgorithm();</span>
+			}
+		}
+		while (true) {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if (useDeSouzaMuntz) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">					for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L60">						scCustFracDiffs[k][j] = 0;</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">						for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L62">							scCustFracDiffs[k][j] += clsPopulation[c] * custFracDiffs[k][c][j];</span>
+						}
+					}
+				}
+<span class="nc bnc" id="L66" title="All 2 branches missed.">				for (int c = 0; c &lt; classes + 1; c++) {</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">					if (coreResults[c] instanceof DeSouzaMuntzLinearizerCoreAlgorithm) {</span>
+<span class="nc" id="L68">						((DeSouzaMuntzLinearizerCoreAlgorithm) coreResults[c]).setScCustFracDiffs(scCustFracDiffs);</span>
+					}
+				}
+			}
+
+			// Step 2
+<span class="nc" id="L74">			coreResults[0].solve(clsPopulation, queueLengths[0], custFracDiffs);</span>
+
+			// Step 3: termination criteria
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if (iterations &gt;= MAX_ITERATIONS</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">					|| maxDiff(queueLengths[0], coreResults[0].getQueueLengths()) &lt; tolerance) {</span>
+<span class="nc" id="L79">				coreResult = coreResults[0];</span>
+<span class="nc" id="L80">				break;</span>
+			}
+
+<span class="nc" id="L83">			queueLengths[0] = coreResults[0].getQueueLengths();</span>
+
+			// Step 4
+<span class="nc bnc" id="L86" title="All 2 branches missed.">			for (int j = 1; j &lt; classes + 1; j++) {</span>
+<span class="nc" id="L87">				int[] newClsPopulation = new int[classes];</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L89">					newClsPopulation[c] = clsPopulation[c];</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">					if (c == j - 1) {</span>
+<span class="nc" id="L91">						newClsPopulation[c]--;</span>
+					}
+				}
+<span class="nc" id="L94">				coreResults[j].solve(newClsPopulation, queueLengths[j], custFracDiffs);</span>
+<span class="nc" id="L95">				queueLengths[j] = coreResults[j].getQueueLengths();</span>
+			}
+
+			// Step 5
+<span class="nc" id="L99">			double[][][] fractions = new double[classes + 1][stations][classes];</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">					for (int j = 0; j &lt; classes + 1; j++) {</span>
+<span class="nc" id="L103">						int clsPop = clsPopulation[c];</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">						if (c == j - 1) {</span>
+<span class="nc" id="L105">							clsPop--;</span>
+						}
+<span class="nc bnc" id="L107" title="All 2 branches missed.">						if (clsPop != 0) {</span>
+<span class="nc" id="L108">							fractions[j][k][c] = queueLengths[j][k][c] / (double) clsPop;</span>
+						}
+					}
+				}
+			}
+
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">					for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L117">						custFracDiffs[k][c][j] = fractions[j + 1][k][c] - fractions[0][k][c];</span>
+					}
+				}
+			}
+
+			// Step 6
+<span class="nc" id="L123">			iterations++;</span>
+<span class="nc" id="L124">		}</span>
+
+<span class="nc" id="L126">		this.iterations = iterations;</span>
+
+<span class="nc" id="L128">		residenceTime = coreResult.getResidenceTimes();</span>
+<span class="nc" id="L129">		queueLen = coreResult.getQueueLengths();</span>
+
+<span class="nc" id="L131">		sysResponseTime = 0;</span>
+<span class="nc" id="L132">		sysNumJobs = 0;</span>
+<span class="nc" id="L133">		sysThroughput = 0;</span>
+
+		// calculate aggregate measures
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L137">			clsRespTime[c] = 0;</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L139">				clsRespTime[c] += residenceTime[k][c];</span>
+			}
+<span class="nc bnc" id="L141" title="All 2 branches missed.">			if (clsRespTime[c] == 0) {</span>
+<span class="nc" id="L142">				clsThroughput[c] = 0;</span>
+			} else {
+<span class="nc" id="L144">				clsThroughput[c] = clsPopulation[c] / clsRespTime[c];</span>
+			}
+<span class="nc" id="L146">			sysResponseTime += clsRespTime[c];</span>
+		}
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L149">			clsNumJobs[c] = 0;</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L151">				throughput[k][c] = clsThroughput[c] * visits[k][c];</span>
+<span class="nc" id="L152">				utilization[k][c] = throughput[k][c] * servTime[k][c][0];</span>
+<span class="nc" id="L153">				clsNumJobs[c] += queueLen[k][c];</span>
+			}
+		}
+<span class="nc bnc" id="L156" title="All 2 branches missed.">		for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L157">			scResidTime[k] = 0;</span>
+<span class="nc" id="L158">			scQueueLen[k] = 0;</span>
+<span class="nc" id="L159">			scThroughput[k] = 0;</span>
+<span class="nc" id="L160">			scUtilization[k] = 0;</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L162">				scResidTime[k] += residenceTime[k][c];</span>
+<span class="nc" id="L163">				scQueueLen[k] += queueLen[k][c];</span>
+<span class="nc" id="L164">				scThroughput[k] += throughput[k][c];</span>
+<span class="nc" id="L165">				scUtilization[k] += utilization[k][c];</span>
+			}
+<span class="nc" id="L167">			sysNumJobs += scQueueLen[k];</span>
+		}
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if (sysResponseTime != 0) {</span>
+<span class="nc" id="L170">			sysThroughput = sysNumJobs / sysResponseTime;</span>
+		}
+<span class="nc" id="L172">	}</span>
+
+	/**
+	 * The original Linearizer Core algorithm
+	 * 
+	 * @author Abhimanyu Chugh
+	 *
+	 */
+	private class LinearizerCoreAlgorithm {
+<span class="nc" id="L181">		private double[][] resTimes = new double[stations][classes];</span>
+		protected double[][][] queueLengths;
+<span class="nc" id="L183">		protected double[] scQueueLengthsWithWholePop = new double[stations];</span>
+
+<span class="nc" id="L185">		public LinearizerCoreAlgorithm() {</span>
+<span class="nc" id="L186">			queueLengths = new double[classes + 1][stations][classes];</span>
+<span class="nc" id="L187">		}</span>
+
+		public double[][] getResidenceTimes() {
+<span class="nc" id="L190">			return resTimes;</span>
+		}
+
+		public double[][] getQueueLengths() {
+<span class="nc" id="L194">			return queueLengths[0];</span>
+		}
+
+		public void solve(int[] clsPopulation, double[][] inputQueueLengths, double[][][] inputCustFracDiffs) {
+<span class="nc" id="L198">			double[] clsThroughputs = new double[classes];</span>
+<span class="nc" id="L199">			double[][] oldQueueLengths = new double[stations][classes];</span>
+
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L202">				scQueueLengthsWithWholePop[k] = 0;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L204">					queueLengths[0][k][c] = inputQueueLengths[k][c];</span>
+<span class="nc" id="L205">					scQueueLengthsWithWholePop[k] += inputQueueLengths[k][c];</span>
+				}
+			}
+
+//			int iterations = 0;
+			while (true) {
+//				iterations++;
+
+<span class="nc bnc" id="L213" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">					for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L215">						oldQueueLengths[k][c] = queueLengths[0][k][c];</span>
+					}
+				}
+
+				// Step 2
+<span class="nc" id="L220">				double[][] scQueueLengths = new double[classes][stations];</span>
+<span class="nc" id="L221">				scQueueLengths = getSCQueueLengths(clsPopulation, inputCustFracDiffs);</span>
+
+<span class="nc bnc" id="L223" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L224">					double clsRespTime = 0;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">					for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L226">						double demand = (servTime[k][c][0] * visits[k][c]);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">						if (type[k] == Solver.DELAY) {</span>
+<span class="nc" id="L228">							resTimes[k][c] = demand;</span>
+						} else {
+<span class="nc" id="L230">							resTimes[k][c] = demand * (1 + scQueueLengths[c][k]);</span>
+						}
+<span class="nc" id="L232">						clsRespTime += resTimes[k][c];</span>
+					}
+<span class="nc bnc" id="L234" title="All 2 branches missed.">					if (clsRespTime == 0) {</span>
+<span class="nc" id="L235">						clsThroughputs[c] = 0;</span>
+					} else {
+<span class="nc" id="L237">						clsThroughputs[c] = clsPopulation[c] / clsRespTime;</span>
+					}
+				}
+
+<span class="nc bnc" id="L241" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L242">					scQueueLengthsWithWholePop[k] = 0;</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">					for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L244">						queueLengths[0][k][c] = clsThroughputs[c] * resTimes[k][c];</span>
+<span class="nc" id="L245">						scQueueLengthsWithWholePop[k] += queueLengths[0][k][c];</span>
+					}
+				}
+
+				// Step 4: termination criteria
+<span class="nc bnc" id="L250" title="All 2 branches missed.">				if (maxDiff(oldQueueLengths, queueLengths[0]) &lt; tolerance) {</span>
+<span class="nc" id="L251">					break;</span>
+				}
+<span class="nc" id="L253">			}</span>
+<span class="nc" id="L254">		}</span>
+
+		protected double[][] getSCQueueLengths(int[] clsPopulation, double[][][] inputCustFracDiffs) {
+<span class="nc" id="L257">			double[][] scQueueLengths = new double[classes][stations];</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L260">					double fraction = 0;</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">					if (clsPopulation[c] &gt; 0) {</span>
+<span class="nc" id="L262">						fraction = queueLengths[0][k][c] / (double) clsPopulation[c];</span>
+					}
+<span class="nc bnc" id="L264" title="All 2 branches missed.">					for (int j = 1; j &lt; classes + 1; j++) {</span>
+<span class="nc" id="L265">						int clsPop = clsPopulation[c];</span>
+<span class="nc bnc" id="L266" title="All 4 branches missed.">						if (clsPop &gt; 0 &amp;&amp; c == j - 1) {</span>
+<span class="nc" id="L267">							clsPop--;</span>
+						}
+<span class="nc" id="L269">						queueLengths[j][k][c] = clsPop * (fraction + inputCustFracDiffs[k][c][j - 1]);</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L274" title="All 2 branches missed.">			for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L276">					scQueueLengths[j][k] = 0;</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">					for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L278">						scQueueLengths[j][k] += queueLengths[j + 1][k][c];</span>
+					}
+				}
+			}
+<span class="nc" id="L282">			return scQueueLengths;</span>
+		}
+	}
+
+	/**
+	 * The modified Core algorithm proposed by De Souza and Muntz
+	 * 
+	 * @author Abhimanyu Chugh
+	 *
+	 */
+	private class DeSouzaMuntzLinearizerCoreAlgorithm extends LinearizerCoreAlgorithm {
+		private int classIndexWithOneLessCustomer;
+<span class="nc" id="L294">		double[][] scCustFracDiffs = null;</span>
+
+<span class="nc" id="L296">		public DeSouzaMuntzLinearizerCoreAlgorithm(int classIndexWithOneLessCustomer) {</span>
+<span class="nc" id="L297">			super();</span>
+<span class="nc" id="L298">			queueLengths = new double[1][stations][classes];</span>
+<span class="nc" id="L299">			this.classIndexWithOneLessCustomer = classIndexWithOneLessCustomer;</span>
+<span class="nc" id="L300">		}</span>
+
+		public void setScCustFracDiffs(double[][] scCustFracDiffs) {
+<span class="nc" id="L303">			this.scCustFracDiffs = scCustFracDiffs;</span>
+<span class="nc" id="L304">		}</span>
+
+		@Override
+		protected double[][] getSCQueueLengths(int[] clsPopulation, double[][][] inputCustFracDiffs) {
+<span class="nc" id="L308">			double[][] scQueueLengths = new double[classes][stations];</span>
+
+<span class="nc bnc" id="L310" title="All 2 branches missed.">			if (scCustFracDiffs == null) {</span>
+<span class="nc" id="L311">				System.out.println(&quot;service centre cust frac diffs are NULL&quot;);</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">					for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L314">						scCustFracDiffs[k][j] = 0;</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">						for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L316">							scCustFracDiffs[k][j] += clsPopulation[c] * inputCustFracDiffs[k][c][j];</span>
+						}
+					}
+				}
+			}
+
+<span class="nc bnc" id="L322" title="All 2 branches missed.">			for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">				for (int k = 0; k &lt; stations; k++) {</span>
+<span class="nc" id="L324">					double scQueueLength = scQueueLengthsWithWholePop[k] + scCustFracDiffs[k][j]</span>
+							- inputCustFracDiffs[k][j][j];
+<span class="nc bnc" id="L326" title="All 2 branches missed.">					if (clsPopulation[j] &gt; 0) {</span>
+<span class="nc" id="L327">						scQueueLength -= queueLengths[0][k][j] / (double) clsPopulation[j];</span>
+					}
+<span class="nc bnc" id="L329" title="All 2 branches missed.">					if (classIndexWithOneLessCustomer &gt;= 0) {</span>
+<span class="nc" id="L330">						scQueueLength -= inputCustFracDiffs[k][classIndexWithOneLessCustomer][j];</span>
+					}
+<span class="nc" id="L332">					scQueueLengths[j][k] = scQueueLength;</span>
+				}
+			}
+
+<span class="nc" id="L336">			return scQueueLengths;</span>
+		}
+	}
+
+	@Override
+	protected double[][] getQueueLensWithOneLessCustomer() {
+		// TODO Auto-generated method stub
+<span class="nc" id="L343">		return null;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

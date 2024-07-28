@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ArrivalRateParametricAnalysis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.parametric</a> &gt; <span class="el_source">ArrivalRateParametricAnalysis.java</span></div><h1>ArrivalRateParametricAnalysis.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.definitions.parametric;
+
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.Vector;
+
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+
+/**
+ * &lt;p&gt;Title: ArrivalRateParametricAnalysis&lt;/p&gt;
+ * &lt;p&gt;Description: this class is used to describe a parametric analysis where
+ * the varied parameter is the mean value of the arrival rate of an/all open
+ * classes. It adds the &lt;code &gt;classKey&lt;/code&gt; field used to keep the key of
+ * the Job-Class whose service time will be varied, and a boolean value
+ * &lt;code&gt;singleClass&lt;/code&gt; used to choose the type of service time growth
+ * (single or all class).&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 14-dic-2005
+ *         Time: 12.22.28
+ *
+ * Modified by: Xinyu Gao
+ */
+
+public class ArrivalRateParametricAnalysis extends ParametricAnalysisDefinition {
+<span class="fc" id="L47">	private final double FROM_ALL = 100;</span>
+<span class="fc" id="L48">	private final double TO_ALL = 150;</span>
+<span class="fc" id="L49">	private final double INCREMENT_SINGLE = 2;</span>
+<span class="fc" id="L50">	private final int STEPS = 10;</span>
+<span class="fc" id="L51">	private final boolean SINGLE_CLASS = false;</span>
+
+	private boolean singleClass;
+	private Object classKey;
+
+	private Vector&lt;Object&gt; availableClasses;
+	private Object values;
+
+<span class="fc" id="L59">	public ArrivalRateParametricAnalysis(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {</span>
+<span class="fc" id="L60">		type = PA_TYPE_ARRIVAL_RATE;</span>
+<span class="fc" id="L61">		numberOfSteps = STEPS;</span>
+<span class="fc" id="L62">		classDef = cd;</span>
+<span class="fc" id="L63">		stationDef = sd;</span>
+<span class="fc" id="L64">		simDef = simd;</span>
+<span class="fc" id="L65">		Vector&lt;Object&gt; available = new ParametricAnalysisChecker(cd, sd, simd).checkForArrivalRatesParametricSimulationAvailableClasses();</span>
+<span class="pc bpc" id="L66" title="3 of 4 branches missed.">		if (cd.getOpenClassKeys().size() == 1 || available.size() &lt; cd.getOpenClassKeys().size()) {</span>
+<span class="fc" id="L67">			singleClass = true;</span>
+<span class="fc" id="L68">			classKey = available.get(0);</span>
+<span class="fc" id="L69">			double arrivalRate = 1 / ((Distribution) cd.getClassDistribution(classKey)).getMean();</span>
+<span class="fc" id="L70">			initialValue = arrivalRate;</span>
+<span class="fc" id="L71">			finalValue = arrivalRate * INCREMENT_SINGLE;</span>
+<span class="fc" id="L72">		} else {</span>
+<span class="nc" id="L73">			singleClass = SINGLE_CLASS;</span>
+			if (SINGLE_CLASS) {
+				double arrivalRate = 1 / ((Distribution) cd.getClassDistribution(classKey)).getMean();
+				initialValue = arrivalRate;
+				finalValue = arrivalRate * INCREMENT_SINGLE;
+			} else {
+<span class="nc" id="L79">				initialValue = FROM_ALL;</span>
+<span class="nc" id="L80">				finalValue = TO_ALL;</span>
+			}
+		}
+<span class="fc" id="L83">	}</span>
+
+	/**
+	 * Returns true if only the arrival rate of one class will be increased
+	 * @return true if only the arrival rate of one class will be increased
+	 */
+	public boolean isSingleClass() {
+<span class="fc" id="L90">		return singleClass;</span>
+	}
+
+	/**
+	 * Sets the type of arrival rate increase. If &lt;code&gt; isSingleClass&lt;/code&gt;
+	 * param is true only the arrival rate of one class will be increased
+	 * @param isSingleClass
+	 */
+	public void setSingleClass(boolean isSingleClass) {
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (singleClass != isSingleClass) {</span>
+<span class="nc" id="L100">			simDef.setSaveChanged();</span>
+		}
+<span class="nc" id="L102">		singleClass = isSingleClass;</span>
+<span class="nc" id="L103">	}</span>
+
+	/**
+	 * Sets the default initial Value
+	 */
+	public void setDefaultInitialValue() {
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">		if (singleClass) {</span>
+<span class="fc" id="L110">			double rate = 1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean();</span>
+<span class="fc" id="L111">			initialValue = rate;</span>
+<span class="fc" id="L112">		} else {</span>
+<span class="nc" id="L113">			initialValue = FROM_ALL;</span>
+		}
+<span class="fc" id="L115">	}</span>
+
+	/**
+	 * Sets default final value
+	 */
+	public void setDefaultFinalValue() {
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">		if (singleClass) {</span>
+<span class="fc" id="L122">			double rate = (1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean()) * INCREMENT_SINGLE;</span>
+<span class="fc" id="L123">			finalValue = rate;</span>
+<span class="fc" id="L124">		} else {</span>
+<span class="nc" id="L125">			finalValue = TO_ALL;</span>
+		}
+<span class="fc" id="L127">	}</span>
+
+	/**
+	 * Gets the class key of the class whose arrival rate will be
+	 * increased. If the simulation is not single class, the &lt;code&gt; null &lt;/code&gt;
+	 * value will be returned
+	 * @return the key of the class whose arrival rate will be increased if the
+	 *         parametric analysis is single class, &lt;code&gt; null &lt;/code&gt; otherwise.
+	 */
+	@Override
+	public Object getReferenceClass() {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		if (singleClass) {</span>
+<span class="nc" id="L139">			return classKey;</span>
+		} else {
+<span class="nc" id="L141">			return null;</span>
+		}
+	}
+
+	/**
+	 * Sets the class whose arrival rate will be increased. If &lt;code&gt; singleClass &lt;/code&gt;
+	 * value is not true nothing will be done
+	 * @param classKey the key of the class whose number of job will be
+	 *        increased
+	 */
+	public void setReferenceClass(Object classKey) {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		if (singleClass) {</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			if (this.classKey != classKey) {</span>
+<span class="nc" id="L154">				simDef.setSaveChanged();</span>
+			}
+<span class="nc" id="L156">			this.classKey = classKey;</span>
+		}
+<span class="nc" id="L158">	}</span>
+
+	/**
+	 * Gets the type of parametric analysis
+	 *
+	 * @return the type of parametric analysis
+	 */
+	@Override
+	public String getType() {
+<span class="fc" id="L167">		return type;</span>
+	}
+
+	/**
+	 * Changes the model preparing it for the next step
+	 *
+	 */
+	@Override
+	public void changeModel(int step) {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		if (step &gt;= numberOfSteps) {</span>
+<span class="nc" id="L177">			return;</span>
+		}
+<span class="nc bnc" id="L179" title="All 2 branches missed.">		if (values != null) {</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">			if (singleClass) {</span>
+<span class="nc" id="L181">				Double refAR = (Double) ((Vector) values).get(step);</span>
+<span class="nc" id="L182">				Distribution distr = (Distribution) classDef.getClassDistribution(classKey);</span>
+<span class="nc" id="L183">				distr.setMean(1 / refAR.doubleValue());</span>
+<span class="nc" id="L184">			} else {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">				for (int i = 0; i &lt; availableClasses.size(); i++) {</span>
+<span class="nc" id="L186">					Object thisClass = availableClasses.get(i);</span>
+<span class="nc" id="L187">					double refAR = ((ValuesTable) values).getValue(thisClass, step);</span>
+<span class="nc" id="L188">					Distribution distr = (Distribution) classDef.getClassDistribution(thisClass);</span>
+<span class="nc" id="L189">					distr.setMean(1 / refAR);</span>
+				}
+			}
+		}
+<span class="nc" id="L193">	}</span>
+
+	/**
+	 * Gets the maximum number of steps compatible with the model definition and the type of parametric analysis.
+	 *
+	 * @return the maximum number of steps
+	 */
+	@Override
+	public int searchForAvailableSteps() {
+<span class="fc" id="L202">		return Integer.MAX_VALUE;</span>
+	}
+
+	/**
+	 * Finds the set of possible values of the population on which the
+	 * simulation may be iterated on.
+	 *
+	 */
+	@Override
+	public void createValuesSet() {
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">		if (singleClass) {</span>
+<span class="fc" id="L213">			double sum = 0;</span>
+<span class="fc" id="L214">			double increment = (finalValue - initialValue) / ((numberOfSteps - 1));</span>
+<span class="fc" id="L215">			values = new Vector(numberOfSteps);</span>
+<span class="fc bfc" id="L216" title="All 2 branches covered.">			for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="fc" id="L217">				double value = initialValue + sum;</span>
+<span class="fc" id="L218">				((Vector&lt;Double&gt;) values).add(new Double(value));</span>
+<span class="fc" id="L219">				sum += increment; //note that the increment may be &lt; 0</span>
+			}
+<span class="fc" id="L221">			originalValues = new Double(initialValue);</span>
+<span class="fc" id="L222">		} else {</span>
+<span class="nc" id="L223">			double sum = 1;</span>
+<span class="nc" id="L224">			double increment = (finalValue - initialValue) / (getInitialValue() * (double) (numberOfSteps - 1));</span>
+			//find the set of available classes
+<span class="nc" id="L226">			Vector&lt;Object&gt; openClasses = classDef.getOpenClassKeys();</span>
+<span class="nc" id="L227">			availableClasses = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">			for (int i = 0; i &lt; openClasses.size(); i++) {</span>
+<span class="nc" id="L229">				Object thisClass = openClasses.get(i);</span>
+<span class="nc" id="L230">				Object temp = classDef.getClassDistribution(thisClass);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">				if (temp instanceof Distribution) {</span>
+<span class="nc" id="L232">					Distribution distr = (Distribution) temp;</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">					if (distr.hasMean()) {</span>
+<span class="nc" id="L234">						availableClasses.add(thisClass);</span>
+					}
+				}
+			}
+<span class="nc" id="L238">			values = new ValuesTable(classDef, availableClasses, numberOfSteps);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">			for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">				for (int k = 0; k &lt; availableClasses.size(); k++) {</span>
+<span class="nc" id="L241">					Object thisClass = availableClasses.get(k);</span>
+<span class="nc" id="L242">					double thisInitialArrivalRate = 1 / ((Distribution) classDef.getClassDistribution(thisClass)).getMean();</span>
+<span class="nc" id="L243">					double value = thisInitialArrivalRate * (sum);</span>
+<span class="nc" id="L244">					((ValuesTable) values).setValue(thisClass, value);</span>
+				}
+<span class="nc" id="L246">				sum += increment; //note that the increment may be &lt; 0</span>
+			}
+			//used to save the initial values of service time
+<span class="nc" id="L249">			originalValues = new Vector(availableClasses.size());</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">			for (int i = 0; i &lt; availableClasses.size(); i++) {</span>
+<span class="nc" id="L251">				Object thisClass = availableClasses.get(i);</span>
+<span class="nc" id="L252">				double thisRate = 1 / ((Distribution) classDef.getClassDistribution(thisClass)).getMean();</span>
+<span class="nc" id="L253">				((Vector&lt;Double&gt;) originalValues).add(new Double(thisRate));</span>
+			}
+		}
+<span class="fc" id="L256">	}</span>
+
+	/**
+	 * Restore the original values of the parameter
+	 */
+	@Override
+	public void restoreOriginalValues() {
+<span class="nc bnc" id="L263" title="All 2 branches missed.">		if (originalValues != null) {</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">			if (singleClass) {</span>
+<span class="nc" id="L265">				Distribution distr = (Distribution) classDef.getClassDistribution(classKey);</span>
+<span class="nc" id="L266">				Double rate = (Double) originalValues;</span>
+<span class="nc" id="L267">				distr.setMean(1 / rate.doubleValue());</span>
+<span class="nc" id="L268">			} else {</span>
+<span class="nc" id="L269">				Vector values = (Vector) originalValues;</span>
+<span class="nc" id="L270">				Vector&lt;Object&gt; openClasses = classDef.getOpenClassKeys();</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">				for (int i = 0; i &lt; openClasses.size(); i++) {</span>
+<span class="nc" id="L272">					Object thisClass = openClasses.get(i);</span>
+<span class="nc" id="L273">					Distribution distr = (Distribution) classDef.getClassDistribution(thisClass);</span>
+<span class="nc" id="L274">					Double thisRate = (Double) values.get(i);</span>
+<span class="nc" id="L275">					distr.setMean(1 / thisRate.doubleValue());</span>
+				}
+			}
+		}
+<span class="nc" id="L279">	}</span>
+
+	/**
+	 * Checks if the PA model is still coherent with simulation model definition. If
+	 * the &lt;code&gt;autocorrect&lt;/code&gt; variable is set to true, if the PA model is no more
+	 * valid but it can be corrected it will be changed.
+	 *
+	 * @param autocorrect if true the PA model will be autocorrected
+	 *
+	 * @return 0 - If the PA model is still valid &lt;br&gt;
+	 *         1 - If the PA model is no more valid, but it will be corrected &lt;br&gt;
+	 *         2 - If the PA model can be no more used
+	 */
+	@Override
+	public int checkCorrectness(boolean autocorrect) {
+<span class="fc" id="L294">		int code = 0;</span>
+<span class="fc" id="L295">		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(classDef, stationDef, simDef);</span>
+<span class="fc" id="L296">		Vector&lt;Object&gt; openClasses = classDef.getOpenClassKeys();</span>
+<span class="fc" id="L297">		Vector&lt;Object&gt; availableClasses = checker.checkForArrivalRatesParametricSimulationAvailableClasses();</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">		if (availableClasses.isEmpty()) {</span>
+<span class="nc" id="L299">			code = 2;</span>
+		} else {
+			//if is single class...
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">			if (isSingleClass()) {</span>
+				// ... and the selected closed class is no more available
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">				if (!availableClasses.contains(classKey)) {</span>
+<span class="nc" id="L305">					code = 1;</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">					if (autocorrect) {</span>
+<span class="nc" id="L307">						classKey = openClasses.get(0); //change the reference class</span>
+<span class="nc" id="L308">						setDefaultInitialValue();</span>
+<span class="nc" id="L309">						setDefaultFinalValue();</span>
+					}
+				} else {
+<span class="fc" id="L312">					double refRate = 1 / ((Distribution) classDef.getClassDistribution(classKey)).getMean();</span>
+					//If the arrival rate of reference class was changed...
+<span class="pc bpc" id="L314" title="1 of 2 branches missed.">					if (initialValue != refRate) {</span>
+<span class="nc" id="L315">						code = 1;</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">						if (autocorrect) {</span>
+<span class="nc" id="L317">							initialValue = refRate;</span>
+<span class="nc" id="L318">							finalValue = refRate * INCREMENT_SINGLE;</span>
+						}
+					}
+<span class="fc" id="L321">				}</span>
+			} else {
+<span class="nc bnc" id="L323" title="All 4 branches missed.">				if (openClasses.size() == 1 || availableClasses.size() &lt; openClasses.size()) {</span>
+<span class="nc" id="L324">					code = 1;</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">					if (autocorrect) {</span>
+<span class="nc" id="L326">						classKey = availableClasses.get(0);</span>
+<span class="nc" id="L327">						singleClass = true;</span>
+<span class="nc" id="L328">						setDefaultInitialValue();</span>
+<span class="nc" id="L329">						setDefaultFinalValue();</span>
+					}
+				}
+			}
+		}
+<span class="fc" id="L334">		return code;</span>
+	}
+
+	/**
+	 * Returns the values assumed by the varying parameter
+	 *
+	 * @return a Vector containing the values assumed by the varying parameter
+	 */
+	@Override
+	public Vector&lt;Number&gt; getParameterValues() {
+<span class="fc" id="L344">		Vector&lt;Number&gt; assumedValues = new Vector&lt;Number&gt;(numberOfSteps);</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">		if (singleClass) {</span>
+<span class="fc" id="L346">			return (Vector&lt;Number&gt;) values;</span>
+		} else {
+<span class="nc" id="L348">			ValuesTable temp = (ValuesTable) values;</span>
+<span class="nc" id="L349">			double originalValue = ((Double) ((Vector) originalValues).get(0)).doubleValue();</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">			for (int i = 0; i &lt; numberOfSteps; i++) {</span>
+<span class="nc" id="L351">				double thisValue = temp.getValue(availableClasses.get(0), i);</span>
+<span class="nc" id="L352">				double ratio = thisValue / originalValue * getInitialValue();</span>
+<span class="nc" id="L353">				assumedValues.add(new Double(ratio));</span>
+			}
+		}
+<span class="nc" id="L356">		return assumedValues;</span>
+	}
+
+	/**
+	 * Get the reference class name
+	 *
+	 * @return the name of the class
+	 */
+	@Override
+	public String getReferenceClassName() {
+<span class="nc" id="L366">		return classDef.getClassName(classKey);</span>
+	}
+
+	/**
+	 * Gets a TreeMap containing for each property its value. The supported properties are
+	 * defined as constants inside this class.
+	 * @return a TreeMap containing the value for each property
+	 */
+	@Override
+	public Map&lt;String, String&gt; getProperties() {
+<span class="fc" id="L376">		TreeMap&lt;String, String&gt; properties = new TreeMap&lt;String, String&gt;();</span>
+<span class="fc" id="L377">		properties.put(FROM_PROPERTY, Double.toString(initialValue));</span>
+<span class="fc" id="L378">		properties.put(TYPE_PROPERTY, getType());</span>
+<span class="fc" id="L379">		properties.put(TO_PROPERTY, Double.toString(finalValue));</span>
+<span class="fc" id="L380">		properties.put(STEPS_PROPERTY, Integer.toString(numberOfSteps));</span>
+<span class="fc" id="L381">		properties.put(IS_SINGLE_CLASS_PROPERTY, Boolean.toString(singleClass));</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">		if (singleClass) {</span>
+<span class="fc" id="L383">			properties.put(REFERENCE_CLASS_PROPERTY, classDef.getClassName(classKey));</span>
+		}
+<span class="fc" id="L385">		return properties;</span>
+	}
+
+	/**
+	 * Sets the value for the specified property. The supported properties are: &lt;br&gt;
+	 * - TO_PROPERTY  &lt;br&gt;
+	 * - FROM_PROPERTY  &lt;br&gt;
+	 * - STEPS_PROPERTY &lt;br&gt;
+	 * - IS_SINGLE_CLASS_PROPERTY &lt;br&gt;
+	 * - REFERENCE_CLASS_PROPERTY
+	 * @param propertyName the name of the property to be set
+	 * @param value the value to be set
+	 */
+	@Override
+	public void setProperty(String propertyName, String value) {
+<span class="fc bfc" id="L400" title="All 2 branches covered.">		if (propertyName.equals(TO_PROPERTY)) {</span>
+<span class="fc" id="L401">			finalValue = Double.parseDouble(value);</span>
+<span class="fc bfc" id="L402" title="All 2 branches covered.">		} else if (propertyName.equals(FROM_PROPERTY)) {</span>
+<span class="fc" id="L403">			initialValue = Double.parseDouble(value);</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">		} else if (propertyName.equals(STEPS_PROPERTY)) {</span>
+<span class="fc" id="L405">			numberOfSteps = Integer.parseInt(value);</span>
+<span class="pc bpc" id="L406" title="1 of 2 branches missed.">			if (numberOfSteps &gt; MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L407">				numberOfSteps = MAX_STEP_NUMBER;</span>
+			}
+<span class="fc bfc" id="L409" title="All 2 branches covered.">		} else if (propertyName.equals(IS_SINGLE_CLASS_PROPERTY)) {</span>
+<span class="fc" id="L410">			singleClass = Boolean.valueOf(value).booleanValue();</span>
+<span class="fc" id="L411">			this.setDefaultInitialValue();</span>
+<span class="fc" id="L412">			this.setDefaultFinalValue();</span>
+<span class="fc bfc" id="L413" title="All 2 branches covered.">		} else if (propertyName.equals(REFERENCE_CLASS_PROPERTY)) {</span>
+<span class="fc" id="L414">			classKey = classDef.getClassByName(value);</span>
+		}
+<span class="fc" id="L416">		simDef.setSaveChanged();</span>
+<span class="fc" id="L417">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

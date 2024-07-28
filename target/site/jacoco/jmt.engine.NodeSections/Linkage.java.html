@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Linkage.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Linkage.java</span></div><h1>Linkage.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.TransitionUtilities.EventFinishPacket;
+import jmt.engine.QueueNet.*;
+
+/**
+ * &lt;p&gt;Title: Linkage&lt;/p&gt;
+ * &lt;p&gt;Description: This class implements the linkage section.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 15-07-2016
+ * Time: 21.00.00
+ */
+public class Linkage extends OutputSection {
+
+	private NodeList outputNodes;
+	private NetNode requestSource;
+
+	//--------------------BLOCKING REGION PROPERTIES--------------------//
+	//true if the border router behaviour is turned on
+	private boolean borderRouterON;
+	//the blocking region that the owner node of this section belongs to
+	private BlockingRegion myRegion;
+	//the input station of the blocking region
+	private NetNode regionInputStation;
+	//------------------------------------------------------------------//
+
+	/**
+	 * Creates a new instance of the linkage section.
+	 */
+<span class="nc" id="L50">	public Linkage() {</span>
+<span class="nc" id="L51">		borderRouterTurnOFF();</span>
+<span class="nc" id="L52">	}</span>
+
+	/**
+	 * Tells if the border router behaviour is turned on.
+	 */
+	public boolean isBorderRouterON() {
+<span class="nc" id="L58">		return borderRouterON;</span>
+	}
+
+	/**
+	 * Turns off the border router behaviour.
+	 */
+	public void borderRouterTurnOFF() {
+<span class="nc" id="L65">		borderRouterON = false;</span>
+<span class="nc" id="L66">		myRegion = null;</span>
+<span class="nc" id="L67">		regionInputStation = null;</span>
+<span class="nc" id="L68">	}</span>
+
+	/**
+	 * Turns on the border router behaviour.
+	 */
+	public void borderRouterTurnON(BlockingRegion region) {
+<span class="nc" id="L74">		borderRouterON = true;</span>
+<span class="nc" id="L75">		myRegion = region;</span>
+<span class="nc" id="L76">		regionInputStation = myRegion.getInputStation();</span>
+<span class="nc" id="L77">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L81">		outputNodes = node.getOutputNodes();</span>
+<span class="nc" id="L82">		requestSource = null;</span>
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc" id="L87">		Object data = message.getData();</span>
+<span class="nc" id="L88">		NetNode source = message.getSource();</span>
+
+<span class="nc bnc" id="L90" title="All 9 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+<span class="nc" id="L93">			break;</span>
+
+		case NetEvent.EVENT_JOB:
+		{
+<span class="nc" id="L97">			Job job = (Job) data;</span>
+<span class="nc" id="L98">			send(job, 0.0, requestSource);</span>
+<span class="nc bnc" id="L99" title="All 4 branches missed.">			if (borderRouterON &amp;&amp; !myRegion.belongsToRegion(requestSource)) {</span>
+<span class="nc" id="L100">				myRegion.decreaseOccupation(job.getJobClass());</span>
+<span class="nc" id="L101">				send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);</span>
+			}
+			break;
+		}
+
+		case NetEvent.EVENT_ACK:
+<span class="nc" id="L107">			return MSG_NOT_PROCESSED;</span>
+
+		case NetEvent.EVENT_JOB_CHANGE:
+		{
+<span class="nc bnc" id="L111" title="All 2 branches missed.">			for (int i = 0; i &lt; outputNodes.size(); i++) {</span>
+<span class="nc" id="L112">				send(NetEvent.EVENT_JOB_CHANGE, data, 0.0, NodeSection.INPUT, outputNodes.get(i));</span>
+			}
+<span class="nc" id="L114">			break;</span>
+		}
+
+		case NetEvent.EVENT_JOB_REQUEST:
+		{
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if (requestSource != null) {</span>
+<span class="nc" id="L120">				return MSG_NOT_PROCESSED;</span>
+			}
+<span class="nc" id="L122">			requestSource = source;</span>
+<span class="nc" id="L123">			sendBackward(NetEvent.EVENT_JOB_REQUEST, data, 0.0);</span>
+<span class="nc" id="L124">			break;</span>
+		}
+
+		case NetEvent.EVENT_JOB_REQUEST_FROM_SERVER:{
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			if(requestSource != null){</span>
+<span class="nc" id="L129">				return MSG_NOT_PROCESSED;</span>
+			}
+<span class="nc" id="L131">			requestSource = source;</span>
+<span class="nc" id="L132">			sendBackward(NetEvent.EVENT_JOB_REQUEST_FROM_SERVER, data, 0.0);</span>
+<span class="nc" id="L133">			break;</span>
+		}
+
+		case NetEvent.EVENT_JOB_FINISH:
+		{
+<span class="nc" id="L138">			send(NetEvent.EVENT_JOB_FINISH, data, 0.0, NodeSection.INPUT, requestSource);</span>
+<span class="nc" id="L139">			requestSource = null;</span>
+<span class="nc" id="L140">			break;</span>
+		}
+
+		case NetEvent.EVENT_STOP:
+<span class="nc" id="L144">			break;</span>
+
+		default:
+<span class="nc" id="L147">			return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L150">		return MSG_PROCESSED;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

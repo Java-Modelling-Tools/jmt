@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoMoMBasis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.basis</a> &gt; <span class="el_source">CoMoMBasis.java</span></div><h1>CoMoMBasis.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical.solvers.basis;
+
+import java.util.ArrayList;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationChangeVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * A class to encapsulate the Basis of CoMoM
+ * 
+ * The basis is intialised according to the initial conditions of CoMoM.
+ * 
+ * An ordered list of PopulationChangeVectors is generated to provide the indexOf() functionality
+ * i.e. to return the index of a normalising constant in the basis.
+ * Subclasses can specify a Comparator to sort this list as they choose.
+ * 
+ * Subclasses can specify a Comparator to sort this list as they choose.
+ * 
+ * @author Jack Bradshaw 
+ */
+public class CoMoMBasis extends Basis {
+
+	/**
+	 * Constructor
+	 * @param m The Queueing Network Model under study
+	 */
+	public CoMoMBasis(QNModel m) {
+<span class="nc" id="L50">		super(m);		</span>
+<span class="nc" id="L51">		initialise();</span>
+<span class="nc" id="L52">	}	</span>
+
+	private void initialise() {
+<span class="nc" id="L55">		order = new ArrayList&lt;PopulationChangeVector&gt;();</span>
+
+		//Generate all the possible population change vectors
+<span class="nc" id="L58">		generate();</span>
+<span class="nc" id="L59">	}</span>
+
+	/**
+	 * Fills the list 'order' with all positive vectors of the form (n_1, n_2, ..., n_(R-1), 0 ),
+	 * where n_1 + n_2 + ... + n_(R-1) &lt;= M
+	 */
+	private void generate() {
+<span class="nc" id="L66">		PopulationChangeVector v = new PopulationChangeVector(0,R);</span>
+<span class="nc" id="L67">		order.add(v);</span>
+<span class="nc" id="L68">		int current_list_end= 1;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		for (int i = 1; i &lt;= M; i++) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">			for (int j = 0; j &lt; R - 1; j++) {</span>
+<span class="nc" id="L71">				for (int k = current_list_end - MiscMathsFunctions.binomialCoefficient(R - 1 - j + i - 2, i - 1);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">					 k &lt; current_list_end; k++) {</span>
+<span class="nc" id="L73">					v = order.get(k);</span>
+<span class="nc" id="L74">					v.plusOne(j+1);</span>
+<span class="nc" id="L75">					order.add(v.copy());</span>
+<span class="nc" id="L76">					v.restore();</span>
+				}
+			}
+<span class="nc" id="L79">			current_list_end += MiscMathsFunctions.binomialCoefficient(R - 1 + i - 1, i );</span>
+		}
+<span class="nc" id="L81">	}</span>
+
+	/**
+	 * Finds the index of Normalising Constant G(N-n, m) as determined by n and m
+	 * @param n Change in population vector
+	 * @param m Multiplicity vector
+	 * @return Index of G(N-n, m) in basis
+	 * @throws InternalErrorException
+	 */
+	public int indexOf(PopulationChangeVector n, MultiplicitiesVector m) throws InternalErrorException {
+<span class="nc" id="L91">		int queue_added = m.whichSingleQueueAdded();</span>
+<span class="nc" id="L92">		return indexOf(n,queue_added);</span>
+	}
+
+	/**
+	 * Finds the index of Normalising Constant G(N-n, m) as determined by n and m
+	 * @param n Change in population vector
+	 * @param m index of queue added (0 for no queue added)
+	 * @return Index of G(N-n, m) in basis
+	 * @throws InternalErrorException
+	 */
+	public int indexOf(PopulationChangeVector n, int m) throws InternalErrorException {
+<span class="nc" id="L103">		int population_position = order.indexOf(n);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if (population_position == -1) throw new InternalErrorException(&quot;Invalid PopulationChangeVector&quot;);</span>
+
+		//order multiplicities 0,1,2,3,...M
+<span class="nc" id="L107">		return population_position*(qnm.M + 1) + m;</span>
+	}
+
+	/**
+	 * @param index index in order
+	 * @return Vector store in 'order' at 'index'
+	 */
+	public PopulationChangeVector getPopulationChangeVector(int index) {
+<span class="nc" id="L115">		return order.get(index);</span>
+	}
+
+
+	/**
+	 * Prints the vectors in the 'order' vector
+	 */
+	public void print() {
+<span class="nc" id="L123">		int total = 0;</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		for (PopulationChangeVector m : order) {</span>
+<span class="nc" id="L125">			m.print();</span>
+<span class="nc" id="L126">			total++;</span>
+<span class="nc" id="L127">		}</span>
+<span class="nc" id="L128">		System.out.println(&quot;total: &quot; + total);</span>
+<span class="nc" id="L129">	}</span>
+
+	/**
+	 * Initialises the basis for population (0,...0)
+	 * @throws InternalErrorException 
+	 */	
+	@Override
+	public void initialiseBasis() throws InternalErrorException {
+
+<span class="nc" id="L138">		System.out.println(&quot;Intialising Basis&quot;);</span>
+
+		// Negative populations have normalising constant equal to ZERO
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		for ( int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L142">			basis[i] = BigRational.ZERO;</span>
+<span class="nc" id="L143">			previous_basis[i] = BigRational.ZERO;</span>
+		}
+
+		// Zero populations have normalising constant equal to ONE
+<span class="nc" id="L147">		PopulationChangeVector zero_population = new PopulationChangeVector(0,R);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		for (int k = 0; k &lt;= M; k++) {</span>
+<span class="nc" id="L149">			int index = indexOf(zero_population,k);</span>
+<span class="nc" id="L150">			basis[index] = BigRational.ONE;</span>
+		}
+<span class="nc" id="L152">	}</span>
+
+	/**
+	 * Calculates the size of the basis to be store in variable size
+	 */
+	@Override
+	public void setSize() {
+<span class="nc" id="L159">		size  = (M + 1)* MiscMathsFunctions.binomialCoefficient(M + R - 1, M);</span>
+<span class="nc" id="L160">	}	</span>
+
+	/**
+	 * Computes Mean Throughput and Mean Queue Length performance indices
+	 * and stores them in the queueing network model object, qnm
+	 * @throws InternalErrorException
+	 */
+	public void computePerformanceMeasures() throws InternalErrorException {
+		//Array of Mean Throughputs per class
+<span class="nc" id="L169">		BigRational[] X = new BigRational[qnm.R];</span>
+
+		//Array of Mean Queue Lengths
+<span class="nc" id="L172">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+
+<span class="nc" id="L174">		PopulationChangeVector n = new PopulationChangeVector(0,R);</span>
+
+		//Computing Throughput
+<span class="nc bnc" id="L177" title="All 2 branches missed.">		for (int job_class = 1; job_class &lt; qnm.R; job_class++) {</span>
+<span class="nc" id="L178">			n.plusOne(job_class);</span>
+<span class="nc" id="L179">			System.out.println(n);</span>
+<span class="nc" id="L180">			System.out.println(indexOf(n, 0));</span>
+<span class="nc" id="L181">			X[job_class-1] = (basis[indexOf(n, 0)]).copy().divide(qnm.getNormalisingConstant());</span>
+<span class="nc" id="L182">			n.restore();</span>
+		}
+<span class="nc" id="L184">		X[qnm.R-1] = (previous_basis[indexOf(n, 0)]).copy().divide(qnm.getNormalisingConstant());</span>
+
+		//Computing Queue Lengths
+<span class="nc bnc" id="L187" title="All 2 branches missed.">		for (int queue = 1; queue &lt;= qnm.M; queue++) {</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">			for (int job_class = 1; job_class &lt; qnm.R; job_class++) {</span>
+<span class="nc" id="L189">				Q[queue-1][job_class-1] = qnm.getDemandAsBigRational(queue - 1, job_class - 1).copy();</span>
+<span class="nc" id="L190">				n.plusOne(job_class);</span>
+<span class="nc" id="L191">				Q[queue-1][job_class-1] = Q[queue-1][job_class-1].multiply(basis[indexOf(n, queue)]);</span>
+<span class="nc" id="L192">				n.restore();</span>
+<span class="nc" id="L193">				Q[queue-1][job_class-1] = Q[queue-1][job_class-1].divide(qnm.getNormalisingConstant());</span>
+			}
+<span class="nc" id="L195">			Q[queue-1][qnm.R-1] = qnm.getDemandAsBigRational(queue - 1, qnm.R - 1).copy();</span>
+<span class="nc" id="L196">			Q[queue-1][qnm.R-1] = Q[queue-1][qnm.R-1].multiply(previous_basis[indexOf(n, queue)]);</span>
+<span class="nc" id="L197">			Q[queue-1][qnm.R-1] = Q[queue-1][qnm.R-1].divide(qnm.getNormalisingConstant());</span>
+		}
+
+		//Store outcome in queueing network model
+<span class="nc" id="L201">		qnm.setPerformanceMeasures(Q, X);</span>
+<span class="nc" id="L202">	}</span>
+
+	/**
+	 * Returns the Normalising Constant for the current computed population  
+	 * @throws InternalErrorException
+	 */
+	public BigRational getNormalisingConstant() throws InternalErrorException {
+<span class="nc" id="L209">		PopulationChangeVector zeros = new PopulationChangeVector(0,R);</span>
+<span class="nc" id="L210">		BigRational G = basis[indexOf(zeros, 0)];</span>
+<span class="nc" id="L211">		return G;</span>
+	}
+
+	//TODO currently just for debugging purposes
+	public void print_values() {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">		for (int col = 0; col &lt; size*2; col++) {</span>
+<span class="nc" id="L217">			System.out.print(&quot;-&quot;);</span>
+		}
+<span class="nc" id="L219">		System.out.println(&quot;\nBasis Values: \n&quot;);</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">		for (int col = 0; col &lt; size; col++) {</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">			if (basis[col].isUndefined()) {</span>
+<span class="nc" id="L222">				System.out.print(&quot;*&quot; + &quot;\n&quot;);</span>
+			} else {
+<span class="nc" id="L224">				System.out.print(basis[col] + &quot;\n&quot;);</span>
+			}
+		}
+<span class="nc" id="L227">		System.out.print(&quot;\n&quot;);</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">		for (int col = 0; col &lt; size*2; col++) {</span>
+<span class="nc" id="L229">			System.out.print(&quot;-&quot;);</span>
+		}
+<span class="nc" id="L231">		System.out.print(&quot;\n\n&quot;);</span>
+<span class="nc" id="L232">	}</span>
+
+	//For testing purposes
+	public ArrayList&lt;PopulationChangeVector&gt; getOrder() {
+<span class="nc" id="L236">		return order;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

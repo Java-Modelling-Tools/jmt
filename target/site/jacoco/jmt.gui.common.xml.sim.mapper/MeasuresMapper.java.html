@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MeasuresMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper</a> &gt; <span class="el_source">MeasuresMapper.java</span></div><h1>MeasuresMapper.java</h1><pre class="source lang-java linenums">/**
+ * Maps performance measure descriptors between the {@link jmt.gui.common.xml.sim.dto.SimDescriptor} DTO
+ * and the {@link jmt.gui.common.definitions.CommonModel}, in both parsing and serialization directions.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.xml.sim.dto.MeasureDescriptor;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+import java.util.List;
+
+<span class="fc" id="L18">public class MeasuresMapper implements ModelElementMapper {</span>
+
+
+    @Override
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
+<span class="pc bpc" id="L23" title="1 of 4 branches missed.">        if (dto.getMeasures() == null || dto.getMeasures().isEmpty()) return;</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">        for (MeasureDescriptor m : dto.getMeasures()) {</span>
+<span class="fc" id="L25">            mapMeasure(m, context);</span>
+<span class="fc" id="L26">        }</span>
+<span class="fc" id="L27">    }</span>
+
+    private void mapMeasure(MeasureDescriptor m, MappingContext context) {
+<span class="fc" id="L30">        CommonModel model = context.getModel();</span>
+<span class="fc" id="L31">        Object stationKey = resolveStationKey(m, context);</span>
+<span class="fc" id="L32">        Object classKey = resolveClassKey(m, stationKey, context);</span>
+
+<span class="fc" id="L34">        Double alpha = 1.0 - getDouble(m.getAlpha(), 0.95);</span>
+<span class="fc" id="L35">        Double precision = getDouble(m.getPrecision(), 0.03);</span>
+<span class="fc" id="L36">        boolean verbose = Boolean.parseBoolean(m.getVerbose());</span>
+
+<span class="fc" id="L38">        Object key = model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);</span>
+
+        // Legacy-compat: try to bind serverType whenever station is set (even if XML attribute is empty).
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        if (stationKey != null) {</span>
+<span class="fc" id="L42">            model.setMeasureServerTypeKey(model.getServerTypeKey(stationKey, m.getServerType()), key);</span>
+        }
+<span class="fc" id="L44">    }</span>
+
+    private Object resolveStationKey(MeasureDescriptor m, MappingContext context) {
+<span class="fc" id="L47">        String refNode = m.getReferenceNode();</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">        if (isPresent(refNode)) {</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">            if (NODETYPE_REGION.equals(m.getNodeType())) return context.regions.get(refNode);</span>
+<span class="fc" id="L50">            else return context.stations.get(refNode);</span>
+        }
+<span class="fc" id="L52">        return null;</span>
+    }
+
+    private Object resolveClassKey(MeasureDescriptor m, Object stationKey, MappingContext context) {
+<span class="fc" id="L56">        String className = m.getReferenceUserClass();</span>
+<span class="fc" id="L57">        String type = m.getType();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if (!isPresent(className)) return null;</span>
+
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (SimulationDefinition.MEASURE_FX.equals(type)) return resolveFiringClassKey(className, stationKey, context);</span>
+<span class="fc" id="L61">        else return context.classes.get(className);</span>
+    }
+
+    private boolean isFiringMeasure(String type) {
+<span class="nc" id="L65">        return SimulationDefinition.MEASURE_FX.equals(type);</span>
+    }
+
+    private Object resolveFiringClassKey(String className, Object stationKey, MappingContext context) {
+<span class="pc bpc" id="L69" title="2 of 4 branches missed.">        if (stationKey != null &amp;&amp; context.modeNameLists != null) {</span>
+<span class="fc" id="L70">            List&lt;String&gt; modeNameList = context.modeNameLists.get(stationKey);</span>
+<span class="pc bpc" id="L71" title="2 of 4 branches missed.">            if (modeNameList != null &amp;&amp; modeNameList.contains(className)) {</span>
+<span class="fc" id="L72">                return modeNameList.get(modeNameList.indexOf(className));</span>
+            }
+        }
+<span class="nc" id="L75">        return className;</span>
+    }
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+<span class="fc" id="L80">        CommonModel model = context.model;</span>
+<span class="fc" id="L81">        List&lt;Object&gt; measureKeys = model.getMeasureKeys();</span>
+<span class="pc bpc" id="L82" title="1 of 4 branches missed.">        if (measureKeys == null || measureKeys.isEmpty()) return;</span>
+
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for (Object measureKey : measureKeys) {</span>
+<span class="fc" id="L85">            MeasureDescriptor measureDto = new MeasureDescriptor();</span>
+<span class="fc" id="L86">            mapModelMeasureToDto(model, measureKey, measureDto);</span>
+<span class="fc" id="L87">            dto.addMeasure(measureDto);</span>
+<span class="fc" id="L88">        }</span>
+<span class="fc" id="L89">    }</span>
+
+    private String resolveAndSetNodeAttributes(CommonModel model, Object stationKey, MeasureDescriptor measureDto) {
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (stationKey == null) {</span>
+<span class="fc" id="L93">            measureDto.setNodeType(&quot;&quot;);</span>
+<span class="fc" id="L94">            return &quot;&quot;;</span>
+        }
+
+<span class="fc" id="L97">        String stationName = model.getStationName(stationKey);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (stationName != null) {</span>
+<span class="fc" id="L99">            measureDto.setNodeType(NODETYPE_STATION);</span>
+<span class="fc" id="L100">            return stationName;</span>
+        }
+
+<span class="fc" id="L103">        String regionName = model.getRegionName(stationKey);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">        if (regionName != null) {</span>
+<span class="fc" id="L105">            measureDto.setNodeType(NODETYPE_REGION);</span>
+<span class="fc" id="L106">            return regionName;</span>
+        }
+
+<span class="nc" id="L109">        measureDto.setNodeType(&quot;&quot;);</span>
+<span class="nc" id="L110">        return &quot;&quot;;</span>
+    }
+
+    private String resolveReferenceClassName(CommonModel model, Object measureKey) {
+<span class="fc" id="L114">        Object classKey = model.getMeasureClass(measureKey);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if (classKey == null) return &quot;&quot;;</span>
+
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        if (classKey instanceof String) {</span>
+<span class="fc" id="L118">            return (String) classKey;</span>
+        }
+
+<span class="fc" id="L121">        String className = model.getClassName(classKey);</span>
+<span class="pc bpc" id="L122" title="1 of 2 branches missed.">        return className != null ? className : &quot;&quot;;</span>
+    }
+
+    private String buildMeasureName(String refNodeName, String refClassName, String measureType) {
+<span class="fc" id="L126">        String measureName = &quot;&quot;;</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (!refNodeName.isEmpty()) {</span>
+<span class="fc" id="L128">            measureName += refNodeName + XML_MEASURE_NAME_SEPARATOR;</span>
+        }
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        if (!refClassName.isEmpty()) {</span>
+<span class="fc" id="L131">            measureName += refClassName + XML_MEASURE_NAME_SEPARATOR;</span>
+        }
+<span class="fc" id="L133">        return measureName + measureType;</span>
+    }
+
+    private void setNumericAndBooleanAttributes(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
+<span class="fc" id="L137">        Double alpha = model.getMeasureAlpha(measureKey);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (alpha != null) {</span>
+<span class="fc" id="L139">            double xmlAlpha = 1.0 - alpha;</span>
+            // Legacy writer keeps 10 decimal digits.
+<span class="fc" id="L141">            xmlAlpha = Math.rint(xmlAlpha * 1e10) / 1e10;</span>
+<span class="fc" id="L142">            measureDto.setAlpha(String.valueOf(xmlAlpha));</span>
+        }
+
+<span class="fc" id="L145">        Double precision = model.getMeasurePrecision(measureKey);</span>
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">        if (precision != null) {</span>
+<span class="fc" id="L147">            measureDto.setPrecision(precision.toString());</span>
+        }
+
+<span class="fc" id="L150">        boolean verbose = model.getMeasureLog(measureKey);</span>
+<span class="fc" id="L151">        measureDto.setVerbose(String.valueOf(verbose));</span>
+<span class="fc" id="L152">    }</span>
+
+    private String resolveServerType(CommonModel model, Object measureKey, Object stationKey) {
+<span class="fc" id="L155">        Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);</span>
+<span class="pc bpc" id="L156" title="3 of 4 branches missed.">        if (serverTypeKey == null || stationKey == null) return null;</span>
+
+<span class="nc" id="L158">        List&lt;String&gt; serverTypeNames = model.getServerTypeNames(stationKey);</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">        if (serverTypeNames == null) return null;</span>
+
+<span class="nc bnc" id="L161" title="All 2 branches missed.">        for (String stName : serverTypeNames) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">            if (serverTypeKey.equals(model.getServerTypeKey(stationKey, stName))) {</span>
+<span class="nc" id="L163">                return stName;</span>
+            }
+<span class="nc" id="L165">        }</span>
+<span class="nc" id="L166">        return null;</span>
+    }
+
+    private String resolveMeasureName(CommonModel model, Object measureKey, String refNodeName, String refClassName, String measureType) {
+<span class="fc" id="L170">        Object stationKey = model.getMeasureStation(measureKey);</span>
+<span class="fc" id="L171">        Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);</span>
+
+<span class="fc" id="L173">        String prefix = refNodeName;</span>
+<span class="pc bpc" id="L174" title="3 of 6 branches missed.">        if (stationKey != null &amp;&amp; serverTypeKey != null &amp;&amp; model.getServerType(serverTypeKey) != null) {</span>
+<span class="nc" id="L175">            String serverTypeStationName = model.getServerTypeStationName(serverTypeKey);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">            if (serverTypeStationName != null) {</span>
+<span class="nc" id="L177">                prefix = serverTypeStationName;</span>
+            }
+        }
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        return buildMeasureName(prefix == null ? &quot;&quot; : prefix, refClassName, measureType);</span>
+    }
+
+    private void mapModelMeasureToDto(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
+<span class="fc" id="L184">        String measureType = model.getMeasureType(measureKey);</span>
+<span class="fc" id="L185">        measureDto.setType(measureType);</span>
+
+<span class="fc" id="L187">        Object stationKey = model.getMeasureStation(measureKey);</span>
+<span class="fc" id="L188">        String refNodeName = resolveAndSetNodeAttributes(model, stationKey, measureDto);</span>
+<span class="fc" id="L189">        String refClassName = resolveReferenceClassName(model, measureKey);</span>
+
+<span class="fc" id="L191">        measureDto.setReferenceNode(refNodeName);</span>
+<span class="fc" id="L192">        measureDto.setReferenceUserClass(refClassName);</span>
+<span class="fc" id="L193">        measureDto.setName(resolveMeasureName(model, measureKey, refNodeName, refClassName, measureType));</span>
+
+<span class="fc" id="L195">        setNumericAndBooleanAttributes(model, measureKey, measureDto);</span>
+
+<span class="fc" id="L197">        String serverType = resolveServerType(model, measureKey, stationKey);</span>
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if (serverType != null) {</span>
+<span class="nc" id="L199">            measureDto.setServerType(serverType);</span>
+        }
+<span class="fc" id="L201">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

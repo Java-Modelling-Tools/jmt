@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommonConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common</a> &gt; <span class="el_source">CommonConstants.java</span></div><h1>CommonConstants.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common;
+
+import java.awt.*;
+
+import jmt.framework.data.ConstMap;
+import jmt.gui.common.forkStrategies.*;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
+import jmt.gui.common.joinStrategies.PartialJoin;
+import jmt.gui.common.routingStrategies.*;
+import jmt.gui.common.semaphoreStrategies.NormalSemaphore;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: OrsotronIII
+ * Date: 17-mag-2005
+ * Time: 11.15.51
+ */
+public interface CommonConstants {
+
+	public static final int CLASS_TYPE_OPEN = 0;
+	public static final int CLASS_TYPE_CLOSED = 1;
+
+	/** Table row height */
+	public static final int ROW_HEIGHT = 30;
+
+	public static final String STATION_TYPE_SOURCE = &quot;Source&quot;;
+	public static final String STATION_TYPE_SINK = &quot;Sink&quot;;
+	public static final String STATION_TYPE_TERMINAL = &quot;Terminal&quot;;
+	public static final String STATION_TYPE_ROUTER = &quot;Router&quot;;
+	public static final String STATION_TYPE_DELAY = &quot;Delay&quot;;
+	public static final String STATION_TYPE_SERVER = &quot;Server&quot;;
+	public static final String STATION_TYPE_FORK = &quot;Fork&quot;;
+	public static final String STATION_TYPE_JOIN = &quot;Join&quot;;
+	public static final String STATION_TYPE_LOGGER = &quot;Logger&quot;;
+	public static final String STATION_TYPE_CLASSSWITCH = &quot;ClassSwitch&quot;;
+	public static final String STATION_TYPE_SEMAPHORE = &quot;Semaphore&quot;;
+	public static final String STATION_TYPE_SCALER = &quot;Scaler&quot;;
+	public static final String STATION_TYPE_PLACE = &quot;Place&quot;;
+	public static final String STATION_TYPE_TRANSITION = &quot;Transition&quot;;
+
+	//For BPMN
+	//public static final String STATION_TYPE_INGATEWAY = &quot;InGateWay&quot;;
+	//public static final String STATION_TYPE_OUTGATEWAY = &quot;OutGateWay&quot;;
+
+	/**
+	 * A map that decodes from station type to station name for the GUI. It also
+	 * determines the display order of station icons/names. To disable a type of
+	 * station, simply comment out the corresponding line.
+	 */
+<span class="fc" id="L71">	public static final ConstMap&lt;String, String&gt; STATION_NAMES = new ConstMap&lt;String, String&gt;() {</span>
+		@Override
+		protected void fill() {
+<span class="fc" id="L74">			put(STATION_TYPE_SOURCE, STATION_TYPE_SOURCE);</span>
+<span class="fc" id="L75">			put(STATION_TYPE_SINK, STATION_TYPE_SINK);</span>
+			//put(STATION_TYPE_TERMINAL, STATION_TYPE_TERMINAL);
+<span class="fc" id="L77">			put(STATION_TYPE_ROUTER, STATION_TYPE_ROUTER);</span>
+<span class="fc" id="L78">			put(STATION_TYPE_DELAY, STATION_TYPE_DELAY);</span>
+<span class="fc" id="L79">			put(STATION_TYPE_SERVER, &quot;Queue&quot;);</span>
+<span class="fc" id="L80">			put(STATION_TYPE_FORK, STATION_TYPE_FORK);</span>
+<span class="fc" id="L81">			put(STATION_TYPE_JOIN, STATION_TYPE_JOIN);</span>
+<span class="fc" id="L82">			put(STATION_TYPE_SCALER, STATION_TYPE_SCALER);</span>
+<span class="fc" id="L83">			put(STATION_TYPE_SEMAPHORE, STATION_TYPE_SEMAPHORE);</span>
+<span class="fc" id="L84">			put(STATION_TYPE_LOGGER, STATION_TYPE_LOGGER);</span>
+<span class="fc" id="L85">			put(STATION_TYPE_CLASSSWITCH, STATION_TYPE_CLASSSWITCH);</span>
+<span class="fc" id="L86">			put(STATION_TYPE_PLACE, STATION_TYPE_PLACE);</span>
+<span class="fc" id="L87">			put(STATION_TYPE_TRANSITION, STATION_TYPE_TRANSITION);</span>
+
+			//For BPMN
+			//put(STATION_TYPE_INGATEWAY, STATION_TYPE_INGATEWAY);
+			//put(STATION_TYPE_OUTGATEWAY, STATION_TYPE_OUTGATEWAY);
+<span class="fc" id="L92">		}</span>
+	};
+
+	/**Constants for GUI scaling*/
+	//Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	public float heightScaling = 1.25F; //(float) (screenSize.height/768/2);
+	public float widthScaling = 1.25F; //(float) (screenSize.height/768/2);
+
+	public int MAX_GUI_WIDTH_STARTSCREEN = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_STARTSCREEN = (int) (600 * heightScaling);
+	public int MAX_GUI_WIDTH_ABOUT = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_ABOUT = (int) (600 * heightScaling);
+	public int MAX_GUI_WIDTH_QUICKHTML = (int) (800 * widthScaling);
+	public int MAX_GUI_HEIGHT_QUICKHTML = (int) (600 * heightScaling);
+
+	public int MAX_GUI_WIDTH_DIALOG_DEFAULT = (int)(780 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_DIALOG_DEFAULT = (int)(520 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_COMMON = (int)(1024);
+	public int MAX_GUI_HEIGHT_COMMON = (int)(768);
+
+	public int MAX_GUI_WIDTH_JSIM_DISTRIB = (int)(480);
+	public int MAX_GUI_HEIGHT_JSIM_DISTRIB = (int)(600);
+	public int MAX_GUI_WIDTH_JSIM_PROBLEMS = (int)(450 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_JSIM_PROBLEMS = (int)(435 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_JSIM_RESULTS = (int)(1024);
+	public int MAX_GUI_HEIGHT_JSIM_RESULTS = (int)(768);
+	public int MAX_GUI_WIDTH_JSIM_STAT_OUTPUT = (int)(1024);
+	public int MAX_GUI_HEIGHT_JSIM_STAT_OUTPUT = (int)(768);
+
+	public int MAX_GUI_WIDTH_JMVA = (int) (1024);
+	public int MAX_GUI_HEIGHT_JMVA = (int) (768);
+
+	public int MAX_GUI_WIDTH_JMCH = (int)(800);
+	public int MAX_GUI_HEIGHT_JMCH = (int)(600);
+
+	public int MAX_GUI_WIDTH_JABA = (int)(1152);
+	public int MAX_GUI_HEIGHT_JABA = (int)(768); // keep 1152x768 or graphical issues
+
+	public int MAX_GUI_WIDTH_JWAT = (int)(1024);
+	public int MAX_GUI_HEIGHT_JWAT = (int)(768);
+	public int MAX_GUI_WIDTH_JWAT_STARTSCREEN = (int)(520);
+	public int MAX_GUI_HEIGHT_JWAT_STARTSCREEN = (int)(400);
+	public int MAX_GUI_WIDTH_JWAT_COLOR = (int)(1024);
+	public int MAX_GUI_HEIGHT_JWAT_COLOR = (int)(768);
+
+	public int MAX_GUI_WIDTH_LDSTRATEGY = (int)(800 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDSTRATEGY = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDHELP = (int)(600 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDHELP = (int)(400 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDROUTING = (int)(800 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDROUTING = (int)(600 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_LDEDITING = (int)(400 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_LDEDITING = (int)(400 * CommonConstants.heightScaling);
+
+	public int MAX_GUI_WIDTH_POLLING = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_POLLING = (int)(480 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_PSSERVER = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_PSSERVER = (int)(200 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_SERVER_FEATURES = (int)(780 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_SERVER_FEATURES = (int)(520 * CommonConstants.heightScaling);
+
+	public int MAX_GUI_WIDTH_WHATIF_PROGRESS = (int)(640 * CommonConstants.widthScaling);
+	public int MAX_GUI_HEIGHT_WHATIF_PROGRESS = (int)(480 * CommonConstants.heightScaling);
+	public int MAX_GUI_WIDTH_WHATIF_RESULTS = (int)(1024);
+	public int MAX_GUI_HEIGHT_WHATIF_RESULTS = (int)(768);
+
+<span class="fc" id="L158">	public static final Dimension DIM_BUTTON_XS = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L159">	public static final Dimension DIM_BUTTON_S = new Dimension((int)(80 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L160">	public static final Dimension DIM_BUTTON_M = new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L161">	public static final Dimension DIM_BUTTON_L = new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L162">	public static final Dimension DIM_BUTTON_XL = new Dimension((int)(140 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+
+	public static final int MAX_SMALL_ICON_SCREEN_WIDTH = (int)(1366 * CommonConstants.widthScaling);
+	public static final int MAX_SMALL_ICON_SCREEN_HEIGHT = (int)(768 * CommonConstants.heightScaling);
+
+<span class="fc" id="L167">	public static final Dimension SMALL_ICON_SIZE_MENU_BAR = new Dimension((int)(25 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L168">	public static final Dimension LARGE_ICON_SIZE_MENU_BAR = new Dimension((int)(35 * CommonConstants.widthScaling), (int)(35 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L169">	public static final Dimension SMALL_ICON_SIZE_TOOL_BAR = new Dimension((int)(25 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));</span>
+<span class="fc" id="L170">	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension((int)(35 * CommonConstants.widthScaling), (int)(35 * CommonConstants.heightScaling));</span>
+
+	/**Constants for server station advanced features*/
+	public static final String SERVER_PARAMETER_ADVANCED_FEATURES = &quot;advancedFeatures&quot;;
+	public static final String SERVER_FEATURE_PREEMPTIVE_STRATEGIES = &quot;preemptiveStrategies&quot;;
+	public static final String SERVER_FEATURE_SWITCHOVER_STRATEGIES = &quot;SwitchoverStrategy&quot;;
+	public static final String SERVER_FEATURE_DELAY_OFF_STRATEGIES = &quot;delayOffTime&quot;;
+	public static final String SERVER_FEATURE_SETUP_STRATEGIES = &quot;setUpTime&quot;;
+	public static final String SERVER_FEATURE_CLASS_PARALLELISM = &quot;classParallelism&quot;;
+	public static final String SERVER_FEATURE_SERVER_NAMES = &quot;serverNames&quot;;
+	public static final String SERVER_FEATURE_SERVERS_PER_SERVER_TYPE = &quot;serversPerServerType&quot;;
+	public static final String SERVER_FEATURE_SERVER_COMPATIBILITIES = &quot;serverCompatibilities&quot;;
+	public static final String SERVER_FEATURE_SCHEDULING_POLICY = &quot;schedulingPolicy&quot;;
+	public static final String SERVER_FEATURE_VACATION_STRATEGY = &quot;vacationStrategy&quot;;
+
+	/**Constants for selection of station queueing strategy*/
+	public static final String STATION_QUEUE_STRATEGY_PSSERVER = &quot;Processor Sharing Scheduling&quot;;
+	public static final String STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY = &quot;Processor Sharing Scheduling (Priority)&quot;;
+	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE = &quot;Non-preemptive Scheduling&quot;;
+	public static final String STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY = &quot;Non-preemptive Scheduling (Priority)&quot;;
+	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE = &quot;Preemptive Scheduling&quot;;
+	public static final String STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY = &quot;Preemptive Scheduling (Priority)&quot;;
+	public static final String STATION_QUEUE_STRATEGY_POLLING = &quot;Polling Scheduling&quot;;
+
+	/**Constants for selection of server type */
+	public static final String STATION_QUEUE_STRATEGY_PS = &quot;PS Station Queue Type&quot;;
+	public static final String STATION_QUEUE_STRATEGY_POLLING_LIMITED = &quot;K-Limited&quot;;
+	public static final String STATION_QUEUE_STRATEGY_POLLING_GATED = &quot;Gated&quot;;
+	public static final String STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE = &quot;Exhaustive&quot;;
+	public static final String STATION_SCHEDULING_POLICY_ALIS =  &quot;ALIS (Assign Longest Idle Server)&quot;;
+	public static final String STATION_SCHEDULING_POLICY_ORDER =  &quot;Order (Assign according to order below)&quot;;
+	public static final String STATION_SCHEDULING_POLICY_FAIRNESS =  &quot;Fairness (Move back server type when used)&quot;;
+	public static final String STATION_SCHEDULING_POLICY_RAIS = &quot;RAIS (Random Assignment to Idle Servers)&quot;;
+	public static final String STATION_SCHEDULING_POLICY_ALFS =  &quot;ALFS (Assign Least Flexible Server)&quot;;
+	public static final String STATION_SCHEDULING_POLICY_FSF =  &quot;FSF (Fastest Servers First)&quot;;
+
+	/**Constants for selection of server vacation policy */
+	public static final String STATION_VACATION_POLICY_NONE = &quot;No Vacation&quot;;
+	public static final String STATION_VACATION_POLICY_SINGLE = &quot;Single Vacation when Idle&quot;;
+	public static final String STATION_VACATION_POLICY_MULTIPLE = &quot;Multiple Vacation when Idle&quot;;
+	public static final String STATION_VACATION_POLICY_BERNOULLI = &quot;Bernoulli Vacation&quot;;
+
+	/**Constants for selection of queueing strategy*/
+	public static final String QUEUE_STRATEGY_PS = &quot;PS&quot;;
+	public static final String QUEUE_STRATEGY_QBPS = &quot;QBPS&quot;;
+	public static final String QUEUE_STRATEGY_GPS = &quot;GPS&quot;;
+	public static final String QUEUE_STRATEGY_DPS = &quot;DPS&quot;;
+	public static final String QUEUE_STRATEGY_FCFS = &quot;FCFS&quot;;
+	public static final String QUEUE_STRATEGY_LCFS = &quot;LCFS&quot;;
+	public static final String QUEUE_STRATEGY_RAND = &quot;RAND&quot;;
+	public static final String QUEUE_STRATEGY_SJF = &quot;SJF&quot;;
+	public static final String QUEUE_STRATEGY_LJF = &quot;LJF&quot;;
+	public static final String QUEUE_STRATEGY_SEPT = &quot;SEPT&quot;;
+	public static final String QUEUE_STRATEGY_LEPT = &quot;LEPT&quot;;
+	public static final String QUEUE_STRATEGY_FCFS_PR = &quot;FCFS-PR&quot;;
+	public static final String QUEUE_STRATEGY_LCFS_PR = &quot;LCFS-PR&quot;;
+	public static final String QUEUE_STRATEGY_SRPT = &quot;SRPT&quot;;
+	public static final String QUEUE_STRATEGY_EDD = &quot;EDD&quot;;
+	public static final String QUEUE_STRATEGY_EDF = &quot;EDF&quot;;
+	public static final String QUEUE_STRATEGY_TBS = &quot;TBS&quot;;
+
+	/**Constants for service time distributions*/
+	public static final String SERVICE_LOAD_INDEPENDENT = &quot;Load Independent&quot;;
+	public static final String SERVICE_LOAD_DEPENDENT = &quot;Load Dependent&quot;;
+	public static final String SERVICE_ZERO = &quot;Zero Service Time&quot;;
+	public static final String SWITCHOVER_ZERO = &quot;Zero Switchover Time&quot;;
+	public static final String SERVICE_DISABLED = &quot;Disabled&quot;;
+
+	/**Constants for selection of distributions*/
+	public static final String DISTRIBUTION_BATCH = &quot;Batch&quot;;
+	public static final String DISTRIBUTION_BURST = &quot;Burst&quot;;
+	public static final String DISTRIBUTION_MAP = &quot;MAP&quot;;
+	public static final String DISTRIBUTION_MMPP2 = &quot;MMPP2&quot;;
+	public static final String DISTRIBUTION_COXIAN = &quot;Coxian&quot;;
+	public static final String DISTRIBUTION_DETERMINISTIC = &quot;Deterministic&quot;;
+	public static final String DISTRIBUTION_ERLANG = &quot;Erlang&quot;;
+	public static final String DISTRIBUTION_EXPONENTIAL = &quot;Exponential&quot;;
+	public static final String DISTRIBUTION_GAMMA = &quot;Gamma&quot;;
+	public static final String DISTRIBUTION_HYPEREXPONENTIAL = &quot;Hyperexponential&quot;;
+	public static final String DISTRIBUTION_LOGNORMAL = &quot;Lognormal&quot;;
+	public static final String DISTRIBUTION_NORMAL = &quot;Normal&quot;;
+	public static final String DISTRIBUTION_PARETO = &quot;Pareto&quot;;
+	public static final String DISTRIBUTION_PHASETYPE = &quot;PhaseType&quot;;
+	//public static final String DISTRIBUTION_POISSON = &quot;Poisson&quot;;
+	public static final String DISTRIBUTION_REPLAYER = &quot;Replayer&quot;;
+	//public static final String DISTRIBUTION_STUDENTT = &quot;StudentT&quot;;
+	public static final String DISTRIBUTION_UNIFORM = &quot;Uniform&quot;;
+	public static final String DISTRIBUTION_WEIBULL = &quot;Weibull&quot;;
+	public static final String DISTRIBUTION_BERNOULLI_DISCRETE = &quot;Bernoulli&quot;;
+	public static final String DISTRIBUTION_BINOMIAL_DISCRETE = &quot;Binomial&quot;;
+	public static final String DISTRIBUTION_UNIFORM_DISCRETE = &quot;DiscreteUniform&quot;;
+	public static final String DISTRIBUTION_SHIFTED_GEOMETRIC_DISCRETE = &quot;ShiftedGeometric&quot;;
+	public static final String DISTRIBUTION_POISSON_DISCRETE = &quot;Poisson&quot;;
+	public static final String DISTRIBUTION_ZIPF_DISCRETE = &quot;Zipf&quot;;
+
+	/**Constants for selection of timing strategy*/
+	public static final String TIMING_STRATEGY_TIMED = &quot;Timed&quot;;
+	public static final String TIMING_STRATEGY_IMMEDIATE = &quot;Immediate&quot;;
+
+<span class="fc" id="L269">	public static final RoutingStrategy ROUTING_RANDOM = new RandomRouting();</span>
+<span class="fc" id="L270">	public static final RoutingStrategy ROUTING_ROUNDROBIN = new RoundRobinRouting();</span>
+<span class="fc" id="L271">	public static final RoutingStrategy ROUTING_PROBABILITIES = new ProbabilityRouting();</span>
+<span class="fc" id="L272">	public static final RoutingStrategy ROUTING_SHORTESTQL = new ShortestQueueLengthRouting();</span>
+<span class="fc" id="L273">	public static final RoutingStrategy ROUTING_SHORTESTRT = new ShortestResponseTimeRouting();</span>
+<span class="fc" id="L274">	public static final RoutingStrategy ROUTING_LEASTUTILIZATION = new LeastUtilizationRouting();</span>
+<span class="fc" id="L275">	public static final RoutingStrategy ROUTING_FASTESTSERVICE = new FastestServiceRouting();</span>
+<span class="fc" id="L276">	public static final RoutingStrategy ROUTING_LOADDEPENDENT = new LoadDependentRouting();</span>
+<span class="fc" id="L277">	public static final RoutingStrategy ROUTING_POWER_OF_K = new PowerOfKRouting();</span>
+<span class="fc" id="L278">	public static final RoutingStrategy ROUTING_WEIGHTED_ROUNDROBIN = new WeightedRoundRobinRouting();</span>
+<span class="fc" id="L279">	public static final RoutingStrategy ROUTING_CLASS_SWITCH = new ClassSwitchRouting();</span>
+<span class="fc" id="L280">	public static final RoutingStrategy ROUTING_DISABLED = new DisabledRouting();</span>
+
+<span class="fc" id="L282">	public static final ForkStrategy FORK_PROBABILITIES = new ProbabilitiesFork();</span>
+<span class="fc" id="L283">	public static final ForkStrategy FORK_COMBINATION = new CombFork();</span>
+<span class="fc" id="L284">	public static final ForkStrategy FORK_CLASS_SWITCH = new ClassSwitchFork();</span>
+<span class="fc" id="L285">	public static final ForkStrategy FORK_MULTI_BRANCH_CLASS_SWITCH = new MultiBranchClassSwitchFork();</span>
+
+<span class="fc" id="L287">	public static final JoinStrategy JOIN_NORMAL = new NormalJoin();</span>
+<span class="fc" id="L288">	public static final JoinStrategy JOIN_PARTIAL = new PartialJoin();</span>
+<span class="fc" id="L289">	public static final JoinStrategy JOIN_MIX = new GuardJoin();</span>
+
+<span class="fc" id="L291">	public static final SemaphoreStrategy SEMAPHORE_NORMAL = new NormalSemaphore();</span>
+
+	/**HTML formats for panels descriptions*/
+	static final String HTML_START = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&quot;;
+	static final String HTML_END = &quot;&lt;/body&gt;&lt;/html&gt;&quot;;
+	static final String HTML_FONT_TITLE = &quot;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;&quot;;
+	static final String HTML_FONT_NORM = &quot;&lt;font size=\&quot;3\&quot;&gt;&quot;;
+	static final String HTML_FONT_TIT_END = &quot;&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&quot;;
+	static final String HTML_FONT_NOR_END = &quot;&lt;/font&gt;&quot;;
+
+	public static final String FINITE_DROP = &quot;Drop&quot;;
+	public static final String FINITE_BLOCK = &quot;BAS Blocking&quot;;
+	public static final String FINITE_WAITING = &quot;Waiting Queue&quot;;
+	public static final String FINITE_RETRIAL = &quot;Retrial&quot;;
+
+	public static final String CLASSES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Classes Characteristics&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define type (Open or Closed), name and parameters for each customer class.&lt;br/&gt;&quot;
+			+ &quot;&lt;b&gt;Closed Classes:&lt;/b&gt; If a &lt;b&gt;ClassSwitch&lt;/b&gt; is in the model, then &lt;b&gt;all&lt;/b&gt; the closed classes must have the &lt;b&gt;same&lt;/b&gt; reference station.&lt;br/&gt;&quot;
+			+ &quot;&lt;b&gt;Open Classes:&lt;/b&gt; An open class that has &lt;b&gt;Fork&lt;/b&gt;, &lt;b&gt;ClassSwitch&lt;/b&gt;, &lt;b&gt;Scaler&lt;/b&gt; or &lt;b&gt;Transition&lt;/b&gt; as the reference station is &lt;b&gt;not&lt;/b&gt; generated by &lt;b&gt;any&lt;/b&gt; Source.&lt;br/&gt;&quot;
+			+ &quot;&lt;b&gt;Priorities:&lt;/b&gt; A larger value implies a higher priority.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String STATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Station Characteristics&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define type and name for each station&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String CONNECTIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Station Connections&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Click on table entry (i,j) to connect station i to station j.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String STATIONS_PAR_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Station Parameters&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;For each station in the list, define the requested parameters&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String MEASURES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Performance Indices&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define performance indices to be collected and plotted by the simulation engine.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String METRIC_CONFIGURATIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Advanced Metric Configurations&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;View and Define advanced metric configurations: &quot;
+			+ &quot;&lt;br/&gt;&quot; + &quot;- Restrict metric to a specific Server Type (or all Server Types)&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String COMPATIBILITIES_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Server Type Compatibilities&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;View and Define server type compatibilities &quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String SERVER_SETTINGS_DESCRIPTION = HTML_START + &quot;&lt;p style='padding:5px; text-align:center;': 10px'&gt;&quot;
+			+ &quot;Define server types which can be compatible with different job classes. &quot;
+			+ &quot;Scheduling policy determines which servers are assigned to jobs. &quot;
+			+ &quot;Heterogeneous service time distributions allow server types to have different service time distributions.&lt;/p&gt;&quot;
+			+ HTML_END;
+
+	public static final String SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Simulation Parameters&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define simulation parameters and initial customer locations.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String BATCH_SIMULATION_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;What-if Analysis&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Enable parametric analysis and customize it.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String REFSOURCE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Reference Station&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Define reference station for each closed class. This is used to calculate system throughput for that class.&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String LDSERVICE_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Load Dependent Service Time Distribution&quot; + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + &quot;Define the distribution and the values of service times for a range of number of jobs inside the station. &quot;
+			+ &quot;Mean value of the distribution can be specified with an arithmetic expression, as a function of the current value of 'n' (see Help for operators).&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String BALKINGSTRATEGY_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Balking Probability&quot; + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + &quot;Define the probability that a job will balk based on the length of the queue when the job arrives. &quot;
+			+ &quot;Assign the probability value (between 0.0 and 1.0) that a job will balk to each range.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String PARAMETRIC_ANALYSIS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;What-if Analysis&quot; + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + &quot;Define the type of What-If analysis to be performed and modify parameter options.&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String BLOCKING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Finite Capacity Region Characteristics&quot; + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + &quot;Define number, name, composition, global and class specific constraints for finite capacity regions.&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String CONVERSION_WARNING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Conversion performed&quot; + HTML_FONT_TIT_END
+			+ HTML_FONT_NORM + &quot;Input model was automatically converted from &lt;b&gt;%PAR1%&lt;/b&gt; to &lt;b&gt;%PAR2%&lt;/b&gt;. &quot;
+			+ &quot;The conversion was completed with the warnings shown below&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	public static final String LDROUTING_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Description&quot; + HTML_FONT_TIT_END +
+			HTML_FONT_NORM + &quot;Customers of each class are routed depending on their number on the current station. &quot;
+			+ &quot;The outgoing paths must have associated probabilities that should sum to 1 for each range.&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Statistics CSV file&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM
+			+ &quot;Check the \&quot;Save Stats\&quot; box to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size.&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String SERVER_VACATION_DESCRIPTION = HTML_START + &quot;&lt;p style='padding:5px; text-align:center;': 10px'&gt;&quot;
+			+ &quot;Server can take a vacation when certain conditions are met. &quot;
+			+ &quot;When in a vacation, the server won't accept new jobs even if there are compatible jobs waiting in the queue. &lt;/p&gt;&quot;
+			+ HTML_END;
+
+	// String tokens
+	public static final String PAR1 = &quot;%PAR1%&quot;;
+	public static final String PAR2 = &quot;%PAR2%&quot;;
+
+	public static final int MAX_NUMBER_OF_PHASES = 1024;
+	public static final int MAX_NUMBER_OF_CLASSES = 1024;
+	public static final int MAX_NUMBER_OF_GROUPS = 1024;
+	public static final int MAX_NUMBER_OF_STATIONS = 1024;
+	public static final int MAX_NUMBER_OF_REGIONS = 1024;
+
+	public static final String ALL_CLASSES = &quot;--- All Classes ---&quot;;
+	public static final String ALL_STATIONS = &quot;System&quot;;
+	public static final String ALL_MODES = &quot;--- All Modes ---&quot;;
+	public static final String INFINITE_CAPACITY = &quot;Infinite Capacity&quot;;
+
+	// Warnings for missing resources
+	public static final String WARNING_CLASS_STATION = &quot;Customer classes and stations have to be defined first&quot;;
+	public static final String WARNING_CLASS = &quot;Customer classes have to be defined first&quot;;
+	public static final String WARNING_STATION = &quot;Stations have to be defined first&quot;;
+	public static final String WARNING_MULTI_CLASS = &quot;At least two customer classes have to be defined first&quot;;
+	public static final String WARNING_INCOMING_ROUTING = &quot;Station incoming connections undefined&quot;;
+	public static final String WARNING_OUTGOING_ROUTING = &quot;Station outgoing connections undefined&quot;;
+	public static final String WARNING_CLASS_INCOMING_ROUTING = &quot;Customer classes and station incoming connections have to be defined first&quot;;
+	public static final String WARNING_CLASS_OUTGOING_ROUTING = &quot;Customer classes and station outgoing connections have to be defined first&quot;;
+
+	// Application names (used for input file format conversion messages)
+	public static final String JMVA = &quot;JMVA&quot;;
+	public static final String JSIM = &quot;JSIM&quot;;
+	public static final String JABA = &quot;JABA&quot;;
+	public static final String JWAT = &quot;JWAT&quot;;
+	public static final String SIMENGINE = &quot;Simulation Engine XML data&quot;;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

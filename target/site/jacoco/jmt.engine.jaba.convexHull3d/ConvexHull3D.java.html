@@ -1,0 +1,466 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConvexHull3D.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba.convexHull3d</a> &gt; <span class="el_source">ConvexHull3D.java</span></div><h1>ConvexHull3D.java</h1><pre class="source lang-java linenums">package jmt.engine.jaba.convexHull3d;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+
+import jmt.engine.jaba.convexHull3d.exceptions.AllPointsCollinearException;
+import jmt.engine.jaba.convexHull3d.exceptions.AllPointsCoplanarExceptions;
+
+/**
+ * This class constructs the convex hull for 3-classes model.
+ * 
+ * We use the algorithm presented in &lt;i&gt;Computational Geometry in C&lt;/i&gt; 2th
+ * edition by Joseph O'Rourke.
+ * 
+ * The original algorithm is coded in C language and uses global variables. In
+ * order to make the concept of global variables available in Java, we adopt the
+ * Singleton pattern for the class ConvexHull3D.
+ * 
+ * In order to make the code as much as possible similar to the original one we
+ * have implemented double linked lists in the C way (next and prev pointer
+ * inside the item). Exploiting the protected visibility for the pointer next
+ * and prev, we use this approach only inside this package. The result (a list
+ * of faces of the convex hull) is converted in a ArrayList before return.
+ * 
+ * Unless for the aforementioned exceptions the code is as the original version,
+ * so for further information consult &lt;i&gt;Computational Geometry in C&lt;/i&gt; 2th ed.
+ * by Joseph O'Rourke (Cambridge University Press).
+ * 
+ * @author Sebastiano Spicuglia 19:42 09/05/2011
+ * 
+ */
+
+public class ConvexHull3D {
+	
+	// Lists
+	private HullVertex	vertices;
+	private HullFace	faces;
+	private HullEdge	edges;
+	
+	
+	/**
+	 * Creates a new ConvexHull3D object
+	 */
+<span class="nc" id="L44">	public ConvexHull3D() {</span>
+<span class="nc" id="L45">	}</span>
+	
+
+	/**
+	 * Builds the convex hull for the @stations set. It returns the faces
+	 * (divided into triangles) of the convex hull.
+	 * 
+	 * @param stations
+	 *            the set of vertices
+	 * @param autoProject
+	 *            if it is true the method explodes the @stations set, adding to
+	 *            it the projection on the planes xy, yz, zx of all points in
+	 *            the @stations set.
+	 * @return It returns the faces (divided into triangles) of the convex hull.
+	 * @throws AllPointsCoplanarExceptions
+	 * @throws AllPointsCollinearException
+	 */
+	public ArrayList&lt;HullFace&gt; buildHull( HashSet&lt;HullVertex&gt; stations, boolean autoProject )
+			throws AllPointsCoplanarExceptions, AllPointsCollinearException {
+		HullVertex v, vnext;
+		
+<span class="nc" id="L66">		cleanState();</span>
+<span class="nc" id="L67">		createVertices( stations, autoProject );</span>
+<span class="nc" id="L68">		doubleTriangle();</span>
+<span class="nc" id="L69">		v = vertices;</span>
+		do {
+<span class="nc" id="L71">			vnext = v.next;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if ( !v.isProcessed() ) {</span>
+<span class="nc" id="L73">				v.setProcessed( true );</span>
+<span class="nc" id="L74">				this.addOne( v );</span>
+<span class="nc" id="L75">				this.cleanUp();</span>
+			}
+<span class="nc" id="L77">			v = vnext;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		} while ( v != vertices );</span>
+<span class="nc" id="L79">		return makeResultUserFriendly();</span>
+	}
+	
+
+	/**
+	 * Adds the @p edge to the global list of edges
+	 * 
+	 * @param p
+	 *            the edge you want to add
+	 */
+	protected void addEdge( HullEdge p ) {
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if ( edges != null ) {</span>
+<span class="nc" id="L91">			p.next = edges;</span>
+<span class="nc" id="L92">			p.prev = edges.prev;</span>
+<span class="nc" id="L93">			edges.prev = p;</span>
+<span class="nc" id="L94">			p.prev.next = p;</span>
+		}
+		else {
+<span class="nc" id="L97">			edges = p;</span>
+<span class="nc" id="L98">			edges.next = p;</span>
+<span class="nc" id="L99">			edges.prev = p;</span>
+		}
+<span class="nc" id="L101">	}</span>
+	
+
+	/**
+	 * Adds the @p face to the global list of faces
+	 * 
+	 * @param p
+	 *            the face you want to add
+	 */
+	protected void addFace( HullFace p ) {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		if ( faces != null ) {</span>
+<span class="nc" id="L112">			p.next = faces;</span>
+<span class="nc" id="L113">			p.prev = faces.prev;</span>
+<span class="nc" id="L114">			faces.prev = p;</span>
+<span class="nc" id="L115">			p.prev.next = p;</span>
+		}
+		else {
+<span class="nc" id="L118">			faces = p;</span>
+<span class="nc" id="L119">			faces.next = p;</span>
+<span class="nc" id="L120">			faces.prev = p;</span>
+		}
+<span class="nc" id="L122">	}</span>
+	
+
+	/**
+	 * Adds the @p vertex to the current hull. If necessary creates new faces
+	 * making the hull enveloping @p point.
+	 * 
+	 * @param p
+	 *            the vertex you want to add
+	 * @return false if the @p vertex is already enveloped by the current hull.
+	 */
+	private boolean addOne( HullVertex p ) {
+		HullFace f;
+		HullEdge e, temp;
+<span class="nc" id="L136">		boolean vis = false;</span>
+		
+<span class="nc" id="L138">		f = faces;</span>
+		do {
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			if ( f.volumeSign( p ) &lt; 0 ) {</span>
+<span class="nc" id="L141">				f.setVisible( true );</span>
+<span class="nc" id="L142">				vis = true;</span>
+			}
+<span class="nc" id="L144">			f = f.next;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		} while ( f != faces );</span>
+		
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		if ( !vis ) {</span>
+<span class="nc" id="L148">			p.setOnHull( false );</span>
+<span class="nc" id="L149">			return false;</span>
+		}
+<span class="nc" id="L151">		e = edges;</span>
+		do {
+<span class="nc" id="L153">			temp = e.next;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			if ( e.areAllFacesVisible() ) {</span>
+<span class="nc" id="L155">				e.setDelete( true );</span>
+			}
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			else if ( e.isOneFaceVisible() ) {</span>
+<span class="nc" id="L158">				HullFace temp2 = new HullFace( e, p, this );</span>
+<span class="nc" id="L159">				e.setNewFace( temp2 );</span>
+<span class="nc" id="L160">				addFace( temp2 );</span>
+			}
+<span class="nc" id="L162">			e = temp;</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		} while ( e != edges );</span>
+<span class="nc" id="L164">		return true;</span>
+	}
+	
+
+	/**
+	 * Adds the @p vertex to the global list of vertices
+	 * 
+	 * @param p
+	 *            the vertex you want to add
+	 */
+	protected void addVertex( HullVertex p ) {
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if ( vertices != null ) {</span>
+<span class="nc" id="L176">			p.next = vertices;</span>
+<span class="nc" id="L177">			p.prev = vertices.prev;</span>
+<span class="nc" id="L178">			vertices.prev = p;</span>
+<span class="nc" id="L179">			p.prev.next = p;</span>
+		}
+		else {
+<span class="nc" id="L182">			vertices = p;</span>
+<span class="nc" id="L183">			vertices.next = p;</span>
+<span class="nc" id="L184">			vertices.prev = p;</span>
+		}
+<span class="nc" id="L186">	}</span>
+	
+
+	/**
+	 * Removes edges no longer visible from the current hull.
+	 */
+	private void cleanEdges() {
+		HullEdge e, t;
+		
+<span class="nc" id="L195">		e = edges;</span>
+		do {
+<span class="nc bnc" id="L197" title="All 2 branches missed.">			if ( e.getNewFace() != null ) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">				if ( e.getFace( 0 ).isVisible() ) {</span>
+<span class="nc" id="L199">					e.setFace( 0, e.getNewFace() );</span>
+				}
+				else {
+<span class="nc" id="L202">					e.setFace( 1, e.getNewFace() );</span>
+				}
+<span class="nc" id="L204">				e.setNewFace( null );</span>
+			}
+<span class="nc" id="L206">			e = e.next;</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		} while ( e != edges );</span>
+		
+<span class="nc bnc" id="L209" title="All 4 branches missed.">		while ( edges != null &amp;&amp; edges.isDeleted() ) {</span>
+<span class="nc" id="L210">			e = edges;</span>
+<span class="nc" id="L211">			deleteEdge( e );</span>
+		}
+<span class="nc" id="L213">		e = edges.next;</span>
+		do {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">			if ( e.isDeleted() ) {</span>
+<span class="nc" id="L216">				t = e;</span>
+<span class="nc" id="L217">				e = e.next;</span>
+<span class="nc" id="L218">				deleteEdge( t );</span>
+			}
+			else {
+<span class="nc" id="L221">				e = e.next;</span>
+			}
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		} while ( e != edges );</span>
+<span class="nc" id="L224">	}</span>
+	
+
+	/**
+	 * Removes faces no longer visible from the current hull.
+	 */
+	private void cleanFaces() {
+		HullFace f, t;
+		
+<span class="nc bnc" id="L233" title="All 4 branches missed.">		while ( faces != null &amp;&amp; faces.isVisible() ) {</span>
+<span class="nc" id="L234">			f = faces;</span>
+<span class="nc" id="L235">			deleteFace( f );</span>
+		}
+<span class="nc" id="L237">		f = faces.next;</span>
+		do {
+<span class="nc bnc" id="L239" title="All 2 branches missed.">			if ( f.isVisible() ) {</span>
+<span class="nc" id="L240">				t = f;</span>
+<span class="nc" id="L241">				f = f.next;</span>
+<span class="nc" id="L242">				deleteFace( t );</span>
+			}
+			else
+<span class="nc" id="L245">				f = f.next;</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">		} while ( f != faces );</span>
+<span class="nc" id="L247">	}</span>
+	
+
+	/**
+	 * Reset the object private fields.
+	 */
+	private void cleanState() {
+<span class="nc" id="L254">		vertices = null;</span>
+<span class="nc" id="L255">		faces = null;</span>
+<span class="nc" id="L256">		edges = null;</span>
+<span class="nc" id="L257">	}</span>
+	
+
+	/**
+	 * Removes elements no longer visible from the current hull.
+	 */
+	private void cleanUp() {
+<span class="nc" id="L264">		cleanEdges();</span>
+<span class="nc" id="L265">		cleanFaces();</span>
+<span class="nc" id="L266">		cleanVertices();</span>
+<span class="nc" id="L267">	}</span>
+	
+
+	/**
+	 * Removes vertices no longer visible from the current hull.
+	 */
+	private void cleanVertices() {
+		HullEdge e;
+		HullVertex v, t;
+		
+<span class="nc" id="L277">		e = edges;</span>
+		do {
+<span class="nc" id="L279">			e.getEndPoint( 0 ).setOnHull( true );</span>
+<span class="nc" id="L280">			e.getEndPoint( 1 ).setOnHull( true );</span>
+<span class="nc" id="L281">			e = e.next;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">		} while ( e != edges );</span>
+<span class="nc bnc" id="L283" title="All 6 branches missed.">		while ( vertices != null &amp;&amp; vertices.isProcessed() &amp;&amp; !vertices.isOnHull() ) {</span>
+<span class="nc" id="L284">			v = vertices;</span>
+<span class="nc" id="L285">			deleteVertex( v );</span>
+		}
+<span class="nc" id="L287">		v = vertices.next;</span>
+		do {
+<span class="nc bnc" id="L289" title="All 4 branches missed.">			if ( v.isProcessed() &amp;&amp; !v.isOnHull() ) {</span>
+<span class="nc" id="L290">				t = v;</span>
+<span class="nc" id="L291">				v = v.next;</span>
+<span class="nc" id="L292">				deleteVertex( t );</span>
+			}
+			else {
+<span class="nc" id="L295">				v = v.next;</span>
+			}
+<span class="nc bnc" id="L297" title="All 2 branches missed.">		} while ( v != vertices );</span>
+<span class="nc" id="L298">		v = vertices;</span>
+		do {
+<span class="nc" id="L300">			v.setDuplicate( null );</span>
+<span class="nc" id="L301">			v.setOnHull( false );</span>
+<span class="nc" id="L302">			v = v.next;</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">		} while ( v != vertices );</span>
+<span class="nc" id="L304">	}</span>
+	
+
+	/**
+	 * Adds to the global list of vertices all the points in the @stations set.
+	 * 
+	 * @param stations
+	 *            set of points you want add to global list of vertices
+	 * @param stationNames 
+	 * @param autoProject
+	 *            if it is true the method explodes the @stations set, adding to
+	 *            it the projection on the planes xy, yz, zx of all points in
+	 *            the @station set.
+	 */
+	private void createVertices( HashSet&lt;HullVertex&gt; stations, boolean autoProject ) {
+<span class="nc bnc" id="L319" title="All 2 branches missed.">		if ( autoProject ) { // FIXME</span>
+<span class="nc" id="L320">			addVertex( new HullVertex( 0, 0, 0, -1, null ) );</span>
+		}
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		for ( HullVertex p : stations ) {</span>
+<span class="nc" id="L323">			addVertex( p );</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">			if ( autoProject ) {</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">				if ( p.x() != 0 ) {</span>
+<span class="nc" id="L326">					addVertex( new HullVertex( 0, p.y(), p.z(), -1, null ) );</span>
+				}
+<span class="nc bnc" id="L328" title="All 2 branches missed.">				if ( p.y() != 0 ) {</span>
+<span class="nc" id="L329">					addVertex( new HullVertex( p.x(), 0, p.z(), -1, null ) );</span>
+				}
+<span class="nc bnc" id="L331" title="All 2 branches missed.">				if ( p.z() != 0 ) {</span>
+<span class="nc" id="L332">					addVertex( new HullVertex( p.x(), p.y(), 0, -1, null ) );</span>
+				}
+<span class="nc bnc" id="L334" title="All 4 branches missed.">				if ( p.x() != 0 &amp;&amp; p.y() != 0 ) {</span>
+<span class="nc" id="L335">					addVertex( new HullVertex( 0, 0, p.z(), -1,null ) );</span>
+				}
+<span class="nc bnc" id="L337" title="All 4 branches missed.">				if ( p.x() != 0 &amp;&amp; p.z() != 0 ) {</span>
+<span class="nc" id="L338">					addVertex( new HullVertex( 0, p.y(), 0, -1,null ) );</span>
+				}
+<span class="nc bnc" id="L340" title="All 4 branches missed.">				if ( p.y() != 0 &amp;&amp; p.z() != 0 ) {</span>
+<span class="nc" id="L341">					addVertex( new HullVertex( p.x(), 0, 0, -1, null ) );</span>
+				}
+			}
+<span class="nc" id="L344">		}</span>
+<span class="nc" id="L345">	}</span>
+	
+
+	/**
+	 * Deletes @p edge from the global list of egdes.
+	 * 
+	 * @param p
+	 *            the edge you want to delete
+	 */
+	private void deleteEdge( HullEdge p ) {
+<span class="nc bnc" id="L355" title="All 2 branches missed.">		if ( edges != null ) {</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">			if ( edges == edges.next )</span>
+<span class="nc" id="L357">				edges = null;</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">			else if ( p == edges )</span>
+<span class="nc" id="L359">				edges = edges.next;</span>
+<span class="nc" id="L360">			p.next.prev = p.prev;</span>
+<span class="nc" id="L361">			p.prev.next = p.next;</span>
+		}
+<span class="nc" id="L363">	}</span>
+	
+
+	/**
+	 * Deletes @p face from the global list of faces.
+	 * 
+	 * @param p
+	 *            the face you want to delete
+	 */
+	private void deleteFace( HullFace p ) {
+<span class="nc bnc" id="L373" title="All 2 branches missed.">		if ( faces != null ) {</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">			if ( faces == faces.next )</span>
+<span class="nc" id="L375">				faces = null;</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">			else if ( p == faces )</span>
+<span class="nc" id="L377">				faces = faces.next;</span>
+<span class="nc" id="L378">			p.next.prev = p.prev;</span>
+<span class="nc" id="L379">			p.prev.next = p.next;</span>
+		}
+<span class="nc" id="L381">	}</span>
+	
+
+	/**
+	 * Deletes @p vertex from the global list of vertices.
+	 * 
+	 * @param p
+	 *            the vertex you want to delete
+	 */
+	private void deleteVertex( HullVertex p ) {
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		if ( vertices != null ) {</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">			if ( vertices == vertices.next )</span>
+<span class="nc" id="L393">				vertices = null;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">			else if ( p == vertices )</span>
+<span class="nc" id="L395">				vertices = vertices.next;</span>
+<span class="nc" id="L396">			p.next.prev = p.prev;</span>
+<span class="nc" id="L397">			p.prev.next = p.next;</span>
+		}
+<span class="nc" id="L399">	}</span>
+	
+
+	/**
+	 * Creates initial politoype(a bihedron).
+	 * 
+	 * @throws AllPointsCoplanarExceptions
+	 * @throws AllPointsCollinearException
+	 */
+	private void doubleTriangle() throws AllPointsCoplanarExceptions, AllPointsCollinearException {
+		HullVertex v0, v1, v2, v3;
+<span class="nc" id="L410">		HullFace f0, f1 = null;</span>
+		int vol;
+		
+<span class="nc" id="L413">		v0 = vertices;</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">		while ( HullVertex.areCollinear( v0, v0.next, v0.next.next ) ) {</span>
+<span class="nc" id="L415">			v0 = v0.next;</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">			if ( v0 == vertices ) {</span>
+<span class="nc" id="L417">				throw new AllPointsCollinearException( &quot;All points are collinear.&quot; );</span>
+			}
+		}
+<span class="nc" id="L420">		v1 = v0.next;</span>
+<span class="nc" id="L421">		v2 = v1.next;</span>
+<span class="nc" id="L422">		v0.setProcessed( true );</span>
+<span class="nc" id="L423">		v1.setProcessed( true );</span>
+<span class="nc" id="L424">		v2.setProcessed( true );</span>
+		
+<span class="nc" id="L426">		f0 = new HullFace( v0, v1, v2, f1, this );</span>
+<span class="nc" id="L427">		f1 = new HullFace( v2, v1, v0, f0, this );</span>
+<span class="nc" id="L428">		addFace( f0 );</span>
+<span class="nc" id="L429">		addFace( f1 );</span>
+		
+<span class="nc" id="L431">		f0.setSecondAdjFace( f1 );</span>
+<span class="nc" id="L432">		f1.setSecondAdjFace( f0 );</span>
+		
+<span class="nc" id="L434">		v3 = v2.next;</span>
+<span class="nc" id="L435">		vol = f0.volumeSign( v3 );</span>
+<span class="nc bnc" id="L436" title="All 2 branches missed.">		while ( vol == 0 ) {// C: if (-1) = true</span>
+<span class="nc" id="L437">			v3 = v3.next;</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">			if ( v3 == v0 ) {</span>
+<span class="nc" id="L439">				throw new AllPointsCoplanarExceptions( &quot;All points are coplanar.&quot; );</span>
+			}
+<span class="nc" id="L441">			vol = f0.volumeSign( v3 );</span>
+		}
+<span class="nc" id="L443">		vertices = v3;</span>
+<span class="nc" id="L444">	}</span>
+	
+
+	/**
+	 * Transforms the double linked list of faces in a more user-friendly
+	 * ArrayList.
+	 * 
+	 * @return the ArrayList of the faces of the convex hull.
+	 */
+	private ArrayList&lt;HullFace&gt; makeResultUserFriendly() {
+		ArrayList&lt;HullFace&gt; result;
+<span class="nc" id="L455">		result = new ArrayList&lt;HullFace&gt;();</span>
+		HullFace f;
+<span class="nc" id="L457">		f = faces;</span>
+		do {
+<span class="nc" id="L459">			result.add( f );</span>
+<span class="nc" id="L460">			f = f.next;</span>
+<span class="nc bnc" id="L461" title="All 2 branches missed.">		} while ( f != faces );</span>
+<span class="nc" id="L462">		return result;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

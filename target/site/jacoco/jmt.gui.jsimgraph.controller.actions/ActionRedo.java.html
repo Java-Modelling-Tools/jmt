@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionRedo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller.actions</a> &gt; <span class="el_source">ActionRedo.java</span></div><h1>ActionRedo.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller.actions;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.KeyStroke;
+import javax.swing.undo.UndoManager;
+
+import jmt.gui.jsimgraph.controller.Mediator;
+
+/**
+
+ * @author Conti Andrea
+ * Date: 27-ago-2003
+ * Time: 23.58.12
+
+ */
+
+/**
+ * A class representing a &quot;redo&quot; action.
+ * @see jmt.gui.jsimgraph.controller.actions.AbstractUndoRedoAction
+ */
+public class ActionRedo extends AbstractUndoRedoAction {
+
+	private static final long serialVersionUID = 1L;
+	protected UndoManager um;
+
+	public ActionRedo(Mediator mediator, UndoManager um) {
+<span class="nc" id="L48">		super(&quot;Redo&quot;, mediator);</span>
+<span class="nc" id="L49">		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_R));</span>
+<span class="nc" id="L50">		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));</span>
+<span class="nc" id="L51">		this.um = um;</span>
+<span class="nc" id="L52">		update();</span>
+<span class="nc" id="L53">	}</span>
+
+	public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L56">		mediator.redo();</span>
+<span class="nc" id="L57">		updateAll();</span>
+<span class="nc" id="L58">	}</span>
+
+	/**
+	 * Update the state (name &amp; enabled) of this instance
+	 */
+	@Override
+	public void update() {
+<span class="nc" id="L65">		setEnabled(um.canRedo());</span>
+<span class="nc" id="L66">		putValue(SHORT_DESCRIPTION, um.getRedoPresentationName());</span>
+<span class="nc" id="L67">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

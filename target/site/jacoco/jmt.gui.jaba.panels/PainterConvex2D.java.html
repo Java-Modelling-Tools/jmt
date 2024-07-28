@@ -1,0 +1,703 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PainterConvex2D.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.panels</a> &gt; <span class="el_source">PainterConvex2D.java</span></div><h1>PainterConvex2D.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jaba.panels;
+
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.Stroke;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
+import java.awt.geom.Point2D;
+import java.text.DecimalFormat;
+import java.util.Vector;
+
+import jmt.engine.jaba.DPoint;
+import jmt.engine.jaba.FinalSect2D;
+import jmt.engine.jaba.Station2D;
+
+/**
+ * This class draws all the part of the graph
+ * 
+ * @author Carlo Gimondi
+ */
+public class PainterConvex2D {
+	private int height;
+	private int width;
+	private int pointSize;
+	private int fromBorderX;
+	private int fromBorderY;
+	private int tran_x;
+	private int tran_y;
+	private double maxValue;
+	private double scale;
+	private int maxLabel;
+
+<span class="nc" id="L58">	private static final DecimalFormat format2Dec = new DecimalFormat(&quot;0.00&quot;);</span>
+<span class="nc" id="L59">	private static final DecimalFormat format4Dec = new DecimalFormat(&quot;0.0000&quot;);</span>
+
+	/**
+	 * Initialize the object from the vector  where all the points are sored
+	 * @param allDominants The vector with all the points
+	 * @param height The height of the window
+	 * @param width The width of the window
+	 */
+<span class="nc" id="L67">	public PainterConvex2D(Vector&lt;Point2D&gt; allDominants, int height, int width) {</span>
+		DPoint p;
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		for (int i = 0; i &lt; allDominants.size(); i++) {</span>
+<span class="nc" id="L71">			p = (DPoint) allDominants.get(i);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (p.getX() &gt; maxValue) {</span>
+<span class="nc" id="L73">				maxValue = p.getX();</span>
+			}
+
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			if (p.getY() &gt; maxValue) {</span>
+<span class="nc" id="L77">				maxValue = p.getY();</span>
+			}
+
+<span class="nc bnc" id="L80" title="All 2 branches missed.">			if (p.getLabel().toString().length() &gt; maxLabel) {</span>
+<span class="nc" id="L81">				maxLabel = p.getLabel().toString().length();</span>
+			}
+
+		}
+
+		//Max value in the graphic
+<span class="nc" id="L87">		maxValue = (int) (maxValue / 10) + 1;</span>
+<span class="nc" id="L88">		maxValue = maxValue * 10;</span>
+
+<span class="nc" id="L90">		maxLabel = maxLabel + 5 + (&quot;&quot; + maxValue).length();</span>
+
+<span class="nc" id="L92">		update(height, width);</span>
+<span class="nc" id="L93">	}</span>
+
+	/**
+	 * Draw the selected line of the convex hull 
+	 * and the information about it
+	 * @param g Graphic object
+	 * @param p1 The first point of the line
+	 * @param p2 The second point of the line
+	 * @param s3d Information aboute the classes
+	 * @param classNames The name of the classes
+	 */
+	public void drawSelectLine(Graphics2D g, DPoint p1, DPoint p2, Vector&lt;Object&gt; s3d, String[] classNames) {
+<span class="nc bnc" id="L105" title="All 4 branches missed.">		if ((p1 != null) &amp;&amp; (p2 != null)) {</span>
+			//Draw the selected line
+<span class="nc" id="L107">			Stroke oldStro = g.getStroke();</span>
+<span class="nc" id="L108">			Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);</span>
+<span class="nc" id="L109">			g.setStroke(stroke);</span>
+<span class="nc" id="L110">			g.setColor(Color.BLACK);</span>
+<span class="nc" id="L111">			g.drawLine((int) (p1.getX() * scale) + tran_x, tran_y - (int) (p1.getY() * scale), (int) (p2.getX() * scale) + tran_x, tran_y</span>
+<span class="nc" id="L112">					- (int) (p2.getY() * scale));</span>
+<span class="nc" id="L113">			g.setStroke(oldStro);</span>
+
+			//Set the middle point
+<span class="nc" id="L116">			int x = (int) p2.getX() + (int) ((p1.getX() - p2.getX()) / 2);</span>
+<span class="nc" id="L117">			int y = (int) p2.getY() + (int) ((p1.getY() - p2.getY()) / 2);</span>
+<span class="nc" id="L118">			x = (int) (x * scale) + tran_x + (pointSize + 3);</span>
+<span class="nc" id="L119">			y = tran_y - (int) (y * scale) - (pointSize + 1);</span>
+
+<span class="nc" id="L121">			Font label = new Font(&quot;Arial&quot;, Font.PLAIN, 7 + pointSize);</span>
+<span class="nc" id="L122">			g.setFont(label);</span>
+
+			//Draw the label
+<span class="nc bnc" id="L125" title="All 2 branches missed.">			for (int i = 0; i &lt; s3d.size(); i++) {</span>
+				// Current sector
+<span class="nc" id="L127">				FinalSect2D sect = (FinalSect2D) s3d.get(i);</span>
+<span class="nc" id="L128">				String pb11 = format2Dec.format(sect.getBeta11() * 100);</span>
+<span class="nc" id="L129">				String pb12 = format2Dec.format(sect.getBeta1() * 100);</span>
+<span class="nc" id="L130">				String pb21 = format2Dec.format(sect.getBeta22() * 100);</span>
+<span class="nc" id="L131">				String pb22 = format2Dec.format(sect.getBeta2() * 100);</span>
+
+<span class="nc bnc" id="L133" title="All 2 branches missed.">				if (sect.countStation() &lt; 2) {</span>
+<span class="nc" id="L134">					continue;</span>
+				}
+
+<span class="nc" id="L137">				Station2D d1 = (sect.getstation()).get(0);</span>
+<span class="nc" id="L138">				Station2D d2 = (sect.getstation()).get(1);</span>
+<span class="nc" id="L139">				int d1x = (int) (d1.getVert()).getX();</span>
+<span class="nc" id="L140">				int d1y = (int) (d1.getVert()).getY();</span>
+<span class="nc" id="L141">				int d2x = (int) (d2.getVert()).getX();</span>
+<span class="nc" id="L142">				int d2y = (int) (d2.getVert()).getY();</span>
+<span class="nc" id="L143">				int p1x = (int) (p1.getX() * 100);</span>
+<span class="nc" id="L144">				int p1y = (int) (p1.getY() * 100);</span>
+<span class="nc" id="L145">				int p2x = (int) (p2.getX() * 100);</span>
+<span class="nc" id="L146">				int p2y = (int) (p2.getY() * 100);</span>
+<span class="nc" id="L147">				double t1 = ((p1.getY() - p2.getY()) / ((p2.getX() * p1.getY()) - (p1.getX() * p2.getY())));</span>
+<span class="nc" id="L148">				double t2 = ((p2.getX() - p1.getX()) / ((p2.getX() * p1.getY()) - (p1.getX() * p2.getY())));</span>
+
+<span class="nc bnc" id="L150" title="All 16 branches missed.">				if (((d1x == p1x) &amp;&amp; (d1y == p1y) &amp;&amp; (d2x == p2x) &amp;&amp; (d2y == p2y)) || ((d1x == p2x) &amp;&amp; (d1y == p2y) &amp;&amp; (d2x == p1x) &amp;&amp; (d2y == p1y))) {</span>
+<span class="nc" id="L151">					g.drawString(classNames[0] + &quot;=&quot; + format4Dec.format(t1) + &quot; job/sec&quot;, x, y - (8 + pointSize));</span>
+<span class="nc" id="L152">					g.drawString(classNames[1] + &quot;=&quot; + format4Dec.format(t2) + &quot; job/sec&quot;, x, y);</span>
+
+<span class="nc" id="L154">					g.drawString(classNames[1] + &quot;% [&quot; + pb22 + &quot;,&quot; + pb12 + &quot;]&quot;, x, y - 2 * (8 + pointSize));</span>
+<span class="nc" id="L155">					g.drawString(classNames[0] + &quot;% [&quot; + pb21 + &quot;,&quot; + pb11 + &quot;]&quot;, x, y - 3 * (8 + pointSize));</span>
+<span class="nc" id="L156">					break;</span>
+				}
+			}
+		}
+<span class="nc" id="L160">	}</span>
+
+	/**
+	 * If the height or the width are changed the parameters of
+	 * the graph are update
+	 * @param height The height of the window
+	 * @param width The width of the window
+	 * @return true if somethig is change
+	 */
+	public boolean update(int height, int width) {
+<span class="nc bnc" id="L170" title="All 4 branches missed.">		if ((this.height != height) || (this.width != width)) {</span>
+
+<span class="nc" id="L172">			this.height = height;</span>
+<span class="nc" id="L173">			this.width = width;</span>
+
+<span class="nc" id="L175">			pointSize = Math.min(height, width) / 100;</span>
+
+<span class="nc" id="L177">			fromBorderX = 48 + maxLabel * (pointSize / 2);</span>
+<span class="nc" id="L178">			fromBorderY = 30 + pointSize;</span>
+
+<span class="nc" id="L180">			tran_y = height - 6 - (2 * (9 + pointSize));</span>
+<span class="nc" id="L181">			tran_x = -2 + (((9 + pointSize) / 2) * ((&quot;&quot; + maxValue).length()));</span>
+
+<span class="nc" id="L183">			int max_possible = (width - fromBorderX - tran_x);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			if ((tran_y - fromBorderY) &lt; max_possible) {</span>
+<span class="nc" id="L185">				max_possible = (tran_y - fromBorderY);</span>
+			}
+
+<span class="nc" id="L188">			scale = (float) ((max_possible - (8 + pointSize)) / maxValue);</span>
+<span class="nc" id="L189">			return true;</span>
+		}
+<span class="nc" id="L191">		return false;</span>
+	}
+
+	/**
+	 * It draws the axis of the graph
+	 * @param g The graphic object
+	 * @param className The name of the classes
+	 */
+	public void axis(Graphics2D g, String[] className) {
+<span class="nc" id="L200">		g.setColor(Color.BLACK);</span>
+		//Axis
+<span class="nc" id="L202">		g.drawLine(tran_x, tran_y, tran_x, fromBorderY);</span>
+<span class="nc" id="L203">		g.drawLine(tran_x, tran_y, width - fromBorderX, tran_y);</span>
+		//Arrows Y
+<span class="nc" id="L205">		g.drawLine(tran_x - 4, fromBorderY + 8, tran_x, fromBorderY);</span>
+<span class="nc" id="L206">		g.drawLine(tran_x + 4, fromBorderY + 8, tran_x, fromBorderY);</span>
+		//Arrows X
+<span class="nc" id="L208">		g.drawLine(width - fromBorderX - 8, tran_y - 4, width - fromBorderX, tran_y);</span>
+<span class="nc" id="L209">		g.drawLine(width - fromBorderX - 8, tran_y + 4, width - fromBorderX, tran_y);</span>
+
+<span class="nc" id="L211">		Font label = new Font(&quot;Arial&quot;, Font.PLAIN, 9 + pointSize);</span>
+<span class="nc" id="L212">		g.setFont(label);</span>
+		//Label Y
+<span class="nc" id="L214">		g.drawString(className[0], tran_x - 15, fromBorderY - 8);</span>
+		//Label X 
+<span class="nc" id="L216">		g.drawString(className[1], width - Math.max(fromBorderX, (int) (className[1].length() * (9 + pointSize) * 0.58)), height - (pointSize));</span>
+
+		//Insert the line on the axis
+<span class="nc bnc" id="L219" title="All 2 branches missed.">		for (int i = 1; i &lt; 11; i++) {</span>
+<span class="nc" id="L220">			g.drawLine(tran_x + (int) (((maxValue / 10) * i) * scale), tran_y, tran_x + (int) (((maxValue / 10) * i) * scale), tran_y + 2);</span>
+<span class="nc" id="L221">			g.drawLine(tran_x, tran_y - (int) (((maxValue / 10) * i) * scale), tran_x - 2, tran_y - (int) (((maxValue / 10) * i) * scale));</span>
+		}
+
+		//Setting the Font
+<span class="nc" id="L225">		int fontSize = 8 + pointSize;</span>
+<span class="nc" id="L226">		Font f = new Font(&quot;Arial&quot;, Font.PLAIN, fontSize);</span>
+<span class="nc" id="L227">		g.setFont(f);</span>
+
+		//Insert the number on the axis X
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		for (int i = 1; i &lt; 11; i++) {</span>
+<span class="nc" id="L231">			g.drawString(&quot;&quot; + (int) (((maxValue / 10) * i)), tran_x + (int) (((maxValue / 10) * i) * scale) - 7, tran_y + 3 + fontSize);</span>
+		}
+
+<span class="nc bnc" id="L234" title="All 2 branches missed.">		for (int i = 1; i &lt; 11; i++) {</span>
+<span class="nc" id="L235">			int translationt = (((&quot;&quot; + maxValue).length()) - (((&quot;&quot; + ((int) (((maxValue / 10) * i)))).length()))) - 1;</span>
+<span class="nc" id="L236">			g.drawString(&quot;&quot; + (int) (((maxValue / 10) * i)), (translationt * (fontSize / 2)) - 3, tran_y + 3 - (int) (((maxValue / 10) * i) * scale));</span>
+		}
+
+		//Insert 0
+<span class="nc" id="L240">		g.drawString(&quot;0&quot;, tran_x - pointSize - 5, tran_y + pointSize + 5);</span>
+<span class="nc" id="L241">	}</span>
+
+	/**
+	 * It draws that explains the simbols on the graphic
+	 * @param g The graphic object
+	 */
+	public void summary(Graphics2D g) {
+<span class="nc" id="L248">		int size = pointSize + 1;</span>
+<span class="nc" id="L249">		int x = width - 53 - (pointSize * 5);</span>
+<span class="nc" id="L250">		int y = 7 + size;</span>
+<span class="nc" id="L251">		int fontSize = 6 + Math.min(pointSize + 1, 9);</span>
+<span class="nc" id="L252">		Font f = new Font(&quot;Arial&quot;, Font.PLAIN, fontSize);</span>
+<span class="nc" id="L253">		g.setFont(f);</span>
+
+		//Potential Bottleneck
+<span class="nc" id="L256">		g.setColor(Color.RED);</span>
+<span class="nc" id="L257">		g.fillOval(5 + (x) - ((size / 2)), (int) (y + (0.5) * fontSize) - ((Math.min(pointSize + 1, 9) / 2)), Math.min(pointSize + 1, 9), Math.min(</span>
+				pointSize + 1, 9));
+<span class="nc" id="L259">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L260">		g.drawString(&quot;Potential&quot;, x + 11 + ((size / 2)), y);</span>
+<span class="nc" id="L261">		g.drawString(&quot;Bottleneck&quot;, x + 11 + ((size / 2)), y + fontSize);</span>
+<span class="nc" id="L262">		g.drawString(&quot;Stations&quot;, x + 11 + ((size / 2)), y + 2 * fontSize);</span>
+
+		//Masked-off
+<span class="nc" id="L265">		g.setColor(Color.BLUE);</span>
+<span class="nc" id="L266">		g.fillOval(5 + (x) - ((size / 2)), -3 + y + (4) * fontSize - Math.min(pointSize + 1, 9), Math.min(pointSize + 1, 9), Math.min(pointSize + 1,</span>
+				9));
+<span class="nc" id="L268">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L269">		g.drawString(&quot;Masked-off&quot;, x + 11 + ((size / 2)), 3 + y + (3) * fontSize);</span>
+<span class="nc" id="L270">		g.drawString(&quot;Stations&quot;, x + 11 + ((size / 2)), 3 + y + (4) * fontSize);</span>
+
+		//Dominated
+<span class="nc" id="L273">		g.setColor(new Color(15, 185, 100));</span>
+<span class="nc" id="L274">		g.fillOval(5 + (x) - ((size / 2)), 6 + y + (((6 * fontSize) + (5 * fontSize)) / 2) - Math.min(pointSize + 1, 9), Math.min(pointSize + 1, 9),</span>
+<span class="nc" id="L275">				Math.min(pointSize + 1, 9));</span>
+<span class="nc" id="L276">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L277">		g.drawString(&quot;Dominated&quot;, x + 11 + ((size / 2)), 6 + y + (5) * fontSize);</span>
+<span class="nc" id="L278">		g.drawString(&quot;Stations&quot;, x + 11 + ((size / 2)), 6 + y + (6) * fontSize);</span>
+
+		//Masked off-Area
+<span class="nc" id="L281">		g.drawString(&quot;Masked-off&quot;, x + 11 + ((size / 2)), 2 + y + (8) * fontSize);</span>
+<span class="nc" id="L282">		g.drawString(&quot;Area&quot;, x + 11 + ((size / 2)), 2 + y + (9) * fontSize);</span>
+<span class="nc" id="L283">		int xP1 = 4 + x - ((size / 2));</span>
+<span class="nc" id="L284">		int yP1 = 3 + y + (8) * fontSize + ((size / 2));</span>
+<span class="nc" id="L285">		int xP2 = 4 + x + size;</span>
+<span class="nc" id="L286">		int yP2 = 3 + (y + (8) * fontSize) - size;</span>
+
+<span class="nc" id="L288">		Polygon p = twoPointRectangle(xP1, yP1, xP2, yP2);</span>
+
+<span class="nc" id="L290">		g.setColor(Color.ORANGE);</span>
+<span class="nc" id="L291">		g.fill(p);</span>
+<span class="nc" id="L292">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L293">		g.draw(p);</span>
+
+		//Dominated Area
+<span class="nc" id="L296">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L297">		g.drawString(&quot;Dominated&quot;, x + 11 + ((size / 2)), 3 + y + (10) * fontSize);</span>
+<span class="nc" id="L298">		g.drawString(&quot;Area&quot;, x + 11 + ((size / 2)), 3 + y + (11) * fontSize);</span>
+<span class="nc" id="L299">		xP1 = 4 + x - ((size / 2));</span>
+<span class="nc" id="L300">		yP1 = 4 + y + (10) * fontSize + ((size / 2));</span>
+<span class="nc" id="L301">		xP2 = 4 + x + size;</span>
+<span class="nc" id="L302">		yP2 = 4 + (y + (10) * fontSize) - size;</span>
+
+<span class="nc" id="L304">		p = twoPointRectangle(xP1, yP1, xP2, yP2);</span>
+
+<span class="nc" id="L306">		g.setColor(new Color(255, 250, 120));</span>
+<span class="nc" id="L307">		g.fill(p);</span>
+<span class="nc" id="L308">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L309">		g.draw(p);</span>
+<span class="nc" id="L310">	}</span>
+
+	/**
+	 * Create a Polygon that is a rectangle draw between two point 
+	 * @param xP1 The x of the first point
+	 * @param yP1 The y of the first point
+	 * @param xP2 The x of the second point
+	 * @param yP2 The y of the second point
+	 * @return The rectangle in a polygon object
+	 */
+	public Polygon twoPointRectangle(int xP1, int yP1, int xP2, int yP2) {
+<span class="nc" id="L321">		Polygon p = new Polygon();</span>
+<span class="nc" id="L322">		p.addPoint(xP1, yP1);</span>
+<span class="nc" id="L323">		p.addPoint(xP1, yP2);</span>
+<span class="nc" id="L324">		p.addPoint(xP2, yP2);</span>
+<span class="nc" id="L325">		p.addPoint(xP2, yP1);</span>
+
+<span class="nc" id="L327">		return p;</span>
+	}
+
+	/**
+	 * It draws the points contained in a vector. The coordinates of the point must be insered 
+	 * in a Point2D object
+	 * @param g The graphic object
+	 * @param points The Vector who contains the points
+	 * @param c The color of the points
+	 */
+	public void drawPoint(Graphics g, Vector&lt;Point2D&gt; points, Color c, int size) {
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">		for (int j = 0; j &lt; points.size(); j++) {</span>
+<span class="nc" id="L340">			Point2D p = points.get(j);</span>
+<span class="nc" id="L341">			g.setColor(c);</span>
+<span class="nc" id="L342">			g.fillOval((int) (p.getX() * scale) - ((size / 2)) + tran_x, tran_y - (int) (p.getY() * scale) - ((size / 2)), size, size);</span>
+		}
+<span class="nc" id="L344">	}</span>
+
+	/**
+	 * It draw a temporary point when a point is moved in another place
+	 * @param g The graphic object
+	 * @param p The position of the point
+	 * @param c The color of the point
+	 * @param size The size of the point
+	 */
+	public void drawShadowPoint(Graphics2D g, Point p, Color c, int size) {
+<span class="nc" id="L354">		g.setColor(c);</span>
+
+<span class="nc" id="L356">		int fontSize = 7 + pointSize;</span>
+<span class="nc" id="L357">		Font f = new Font(&quot;Arial&quot;, Font.PLAIN, fontSize);</span>
+<span class="nc" id="L358">		g.setFont(f);</span>
+<span class="nc" id="L359">		double x = Math.max((p.getX() - tran_x) / scale, 0);</span>
+<span class="nc" id="L360">		double y = Math.max((-p.getY() + tran_y) / scale, 0);</span>
+<span class="nc" id="L361">		double X = (x * scale) + tran_x;</span>
+<span class="nc" id="L362">		double Y = -((y * scale) - tran_y);</span>
+
+<span class="nc" id="L364">		g.drawString(&quot;(&quot; + format2Dec.format(x) + &quot;, &quot; + format2Dec.format(y) + &quot;)&quot;, (int) (X - (fontSize * 3)), (int) Y - 5 - pointSize);</span>
+
+<span class="nc" id="L366">		g.drawOval((int) X - (((size / 2))), (int) Y - (((size / 2))), size, size);</span>
+
+<span class="nc" id="L368">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L369">		Composite oldComp = g.getComposite();</span>
+<span class="nc" id="L370">		Composite alphaComp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);</span>
+<span class="nc" id="L371">		g.setComposite(alphaComp);</span>
+<span class="nc" id="L372">		g.fillOval((int) X - (((size / 2))), (int) Y - (((size / 2))), size, size);</span>
+<span class="nc" id="L373">		g.setComposite(oldComp);</span>
+
+<span class="nc" id="L375">	}</span>
+
+	/**
+	 * Return the scale factor
+	 * @return the scale factor
+	 */
+	public double getScale() {
+<span class="nc" id="L382">		return scale;</span>
+	}
+
+	/**
+	* This function draw the area among the axis and the point of the convex hull
+	 * @param g The graphic object
+	 * @param allConvex The vector with the points of the convex hull
+	 * @param allDominants The vector with the dominant points
+	 * @param area The filter area
+	 * @param maskedoff The vector with the masked-off points
+	 */
+	public void drawArea(Graphics g, Vector&lt;Point2D&gt; allConvex, Vector&lt;Point2D&gt; allDominants, Color area, Color maskedoff) {
+		//The first color in the maskedoff color because after will be draw
+		//the non-maskedoff areas
+<span class="nc" id="L396">		g.setColor(maskedoff);</span>
+<span class="nc" id="L397">		Polygon poly = new Polygon();</span>
+
+		DPoint p;
+<span class="nc" id="L400">		p = (DPoint) allConvex.get(0);</span>
+
+<span class="nc" id="L402">		poly.addPoint((int) (p.getX() * scale) + tran_x, tran_y);</span>
+
+		//Add the point a the polygon for paint the convex area
+<span class="nc bnc" id="L405" title="All 2 branches missed.">		for (int i = 0; i &lt; allConvex.size(); i++) {</span>
+<span class="nc" id="L406">			p = (DPoint) allConvex.get(i);</span>
+<span class="nc" id="L407">			poly.addPoint((int) (p.getX() * scale) + tran_x, tran_y - (int) (p.getY() * scale));</span>
+		}
+
+<span class="nc" id="L410">		p = (DPoint) allConvex.get(allConvex.size() - 1);</span>
+<span class="nc" id="L411">		poly.addPoint(1 + tran_x, tran_y - (int) (p.getY() * scale));</span>
+<span class="nc" id="L412">		poly.addPoint(1 + tran_x, tran_y);</span>
+<span class="nc" id="L413">		g.fillPolygon(poly);</span>
+<span class="nc" id="L414">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L415">		g.drawPolygon(poly);</span>
+
+		//Draw the non-maskedoff area for each dominant point
+<span class="nc" id="L418">		Polygon masked = new Polygon();</span>
+<span class="nc" id="L419">		g.setColor(area);</span>
+
+<span class="nc" id="L421">		int k = 0;</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		for (k = 0; k &lt; allDominants.size() - 1; k++) {</span>
+<span class="nc" id="L423">			p = (DPoint) allDominants.get(k);</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">			if (!p.intEquals((DPoint) allDominants.get(k + 1))) {</span>
+<span class="nc" id="L425">				masked = twoPointRectangle(1 + tran_x, tran_y, (int) (p.getX() * scale) + tran_x, tran_y - (int) (p.getY() * scale));</span>
+<span class="nc" id="L426">				g.fillPolygon(masked);</span>
+			}
+		}
+		//Last area is 1 point small
+<span class="nc" id="L430">		p = (DPoint) allDominants.get(k);</span>
+<span class="nc" id="L431">		masked = twoPointRectangle(1 + tran_x, tran_y, (int) (p.getX() * scale) + tran_x, tran_y - (int) (p.getY() * scale) + 1);</span>
+<span class="nc" id="L432">		g.fillPolygon(masked);</span>
+<span class="nc" id="L433">	}</span>
+
+	/**
+	 * Print a label over every point, if the point is select
+	 * the label contain the coordinate too
+	 * @param gra The graphic object
+	 * @param points The vector with all points
+	 */
+	public void pointLabel(Graphics2D g, Vector&lt;Point2D&gt; points) {
+<span class="nc" id="L442">		g.setColor(Color.BLACK);</span>
+
+		//Setting the Font
+<span class="nc" id="L445">		int fontSize = 7 + pointSize;</span>
+<span class="nc" id="L446">		Font f = new Font(&quot;Arial&quot;, Font.PLAIN, fontSize);</span>
+<span class="nc" id="L447">		g.setFont(f);</span>
+
+<span class="nc bnc" id="L449" title="All 2 branches missed.">		for (int i = 0; i &lt; points.size(); i++) {</span>
+<span class="nc" id="L450">			DPoint p = (DPoint) points.get(i);</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">			if (!p.isSelect()) {</span>
+<span class="nc" id="L452">				g.drawString(p.getLabel(), tran_x + (int) (p.getX() * scale) - 15, tran_y - (int) (p.getY() * scale) - 3 - pointSize);</span>
+			} else {
+<span class="nc" id="L454">				g.drawString(p.getLabel() + &quot; (&quot; + format2Dec.format(p.getX()) + &quot;, &quot; + format2Dec.format(p.getY()) + &quot;)&quot;, tran_x</span>
+<span class="nc" id="L455">						+ (int) (p.getX() * scale) - 15, tran_y - (int) (p.getY() * scale) - 3 - pointSize);</span>
+			}
+		}
+<span class="nc" id="L458">	}</span>
+
+	/**
+	 * When is select a Dominat point is draw an arrow from the dominant
+	 * @param g The graphic object
+	 * @param dominant The vector with the dominant points
+	 * @param dominates The vector with the dominates points
+	 */
+	public void drawDominantArrow(Graphics2D g, Vector&lt;Point2D&gt; dominant, Vector&lt;Point2D&gt; dominates) {
+		DPoint p;
+		DPoint p2;
+<span class="nc" id="L469">		boolean first = true;</span>
+
+<span class="nc bnc" id="L471" title="All 2 branches missed.">		for (int i = 0; i &lt; dominates.size(); i++) {</span>
+<span class="nc" id="L472">			p = (DPoint) dominates.get(i);</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">			if (p.isSelect()) {</span>
+<span class="nc bnc" id="L474" title="All 2 branches missed.">				for (int k = dominant.size() - 1; k &gt;= 0; k--) {</span>
+<span class="nc" id="L475">					p2 = (DPoint) dominant.get(k);</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">					if (p2.isSelect()) {</span>
+
+<span class="nc" id="L478">						g.setColor(Color.MAGENTA);</span>
+						//Draw Arrow
+
+						//The angle is calculete throw the rotator point
+<span class="nc" id="L482">						DPoint rotator = new DPoint(p2.getX() - p.getX(), p2.getY() - p.getY());</span>
+<span class="nc" id="L483">						double angle = rotator.polarAngle();</span>
+						//The thestination point in not into the point but near the point
+<span class="nc" id="L485">						int xPoint = (int) (p.getX() * scale) + tran_x + (int) (pointSize * Math.cos(angle));</span>
+<span class="nc" id="L486">						int yPoint = tran_y - (int) (p.getY() * scale) - (int) (pointSize * Math.sin(angle));</span>
+
+<span class="nc" id="L488">						g.drawLine(xPoint, yPoint, (int) (p2.getX() * scale) + tran_x, tran_y - (int) (p2.getY() * scale));</span>
+						//The rotation turn the arrow in the right position
+<span class="nc" id="L490">						g.rotate(-angle, xPoint, yPoint);</span>
+
+<span class="nc" id="L492">						g.drawLine(xPoint, yPoint, xPoint + 4 + pointSize, yPoint - pointSize);</span>
+<span class="nc" id="L493">						g.drawLine(xPoint, yPoint, xPoint + 4 + pointSize, yPoint + pointSize);</span>
+
+<span class="nc" id="L495">						g.rotate((2 * Math.PI) + angle, xPoint, yPoint);</span>
+
+						//Draw Label on the first arrow (only)
+<span class="nc bnc" id="L498" title="All 2 branches missed.">						if (first) {</span>
+<span class="nc" id="L499">							first = false;</span>
+
+<span class="nc" id="L501">							g.setColor(new Color(152, 61, 168));</span>
+<span class="nc" id="L502">							int fontSize = 7 + pointSize;</span>
+<span class="nc" id="L503">							Font f = new Font(&quot;Arial&quot;, Font.PLAIN, fontSize);</span>
+<span class="nc" id="L504">							g.setFont(f);</span>
+
+<span class="nc" id="L506">							double x = (p.getX() + p2.getX()) / 2;</span>
+<span class="nc" id="L507">							double y = (p.getY() + p2.getY()) / 2;</span>
+
+<span class="nc" id="L509">							g.drawString(&quot;Dominating&quot;, (int) (x * scale) + tran_x + 7, tran_y - 3 - (int) (y * scale));</span>
+						}
+					}
+				}
+			}
+		}
+<span class="nc" id="L515">	}</span>
+
+	/**
+	 * This function traw a line near the coordinate of the mouse
+	 * @param g The graphic object
+	 * @param dragPoint The position of the mouse
+	 */
+	public void drawMousePosition(Graphics2D g, Point dragPoint) {
+<span class="nc" id="L523">		g.setColor(Color.DARK_GRAY);</span>
+		//Draw the line
+<span class="nc" id="L525">		g.drawLine(1 + tran_x, (int) (dragPoint.getY()), pointSize + tran_x - 1, (int) (dragPoint.getY()));</span>
+<span class="nc" id="L526">		g.drawLine((int) (dragPoint.getX()), tran_y - pointSize + 1, (int) dragPoint.getX(), tran_y);</span>
+<span class="nc" id="L527">	}</span>
+
+	/**
+	 * Draw a semi-trasparent area that is the filtered area
+	 * @param g The graphic object
+	 * @param filteredArea The filtered area
+	 */
+	public void drawFiltArea(Graphics2D g, Area filtArea) {
+<span class="nc" id="L535">		AffineTransform t = new AffineTransform();</span>
+<span class="nc" id="L536">		t.scale(scale / 100, scale / 100);</span>
+<span class="nc" id="L537">		AffineTransform t2 = new AffineTransform();</span>
+<span class="nc" id="L538">		t2.translate(tran_x, tran_y);</span>
+
+<span class="nc" id="L540">		filtArea.transform(t);</span>
+<span class="nc" id="L541">		filtArea.transform(t2);</span>
+
+<span class="nc" id="L543">		Stroke oldStro = g.getStroke();</span>
+<span class="nc" id="L544">		Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);</span>
+<span class="nc" id="L545">		g.setStroke(stroke);</span>
+
+<span class="nc" id="L547">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L548">		Composite oldComp = g.getComposite();</span>
+<span class="nc" id="L549">		Composite alphaComp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);</span>
+<span class="nc" id="L550">		g.setComposite(alphaComp);</span>
+
+<span class="nc" id="L552">		g.fill(filtArea);</span>
+<span class="nc" id="L553">		g.setComposite(oldComp);</span>
+<span class="nc" id="L554">		g.setStroke(oldStro);</span>
+<span class="nc" id="L555">	}</span>
+
+	/**
+	 * Draw a semi-trasparet area
+	 * @param g The graphic object
+	 * @param dragPoint The first point
+	 * @param beginPoint The second point
+	 * @param c The color of the area
+	 */
+	public void drawDragArea(Graphics2D g, Point dragPoint, Point beginPoint, Color c) {
+<span class="nc" id="L565">		g.setColor(c);</span>
+
+<span class="nc" id="L567">		Polygon poly = new Polygon();</span>
+
+<span class="nc" id="L569">		poly.addPoint((int) beginPoint.getX(), (int) beginPoint.getY());</span>
+<span class="nc" id="L570">		poly.addPoint((int) beginPoint.getX(), (int) dragPoint.getY());</span>
+<span class="nc" id="L571">		poly.addPoint((int) dragPoint.getX(), (int) dragPoint.getY());</span>
+<span class="nc" id="L572">		poly.addPoint((int) dragPoint.getX(), (int) beginPoint.getY());</span>
+
+		//Set the widths of the shape's outline
+<span class="nc" id="L575">		Stroke oldStro = g.getStroke();</span>
+<span class="nc" id="L576">		Stroke stroke = new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);</span>
+<span class="nc" id="L577">		g.setStroke(stroke);</span>
+<span class="nc" id="L578">		g.drawPolygon(poly);</span>
+<span class="nc" id="L579">		g.setStroke(oldStro);</span>
+
+		//Set the trasparency of the iside of the rectangle
+<span class="nc" id="L582">		Composite oldComp = g.getComposite();</span>
+<span class="nc" id="L583">		Composite alphaComp = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f);</span>
+<span class="nc" id="L584">		g.setComposite(alphaComp);</span>
+<span class="nc" id="L585">		g.fillPolygon(poly);</span>
+<span class="nc" id="L586">		g.setComposite(oldComp);</span>
+
+<span class="nc" id="L588">	}</span>
+
+	/**
+	 * Set the parameter point as the dragPoint. If the point in out of the
+	 * graphich area it is resized
+	 * @param p The point
+	 */
+	public Point insidePoint(Point p) {
+<span class="nc" id="L596">		int x = (int) p.getX();</span>
+<span class="nc" id="L597">		int y = (int) p.getY();</span>
+
+		//Resize x and y if they are too big or too small
+<span class="nc bnc" id="L600" title="All 2 branches missed.">		if (x &lt; tran_x) {</span>
+<span class="nc" id="L601">			Math.max(x = tran_x, 0);</span>
+		}
+<span class="nc bnc" id="L603" title="All 2 branches missed.">		if (x &gt; (tran_x + (int) (maxValue * scale))) {</span>
+<span class="nc" id="L604">			x = (tran_x + (int) (maxValue * scale));</span>
+		}
+<span class="nc bnc" id="L606" title="All 2 branches missed.">		if (y &gt; tran_y) {</span>
+<span class="nc" id="L607">			Math.max(y = tran_y, 0);</span>
+		}
+<span class="nc bnc" id="L609" title="All 2 branches missed.">		if (y &lt; (tran_y - (int) (maxValue * scale))) {</span>
+<span class="nc" id="L610">			y = (tran_y - (int) (maxValue * scale));</span>
+		}
+<span class="nc" id="L612">		return new Point(x, y);</span>
+	}
+
+	/**
+	 * Return the true x on the graph from the mouse position
+	 * @param XonScreen The x of the point on screen
+	 * @return The true x point
+	 */
+	public double getTrueX(double XonScreen) {
+<span class="nc" id="L621">		double x = (((XonScreen - tran_x)) / scale);</span>
+
+<span class="nc bnc" id="L623" title="All 2 branches missed.">		if (x &lt; 0) {</span>
+<span class="nc" id="L624">			return 0;</span>
+		} else {
+<span class="nc" id="L626">			return x;</span>
+		}
+	}
+
+	/**
+	 * Return the true y on the graph from the mouse position
+	 * @param YonScreen The y of the point on screen
+	 * @return The true y point
+	 */
+	public double getTrueY(double YonScreen) {
+<span class="nc" id="L636">		double y = (((tran_y - YonScreen)) / scale);</span>
+
+<span class="nc bnc" id="L638" title="All 2 branches missed.">		if (y &lt; 0) {</span>
+<span class="nc" id="L639">			return 0;</span>
+		} else {
+<span class="nc" id="L641">			return y;</span>
+		}
+	}
+
+	/**
+	 * Return the size of the points on screen
+	 * @return The size of the points
+	 */
+	public int getPointSize() {
+<span class="nc" id="L650">		return pointSize;</span>
+	}
+
+	/**
+	 * Return true if the point is on a line between the first and the second point
+	 * @param p1 The first point of the line
+	 * @param p2 The second point of the line
+	 * @param point The point that could be on the line
+	 * @return True if the point is on a line between the first and the second point
+	 */
+	public boolean selectLine(DPoint p1, DPoint p2, Point point) {
+<span class="nc" id="L661">		Polygon p = new Polygon();</span>
+<span class="nc" id="L662">		p.addPoint((int) ((p1.getX() * scale) + tran_x - ((pointSize + 1))), (int) ((tran_y - (p1.getY() * scale) + ((pointSize + 1)))));</span>
+<span class="nc" id="L663">		p.addPoint((int) ((p1.getX() * scale) + tran_x + ((pointSize + 1))), (int) ((tran_y - (p1.getY() * scale) - ((pointSize + 1)))));</span>
+<span class="nc" id="L664">		p.addPoint((int) ((p2.getX() * scale) + tran_x + ((pointSize + 1))), (int) ((tran_y - (p2.getY() * scale) - ((pointSize + 1)))));</span>
+<span class="nc" id="L665">		p.addPoint((int) ((p2.getX() * scale) + tran_x - ((pointSize + 1))), (int) ((tran_y - (p2.getY() * scale) + ((pointSize + 1)))));</span>
+
+<span class="nc bnc" id="L667" title="All 2 branches missed.">		if (p.contains(point)) {</span>
+<span class="nc" id="L668">			return true;</span>
+		}
+<span class="nc" id="L670">		return false;</span>
+	}
+
+	/**
+	 * If a generic point and a point on the screen are the same point
+	 * @param mousePoint The point on screen
+	 * @param ifPoint A generic point
+	 * @return If the point on screen and a generic point are the same
+	 */
+	public boolean theSame(Point mousePoint, DPoint ifPoint, int more) {
+<span class="nc" id="L680">		double max = Math.max(ifPoint.getX(), ifPoint.getY());</span>
+<span class="nc" id="L681">		double error = 1;</span>
+<span class="nc bnc" id="L682" title="All 2 branches missed.">		if (max &lt; 1) {</span>
+<span class="nc" id="L683">			error = 0.1;</span>
+		}
+<span class="nc bnc" id="L685" title="All 2 branches missed.">		if (max &lt; 0.1) {</span>
+<span class="nc" id="L686">			error = 0.01;</span>
+		}
+
+<span class="nc" id="L689">		error = error / scale;</span>
+
+<span class="nc" id="L691">		double minX = (getTrueX(mousePoint.getX()) - error - (((getPointSize() + more) / getScale()) / 2));</span>
+<span class="nc" id="L692">		double maxX = (getTrueX(mousePoint.getX()) + error + (((getPointSize() + more) / getScale()) / 2));</span>
+<span class="nc" id="L693">		double minY = (getTrueY(mousePoint.getY()) - error - (((getPointSize() + more) / getScale()) / 2));</span>
+<span class="nc" id="L694">		double maxY = (getTrueY(mousePoint.getY()) + error + (((getPointSize() + more) / getScale()) / 2));</span>
+
+<span class="nc bnc" id="L696" title="All 8 branches missed.">		if ((minX &lt;= ifPoint.getX()) &amp;&amp; (maxX &gt; ifPoint.getX()) &amp;&amp; (minY &lt;= ifPoint.getY()) &amp;&amp; (maxY &gt; ifPoint.getY())) {</span>
+<span class="nc" id="L697">			return true;</span>
+		}
+<span class="nc" id="L699">		return false;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

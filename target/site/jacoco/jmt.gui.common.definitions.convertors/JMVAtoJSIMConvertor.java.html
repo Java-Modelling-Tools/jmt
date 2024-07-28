@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JMVAtoJSIMConvertor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.convertors</a> &gt; <span class="el_source">JMVAtoJSIMConvertor.java</span></div><h1>JMVAtoJSIMConvertor.java</h1><pre class="source lang-java linenums">package jmt.gui.common.definitions.convertors;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.ServerType;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.distributions.Exponential;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RandomRouting;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="nc" id="L18">public class JMVAtoJSIMConvertor {</span>
+
+    /**
+     * Converts a JMVA model to JSIM. Conversion is performed by equalling service times in every
+     * LI station (adjusting visits) and creating FCFS queues with exponential service time distribution.
+     * &lt;br&gt;
+     * Visits are converted with routing probability, to maintain correctness of computed response time values
+     * a &quot;virtual&quot; node called  RefStation is added as a reference station for closed classes and
+     * routed when (in terms of mean values) a single visit is performed in the system. (as visits values are scaled to
+     * compute probability distribution).
+     * &lt;br&gt;
+     * Note that a single router node, called &quot;Router&quot; is used to route jobs through the
+     * entire network, simplifying its topology. Stations (LI, LD and Delays) are connected in a parallel form with
+     * the Router.
+     * @param input JMVA model (read only access)
+     * @param output target JSIM or JMODEL model. This is expected to be empty
+     * @return a List with all found warnings during conversion (in String format).
+     */
+    public static List&lt;String&gt; convert(ExactModel input, CommonModel output) {
+        // Changes default values, then restores default back at the end of method
+<span class="nc" id="L38">        String defaultRouting = Defaults.get(&quot;stationRoutingStrategy&quot;);</span>
+<span class="nc" id="L39">        String defaultStationQueue = Defaults.get(&quot;stationStationQueueStrategy&quot;);</span>
+<span class="nc" id="L40">        String defaultQueue = Defaults.get(&quot;stationQueueStrategy&quot;);</span>
+<span class="nc" id="L41">        Defaults.set(&quot;stationRoutingStrategy&quot;, RandomRouting.class.getName());</span>
+<span class="nc" id="L42">        Defaults.set(&quot;stationStationQueueStrategy&quot;, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);</span>
+<span class="nc" id="L43">        Defaults.set(&quot;stationQueueStrategy&quot;, CommonConstants.QUEUE_STRATEGY_PS);</span>
+
+<span class="nc" id="L45">        ArrayList&lt;String&gt; res = new ArrayList&lt;String&gt;();</span>
+        // Keys for unique items
+<span class="nc" id="L47">        Object sourceKey = null, sinkKey = null, routerKey, refRouterKey = null;</span>
+        // Sums visit for each class
+<span class="nc" id="L49">        double[] visitSum = new double[input.getClasses()];</span>
+        // Visits matrix (row: stations, column: classes)
+<span class="nc" id="L51">        double[][] visits = input.getVisits();</span>
+
+        // Convert classes
+<span class="nc" id="L54">        Object[] classKeys = new Object[input.getClasses()];</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        for (int i = 0; i &lt; input.getClasses(); i++) {</span>
+<span class="nc" id="L56">            String name = input.getClassNames()[i];</span>
+<span class="nc" id="L57">            int type = input.getClassTypes()[i];</span>
+            // This holds customers if class is closed or arrival rate if open
+<span class="nc" id="L59">            double data = input.getClassData()[i];</span>
+<span class="nc" id="L60">            int priority = input.getClassPriorities()[i];</span>
+            Object key;
+
+<span class="nc" id="L63">            visitSum[i] = 1; // Sums visit for each station. This is initialized to one as we</span>
+            // count visit to reference station
+<span class="nc bnc" id="L65" title="All 2 branches missed.">            for (int j = 0; j &lt; input.getStations(); j++) {</span>
+<span class="nc" id="L66">                visitSum[i] += visits[j][i];</span>
+            }
+
+<span class="nc" id="L69">	    Double softDeadline = -1.0;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">            if (type == ExactConstants.CLASS_CLOSED) {</span>
+                // Closed class
+<span class="nc" id="L72">                key = output.addClass(name, CommonConstants.CLASS_TYPE_CLOSED, priority, softDeadline, new Integer((int) data), null);</span>
+            } else {
+                // Open class
+<span class="nc" id="L75">                Exponential exp = new Exponential();</span>
+<span class="nc" id="L76">                exp.setMean(1 / data);</span>
+<span class="nc" id="L77">                key = output.addClass(name, CommonConstants.CLASS_TYPE_OPEN, priority, softDeadline, null, exp);</span>
+            }
+<span class="nc" id="L79">            classKeys[i] = key;</span>
+        }
+
+<span class="nc" id="L82">        routerKey = output.addStation(&quot;Router&quot;, CommonConstants.STATION_TYPE_ROUTER, 1, new ArrayList&lt;ServerType&gt;());</span>
+
+        // Creates source, sink and router (if needed)
+<span class="nc bnc" id="L85" title="All 4 branches missed.">        if (input.isClosed() || input.isMixed()) {</span>
+<span class="nc" id="L86">            refRouterKey = output.addStation(&quot;RefStation&quot;, CommonConstants.STATION_TYPE_ROUTER, 1, new ArrayList&lt;ServerType&gt;());</span>
+            // Makes connection between refRouter and router
+<span class="nc" id="L88">            output.setConnected(refRouterKey, routerKey, true);</span>
+<span class="nc" id="L89">            output.setConnected(routerKey, refRouterKey, true);</span>
+            // Gives warning on refStation
+<span class="nc" id="L91">            res.add(&quot;A special node, called RefStation, is added to compute the system response times and throughputs of closed classes. &quot;</span>
+                    + &quot;Its presence is fundamental to compute the number of visits at each station for closed classes.&quot;);
+        }
+
+<span class="nc bnc" id="L95" title="All 4 branches missed.">        if (input.isOpen() || input.isMixed()) {</span>
+<span class="nc" id="L96">            sourceKey = output.addStation(&quot;Source&quot;, CommonConstants.STATION_TYPE_SOURCE, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L97">            sinkKey = output.addStation(&quot;Sink&quot;, CommonConstants.STATION_TYPE_SINK, 1, new ArrayList&lt;ServerType&gt;());</span>
+            //Makes connections between source, sink and router
+<span class="nc" id="L99">            output.setConnected(sourceKey, routerKey, true);</span>
+<span class="nc" id="L100">            output.setConnected(routerKey, sinkKey, true);</span>
+        }
+
+        // Convert stations
+<span class="nc" id="L104">        Object[] stationKeys = new Object[input.getStations()];</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">        for (int i = 0; i &lt; input.getStations(); i++) {</span>
+<span class="nc" id="L106">            String name = input.getStationNames()[i];</span>
+<span class="nc" id="L107">            int type = input.getStationTypes()[i];</span>
+<span class="nc" id="L108">            int servers = input.getStationServers()[i];</span>
+<span class="nc" id="L109">            double[][] serviceTimes = input.getServiceTimes()[i];</span>
+<span class="nc" id="L110">            Object key = null;</span>
+<span class="nc bnc" id="L111" title="All 6 branches missed.">            switch (type) {</span>
+            case ExactConstants.STATION_DELAY:
+                // Delay
+<span class="nc" id="L114">                key = addDelayStation(output, classKeys, name, serviceTimes);</span>
+<span class="nc" id="L115">                break;</span>
+            case ExactConstants.STATION_LI:
+                // Load independent
+<span class="nc" id="L118">                key = addLIStation(output, classKeys, name, serviceTimes, servers);</span>
+<span class="nc" id="L119">                break;</span>
+            case ExactConstants.STATION_LD:
+                // Load dependent - this is single class only, but here
+<span class="nc" id="L122">                key = addLDStation(output, classKeys, name, serviceTimes, servers);</span>
+<span class="nc" id="L123">                break;</span>
+            case ExactConstants.STATION_PRS:
+                // FCFS Preemptive Resume
+<span class="nc" id="L126">                key = addPRSStation(output, classKeys, name, serviceTimes);</span>
+<span class="nc" id="L127">                break;</span>
+            case ExactConstants.STATION_HOL:
+                // FCFS Non-preemptive Head-of-Line
+<span class="nc" id="L130">                key = addHOLStation(output, classKeys, name, serviceTimes);</span>
+                break;
+            }
+<span class="nc" id="L133">            stationKeys[i] = key;</span>
+
+            // Make connections with router
+<span class="nc" id="L136">            output.setConnected(routerKey, key, true);</span>
+<span class="nc" id="L137">            output.setConnected(key, routerKey, true);</span>
+        }
+
+        // Sets routing for router
+<span class="nc bnc" id="L141" title="All 2 branches missed.">        for (int i = 0; i &lt; classKeys.length; i++) {</span>
+<span class="nc" id="L142">            ProbabilityRouting pr = new ProbabilityRouting();</span>
+<span class="nc" id="L143">            output.setRoutingStrategy(routerKey, classKeys[i], pr);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">            for (int j = 0; j &lt; stationKeys.length; j++) {</span>
+<span class="nc" id="L145">                pr.getValues().put(stationKeys[j], new Double(visits[j][i] / visitSum[i]));</span>
+            }
+
+            // Sets refRouter as reference station for closed class, sets its routing and avoid put jobs into sink
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            if (output.getClassType(classKeys[i]) == CommonConstants.CLASS_TYPE_CLOSED) {</span>
+<span class="nc" id="L150">                output.setClassRefStation(classKeys[i], refRouterKey);</span>
+<span class="nc" id="L151">                pr.getValues().put(refRouterKey, new Double(1 / visitSum[i]));</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">                if (sinkKey != null) {</span>
+<span class="nc" id="L153">                    pr.getValues().put(sinkKey, new Double(0.0));</span>
+                }
+            }
+            // Sets source as reference station for open class and sets sink routing, avoid routing to refRouter
+            else {
+<span class="nc" id="L158">                output.setClassRefStation(classKeys[i], sourceKey);</span>
+<span class="nc" id="L159">                pr.getValues().put(sinkKey, new Double(1 / visitSum[i]));</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">                if (refRouterKey != null) {</span>
+<span class="nc" id="L161">                    pr.getValues().put(refRouterKey, new Double(0.0));</span>
+                }
+            }
+        }
+
+        // Create measures
+<span class="nc" id="L167">        createMeasures(output, classKeys, stationKeys);</span>
+
+        // Restores default values
+<span class="nc" id="L170">        Defaults.set(&quot;stationRoutingStrategy&quot;, defaultRouting);</span>
+<span class="nc" id="L171">        Defaults.set(&quot;stationStationQueueStrategy&quot;, defaultStationQueue);</span>
+<span class="nc" id="L172">        Defaults.set(&quot;stationQueueStrategy&quot;, defaultQueue);</span>
+
+        // Manage preloading
+<span class="nc" id="L175">        output.manageJobs();</span>
+
+        // Return warnings
+<span class="nc" id="L178">        return res;</span>
+    }
+
+    private static Object addDelayStation(CommonModel output, Object[] classKeys, String name, double[][] serviceTimes) {
+<span class="nc" id="L182">        Object key = output.addStation(name, CommonConstants.STATION_TYPE_DELAY, 1, new ArrayList&lt;ServerType&gt;());</span>
+        // Sets distribution for each class
+<span class="nc bnc" id="L184" title="All 2 branches missed.">        for (int j = 0; j &lt; classKeys.length; j++) {</span>
+<span class="nc" id="L185">            Exponential exp = new Exponential();</span>
+<span class="nc" id="L186">            exp.setMean(serviceTimes[j][0]);</span>
+<span class="nc" id="L187">            output.setServiceTimeDistribution(key, classKeys[j], exp);</span>
+        }
+<span class="nc" id="L189">        return key;</span>
+    }
+
+    private static Object addLIStation(CommonModel output, Object[] classKeys, String name, double[][] serviceTimes, int servers) {
+<span class="nc" id="L193">        Object key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L194">        output.setStationNumberOfServers(key, new Integer(servers));</span>
+        // Sets distribution for each class
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        for (int j = 0; j &lt; classKeys.length; j++) {</span>
+<span class="nc" id="L197">            Exponential exp = new Exponential();</span>
+<span class="nc" id="L198">            exp.setMean(serviceTimes[j][0]);</span>
+<span class="nc" id="L199">            output.setServiceTimeDistribution(key, classKeys[j], exp);</span>
+        }
+<span class="nc" id="L201">        return key;</span>
+    }
+
+    private static Object addLDStation(CommonModel output, Object[] classKeys, String name, double[][] serviceTimes, int servers) {
+        // we support multiclass too (future extensions).
+
+<span class="nc" id="L207">        Object key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L208">        output.setStationNumberOfServers(key, new Integer(servers));</span>
+        // Sets distribution for each class
+<span class="nc bnc" id="L210" title="All 2 branches missed.">        for (int j = 0; j &lt; classKeys.length; j++) {</span>
+<span class="nc" id="L211">            LDStrategy lds = new LDStrategy();</span>
+<span class="nc" id="L212">            Object rangeKey = lds.getAllRanges()[0];</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">            for (int range = 0; range &lt; serviceTimes[j].length; range++) {</span>
+                // First range is already available
+<span class="nc bnc" id="L215" title="All 2 branches missed.">                if (range &gt; 0) {</span>
+<span class="nc" id="L216">                    rangeKey = lds.addRange();</span>
+                }
+<span class="nc" id="L218">                Exponential exp = new Exponential();</span>
+<span class="nc" id="L219">                exp.setMean(serviceTimes[j][range]);</span>
+<span class="nc" id="L220">                lds.setRangeDistribution(rangeKey, exp);</span>
+<span class="nc" id="L221">                lds.setRangeDistributionMean(rangeKey, Double.toString(serviceTimes[j][range]));</span>
+            }
+<span class="nc" id="L223">            output.setServiceTimeDistribution(key, classKeys[j], lds);</span>
+        }
+<span class="nc" id="L225">        return key;</span>
+    }
+
+
+    private static Object addPRSStation(CommonModel output, Object[] classKeys, String name, double[][] serviceTimes) {
+<span class="nc" id="L230">        Object key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L231">        output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);</span>
+        // Sets distribution for each class
+<span class="nc bnc" id="L233" title="All 2 branches missed.">        for (int j = 0; j &lt; classKeys.length; j++) {</span>
+<span class="nc" id="L234">            Exponential exp = new Exponential();</span>
+<span class="nc" id="L235">            exp.setMean(serviceTimes[j][0]);</span>
+<span class="nc" id="L236">            output.setServiceTimeDistribution(key, classKeys[j], exp);</span>
+<span class="nc" id="L237">            output.setQueueStrategy(key, classKeys[j], CommonConstants.QUEUE_STRATEGY_FCFS_PR);</span>
+        }
+<span class="nc" id="L239">        return key;</span>
+    }
+
+
+    private static Object addHOLStation(CommonModel output, Object[] classKeys, String name, double[][] serviceTimes) {
+        // Non-preemptive Priority Head-of-line (FCFS)
+<span class="nc" id="L245">        Object key = output.addStation(name, CommonConstants.STATION_TYPE_SERVER, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L246">        output.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);</span>
+        // Sets distribution for each class
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        for (int j = 0; j &lt; classKeys.length; j++) {</span>
+<span class="nc" id="L249">            Exponential exp = new Exponential();</span>
+<span class="nc" id="L250">            exp.setMean(serviceTimes[j][0]);</span>
+<span class="nc" id="L251">            output.setServiceTimeDistribution(key, classKeys[j], exp);</span>
+<span class="nc" id="L252">            output.setQueueStrategy(key, classKeys[j], CommonConstants.QUEUE_STRATEGY_FCFS);</span>
+        }
+<span class="nc" id="L254">        return key;</span>
+    }
+
+
+
+    private static void createMeasures(CommonModel output, Object[] classKeys, Object[] stationKeys) {
+<span class="nc bnc" id="L260" title="All 2 branches missed.">        for (Object classKey : classKeys) {</span>
+<span class="nc bnc" id="L261" title="All 2 branches missed.">            for (Object stationKey : stationKeys) {</span>
+                // Queue length
+<span class="nc" id="L263">                output.addMeasure(SimulationDefinition.MEASURE_QL, stationKey, classKey);</span>
+                // Residence Time
+<span class="nc" id="L265">                output.addMeasure(SimulationDefinition.MEASURE_RD, stationKey, classKey);</span>
+                // Utilization
+<span class="nc" id="L267">                output.addMeasure(SimulationDefinition.MEASURE_U, stationKey, classKey);</span>
+                // Throughput
+<span class="nc" id="L269">                output.addMeasure(SimulationDefinition.MEASURE_X, stationKey, classKey);</span>
+            }
+        }
+<span class="nc" id="L272">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

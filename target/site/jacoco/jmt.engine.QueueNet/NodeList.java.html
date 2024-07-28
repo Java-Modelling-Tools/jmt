@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NodeList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">NodeList.java</span></div><h1>NodeList.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+/** This class implements a list of nodes. Note that only classes of QueueNet
+ * package can add or remove objects to/from the list.
+ * @author Francesco Radaelli
+ */
+public class NodeList {
+
+	private List&lt;NetNode&gt; nodes;
+	private Map&lt;String, NetNode&gt; nodeMap;
+
+	/** Creates a new instance of NodeList class.
+	 */
+<span class="nc" id="L38">	public NodeList() {</span>
+<span class="nc" id="L39">		nodes = new ArrayList&lt;NetNode&gt;();</span>
+<span class="nc" id="L40">		nodeMap = new HashMap&lt;String, NetNode&gt;();</span>
+<span class="nc" id="L41">	}</span>
+
+	/** Adds a new node to the list.
+	 * @param node Reference to the node.
+	 */
+	public void add(NetNode node) {
+<span class="nc" id="L47">		nodes.add(node);</span>
+<span class="nc" id="L48">		nodeMap.put(node.getName(), node);</span>
+<span class="nc" id="L49">	}</span>
+
+	/** Removes a node from the list.
+	 * @param node Reference to the node.
+	 */
+	public void remove(NetNode node) {
+<span class="nc" id="L55">		nodes.remove(node);</span>
+<span class="nc" id="L56">		nodeMap.remove(node.getName());</span>
+<span class="nc" id="L57">	}</span>
+
+	/** Gets the first node in the list.
+	 * @return Reference to the first node.
+	 */
+	public NetNode getFirst() {
+<span class="nc" id="L63">		return nodes.get(0);</span>
+	}
+
+	/** Gets the last node in the list.
+	 * @return Reference to the last node.
+	 */
+	public NetNode getLast() {
+<span class="nc" id="L70">		return nodes.get(nodes.size() - 1);</span>
+	}
+
+	/** Gets the i-th node in the list.
+	 * @param index Index of the node.
+	 * @return Reference to the i-th node.
+	 */
+	public NetNode get(int index) {
+<span class="nc" id="L78">		return nodes.get(index);</span>
+	}
+
+	/** Gets the node with a specific name in the list.
+	 * @param name Name of the node.
+	 * @return Reference to the node.
+	 */
+	public NetNode get(String name) {
+<span class="nc" id="L86">		return nodeMap.get(name);</span>
+	}
+
+	/** Gets the size of the list.
+	 * @return Size of the list.
+	 */
+	public int size() {
+<span class="nc" id="L93">		return nodes.size();</span>
+	}
+
+	/** Gets an iterator of the list.
+	 * @return Iterator of the list.
+	 */
+	public ListIterator&lt;NetNode&gt; listIterator() {
+<span class="nc" id="L100">		return nodes.listIterator();</span>
+	}
+
+	/** Converts the list into an array of nodes.
+	 * @return Array of nodes in the list.
+	 */
+	public NetNode[] toArray() {
+<span class="nc" id="L107">		return nodes.toArray(new NetNode[nodes.size()]);</span>
+	}
+
+	/** Gets the index of a node.
+	 * @param node Reference to the node.
+	 * @return Index of the node.
+	 */
+	public int indexOf(NetNode node) {
+<span class="nc" id="L115">		return nodes.indexOf(node);</span>
+	}
+
+	/** Used to know if a node is in the list.
+	 * @param node Reference to the node.
+	 * @return true if the node is in the list.
+	 */
+	public boolean contains(NetNode node) {
+<span class="nc" id="L123">		return nodes.contains(node);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

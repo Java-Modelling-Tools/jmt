@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolutionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">SolutionPanel.java</span></div><h1>SolutionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.gui.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+
+import jmt.framework.gui.help.HoverHelp;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.table.ExactTableModel;
+import jmt.gui.table.ResultsTable;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.gui.JMVAWizard;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 23.48.19
+
+ * Modified by Bertoli Marco 6-jun-2006 --&gt; What-if analysis
+ * Modified by kourosh Sheykhvand NOV 2013 --&gt; Add class station
+
+ */
+
+/**
+ * generic solution panel
+ */
+/* EDITED by Abhimanyu Chugh */
+public abstract class SolutionPanel extends AlgorithmPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	protected String helpText;
+
+	protected String name;
+
+	protected HoverHelp help;
+
+	protected ExactModel data;
+
+	protected int classes;
+
+	protected int stations;
+	protected String[] classNames;
+	protected String[] stationNames;
+	//protected double[][] ReferenceStation;
+	protected int[] ReferenceStation;
+	protected boolean hasResults;
+	protected boolean resultsOK;
+	protected boolean isSingle;
+	protected int[] classTypes;
+	protected double[][] visits;
+	protected double[][][] serviceTimes;
+
+
+	protected ResultsTable table;
+<span class="nc" id="L88">	protected JLabel statusLabel = new JLabel();</span>
+	/** Number of iteration to be shown. Used by What-if analysis */
+<span class="nc" id="L90">	protected int iteration = 0;</span>
+
+	/* EDITED by Abhimanyu Chugh */
+	public SolutionPanel(JMVAWizard ew, SolverAlgorithm alg) {
+<span class="nc" id="L94">		super(ew, alg);</span>
+<span class="nc" id="L95">		help = ew.getHelp();</span>
+
+		/* sync status with data object */
+<span class="nc" id="L98">		sync();</span>
+<span class="nc" id="L99">		initComponents();</span>
+<span class="nc" id="L100">	}</span>
+	/* END */
+
+	/**
+	 * gets status from data object
+	 */
+	protected void sync() {
+		/* arrays are copied to ensure data object consistency is preserved */
+<span class="nc" id="L108">		data = ew.getData();</span>
+<span class="nc" id="L109">		classes = data.getClasses();</span>
+<span class="nc" id="L110">		stations = data.getStations();</span>
+<span class="nc" id="L111">		classNames = data.getClassNames();</span>
+<span class="nc" id="L112">		stationNames = data.getStationNames();</span>
+<span class="nc" id="L113">		hasResults = data.hasResults();</span>
+<span class="nc" id="L114">		resultsOK = data.areResultsOK();</span>
+<span class="nc" id="L115">		ReferenceStation = data.getReferenceStation();</span>
+<span class="nc" id="L116">		classTypes = data.getClassTypes();</span>
+<span class="nc" id="L117">		visits = data.getVisits();</span>
+<span class="nc" id="L118">		serviceTimes = data.getServiceTimes();</span>
+
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		isSingle = (classes == 1);</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		statusLabel.setVisible(!resultsOK);</span>
+<span class="nc" id="L122">	}</span>
+
+	/**
+	 * Set up the panel contents and layout
+	 */
+	protected void initComponents() {
+<span class="nc" id="L128">		table = new ResultsTable(getTableModel(), help);</span>
+<span class="nc" id="L129">		table.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L130">		statusLabel.setForeground(Color.RED);</span>
+<span class="nc" id="L131">		statusLabel.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 14));</span>
+<span class="nc" id="L132">		statusLabel.setText(&quot;WARNING: parameters have been changed since this solution was computed!&quot;);</span>
+<span class="nc" id="L133">		statusLabel.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L134">		help.addHelp(statusLabel, &quot;This solution is not current with the parameters of the model. Click solve to compute a new solution.&quot;);</span>
+
+<span class="nc" id="L136">		JPanel intPanel = new JPanel(new BorderLayout(10, 10));</span>
+
+<span class="nc" id="L138">		JScrollPane jsp = new JScrollPane(table, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L139">		JLabel descrLabel = new JLabel(getDescriptionMessage());</span>
+                
+<span class="nc" id="L141">		intPanel.add(descrLabel, BorderLayout.NORTH);</span>
+<span class="nc" id="L142">		intPanel.add(jsp, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L144">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L145">		add(intPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L146">		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));</span>
+<span class="nc" id="L147">	}</span>
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L151">		sync();</span>
+<span class="nc" id="L152">		table.updateStructure();</span>
+<span class="nc" id="L153">	}</span>
+
+	@Override
+	public void help() {
+<span class="nc" id="L157">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L158">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L162">		return name;</span>
+	}
+
+	/**Returns table model that must describe data contained in this panel's table.
+	 * @return :this panel's table model.
+	 * */
+	protected abstract ExactTableModel getTableModel();
+
+	/**Returns this panel's purpose description.
+	 * @return :message describing data contained in this panel.*/
+	protected abstract String getDescriptionMessage();
+
+	/**
+	 * Sets iteration number for results to be shown. This is used for
+	 * what-if analysis. Default is first iteration (0)
+	 * @param iteration number of iteration to be shown. Must be between 0
+	 * and [number of iterations]-1
+	 */
+	@Override
+	public void setIteration(int iteration) {
+<span class="nc" id="L182">		this.iteration = iteration;</span>
+		// Refresh table
+<span class="nc bnc" id="L184" title="All 2 branches missed.">		if (table != null) {</span>
+<span class="nc" id="L185">			table.tableChanged(new TableModelEvent(table.getModel()));</span>
+		}
+<span class="nc" id="L187">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

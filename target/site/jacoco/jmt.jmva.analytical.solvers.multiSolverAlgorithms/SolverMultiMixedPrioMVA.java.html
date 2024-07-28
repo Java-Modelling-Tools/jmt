@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverMultiMixedPrioMVA.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.multiSolverAlgorithms</a> &gt; <span class="el_source">SolverMultiMixedPrioMVA.java</span></div><h1>SolverMultiMixedPrioMVA.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
+
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.priority.prioMVACalculators.*;
+import jmt.jmva.analytical.solvers.utilities.*;
+import jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.PrioMVAClosedQueueLengthCalculator;
+import jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.PrioMVAClosedResidenceTimeCalculator;
+import jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.PrioMVAOpenQueueLengthCalculator;
+import jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.PrioMVAThroughputCalculator;
+
+import java.util.*;
+
+
+public class SolverMultiMixedPrioMVA extends SolverMulti {
+
+    private int[] classTypes;
+
+    /**
+     * Each of the inputs and outputs are split into their class types.
+     * The classes are sorted by priority in the arrays.
+     * Descending order so the highest priority is at index 0
+     */
+    private int numOpenClasses;
+    private int numClosedClasses;
+
+    private double[][][] opServTime;
+    private double[][][] clServTime;
+
+    private double[][] opVisits;
+    private double[][] clVisits;
+
+    private double[][] opResidenceTimes;
+    private double[][] clResidenceTimes;
+
+    // Only used at the end, use queue length map for calculations
+    private double[][] opQueueLength;
+    private double[][] clQueueLength;
+
+    private double[] clThroughput;
+    private double[][] opFinalThroughput;
+    private double[][] clFinalThroughput;
+
+    private int[] opPriorities;
+    private int[] clPriorities;
+
+    private double[][] opUtilization;
+    private double[] opUtilizationSums;
+    // Only used at the end, use utilisation map for calculations
+    private double[][] clUtilization;
+
+    /**
+     * Class data
+     */
+    private double[] opArrivalRate;
+    private int[] clPopulation;
+
+    private final PerformanceValuePerStationPerClassCalculator closedResidenceCalculator;
+    private final ThroughputCalculator throughputCalculator;
+    private final QueueLengthCalculator closedQueueLengthCalculator;
+    private final PerformanceValuePerStationCalculator openQueueLengthCalculator;
+
+    /**
+     * A map from the index in the op/cl arrays to the original mixed arrays (servTime, visits)
+     */
+    private int[] opInternalIndexToOriginal;
+    private int[] clInternalIndexToOriginal;
+
+    /**
+     * YMCB calculates residence time from lowest to highest priority, but
+     * PrioMVA calculates it from the highest to lowest priority.
+     * highestPriorityToLowestPriority determines
+     * in what order they are calculated
+     */
+    private final boolean highestPriorityToLowestPriority;
+
+
+    /**
+     * Total population of all closed classes
+     */
+    private int closedClassesTotalPop;
+
+    /**
+     * Map from vector population to array of queue lengths.
+     * Queue lengths are length of queues at a station for a given class
+     * (Average population of a class at a station)
+     * int[classes] -&gt; double[stations][classes]
+     * MVAPopulation is a wrapper for int[classes]
+     * double[s][c] = &quot;average&quot; number of jobs of type c at station s
+     * &lt;p&gt;
+     * Index order of queueLength array is closed classed followed by open classes
+     * so indices 0...(numClosedClasses-1) are for closed classes and indices
+     * numClosedClasses...(numClosedClasses+numOpenClasses-1) are for open classes
+     * &lt;p&gt;
+     * Queue Length includes jobs being served
+     */
+    private Map&lt;MVAPopulation, double[][]&gt; queueLengthMap;
+
+    /**
+     * Map from vector population to array of utilizations.
+     * int[classes] -&gt; double[stations][classes]
+     * MVAPopulation is a wrapper for int[classes]
+     * double[s][c] = &quot;average&quot; utilization at station s for jobs of type c
+     */
+    private Map&lt;MVAPopulation, double[][]&gt; utilizationMap;
+
+    /**
+     * Defaults to CL variation (The MVA Priority Approximation)
+     *
+     * @param classes  number of classes.
+     * @param stations number of stations.
+     */
+    public SolverMultiMixedPrioMVA(int classes, int stations) {
+<span class="nc" id="L113">        this(classes, stations, new PrioMVAClosedResidenceTimeCalculator(),</span>
+                new PrioMVAThroughputCalculator(), new PrioMVAClosedQueueLengthCalculator(),
+                new PrioMVAOpenQueueLengthCalculator(), true);
+<span class="nc" id="L116">    }</span>
+
+    /**
+     * @param classes        number of classes.
+     * @param stations       number of stations.
+     * @param utilCalculator To allow for the different variations so CL, BKT and T
+     */
+    public SolverMultiMixedPrioMVA(int classes, int stations, UtilizationCalculator utilCalculator) {
+<span class="nc" id="L124">        this(classes, stations, new PrioMVAClosedResidenceTimeCalculator(utilCalculator),</span>
+                new PrioMVAThroughputCalculator(), new PrioMVAClosedQueueLengthCalculator(),
+                new PrioMVAOpenQueueLengthCalculator(utilCalculator), true);
+<span class="nc" id="L127">    }</span>
+
+    public SolverMultiMixedPrioMVA(int classes, int stations, PerformanceValuePerStationPerClassCalculator closedResidenceCalculator,
+                                   ThroughputCalculator throughputCalculator, QueueLengthCalculator closedQueueLengthCalculator,
+                                   PerformanceValuePerStationCalculator openQueueLengthCalculator,
+                                   boolean highestPriorityToLowestPriority) {
+<span class="nc" id="L133">        super(classes, stations);</span>
+<span class="nc" id="L134">        this.closedResidenceCalculator = closedResidenceCalculator;</span>
+<span class="nc" id="L135">        this.throughputCalculator = throughputCalculator;</span>
+<span class="nc" id="L136">        this.closedQueueLengthCalculator = closedQueueLengthCalculator;</span>
+<span class="nc" id="L137">        this.openQueueLengthCalculator = openQueueLengthCalculator;</span>
+<span class="nc" id="L138">        this.highestPriorityToLowestPriority = highestPriorityToLowestPriority;</span>
+<span class="nc" id="L139">        this.classTypes = new int[classes];</span>
+<span class="nc" id="L140">    }</span>
+
+    /**
+     * initializes the solver with the system parameters.
+     *
+     * @param n         array of names of service centers.
+     * @param t         array of the types (LD, LI, Delay, PRS, HOL) of service centers.
+     * @param s         matrix of service time of the service centers.
+     * @param v         matrix of visits to the service centers.
+     * @param classData array describing the classes: each element can be either an
+     *                  arrival rate (for open classes) or a population (for closed ones),
+     *                  according to the class type
+     * @param classType array of class types (open or closed)
+     * @param p         array of priorities of the classes.
+     * @return true if the operation has been completed with success
+     */
+    public boolean input(String[] n, int[] t, double[][][] s, double[][] v, double[] classData, int[] classType,
+                         int[] p) {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (!input(n, t, s, v, p)) {</span>
+            // Failed loading
+<span class="nc" id="L160">            return false;</span>
+        }
+<span class="nc" id="L162">        System.arraycopy(classType, 0, this.classTypes, 0, classes);</span>
+
+<span class="nc" id="L164">        List&lt;Integer&gt; openClasses = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L165">        List&lt;Integer&gt; closedClasses = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (!generateClassLists(openClasses, closedClasses, classType)) {</span>
+<span class="nc" id="L168">            return false;</span>
+        }
+<span class="nc" id="L170">        numOpenClasses = openClasses.size();</span>
+<span class="nc" id="L171">        numClosedClasses = closedClasses.size();</span>
+
+<span class="nc" id="L173">        sortClassListsByPriority(openClasses, closedClasses);</span>
+
+<span class="nc" id="L175">        generateClassIndexMaps(openClasses, closedClasses);</span>
+
+<span class="nc" id="L177">        initialiseSeparateOpenArrays(openClasses, classData);</span>
+<span class="nc" id="L178">        initialiseSeparateClosedArrays(closedClasses, classData);</span>
+<span class="nc" id="L179">        return true;</span>
+    }
+
+    /**
+     * This generates a map from the class index of the internal structure
+     * to the original indices of the arrays passed in so it can be correctly converted backwards afterwards
+     */
+    private void generateClassIndexMaps(List&lt;Integer&gt; openClasses, List&lt;Integer&gt; closedClasses) {
+<span class="nc" id="L187">        opInternalIndexToOriginal = new int[openClasses.size()];</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        for (int i = 0; i &lt; openClasses.size(); i++) {</span>
+<span class="nc" id="L189">            opInternalIndexToOriginal[i] = openClasses.get(i);</span>
+        }
+
+<span class="nc" id="L192">        clInternalIndexToOriginal = new int[closedClasses.size()];</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">        for (int i = 0; i &lt; closedClasses.size(); i++) {</span>
+<span class="nc" id="L194">            clInternalIndexToOriginal[i] = closedClasses.get(i);</span>
+        }
+<span class="nc" id="L196">    }</span>
+
+    /**
+     * Sorts classes by class types into the respective lists
+     */
+    private boolean generateClassLists(List&lt;Integer&gt; openClasses, List&lt;Integer&gt; closedClasses, int[] classType) {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">        for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">            if (classType[i] == CLOSED_CLASS) {</span>
+<span class="nc" id="L204">                closedClasses.add(i);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">            } else if (classType[i] == OPEN_CLASS) {</span>
+<span class="nc" id="L206">                openClasses.add(i);</span>
+            } else {
+                // Unknown class type
+<span class="nc" id="L209">                return false;</span>
+            }
+        }
+<span class="nc" id="L212">        return true;</span>
+    }
+
+    private void sortClassListsByPriority(List&lt;Integer&gt; openClasses, List&lt;Integer&gt; closedClasses) {
+<span class="nc" id="L216">        sortClassListByPriority(openClasses);</span>
+<span class="nc" id="L217">        sortClassListByPriority(closedClasses);</span>
+<span class="nc" id="L218">    }</span>
+
+    /**
+     * Higher Number = Higher Priority
+     */
+    private void sortClassListByPriority(List&lt;Integer&gt; classes) {
+        // Don't replace with lambda due to java version
+<span class="nc" id="L225">        Collections.sort(classes, new Comparator&lt;Integer&gt;() {</span>
+            @Override
+            public int compare(Integer cl1, Integer cl2) {
+<span class="nc" id="L228">                return priorities[cl2] - priorities[cl1];</span>
+            }
+        });
+<span class="nc" id="L231">    }</span>
+
+    private void initialiseSeparateOpenArrays(List&lt;Integer&gt; openClasses, double[] classData) {
+<span class="nc" id="L234">        opArrivalRate = new double[numOpenClasses];</span>
+<span class="nc" id="L235">        opVisits = new double[stations][];</span>
+<span class="nc" id="L236">        opResidenceTimes = new double[stations][];</span>
+<span class="nc" id="L237">        opServTime = new double[stations][][];</span>
+<span class="nc" id="L238">        opUtilization = new double[stations][];</span>
+<span class="nc" id="L239">        opUtilizationSums = new double[stations];</span>
+<span class="nc" id="L240">        opPriorities = new int[numOpenClasses];</span>
+
+<span class="nc bnc" id="L242" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L243">            opUtilization[station] = new double[numOpenClasses];</span>
+<span class="nc" id="L244">            opVisits[station] = new double[numOpenClasses];</span>
+<span class="nc" id="L245">            opResidenceTimes[station] = new double[numOpenClasses];</span>
+<span class="nc" id="L246">            opServTime[station] = new double[numOpenClasses][];</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            for (int i = 0; i &lt; numOpenClasses; i++) {</span>
+<span class="nc" id="L248">                int clas = openClasses.get(i);</span>
+
+<span class="nc" id="L250">                int servLength = servTime[station][clas].length;</span>
+<span class="nc" id="L251">                opServTime[station][i] = new double[servLength];</span>
+<span class="nc" id="L252">                System.arraycopy(servTime[station][clas], 0, opServTime[station][i], 0, servLength);</span>
+
+<span class="nc" id="L254">                opVisits[station][i] = visits[station][clas];</span>
+            }
+        }
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">        for (int i = 0; i &lt; numOpenClasses; i++) {</span>
+<span class="nc" id="L259">            int clas = openClasses.get(i);</span>
+<span class="nc" id="L260">            opPriorities[i] = priorities[clas];</span>
+<span class="nc" id="L261">            opArrivalRate[i] = classData[clas];</span>
+        }
+
+<span class="nc" id="L264">    }</span>
+
+    private void initialiseSeparateClosedArrays(List&lt;Integer&gt; closedClasses, double[] classData) {
+<span class="nc" id="L267">        calculateClosedPopulationValues(closedClasses, classData);</span>
+
+<span class="nc" id="L269">        clPopulation = new int[numClosedClasses];</span>
+<span class="nc" id="L270">        clVisits = new double[stations][];</span>
+<span class="nc" id="L271">        clResidenceTimes = new double[stations][];</span>
+<span class="nc" id="L272">        clServTime = new double[stations][][];</span>
+<span class="nc" id="L273">        clPriorities = new int[numClosedClasses];</span>
+<span class="nc" id="L274">        clThroughput = new double[numClosedClasses];</span>
+
+<span class="nc bnc" id="L276" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L277">            clVisits[station] = new double[numClosedClasses];</span>
+<span class="nc" id="L278">            clResidenceTimes[station] = new double[numClosedClasses];</span>
+<span class="nc" id="L279">            clServTime[station] = new double[numClosedClasses][];</span>
+
+<span class="nc bnc" id="L281" title="All 2 branches missed.">            for (int i = 0; i &lt; numClosedClasses; i++) {</span>
+<span class="nc" id="L282">                int clas = closedClasses.get(i);</span>
+<span class="nc bnc" id="L283" title="All 2 branches missed.">                if (type[station] == SolverMulti.LD) {</span>
+<span class="nc" id="L284">                    clServTime[station][i] = new double[closedClassesTotalPop];</span>
+<span class="nc" id="L285">                    System.arraycopy(servTime[station][clas], 0, clServTime[station][i], 0, closedClassesTotalPop);</span>
+                } else {
+<span class="nc" id="L287">                    clServTime[station][i] = new double[1];</span>
+<span class="nc" id="L288">                    clServTime[station][i][0] = servTime[station][clas][0];</span>
+                }
+
+<span class="nc" id="L291">                clVisits[station][i] = visits[station][clas];</span>
+            }
+        }
+
+<span class="nc bnc" id="L295" title="All 2 branches missed.">        for (int i = 0; i &lt; numClosedClasses; i++) {</span>
+<span class="nc" id="L296">            int clas = closedClasses.get(i);</span>
+<span class="nc" id="L297">            clPopulation[i] = (int) classData[clas];</span>
+<span class="nc" id="L298">            clPriorities[i] = priorities[clas];</span>
+        }
+
+<span class="nc" id="L301">    }</span>
+
+    /**
+     * Calculates Total Population of closed classes
+     */
+    private void calculateClosedPopulationValues(List&lt;Integer&gt; closedClasses, double[] classData) {
+<span class="nc" id="L307">        closedClassesTotalPop = 0;</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">        for (Integer clas : closedClasses) {</span>
+<span class="nc" id="L309">            closedClassesTotalPop += classData[clas];</span>
+<span class="nc" id="L310">        }</span>
+<span class="nc" id="L311">    }</span>
+
+    @Override
+    public void solve() {
+<span class="nc" id="L315">        calculateUtilizationsForOpenClasses();</span>
+<span class="nc" id="L316">        int[][] iteratorPops = MVAPopulationUtil.generatePopulations(clPopulation);</span>
+<span class="nc" id="L317">        initializeQueueLengthAndUtilMap();</span>
+<span class="nc" id="L318">        initialiseCalculators();</span>
+
+        // i = 0 is the zero population
+        // Only the open queue lengths needs calculating for the zero population
+<span class="nc" id="L322">        openQueueLengthCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L323">        calculateQueueLengthForOpenClasses(new MVAPopulation(iteratorPops[0]),</span>
+<span class="nc" id="L324">                MiscMathsFunctions.sum(iteratorPops[0]));</span>
+
+        // classes are sorted from highest to lowest priority
+<span class="nc" id="L327">        int startIndex = 0;</span>
+<span class="nc" id="L328">        int step = 1;</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">        if (!highestPriorityToLowestPriority) {</span>
+<span class="nc" id="L330">            startIndex = numClosedClasses - 1;</span>
+<span class="nc" id="L331">            step = -1;</span>
+        }
+
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (int i = 1; i &lt; iteratorPops.length; i++) {</span>
+<span class="nc" id="L335">            int numCustomers = MiscMathsFunctions.sum(iteratorPops[i]);</span>
+<span class="nc" id="L336">            MVAPopulation population = new MVAPopulation(iteratorPops[i]);</span>
+<span class="nc" id="L337">            updateUtilAndQueueMapForPopulation(population);</span>
+<span class="nc" id="L338">            updateCalculatorsForPopulation();</span>
+
+<span class="nc" id="L340">            for (int clClass = startIndex;</span>
+<span class="nc bnc" id="L341" title="All 8 branches missed.">                 (clClass &lt; numClosedClasses &amp;&amp; highestPriorityToLowestPriority) ||</span>
+                         (clClass &gt;= 0 &amp;&amp; !highestPriorityToLowestPriority);
+<span class="nc" id="L343">                 clClass += step) {</span>
+<span class="nc" id="L344">                closedResidenceCalculator.iterateClassUpdate(this);</span>
+<span class="nc" id="L345">                calculateResidenceTimesForClosedClasses(population, numCustomers, clClass);</span>
+
+<span class="nc" id="L347">                throughputCalculator.iterateClassUpdate(this);</span>
+<span class="nc" id="L348">                calculateThroughputForClosedClasses(population, numCustomers, clClass);</span>
+
+<span class="nc" id="L350">                updateClosedUtilizationMap(population, clClass);</span>
+
+<span class="nc" id="L352">                closedQueueLengthCalculator.iterateClassUpdate(this);</span>
+<span class="nc" id="L353">                calculateQueueLengthForClosedClasses(population, numCustomers, clClass);</span>
+            }
+
+<span class="nc" id="L356">            openQueueLengthCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L357">            calculateQueueLengthForOpenClasses(population, numCustomers);</span>
+        }
+<span class="nc" id="L359">        setFinalQueueLengthAndUtilization();</span>
+<span class="nc" id="L360">        calculateThroughputPerStation();</span>
+<span class="nc" id="L361">        calculateFinalResidenceTimeForOpenClasses();</span>
+<span class="nc" id="L362">        mapSplitArraysBackToNonSplitArrays();</span>
+<span class="nc" id="L363">    }</span>
+
+    private void calculateFinalResidenceTimeForOpenClasses() {
+        // Little's Law
+<span class="nc bnc" id="L367" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">            for (int opClass = 0; opClass &lt; numOpenClasses; opClass++) {</span>
+<span class="nc" id="L369">                opResidenceTimes[station][opClass] = opQueueLength[station][opClass] / opFinalThroughput[station][opClass];</span>
+            }
+        }
+<span class="nc" id="L372">    }</span>
+
+    private void updateCalculatorsForPopulation() {
+<span class="nc" id="L375">        closedResidenceCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L376">        throughputCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L377">        closedQueueLengthCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L378">        openQueueLengthCalculator.iteratePopulationUpdate(this);</span>
+<span class="nc" id="L379">    }</span>
+
+    private void updateUtilAndQueueMapForPopulation(MVAPopulation population) {
+<span class="nc" id="L382">        queueLengthMap.put(population, new double[stations][numClosedClasses + numOpenClasses]);</span>
+<span class="nc" id="L383">        utilizationMap.put(population, new double[stations][numClosedClasses]);</span>
+<span class="nc" id="L384">    }</span>
+
+    private void initializeQueueLengthAndUtilMap() {
+<span class="nc" id="L387">        queueLengthMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L388">        utilizationMap = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L389">        addEmptyPopulationValuesToMaps();</span>
+<span class="nc" id="L390">    }</span>
+
+    private void addEmptyPopulationValuesToMaps() {
+        // Sets it so when population is all zeroes, the queue length &amp; util is 0
+<span class="nc" id="L394">        MVAPopulation emptyPop = new MVAPopulation(new int[numClosedClasses]);</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L396">            queueLengthMap.put(emptyPop, new double[stations][numClosedClasses + numOpenClasses]);</span>
+<span class="nc" id="L397">            utilizationMap.put(emptyPop, new double[stations][numClosedClasses]);</span>
+        }
+<span class="nc" id="L399">    }</span>
+
+    private void calculateThroughputPerStation() {
+<span class="nc" id="L402">        opFinalThroughput = new double[stations][numOpenClasses];</span>
+<span class="nc" id="L403">        clFinalThroughput = new double[stations][numClosedClasses];</span>
+
+<span class="nc bnc" id="L405" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">            for (int opClass = 0; opClass &lt; numOpenClasses; opClass++) {</span>
+                // Open arrival rate = throughput
+<span class="nc" id="L408">                opFinalThroughput[station][opClass] = opArrivalRate[opClass] * visits[station][opClass];</span>
+            }
+
+<span class="nc bnc" id="L411" title="All 2 branches missed.">            for (int clClass = 0; clClass &lt; numClosedClasses; clClass++) {</span>
+                // Forced Flow Law
+<span class="nc" id="L413">                clFinalThroughput[station][clClass] = clThroughput[clClass] * visits[station][clClass];</span>
+            }
+        }
+<span class="nc" id="L416">    }</span>
+
+    /**
+     * Converts the op and cl arrays back into the main
+     * arrays in the correct order
+     */
+    private void mapSplitArraysBackToNonSplitArrays() {
+<span class="nc bnc" id="L423" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">            for (int opClass = 0; opClass &lt; numOpenClasses; opClass++) {</span>
+<span class="nc" id="L425">                throughput[station][opInternalIndexToOriginal[opClass]] = opFinalThroughput[station][opClass];</span>
+<span class="nc" id="L426">                utilization[station][opInternalIndexToOriginal[opClass]] = opUtilization[station][opClass];</span>
+<span class="nc" id="L427">                residenceTime[station][opInternalIndexToOriginal[opClass]] = opResidenceTimes[station][opClass];</span>
+<span class="nc" id="L428">                queueLen[station][opInternalIndexToOriginal[opClass]] = opQueueLength[station][opClass];</span>
+            }
+
+<span class="nc bnc" id="L431" title="All 2 branches missed.">            for (int clClass = 0; clClass &lt; numClosedClasses; clClass++) {</span>
+<span class="nc" id="L432">                throughput[station][clInternalIndexToOriginal[clClass]] = clFinalThroughput[station][clClass];</span>
+<span class="nc" id="L433">                utilization[station][clInternalIndexToOriginal[clClass]] = clUtilization[station][clClass];</span>
+<span class="nc" id="L434">                residenceTime[station][clInternalIndexToOriginal[clClass]] = clResidenceTimes[station][clClass];</span>
+<span class="nc" id="L435">                queueLen[station][clInternalIndexToOriginal[clClass]] = clQueueLength[station][clClass];</span>
+            }
+        }
+<span class="nc" id="L438">    }</span>
+
+    private void setFinalQueueLengthAndUtilization() {
+        // These two values are stored in maps, this function is taking them out of said maps
+<span class="nc" id="L442">        setFinalQueueLengths();</span>
+<span class="nc" id="L443">        setFinalUtilization();</span>
+<span class="nc" id="L444">    }</span>
+
+    private void setFinalUtilization() {
+        // clPopulation = final population
+<span class="nc" id="L448">        clUtilization = new double[stations][numClosedClasses];</span>
+<span class="nc" id="L449">        System.arraycopy(utilizationMap.get(new MVAPopulation(clPopulation)),</span>
+                0, clUtilization, 0, stations);
+<span class="nc" id="L451">    }</span>
+
+    private void setFinalQueueLengths() {
+        // clPopulation = the last population used in the for loop in the solve method
+<span class="nc" id="L455">        double[][] allQueueLengths = queueLengthMap.get(new MVAPopulation(clPopulation));</span>
+<span class="nc" id="L456">        opQueueLength = new double[stations][numOpenClasses];</span>
+<span class="nc" id="L457">        clQueueLength = new double[stations][numClosedClasses];</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L459">            System.arraycopy(allQueueLengths[station], numClosedClasses, opQueueLength[station], 0, numOpenClasses);</span>
+<span class="nc" id="L460">            System.arraycopy(allQueueLengths[station], 0, clQueueLength[station], 0, numClosedClasses);</span>
+        }
+<span class="nc" id="L462">    }</span>
+
+
+    private void calculateQueueLengthForOpenClasses(MVAPopulation population, int numCustomers) {
+<span class="nc" id="L466">        double[][] queueLength = openQueueLengthCalculator.calculatePerformanceValue(population, numCustomers, type);</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+            // Open classes are stored after closed classes
+<span class="nc" id="L469">            System.arraycopy(queueLength[station], 0,</span>
+<span class="nc" id="L470">                    queueLengthMap.get(population)[station], numClosedClasses,</span>
+                    numOpenClasses);
+        }
+<span class="nc" id="L473">    }</span>
+
+    private void calculateQueueLengthForClosedClasses(MVAPopulation population, int numCustomers, int clClass) {
+<span class="nc bnc" id="L476" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L477">            queueLengthMap.get(population)[station][clClass] = closedQueueLengthCalculator.getQueueLengths(population, numCustomers, station, clClass);</span>
+        }
+<span class="nc" id="L479">    }</span>
+
+    private void initialiseCalculators() {
+<span class="nc" id="L482">        closedResidenceCalculator.initialise(this);</span>
+<span class="nc" id="L483">        throughputCalculator.initialise(this);</span>
+<span class="nc" id="L484">        closedQueueLengthCalculator.initialise(this);</span>
+<span class="nc" id="L485">        openQueueLengthCalculator.initialise(this);</span>
+<span class="nc" id="L486">    }</span>
+
+    private void updateClosedUtilizationMap(MVAPopulation population, int clClass) {
+<span class="nc bnc" id="L489" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc bnc" id="L490" title="All 2 branches missed.">            if (type[station] == SolverMulti.LD) {</span>
+                // TODO
+            } else {
+                // Util = throughput * servTime for non-load dependent stations
+<span class="nc" id="L494">                utilizationMap.get(population)[station][clClass] = visits[station][clClass] * clThroughput[clClass] * clServTime[station][clClass][0];</span>
+            }
+        }
+<span class="nc" id="L497">    }</span>
+
+    private void calculateThroughputForClosedClasses(MVAPopulation population, int numCustomers, int clas) {
+<span class="nc" id="L500">        clThroughput[clas] = throughputCalculator.getClassThroughput(population, numCustomers, clas);</span>
+<span class="nc" id="L501">    }</span>
+
+    private void calculateResidenceTimesForClosedClasses(MVAPopulation population, int numCustomers, int clClass) {
+<span class="nc" id="L504">        double[] residencesPerStation = closedResidenceCalculator.calculatePerformanceValue(population, numCustomers, clClass, type);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L506">            clResidenceTimes[station][clClass] = residencesPerStation[station];</span>
+        }
+<span class="nc" id="L508">    }</span>
+
+    private void calculateUtilizationsForOpenClasses() {
+<span class="nc bnc" id="L511" title="All 2 branches missed.">        if (numOpenClasses == 0) {</span>
+<span class="nc" id="L512">            return;</span>
+        }
+<span class="nc bnc" id="L514" title="All 2 branches missed.">        for (int station = 0; station &lt; stations; station++) {</span>
+<span class="nc" id="L515">            opUtilizationSums[station] = 0;</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">            for (int clas = 0; clas &lt; numOpenClasses; clas++) {</span>
+                // Assumes not LD service time (I think)
+<span class="nc" id="L518">                opUtilization[station][clas] = opServTime[station][clas][0] * opArrivalRate[clas] * opVisits[station][clas];</span>
+<span class="nc" id="L519">                opUtilizationSums[station] += opUtilization[station][clas];</span>
+            }
+        }
+<span class="nc" id="L522">    }</span>
+
+    @Override
+    public boolean hasSufficientProcessingCapacity() {
+<span class="nc bnc" id="L526" title="All 2 branches missed.">        if (numOpenClasses == 0) {</span>
+<span class="nc" id="L527">            return true;</span>
+        }
+<span class="nc" id="L529">        return ProcessingCapacityChecker.openHasSufficientProcessingCapacity(</span>
+                type, opVisits, opServTime, opArrivalRate);
+    }
+
+    // Getters
+
+    public double[] getOpUtilizationSums() {
+<span class="nc" id="L536">        return opUtilizationSums;</span>
+    }
+
+    public double[][] getOpUtilization() {
+<span class="nc" id="L540">        return opUtilization;</span>
+    }
+
+    public double[][] getOpVisits() {
+<span class="nc" id="L544">        return opVisits;</span>
+    }
+
+    public double[][] getClVisits() {
+<span class="nc" id="L548">        return clVisits;</span>
+    }
+
+    public double[][][] getOpServTime() {
+<span class="nc" id="L552">        return opServTime;</span>
+    }
+
+    public double[][][] getClServTime() {
+<span class="nc" id="L556">        return clServTime;</span>
+    }
+
+    public double[][] getClResidenceTimes() {
+<span class="nc" id="L560">        return clResidenceTimes;</span>
+    }
+
+    public double[] getClThroughput() {
+<span class="nc" id="L564">        return clThroughput;</span>
+    }
+
+    public int[] getOpPriorities() {
+<span class="nc" id="L568">        return opPriorities;</span>
+    }
+
+    public int[] getClPriorities() {
+<span class="nc" id="L572">        return clPriorities;</span>
+    }
+
+    public Map&lt;MVAPopulation, double[][]&gt; getQueueLengthMap() {
+<span class="nc" id="L576">        return queueLengthMap;</span>
+    }
+
+    public Map&lt;MVAPopulation, double[][]&gt; getUtilizationMap() {
+<span class="nc" id="L580">        return utilizationMap;</span>
+    }
+
+    public double[] getOpArrivalRate() {
+<span class="nc" id="L584">        return opArrivalRate;</span>
+    }
+
+    public int getNumOpenClasses() {
+<span class="nc" id="L588">        return numOpenClasses;</span>
+    }
+
+    public int getNumClosedClasses() {
+<span class="nc" id="L592">        return numClosedClasses;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ColorCellEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.table.editors</a> &gt; <span class="el_source">ColorCellEditor.java</span></div><h1>ColorCellEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.gui.table.editors;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
+import javax.swing.CellEditor;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.border.Border;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+/**
+ * &lt;p&gt;Title: Color Cell Editor&lt;/p&gt;
+ * &lt;p&gt;Description: Implements both a TableCellRender component and a TableCellEditor to add
+ * support for managing colors into table's field. The render will display a rectangle
+ * with defined Color while the editor will show a panel to choose the color from.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 15-giu-2005
+ *         Time: 12.27.22
+ */
+public class ColorCellEditor extends AbstractCellEditor implements TableCellEditor, CellEditor, ActionListener, TableCellRenderer {
+
+	private static final long serialVersionUID = 1L;
+	protected Color currentColor;
+	protected JButton button;
+<span class="nc" id="L55">	protected static JColorChooser colorChooser = new JColorChooser();</span>
+	protected static final String EDIT = &quot;edit&quot;;
+
+<span class="nc" id="L58">	protected Border unselectedBorder = null;</span>
+<span class="nc" id="L59">	protected Border selectedBorder = null;</span>
+<span class="nc" id="L60">	protected JLabel label = new JLabel();</span>
+
+	/**
+	 * Creates a new ColorCellEditor. This object will act as a Renderer or Editor.
+	 */
+<span class="nc" id="L65">	public ColorCellEditor() {</span>
+<span class="nc" id="L66">		button = new JButton();</span>
+<span class="nc" id="L67">		button.setActionCommand(EDIT);</span>
+<span class="nc" id="L68">		button.addActionListener(this);</span>
+<span class="nc" id="L69">		button.setBorderPainted(false);</span>
+<span class="nc" id="L70">		label.setOpaque(true);</span>
+<span class="nc" id="L71">	}</span>
+
+	/**
+	 * Handles events from the editor button and from
+	 * the dialog's OK button.
+	 */
+	public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if (EDIT.equals(e.getActionCommand())) {</span>
+			//The user has clicked the cell, so
+			//bring up the dialog.
+<span class="nc" id="L81">			button.setBackground(currentColor);</span>
+<span class="nc" id="L82">			colorChooser.setColor(currentColor);</span>
+<span class="nc" id="L83">			JDialog dialog = JColorChooser.createDialog(button, &quot;Choose User Class Color&quot;, true, //modal</span>
+					colorChooser, this, //OK button handler
+					null); //no CANCEL button handler
+<span class="nc" id="L86">			Dimension scrDim = Toolkit.getDefaultToolkit().getScreenSize();</span>
+<span class="nc" id="L87">			dialog.setBounds((scrDim.width - dialog.getWidth()) / 2, (scrDim.height - dialog.getHeight()) / 2, dialog.getWidth(), dialog.getHeight());</span>
+<span class="nc" id="L88">			dialog.setVisible(true);</span>
+
+			//Make the renderer reappear.
+<span class="nc" id="L91">			fireEditingStopped();</span>
+
+<span class="nc" id="L93">		} else { //User pressed dialog's &quot;OK&quot; button.</span>
+<span class="nc" id="L94">			currentColor = colorChooser.getColor();</span>
+		}
+<span class="nc" id="L96">	}</span>
+
+	//Implement the one CellEditor method that AbstractCellEditor does not.
+	public Object getCellEditorValue() {
+<span class="nc" id="L100">		return currentColor;</span>
+	}
+
+	//Implement the one method defined by TableCellEditor.
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+<span class="nc" id="L105">		currentColor = (Color) value;</span>
+<span class="nc" id="L106">		return button;</span>
+	}
+
+	/**
+	 *  Returns TableCellRendererComponent used to show a rectangle of the right color in the table
+	 */
+	public Component getTableCellRendererComponent(JTable table, Object color, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc" id="L113">		Color newColor = (Color) color;</span>
+<span class="nc" id="L114">		label.setBackground(newColor);</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (isSelected) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			if (selectedBorder == null) {</span>
+<span class="nc" id="L117">				selectedBorder = BorderFactory.createMatteBorder(2, 5, 2, 5, table.getSelectionBackground());</span>
+			}
+<span class="nc" id="L119">			label.setBorder(selectedBorder);</span>
+		} else {
+<span class="nc bnc" id="L121" title="All 2 branches missed.">			if (unselectedBorder == null) {</span>
+<span class="nc" id="L122">				unselectedBorder = BorderFactory.createMatteBorder(2, 5, 2, 5, table.getBackground());</span>
+			}
+<span class="nc" id="L124">			label.setBorder(unselectedBorder);</span>
+		}
+<span class="nc" id="L126">		return label;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

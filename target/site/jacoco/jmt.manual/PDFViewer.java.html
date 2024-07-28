@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PDFViewer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.manual</a> &gt; <span class="el_source">PDFViewer.java</span></div><h1>PDFViewer.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.manual;
+
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JOptionPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
+import org.apache.pdfbox.pdmodel.interactive.action.PDActionGoTo;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDNamedDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.destination.PDPageDestination;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDDocumentOutline;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineItem;
+import org.apache.pdfbox.pdmodel.interactive.documentnavigation.outline.PDOutlineNode;
+import org.apache.pdfbox.rendering.PDFRenderer;
+
+import jmt.framework.gui.components.JMTFrame;
+import jmt.gui.common.Defaults;
+
+/**
+ * &lt;p&gt;Title: PDF Viewer&lt;/p&gt;
+ * &lt;p&gt;Description: This class opens a view to a specified chapter of the JMT
+ * manual with navigation.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 16-08-2018
+ * Time: 18.00.00
+ */
+public class PDFViewer extends JMTFrame {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L72">	private static final String MANUAL_PATH = &quot;manuals&quot; + File.separator + &quot;manual.pdf&quot;;</span>
+<span class="nc" id="L73">	private static final float IMAGE_SCALE = Toolkit.getDefaultToolkit().getScreenResolution() / 64.0f;</span>
+
+	private PDDocument document;
+	private PDDocumentCatalog catalog;
+	private PDOutlineItem chapter;
+
+	private int startPageIndex;
+	private int endPageIndex;
+
+	private JScrollBar pagePaneBar;
+
+<span class="nc" id="L84">	public PDFViewer(String title, ChapterIdentifier identifier) throws Exception {</span>
+		try {
+<span class="nc" id="L86">			setTitle(title);</span>
+<span class="nc" id="L87">			openManual();</span>
+<span class="nc" id="L88">			findChapter(identifier);</span>
+<span class="nc" id="L89">			initComponents();</span>
+<span class="nc" id="L90">			closeManual();</span>
+<span class="nc" id="L91">		} catch (Exception ex) {</span>
+<span class="nc" id="L92">			closeManual();</span>
+<span class="nc" id="L93">			throw ex;</span>
+<span class="nc" id="L94">		}</span>
+<span class="nc" id="L95">	}</span>
+
+	private void openManual() throws IOException {
+<span class="nc" id="L98">		File file = new File(MANUAL_PATH);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!file.isFile()) {</span>
+<span class="nc" id="L100">			file = new File(Defaults.getWorkingPath(), MANUAL_PATH);</span>
+		}
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if (!file.isFile()) {</span>
+<span class="nc" id="L103">			JOptionPane.showMessageDialog(null, &quot;Cannot find manual. Please download https://jmt.sf.net/Papers/JMT_users_Manual.pdf to &quot; + file.getParentFile().getAbsolutePath() + System.getProperty(&quot;file.separator&quot;) + &quot;manual.pdf&quot;, &quot;Manual error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L104">			throw new IOException(&quot;Cannot find JMT manual.pdf file. Please put it in &quot;</span>
+<span class="nc" id="L105">					+ file.getParentFile().getAbsolutePath() + &quot;.&quot;);</span>
+		}
+		try {
+<span class="nc" id="L108">			Class.forName(&quot;sun.java2d.cmm.kcms.KcmsServiceProvider&quot;);</span>
+<span class="nc" id="L109">			System.setProperty(&quot;sun.java2d.cmm&quot;, &quot;sun.java2d.cmm.kcms.KcmsServiceProvider&quot;);</span>
+<span class="nc" id="L110">		} catch (ClassNotFoundException ex) {</span>
+			// Do nothing
+<span class="nc" id="L112">		}</span>
+<span class="nc" id="L113">		document = PDDocument.load(file);</span>
+<span class="nc" id="L114">		catalog = document.getDocumentCatalog();</span>
+<span class="nc" id="L115">	}</span>
+
+	private void findChapter(ChapterIdentifier identifier) throws IOException {
+<span class="nc" id="L118">		PDDocumentOutline outline = catalog.getDocumentOutline();</span>
+<span class="nc" id="L119">		Iterable&lt;PDOutlineItem&gt; children = outline.children();</span>
+<span class="nc" id="L120">		Iterator&lt;PDOutlineItem&gt; it = children.iterator();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		while (it.hasNext()) {</span>
+<span class="nc" id="L122">			PDOutlineItem item = it.next();</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			if (item.getTitle().startsWith(identifier.getPrefix())) {</span>
+<span class="nc" id="L124">				chapter = item;</span>
+<span class="nc" id="L125">				startPageIndex = retrievePageIndex(item);</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">				if (it.hasNext()) {</span>
+<span class="nc" id="L127">					item = it.next();</span>
+<span class="nc" id="L128">					endPageIndex = retrievePageIndex(item);</span>
+				} else {
+<span class="nc" id="L130">					endPageIndex = document.getNumberOfPages();</span>
+				}
+<span class="nc" id="L132">				return;</span>
+			}
+<span class="nc" id="L134">		}</span>
+<span class="nc" id="L135">		throw new IOException(&quot;No chapter in JMT manual.pdf file is prefixed with &quot;</span>
+<span class="nc" id="L136">				+ identifier.getPrefix() + &quot;.&quot;);</span>
+	}
+
+	private void initComponents() throws IOException {
+<span class="nc" id="L140">		JTree bookmarkTree = new JTree();</span>
+<span class="nc" id="L141">		bookmarkTree.setModel(createBookmarkTreeModel());</span>
+<span class="nc" id="L142">		bookmarkTree.setSelectionModel(new BookmarkTreeSelectionModel());</span>
+<span class="nc" id="L143">		bookmarkTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);</span>
+<span class="nc" id="L144">		bookmarkTree.addTreeSelectionListener(new TreeSelectionListener() {</span>
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+<span class="nc" id="L147">				TreePath path = e.getNewLeadSelectionPath();</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">				if (path == null) {</span>
+<span class="nc" id="L149">					return;</span>
+				}
+<span class="nc" id="L151">				BookmarkTreeNode node = (BookmarkTreeNode) path.getLastPathComponent();</span>
+<span class="nc" id="L152">				int pageOffset = node.getPageIndex() - startPageIndex;</span>
+<span class="nc" id="L153">				int pageNumber = endPageIndex - startPageIndex;</span>
+<span class="nc" id="L154">				int max = pagePaneBar.getMaximum();</span>
+<span class="nc" id="L155">				int min = pagePaneBar.getMinimum();</span>
+<span class="nc" id="L156">				int value = (int) (((double) pageOffset / pageNumber) * (max - min + 8));</span>
+<span class="nc" id="L157">				pagePaneBar.setValue(value);</span>
+<span class="nc" id="L158">			}</span>
+		});
+
+<span class="nc" id="L161">		JScrollPane bookmarkPane = new JScrollPane();</span>
+<span class="nc" id="L162">		bookmarkPane.setViewportView(bookmarkTree);</span>
+
+<span class="nc" id="L164">		int pageNumber = endPageIndex - startPageIndex;</span>
+<span class="nc" id="L165">		PDFRenderer renderer = new PDFRenderer(document);</span>
+<span class="nc" id="L166">		JPanel pagePanel = new JPanel();</span>
+<span class="nc" id="L167">		pagePanel.setLayout(new GridLayout(pageNumber, 1, 0, 8));</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">		for (int i = 0; i &lt; pageNumber; i++) {</span>
+<span class="nc" id="L169">			int pageIndex = i + startPageIndex;</span>
+<span class="nc" id="L170">			BufferedImage image = renderer.renderImage(pageIndex, IMAGE_SCALE);</span>
+<span class="nc" id="L171">			JLabel label = new JLabel();</span>
+<span class="nc" id="L172">			label.setIcon(new ImageIcon(image));</span>
+<span class="nc" id="L173">			label.setHorizontalAlignment(JLabel.CENTER);</span>
+<span class="nc" id="L174">			pagePanel.add(label);</span>
+		}
+
+<span class="nc" id="L177">		JScrollPane pagePane = new JScrollPane();</span>
+<span class="nc" id="L178">		pagePane.setViewportView(pagePanel);</span>
+<span class="nc" id="L179">		pagePaneBar = pagePane.getVerticalScrollBar();</span>
+<span class="nc" id="L180">		pagePaneBar.setUnitIncrement(16);</span>
+
+<span class="nc" id="L182">		JSplitPane mainPanel = new JSplitPane();</span>
+<span class="nc" id="L183">		mainPanel.setDividerSize(4);</span>
+<span class="nc" id="L184">		mainPanel.setResizeWeight(0.25);</span>
+<span class="nc" id="L185">		mainPanel.setLeftComponent(bookmarkPane);</span>
+<span class="nc" id="L186">		mainPanel.setRightComponent(pagePane);</span>
+<span class="nc" id="L187">		add(mainPanel);</span>
+
+<span class="nc" id="L189">		centerWindow(Defaults.getAsInteger(&quot;JMTManualWidth&quot;).intValue(),</span>
+<span class="nc" id="L190">				Defaults.getAsInteger(&quot;JMTManualHeight&quot;).intValue());</span>
+<span class="nc" id="L191">		setVisible(true);</span>
+<span class="nc" id="L192">	}</span>
+
+	private int retrievePageIndex(PDOutlineItem item) throws IOException {
+<span class="nc" id="L195">		PDActionGoTo action = (PDActionGoTo) item.getAction();</span>
+<span class="nc" id="L196">		PDNamedDestination namedDest = (PDNamedDestination) action.getDestination();</span>
+<span class="nc" id="L197">		PDPageDestination pageDest = catalog.findNamedDestinationPage(namedDest);</span>
+<span class="nc" id="L198">		return pageDest.retrievePageNumber();</span>
+	}
+
+	private TreeModel createBookmarkTreeModel() throws IOException {
+<span class="nc" id="L202">		BookmarkTreeNode root = new BookmarkTreeNode();</span>
+<span class="nc" id="L203">		root.setUserObject(chapter.getTitle());</span>
+<span class="nc" id="L204">		root.setPageIndex(retrievePageIndex(chapter));</span>
+<span class="nc" id="L205">		addDescendentBookmarkTreeNodes(chapter, root);</span>
+<span class="nc" id="L206">		return new DefaultTreeModel(root);</span>
+	}
+
+	private void addDescendentBookmarkTreeNodes(PDOutlineItem parentItem, BookmarkTreeNode parentNode) throws IOException {
+<span class="nc" id="L210">		Iterable&lt;PDOutlineItem&gt; children = ((PDOutlineNode) parentItem).children();</span>
+<span class="nc" id="L211">		Iterator&lt;PDOutlineItem&gt; it = children.iterator();</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		while (it.hasNext()) {</span>
+<span class="nc" id="L213">			PDOutlineItem item = it.next();</span>
+<span class="nc" id="L214">			BookmarkTreeNode node = new BookmarkTreeNode();</span>
+<span class="nc" id="L215">			node.setUserObject(item.getTitle());</span>
+<span class="nc" id="L216">			node.setPageIndex(retrievePageIndex(item));</span>
+<span class="nc" id="L217">			addDescendentBookmarkTreeNodes(item, node);</span>
+<span class="nc" id="L218">			parentNode.add(node);</span>
+<span class="nc" id="L219">		}</span>
+<span class="nc" id="L220">	}</span>
+
+	private void closeManual() throws IOException {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		if (document != null) {</span>
+<span class="nc" id="L224">			document.close();</span>
+		}
+<span class="nc" id="L226">	}</span>
+
+	@Override
+	protected void doClose() {
+<span class="nc" id="L230">		Dimension d = getSize();</span>
+<span class="nc" id="L231">		Defaults.set(&quot;JMTManualWidth&quot;, String.valueOf(d.width));</span>
+<span class="nc" id="L232">		Defaults.set(&quot;JMTManualHeight&quot;, String.valueOf(d.height));</span>
+<span class="nc" id="L233">		Defaults.save();</span>
+<span class="nc" id="L234">	}</span>
+
+<span class="nc" id="L236">	private class BookmarkTreeNode extends DefaultMutableTreeNode {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		private int pageIndex;
+
+		public int getPageIndex() {
+<span class="nc" id="L243">			return pageIndex;</span>
+		}
+
+		public void setPageIndex(int value) {
+<span class="nc" id="L247">			pageIndex = value;</span>
+<span class="nc" id="L248">		}</span>
+
+	}
+
+<span class="nc" id="L252">	private class BookmarkTreeSelectionModel extends DefaultTreeSelectionModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public void setSelectionPaths(TreePath[] pPaths) {
+<span class="nc" id="L258">			super.setSelectionPaths(null);</span>
+<span class="nc" id="L259">			super.setSelectionPaths(pPaths);</span>
+<span class="nc" id="L260">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

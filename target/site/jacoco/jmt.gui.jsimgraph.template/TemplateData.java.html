@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TemplateData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.template</a> &gt; <span class="el_source">TemplateData.java</span></div><h1>TemplateData.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.template;
+
+import java.io.File;
+
+/**
+ * @author S Jiang
+ * 
+ */
+public class TemplateData {
+
+	//available in both manifest and index.xml
+	private String name;
+	private String fileName;
+	private String author;
+	private String version;
+	private String date;
+	private String shortDescription;
+	private String toolTip;
+	private String updateAddress;
+	private String descriptionAddress;
+	//refer to the .jar file
+	private File file;
+	//not available in manifest
+	//use md5 checksum function
+	private String md5; 
+
+<span class="nc" id="L45">	public TemplateData() {</span>
+
+<span class="nc" id="L47">	}</span>
+
+<span class="nc" id="L49">	public TemplateData(String fileName, String shortDescription, String updateAddress) {</span>
+<span class="nc" id="L50">		this.fileName = fileName;</span>
+<span class="nc" id="L51">		this.shortDescription = shortDescription;</span>
+<span class="nc" id="L52">		this.updateAddress = updateAddress;</span>
+<span class="nc" id="L53">	}</span>
+
+	public File getFile() {
+<span class="nc" id="L56">		return file;</span>
+	}
+
+	public void setFile(File file) {
+<span class="nc" id="L60">		this.file = file;</span>
+<span class="nc" id="L61">	}</span>
+
+	public String getName() {
+<span class="nc" id="L64">		return name;</span>
+	}
+
+	public void setName(String name) {
+<span class="nc" id="L68">		this.name = name;</span>
+<span class="nc" id="L69">	}</span>
+
+	public String getShortDescription() {
+<span class="nc" id="L72">		return shortDescription;</span>
+	}
+
+	public void setShortDescription(String description) {
+<span class="nc" id="L76">		this.shortDescription = description;</span>
+<span class="nc" id="L77">	}</span>
+
+	public String getVersion() {
+<span class="nc" id="L80">		return version;</span>
+	}
+
+	public void setVersion(String version) {
+<span class="nc" id="L84">		this.version = version;</span>
+<span class="nc" id="L85">	}</span>
+
+	public String getUpdateAddress() {
+<span class="nc" id="L88">		return updateAddress;</span>
+	}
+
+	public void setUpdateAddress(String address) {
+<span class="nc" id="L92">		this.updateAddress = address;</span>
+<span class="nc" id="L93">	}</span>
+
+	public String getAuthor() {
+<span class="nc" id="L96">		return author;</span>
+	}
+
+	public void setAuthor(String author) {
+<span class="nc" id="L100">		this.author = author;</span>
+<span class="nc" id="L101">	}</span>
+
+	public String getDate() {
+<span class="nc" id="L104">		return date;</span>
+	}
+
+	public void setDate(String date) {
+<span class="nc" id="L108">		this.date = date;</span>
+<span class="nc" id="L109">	}</span>
+
+	public String getDescriptionAddress() {
+<span class="nc" id="L112">		return descriptionAddress;</span>
+	}
+
+	public void setDescriptionAddress(String descriptionAddress) {
+<span class="nc" id="L116">		this.descriptionAddress = descriptionAddress;</span>
+<span class="nc" id="L117">	}</span>
+
+	public String getMd5() {
+<span class="nc" id="L120">		return md5;</span>
+	}
+
+	public void setMd5(String md5) {
+<span class="nc" id="L124">		this.md5 = md5;</span>
+<span class="nc" id="L125">	}</span>
+
+	public String getFileName() {
+<span class="nc" id="L128">		return fileName;</span>
+	}
+
+	public void setFileName(String fileName) {
+<span class="nc" id="L132">		this.fileName = fileName;</span>
+<span class="nc" id="L133">	}</span>
+
+	public String getToolTip() {
+<span class="nc" id="L136">		return toolTip;</span>
+	}
+
+	public void setToolTip(String toolTip) {
+<span class="nc" id="L140">		this.toolTip = toolTip;</span>
+<span class="nc" id="L141">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

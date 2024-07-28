@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>grahamScan.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba</a> &gt; <span class="el_source">grahamScan.java</span></div><h1>grahamScan.java</h1><pre class="source lang-java linenums">package jmt.engine.jaba;
+
+// grahamScan.java
+// 
+// Mark F. Hulber
+// May 1996
+//
+//
+// grahamScan implements the Graham Scan convex hull algorithm.  Given
+//   a vector containing points it will return a vector of points forming
+//   the convex hull of the input.  This class relies on extensions to the
+//   point class called newPoints.  grahamScan does not begin computing the
+//   convex hull until three points have been provided.
+//
+//
+
+<span class="nc" id="L17">public class grahamScan {</span>
+
+<span class="nc" id="L19">	java.util.Vector&lt;newPoint&gt; lines = new java.util.Vector&lt;newPoint&gt;(100, 100);</span>
+<span class="nc" id="L20">	java.util.Stack&lt;newPoint&gt; stk = new java.util.Stack&lt;newPoint&gt;();</span>
+<span class="nc" id="L21">	java.util.Vector&lt;newPoint&gt; s = new java.util.Vector&lt;newPoint&gt;(100, 100);</span>
+
+	public java.util.Vector&lt;newPoint&gt; doGraham(java.util.Vector&lt;newPoint&gt; q) {
+
+<span class="nc" id="L25">		int m = 0;</span>
+		newPoint temp, temp2;
+<span class="nc" id="L27">		int n = q.size();</span>
+		int a, i;
+<span class="nc bnc" id="L29" title="All 2 branches missed.">		if (n &gt; 2) {</span>
+<span class="nc" id="L30">			s.removeAllElements();</span>
+<span class="nc" id="L31">			s = (java.util.Vector&lt;newPoint&gt;) q.clone();</span>
+<span class="nc bnc" id="L32" title="All 2 branches missed.">			for (i = 1; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L33" title="All 6 branches missed.">				if (s.elementAt(i).y &lt; s.elementAt(m).y || ((s.elementAt(i).y == s.elementAt(m).y) &amp;&amp; (s.elementAt(i).x &lt; s.elementAt(m).x))) {</span>
+<span class="nc" id="L34">					m = i;</span>
+				}
+			}
+<span class="nc" id="L37">			temp = s.elementAt(0);</span>
+<span class="nc" id="L38">			s.setElementAt(s.elementAt(m), 0);</span>
+<span class="nc" id="L39">			s.setElementAt(temp, m);</span>
+
+			// stage 2
+<span class="nc" id="L42">			temp2 = s.elementAt(0);</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">			for (i = 2; i &lt; n; i++) {</span>
+<span class="nc bnc" id="L44" title="All 2 branches missed.">				for (int j = n - 1; j &gt;= i; j--) {</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">					if (temp2.polarCmp(s.elementAt(j - 1), s.elementAt(j)) == 1) {</span>
+<span class="nc" id="L46">						temp = s.elementAt(j - 1);</span>
+<span class="nc" id="L47">						s.setElementAt(s.elementAt(j), j - 1);</span>
+<span class="nc" id="L48">						s.setElementAt(temp, j);</span>
+					}
+				}
+			}
+<span class="nc bnc" id="L52" title="All 4 branches missed.">			for (i = 1; i + 1 &lt; s.size() &amp;&amp; (s.elementAt(i + 1).classify(s.elementAt(0), s.elementAt(i)) == 3); i++) {</span>
+				; //TODO quick fix by Bertoli Marco ( i+1 &lt; s.size() )
+			}
+<span class="nc" id="L55">			stk.removeAllElements();</span>
+<span class="nc" id="L56">			stk.push(s.elementAt(0));</span>
+<span class="nc" id="L57">			stk.push(s.elementAt(i));</span>
+
+			boolean blah;
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			for (i = i + 1; i &lt; n; i++) {</span>
+<span class="nc" id="L61">				blah = true;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">				while (blah) {</span>
+<span class="nc" id="L63">					temp2 = stk.pop();</span>
+					//TODO quick fix by Bertoli Marco ( stk.empty() )
+<span class="nc bnc" id="L65" title="All 4 branches missed.">					if (stk.empty() || s.elementAt(i).classify(stk.peek(), temp2) == 0) {</span>
+<span class="nc" id="L66">						stk.push(temp2);</span>
+<span class="nc" id="L67">						blah = false;</span>
+					}
+				}
+<span class="nc" id="L70">				stk.push(s.elementAt(i));</span>
+			}
+
+<span class="nc" id="L73">			lines.removeAllElements();</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">			while (!stk.empty()) {</span>
+<span class="nc" id="L76">				lines.addElement(stk.pop());</span>
+			}
+<span class="nc" id="L78">			return lines;</span>
+		}
+<span class="nc" id="L80">		return null;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

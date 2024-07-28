@@ -22,6 +22,10 @@ import java.util.*;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.PSStrategies.QBPSStrategy;
+<<<<<<< HEAD
+=======
+import jmt.engine.NetStrategies.PSStrategies.QBPSStrategyPriority;
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 import jmt.engine.NetStrategies.PSStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
@@ -85,12 +89,25 @@ public class PSServer extends Server {
 	private double switchTime;
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
+<<<<<<< HEAD
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);
+=======
+		this(numberOfServers, null, numberOfVisits, serviceStrategies, null,null, null, null, null, null, null, null);
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	}
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
 									PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
+<<<<<<< HEAD
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights, null, null, null, null, null);
+=======
+		this(numberOfServers, null, numberOfVisits, serviceStrategies,  null, psStrategies,serviceWeights, null, null, null, null, null);
+	}
+
+	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,Boolean priorityUsed,
+					PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
+		this(numberOfServers, null, numberOfVisits, serviceStrategies, priorityUsed, psStrategies, serviceWeights, null, null, null, null, null);
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	}
 
 	/**
@@ -103,7 +120,11 @@ public class PSServer extends Server {
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
 	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
+<<<<<<< HEAD
 									ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
+=======
+									ServiceStrategy[] serviceStrategies, Boolean priorityUsed,PSStrategy[] psStrategies,  Double[] serviceWeights,
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 									Integer[] serverNumRequired,
 									String[] serverNames,
 									Integer[] serversPerServerType,
@@ -125,7 +146,11 @@ public class PSServer extends Server {
 		} else {
 			this.psStrategies = psStrategies;
 			for (int i = 0; i < psStrategies.length; i++) {
+<<<<<<< HEAD
 				if(psStrategies[i] instanceof QBPSStrategy) {
+=======
+				if(psStrategies[i] instanceof QBPSStrategy || psStrategies[i] instanceof QBPSStrategyPriority) {
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 					QBPS = true;
 				}
 			}

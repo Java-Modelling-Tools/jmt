@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JmtEdgeBreakagesIterator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">JmtEdgeBreakagesIterator.java</span></div><h1>JmtEdgeBreakagesIterator.java</h1><pre class="source lang-java linenums">package jmt.gui.jsimgraph.JGraphMod;
+
+import java.util.*;
+/**
+ * &lt;p&gt;Title: JmtEdgeBreakagesIterator&lt;/p&gt;
+ * &lt;p&gt;Description: Stores the identifiers for broken arcs &lt;/p&gt;
+ *
+ * @author Emma Bortone
+ *         Date: 13-feb-2020
+ *         Time: 13.33.00
+ *
+ */
+public class JmtEdgeBreakagesIterator {
+
+
+    private HashMap&lt;Object,HashMap&lt;Object, List&lt;Integer&gt;&gt;&gt; actualLetter;
+<span class="nc" id="L17">    private List&lt;String&gt; letters = Arrays.asList(&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;,&quot;F&quot;,&quot;G&quot;,&quot;H&quot;,&quot;I&quot;,&quot;J&quot;,&quot;K&quot;,&quot;L&quot;,&quot;M&quot;,&quot;N&quot;,&quot;O&quot;,&quot;P&quot;,&quot;Q&quot;,</span>
+            &quot;R&quot;,&quot;S&quot;,&quot;T&quot;,&quot;U&quot;,&quot;V&quot;,&quot;W&quot;,&quot;X&quot;,&quot;Y&quot;,&quot;Z&quot;,&quot; &quot;);
+    private List&lt;Boolean&gt; isAvailableIndex;
+
+<span class="nc" id="L21">    public JmtEdgeBreakagesIterator(){</span>
+<span class="nc" id="L22">        actualLetter = new HashMap&lt;Object,HashMap&lt;Object, List&lt;Integer&gt;&gt;&gt;();</span>
+<span class="nc" id="L23">        int n = letters.size();</span>
+<span class="nc" id="L24">        Boolean[] isAvailable = new Boolean[n];</span>
+        //Assign all the elements of boolean array to true
+<span class="nc" id="L26">        Arrays.fill(isAvailable,true);</span>
+<span class="nc" id="L27">        isAvailableIndex = new ArrayList&lt;Boolean&gt;();</span>
+<span class="nc" id="L28">        Collections.addAll(isAvailableIndex, isAvailable);</span>
+<span class="nc" id="L29">    }</span>
+
+    /**
+     * Returns the identifier letter for a given connection and a given breakage in that connection
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     * @param breakIndex : index of the breakage in this connection
+     * @return identifier letter for a given connection and a given breakage in that connection
+     */
+    public String getLetter(Object sourceKey,Object targetKey,int breakIndex){
+<span class="nc bnc" id="L39" title="All 2 branches missed.">        while(!isAttributed(sourceKey,targetKey,breakIndex)) {</span>
+<span class="nc" id="L40">            attributeNewLetter(sourceKey,targetKey);</span>
+        }
+<span class="nc" id="L42">        return (letters.get(actualLetter.get(sourceKey).get(targetKey).get(breakIndex)));</span>
+    }
+
+    /**
+     * Assigns a new letter to a given connection
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     */
+    private void attributeNewLetter(Object sourceKey, Object targetKey) {
+<span class="nc" id="L51">        int nextLetter = findNextLetter();</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">        if(!actualLetter.keySet().contains(sourceKey)){</span>
+<span class="nc" id="L53">            actualLetter.put(sourceKey,new HashMap&lt;Object, List&lt;Integer&gt;&gt;());</span>
+        }
+<span class="nc bnc" id="L55" title="All 2 branches missed.">        if(!actualLetter.get(sourceKey).keySet().contains(targetKey)){</span>
+<span class="nc" id="L56">           actualLetter.get(sourceKey).put(targetKey,new ArrayList&lt;Integer&gt;());</span>
+        }
+<span class="nc" id="L58">        actualLetter.get(sourceKey).get(targetKey).add(nextLetter);</span>
+<span class="nc" id="L59">        isAvailableIndex.set(nextLetter,false);</span>
+<span class="nc" id="L60">    }</span>
+
+    /**
+     * @return the next available letter
+     */
+    private int findNextLetter() {
+<span class="nc" id="L66">        int n = isAvailableIndex.size();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">        for(int i =0;i &lt;n; i++){</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">            if(isAvailableIndex.get(i)){</span>
+<span class="nc" id="L69">                return i;</span>
+            }
+        }
+<span class="nc" id="L72">        return(n-1);</span>
+    }
+
+    /**
+     *
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     * @param breakIndex : index of the breakage in this connection
+     * @return true if the specific connection and breakage already has a letter assigned to it
+     *         false otherwise
+     */
+    private boolean isAttributed(Object sourceKey, Object targetKey, int breakIndex) {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if(actualLetter.keySet().contains(sourceKey)){</span>
+<span class="nc bnc" id="L85" title="All 2 branches missed.">            if(actualLetter.get(sourceKey).keySet().contains(targetKey)){</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">                return actualLetter.get(sourceKey).get(targetKey).size() &gt; breakIndex;</span>
+            }
+        }
+<span class="nc" id="L89">        return false;</span>
+    }
+
+    /**
+     * Removes one attributed letter for the connection identified by sourceKey and targetKey
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     */
+    public void removeLast(Object sourceKey,Object targetKey){
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        if(actualLetter.keySet().contains(sourceKey)){</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            if(actualLetter.get(sourceKey).keySet().contains(targetKey)){</span>
+<span class="nc" id="L100">                int size = actualLetter.get(sourceKey).get(targetKey).size();</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">                if(size &gt;0){</span>
+<span class="nc" id="L102">                   int indexLetter = actualLetter.get(sourceKey).get(targetKey).get(size-1);</span>
+<span class="nc" id="L103">                   actualLetter.get(sourceKey).get(targetKey).remove(size-1);</span>
+<span class="nc" id="L104">                   isAvailableIndex.set(indexLetter,true);</span>
+               }
+            }
+        }
+<span class="nc" id="L108">    }</span>
+
+    /**
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     * @return the number of identifiers attributed to the connection identified by sourceKey and targetKey
+     */
+    public int getNumberAttributedTo(Object sourceKey,Object targetKey){
+<span class="nc" id="L116">        int size=0;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if(actualLetter.keySet().contains(sourceKey)){</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            if(actualLetter.get(sourceKey).keySet().contains(targetKey)){</span>
+<span class="nc" id="L119">                size = actualLetter.get(sourceKey).get(targetKey).size();</span>
+
+            }
+        }
+<span class="nc" id="L123">        return(size);</span>
+    }
+
+    /**
+     *Removes all the attributed letters for the connection identified by sourceKey and targetKey
+     * @param sourceKey : key of the source station of the connection
+     * @param targetKey : key of the target station of the connection
+     */
+    public void removeAll(Object sourceKey,Object targetKey){
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        while(getNumberAttributedTo(sourceKey,targetKey)&gt;0){</span>
+<span class="nc" id="L133">            removeLast(sourceKey,targetKey);</span>
+        }
+<span class="nc" id="L135">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

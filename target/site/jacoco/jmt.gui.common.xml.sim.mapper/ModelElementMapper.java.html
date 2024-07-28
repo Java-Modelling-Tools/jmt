@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModelElementMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper</a> &gt; <span class="el_source">ModelElementMapper.java</span></div><h1>ModelElementMapper.java</h1><pre class="source lang-java linenums">/**
+ * This interface defines the contract for a mapper that transforms a part of the {@link SimDescriptor} DTO into
+ * the {@link jmt.gui.common.definitions.CommonModel}. Each implementation is responsible for a specific part of the model,
+ * such as stations, classes, or connections.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.XMLConstantNames;
+import jmt.gui.common.xml.sim.dto.ParameterDescriptor;
+import jmt.gui.common.xml.sim.dto.SectionDescriptor;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public interface ModelElementMapper extends XMLConstantNames {
+    /**
+     * Maps a part of the data from the {@link SimDescriptor} to the {@link jmt.gui.common.definitions.CommonModel}.
+     *
+     * @param dto     The root DTO object containing all data parsed from the XML
+     * @param context The shared context containing the CommonModel and support maps
+     */
+    void mapDtoToCommonModel(SimDescriptor dto, MappingContext context);
+
+    /**
+     * Maps the internal {@link jmt.gui.common.definitions.CommonModel} back to the {@link SimDescriptor} DTO.
+     * This is the inverse operation of {@link #mapDtoToCommonModel(SimDescriptor, MappingContext)}.
+     *
+     * @param dto     The root DTO object that will be populated with data from the model
+     * @param context The shared context used during the WRITING phase
+     */
+    void mapCommonModelToDto(SimDescriptor dto, WritingContext context); // We use WritingContext here
+
+    default boolean isPresent(String value) {
+<span class="fc bfc" id="L42" title="All 4 branches covered.">        return value != null &amp;&amp; !value.isEmpty();</span>
+    }
+
+    default Integer getInt(String value, Integer defaultValue) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        return isPresent(value) ? Integer.valueOf(value) : defaultValue;</span>
+    }
+
+    default Double getDouble(String value, Double defaultValue) {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">        return isPresent(value) ? Double.valueOf(value) : defaultValue;</span>
+    }
+
+    default Long getLong(String value, Long defaultValue) {
+<span class="nc bnc" id="L54" title="All 2 branches missed.">        return isPresent(value) ? Long.valueOf(value) : defaultValue;</span>
+    }
+
+    default Boolean getBoolean(String value, Boolean defaultValue) {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">        return isPresent(value) ? Boolean.valueOf(value) : defaultValue;</span>
+    }
+
+    default Object resolveStationOrRegion(String name, MappingContext context) {
+<span class="fc" id="L62">        Object station = context.stations.get(name);</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">        return (station != null) ? station : context.regions.get(name);</span>
+    }
+
+    default ParameterDescriptor getParam(SectionDescriptor sec, String name) {
+<span class="pc bpc" id="L67" title="2 of 4 branches missed.">        if (sec == null || sec.getParameters() == null) return null;</span>
+<span class="fc" id="L68">        return sec.getParameters().stream().filter(p -&gt; name.equals(p.getName())).findFirst().orElse(null);</span>
+    }
+
+    default List&lt;ParameterDescriptor&gt; getSubParams(ParameterDescriptor p) {
+<span class="pc bpc" id="L72" title="2 of 4 branches missed.">        return (p != null &amp;&amp; p.getSubParameters() != null) ? p.getSubParameters() : Collections.emptyList();</span>
+    }
+
+    default Map&lt;String, ParameterDescriptor&gt; getRefClassMap(ParameterDescriptor p) {
+<span class="fc" id="L76">        Map&lt;String, ParameterDescriptor&gt; map = new LinkedHashMap&lt;&gt;();</span>
+<span class="pc bpc" id="L77" title="1 of 4 branches missed.">        if (p == null || p.getSubParameters() == null) return map;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        for (ParameterDescriptor sub : p.getSubParameters()) {</span>
+<span class="fc" id="L79">            String refClass = sub.getRefClass();</span>
+<span class="pc bpc" id="L80" title="1 of 4 branches missed.">            if (refClass != null &amp;&amp; !refClass.isEmpty()) {</span>
+<span class="fc" id="L81">                map.put(refClass, sub);</span>
+            }
+<span class="fc" id="L83">        }</span>
+<span class="fc" id="L84">        return map;</span>
+    }
+
+    default ParameterDescriptor getFirst(List&lt;ParameterDescriptor&gt; list) {
+<span class="pc bpc" id="L88" title="1 of 4 branches missed.">        return (list != null &amp;&amp; !list.isEmpty()) ? list.get(0) : null;</span>
+    }
+
+    default ParameterDescriptor getAt(List&lt;ParameterDescriptor&gt; list, int index) {
+<span class="pc bpc" id="L92" title="2 of 6 branches missed.">        return (list != null &amp;&amp; index &gt;= 0 &amp;&amp; index &lt; list.size()) ? list.get(index) : null;</span>
+    }
+
+    default String val(ParameterDescriptor p) {
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if (p == null) return null;</span>
+<span class="pc bpc" id="L97" title="2 of 4 branches missed.">        if (p.getValue() != null &amp;&amp; !p.getValue().trim().isEmpty()) return p.getValue().trim();</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">        for (ParameterDescriptor sub : getSubParams(p)) {</span>
+<span class="nc bnc" id="L99" title="All 4 branches missed.">            if (&quot;value&quot;.equals(sub.getName()) &amp;&amp; sub.getValue() != null) return sub.getValue().trim();</span>
+<span class="nc" id="L100">        }</span>
+<span class="nc" id="L101">        return null;</span>
+    }
+
+    /**
+     * Returns the first non-empty value from a parameter without trimming it.
+     * &lt;p&gt;
+     * Use this when XML text must be preserved exactly as provided by legacy files (for example,
+     * map keys used by routing post-processing), while still treating blank strings as absent.
+     * This mirrors {@link #val(ParameterDescriptor)} lookup order but keeps the original text.
+     */
+    default String rawVal(ParameterDescriptor p) {
+<span class="pc bpc" id="L112" title="1 of 2 branches missed.">        if (p == null) return null;</span>
+<span class="pc bpc" id="L113" title="2 of 4 branches missed.">        if (p.getValue() != null &amp;&amp; !p.getValue().trim().isEmpty()) return p.getValue();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">        for (ParameterDescriptor sub : getSubParams(p)) {</span>
+<span class="nc bnc" id="L115" title="All 6 branches missed.">            if (&quot;value&quot;.equals(sub.getName()) &amp;&amp; sub.getValue() != null &amp;&amp; !sub.getValue().trim().isEmpty()) {</span>
+<span class="nc" id="L116">                return sub.getValue();</span>
+            }
+<span class="nc" id="L118">        }</span>
+<span class="nc" id="L119">        return null;</span>
+    }
+
+    default Double valD(ParameterDescriptor p) {
+<span class="fc" id="L123">        String v = val(p);</span>
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">        return v != null ? Double.valueOf(v) : null;</span>
+    }
+
+    default Integer valI(ParameterDescriptor p) {
+<span class="fc" id="L128">        String v = val(p);</span>
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        if (v == null) return null;</span>
+        try {
+            // Try parsing as int first for precision
+<span class="fc" id="L132">            return Integer.parseInt(v);</span>
+<span class="nc" id="L133">        } catch (NumberFormatException e) {</span>
+            // Fall back to double if needed (for scientific notation, etc.)
+<span class="nc" id="L135">            return Double.valueOf(v).intValue();</span>
+        }
+    }
+
+    default ParameterDescriptor makeParam(String name, String classPath, String value) {
+<span class="fc" id="L140">        ParameterDescriptor p = new ParameterDescriptor();</span>
+<span class="fc" id="L141">        p.setName(name);</span>
+<span class="fc" id="L142">        p.setClassPath(classPath);</span>
+<span class="fc" id="L143">        p.setValue(value);</span>
+<span class="fc" id="L144">        return p;</span>
+    }
+
+    default ParameterDescriptor makeContainer(String name, String classPath) {
+<span class="fc" id="L148">        ParameterDescriptor p = new ParameterDescriptor();</span>
+<span class="fc" id="L149">        p.setName(name);</span>
+<span class="fc" id="L150">        p.setClassPath(classPath);</span>
+<span class="fc" id="L151">        return p;</span>
+    }
+
+    default ParameterDescriptor makeRefParam(String name, String classPath, String refClass, String value) {
+<span class="fc" id="L155">        ParameterDescriptor p = makeParam(name, classPath, value);</span>
+<span class="fc" id="L156">        p.setRefClass(refClass);</span>
+<span class="fc" id="L157">        return p;</span>
+    }
+
+    /**
+     * Helper method to retrieve the string name of a node, checking both stations and blocking regions.
+     */
+    default String getNodeName(CommonModel model, Object nodeKey) {
+<span class="nc" id="L164">        String name = model.getStationName(nodeKey);</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">        if (name == null) {</span>
+<span class="nc" id="L166">            name = model.getRegionName(nodeKey);</span>
+        }
+<span class="nc" id="L168">        return name;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

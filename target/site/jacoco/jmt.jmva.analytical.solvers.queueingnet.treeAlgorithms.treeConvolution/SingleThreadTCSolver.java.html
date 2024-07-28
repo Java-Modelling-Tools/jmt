@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SingleThreadTCSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution</a> &gt; <span class="el_source">SingleThreadTCSolver.java</span></div><h1>SingleThreadTCSolver.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
+
+import java.math.BigDecimal;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreeTraverser;
+
+/**
+ * Tree Convolution solver that uses a single thread.
+ * @author Ben Homer, 2014.
+ */
+public class SingleThreadTCSolver extends TreeTraverser implements IThreadedTCSolver  {
+
+	/** The queueing network model to solve. */
+	private QNModel qnm;
+	
+	/** The convolution layer to delegate to. */
+	private ConvolutionLayer cl;
+	
+	/** The tree planter. */
+	private TreePlanter tp;
+	
+	/** The most recently calculated mean throughputs for each class. */
+	private BigRational[] X;
+	
+	/**
+	 * Constructor.
+	 * @param qnm The queueing network model to solve.
+	 * @param cl The convolution layer to delegate to.
+	 * @param tp The tree planter.
+	 */
+<span class="nc" id="L38">	public SingleThreadTCSolver(QNModel qnm, ConvolutionLayer cl, TreePlanter tp) {</span>
+<span class="nc" id="L39">		this.qnm = qnm;</span>
+<span class="nc" id="L40">		this.cl = cl;</span>
+<span class="nc" id="L41">		this.tp = tp;</span>
+<span class="nc" id="L42">	}</span>
+	
+	/** Computes G using postorder tree traversal. 
+	 * @param node The current node to compute the normalisation constant G for.
+	 * @param pv The population vector to be used during the computation.
+	 * @returns The normalisation constant G at the given node, calculated using the
+	 * specified population vector.
+	 */
+	public BigRational computeG(Node node, PopulationVector pv) {
+<span class="nc" id="L51">		Printer.out.println(&quot;\nComputing normalisation constant.&quot;);</span>
+<span class="nc" id="L52">		normalisationConstantTimer.start();</span>
+		if (Config.RECURSIVE) {
+			this.recursiveTraverse(node, pv);
+		} else {
+<span class="nc" id="L56">			this.iterativeTraverse(node, pv);</span>
+		}
+<span class="nc" id="L58">		normalisationConstantTimer.pause();</span>
+<span class="nc" id="L59">		BigDecimal res = node.getG();</span>
+<span class="nc" id="L60">		Printer.out.println(&quot;G(N) = &quot; + res);</span>
+<span class="nc" id="L61">		return new BigRational(res);</span>
+	}
+
+	/** 
+	 * Computes results at leaf node by delegating to the convolution layer.
+	 * @param node The leaf node.
+	 * @param pv The population vector to use for the computation.
+	 */
+	@Override
+	public void initLeafNode(Node node, PopulationVector pv) {
+<span class="nc" id="L71">		cl.computeLeafNodeGArray(node, pv);</span>
+<span class="nc" id="L72">	}</span>
+	
+	/** 
+	 * Computes results at subnetwork node by delegating to the convolution layer.
+	 * @param node The subnetwork node.
+	 * @param pv The population vector to use for the computation.
+	 */
+	@Override
+	public void computeSubnetNode(Node node, PopulationVector pv) {
+<span class="nc" id="L81">		cl.computeSubnetNodeGArray(node, pv);</span>
+<span class="nc" id="L82">	}</span>
+	
+	/** 
+	 * Calculates per class throughputs using methods outlined in LamLien83 paper.
+	 * @param p The full population vector.
+	 * @return The per class throughputs as an array of BigRationals.
+	 */
+	@Override
+	public BigRational[] calculateThroughputs(PopulationVector p) {
+<span class="nc" id="L91">		X = new BigRational[qnm.R];</span>
+<span class="nc" id="L92">		Printer.out.println(&quot;--- Calculating throughputs ---&quot;);</span>
+<span class="nc" id="L93">		throughputTimer.start();</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		for (int s = 0; s &lt; qnm.R; s++) {</span>
+<span class="nc" id="L95">			double totD = 0;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">			for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc" id="L97">				totD += qnm.getDemand(k, s);</span>
+			}
+<span class="nc bnc" id="L99" title="All 2 branches missed.">			if (totD == 0) {</span>
+<span class="nc" id="L100">				X[s] = BigRational.ZERO;</span>
+<span class="nc" id="L101">				continue;</span>
+			}
+			
+<span class="nc" id="L104">			p.minusOne(s + 1);</span>
+<span class="nc" id="L105">			BigRational newG = cl.computeGNminusOneMethod1(tp.rootClone(), s, p);</span>
+<span class="nc" id="L106">			X[s] = newG.divide(qnm.getNormalisingConstant());</span>
+<span class="nc" id="L107">			p.restore();</span>
+		}
+		
+<span class="nc" id="L110">		throughputTimer.pause();</span>
+<span class="nc" id="L111">		Printer.out.println(&quot;--- END Calculating throughputs ---&quot;);</span>
+<span class="nc" id="L112">		return X;</span>
+	}
+	
+	/** 
+	 * Calculates per class and per station mean queue lengths using methods outlined in LamLien83 paper.
+	 * @param p The full population vector.
+	 * @return The per class per station mean queue lengths as a 2D array of BigRationals.
+	 */
+	@Override
+	public BigRational[][] calculateMeanQueueLengths(PopulationVector p) {
+<span class="nc" id="L122">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+<span class="nc" id="L123">		Printer.out.println(&quot;--- Calculating mean queue lengths ---&quot;);</span>
+<span class="nc" id="L124">		queueLengthTimer.start();</span>
+
+<span class="nc" id="L126">		tp.printCurrentTree();</span>
+		
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		for (int m = 0; m &lt; qnm.M; m++) {</span>
+			
+<span class="nc bnc" id="L130" title="All 4 branches missed.">			switch (qnm.getQueueType(m)) {</span>
+			
+			// Case: Queue-dependent station, DELAY/infinite server.
+			case DELAY:
+				// TODO: not quite right, needs multiplying by service time - currently cant access this.
+<span class="nc bnc" id="L135" title="All 2 branches missed.">				for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc" id="L136">					Q[m][r] = X[r].multiply(qnm.getDemandAsBigRational(m, r));</span>
+				}
+<span class="nc" id="L138">				break;</span>
+			
+			// Case: Queue-dependent station, with general service rate function.
+			// (This will never actually be accessed from JMT since multi-class models
+			// do not allow general queue-depended stations)
+			// Currently not supported by QNModel data structure, needs access to service times
+			case LD:
+				//Node root = tp.createTreeWithRemovedStation(m);
+<span class="nc" id="L146">				throw new UnsupportedOperationException(&quot;LD stations not supported.&quot;);</span>
+				// TODO: implement eq (2) and (14) from Lam/Lien -&gt; need to be able to access service times.
+			
+			// Case: Fixed-rate service station (LI).
+			case LI:
+				// Create tree for Gm+ as described in Lam/Lien paper.
+<span class="nc" id="L152">				Node cloneParent = tp.createTreeWithClonedStation(m);</span>
+				
+				if (Config.Q_COMPUTE_SEQUENTIALLY) {
+					/* Calculates the values of Gm+(N - 1_k) for each station m and class k
+					 * individually, storing a single g array at each node. */
+<span class="nc" id="L157">					Q[m] = cl.computeGmPlusStoreSingle(cloneParent, p, m);</span>
+				} else {
+					/* Calculates the values of Gm+(N - 1_k) for each station m and class k,
+					 * calculating for all classes k in single pass, stores multiple g arrays at each node. */
+					Q[m] = cl.computeGmPlusStoreMultiple(cloneParent, p, m);
+				}
+<span class="nc" id="L163">				break;</span>
+				
+			default:
+<span class="nc" id="L166">				throw new UnsupportedOperationException(&quot;Unsupported station type.&quot;);</span>
+			}
+		}
+		
+<span class="nc" id="L170">		Printer.out.println(&quot;--- END Calculating mean queue lengths ---&quot;);</span>
+<span class="nc" id="L171">		queueLengthTimer.pause();</span>
+<span class="nc" id="L172">		return Q;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

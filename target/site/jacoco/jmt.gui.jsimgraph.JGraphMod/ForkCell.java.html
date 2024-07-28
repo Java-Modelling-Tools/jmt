@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ForkCell.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.JGraphMod</a> &gt; <span class="el_source">ForkCell.java</span></div><h1>ForkCell.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.JGraphMod;
+
+import org.jgraph.graph.Port;
+
+/**
+ * Generates new jobs in open systems, it generates jobs of 1 JobClass only
+ *
+ * @author Federico Granata, Bertoli Marco
+ * Date: 5-giu-2003
+ * Time: 13.13.51
+ */
+public class ForkCell extends JmtCell {
+
+	private static final long serialVersionUID = 1L;
+
+	// Do not change this as it is accessed by reflection to forecast new cell dimensions (Bertoli Marco)
+	public static final String ICON = &quot;Fork&quot;;
+
+	/**
+	 * Creates a graph cell and initializes it with the specified user object.
+	 *
+	 * @param userObject an Object provided by the user that constitutes
+	 *                   the cell's data
+	 */
+	public ForkCell(Object userObject) {
+<span class="nc" id="L44">		super(ICON, userObject);</span>
+<span class="nc" id="L45">		type = FORK;</span>
+<span class="nc" id="L46">	}</span>
+
+	/**
+	 * Creates the ports for this vertex
+	 *
+	 * @return array of ports
+	 */
+	@Override
+	public Port[] createPorts() {
+<span class="nc" id="L55">		Port[] ports = new Port[2];</span>
+<span class="nc" id="L56">		ports[0] = new InputPort(this);</span>
+<span class="nc" id="L57">		ports[1] = new OutputPort(this);</span>
+<span class="nc" id="L58">		return ports;</span>
+	}
+
+	/**
+	 * Tells if this station generates or destroys jobs (useful for blocking region
+	 * management)
+	 *
+	 * @return true if this station generates or destroy jobs, false otherwise
+	 */
+	@Override
+	public boolean generateOrDestroyJobs() {
+<span class="nc" id="L69">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

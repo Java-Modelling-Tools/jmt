@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TCComplexityEvaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution</a> &gt; <span class="el_source">TCComplexityEvaluator.java</span></div><h1>TCComplexityEvaluator.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
+
+import java.util.TreeSet;
+
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils.Covered;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ComplexityEvaluator;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+
+/**
+ * Class responsible for evaluating the complexity of the tree convolution algorithm if
+ * it were to be run on a given tree representing a network.
+ * @author Ben Homer, 2014.
+ */
+public class TCComplexityEvaluator extends ComplexityEvaluator {
+	
+	/** Complexity of running standard/sequential version of algorithm over specified model,
+	 * when feedback filtering is used. */
+	private ComplexityBundle stdComplexityFF;
+	
+	/**
+	 * Constructor.
+	 * @param qnm The queueing network model we are trying to solve.
+	 * @param ccu The ClassCoverageUtils object used for calculating the
+	 * class coverage at certain nodes in the planted tree. 
+	 */
+	public TCComplexityEvaluator(QNModel qnm, ClassCoverageUtils ccu) {
+<span class="nc" id="L32">		super(qnm, ccu);</span>
+<span class="nc" id="L33">	}</span>
+	
+	/**
+	 * Determines if the tree convolution algorithm for the specified tree has better complexity
+	 * characteristics than the standard/sequential algorithm for the same network.
+	 * @param root The root node of the tree to test.
+	 * @param pv The per class population vector of the network.
+	 * @return A boolean indicating whether the tree has an acceptable expected complexity.
+	 */
+	public boolean treeHasAcceptableComplexity(Node root, PopulationVector pv) {
+		// TODO: include complexity for calculating performance measures as well?
+<span class="nc" id="L44">		stdComplexity = getStandardAlgorithmComplexity(pv);</span>
+<span class="nc" id="L45">		stdComplexityFF = getStandardConvolutionComplexityFeedbackFiltering(pv);</span>
+<span class="nc" id="L46">		treeComplexity = getTreeComplexity(root.clone(), pv);</span>
+<span class="nc" id="L47">		sparcityOfDemandsMatrix = getSparcityOfDemandsMatrix();</span>
+		//fcfToPcRatio = calculateFcsToPcsRatio(root);
+		
+		if (Config.TERMINATE_IF_HIGH_COMPLEXITY &amp;&amp; treeComplexity.timeComplexity &gt; stdComplexityFF.timeComplexity) {
+			return false;
+		}
+		
+<span class="nc" id="L54">		printSummary();</span>
+<span class="nc" id="L55">		return true;</span>
+	}
+	
+	/**
+	 * Gets the complexity of a leaf node computation in the tree convolution algorithm.
+	 * Implements equation (8) in Lam/Lien paper which gives time of
+	 * convolution between 2 subnets in tree.
+	 * @param node The leaf node.
+	 * @param pv The per class population vector of the network.
+	 * @return A ComplexityBundle containing the expected time and space complexities.
+	 */
+	@Override
+	protected ComplexityBundle getLeafNodeComplexity(Node n, PopulationVector popVec) {
+<span class="nc" id="L68">		TreeSet&lt;Integer&gt; pcUfc = n.pcs;</span>
+<span class="nc" id="L69">		pcUfc.addAll(n.fcs);</span>
+<span class="nc" id="L70">		int time = 1;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		for (int k : pcUfc) {</span>
+<span class="nc" id="L72">			time *= (popVec.get(k) + 1);</span>
+<span class="nc" id="L73">		}</span>
+		
+<span class="nc" id="L75">		time *= 4;</span>
+		
+<span class="nc" id="L77">		int space = n.pcs.size() + n.fcs.size();</span>
+		
+<span class="nc" id="L79">		return new ComplexityBundle(time, space);</span>
+	}
+	
+	/**
+	 * Gets the complexity of a subnetwork node computation in the tree convolution algorithm.
+	 * Implements equation (8) in Lam/Lien paper which gives time of
+	 * convolution between 2 subnets in tree.
+	 * @param node The subnetwork node.
+	 * @param pv The per class population vector of the network.
+	 * @return A ComplexityBundle containing the expected time and space complexities.
+	 */
+	@Override
+	protected ComplexityBundle getSubnetNodeComplexity(Node n, PopulationVector popVec) {
+		// Start by computing the overlap and partially covered status of each class.
+<span class="nc" id="L93">		Node n1 = n.leftChild();</span>
+<span class="nc" id="L94">		Node n2 = n.rightChild();</span>
+<span class="nc" id="L95">		TreeSet&lt;Integer&gt; subnet = n1.stations;</span>
+<span class="nc" id="L96">		subnet.addAll(n2.stations);</span>
+<span class="nc" id="L97">		TreeSet&lt;Integer&gt; overlapped = n1.pcs;</span>
+<span class="nc" id="L98">		overlapped.retainAll(n2.pcs);</span>
+<span class="nc" id="L99">		TreeSet&lt;Integer&gt; notOverlapped = n1.pcs;</span>
+<span class="nc" id="L100">		notOverlapped.addAll(n2.pcs);</span>
+<span class="nc" id="L101">		notOverlapped.removeAll(overlapped);</span>
+		
+<span class="nc" id="L103">		TreeSet&lt;Integer&gt; subnetPc = ccu.getCoveredClasses(Covered.PARTIALLY, subnet);</span>
+		
+<span class="nc" id="L105">		TreeSet&lt;Integer&gt; p00 = notOverlapped;</span>
+<span class="nc" id="L106">		p00.removeAll(subnetPc);</span>
+<span class="nc" id="L107">		TreeSet&lt;Integer&gt; p01 = notOverlapped;</span>
+<span class="nc" id="L108">		p01.retainAll(subnetPc);</span>
+<span class="nc" id="L109">		TreeSet&lt;Integer&gt; p10 = overlapped;</span>
+<span class="nc" id="L110">		p10.removeAll(subnetPc);</span>
+<span class="nc" id="L111">		TreeSet&lt;Integer&gt; p11 = overlapped;</span>
+<span class="nc" id="L112">		p11.retainAll(subnetPc);</span>
+		
+<span class="nc" id="L114">		TreeSet&lt;Integer&gt; p10up01 = p10;</span>
+<span class="nc" id="L115">		p10up01.addAll(p01);</span>
+		
+<span class="nc" id="L117">		int time = 1;</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		for (int k : p10up01) {</span>
+<span class="nc" id="L119">			time *= (popVec.get(k) + 1);</span>
+<span class="nc" id="L120">		}</span>
+		
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		for (int k : p11) {</span>
+<span class="nc" id="L123">			int Nk = popVec.get(k);</span>
+<span class="nc" id="L124">			time *= ((Nk + 2)*(Nk + 1))/2;</span>
+<span class="nc" id="L125">		}</span>
+		
+<span class="nc" id="L127">		int space = n.pcs.size() + n.fcs.size();</span>
+		
+<span class="nc" id="L129">		return new ComplexityBundle(time, space);</span>
+	}
+	
+	/**
+	 * Gets the complexity of running standard convolution over a network with the specified population vector.
+	 * @param popVec The network's population vector.
+	 * @return A ComplexityBundle containing the expected time and space complexities.
+	 */
+	@Override
+	protected ComplexityBundle getStandardAlgorithmComplexity(PopulationVector popVec) {
+<span class="nc" id="L139">		int time = 1;</span>
+<span class="nc" id="L140">		int space = 1;</span>
+<span class="nc" id="L141">		int Nk = 0;</span>
+		
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		for (int k = 0; k &lt; popVec.size(); k++) {</span>
+<span class="nc" id="L144">			Nk = popVec.get(k);</span>
+<span class="nc" id="L145">			time *= ((Nk + 1)*(Nk + 2))/2;</span>
+<span class="nc" id="L146">			space *= (Nk + 1);</span>
+		}
+		
+<span class="nc" id="L149">		time *= (qnm.M-1);</span>
+<span class="nc" id="L150">		space *= 2;</span>
+		
+<span class="nc" id="L152">		return new ComplexityBundle(time, space);</span>
+	}
+	
+	/**
+	 * Gets the complexity if running standard convolution over a network with the specified population vector,
+	 * in which feedback filtering is used.
+	 * @param popVec The network's population vector.
+	 * @return A ComplexityBundle containing the expected time and space complexities.
+	 */
+	private ComplexityBundle getStandardConvolutionComplexityFeedbackFiltering(PopulationVector popVec) {
+<span class="nc" id="L162">		int time = 1;</span>
+<span class="nc" id="L163">		int space = 1;</span>
+		
+<span class="nc bnc" id="L165" title="All 2 branches missed.">		for (int k = 0; k &lt; popVec.size(); k++) {</span>
+<span class="nc" id="L166">			space *= (popVec.get(k) + 1);</span>
+		}
+		
+<span class="nc" id="L169">		time = qnm.M * qnm.R * space;</span>
+		
+<span class="nc" id="L171">		return new ComplexityBundle(time, space);</span>
+	}
+
+	/**
+	 * Prints a summary of the complexity evaluators calculations.
+	 */
+	@Override
+	protected void printSummary() {
+<span class="nc" id="L179">		Printer.out.println(&quot;--- Tree Convolution Complexity Evaluation ---&quot;);</span>
+<span class="nc" id="L180">		getMachineCapabilities();</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		if (stdComplexity != null) {</span>
+<span class="nc" id="L182">			Printer.out.println(&quot;Std. convolution: Time = &quot; + stdComplexity.timeComplexity</span>
+					+ &quot; Space = &quot; + stdComplexity.spaceComplexity);
+		}
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		if (stdComplexityFF != null) {</span>
+<span class="nc" id="L186">			Printer.out.println(&quot;Std. convolution w/ feedback filtering: Time = &quot; + stdComplexityFF.timeComplexity</span>
+					+ &quot; Space = &quot; + stdComplexityFF.spaceComplexity);
+		}
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		if (treeComplexity != null) {</span>
+<span class="nc" id="L190">			Printer.out.println(&quot;Tree convolution: Time = &quot; + treeComplexity.timeComplexity</span>
+					+ &quot; Space = &quot; + treeComplexity.spaceComplexity);
+		}
+<span class="nc" id="L193">		Printer.out.println(&quot;Sparsity of demands matrix: &quot; + sparcityOfDemandsMatrix);</span>
+<span class="nc" id="L194">		Printer.out.println(&quot;Ratio of FCS to PCS: &quot; + fcfToPcRatio);</span>
+<span class="nc" id="L195">		Printer.out.println(&quot;--- END Complexity Evaluation ---&quot;);</span>
+<span class="nc" id="L196">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

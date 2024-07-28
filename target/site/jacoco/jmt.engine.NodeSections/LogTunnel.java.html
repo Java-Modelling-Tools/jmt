@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogTunnel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">LogTunnel.java</span></div><h1>LogTunnel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.swing.JOptionPane;
+
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.log.CSVLogger;
+import jmt.engine.log.JSimLoggerFactory;
+import jmt.engine.log.LoggerParameters;
+
+/**
+ * &lt;p&gt;Title: LogTunnel Extension&lt;/p&gt;
+ * &lt;p&gt;Description: This class extends the &quot;tunnel&quot; service-section
+ * by adding logging (information about forward messages only).
+ * Every message sent from the input section is forwarded to the
+ * output section and every message sent the from output section
+ * is backward to the input section.&lt;/p&gt;
+ *
+ * @author Michael Fercu
+ *         Date: 12-lug-2008
+ *         Time: 14.04.02
+ *         
+ * @author Marco Bertoli
+ * 			Date: 12-dec-2009
+ * 
+ * 		Nearly rewrote everything to fix bugs with log files kept open and with log lines deleted when 
+ *      multiple loggers were writing on the same file.
+ *      Now instead of using Log4j it relies on a fast, custom, thread-safe implementation.
+ *
+ */
+public class LogTunnel extends ServiceTunnel {
+
+	public static final String COLUMN_LOGGERNAME = &quot;LOGGERNAME&quot;;
+	public static final String COLUMN_TIMESTAMP = &quot;TIMESTAMP&quot;;
+	public static final String COLUMN_JOBID = &quot;JOB_ID&quot;;
+	public static final String COLUMN_CLASSID = &quot;CLASS_ID&quot;;
+	public static final String COLUMN_INTERARRIVAL_SAMECLASS = &quot;INTERARRIVAL_SAMECLASS&quot;;
+	public static final String COLUMN_INTERARRIVAL_ANYCLASS = &quot;INTERARRIVAL_ANYCLASS&quot;;
+	public static final String COLUMN_START_TIME = &quot;SIMUL_START_TIME&quot;;
+
+<span class="nc" id="L67">	public static final String[] COLUMNS = {COLUMN_LOGGERNAME, COLUMN_TIMESTAMP, COLUMN_JOBID, COLUMN_CLASSID,</span>
+			COLUMN_INTERARRIVAL_SAMECLASS, COLUMN_INTERARRIVAL_ANYCLASS, COLUMN_START_TIME};
+
+	private String chDelimiter;
+	private String decimalSeparator;
+	private int intReplacePolicy;
+	private String strTimestampValue;
+	private LoggerParameters lp;
+
+	private File file;
+	private CSVLogger logger;
+	private Map&lt;String, String&gt; defaultValues;
+
+	/**
+	 *  Creates a new instance of LogTunnel; called by simulator engine.
+	 */
+	public LogTunnel(String argFN, String argFP, Boolean argET, Boolean argBLN, Boolean argBTS, Boolean argBJID, Boolean argBJC, Boolean argBTSC,
+<span class="nc" id="L84">			Boolean argBTAC, Integer numClasses) {</span>
+		/* Create an object to hold the Logger's parameters, with parameters from XMLReader */
+<span class="nc" id="L86">		lp = new LoggerParameters(argFN, argFP, argET, argBLN, argBTS, argBJID, argBJC, argBTSC, argBTAC);</span>
+<span class="nc" id="L87">	}</span>
+
+	/**
+	 * Checks if the file is writable.
+	 */
+	private void initLoggerParameters() {
+		// Get global values (from the XML file) for the path, auto-replace, and delimiter 
+<span class="nc" id="L94">		lp.path = getOwnerNode().getSimParameters().getLogPath();</span>
+<span class="nc" id="L95">		int parametricStep = getOwnerNode().getQueueNet().getParametricStep();</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if (parametricStep &gt;= 0) {</span>
+<span class="nc" id="L97">			lp.name = lp.name.substring(0, lp.name.length() - 4) + &quot;_&quot; + (parametricStep + 1) + &quot;.csv&quot;;</span>
+		}
+<span class="nc" id="L99">		intReplacePolicy = Integer.parseInt(getOwnerNode().getSimParameters().getLogReplaceMode());</span>
+<span class="nc" id="L100">		chDelimiter = getOwnerNode().getSimParameters().getLogDelimiter();</span>
+<span class="nc" id="L101">		decimalSeparator = getOwnerNode().getSimParameters().getLogDecimalSeparator();</span>
+<span class="nc" id="L102">		strTimestampValue = getOwnerNode().getSimParameters().getTimestampValue();</span>
+<span class="nc" id="L103">	}</span>
+
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc bnc" id="L107" title="All 4 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+			// Build logger and default values
+<span class="nc" id="L111">			initLoggerParameters();</span>
+<span class="nc" id="L112">			file = new File(lp.path, lp.name);</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">			logger = JSimLoggerFactory.getCSVLogger(</span>
+					file,
+					COLUMNS,
+					intReplacePolicy == LoggerParameters.LOGGER_AR_APPEND,
+					chDelimiter,
+					decimalSeparator);
+<span class="nc" id="L119">			defaultValues = new HashMap&lt;String, String&gt;();</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">			if (lp.boolExecTimestamp.booleanValue()) {</span>
+<span class="nc" id="L121">				defaultValues.put(COLUMN_START_TIME, strTimestampValue);</span>
+			}
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			if (lp.boolLoggername.booleanValue()) {</span>
+<span class="nc" id="L124">				defaultValues.put(COLUMN_LOGGERNAME, message.getSource().getName());</span>
+			}
+			break;
+
+		case NetEvent.EVENT_STOP:
+<span class="nc bnc" id="L129" title="All 2 branches missed.">			if (logger != null) {</span>
+				try {
+<span class="nc" id="L131">					JSimLoggerFactory.remove(logger);</span>
+<span class="nc" id="L132">				} catch (IOException e) {</span>
+<span class="nc" id="L133">					e.printStackTrace();</span>
+<span class="nc" id="L134">				}</span>
+<span class="nc" id="L135">				logger = null;</span>
+			}
+			break;
+
+		case NetEvent.EVENT_JOB:
+<span class="nc bnc" id="L140" title="All 2 branches missed.">			if (logger != null) {</span>
+<span class="nc" id="L141">				Job job = message.getJob();</span>
+				// Fills the values for the log column
+<span class="nc" id="L143">				Map&lt;String, Object&gt; values = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">				if (lp.boolTimeStamp.booleanValue()) {</span>
+<span class="nc" id="L145">					values.put(COLUMN_TIMESTAMP, message.getTime());</span>
+				}
+
+<span class="nc bnc" id="L148" title="All 2 branches missed.">				if (lp.boolJobID.booleanValue()) {</span>
+<span class="nc" id="L149">					values.put(COLUMN_JOBID, job.getId());</span>
+				}
+
+<span class="nc bnc" id="L152" title="All 2 branches missed.">				if (lp.boolJobClass.booleanValue()) {</span>
+<span class="nc" id="L153">					values.put(COLUMN_CLASSID, job.getJobClass().getName());</span>
+				}
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">				if (lp.boolTimeSameClass.booleanValue()) {</span>
+<span class="nc" id="L157">					double interarrivalSame = message.getTime() - jobsList.getLastJobOutTimePerClass(job.getJobClass());</span>
+<span class="nc" id="L158">					values.put(COLUMN_INTERARRIVAL_SAMECLASS, interarrivalSame);</span>
+				}
+
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				if (lp.boolTimeAnyClass.booleanValue()) {</span>
+<span class="nc" id="L162">					double interarrivalAny = message.getTime() - jobsList.getLastJobOutTime();</span>
+<span class="nc" id="L163">					values.put(COLUMN_INTERARRIVAL_ANYCLASS, interarrivalAny);</span>
+				}
+
+				try {
+					// Finally logs the line
+<span class="nc" id="L168">					logger.log(values, defaultValues);</span>
+<span class="nc" id="L169">				} catch (IOException e1) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">					if (getOwnerNode().getQueueNet().isTerminalSimulation()) {</span>
+<span class="nc" id="L171">						System.out.println(&quot;JSIMengine - Warning: &quot; + getOwnerNode().getName()</span>
+<span class="nc" id="L172">								+ &quot; failed to write the CSV file: &quot; + file.getAbsolutePath());</span>
+					} else {
+<span class="nc" id="L174">						new Thread(new Runnable() {</span>
+							@Override
+							public void run() {
+								try {
+<span class="nc" id="L178">									Thread.sleep(800);</span>
+<span class="nc" id="L179">								} catch (InterruptedException e) {</span>
+<span class="nc" id="L180">								}</span>
+<span class="nc" id="L181">								JOptionPane.showMessageDialog(null, getOwnerNode().getName()</span>
+<span class="nc" id="L182">										+ &quot; failed to write the CSV file: &quot; + file.getAbsolutePath(),</span>
+										&quot;JSIMengine - Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L184">							}</span>
+<span class="nc" id="L185">						}).start();</span>
+					}
+					try {
+<span class="nc" id="L188">						JSimLoggerFactory.remove(logger);</span>
+<span class="nc" id="L189">					} catch (IOException e2) {</span>
+<span class="nc" id="L190">						e2.printStackTrace();</span>
+<span class="nc" id="L191">					}</span>
+<span class="nc" id="L192">					logger = null;</span>
+<span class="nc" id="L193">				}</span>
+			}
+			// Do not break here
+
+		default:
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			if (message.getSourceSection() == NodeSection.INPUT) {</span>
+<span class="nc" id="L199">				sendForward(message.getEvent(), message.getData(), 0.0);</span>
+			}
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (message.getSourceSection() == NodeSection.OUTPUT) {</span>
+<span class="nc" id="L202">				sendBackward(message.getEvent(), message.getData(), 0.0);</span>
+			}
+			break;
+		}
+
+<span class="nc" id="L207">		return MSG_PROCESSED;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

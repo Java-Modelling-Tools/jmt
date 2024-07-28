@@ -1,0 +1,1320 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Server.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Server.java</span></div><h1>Server.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.*;
+import java.util.function.Supplier;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
+import jmt.engine.NetStrategies.TransitionUtilities.TimingPacket;
+import jmt.engine.NetStrategies.VacationStrategies.BernoulliVacationStrategy;
+import jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy;
+import jmt.engine.NetStrategies.VacationStrategies.QueueIdleAckBody;
+import jmt.engine.NetStrategies.VacationStrategies.VacationWhenIdleStrategy;
+import jmt.engine.NetStrategies.VacationStrategy;
+import jmt.engine.QueueNet.*;
+import jmt.engine.random.engine.RandomEngine;
+import jmt.engine.simEngine.RemoveToken;
+
+import javax.swing.*;
+
+import static jmt.gui.common.CommonConstants.*;
+
+
+/**
+ * This class implements a multi-class, single/multi server service.
+ * Every class has a specific distribution and a own set of statistical
+ * parameters.
+ * A server service remains busy while processing one or more jobs.
+ *
+ * @author Francesco Radaelli, Stefano Omini, Bertoli Marco
+ */
+public class Server extends ServiceSection {
+
+    private int numberOfServers;
+    private int maxRunningJobs;
+    private int originalMaxRunningJobs;
+    private int nextMaxRunningJobs;
+
+    private double lastCompletionTime;
+    private QueuePutStrategy[] putStrategies;
+    private ServiceStrategy[][] switchoverStrategies;
+    private ServiceStrategy[] serviceStrategies;
+    private ServiceStrategy[][] delayOffStrategies;
+    private ServiceStrategy[][] setUpStrategies;
+    private int[] serverNumRequired;
+
+    private List&lt;ServerType&gt; serverTypes;
+    private Map&lt;Integer, List&lt;BusyServer&gt;&gt; busyServersPerJob;
+    private String schedulingPolicy;
+    private int[] totalNumOfServers;
+    private int[] numberOfAvailableServersPerClass;
+    private int[] busyCounterPerClass;
+    private int busyCounter;
+<span class="nc" id="L74">    private int maxParalellism = 1;</span>
+    private HashMap&lt;Job, ServerUnit&gt; busyServerMap;
+    private PriorityQueue&lt;ServerUnit&gt; idleServerQueue;
+    private ArrayList&lt;ServerSetupUnit&gt; wakeServerQueue;
+    private LinkedList&lt;JobInfo&gt; jobsToFire;
+    private int savedNumberOfServers;
+    private Boolean[][] classCompatibilities;
+    private ServiceStrategy[][] serviceStrategiesPerServerType;
+<span class="nc" id="L82">    private boolean serverTypesInitialized = false;</span>
+    private VacationStrategy vacationStrategy;
+<span class="nc" id="L84">    private boolean inVacation = false;</span>
+<span class="nc" id="L85">    private boolean justTakenAVacation = false;</span>
+
+    private boolean delayOffEnabled;
+
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
+<span class="nc" id="L91">        this(numberOfServers, numberOfVisits, serviceStrategies, null, null, null, null, null,</span>
+                null, null, null, null);
+<span class="nc" id="L93">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  QueuePutStrategy[] preemptiveStrategies) throws NetException {
+<span class="nc" id="L97">        this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, null, null, null,</span>
+                null, null, null, null);
+<span class="nc" id="L99">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  Object[] switchoverStrategies, Object[] delayOffStrategies, Object[] setUpStrategies) throws NetException {
+<span class="nc" id="L103">        this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, delayOffStrategies, setUpStrategies, null,</span>
+                null, null, null, null);
+<span class="nc" id="L105">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies, Object[] delayOffStrategies, Object[] setUpStrategies,
+                  Integer[] serverNumRequired, String[] serverTypesNames, Integer[] serverTypesNumOfServers,
+                  Object[] serverTypesCompatibilities, String schedulingPolicy) throws NetException {
+<span class="nc" id="L110">        this(numberOfServers, numberOfVisits, serviceStrategies, null, null, delayOffStrategies, setUpStrategies, serverNumRequired,</span>
+                serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+<span class="nc" id="L112">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  Integer[] serverNumRequired, String[] serverTypesNames, Integer[] serverTypesNumOfServers,
+                  Object[] serverTypesCompatibilities, String schedulingPolicy) throws NetException {
+<span class="nc" id="L117">        this(numberOfServers, numberOfVisits, serviceStrategies, null, null, null, null, serverNumRequired,</span>
+                serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+<span class="nc" id="L119">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  QueuePutStrategy[] preemptiveStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
+                  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+    ) throws NetException {
+<span class="nc" id="L125">        this(numberOfServers, numberOfVisits, serviceStrategies, preemptiveStrategies, null, null, null, serverNumRequired,</span>
+                serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+<span class="nc" id="L127">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  Object[] switchoverStrategies, Object[] delayOffStrategies, Object[] setUpStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
+                  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+    ) throws NetException {
+<span class="nc" id="L133">        this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, delayOffStrategies, setUpStrategies, serverNumRequired,</span>
+                serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+<span class="nc" id="L135">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  Object[] switchoverStrategies, Integer[] serverNumRequired, String[] serverTypesNames,
+                  Integer[] serverTypesNumOfServers, Object[] serverTypesCompatibilities, String schedulingPolicy
+    ) throws NetException {
+<span class="nc" id="L141">        this(numberOfServers, numberOfVisits, serviceStrategies, null, switchoverStrategies, null, null, serverNumRequired,</span>
+                serverTypesNames, serverTypesNumOfServers, serverTypesCompatibilities, schedulingPolicy);
+<span class="nc" id="L143">    }</span>
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                  QueuePutStrategy[] preemptiveStrategies, Object[] switchoverStrategies, Object[] delayOffStrategies, Object[] setUpStrategies, Integer[] serverNumRequired,
+                  String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities,
+                  String schedulingPolicy) throws NetException {
+<span class="nc" id="L148">        this(numberOfServers, numberOfVisits, serviceStrategies,</span>
+                ((Supplier&lt;Map&lt;String, Object&gt;&gt;) () -&gt; {
+<span class="nc" id="L150">                    Map&lt;String, Object&gt; advancedFeatures = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L151">                    advancedFeatures.put(SERVER_FEATURE_PREEMPTIVE_STRATEGIES, preemptiveStrategies);</span>
+<span class="nc" id="L152">                    advancedFeatures.put(SERVER_FEATURE_SWITCHOVER_STRATEGIES, switchoverStrategies);</span>
+<span class="nc" id="L153">                    advancedFeatures.put(SERVER_FEATURE_DELAY_OFF_STRATEGIES, delayOffStrategies);</span>
+<span class="nc" id="L154">                    advancedFeatures.put(SERVER_FEATURE_SETUP_STRATEGIES, setUpStrategies);</span>
+<span class="nc" id="L155">                    advancedFeatures.put(SERVER_FEATURE_CLASS_PARALLELISM, serverNumRequired);</span>
+<span class="nc" id="L156">                    advancedFeatures.put(SERVER_FEATURE_SERVER_NAMES, serverNames);</span>
+<span class="nc" id="L157">                    advancedFeatures.put(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, serversPerServerType);</span>
+<span class="nc" id="L158">                    advancedFeatures.put(SERVER_FEATURE_SERVER_COMPATIBILITIES, serverCompatibilities);</span>
+<span class="nc" id="L159">                    advancedFeatures.put(SERVER_FEATURE_SCHEDULING_POLICY, schedulingPolicy);</span>
+<span class="nc" id="L160">                    return advancedFeatures;</span>
+<span class="nc" id="L161">                }).get());</span>
+<span class="nc" id="L162">    }</span>
+
+    public Server(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies, Map&lt;String, Object&gt; advancedFeatures) throws NetException {
+<span class="nc" id="L165">        super(false);</span>
+<span class="nc" id="L166">        String schedulingPolicy = (String) advancedFeatures.get(SERVER_FEATURE_SCHEDULING_POLICY);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">        if (schedulingPolicy == null) {</span>
+<span class="nc" id="L168">            schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;</span>
+        }
+<span class="nc" id="L170">        this.schedulingPolicy = schedulingPolicy;</span>
+<span class="nc" id="L171">        busyServersPerJob = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L172">        serverTypes = new ArrayList&lt;&gt;();</span>
+
+        //
+<span class="nc" id="L175">        this.numberOfServers = numberOfServers.intValue();</span>
+<span class="nc" id="L176">        this.serviceStrategies = serviceStrategies;</span>
+<span class="nc" id="L177">        QueuePutStrategy[] preemptiveStrategies = (QueuePutStrategy[]) advancedFeatures.get(SERVER_FEATURE_PREEMPTIVE_STRATEGIES);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">        if (preemptiveStrategies == null) {</span>
+<span class="nc" id="L179">            this.putStrategies = new QueuePutStrategy[serviceStrategies.length];</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">            for (int i = 0; i &lt; serviceStrategies.length; i++) {</span>
+<span class="nc" id="L181">                this.putStrategies[i] = new TailStrategy();</span>
+            }
+        } else {
+<span class="nc" id="L184">            this.putStrategies = preemptiveStrategies;</span>
+        }
+<span class="nc" id="L186">        Object[] switchoverStrategies = (Object[]) advancedFeatures.get(SERVER_FEATURE_SWITCHOVER_STRATEGIES);</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">        if (switchoverStrategies == null) {</span>
+<span class="nc" id="L188">            this.switchoverStrategies = null;</span>
+        } else {
+<span class="nc" id="L190">            this.switchoverStrategies = new ServiceStrategy[switchoverStrategies.length][];</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">            for (int i = 0; i &lt; switchoverStrategies.length; i++) {</span>
+<span class="nc" id="L192">                this.switchoverStrategies[i] = (ServiceStrategy[]) switchoverStrategies[i];</span>
+            }
+        }
+<span class="nc" id="L195">        Object[] delayOffStrategies = (Object[]) advancedFeatures.get(SERVER_FEATURE_DELAY_OFF_STRATEGIES);</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">        if (delayOffStrategies != null) {</span>
+<span class="nc" id="L197">            this.delayOffStrategies = new ServiceStrategy[delayOffStrategies.length][];</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (int i = 0; i &lt; delayOffStrategies.length; i++) {</span>
+<span class="nc" id="L199">                this.delayOffStrategies[i] = (ServiceStrategy[]) delayOffStrategies[i];</span>
+            }
+<span class="nc" id="L201">            this.delayOffEnabled = true;</span>
+        } else {
+<span class="nc" id="L203">            this.delayOffEnabled = false;</span>
+        }
+
+<span class="nc" id="L206">        Object[] setUpStrategies = (Object[]) advancedFeatures.get(SERVER_FEATURE_SETUP_STRATEGIES);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">        if (setUpStrategies != null) {</span>
+<span class="nc" id="L208">            this.setUpStrategies = new ServiceStrategy[setUpStrategies.length][];</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">            for (int i = 0; i &lt; setUpStrategies.length; i++) {</span>
+<span class="nc" id="L210">                this.setUpStrategies[i] = (ServiceStrategy[]) setUpStrategies[i];</span>
+            }
+        }
+
+<span class="nc" id="L214">        busyCounter = 0;</span>
+<span class="nc" id="L215">        lastCompletionTime = 0.0;</span>
+
+<span class="nc" id="L217">        Integer[] serverNumRequired = (Integer[]) advancedFeatures.get(SERVER_FEATURE_CLASS_PARALLELISM);</span>
+<span class="nc" id="L218">        String[] serverNames = (String[]) advancedFeatures.get(SERVER_FEATURE_SERVER_NAMES);</span>
+<span class="nc" id="L219">        Integer[] serversPerServerType = (Integer[]) advancedFeatures.get(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE);</span>
+<span class="nc" id="L220">        Object[] serverCompatibilities = (Object[]) advancedFeatures.get(SERVER_FEATURE_SERVER_COMPATIBILITIES);</span>
+<span class="nc bnc" id="L221" title="All 2 branches missed.">        if (serverCompatibilities != null) {</span>
+<span class="nc" id="L222">            initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);</span>
+        }
+
+<span class="nc" id="L225">        VacationStrategy vacationStrategy = (VacationStrategy) advancedFeatures.get(SERVER_FEATURE_VACATION_STRATEGY);</span>
+<span class="nc bnc" id="L226" title="All 2 branches missed.">        if (vacationStrategy == null) {</span>
+<span class="nc" id="L227">            vacationStrategy = new NoVacationStrategy();</span>
+        }
+<span class="nc" id="L229">        this.vacationStrategy = vacationStrategy;</span>
+<span class="nc" id="L230">    }</span>
+
+    void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serversPerServerType,
+                               Object[] serverCompatibilities) throws NetException {
+<span class="nc" id="L234">        totalNumOfServers = new int[serverCompatibilities.length];</span>
+<span class="nc" id="L235">        numberOfAvailableServersPerClass = new int[serverNumRequired.length];</span>
+<span class="nc" id="L236">        busyCounterPerClass = new int[serverNumRequired.length];</span>
+
+<span class="nc" id="L238">        classCompatibilities = new Boolean[((Boolean[]) serverCompatibilities[0]).length][serverCompatibilities.length];</span>
+<span class="nc" id="L239">        serviceStrategiesPerServerType = new ServiceStrategy[serverCompatibilities.length][((Boolean[]) serverCompatibilities[0]).length];</span>
+
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        for (int i = 0; i &lt; serverCompatibilities.length; i++) {</span>
+<span class="nc" id="L242">            String name = serverNames[i];</span>
+<span class="nc" id="L243">            int numOfServers = serversPerServerType[i];</span>
+<span class="nc" id="L244">            Boolean[] compatibilities = (Boolean[]) serverCompatibilities[i];</span>
+
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            for (int j = 0; j &lt; compatibilities.length; j++) {</span>
+<span class="nc" id="L247">                classCompatibilities[j][i] = compatibilities[j];</span>
+<span class="nc" id="L248">                serviceStrategiesPerServerType[i][j] = serviceStrategies[(i * compatibilities.length + j) % serviceStrategies.length];</span>
+            }
+
+<span class="nc" id="L251">            ServerType serverType = new ServerType(name, numOfServers, compatibilities, i);</span>
+<span class="nc" id="L252">            serverTypes.add(serverType);</span>
+<span class="nc" id="L253">            totalNumOfServers[i] = serverType.numOfServers;</span>
+
+<span class="nc bnc" id="L255" title="All 2 branches missed.">            for (int j = 0; j &lt; numberOfAvailableServersPerClass.length; j++) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">                if (compatibilities[j]) {</span>
+<span class="nc" id="L257">                    numberOfAvailableServersPerClass[j] += serverType.numOfServers;</span>
+                }
+            }
+
+        }
+
+<span class="nc" id="L263">        this.serverNumRequired = new int[serverNumRequired.length];</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">        for (int i = 0; i &lt; serverNumRequired.length; i++) {</span>
+<span class="nc" id="L265">            int val = serverNumRequired[i].intValue();</span>
+<span class="nc" id="L266">            int numberOfServersForClass = getNumberOfAvailableServersForClass(i);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            if (val &gt; numberOfServersForClass) {</span>
+<span class="nc" id="L268">                JOptionPane.showMessageDialog(</span>
+                        new JFrame(),
+                        &quot;Servers Required for a class are more than the total number of servers&quot;,
+                        &quot;Parameter Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L272">                throw new NetException(&quot;Remember: Servers required can't be more than the total number of servers&quot;);</span>
+
+            }
+<span class="nc" id="L275">            this.serverNumRequired[i] = val;</span>
+<span class="nc" id="L276">            maxParalellism = Math.max(maxParalellism, this.serverNumRequired[i]);</span>
+        }
+
+<span class="nc bnc" id="L279" title="All 2 branches missed.">        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALFS)) {</span>
+<span class="nc" id="L280">            Collections.sort(serverTypes, new Comparator&lt;ServerType&gt;() {</span>
+                @Override
+                public int compare(ServerType o1, ServerType o2) {
+<span class="nc" id="L283">                    Boolean[] c1 = o1.getCompatibilities();</span>
+<span class="nc" id="L284">                    Boolean[] c2 = o2.getCompatibilities();</span>
+<span class="nc" id="L285">                    int ctr = 0;</span>
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                    for (int i = 0; i &lt; c1.length; i++) {</span>
+<span class="nc bnc" id="L287" title="All 4 branches missed.">                        if (c1[i] &amp;&amp; !c2[i]) {</span>
+<span class="nc" id="L288">                            ctr++;</span>
+<span class="nc bnc" id="L289" title="All 4 branches missed.">                        } else if (!c1[i] &amp;&amp; c2[i]) {</span>
+<span class="nc" id="L290">                            ctr--;</span>
+                        }
+                    }
+<span class="nc" id="L293">                    return ctr;</span>
+                }
+            });
+        }
+
+<span class="nc" id="L298">        serverTypesInitialized = true;</span>
+<span class="nc" id="L299">    }</span>
+
+    @Override
+    public Boolean[][] getClassCompatibilities() {
+<span class="nc" id="L303">        return classCompatibilities;</span>
+    }
+
+    @Override
+    public List&lt;ServerType&gt; getServerTypes() {
+<span class="nc" id="L308">        return serverTypes;</span>
+    }
+
+    @Override
+    public double getDoubleSectionProperty(int id) throws NetException {
+<span class="nc" id="L313">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L314" title="All 3 branches missed.">        switch (id) {</span>
+            case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L316">                return jobsList.size() / numberOfServers;</span>
+            case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L318" title="All 2 branches missed.">                return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L319">                        : jobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;</span>
+            default:
+<span class="nc" id="L321">                return super.getDoubleSectionProperty(id);</span>
+        }
+    }
+
+    @Override
+    public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L327">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L328" title="All 3 branches missed.">        switch (id) {</span>
+            case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L330">                return jobsList.size(jobClass) / numberOfServers;</span>
+            case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L332" title="All 2 branches missed.">                return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L333">                        : jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;</span>
+            default:
+<span class="nc" id="L335">                return super.getDoubleSectionProperty(id, jobClass);</span>
+        }
+    }
+
+    @Override
+    protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (!serverTypesInitialized) {</span>
+<span class="nc" id="L342">            int numClasses = getOwnerNode().getJobClasses().size();</span>
+<span class="nc" id="L343">            Integer[] serverNumRequired = new Integer[numClasses];</span>
+<span class="nc" id="L344">            Arrays.fill(serverNumRequired, 1);</span>
+<span class="nc" id="L345">            String[] serverNames = new String[]{&quot;Server 1&quot;};</span>
+<span class="nc" id="L346">            Integer[] serversPerServerType = new Integer[]{numberOfServers};</span>
+<span class="nc" id="L347">            Object[] serverCompatibilities = new Object[]{new Boolean[numClasses]};</span>
+<span class="nc" id="L348">            Arrays.fill((Boolean[]) serverCompatibilities[0], true);</span>
+<span class="nc" id="L349">            initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);</span>
+        }
+<span class="nc" id="L351">        maxRunningJobs = numberOfServers;</span>
+<span class="nc" id="L352">        int stationCapacity = ((Queue) getOwnerNode().getSection(NodeSection.INPUT)).getStationCapacity();</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">        if (stationCapacity &gt; 0) {</span>
+<span class="nc" id="L354">            maxRunningJobs = Math.min(maxRunningJobs, stationCapacity);</span>
+        }
+<span class="nc" id="L356">        originalMaxRunningJobs = maxRunningJobs;</span>
+<span class="nc" id="L357">        jobsList.setNumberOfServers(numberOfServers);</span>
+<span class="nc" id="L358">        jobsList.setServerNumRequired(serverNumRequired);</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (switchoverStrategies != null) {</span>
+<span class="nc" id="L360">            busyServerMap = new HashMap&lt;Job, ServerUnit&gt;();</span>
+<span class="nc" id="L361">            idleServerQueue = new PriorityQueue&lt;ServerUnit&gt;();</span>
+        }
+<span class="nc bnc" id="L363" title="All 2 branches missed.">        if (setUpStrategies != null) {</span>
+<span class="nc" id="L364">            wakeServerQueue = new ArrayList&lt;ServerSetupUnit&gt;();</span>
+        }
+<span class="nc" id="L366">        jobsToFire = new LinkedList&lt;JobInfo&gt;();</span>
+<span class="nc" id="L367">        savedNumberOfServers = 0;</span>
+<span class="nc" id="L368">    }</span>
+
+    // Michalis
+
+    public class ServerType {
+
+        private String name;
+        private int numOfServers;
+        private Boolean[] compatibilities;
+        private int busyCnt;
+        private int id;
+
+<span class="nc" id="L380">        public ServerType(String name, int numOfServers, Boolean[] compatibilities, int id) {</span>
+<span class="nc" id="L381">            this.name = name;</span>
+<span class="nc" id="L382">            this.numOfServers = numOfServers;</span>
+<span class="nc" id="L383">            this.compatibilities = compatibilities;</span>
+<span class="nc" id="L384">            this.busyCnt = 0;</span>
+<span class="nc" id="L385">            this.id = id;</span>
+<span class="nc" id="L386">        }</span>
+
+        public int getId() {
+<span class="nc" id="L389">            return id;</span>
+        }
+
+        public Boolean[] getCompatibilities() {
+<span class="nc" id="L393">            return compatibilities;</span>
+        }
+
+        public int getNumOfServers() {
+<span class="nc" id="L397">            return numOfServers;</span>
+        }
+
+        public String getName() {
+<span class="nc" id="L401">            return name;</span>
+        }
+
+        public void incrementBusyCounter(int inc) {
+<span class="nc" id="L405">            busyCnt += inc;</span>
+<span class="nc" id="L406">        }</span>
+
+        public void decrementBusyCounter(int dec) {
+<span class="nc" id="L409">            busyCnt -= dec;</span>
+<span class="nc" id="L410">        }</span>
+
+        public int getBusyCounter() {
+<span class="nc" id="L413">            return busyCnt;</span>
+        }
+
+        public int getNumberOfFreeServers() {
+<span class="nc" id="L417">            return numOfServers - busyCnt;</span>
+        }
+    }
+
+    public class BusyServer {
+        private int numOfBusyServers;
+        private Boolean[] compatibilities;
+        private int totalServers;
+        private int id;
+        private String name;
+
+        public BusyServer(int numOfBusyServers, int id, Boolean[] compatibilities, int totalServers,
+<span class="nc" id="L429">                          String name) {</span>
+<span class="nc" id="L430">            this.numOfBusyServers = numOfBusyServers;</span>
+<span class="nc" id="L431">            this.id = id;</span>
+<span class="nc" id="L432">            this.compatibilities = compatibilities;</span>
+<span class="nc" id="L433">            this.totalServers = totalServers;</span>
+<span class="nc" id="L434">            this.name = name;</span>
+<span class="nc" id="L435">        }</span>
+
+        public int getTotalServers() {
+<span class="nc" id="L438">            return totalServers;</span>
+        }
+
+        public Boolean[] getCompatibilities() {
+<span class="nc" id="L442">            return compatibilities;</span>
+        }
+
+        public int getId() {
+<span class="nc" id="L446">            return id;</span>
+        }
+
+        public int getNumOfBusyServers() {
+<span class="nc" id="L450">            return numOfBusyServers;</span>
+        }
+
+        public void incrementBusyServers(int inc) {
+<span class="nc" id="L454">            numOfBusyServers += inc;</span>
+<span class="nc" id="L455">        }</span>
+
+        public String getName() {
+<span class="nc" id="L458">            return name;</span>
+        }
+    }
+    //
+
+    //Michalis
+
+    private List&lt;ServerType&gt; getCompatibleServers(List&lt;ServerType&gt; availableServers, int classId) {
+
+<span class="nc" id="L467">        List&lt;ServerType&gt; compatibleServers = new ArrayList&lt;&gt;();</span>
+
+<span class="nc bnc" id="L469" title="All 2 branches missed.">        for (ServerType serverType : availableServers) {</span>
+<span class="nc bnc" id="L470" title="All 2 branches missed.">            if (serverType.getCompatibilities()[classId]) {</span>
+<span class="nc" id="L471">                compatibleServers.add(serverType);</span>
+            }
+<span class="nc" id="L473">        }</span>
+
+<span class="nc" id="L475">        return compatibleServers;</span>
+
+    }
+
+    private int getNumOfFreeServersForClassFromCompatibleServers(List&lt;ServerType&gt; compatibleServers, int classId) {
+<span class="nc" id="L480">        int res = 0;</span>
+<span class="nc bnc" id="L481" title="All 2 branches missed.">        for (ServerType serverType : compatibleServers) {</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">            if (serverType.getCompatibilities()[classId]) {</span>
+<span class="nc" id="L483">                res += serverType.getNumberOfFreeServers();</span>
+            }
+<span class="nc" id="L485">        }</span>
+
+<span class="nc" id="L487">        return res;</span>
+    }
+
+    public JobInfo findNextJobToProcessLCFS(JobInfoList queue) {
+
+<span class="nc" id="L492">        List&lt;Integer&gt; classesId = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">        for (int i = 0; i &lt; serverNumRequired.length; i++) {</span>
+<span class="nc" id="L494">            classesId.add(i);</span>
+        }
+
+<span class="nc" id="L497">        List&lt;ServerType&gt; availableServers = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">        for (ServerType serverType : serverTypes) {</span>
+<span class="nc" id="L499">            availableServers.add(serverType);</span>
+<span class="nc" id="L500">        }</span>
+
+
+<span class="nc bnc" id="L503" title="All 2 branches missed.">        for (int i = queue.size() - 1; i &gt;= 0; i--) {</span>
+
+<span class="nc" id="L505">            JobInfo jobInfo = queue.getJob(i);</span>
+
+<span class="nc" id="L507">            Job job = jobInfo.getJob();</span>
+
+<span class="nc" id="L509">            int classId = job.getJobClass().getId();</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">            if (classesId.contains(classId)) {</span>
+<span class="nc" id="L511">                List&lt;ServerType&gt; compatibleServers = getCompatibleServers(availableServers, classId);</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">                if (getNumOfFreeServersForClassFromCompatibleServers(compatibleServers, classId)</span>
+                        &gt;= serverNumRequired[classId]) {
+<span class="nc" id="L514">                    return jobInfo;</span>
+                } else {
+<span class="nc" id="L516">                    availableServers.removeAll(compatibleServers);</span>
+<span class="nc" id="L517">                    classesId.remove(classId);</span>
+<span class="nc bnc" id="L518" title="All 4 branches missed.">                    if (classesId.size() == 0 || availableServers.size() == 0) {</span>
+<span class="nc" id="L519">                        return queue.getLastJob();</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L524">        return queue.getLastJob();</span>
+    }
+
+    public JobInfo findNextJobToProcessFCFS(JobInfoList queue) {
+
+<span class="nc" id="L529">        List&lt;JobClass&gt; classesId = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        for (int i = 0; i &lt; serverNumRequired.length; i++) {</span>
+<span class="nc" id="L531">            classesId.add(getJobClasses().get(i));</span>
+        }
+
+<span class="nc" id="L534">        List&lt;ServerType&gt; availableServers = new ArrayList&lt;&gt;();</span>
+<span class="nc bnc" id="L535" title="All 2 branches missed.">        for (ServerType serverType : serverTypes) {</span>
+<span class="nc" id="L536">            availableServers.add(serverType);</span>
+<span class="nc" id="L537">        }</span>
+
+
+<span class="nc bnc" id="L540" title="All 2 branches missed.">        for (int i = 0; i &lt; queue.size(); i++) {</span>
+
+<span class="nc" id="L542">            JobInfo jobInfo = queue.getJob(i);</span>
+
+<span class="nc" id="L544">            Job job = jobInfo.getJob();</span>
+
+<span class="nc" id="L546">            int classId = job.getJobClass().getId();</span>
+<span class="nc bnc" id="L547" title="All 2 branches missed.">            if (classesId.contains(getJobClasses().get(classId))) {</span>
+<span class="nc" id="L548">                List&lt;ServerType&gt; compatibleServers = getCompatibleServers(availableServers, classId);</span>
+<span class="nc bnc" id="L549" title="All 2 branches missed.">                if (getNumOfFreeServersForClassFromCompatibleServers(compatibleServers, classId)</span>
+                        &gt;= serverNumRequired[classId]) {
+<span class="nc" id="L551">                    return jobInfo;</span>
+                } else {
+<span class="nc" id="L553">                    classesId.remove(getJobClasses().get(classId));</span>
+<span class="nc bnc" id="L554" title="All 4 branches missed.">                    if (classesId.size() == 0 || availableServers.size() == 0) {</span>
+<span class="nc" id="L555">                        break;</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L560">        return null;</span>
+    }
+
+    public int getServerRequired(int class_id) {
+<span class="nc" id="L564">        return serverNumRequired[class_id];</span>
+    }
+
+    private int getNumberOfAvailableServersForClass(int id) {
+<span class="nc" id="L568">        return numberOfAvailableServersPerClass[id];</span>
+    }
+
+    private int getBusyCounterForClass(int id) {
+<span class="nc" id="L572">        return busyCounterPerClass[id];</span>
+    }
+
+    public int getNumOfFreeServersForClass(int classId) {
+<span class="nc" id="L576">        return getNumberOfAvailableServersForClass(classId) - getBusyCounterForClass(classId);</span>
+    }
+
+    private void changeBusyCounters(int change, Boolean[] compatibilities) {
+<span class="nc bnc" id="L580" title="All 2 branches missed.">        for (int i = 0; i &lt; busyCounterPerClass.length; i++) {</span>
+<span class="nc bnc" id="L581" title="All 2 branches missed.">            if (compatibilities[i]) {</span>
+<span class="nc" id="L582">                busyCounterPerClass[i] += change;</span>
+            }
+        }
+<span class="nc" id="L585">    }</span>
+
+    public boolean hasFreeServers() {
+<span class="nc bnc" id="L588" title="All 2 branches missed.">        for (ServerType serverType : getServerTypes()) {</span>
+<span class="nc bnc" id="L589" title="All 2 branches missed.">            if (serverType.getNumberOfFreeServers() &gt; 0) {</span>
+<span class="nc" id="L590">                return true;</span>
+            }
+<span class="nc" id="L592">        }</span>
+<span class="nc" id="L593">        return false;</span>
+    }
+
+
+    private void enterJob(Job job) throws NetException {
+
+<span class="nc" id="L599">        int job_id = job.getId();</span>
+<span class="nc" id="L600">        int class_id = job.getJobClass().getId();</span>
+<span class="nc" id="L601">        int serversRequired = serverNumRequired[class_id];</span>
+<span class="nc" id="L602">        int indx = 0;</span>
+
+<span class="nc" id="L604">        List&lt;BusyServer&gt; busyServers = new ArrayList&lt;&gt;();</span>
+
+
+<span class="nc" id="L607">        List&lt;ServerType&gt; moveAtTheBack = new ArrayList&lt;&gt;();</span>
+
+
+<span class="nc bnc" id="L610" title="All 2 branches missed.">        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_RAIS)) {</span>
+
+<span class="nc bnc" id="L612" title="All 2 branches missed.">            for (int i = 0; i &lt; serversRequired; i++) {</span>
+<span class="nc" id="L613">                List&lt;ServerType&gt; compatibleServers = getCompatibleServers(serverTypes, class_id);</span>
+<span class="nc" id="L614">                int freeServers = getNumOfFreeServersForClass(class_id);</span>
+<span class="nc" id="L615">                Random rand = new Random();</span>
+<span class="nc" id="L616">                int rng = rand.nextInt(freeServers);</span>
+
+<span class="nc bnc" id="L618" title="All 2 branches missed.">                for (int j = 0; j &lt; compatibleServers.size(); j++) {</span>
+<span class="nc" id="L619">                    ServerType serverType = compatibleServers.get(j);</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">                    if (serverType.getNumberOfFreeServers() &lt;= rng) {</span>
+<span class="nc" id="L621">                        rng -= serverType.getNumberOfFreeServers();</span>
+                    } else {
+<span class="nc" id="L623">                        serverType.incrementBusyCounter(1);</span>
+<span class="nc" id="L624">                        changeBusyCounters(1, serverType.getCompatibilities());</span>
+
+<span class="nc" id="L626">                        boolean addBusyServer = true;</span>
+
+<span class="nc bnc" id="L628" title="All 2 branches missed.">                        for (BusyServer busyServer : busyServers) {</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">                            if (busyServer.getId() == serverType.getId()) {</span>
+<span class="nc" id="L630">                                busyServer.incrementBusyServers(1);</span>
+<span class="nc" id="L631">                                addBusyServer = false;</span>
+<span class="nc" id="L632">                                break;</span>
+                            }
+<span class="nc" id="L634">                        }</span>
+
+<span class="nc bnc" id="L636" title="All 2 branches missed.">                        if (addBusyServer) {</span>
+<span class="nc" id="L637">                            busyServers.add(new BusyServer(1, serverType.getId(),</span>
+<span class="nc" id="L638">                                    serverType.getCompatibilities(), totalNumOfServers[serverType.getId()],</span>
+<span class="nc" id="L639">                                    serverType.getName()));</span>
+                        }
+                        break;
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L646" title="All 2 branches missed.">        } else if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FSF)) {</span>
+<span class="nc bnc" id="L647" title="All 2 branches missed.">            while (serversRequired &gt; 0) {</span>
+<span class="nc" id="L648">                double minServiceTime = Double.MAX_VALUE;</span>
+<span class="nc" id="L649">                ServerType minServer = serverTypes.get(0);</span>
+<span class="nc bnc" id="L650" title="All 2 branches missed.">                for (ServerType serverType : serverTypes) {</span>
+<span class="nc bnc" id="L651" title="All 4 branches missed.">                    if (serverType.getCompatibilities()[class_id] &amp;&amp; serverType.getNumberOfFreeServers() &gt; 0) {</span>
+<span class="nc" id="L652">                        double expectedServiceTime = serviceStrategiesPerServerType[serverType.getId()][class_id].expect(this, job.getJobClass());</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">                        if (expectedServiceTime &lt; minServiceTime) {</span>
+<span class="nc" id="L654">                            minServiceTime = expectedServiceTime;</span>
+<span class="nc" id="L655">                            minServer = serverType;</span>
+                        }
+                    }
+<span class="nc" id="L658">                }</span>
+<span class="nc" id="L659">                int serversUsed = Math.min(serversRequired, minServer.getNumberOfFreeServers());</span>
+<span class="nc" id="L660">                minServer.incrementBusyCounter(serversUsed);</span>
+<span class="nc" id="L661">                changeBusyCounters(serversUsed, minServer.getCompatibilities());</span>
+<span class="nc" id="L662">                serversRequired -= serversUsed;</span>
+
+<span class="nc" id="L664">                boolean addBusyServer = true;</span>
+
+<span class="nc bnc" id="L666" title="All 2 branches missed.">                for (BusyServer busyServer : busyServers) {</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">                    if (busyServer.getId() == minServer.getId()) {</span>
+<span class="nc" id="L668">                        busyServer.incrementBusyServers(serversUsed);</span>
+<span class="nc" id="L669">                        addBusyServer = false;</span>
+<span class="nc" id="L670">                        break;</span>
+                    }
+<span class="nc" id="L672">                }</span>
+
+<span class="nc bnc" id="L674" title="All 2 branches missed.">                if (addBusyServer) {</span>
+<span class="nc" id="L675">                    busyServers.add(new BusyServer(serversUsed, minServer.getId(),</span>
+<span class="nc" id="L676">                            minServer.getCompatibilities(), totalNumOfServers[minServer.getId()],</span>
+<span class="nc" id="L677">                            minServer.getName()));</span>
+                }
+<span class="nc" id="L679">            }</span>
+        } else {
+<span class="nc bnc" id="L681" title="All 2 branches missed.">            while (serversRequired &gt; 0) {</span>
+<span class="nc" id="L682">                ServerType serverType = serverTypes.get(indx);</span>
+<span class="nc bnc" id="L683" title="All 2 branches missed.">                if (serverType.getCompatibilities()[class_id]) {</span>
+<span class="nc" id="L684">                    int numOfFreeServers = serverType.getNumberOfFreeServers();</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">                    if (numOfFreeServers &gt; 0) {</span>
+<span class="nc" id="L686">                        int serversUsed = Math.min(serversRequired, numOfFreeServers);</span>
+<span class="nc" id="L687">                        serverType.incrementBusyCounter(serversUsed);</span>
+<span class="nc" id="L688">                        changeBusyCounters(serversUsed, serverType.getCompatibilities());</span>
+<span class="nc" id="L689">                        serversRequired -= serversUsed;</span>
+
+<span class="nc" id="L691">                        boolean addBusyServer = true;</span>
+
+                        //Fairness
+<span class="nc bnc" id="L694" title="All 2 branches missed.">                        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FAIRNESS)) {</span>
+<span class="nc" id="L695">                            moveAtTheBack.add(serverType);</span>
+                        }
+                        //
+                        //ALIS
+<span class="nc bnc" id="L699" title="All 2 branches missed.">                        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS)) {</span>
+<span class="nc" id="L700">                            moveAtTheBack.add(serverType);</span>
+
+<span class="nc bnc" id="L702" title="All 2 branches missed.">                            for (BusyServer busyServer : busyServers) {</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">                                if (busyServer.getId() == serverType.getId()) {</span>
+<span class="nc" id="L704">                                    busyServer.incrementBusyServers(serversUsed);</span>
+<span class="nc" id="L705">                                    addBusyServer = false;</span>
+<span class="nc" id="L706">                                    break;</span>
+                                }
+<span class="nc" id="L708">                            }</span>
+                        }
+                        //
+
+<span class="nc bnc" id="L712" title="All 2 branches missed.">                        if (addBusyServer) {</span>
+<span class="nc" id="L713">                            busyServers.add(new BusyServer(serversUsed, serverType.getId(),</span>
+<span class="nc" id="L714">                                    serverType.getCompatibilities(), totalNumOfServers[serverType.getId()],</span>
+<span class="nc" id="L715">                                    serverType.getName()));</span>
+                        }
+                    }
+                }
+<span class="nc" id="L719">                indx++;</span>
+
+<span class="nc" id="L721">            }</span>
+        }
+
+        //FAIRNESS
+<span class="nc bnc" id="L725" title="All 2 branches missed.">        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FAIRNESS)) {</span>
+<span class="nc bnc" id="L726" title="All 2 branches missed.">            for (ServerType serverType : moveAtTheBack) {</span>
+<span class="nc" id="L727">                serverTypes.remove(serverType);</span>
+<span class="nc" id="L728">                serverTypes.add(serverType);</span>
+<span class="nc" id="L729">            }</span>
+        }
+        //
+
+        //ALIS
+<span class="nc bnc" id="L734" title="All 2 branches missed.">        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS)) {</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">            for (ServerType serverType : moveAtTheBack) {</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">                if (serverType.getNumberOfFreeServers() == 0) {</span>
+<span class="nc" id="L737">                    serverTypes.remove(serverType);</span>
+<span class="nc" id="L738">                    serverTypes.add(serverType);</span>
+                }
+<span class="nc" id="L740">            }</span>
+        }
+        //
+
+
+        // update jobInfoLists
+<span class="nc" id="L746">        this.getOwnerNode().getJobInfoList().addUsedServersForJob(job_id, busyServers);</span>
+<span class="nc" id="L747">        this.getOwnerNode().getSection(NodeSection.SERVICE).getJobInfoList().addUsedServersForJob(job_id, busyServers);</span>
+<span class="nc" id="L748">        this.getOwnerNode().getSection(NodeSection.OUTPUT).getJobInfoList().addUsedServersForJob(job_id, busyServers);</span>
+
+<span class="nc" id="L750">        busyServersPerJob.put(job_id, busyServers);</span>
+<span class="nc" id="L751">    }</span>
+
+    private void exitJob(Job job) throws NetException {
+
+
+<span class="nc" id="L756">        int job_id = job.getId();</span>
+<span class="nc" id="L757">        List&lt;BusyServer&gt; busyServers = busyServersPerJob.get(job_id);</span>
+
+<span class="nc bnc" id="L759" title="All 4 branches missed.">        if (busyServers != null &amp;&amp; !busyServers.isEmpty()) {</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">            for (BusyServer busyServer : busyServers) {</span>
+<span class="nc" id="L761">                int numOfBusyServers = busyServer.getNumOfBusyServers();</span>
+<span class="nc bnc" id="L762" title="All 2 branches missed.">                for (ServerType serverType : serverTypes) {</span>
+<span class="nc bnc" id="L763" title="All 2 branches missed.">                    if (serverType.getId() == busyServer.getId()) {</span>
+<span class="nc" id="L764">                        serverType.decrementBusyCounter(numOfBusyServers);</span>
+<span class="nc" id="L765">                        break;</span>
+                    }
+<span class="nc" id="L767">                }</span>
+<span class="nc" id="L768">                changeBusyCounters(-numOfBusyServers, busyServer.getCompatibilities());</span>
+<span class="nc" id="L769">            }</span>
+        }
+
+        // update jobInfoLists
+<span class="nc" id="L773">        this.getOwnerNode().getJobInfoList().removeUsedServerForJob(job_id);</span>
+<span class="nc" id="L774">        this.getOwnerNode().getSection(NodeSection.SERVICE).getJobInfoList().removeUsedServerForJob(job_id);</span>
+<span class="nc" id="L775">        this.getOwnerNode().getSection(NodeSection.OUTPUT).getJobInfoList().removeUsedServerForJob(job_id);</span>
+
+<span class="nc" id="L777">        busyServersPerJob.remove(job_id);</span>
+<span class="nc" id="L778">    }</span>
+
+    public ServiceStrategy[][] getServiceStrategiesPerServerType() {
+<span class="nc" id="L781">        return serviceStrategiesPerServerType;</span>
+    }
+
+    //
+
+    @Override
+    protected int process(NetMessage message) throws NetException {
+        Job job;
+        JobInfo jobInfo;
+<span class="nc" id="L790">        Object data = message.getData();</span>
+<span class="nc" id="L791">        RandomEngine randomEngine = getOwnerNode().getNetSystem().getEngine();</span>
+<span class="nc" id="L792">        boolean workingAsTransition = ((Queue) getOwnerNode().getSection(NodeSection.INPUT)).isStationWorkingAsATransition();</span>
+
+<span class="nc bnc" id="L794" title="All 10 branches missed.">        switch (message.getEvent()) {</span>
+
+            case NetEvent.EVENT_START:
+<span class="nc" id="L797">                this.getOwnerNode().setServer(this);</span>
+<span class="nc" id="L798">                break;</span>
+
+            case NetEvent.EVENT_JOB:
+                //EVENT_JOB
+                //If the message has been sent by the server itself,
+                //then the job is forwarded.
+                //
+                //If the message has been sent by another section, the server, if
+                //is not completely busy, sends to itself a message containing the
+                //job and with delay equal to the service time calculated using
+                //the service strategy.
+                //The counter of jobs in service is increased and, if further service
+                //capacity is left, an ack is sent to the input section.
+
+                //gets the job from the message
+<span class="nc" id="L813">                job = message.getJob();</span>
+                //Number of servers required by a class to process this job
+<span class="nc" id="L815">                int numServerNeeded = serverNumRequired[job.getJobClass().getId()];</span>
+<span class="nc" id="L816">                int numServerAvailable = getNumberOfAvailableServersForClass(job.getJobClass().getId());</span>
+<span class="nc bnc" id="L817" title="All 2 branches missed.">                if (numServerNeeded &gt; numServerAvailable) {</span>
+<span class="nc" id="L818">                    JOptionPane.showMessageDialog(</span>
+                            new JFrame(),
+<span class="nc" id="L820">                            &quot;Servers Required for &quot; + job.getJobClass().getName() + &quot; are more than the total number of servers&quot;,</span>
+                            &quot;Parameter Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L822">                    throw new NetException(&quot;Remember: Servers required can't be more than the total number of servers&quot;);</span>
+
+                }
+
+<span class="nc bnc" id="L826" title="All 2 branches missed.">                if (isMine(message)) {</span>
+<span class="nc bnc" id="L827" title="All 2 branches missed.">                    if (workingAsTransition) {</span>
+<span class="nc" id="L828">                        TimingPacket packet = new TimingPacket(0, 0.0, 1, 1);</span>
+<span class="nc" id="L829">                        sendBackward(NetEvent.EVENT_TIMING, packet, 0.0);</span>
+<span class="nc" id="L830">                        jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">                        if (jobInfo == null) {</span>
+<span class="nc" id="L832">                            System.out.println(&quot;Problema: jobInfo is null&quot;);</span>
+                        }
+<span class="nc" id="L834">                        jobsToFire.addLast(jobInfo);</span>
+<span class="nc" id="L835">                    } else {</span>
+                        //this job has been just served (the message has been sent by the server itself)
+                        //forwards the job to the output section
+<span class="nc" id="L838">                        jobInfo = jobsList.lookFor(job);</span>
+<span class="nc" id="L839">                        job.setServiceTime(-1.0);</span>
+<span class="nc" id="L840">                        job.setServiceStartTime(-1.0);</span>
+<span class="nc" id="L841">                        job.setServingMessage(null);</span>
+<span class="nc" id="L842">                        jobsList.endJob(jobInfo);</span>
+<span class="nc" id="L843">                        jobsList.remove(jobInfo);</span>
+<span class="nc bnc" id="L844" title="All 2 branches missed.">                        if (switchoverStrategies != null) {</span>
+<span class="nc" id="L845">                            ServerUnit serverUnit = busyServerMap.remove(job);</span>
+<span class="nc" id="L846">                            idleServerQueue.offer(serverUnit);</span>
+                        }
+<span class="nc" id="L848">                        sendForward(job, 0.0);</span>
+<span class="nc" id="L849">                        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L850">                        lastCompletionTime = netSystem.getTime();</span>
+<span class="nc" id="L851">                    }</span>
+                } else {
+                    //message received from another node section: if the server is not completely busy,
+                    //it sends itself a message with this job
+<span class="nc" id="L855">                    boolean success = processJob(job, numServerAvailable, numServerNeeded);</span>
+<span class="nc bnc" id="L856" title="All 2 branches missed.">                    if (!success) {</span>
+<span class="nc" id="L857">                        return MSG_NOT_PROCESSED;</span>
+                    }
+<span class="nc" id="L859">                    justTakenAVacation = false;</span>
+                }
+
+<span class="nc bnc" id="L862" title="All 2 branches missed.">                if (hasFreeServers()) {</span>
+                    //sends an ack to the input section (remember not to propagate
+                    //this ack again when computation is finished)
+<span class="nc" id="L865">                    sendBackward(NetEvent.EVENT_ACK, job, 0.0);</span>
+                }
+
+                break;
+
+            case NetEvent.EVENT_SETUP_JOB: {
+<span class="nc" id="L871">                job = message.getJob();</span>
+<span class="nc" id="L872">                jobInfo = jobsList.lookFor(job);</span>
+<span class="nc" id="L873">                ServerUnit serverUnit = busyServerMap.get(job);</span>
+<span class="nc" id="L874">                int jobClassID = job.getJobClass().getId();</span>
+<span class="nc" id="L875">                serverUnit.jobClassID = jobClassID;</span>
+<span class="nc" id="L876">                NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L877">                double serviceTime = job.getServiceTime();</span>
+<span class="nc" id="L878">                RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);</span>
+<span class="nc" id="L879">                job.setServiceStartTime(netSystem.getTime());</span>
+<span class="nc" id="L880">                job.setServingMessage(jobServingMessage);</span>
+<span class="nc" id="L881">                jobsList.startJob(jobInfo);</span>
+<span class="nc" id="L882">                enterJob(job);</span>
+<span class="nc" id="L883">                break;</span>
+            }
+
+
+            case NetEvent.EVENT_ACK:
+                //EVENT_ACK
+                //If there are no jobs in the service section, message is not processed.
+                //Otherwise an ack is sent backward to the input section and
+                //the counter of jobs in service is decreased.
+
+<span class="nc" id="L893">                Job job2 = message.getJob();</span>
+<span class="nc" id="L894">                int jobClassID2 = job2.getJobClass().getId();</span>
+
+<span class="nc" id="L896">                int num2 = serverNumRequired[job2.getJobClass().getId()];</span>
+<span class="nc" id="L897">                int numberOfServersForJob2 = getNumberOfAvailableServersForClass(job2.getJobClass().getId());</span>
+<span class="nc" id="L898">                int busyCounterForJob2 = getBusyCounterForClass(job2.getJobClass().getId());</span>
+
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                if (!workingAsTransition) {</span>
+<span class="nc bnc" id="L901" title="All 2 branches missed.">                    if (busyCounterForJob2 &lt;= 0) {</span>
+                        //it was not waiting for any job
+<span class="nc" id="L903">                        return MSG_NOT_PROCESSED;</span>
+<span class="nc bnc" id="L904" title="All 4 branches missed.">                    } else if (busyCounterForJob2 == numberOfServersForJob2 || numberOfServersForJob2 - busyCounterForJob2 &lt;= num2) {</span>
+<span class="nc" id="L905">                        exitJob(job2);</span>
+                        // Sends a request to the input section
+<span class="nc bnc" id="L907" title="All 2 branches missed.">                        if (hasFreeServers()) {</span>
+<span class="nc bnc" id="L908" title="All 2 branches missed.">                            if (vacationStrategy instanceof BernoulliVacationStrategy) {</span>
+<span class="nc" id="L909">                                boolean startsVacation = ((BernoulliVacationStrategy) vacationStrategy).nextRandBool();</span>
+<span class="nc bnc" id="L910" title="All 2 branches missed.">                                if (startsVacation) {</span>
+<span class="nc" id="L911">                                    double length = vacationStrategy.nextVacationLength();</span>
+<span class="nc" id="L912">                                    startsVacation(length);</span>
+<span class="nc" id="L913">                                } else {</span>
+<span class="nc" id="L914">                                    sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);</span>
+                                }
+<span class="nc" id="L916">                            } else {</span>
+<span class="nc" id="L917">                                sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);</span>
+                            }
+                        }
+                    } else {
+                        // Avoid ACK as we already sent ack
+<span class="nc" id="L922">                        exitJob(job2);</span>
+                    }
+                } else {
+<span class="nc bnc" id="L925" title="All 2 branches missed.">                    if (busyCounterForJob2 &lt;= -1) {</span>
+                        //it was not waiting for any job
+<span class="nc" id="L927">                        return MSG_NOT_PROCESSED;</span>
+<span class="nc bnc" id="L928" title="All 2 branches missed.">                    } else if (numberOfServersForJob2 - busyCounterForJob2 &gt; num2) {</span>
+<span class="nc" id="L929">                        exitJob(job2);</span>
+                        // Sends a request to the input section
+<span class="nc bnc" id="L931" title="All 2 branches missed.">                        if (hasFreeServers()) {</span>
+<span class="nc bnc" id="L932" title="All 2 branches missed.">                            if (vacationStrategy instanceof BernoulliVacationStrategy) {</span>
+<span class="nc" id="L933">                                boolean startsVacation = ((BernoulliVacationStrategy) vacationStrategy).nextRandBool();</span>
+<span class="nc bnc" id="L934" title="All 2 branches missed.">                                if (startsVacation) {</span>
+<span class="nc" id="L935">                                    double length = vacationStrategy.nextVacationLength();</span>
+<span class="nc" id="L936">                                    startsVacation(length);</span>
+<span class="nc" id="L937">                                } else {</span>
+<span class="nc" id="L938">                                    sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);</span>
+                                }
+<span class="nc" id="L940">                            } else {</span>
+<span class="nc" id="L941">                                sendBackward(NetEvent.EVENT_ACK, message.getJob(), 0.0);</span>
+                            }
+                        }
+                    } else {
+                        // Avoid ACK as we already sent ack
+<span class="nc" id="L946">                        exitJob(job2);</span>
+                    }
+                }
+<span class="nc bnc" id="L949" title="All 4 branches missed.">                if (delayOffEnabled &amp;&amp; delayOffStrategies.length &gt; 0) {</span>
+<span class="nc bnc" id="L950" title="All 2 branches missed.">                    for (ServerSetupUnit unit : wakeServerQueue) {</span>
+<span class="nc bnc" id="L951" title="All 2 branches missed.">                        if (unit.jobs.contains(job2)) {</span>
+<span class="nc" id="L952">                            unit.jobs.remove(job2);</span>
+<span class="nc" id="L953">                            unit.lastIdleTime = getOwnerNode().getNetSystem().getTime();</span>
+<span class="nc bnc" id="L954" title="All 2 branches missed.">                            if (unit.jobs.size() == 0) {</span>
+<span class="nc" id="L955">                                double delayOffDuration = unit.delayOffTime.wait(this, job2.getJobClass());</span>
+<span class="nc bnc" id="L956" title="All 2 branches missed.">                                if (delayOffDuration == 0) {</span>
+<span class="nc" id="L957">                                    delayOffDuration = 0.0001;</span>
+                                }
+<span class="nc" id="L959">                                unit.lastDelayOffTime = delayOffDuration;</span>
+                            }
+                        }
+<span class="nc" id="L962">                    }</span>
+                }
+                break;
+
+            case NetEvent.EVENT_ENABLING: {
+<span class="nc" id="L967">                int enablingDegree = (int) message.getData();</span>
+
+<span class="nc bnc" id="L969" title="All 2 branches missed.">                if (enablingDegree &lt; 0) {</span>
+<span class="nc" id="L970">                    maxRunningJobs = originalMaxRunningJobs;</span>
+                } else {
+<span class="nc" id="L972">                    maxRunningJobs = Math.min(enablingDegree, originalMaxRunningJobs);</span>
+                }
+
+<span class="nc" id="L975">                int deltaEvents = maxRunningJobs - busyCounter;</span>
+
+<span class="nc bnc" id="L977" title="All 2 branches missed.">                if (deltaEvents == 0) {</span>
+<span class="nc" id="L978">                    sendBackward(NetEvent.EVENT_RESET_COOLSTART, false, 0.0);</span>
+<span class="nc bnc" id="L979" title="All 2 branches missed.">                } else if (deltaEvents &gt; 0) {</span>
+<span class="nc bnc" id="L980" title="All 2 branches missed.">                    if (savedNumberOfServers &lt; maxRunningJobs) {</span>
+                        //l'ack viene mandato solo nel caso in cui sia appena aumentato il numero di server disponibili
+<span class="nc" id="L982">                        sendBackward(NetEvent.EVENT_ACK, null, 0.0);</span>
+                    }
+<span class="nc bnc" id="L984" title="All 2 branches missed.">                } else if (deltaEvents &lt; 0) {</span>
+<span class="nc bnc" id="L985" title="All 2 branches missed.">                    for (int i = deltaEvents; i &lt; 0; i++) {</span>
+<span class="nc" id="L986">                        preemptJob();</span>
+                    }
+<span class="nc" id="L988">                    sendBackward(NetEvent.EVENT_RESET_COOLSTART, false, 0.0);</span>
+                }
+
+<span class="nc bnc" id="L991" title="All 2 branches missed.">                if (maxRunningJobs != savedNumberOfServers) {</span>
+<span class="nc" id="L992">                    savedNumberOfServers = maxRunningJobs;</span>
+                }
+<span class="nc" id="L994">                jobsList.changeNumberOfActiveServers(savedNumberOfServers);</span>
+
+<span class="nc" id="L996">                break;</span>
+            }
+
+            case NetEvent.EVENT_FIRING: {
+<span class="nc bnc" id="L1000" title="All 2 branches missed.">                if (jobsToFire.size() &gt; 0) {</span>
+<span class="nc" id="L1001">                    JobInfo ji = jobsToFire.removeFirst();</span>
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">                    if (ji.getJob() == null) {</span>
+<span class="nc" id="L1003">                        System.out.println(&quot;Problem: ji.getJob() is null&quot;);</span>
+                    }
+<span class="nc" id="L1005">                    Job j = ji.getJob();</span>
+<span class="nc" id="L1006">                    j.setServiceTime(-1.0);</span>
+<span class="nc" id="L1007">                    j.setServiceStartTime(-1.0);</span>
+<span class="nc" id="L1008">                    j.setServingMessage(null);</span>
+<span class="nc" id="L1009">                    jobsList.endJob(ji);</span>
+<span class="nc" id="L1010">                    jobsList.remove(ji);</span>
+<span class="nc bnc" id="L1011" title="All 2 branches missed.">                    if (switchoverStrategies != null) {</span>
+<span class="nc" id="L1012">                        ServerUnit serverUnit = busyServerMap.remove(j);</span>
+<span class="nc" id="L1013">                        idleServerQueue.offer(serverUnit);</span>
+                    }
+<span class="nc" id="L1015">                    busyCounter--;</span>
+<span class="nc" id="L1016">                    sendForward(j, 0.0);</span>
+<span class="nc" id="L1017">                }</span>
+                break;
+            }
+
+            case NetEvent.EVENT_STOP:
+<span class="nc" id="L1022">                break;</span>
+
+            case NetEvent.EVENT_QUEUE_IDLE: {
+<span class="nc bnc" id="L1025" title="All 2 branches missed.">                if (!isServerCompletelyIdle()) {</span>
+<span class="nc" id="L1026">                    sendBackward(NetEvent.EVENT_QUEUE_IDLE_ACK, new QueueIdleAckBody(false), 0.0);</span>
+<span class="nc" id="L1027">                    break;</span>
+                }
+                // there are no jobs inside the queue or the server: the server is completely idle
+<span class="nc bnc" id="L1030" title="All 2 branches missed.">                if (vacationStrategy instanceof VacationWhenIdleStrategy) {</span>
+<span class="nc bnc" id="L1031" title="All 4 branches missed.">                    if (justTakenAVacation &amp;&amp; ((VacationWhenIdleStrategy) vacationStrategy).getType() == VacationWhenIdleStrategy.SINGLE_VACATION) {</span>
+<span class="nc" id="L1032">                        sendBackward(NetEvent.EVENT_QUEUE_IDLE_ACK, new QueueIdleAckBody(false), 0.0);</span>
+<span class="nc" id="L1033">                        break;</span>
+                    }
+<span class="nc" id="L1035">                    double vacationLength = vacationStrategy.nextVacationLength();</span>
+<span class="nc" id="L1036">                    startsVacation(vacationLength);</span>
+<span class="nc" id="L1037">                    break;</span>
+                }
+<span class="nc" id="L1039">                sendBackward(NetEvent.EVENT_QUEUE_IDLE_ACK, new QueueIdleAckBody(false), 0.0);</span>
+<span class="nc" id="L1040">                break;</span>
+            }
+
+            case NetEvent.EVENT_VACATION_JOB:
+<span class="nc" id="L1044">                VacationJob vacationJob = (VacationJob) data;</span>
+<span class="nc" id="L1045">                endsVacation(vacationJob);</span>
+
+            default:
+<span class="nc" id="L1048">                return MSG_NOT_PROCESSED;</span>
+        }
+
+<span class="nc" id="L1051">        return MSG_PROCESSED;</span>
+    }
+
+    private void startsVacation(double vacationLength) {
+<span class="nc bnc" id="L1055" title="All 2 branches missed.">        if (inVacation) return;</span>
+<span class="nc" id="L1056">        inVacation = true;</span>
+<span class="nc" id="L1057">        VacationJob vacationJob = new VacationJob(vacationLength);</span>
+<span class="nc" id="L1058">        sendMe(NetEvent.EVENT_VACATION_JOB, vacationJob, vacationLength);</span>
+<span class="nc" id="L1059">        sendBackward(NetEvent.EVENT_QUEUE_IDLE_ACK, new QueueIdleAckBody(true), 0.0);</span>
+<span class="nc" id="L1060">        jobsList.startsServerVacation(vacationJob);</span>
+<span class="nc" id="L1061">    }</span>
+
+    private void endsVacation(VacationJob vacationJob) {
+<span class="nc bnc" id="L1064" title="All 2 branches missed.">        if (!inVacation) return;</span>
+<span class="nc" id="L1065">        inVacation = false;</span>
+<span class="nc" id="L1066">        justTakenAVacation = true;</span>
+<span class="nc" id="L1067">        sendBackward(NetEvent.EVENT_ACK, null, 0.0);</span>
+<span class="nc" id="L1068">        jobsList.endsServerVacation(vacationJob);</span>
+<span class="nc" id="L1069">    }</span>
+
+    private boolean isServerCompletelyIdle() {
+<span class="nc bnc" id="L1072" title="All 2 branches missed.">        for (ServerType serverType : serverTypes) {</span>
+<span class="nc bnc" id="L1073" title="All 2 branches missed.">            if (serverType.getBusyCounter() != 0) {</span>
+<span class="nc" id="L1074">                return false;</span>
+            }
+<span class="nc" id="L1076">        }</span>
+<span class="nc" id="L1077">        return true;</span>
+    }
+
+    public boolean isInVacation() {
+<span class="nc" id="L1081">        return inVacation;</span>
+    }
+
+    private boolean processJob(Job job, int numServerAvailable, int numServerNeeded) throws NetException {
+        JobInfo jobInfo;
+<span class="nc" id="L1086">        int jobClassID = job.getJobClass().getId();</span>
+<span class="nc" id="L1087">        int busyCounterForClass = getBusyCounterForClass(job.getJobClass().getId());</span>
+<span class="nc bnc" id="L1088" title="All 4 branches missed.">        if (putStrategies[jobClassID] instanceof PreemptiveStrategy &amp;&amp; busyCounterForClass == numServerAvailable) {</span>
+<span class="nc" id="L1089">            preemptJob();</span>
+        }
+
+<span class="nc bnc" id="L1092" title="All 2 branches missed.">        if (busyCounterForClass + numServerNeeded &gt; numServerAvailable) {</span>
+<span class="nc" id="L1093">            return false;</span>
+        }
+
+<span class="nc" id="L1096">        putStrategies[jobClassID].put(job, jobsList, this);</span>
+<span class="nc" id="L1097">        jobInfo = jobsList.lookFor(job);</span>
+
+        //sends the job with delay equal to &quot;serviceTime&quot;
+        //message received from another node section: if the server is not completely busy,
+        //it sends itself a message with this job
+<span class="nc" id="L1102">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L1103" title="All 2 branches missed.">        if (delayOffEnabled) {</span>
+<span class="nc" id="L1104">            double currentTime = netSystem.getTime();</span>
+<span class="nc bnc" id="L1105" title="All 2 branches missed.">            if (wakeServerQueue.size() &gt; 0) {</span>
+<span class="nc" id="L1106">                Iterator&lt;ServerSetupUnit&gt; iterator = wakeServerQueue.iterator();</span>
+<span class="nc bnc" id="L1107" title="All 2 branches missed.">                while (iterator.hasNext()) {</span>
+<span class="nc" id="L1108">                    ServerSetupUnit obj = iterator.next();</span>
+<span class="nc" id="L1109">                    double delayOffDeadline = obj.lastIdleTime + obj.lastDelayOffTime;</span>
+<span class="nc bnc" id="L1110" title="All 2 branches missed.">                    if (currentTime &gt;= delayOffDeadline) {</span>
+<span class="nc" id="L1111">                        iterator.remove();</span>
+//									System.out.println(&quot;delay off triggered&quot;);
+                    } else {
+<span class="nc bnc" id="L1114" title="All 2 branches missed.">                        if (obj.isSettingUp) {</span>
+<span class="nc" id="L1115">                            obj.checkSetUpComplete(currentTime);</span>
+//										System.out.println(&quot;setup complete&quot;);
+                        }
+                    }
+<span class="nc" id="L1119">                }</span>
+            }
+        }
+<span class="nc bnc" id="L1122" title="All 2 branches missed.">        if (switchoverStrategies != null) {</span>
+<span class="nc" id="L1123">            ServerUnit serverUnit = idleServerQueue.poll();</span>
+<span class="nc bnc" id="L1124" title="All 2 branches missed.">            if (serverUnit == null) {</span>
+<span class="nc" id="L1125">                serverUnit = new ServerUnit(busyCounter, jobClassID);</span>
+            }
+<span class="nc bnc" id="L1127" title="All 2 branches missed.">            if (serverUnit.jobClassID == jobClassID) {</span>
+<span class="nc" id="L1128">                enterJob(job);</span>
+<span class="nc" id="L1129">                double serviceTime = job.getServiceTime();</span>
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">                if (serviceTime &lt; 0.0) {</span>
+<span class="nc" id="L1131">                    serviceTime = 0;</span>
+<span class="nc" id="L1132">                    List&lt;BusyServer&gt; busyServers = busyServersPerJob.get(job.getId());</span>
+<span class="nc bnc" id="L1133" title="All 2 branches missed.">                    for (BusyServer server : busyServers) {</span>
+<span class="nc" id="L1134">                        serviceTime += serviceStrategiesPerServerType[server.getId()][jobClassID].wait(this, job.getJobClass());</span>
+<span class="nc" id="L1135">                    }</span>
+<span class="nc" id="L1136">                    serviceTime /= busyServers.size();</span>
+<span class="nc" id="L1137">                    job.setServiceTime(serviceTime);</span>
+                }
+<span class="nc" id="L1139">                RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);</span>
+<span class="nc" id="L1140">                job.setServiceStartTime(netSystem.getTime());</span>
+<span class="nc" id="L1141">                job.setServingMessage(jobServingMessage);</span>
+<span class="nc" id="L1142">                jobsList.startJob(jobInfo);</span>
+<span class="nc" id="L1143">            } else {</span>
+<span class="nc" id="L1144">                ServiceStrategy switchoverTimeStrategy = switchoverStrategies[serverUnit.jobClassID][jobClassID];</span>
+<span class="nc" id="L1145">                double switchoverTime = 0.0;</span>
+                //if ((netSystem.getTime() - lastCompletionTime) &gt; 0.0) { // if the server has been idle
+<span class="nc" id="L1147">                switchoverTime = switchoverTimeStrategy.wait(this, job.getJobClass());</span>
+                //}
+<span class="nc" id="L1149">                RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_SETUP_JOB, job, switchoverTime);</span>
+<span class="nc" id="L1150">                job.setServingMessage(jobServingMessage);</span>
+            }
+<span class="nc" id="L1152">            busyServerMap.put(job, serverUnit);</span>
+<span class="nc" id="L1153">        } else {</span>
+<span class="nc" id="L1154">            enterJob(job);</span>
+<span class="nc" id="L1155">            double serviceTime = job.getServiceTime();</span>
+<span class="nc bnc" id="L1156" title="All 2 branches missed.">            if (serviceTime &lt; 0.0) {</span>
+<span class="nc" id="L1157">                serviceTime = 0;</span>
+<span class="nc" id="L1158">                List&lt;BusyServer&gt; busyServers = busyServersPerJob.get(job.getId());</span>
+<span class="nc bnc" id="L1159" title="All 2 branches missed.">                for (BusyServer server : busyServers) {</span>
+<span class="nc" id="L1160">                    serviceTime += serviceStrategiesPerServerType[server.getId()][jobClassID].wait(this, job.getJobClass());</span>
+<span class="nc" id="L1161">                }</span>
+<span class="nc" id="L1162">                serviceTime /= busyServers.size();</span>
+<span class="nc bnc" id="L1163" title="All 4 branches missed.">                if (delayOffEnabled &amp;&amp; delayOffStrategies.length &gt; 0) {</span>
+<span class="nc" id="L1164">                    double setuptime = 0.0;</span>
+<span class="nc bnc" id="L1165" title="All 2 branches missed.">                    if (wakeServerQueue.size() &gt; 0) {</span>
+<span class="nc" id="L1166">                        ServerSetupUnit minIdleUnit = null;</span>
+<span class="nc bnc" id="L1167" title="All 2 branches missed.">                        for (ServerSetupUnit unit : wakeServerQueue) {</span>
+<span class="nc bnc" id="L1168" title="All 4 branches missed.">                            if (unit.isRunning &amp;&amp; !unit.isSettingUp) {</span>
+<span class="nc bnc" id="L1169" title="All 4 branches missed.">                                if (minIdleUnit == null || unit.lastIdleTime &lt; minIdleUnit.lastIdleTime) {</span>
+<span class="nc" id="L1170">                                    minIdleUnit = unit;</span>
+                                }
+                            }
+<span class="nc" id="L1173">                        }</span>
+<span class="nc bnc" id="L1174" title="All 2 branches missed.">                        if (minIdleUnit != null) {</span>
+//										System.out.println(&quot;put to running server&quot;);
+<span class="nc" id="L1176">                            minIdleUnit.isRunning = true;</span>
+<span class="nc" id="L1177">                            minIdleUnit.jobs.add(job);</span>
+<span class="nc" id="L1178">                            minIdleUnit.lastIdleTime = netSystem.getTime();</span>
+                        } else {
+<span class="nc" id="L1180">                            System.out.println(&quot;intermidiate setup triggered&quot;);</span>
+<span class="nc bnc" id="L1181" title="All 2 branches missed.">                            for (ServerSetupUnit unit : wakeServerQueue) {</span>
+<span class="nc bnc" id="L1182" title="All 2 branches missed.">                                if (unit.isSettingUp) {</span>
+<span class="nc bnc" id="L1183" title="All 4 branches missed.">                                    if (minIdleUnit == null || unit.lastSettingUpTime &lt; minIdleUnit.lastSettingUpTime) {</span>
+<span class="nc" id="L1184">                                        minIdleUnit = unit;</span>
+                                    }
+                                }
+<span class="nc" id="L1187">                            }</span>
+<span class="nc" id="L1188">                            setuptime = minIdleUnit.lastSettingUpTime - netSystem.getTime();</span>
+<span class="nc" id="L1189">                            serviceTime += setuptime;</span>
+<span class="nc" id="L1190">                            minIdleUnit.jobs.add(job);</span>
+<span class="nc" id="L1191">                            minIdleUnit.lastIdleTime = netSystem.getTime();</span>
+                        }
+<span class="nc" id="L1193">                    } else {</span>
+//									System.out.println(&quot;setup triggered&quot;);
+<span class="nc" id="L1195">                        setuptime = setUpStrategies[jobClassID][0].wait(this, job.getJobClass());</span>
+<span class="nc" id="L1196">                        ServerSetupUnit serverSetupUnit = new ServerSetupUnit(job, jobClassID, setUpStrategies[jobClassID][0], delayOffStrategies[jobClassID][0]);</span>
+<span class="nc" id="L1197">                        serverSetupUnit.isSettingUp = true;</span>
+<span class="nc" id="L1198">                        serverSetupUnit.lastSettingUpTime = getOwnerNode().getNetSystem().getTime() + setuptime;</span>
+<span class="nc" id="L1199">                        serviceTime += setuptime;</span>
+<span class="nc" id="L1200">                        wakeServerQueue.add(serverSetupUnit);</span>
+                    }
+                }
+<span class="nc" id="L1203">                job.setServiceTime(serviceTime);</span>
+            }
+<span class="nc" id="L1205">            RemoveToken jobServingMessage = sendMe(NetEvent.EVENT_JOB, job, serviceTime);</span>
+<span class="nc" id="L1206">            job.setServiceStartTime(netSystem.getTime());</span>
+<span class="nc" id="L1207">            job.setServingMessage(jobServingMessage);</span>
+<span class="nc" id="L1208">            jobsList.startJob(jobInfo);</span>
+        }
+<span class="nc" id="L1210">        return true;</span>
+    }
+
+    private void preemptJob() throws NetException {
+<span class="nc" id="L1214">        JobInfo lastJobInfo = getLastJobInfo();</span>
+<span class="nc" id="L1215">        Job lastJob = lastJobInfo.getJob();</span>
+<span class="nc" id="L1216">        RemoveToken lastJobServingMessage = lastJob.getServingMessage();</span>
+<span class="nc" id="L1217">        removeMessage(lastJobServingMessage);</span>
+<span class="nc" id="L1218">        lastJob.setServingMessage(null);</span>
+<span class="nc" id="L1219">        double lastJobStartTime = lastJob.getServiceStartTime();</span>
+<span class="nc bnc" id="L1220" title="All 2 branches missed.">        if (lastJobStartTime &gt;= 0.0) {</span>
+<span class="nc" id="L1221">            double lastJobRemainingTime = lastJob.getRemainingServiceTime();</span>
+<span class="nc" id="L1222">            lastJob.setServiceTime(lastJobRemainingTime);</span>
+<span class="nc" id="L1223">            lastJob.setServiceStartTime(-1.0);</span>
+<span class="nc" id="L1224">            jobsList.endJob(lastJobInfo);</span>
+        }
+<span class="nc" id="L1226">        jobsList.remove(lastJobInfo);</span>
+<span class="nc bnc" id="L1227" title="All 2 branches missed.">        if (switchoverStrategies != null) {</span>
+<span class="nc" id="L1228">            ServerUnit serverUnit = busyServerMap.remove(lastJob);</span>
+<span class="nc" id="L1229">            idleServerQueue.add(serverUnit);</span>
+        }
+<span class="nc" id="L1231">        exitJob(lastJob);</span>
+
+<span class="nc" id="L1233">        sendBackward(NetEvent.EVENT_PREEMPTED_JOB, lastJob, 0.0);</span>
+<span class="nc" id="L1234">        busyCounter--;</span>
+<span class="nc" id="L1235">    }</span>
+
+    /**
+     * Gets the service strategy for each class.
+     *
+     * @return the service strategy for each class.
+     */
+    public ServiceStrategy[] getServiceStrategies() {
+<span class="nc" id="L1243">        return serviceStrategies;</span>
+    }
+
+    /**
+     * Gets the last job info in the service list.
+     *
+     * @return the last job info in the service list.
+     */
+    public JobInfo getLastJobInfo() {
+<span class="nc bnc" id="L1252" title="All 2 branches missed.">        if (jobsList.size() &lt;= 0) {</span>
+<span class="nc" id="L1253">            System.out.println(&quot;Problem: jobsList.size() &lt;= 0&quot;);</span>
+        }
+<span class="nc" id="L1255">        return jobsList.getInternalJobInfoList().get(jobsList.size() - 1);</span>
+    }
+
+    private static class ServerUnit implements Comparable&lt;ServerUnit&gt; {
+
+        public int id;
+        public int jobClassID;
+
+<span class="nc" id="L1263">        public ServerUnit(int id, int jobClassID) {</span>
+<span class="nc" id="L1264">            this.id = id;</span>
+<span class="nc" id="L1265">            this.jobClassID = jobClassID;</span>
+<span class="nc" id="L1266">        }</span>
+
+        @Override
+        public int compareTo(ServerUnit that) {
+<span class="nc bnc" id="L1270" title="All 2 branches missed.">            if (this.id &lt; that.id) {</span>
+<span class="nc" id="L1271">                return -1;</span>
+<span class="nc bnc" id="L1272" title="All 2 branches missed.">            } else if (this.id &gt; that.id) {</span>
+<span class="nc" id="L1273">                return 1;</span>
+            } else {
+<span class="nc" id="L1275">                return 0;</span>
+            }
+        }
+
+    }
+
+    private static class ServerSetupUnit implements Comparable&lt;ServerSetupUnit&gt; {
+        public ArrayList&lt;Job&gt; jobs;
+        public int jobClassID;
+        public ServiceStrategy setupTime;
+        public ServiceStrategy delayOffTime;
+
+        public boolean isRunning;
+        public boolean isSettingUp;
+        public double lastSettingUpTime;
+        public double lastIdleTime;
+        public double lastDelayOffTime;
+
+<span class="nc" id="L1293">        public ServerSetupUnit(Job job, int jobClassID, ServiceStrategy setupTime, ServiceStrategy delayOffTime) {</span>
+<span class="nc" id="L1294">            this.jobs = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L1295">            this.jobs.add(job);</span>
+<span class="nc" id="L1296">            this.jobClassID = jobClassID;</span>
+<span class="nc" id="L1297">            this.setupTime = setupTime;</span>
+<span class="nc" id="L1298">            this.delayOffTime = delayOffTime;</span>
+<span class="nc" id="L1299">            this.isRunning = false;</span>
+<span class="nc" id="L1300">            this.isSettingUp = false;</span>
+<span class="nc" id="L1301">            this.lastSettingUpTime = 0.0;</span>
+<span class="nc" id="L1302">            this.lastIdleTime = 0.0;</span>
+<span class="nc" id="L1303">            this.lastDelayOffTime = 0.0;</span>
+<span class="nc" id="L1304">        }</span>
+
+        public void checkSetUpComplete(double currentTime) {
+<span class="nc" id="L1307">            double settingUpDeadline = lastSettingUpTime;</span>
+<span class="nc bnc" id="L1308" title="All 2 branches missed.">            if (settingUpDeadline &lt;= currentTime) {</span>
+<span class="nc" id="L1309">                isSettingUp = false;</span>
+<span class="nc" id="L1310">                isRunning = true;</span>
+            }
+<span class="nc" id="L1312">        }</span>
+
+        @Override
+        public int compareTo(ServerSetupUnit o) {
+<span class="nc" id="L1316">            return Double.compare(this.lastIdleTime, o.lastIdleTime);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

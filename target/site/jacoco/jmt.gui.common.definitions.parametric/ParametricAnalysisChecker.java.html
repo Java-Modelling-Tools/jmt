@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParametricAnalysisChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.parametric</a> &gt; <span class="el_source">ParametricAnalysisChecker.java</span></div><h1>ParametricAnalysisChecker.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.definitions.parametric;
+
+import java.util.Vector;
+import java.util.Map;
+
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+
+/**
+ * &lt;p&gt;Title: ParametricAnalysisChecker &lt;/p&gt;
+ * &lt;p&gt;Description: the main task of this class is to check which parametric analysis simulation
+ *           are available. It offers also some other methods used to get available stations and
+ *           classes for some types of parametric analysis.&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 1-feb-2006
+ *         Time: 11.00.12
+ */
+public class ParametricAnalysisChecker {
+	private ClassDefinition cd;
+	private StationDefinition sd;
+	private SimulationDefinition simd;
+
+	/**
+	 *
+	 * @param cd class definition
+	 * @param sd simulation definition
+	 * @param simd simulation definition
+	 */
+<span class="fc" id="L51">	public ParametricAnalysisChecker(ClassDefinition cd, StationDefinition sd, SimulationDefinition simd) {</span>
+<span class="fc" id="L52">		this.cd = cd;</span>
+<span class="fc" id="L53">		this.sd = sd;</span>
+<span class="fc" id="L54">		this.simd = simd;</span>
+<span class="fc" id="L55">	}</span>
+
+	/**
+	 * Checks if at least one parametric simulation is available.
+	 * @return true if at least one parametric simulation is available.
+	 */
+	public boolean canBeEnabled() {
+<span class="nc bnc" id="L62" title="All 4 branches missed.">		return !cd.getClassKeys().isEmpty() &amp;&amp; !sd.getStationKeys().isEmpty()</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">				&amp;&amp; getRunnableParametricAnalysis().length &gt; 0;</span>
+	}
+
+	/**
+	 * Gets an array of String containing the description of available parametric simulations
+	 * @return the array
+	 */
+	public String[] getRunnableParametricAnalysis() {
+		String[] runnable;
+<span class="nc" id="L72">		Vector&lt;String&gt; runnableVector = new Vector&lt;String&gt;(0, 1);</span>
+		//check if &quot;Number of customer&quot; parametric analysis is runnable
+<span class="nc" id="L74">		Vector&lt;Object&gt; temp = cd.getClosedClassKeys();</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L76">			runnableVector.add(ParametricAnalysis.PA_TYPE_NUMBER_OF_CUSTOMERS);</span>
+		}
+		//check if &quot;Population mix&quot; parametric analysis is runnable
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		if (temp.size() == 2) {</span>
+<span class="nc" id="L80">			runnableVector.add(ParametricAnalysis.PA_TYPE_POPULATION_MIX);</span>
+		}
+		//check if &quot;Service time&quot; parametric analysis is runnable
+<span class="nc" id="L83">		temp = checkForServiceTimesParametricAnalysisAvailableStations();</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L85">			runnableVector.add(ParametricAnalysis.PA_TYPE_SERVICE_TIMES);</span>
+		}
+		//check if &quot;Arrival rate&quot; parametric analysis is runnable
+<span class="nc" id="L88">		temp = checkForArrivalRatesParametricSimulationAvailableClasses();</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L90">			runnableVector.add(ParametricAnalysis.PA_TYPE_ARRIVAL_RATE);</span>
+		}
+		//check if &quot;Number of server&quot; parametric analysis is runnable
+<span class="nc" id="L93">		temp = checkForNumberOfServersParametricAnalysisAvailableStations();</span>
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L95">			runnableVector.add(ParametricAnalysis.PA_TYPE_NUMBER_OF_SERVERS);</span>
+		}
+		//check if &quot;Total station capacity&quot; parametric analysis is runnable
+<span class="nc" id="L98">		temp = checkForTotalStationCapacityParametricAnalysisAvailableStations();</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L100">			runnableVector.add(ParametricAnalysis.PA_TYPE_TOTAL_CAPACITY);</span>
+		}
+		//check if &quot;Routing probabilities&quot; parametric analysis is runnable
+<span class="nc" id="L103">		temp = checkForRoutingProbabilitiesParametricAnalysisAvailableSourceStations();</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if (!temp.isEmpty()) {</span>
+<span class="nc" id="L105">			runnableVector.add(ParametricAnalysis.PA_TYPE_ROUTING_PROBABILITY);</span>
+		}
+		//check if &quot;Seed&quot; parametric analysis is available
+<span class="nc bnc" id="L108" title="All 4 branches missed.">		if (!cd.getClassKeys().isEmpty() &amp;&amp; !sd.getStationKeys().isEmpty()) {</span>
+<span class="nc" id="L109">			runnableVector.add(ParametricAnalysis.PA_TYPE_SEED);</span>
+		}
+		//initialize runnable array
+<span class="nc" id="L112">		runnable = new String[runnableVector.size()];</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		for (int i = 0; i &lt; runnable.length; i++) {</span>
+<span class="nc" id="L114">			runnable[i] = runnableVector.get(i);</span>
+		}
+<span class="nc" id="L116">		return runnable;</span>
+	}
+
+	/**
+	 *  This method has a meaning only if used inside a service times parametric analysis. It
+	 *  can be used to get the keys of stations available to perform that kind of parametric
+	 *  analysis.
+	 * @return the Vector containing the keys of available stations
+	 */
+	public Vector&lt;Object&gt; checkForServiceTimesParametricAnalysisAvailableStations() {
+<span class="nc" id="L126">		Vector&lt;Object&gt; availableStations = new Vector&lt;Object&gt;(0, 1);</span>
+		// get all stations
+<span class="nc" id="L128">		Vector&lt;Object&gt; stations = sd.getStationKeys();</span>
+		// get all classes
+<span class="nc" id="L130">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc" id="L133">			Object thisStation = stations.get(i);</span>
+			// used to see whether current station is suitable for PA
+<span class="nc" id="L135">			boolean stationOK = false;</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">			for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L137">				Object thisClass = classes.get(j);</span>
+<span class="nc" id="L138">				Object temp = sd.getServiceTimeDistribution(thisStation, thisClass);</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">				if (temp instanceof Distribution) {</span>
+<span class="nc" id="L140">					Distribution distr = (Distribution) temp;</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">					if (distr.hasMean()) {</span>
+<span class="nc" id="L142">						stationOK = true;</span>
+<span class="nc" id="L143">						break;</span>
+					}
+				}
+			}
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			if (stationOK) {</span>
+<span class="nc" id="L148">				availableStations.add(thisStation);</span>
+			}
+		}
+<span class="nc" id="L151">		return availableStations;</span>
+	}
+
+	/**
+	 * This method has a meaning only if used inside a service times parametric analysis.
+	 * It can be used to get the keys of classes available to perform that kind of parametric
+	 * analysis.
+	 * @param stationKey the key of the station whose service times will be varied.
+	 * @return a Vector containing the keys of available classes
+	 */
+	public Vector&lt;Object&gt; checkForServiceTimesParametricSimulationAvailableClasses(Object stationKey) {
+<span class="nc" id="L162">		Vector&lt;Object&gt; valid = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="nc" id="L163">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">		for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L165">			Object thisClass = classes.get(j);</span>
+<span class="nc" id="L166">			Object temp = sd.getServiceTimeDistribution(stationKey, thisClass);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">			if (temp instanceof Distribution) {</span>
+<span class="nc" id="L168">				Distribution distr = (Distribution) temp;</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">				if (distr.hasMean()) {</span>
+<span class="nc" id="L170">					valid.add(thisClass);</span>
+				}
+			}
+		}
+<span class="nc" id="L174">		return valid;</span>
+	}
+
+	/**
+	 * This method has a meaning only if used inside a routing probabilities parametric analysis.
+	 * It can be used to get the keys of stations available to perform that kind of parametric
+	 * analysis.
+	 * @param stationKey the key of the station whose routing probabilities will be varied.
+	 * @return a Vector containing the keys of available stations
+	 */
+	public Vector&lt;Object&gt; checkForRoutingProbabilitiesParametricAnalysisAvailableSourceStations() {
+		// get all stations
+<span class="nc" id="L186">		Vector&lt;Object&gt; stations = sd.getStationKeys();</span>
+		// get all classes
+<span class="nc" id="L188">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc" id="L189">		Vector&lt;Object&gt; availableStations = new Vector&lt;Object&gt;(0, 1);</span>
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		for(int i=0; i&lt;stations.size(); i++) {</span>
+<span class="nc" id="L192">			Object thisStation = stations.get(i);</span>
+			// used to see whether current station is suitable for PA
+<span class="nc" id="L194">			boolean stationOK = false;</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">			for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L196">				Object thisClass = classes.get(j);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				if (sd.getRoutingStrategy(thisStation, thisClass) instanceof ProbabilityRouting) {</span>
+<span class="nc" id="L198">					ProbabilityRouting pr = (ProbabilityRouting) sd.getRoutingStrategy(thisStation, thisClass);</span>
+<span class="nc" id="L199">					Map&lt;Object, Double&gt; values = pr.getValues();</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">					if (!values.isEmpty()) {</span>
+<span class="nc" id="L201">						stationOK = true;</span>
+<span class="nc" id="L202">						break;</span>
+					}
+				}
+			}
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (stationOK) {</span>
+<span class="nc" id="L207">				availableStations.add(thisStation);</span>
+			}
+		}
+<span class="nc" id="L210">		return availableStations;</span>
+	}
+
+	/**
+	 * This method has a meaning only if used inside a routing probabilities parametric analysis.
+	 * It can be used to get the keys of classes available to perform that kind of parametric
+	 * analysis.
+	 * @param stationKey the key of the station whose routing probabilities will be varied.
+	 * @return a Vector containing the keys of available classes
+	 */
+	public Vector&lt;Object&gt; checkForRoutingProbabilitiesParametricSimulationAvailableClasses(Object stationKey) {
+<span class="nc" id="L221">		Vector&lt;Object&gt; valid = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="nc" id="L222">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L224">			Object thisClass = classes.get(j);</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (sd.getRoutingStrategy(stationKey, thisClass) instanceof ProbabilityRouting) {</span>
+<span class="nc" id="L226">				ProbabilityRouting pr = (ProbabilityRouting) sd.getRoutingStrategy(stationKey, thisClass);</span>
+<span class="nc" id="L227">				Map&lt;Object, Double&gt; values = pr.getValues();</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">				if (!values.isEmpty()) {</span>
+<span class="nc" id="L229">					valid.add(thisClass);</span>
+				}
+			}
+		}
+<span class="nc" id="L233">		return valid;</span>
+	}
+
+	/**
+	 * This method has a meaning only if used inside an arrival rate parametric analysis.
+	 * It can be used to get the keys of classes available to perform that kind of parametric
+	 * analysis.
+	 * @return a Vector containing the keys of available classes
+	 */
+	public Vector&lt;Object&gt; checkForArrivalRatesParametricSimulationAvailableClasses() {
+<span class="fc" id="L243">		Vector&lt;Object&gt; valid = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="fc" id="L244">		Vector&lt;Object&gt; classes = cd.getOpenClassKeys();</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">		for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="fc" id="L246">			Object thisClass = classes.get(j);</span>
+<span class="fc" id="L247">			Object temp = cd.getClassDistribution(thisClass);</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">			if (temp instanceof Distribution) {</span>
+<span class="fc" id="L249">				Distribution distr = (Distribution) temp;</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">				if (distr.hasMean()) {</span>
+<span class="fc" id="L251">					valid.add(thisClass);</span>
+				}
+			}
+		}
+<span class="fc" id="L255">		return valid;</span>
+	}
+
+	public Vector&lt;Object&gt; checkForNumberOfServersParametricAnalysisAvailableStations() {
+<span class="nc" id="L259">		Vector&lt;Object&gt; availableStations = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="nc" id="L260">		Vector&lt;Object&gt; stations = sd.getStationKeys();</span>
+<span class="nc" id="L261">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc" id="L263">			Object thisStation = stations.get(i);</span>
+<span class="nc" id="L264">			boolean stationOK = false;</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L266">				Object thisClass = classes.get(j);</span>
+<span class="nc" id="L267">				Integer temp = sd.getStationNumberOfServers(thisStation);</span>
+<span class="nc bnc" id="L268" title="All 4 branches missed.">				if (temp != null &amp;&amp; temp.intValue() &gt; 0) {</span>
+<span class="nc" id="L269">					stationOK = true;</span>
+<span class="nc" id="L270">					break;</span>
+				}
+			}
+<span class="nc bnc" id="L273" title="All 2 branches missed.">			if (stationOK) {</span>
+<span class="nc" id="L274">				availableStations.add(thisStation);</span>
+			}
+		}
+<span class="nc" id="L277">		return availableStations;</span>
+	}
+
+	public Vector&lt;Object&gt; checkForTotalStationCapacityParametricAnalysisAvailableStations() {
+<span class="nc" id="L281">		Vector&lt;Object&gt; availableStations = new Vector&lt;Object&gt;(0, 1);</span>
+<span class="nc" id="L282">		Vector&lt;Object&gt; stations = sd.getStationKeys();</span>
+<span class="nc" id="L283">		Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc" id="L285">			Object thisStation = stations.get(i);</span>
+<span class="nc" id="L286">			boolean stationOK = false;</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			for (int j = 0; j &lt; classes.size(); j++) {</span>
+<span class="nc" id="L288">				Object thisClass = classes.get(j);</span>
+<span class="nc" id="L289">				Integer temp = sd.getStationQueueCapacity(thisStation);</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">				if (temp != null) {</span>
+<span class="nc" id="L291">					stationOK = true;</span>
+<span class="nc" id="L292">					break;</span>
+				}
+			}
+<span class="nc bnc" id="L295" title="All 2 branches missed.">			if (stationOK) {</span>
+<span class="nc" id="L296">				availableStations.add(thisStation);</span>
+			}
+		}
+<span class="nc" id="L299">		return availableStations;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

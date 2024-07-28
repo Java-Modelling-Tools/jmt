@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Defaults.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common</a> &gt; <span class="el_source">Defaults.java</span></div><h1>Defaults.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+import java.util.Properties;
+
+import jmt.engine.log.JSimLogger;
+import jmt.framework.data.MacroReplacer;
+import jmt.framework.gui.components.JMTFrame;
+import jmt.gui.common.distributions.Distribution;
+
+/**
+ * &lt;p&gt;Title: Simulation Defaults&lt;/p&gt;
+ * &lt;p&gt;Description: This class will provide methods to get default values of every
+ * parameter that can be set by the user. Default values can be overridden and
+ * will be saved on a config file.&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 12-lug-2005
+ *         Time: 14.04.02
+ *
+ * Modified by Francesco D'Aquino 15/11/2005
+ * 
+ * Modified by Ashanka (July 2010)
+ * Desc: Added new defaults control of a Random CheckBox.
+ * 
+ */
+<span class="nc" id="L52">public class Defaults implements CommonConstants {</span>
+
+	protected static final String FILENAME = &quot;defaults.conf&quot;;
+	protected static Properties prop;
+
+<span class="fc" id="L57">	private static JSimLogger logger = JSimLogger.getLogger(Defaults.class);</span>
+	// Initialize properties
+	static {
+<span class="fc" id="L60">		reload();</span>
+<span class="fc" id="L61">	}</span>
+
+	/**
+	 * Sets default properties. This function is called only once before initializing
+	 * internal data structure. Upon inserting a new property, this function MUST be
+	 * extended.
+	 * @return default (factory hard coded) initial properties
+	 */
+	protected static Properties getDefaults() {
+<span class="fc" id="L70">		Properties def = new Properties();</span>
+
+		// Station parameters defaults
+<span class="fc" id="L73">		def.setProperty(&quot;stationName&quot;, &quot;Station&quot;);</span>
+<span class="fc" id="L74">		def.setProperty(&quot;stationType&quot;, STATION_TYPE_SERVER);</span>
+<span class="fc" id="L75">		def.setProperty(&quot;stationCapacity&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L76">		def.setProperty(&quot;stationStationQueueStrategy&quot;, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);</span>
+<span class="fc" id="L77">		def.setProperty(&quot;stationQueueStrategy&quot;, QUEUE_STRATEGY_FCFS);</span>
+<span class="fc" id="L78">		def.setProperty(&quot;stationServers&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L79">		def.setProperty(&quot;stationRunningJobs&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L80">		def.setProperty(&quot;stationServiceStrategy&quot;, &quot;jmt.gui.common.distributions.Exponential&quot;);</span>
+<span class="fc" id="L81">		def.setProperty(&quot;stationDelayServiceStrategy&quot;, &quot;jmt.gui.common.distributions.Exponential&quot;);</span>
+<span class="fc" id="L82">		def.setProperty(&quot;stationRoutingStrategy&quot;, &quot;jmt.gui.common.routingStrategies.RandomRouting&quot;);</span>
+<span class="fc" id="L83">		def.setProperty(&quot;stationForkStrategy&quot;, &quot;jmt.gui.common.forkStrategies.ProbabilitiesFork&quot;);</span>
+<span class="fc" id="L84">		def.setProperty(&quot;stationJoinStrategy&quot;,&quot;jmt.gui.common.joinStrategies.NormalJoin&quot;);</span>
+<span class="fc" id="L85">		def.setProperty(&quot;stationSemaphoreStrategy&quot;,&quot;jmt.gui.common.semaphoreStrategies.NormalSemaphore&quot;);</span>
+
+<span class="fc" id="L87">		def.setProperty(&quot;dropRule&quot;, FINITE_DROP);</span>
+<span class="fc" id="L88">		def.setProperty(&quot;serviceWeight&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L89">		def.setProperty(&quot;forkBlock&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L90">		def.setProperty(&quot;isSimplifiedFork&quot;, &quot;true&quot;);</span>
+<span class="fc" id="L91">		def.setProperty(&quot;forkJobsPerLink&quot;, &quot;1&quot;);</span>
+
+<span class="fc" id="L93">		def.setProperty(&quot;placeCapacity&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L94">		def.setProperty(&quot;placeQueueCapacity&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L95">		def.setProperty(&quot;placeQueueStrategy&quot;, QUEUE_STRATEGY_FCFS);</span>
+<span class="fc" id="L96">		def.setProperty(&quot;placeDropRule&quot;, FINITE_DROP);</span>
+<span class="fc" id="L97">		def.setProperty(&quot;transitionModeName&quot;, &quot;Mode&quot;);</span>
+<span class="fc" id="L98">		def.setProperty(&quot;transitionModeNumberOfServers&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L99">		def.setProperty(&quot;transitionTimedModeFiringTimeDistribution&quot;, &quot;jmt.gui.common.distributions.Exponential&quot;);</span>
+<span class="fc" id="L100">		def.setProperty(&quot;transitionTimedModeFiringPriority&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L101">		def.setProperty(&quot;transitionTimedModeFiringWeight&quot;, &quot;1.0&quot;);</span>
+<span class="fc" id="L102">		def.setProperty(&quot;transitionImmediateModeFiringTimeDistribution&quot;, &quot;jmt.gui.common.serviceStrategies.ZeroStrategy&quot;);</span>
+<span class="fc" id="L103">		def.setProperty(&quot;transitionImmediateModeFiringPriority&quot;, &quot;0&quot;);</span>
+<span class="fc" id="L104">		def.setProperty(&quot;transitionImmediateModeFiringWeight&quot;, &quot;1.0&quot;);</span>
+
+		// Classes parameters defaults
+<span class="fc" id="L107">		def.setProperty(&quot;className&quot;, &quot;Class&quot;);</span>
+<span class="fc" id="L108">		def.setProperty(&quot;classType&quot;, &quot;&quot; + CLASS_TYPE_OPEN);</span>
+<span class="fc" id="L109">		def.setProperty(&quot;classPriority&quot;, &quot;0&quot;);</span>
+<span class="fc" id="L110">		def.setProperty(&quot;classPopulation&quot;, &quot;0&quot;);</span>
+<span class="fc" id="L111">		def.setProperty(&quot;classSoftDeadline&quot;, &quot;0&quot;);</span>
+<span class="fc" id="L112">		def.setProperty(&quot;classDistribution&quot;, &quot;jmt.gui.common.distributions.Exponential&quot;);</span>
+
+		// Blocking Region Parameters
+<span class="fc" id="L115">		def.setProperty(&quot;blockingRegionName&quot;, &quot;FCRegion&quot;);</span>
+<span class="fc" id="L116">		def.setProperty(&quot;blockingMaxJobs&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L117">		def.setProperty(&quot;blockingMaxMemory&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L118">		def.setProperty(&quot;blockingMaxJobsPerClass&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L119">		def.setProperty(&quot;blockingMaxMemoryPerClass&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L120">		def.setProperty(&quot;blockingDropPerClass&quot;, &quot;false&quot;);</span>
+<span class="fc" id="L121">		def.setProperty(&quot;blockingWeightPerClass&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L122">		def.setProperty(&quot;blockingSizePerClass&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L123">		def.setProperty(&quot;blockingGroupName&quot;, &quot;Group&quot;);</span>
+<span class="fc" id="L124">		def.setProperty(&quot;blockingGroupMaxJobs&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L125">		def.setProperty(&quot;blockingGroupMaxMemory&quot;, &quot;-1&quot;);</span>
+		// Not used parameter...
+<span class="fc" id="L127">		def.setProperty(&quot;blockingRegionType&quot;, &quot;default&quot;);</span>
+
+		// Logger Parameters (for global log)
+<span class="fc" id="L130">		Locale locale = JMTFrame.getPlatformDefaultLocale();</span>
+<span class="fc" id="L131">		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">		if (String.valueOf(symbols.getDecimalSeparator()).equals(&quot;,&quot;)) {</span>
+<span class="nc" id="L133">			def.setProperty(&quot;loggerDelimiter&quot;, &quot;;&quot;);</span>
+		} else {
+<span class="fc" id="L135">			def.setProperty(&quot;loggerDelimiter&quot;, &quot;,&quot;);</span>
+		}
+<span class="fc" id="L137">		def.setProperty(&quot;loggerDecimalSeparator&quot;, String.valueOf(symbols.getDecimalSeparator()));</span>
+<span class="fc" id="L138">		def.setProperty(&quot;loggerAutoAppend&quot;, &quot;&quot; + jmt.engine.log.LoggerParameters.LOGGER_AR_ASK);</span>
+<span class="fc" id="L139">		def.setProperty(&quot;loggerFilePath&quot;, &quot;&quot;);</span>
+
+		// Simulation Defaults parameters
+<span class="fc" id="L142">		def.setProperty(&quot;measureAlpha&quot;, &quot;0.99&quot;);</span>
+<span class="fc" id="L143">		def.setProperty(&quot;measurePrecision&quot;, &quot;0.03&quot;);</span>
+<span class="fc" id="L144">		def.setProperty(&quot;simulationSeed&quot;, &quot;23000&quot;);</span>
+<span class="fc" id="L145">		def.setProperty(&quot;isSimulationSeedRandom&quot;, &quot;true&quot;);</span>
+<span class="fc" id="L146">		def.setProperty(&quot;simulationMaxDuration&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L147">		def.setProperty(&quot;maxSimulatedTime&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L148">		def.setProperty(&quot;maxSimulationSamples&quot;, &quot;1000000&quot;);</span>
+<span class="fc" id="L149">		def.setProperty(&quot;isStatisticDisabled&quot;, &quot;false&quot;);</span>
+<span class="fc" id="L150">		def.setProperty(&quot;maxSimulationEvents&quot;, &quot;-1&quot;);</span>
+<span class="fc" id="L151">		def.setProperty(&quot;simulationPolling&quot;, &quot;1&quot;);</span>
+<span class="fc" id="L152">		def.setProperty(&quot;isWithAnimation&quot;, &quot;true&quot;);</span>
+<span class="fc" id="L153">		def.setProperty(&quot;representableClasses&quot;, &quot;10&quot;);</span>
+
+<span class="fc" id="L155">		int logicalCores = Runtime.getRuntime().availableProcessors(); // hyper-threading doubles this</span>
+<span class="fc" id="L156">		def.setProperty(&quot;whatIfParallelism&quot;, String.valueOf(logicalCores));</span>
+		// GUI default parameters.
+<span class="fc" id="L158">		def.setProperty(&quot;JMTManualWidth&quot;, &quot;1024&quot;);</span>
+<span class="fc" id="L159">		def.setProperty(&quot;JMTManualHeight&quot;, &quot;520&quot;);</span>
+<span class="fc" id="L160">		def.setProperty(&quot;JSIMWindowWidth&quot;, &quot;1024&quot;);</span>
+<span class="fc" id="L161">		def.setProperty(&quot;JSIMWindowHeight&quot;, &quot;768&quot;);</span>
+<span class="fc" id="L162">		def.setProperty(&quot;JSIMClassDefWindowWidth&quot;, &quot;1024&quot;);</span>
+<span class="fc" id="L163">		def.setProperty(&quot;JSIMClassDefWindowHeight&quot;, &quot;520&quot;);</span>
+<span class="fc" id="L164">		def.setProperty(&quot;JSIMMeasuresDefWindowWidth&quot;, &quot;1024&quot;);</span>
+<span class="fc" id="L165">		def.setProperty(&quot;JSIMMeasuresDefWindowHeight&quot;, &quot;520&quot;);</span>
+<span class="fc" id="L166">		def.setProperty(&quot;JSIMSimulationDefWindowWidth&quot;, &quot;780&quot;);</span>
+<span class="fc" id="L167">		def.setProperty(&quot;JSIMSimulationDefWindowHeight&quot;, &quot;520&quot;);</span>
+<span class="fc" id="L168">		def.setProperty(&quot;JSIMPADefWindowWidth&quot;, &quot;780&quot;);</span>
+<span class="fc" id="L169">		def.setProperty(&quot;JSIMPADefWindowHeight&quot;, &quot;520&quot;);</span>
+		// Templates dialogs default parameters
+<span class="fc" id="L171">		def.setProperty(&quot;showDefaultTemplates&quot;, &quot;true&quot;);</span>
+<span class="fc" id="L172">		def.setProperty(&quot;showTemplateDialog&quot;, &quot;true&quot;);</span>
+
+		// KPC fit default parameters
+<span class="fc" id="L175">		def.setProperty(&quot;autoOrder&quot;, &quot;false&quot;);</span>
+<span class="fc" id="L176">		def.setProperty(&quot;fitStyle&quot;, &quot;fast&quot;);</span>
+<span class="fc" id="L177">		def.setProperty(&quot;numStates&quot;, &quot;4&quot;);</span>
+
+<span class="fc" id="L179">		return def;</span>
+	}
+
+	/**
+	 * Returns inner properties data structure
+	 * @return inner properties data structure
+	 */
+	public static Properties getProperties() {
+<span class="nc" id="L187">		return prop;</span>
+	}
+
+	/**
+	 * Returns default value of chosen parameter
+	 * @param parameterName name of the parameter to be selected
+	 * @return selected parameter default value in String format
+	 */
+	public static String get(String parameterName) {
+<span class="fc" id="L196">		return prop.getProperty(parameterName);</span>
+	}
+
+	/**
+	 * Returns default value of chosen parameter in Integer form
+	 * @param parameterName name of the parameter to be selected
+	 * @return selected parameter default value in Integer format
+	 * @throws NumberFormatException if the parameter does not contain a parsable integer
+	 */
+	public static Integer getAsInteger(String parameterName) {
+<span class="fc" id="L206">		return Integer.parseInt(get(parameterName));</span>
+	}
+
+	/**
+	 * Returns default value of chosen parameter in Long form
+	 * @param parameterName name of the parameter to be selected
+	 * @return selected parameter default value in Long format
+	 * @throws NumberFormatException if the parameter does not contain a parsable long
+	 */
+	public static Long getAsLong(String parameterName) {
+<span class="fc" id="L216">		return Long.parseLong(get(parameterName));</span>
+	}
+
+	/**
+	 * Returns default value of chosen parameter in Double form
+	 * @param parameterName name of the parameter to be selected
+	 * @return selected parameter default value in Double format
+	 * @throws NumberFormatException if the parameter does not contain a parsable integer
+	 */
+	public static Double getAsDouble(String parameterName) {
+<span class="fc" id="L226">		return Double.parseDouble(get(parameterName));</span>
+	}
+
+	/**
+	 * Returns default value of chosen parameter in Boolean form
+	 * @param parameterName name of the parameter to be selected
+	 * @return selected parameter default value in Boolean format
+	 */
+	public static Boolean getAsBoolean(String parameterName) {
+<span class="fc" id="L235">		return Boolean.parseBoolean(get(parameterName));</span>
+	}
+
+	/**
+	 * Returns a new instance of default value of chosen parameter. Uses reflection to instantiate
+	 * selected parameter's class.
+	 * @param parameterName name of the parameter to be selected
+	 * @return new instance of default value for selected parameter or null if value of
+	 * this parameter is not a class to be instantiated
+	 */
+	public static Object getAsNewInstance(String parameterName) {
+<span class="fc" id="L246">		String className = get(parameterName);</span>
+<span class="fc" id="L247">		Object newClass = null;</span>
+		try {
+<span class="fc" id="L249">			newClass = Class.forName(className).newInstance();</span>
+<span class="fc bfc" id="L250" title="All 2 branches covered.">			if (parameterName.equals(&quot;classDistribution&quot;)) {</span>
+<span class="fc" id="L251">				Distribution distribution = (Distribution) newClass;</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">				if (distribution.hasMean()) {</span>
+<span class="fc" id="L253">					distribution.setMean(distribution.getMean() * 2);</span>
+				}
+			}
+<span class="nc" id="L256">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L257">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L258">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L259">			System.err.println(&quot;Error: Default class not found&quot;);</span>
+<span class="nc" id="L260">			e.printStackTrace();</span>
+<span class="nc" id="L261">		} catch (Exception e) {</span>
+<span class="pc" id="L262">		}</span>
+<span class="fc" id="L263">		return newClass;</span>
+	}
+
+	/**
+	 * Sets a default value for a chosen parameter
+	 * @param parameterName name of the parameter to be chosen
+	 * @param value new default value to be associated with given parameter
+	 */
+	public static void set(String parameterName, String value) {
+<span class="nc" id="L272">		prop.setProperty(parameterName, value);</span>
+<span class="nc" id="L273">	}</span>
+
+	/**
+	 * Saves current default values into &lt;CODE&gt;FILENAME&lt;/CODE&gt;
+	 * @return true iff file was correctly saved
+	 */
+	public static boolean save() {
+<span class="nc" id="L280">		boolean saved = false;</span>
+		try {
+<span class="nc" id="L282">			OutputStream output = new FileOutputStream(new File(getWorkingPath(), FILENAME));</span>
+<span class="nc" id="L283">			prop.store(output, &quot;JMT Default parameters definition&quot;);</span>
+<span class="nc" id="L284">			saved = true;</span>
+<span class="nc" id="L285">			output.close();</span>
+<span class="nc" id="L286">		} catch (IOException e) {</span>
+<span class="nc" id="L287">			logger.error(&quot;Error while storing default values&quot;, e);</span>
+<span class="nc" id="L288">		}</span>
+<span class="nc" id="L289">		return saved;</span>
+	}
+
+	/**
+	 * Reloads current default values from &lt;CODE&gt;FILENAME&lt;/CODE&gt;
+	 */
+	public static void reload() {
+<span class="fc" id="L296">		prop = new Properties(getDefaults());</span>
+		// Try to load properties from default config file, otherwise uses defaults one
+<span class="fc" id="L298">		File file = new File(getWorkingPath(), FILENAME);</span>
+<span class="pc bpc" id="L299" title="1 of 2 branches missed.">		if (file.isFile()) {</span>
+			try {
+<span class="fc" id="L301">				InputStream input = new FileInputStream(new File(getWorkingPath(), FILENAME));</span>
+<span class="fc" id="L302">				prop.load(input);</span>
+<span class="fc" id="L303">				input.close();</span>
+<span class="nc" id="L304">			} catch (IOException e) {</span>
+<span class="nc" id="L305">				logger.error(&quot;Error while reading default values&quot;, e);</span>
+<span class="pc" id="L306">			}</span>
+		} else {
+<span class="nc" id="L308">			logger.debug(&quot;Configuration file not found in location &quot; + file.getAbsolutePath());</span>
+		}
+<span class="fc" id="L310">	}</span>
+
+	/**
+	 * Reverts current values to original default ones (hard coded)
+	 */
+	public static void revertToDefaults() {
+<span class="nc" id="L316">		prop = new Properties(getDefaults());</span>
+<span class="nc" id="L317">	}</span>
+
+	/**
+	 * Returns the working directory. Creates it if it does not exist.
+	 * @return the working directory for JMT files
+	 */
+	public static File getWorkingPath() {
+<span class="fc" id="L324">		String dirStr = MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR);</span>
+<span class="fc" id="L325">		File dir = new File(dirStr);</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">		if (!dir.isDirectory()) {</span>
+<span class="nc" id="L327">			dir.mkdirs();</span>
+		}
+<span class="fc" id="L329">		return dir;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

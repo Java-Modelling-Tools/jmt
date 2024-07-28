@@ -1,0 +1,475 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServiceTimesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">ServiceTimesPanel.java</span></div><h1>ServiceTimesPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels.parametric;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Vector;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysis;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
+import jmt.gui.common.definitions.parametric.ServiceTimesParametricAnalysis;
+
+/**
+ * &lt;p&gt;Title: ServiceTimesPanel&lt;/p&gt;
+ * &lt;p&gt;Description: this is the panel for he parametric analysis where
+ * the service time inside a station is modified.&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 9-mar-2006
+ *         Time: 16.19.35
+ * Modified by: Xinyu Gao
+ */
+public class ServiceTimesPanel extends ParameterOptionPanel {
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+	private JRadioButton allClass;
+	private JRadioButton singleClass;
+	private JLabel fromLabel;
+	private JSpinner from;
+	private JLabel toLabel;
+	private JSpinner to;
+	private JLabel stepsLabel;
+	private JSpinner steps;
+	private JLabel classChooserLabel;
+	private JComboBox classChooser;
+	private JLabel stationChooserLabel;
+	private JComboBox stationChooser;
+	private JScrollPane scroll;
+	private JTextArea description;
+	private JScrollPane descrPane;
+	private TitledBorder descriptionTitle;
+	private ParametricAnalysisChecker checker;
+	private String DESCRIPTION_SINGLE;
+
+	private ServiceTimesParametricAnalysis STPA;
+
+	public ServiceTimesPanel(ServiceTimesParametricAnalysis stpa, ClassDefinition classDef, StationDefinition stationDef, SimulationDefinition simDef) {
+<span class="nc" id="L92">		super();</span>
+<span class="nc" id="L93">		STPA = stpa;</span>
+<span class="nc" id="L94">		super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L95">		super.setDividerSize(3);</span>
+<span class="nc" id="L96">		DESCRIPTION = &quot;Repeat the simulation with different service times of a station for&quot; + &quot; the jobs of all the classes.\n\n&quot;</span>
+				+ &quot;The 'To' value represents the proportion of the final service time with&quot; + &quot; respect to the initial value.\n\n&quot;
+				+ &quot;The 'all class proportionally' option&quot;
+				+ &quot; will not be enabled for those stations where at least one of the two following conditions is true:\n&quot;
+				+ &quot; - there is at least one class with a service time distribution with infinite or null mean value;\n&quot;
+				+ &quot; - there is at least one load dependent class&quot;;
+
+<span class="nc" id="L103">		DESCRIPTION_SINGLE = &quot;Repeat the simulation changing the service time of a station for&quot; + &quot; one class only.\n\n&quot;</span>
+				+ &quot;The 'To' value represents the final mean value of service time distribution.&quot;;
+
+<span class="nc" id="L106">		cd = classDef;</span>
+<span class="nc" id="L107">		sd = stationDef;</span>
+<span class="nc" id="L108">		simd = simDef;</span>
+<span class="nc" id="L109">		checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+<span class="nc" id="L110">		initialize();</span>
+<span class="nc" id="L111">	}</span>
+
+	public void initialize() {
+<span class="nc" id="L114">		JPanel radioButtonsPanel = new JPanel(new GridLayout(2, 1));</span>
+<span class="nc" id="L115">		allClass = new JRadioButton(&quot;Change service time of all classes&quot;);</span>
+<span class="nc" id="L116">		allClass.setToolTipText(&quot;Change service time of all classes&quot;);</span>
+<span class="nc" id="L117">		singleClass = new JRadioButton(&quot;Change service time of one class&quot;);</span>
+<span class="nc" id="L118">		singleClass.setToolTipText(&quot;Change only the service time of one class&quot;);</span>
+<span class="nc" id="L119">		ButtonGroup group = new ButtonGroup();</span>
+<span class="nc" id="L120">		group.add(allClass);</span>
+<span class="nc" id="L121">		group.add(singleClass);</span>
+<span class="nc" id="L122">		allClass.setSelected(true);</span>
+<span class="nc" id="L123">		radioButtonsPanel.add(allClass);</span>
+<span class="nc" id="L124">		radioButtonsPanel.add(singleClass);</span>
+<span class="nc" id="L125">		radioButtonsPanel.setBorder(new EmptyBorder(5, 20, 0, 20));</span>
+<span class="nc" id="L126">		JPanel edit = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L127">		ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+<span class="nc" id="L128">		Vector&lt;Object&gt; availableS = checker.checkForServiceTimesParametricAnalysisAvailableStations();</span>
+<span class="nc" id="L129">		String[] stationNames = new String[availableS.size()];</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		for (int i = 0; i &lt; availableS.size(); i++) {</span>
+<span class="nc" id="L131">			stationNames[i] = sd.getStationName(availableS.get(i));</span>
+		}
+<span class="nc" id="L133">		classChooserLabel = new JLabel(&quot;Class:&quot;);</span>
+<span class="nc" id="L134">		classChooser = new JComboBox();</span>
+<span class="nc" id="L135">		classChooser.setToolTipText(&quot;Choose the class whose service time mean value inside the selected station will change&quot;);</span>
+<span class="nc" id="L136">		stationChooser = new JComboBox(stationNames);</span>
+<span class="nc" id="L137">		stationChooser.setToolTipText(&quot;Choose the station whose service time mean value will be change&quot;);</span>
+<span class="nc" id="L138">		description = new JTextArea();</span>
+<span class="nc" id="L139">		description.setOpaque(false);</span>
+<span class="nc" id="L140">		description.setEditable(false);</span>
+<span class="nc" id="L141">		description.setLineWrap(true);</span>
+<span class="nc" id="L142">		description.setWrapStyleWord(true);</span>
+<span class="nc" id="L143">		descrPane = new JScrollPane(description);</span>
+<span class="nc" id="L144">		descriptionTitle = new TitledBorder(new EtchedBorder(), &quot;Description&quot;);</span>
+<span class="nc" id="L145">		descrPane.setBorder(descriptionTitle);</span>
+<span class="nc" id="L146">		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+		//if the reference station of the STPA is still available
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if (availableS.contains(STPA.getReferenceStation())) {</span>
+<span class="nc" id="L149">			stationChooser.setSelectedItem(sd.getStationName(STPA.getReferenceStation()));</span>
+		}
+		//else select another one
+		else {
+<span class="nc" id="L153">			STPA.setReferenceStation(availableS.get(0));</span>
+<span class="nc" id="L154">			stationChooser.setSelectedIndex(0);</span>
+		}
+<span class="nc bnc" id="L156" title="All 2 branches missed.">		if (STPA.isSingleClass()) {</span>
+<span class="nc" id="L157">			fromLabel = new JLabel(&quot;From (s):&quot;);</span>
+<span class="nc" id="L158">			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L159">			from.setEnabled(true);   // changed to &quot;true</span>
+<span class="nc" id="L160">			toLabel = new JLabel(&quot;To (s):&quot;);</span>
+<span class="nc" id="L161">			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L162">			to.setToolTipText(&quot;Sets the final service time mean value expressed in seconds&quot;);</span>
+<span class="nc" id="L163">			stepsLabel = new JLabel(&quot;Steps: &quot;);</span>
+<span class="nc" id="L164">			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));</span>
+<span class="nc" id="L165">			steps.setToolTipText(&quot;Sets the number of steps to be performed&quot;);</span>
+			//get the vector containing the keys of the class that can be used to do this type of parametric analysis
+<span class="nc" id="L167">			Vector&lt;Object&gt; validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());</span>
+<span class="nc" id="L168">			String[] classeNames = new String[validC.size()];</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">			for (int i = 0; i &lt; validC.size(); i++) {</span>
+<span class="nc" id="L170">				classeNames[i] = cd.getClassName(validC.get(i));</span>
+			}
+<span class="nc" id="L172">			classChooser.removeAllItems();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">			for (String classeName : classeNames) {</span>
+<span class="nc" id="L174">				classChooser.addItem(classeName);</span>
+			}
+<span class="nc" id="L176">			classChooser.setEnabled(true);</span>
+<span class="nc" id="L177">			classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));</span>
+<span class="nc" id="L178">			singleClass.setSelected(true);</span>
+<span class="nc bnc" id="L179" title="All 4 branches missed.">			if (cd.getClosedClassKeys().size() == 1 || validC.size() &lt; cd.getClassKeys().size()) {</span>
+<span class="nc" id="L180">				allClass.setEnabled(false);</span>
+			}
+<span class="nc" id="L182">			allClass.setSelected(false);</span>
+<span class="nc" id="L183">			description.setText(DESCRIPTION_SINGLE);</span>
+<span class="nc" id="L184">		} else {</span>
+<span class="nc" id="L185">			fromLabel = new JLabel(&quot;From (%):&quot;);</span>
+<span class="nc" id="L186">			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L187">			from.setEnabled(true);  // changed to &quot;true&quot;</span>
+			//from.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling)));
+<span class="nc" id="L189">			from.setToolTipText(&quot;Sets the initial service time&quot;);</span>
+<span class="nc" id="L190">			toLabel = new JLabel(&quot;To (%):&quot;);</span>
+<span class="nc" id="L191">			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));</span>
+<span class="nc" id="L192">			to.setToolTipText(&quot;Sets the final proportion of service time with respect to the initial&quot;);</span>
+<span class="nc" id="L193">			stepsLabel = new JLabel(&quot;Steps: &quot;);</span>
+<span class="nc" id="L194">			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));</span>
+<span class="nc" id="L195">			steps.setToolTipText(&quot;Sets the number of steps to be performed&quot;);</span>
+<span class="nc" id="L196">			classChooser.setEnabled(false);</span>
+<span class="nc" id="L197">			singleClass.setSelected(false);</span>
+<span class="nc" id="L198">			allClass.setSelected(true);</span>
+<span class="nc" id="L199">			description.setText(DESCRIPTION);</span>
+<span class="nc" id="L200">			classChooser.addItem(&quot;All classes&quot;);</span>
+		}
+<span class="nc" id="L202">		from.setBackground(Color.WHITE);</span>
+<span class="nc" id="L203">		stationChooserLabel = new JLabel(&quot;Station:&quot;);</span>
+<span class="nc" id="L204">		edit.add(fromLabel);</span>
+<span class="nc" id="L205">		edit.add(from);</span>
+<span class="nc" id="L206">		edit.add(toLabel);</span>
+<span class="nc" id="L207">		edit.add(to);</span>
+<span class="nc" id="L208">		edit.add(stepsLabel);</span>
+<span class="nc" id="L209">		edit.add(steps);</span>
+<span class="nc" id="L210">		edit.add(classChooserLabel);</span>
+<span class="nc" id="L211">		edit.add(stationChooser);</span>
+<span class="nc" id="L212">		edit.add(classChooser);</span>
+<span class="nc" id="L213">		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L214">		JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L215">		editLables.add(fromLabel);</span>
+<span class="nc" id="L216">		editLables.add(toLabel);</span>
+<span class="nc" id="L217">		editLables.add(stepsLabel);</span>
+<span class="nc" id="L218">		editLables.add(stationChooserLabel);</span>
+<span class="nc" id="L219">		editLables.add(classChooserLabel);</span>
+<span class="nc" id="L220">		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L221">		JPanel editPanel = new JPanel();</span>
+<span class="nc" id="L222">		editPanel.add(editLables);</span>
+<span class="nc" id="L223">		editPanel.add(edit);</span>
+<span class="nc" id="L224">		editPanel.setBorder(new EmptyBorder(10, 20, 0, 20));</span>
+<span class="nc" id="L225">		JPanel cont = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L226">		cont.add(radioButtonsPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L227">		cont.add(editPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L228">		scroll = new JScrollPane(cont);</span>
+<span class="nc" id="L229">		title = new TitledBorder(&quot;Type of service time growth&quot;);</span>
+<span class="nc" id="L230">		scroll.setBorder(title);</span>
+		//description = new JTextArea(DESCRIPTION);
+<span class="nc" id="L232">		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L233">		setLeftComponent(scroll);</span>
+<span class="nc" id="L234">		setRightComponent(descrPane);</span>
+<span class="nc" id="L235">		this.setBorder(new EmptyBorder(5, 0, 5, 0));</span>
+<span class="nc" id="L236">		setListeners();</span>
+<span class="nc" id="L237">	}</span>
+
+	@Override
+	public void setEnabled(boolean enabled) {
+<span class="nc bnc" id="L241" title="All 2 branches missed.">		if (enabled) {</span>
+			//if the panel is enabled the allClass radioButton can be enabled only if all of the class have a service
+			//time distribution with a mean value, in the reference station contained in STPA.
+<span class="nc" id="L244">			Vector&lt;Object&gt; validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());</span>
+<span class="nc bnc" id="L245" title="All 4 branches missed.">			if (cd.getClassKeys().size() == 1 || validC.size() &lt; cd.getClassKeys().size()) {</span>
+<span class="nc" id="L246">				allClass.setEnabled(false);</span>
+			} else {
+<span class="nc" id="L248">				allClass.setEnabled(true);</span>
+			}
+<span class="nc" id="L250">		} else {</span>
+<span class="nc" id="L251">			allClass.setEnabled(false);</span>
+		}
+<span class="nc" id="L253">		singleClass.setEnabled(enabled);</span>
+<span class="nc" id="L254">		fromLabel.setEnabled(enabled);</span>
+<span class="nc" id="L255">		from.setEnabled(enabled);  // set to &quot;enabled&quot;</span>
+<span class="nc" id="L256">		toLabel.setEnabled(enabled);</span>
+<span class="nc" id="L257">		to.setEnabled(enabled);</span>
+<span class="nc" id="L258">		stepsLabel.setEnabled(enabled);</span>
+<span class="nc" id="L259">		steps.setEnabled(enabled);</span>
+<span class="nc" id="L260">		description.setEnabled(enabled);</span>
+<span class="nc" id="L261">		classChooserLabel.setEnabled(enabled);</span>
+<span class="nc bnc" id="L262" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L263">			classChooser.setEnabled(enabled);</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">		} else if (singleClass.isSelected()) {</span>
+<span class="nc" id="L265">			classChooser.setEnabled(enabled);</span>
+		}
+<span class="nc" id="L267">		stationChooserLabel.setEnabled(enabled);</span>
+<span class="nc" id="L268">		stationChooser.setEnabled(enabled);</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L270">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L271">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+		} else {
+<span class="nc" id="L273">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L274">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+		}
+<span class="nc bnc" id="L276" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L277">			title.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L278">			descriptionTitle.setTitleColor(Color.LIGHT_GRAY);</span>
+		} else {
+<span class="nc" id="L280">			title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L281">			descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+		}
+<span class="nc" id="L283">	}</span>
+
+	private void setListeners() {
+		// Add the &quot;from&quot; listener
+<span class="nc" id="L287">		from.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L289">				Object fValue = from.getValue();</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">				if (fValue instanceof Double) {</span>
+<span class="nc" id="L291">					STPA.setInitialValue(((Double) fValue).doubleValue());</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">				} else if (fValue instanceof Integer) {</span>
+<span class="nc" id="L293">					STPA.setInitialValue(((Integer) fValue).doubleValue());</span>
+				}
+<span class="nc" id="L295">				from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L296">			}</span>
+		});
+<span class="nc" id="L298">		to.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L300">				Object tValue = to.getValue();</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">				if (tValue instanceof Double) {</span>
+<span class="nc" id="L302">					STPA.setFinalValue(((Double) tValue).doubleValue());</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">				} else if (tValue instanceof Integer) {</span>
+<span class="nc" id="L304">					STPA.setFinalValue(((Integer) tValue).doubleValue());</span>
+				}
+<span class="nc" id="L306">				to.setValue(new Double(STPA.getFinalValue()));</span>
+<span class="nc" id="L307">			}</span>
+		});
+<span class="nc" id="L309">		steps.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L311" title="All 2 branches missed.">				if (steps.getValue() instanceof Integer) {</span>
+<span class="nc" id="L312">					Integer sValue = (Integer) steps.getValue();</span>
+<span class="nc" id="L313">					STPA.setNumberOfSteps(sValue.intValue());</span>
+				}
+<span class="nc" id="L315">				steps.setValue(new Integer(STPA.getNumberOfSteps()));</span>
+<span class="nc" id="L316">			}</span>
+		});
+<span class="nc" id="L318">		allClass.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L321">					return;</span>
+				}
+<span class="nc" id="L323">				STPA.setSingleClass(false);</span>
+<span class="nc" id="L324">				fromLabel.setText(&quot;From (%):&quot;);</span>
+<span class="nc" id="L325">				toLabel.setText(&quot;To (%): &quot;);</span>
+<span class="nc" id="L326">				STPA.setDefaultInitialValue();</span>
+<span class="nc" id="L327">				STPA.setDefaultFinalValue();</span>
+<span class="nc" id="L328">				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L329">				from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L330">				from.setToolTipText(&quot;Sets the initial value of service time&quot;);</span>
+<span class="nc" id="L331">				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));</span>
+<span class="nc" id="L332">				to.setValue(new Double(STPA.getFinalValue()));</span>
+<span class="nc" id="L333">				to.setToolTipText(&quot;Sets the final proportion of service time with respect to the initial&quot;);</span>
+<span class="nc" id="L334">				classChooser.removeAllItems();</span>
+<span class="nc" id="L335">				classChooser.addItem(&quot;All classes&quot;);</span>
+<span class="nc" id="L336">				classChooser.setEnabled(false);</span>
+<span class="nc" id="L337">				description.setText(DESCRIPTION);</span>
+<span class="nc" id="L338">			}</span>
+		});
+<span class="nc" id="L340">		singleClass.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L342" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L343">					return;</span>
+				}
+<span class="nc" id="L345">				STPA.setSingleClass(true);</span>
+				//get the vector containing the keys of the valid classes. A class is valid if its service
+				//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
+<span class="nc" id="L348">				Vector&lt;Object&gt; validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());</span>
+<span class="nc" id="L349">				String[] classNames = new String[validC.size()];</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">				for (int i = 0; i &lt; validC.size(); i++) {</span>
+<span class="nc" id="L351">					classNames[i] = cd.getClassName(validC.get(i));</span>
+				}
+<span class="nc" id="L353">				classChooser.setEnabled(true);</span>
+<span class="nc" id="L354">				ItemListener listener = classChooser.getItemListeners()[0];</span>
+<span class="nc" id="L355">				classChooser.removeItemListener(listener);</span>
+<span class="nc" id="L356">				classChooser.removeAllItems();</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">				for (String className : classNames) {</span>
+<span class="nc" id="L358">					classChooser.addItem(className);</span>
+				}
+<span class="nc" id="L360">				classChooser.addItemListener(listener);</span>
+				//if no classes where previously associated, associate
+				//the first one
+<span class="nc bnc" id="L363" title="All 2 branches missed.">				if (!validC.contains(STPA.getReferenceClass())) {</span>
+<span class="nc" id="L364">					STPA.setReferenceClass(validC.get(0));</span>
+				}
+<span class="nc" id="L366">				classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));</span>
+<span class="nc" id="L367">				fromLabel.setText(&quot;From (s):&quot;);</span>
+<span class="nc" id="L368">				toLabel.setText(&quot;To (s):&quot;);</span>
+<span class="nc" id="L369">				STPA.setDefaultInitialValue();</span>
+<span class="nc" id="L370">				STPA.setDefaultFinalValue();</span>
+<span class="nc" id="L371">				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L372">				from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L373">				from.setToolTipText(&quot;Sets the initial service time in job/sec&quot;);</span>
+<span class="nc" id="L374">				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L375">				to.setValue(new Double(STPA.getFinalValue()));</span>
+<span class="nc" id="L376">				to.setToolTipText(&quot;Sets the final service time in job/sec&quot;);</span>
+<span class="nc" id="L377">				description.setText(DESCRIPTION_SINGLE);</span>
+<span class="nc" id="L378">			}</span>
+		});
+<span class="nc" id="L380">		classChooser.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L382" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L383">					return;</span>
+				}
+<span class="nc" id="L385">				String className = (String) classChooser.getSelectedItem();</span>
+<span class="nc" id="L386">				Object classKey = null;</span>
+<span class="nc" id="L387">				Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+				//for cycle used to get the key of the selected class
+<span class="nc bnc" id="L389" title="All 2 branches missed.">				for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">					if (cd.getClassName(classes.get(i)).equals(className)) {</span>
+<span class="nc" id="L391">						classKey = classes.get(i);</span>
+<span class="nc" id="L392">						break;</span>
+					}
+				}
+<span class="nc" id="L395">				STPA.setReferenceClass(classKey);</span>
+<span class="nc" id="L396">				STPA.setDefaultInitialValue();</span>
+<span class="nc" id="L397">				STPA.setDefaultFinalValue();</span>
+<span class="nc" id="L398">				from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L399">				to.setValue(new Double(STPA.getFinalValue()));</span>
+<span class="nc" id="L400">			}</span>
+		});
+<span class="nc" id="L402">		stationChooser.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L404" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L405">					return;</span>
+				}
+<span class="nc" id="L407">				String stationName = (String) stationChooser.getSelectedItem();</span>
+<span class="nc" id="L408">				STPA.setReferenceStation(getStationKey(stationName));</span>
+				//get the vector containing the keys of the valid classes. A class is valid if its service
+				//time distribution is load independent (inside the reference station of the STPA) and has a mean value.
+<span class="nc" id="L411">				Vector&lt;Object&gt; validC = checker.checkForServiceTimesParametricSimulationAvailableClasses(STPA.getReferenceStation());</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">				if (STPA.isSingleClass()) {</span>
+<span class="nc" id="L413">					String[] classes = new String[validC.size()];</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">					for (int i = 0; i &lt; validC.size(); i++) {</span>
+<span class="nc" id="L415">						classes[i] = cd.getClassName(validC.get(i));</span>
+					}
+					//if the reference station of the STPA is no more valid get the first available
+<span class="nc bnc" id="L418" title="All 2 branches missed.">					if (!validC.contains(STPA.getReferenceClass())) {</span>
+<span class="nc" id="L419">						STPA.setReferenceClass(validC.get(0));</span>
+					}
+<span class="nc" id="L421">					STPA.setDefaultInitialValue();</span>
+<span class="nc" id="L422">					STPA.setDefaultFinalValue();</span>
+<span class="nc" id="L423">					from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L424">					to.setValue(new Double(STPA.getFinalValue()));</span>
+<span class="nc" id="L425">					ItemListener listener = classChooser.getItemListeners()[0];</span>
+<span class="nc" id="L426">					classChooser.removeItemListener(listener);</span>
+<span class="nc" id="L427">					classChooser.removeAllItems();</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">					for (String classe : classes) {</span>
+<span class="nc" id="L429">						classChooser.addItem(classe);</span>
+					}
+<span class="nc" id="L431">					classChooser.setEnabled(true);</span>
+<span class="nc" id="L432">					classChooser.setSelectedItem(cd.getClassName(STPA.getReferenceClass()));</span>
+<span class="nc" id="L433">					classChooser.addItemListener(listener);</span>
+<span class="nc" id="L434">					singleClass.setSelected(true);</span>
+<span class="nc" id="L435">					allClass.setSelected(false);</span>
+					//if the number of available classes is less than the total number of classes the all class service
+					//time parametric analysis is no more available.
+<span class="nc bnc" id="L438" title="All 2 branches missed.">					if (validC.size() &lt; cd.getClassKeys().size()) {</span>
+<span class="nc" id="L439">						allClass.setEnabled(false);</span>
+					} else {
+<span class="nc" id="L441">						allClass.setEnabled(true);</span>
+					}
+<span class="nc" id="L443">				} else {</span>
+					//if the number of available classes is less than the total number of classes the all class service
+					//time parametric analysis is no more available...
+<span class="nc bnc" id="L446" title="All 2 branches missed.">					if (validC.size() &lt; cd.getClassKeys().size()) {</span>
+<span class="nc" id="L447">						STPA.setSingleClass(true);</span>
+<span class="nc" id="L448">						String[] classes = new String[validC.size()];</span>
+<span class="nc bnc" id="L449" title="All 2 branches missed.">						for (int i = 0; i &lt; validC.size(); i++) {</span>
+<span class="nc" id="L450">							classes[i] = cd.getClassName(validC.get(i));</span>
+						}
+						//set the reference class to the STPA...
+<span class="nc" id="L453">						STPA.setReferenceClass(validC.get(0));</span>
+<span class="nc" id="L454">						STPA.setDefaultInitialValue();</span>
+<span class="nc" id="L455">						STPA.setDefaultFinalValue();</span>
+<span class="nc" id="L456">						from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L457">						from.setValue(new Double(STPA.getInitialValue()));</span>
+<span class="nc" id="L458">						to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));</span>
+<span class="nc" id="L459">						to.setValue(new Double(STPA.getFinalValue()));</span>
+						//... and set the STPA to be single class
+<span class="nc" id="L461">						singleClass.setSelected(true);</span>
+<span class="nc" id="L462">						allClass.setEnabled(false);</span>
+<span class="nc" id="L463">						description.setText(DESCRIPTION_SINGLE);</span>
+<span class="nc" id="L464">					} else {</span>
+<span class="nc" id="L465">						allClass.setEnabled(true);</span>
+<span class="nc" id="L466">						classChooser.setEnabled(false);</span>
+<span class="nc" id="L467">						singleClass.setSelected(false);</span>
+<span class="nc" id="L468">						allClass.setSelected(true);</span>
+					}
+				}
+<span class="nc" id="L471">			}</span>
+		});
+<span class="nc" id="L473">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

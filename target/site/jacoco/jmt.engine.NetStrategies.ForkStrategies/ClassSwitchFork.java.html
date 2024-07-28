@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassSwitchFork.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.ForkStrategies</a> &gt; <span class="el_source">ClassSwitchFork.java</span></div><h1>ClassSwitchFork.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NetStrategies.ForkStrategies;
+
+import java.util.HashMap;
+import java.util.Map;
+import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeListWithJobNum;
+
+/**
+ *
+ * @author mattia
+ */
+public class ClassSwitchFork extends ForkStrategy {
+
+	private ClassJobNum jobsPerClass[];
+	private String nodeNames[];
+	private NetNode[] nodes;
+	private JobClassList classList;
+
+<span class="nc" id="L40">	public ClassSwitchFork(ClassJobNum jobsPerClass[]) {</span>
+<span class="nc" id="L41">		this.jobsPerClass = jobsPerClass;</span>
+<span class="nc" id="L42">		nodeNames = new String[jobsPerClass.length];</span>
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		for (int i = 0; i &lt; jobsPerClass.length; i++) {</span>
+<span class="nc" id="L44">			nodeNames[i] = jobsPerClass[i].getName();</span>
+		}
+<span class="nc" id="L46">	}</span>
+
+	@Override
+	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		if (nodes == null) {</span>
+			//it is the first execution of this method: find the NetNode objects
+<span class="nc" id="L52">			nodes = new NetNode[nodeNames.length];</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">			for (int i = 0; i &lt; nodeNames.length; i++) {</span>
+<span class="nc" id="L54">				nodes[i] = ownerNode.getNetSystem().getNode(nodeNames[i]);</span>
+			}
+		}
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (classList == null) {</span>
+			//it is the first execution of this method: find the JobClassList object
+<span class="nc" id="L59">			classList = ownerNode.getJobClasses();</span>
+		}
+
+<span class="nc" id="L62">		NodeListWithJobNum nl = new NodeListWithJobNum();</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		for (int i = 0; i &lt; jobsPerClass.length; i++) {</span>
+<span class="nc" id="L64">			Map&lt;JobClass, Integer&gt; map = new HashMap&lt;JobClass, Integer&gt;();</span>
+<span class="nc" id="L65">			String[] classes = jobsPerClass[i].getClasses();</span>
+<span class="nc" id="L66">			Integer[] numbers = jobsPerClass[i].getNumbers();</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			for (int j = 0; j &lt; classes.length; j++) {</span>
+<span class="nc" id="L68">				map.put(classList.get(classes[j]), numbers[j]);</span>
+			}
+<span class="nc" id="L70">			nl.add(nodes[i], map);</span>
+		}
+<span class="nc" id="L72">		return nl;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

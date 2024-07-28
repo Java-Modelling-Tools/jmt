@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Erlang.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">Erlang.java</span></div><h1>Erlang.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.engine.math;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; Erlang&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * This class provides methods to compute Erlang-B and Erlang-C 
+ * formulas with a numerically stable algorithm.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 13/apr/07
+ * &lt;b&gt;Time:&lt;/b&gt; 10:43:39&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+<span class="nc" id="L31">public class Erlang {</span>
+
+	/**
+	 * Computes Erlang-B formula (probability of blocking) with a 
+	 * recursive method to avoid numeric instability
+	 * @param traffic The total traffic offered (in erlangs) 
+	 * that is &lt;em&gt;arrival rate * service demand&lt;/em&gt;. Must be greater than zero.
+	 * @param servers number of servers. Must be greater than one.
+	 * @return computed value
+	 * @throws IllegalArgumentException if &lt;code&gt;traffic &lt;= 0&lt;/code&gt; or &lt;code&gt;servers &lt;= 0&lt;/code&gt;
+	 */
+	public static double erlangB(double traffic, int servers) throws IllegalArgumentException {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		if (traffic &lt; 0) {</span>
+<span class="nc" id="L44">			throw new IllegalArgumentException(&quot;Traffic parameter must be greater than zero&quot;);</span>
+		}
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if (servers &lt; 0) {</span>
+<span class="nc" id="L47">			throw new IllegalArgumentException(&quot;Number of servers must be greater than zero&quot;);</span>
+		}
+<span class="nc" id="L49">		double a = 1.0, inv = 1.0;</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		for (int i = 0; i &lt; servers; i++) {</span>
+<span class="nc" id="L51">			a *= (servers - i) / traffic;</span>
+<span class="nc" id="L52">			inv += a;</span>
+		}
+<span class="nc" id="L54">		return 1.0 / inv;</span>
+	}
+
+	/**
+	 * Computes Erlang-C formula (probability of queueing) 
+	 * basing on Erlang-B evaluation
+	 * @param traffic The total traffic offered (in erlangs) 
+	 * that is &lt;em&gt;arrival rate * service demand&lt;/em&gt;. Must be greater than zero.
+	 * @param servers number of servers. Must be greater than one.
+	 * @return computed value
+	 * @throws IllegalArgumentException if traffic &lt;= 0 or servers &lt;= 0
+	 */
+	public static double erlangC(double traffic, int servers) throws IllegalArgumentException {
+<span class="nc" id="L67">		double b = erlangB(traffic, servers);</span>
+<span class="nc" id="L68">		double rho = traffic / servers;</span>
+<span class="nc" id="L69">		return b / (1 - rho + rho * b);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

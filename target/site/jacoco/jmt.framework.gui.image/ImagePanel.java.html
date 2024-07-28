@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImagePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.image</a> &gt; <span class="el_source">ImagePanel.java</span></div><h1>ImagePanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.gui.image;
+
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.util.HashMap;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+
+/**
+ * &lt;p&gt;Title: ImagePanel&lt;/p&gt;
+ * &lt;p&gt;Description: A graphical component used to show a given IconImage. This panel is designed to
+ * auto-resize the image basing on width assigned by layout managers, maintaining aspect ratio.
+ * A maximum height can be specified too. Internal caching is used as long as width is not changed
+ * to avoid to recalculate images scaling continuously.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 1-lug-2005
+ *         Time: 15.55.21
+ */
+public class ImagePanel extends JLabel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected ImageIcon image;
+<span class="nc" id="L48">	protected int maxheight = Integer.MAX_VALUE;</span>
+	protected int currentWidth;
+	/** Maximum number of cached elements */
+<span class="nc" id="L51">	protected int maxCache = 256;</span>
+<span class="nc" id="L52">	protected HashMap&lt;ImageIcon, ImageIcon&gt; cache = new HashMap&lt;ImageIcon, ImageIcon&gt;();</span>
+
+	/**
+	 * Construct a new ImagePanel
+	 */
+	public ImagePanel() {
+<span class="nc" id="L58">		super();</span>
+<span class="nc" id="L59">		this.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L60">		this.addComponentListener(new ComponentAdapter() {</span>
+			@Override
+			public void componentResized(ComponentEvent e) {
+<span class="nc bnc" id="L63" title="All 2 branches missed.">				if (image != null) {</span>
+<span class="nc" id="L64">					ImagePanel.this.resizeImage();</span>
+				}
+<span class="nc" id="L66">			}</span>
+		});
+<span class="nc" id="L68">	}</span>
+
+	/**
+	 * Sets image to be shown on this panel
+	 * @param image image to be shown in IconImage format
+	 */
+	public void setImage(ImageIcon image) {
+<span class="nc" id="L75">		this.image = image;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (image == null) {</span>
+<span class="nc" id="L77">			this.setIcon(null);</span>
+<span class="nc" id="L78">			return;</span>
+		}
+<span class="nc" id="L80">		resizeImage();</span>
+<span class="nc" id="L81">	}</span>
+
+	/**
+	 * Sets maximum height allowed for this component
+	 * @param height maximum height allowed
+	 */
+	public void setMaximumHeight(int height) {
+<span class="nc" id="L88">		this.maxheight = height;</span>
+<span class="nc" id="L89">		cache.clear();</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if (image != null) {</span>
+<span class="nc" id="L91">			resizeImage();</span>
+		}
+<span class="nc" id="L93">	}</span>
+
+	/**
+	 * Helper method used to resize input image and display it. If image was already resized to current size, 
+	 * take the copy from local cache.
+	 */
+	protected void resizeImage() {
+		// Resets cache if width has changed
+<span class="nc bnc" id="L101" title="All 2 branches missed.">		if (currentWidth != this.getWidth()) {</span>
+<span class="nc" id="L102">			currentWidth = this.getWidth();</span>
+<span class="nc" id="L103">			cache.clear();</span>
+		}
+
+		// If this component size is not already defined, sets image without resizing
+<span class="nc" id="L107">		Dimension d = this.getSize();</span>
+<span class="nc bnc" id="L108" title="All 4 branches missed.">		if (d.width &lt;= 0 || d.height &lt;= 0) {</span>
+<span class="nc" id="L109">			this.setIcon(image);</span>
+<span class="nc" id="L110">			return;</span>
+		}
+
+		// If cache contains image of the correct size, returns it.
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		if (cache.containsKey(image)) {</span>
+<span class="nc" id="L115">			this.setIcon(cache.get(image));</span>
+<span class="nc" id="L116">			return;</span>
+		}
+
+		// Calculates ratio factor
+<span class="nc" id="L120">		Image tmp = image.getImage();</span>
+<span class="nc" id="L121">		float scale = (float) d.width / (float) image.getIconWidth();</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if (scale * image.getIconHeight() &gt; maxheight) {</span>
+<span class="nc" id="L124">			scale = (float) maxheight / (float) image.getIconHeight();</span>
+		}
+
+		// Resizes image
+<span class="nc" id="L128">		tmp = tmp.getScaledInstance((int) (scale * image.getIconWidth()), (int) (scale * image.getIconHeight()), Image.SCALE_SMOOTH);</span>
+<span class="nc" id="L129">		ImageIcon resized = new ImageIcon(tmp);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (cache.size() &gt; maxCache) {</span>
+<span class="nc" id="L131">			cache.clear();</span>
+		}
+<span class="nc" id="L133">		cache.put(image, resized);</span>
+<span class="nc" id="L134">		this.setIcon(resized);</span>
+<span class="nc" id="L135">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

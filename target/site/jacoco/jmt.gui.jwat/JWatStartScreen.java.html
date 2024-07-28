@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWatStartScreen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat</a> &gt; <span class="el_source">JWatStartScreen.java</span></div><h1>JWatStartScreen.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import jmt.framework.gui.controller.Manager;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+
+public class JWatStartScreen extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+
+	//Start screen image
+	private static final String IMG_STARTSCREEN = &quot;StartScreenJWat&quot;;
+	//JWAT tool icons
+	private static final String IMG_JWATICON = &quot;JWATIcon&quot;;
+	private static final String IMG_TRAFFIC_ICON = &quot;TrafficIcon&quot;;
+	private static final String IMG_SAVE_ICON = &quot;Open&quot;;
+	private static final String IMG_PATH_ICON = &quot;PathIcon&quot;;
+	private static final String IMG_WL_ICON = &quot;WorkLoadIcon&quot;;
+	//Tool buttons size
+	private static final int BUTTONSIZE = 25;
+	//Rollover help
+<span class="nc" id="L62">	private Rollover rollover = new Rollover();</span>
+
+<span class="nc" id="L64">	protected AbstractAction startPath = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L69">			putValue(Action.SHORT_DESCRIPTION, &quot;Path analyzer&quot;);</span>
+<span class="nc" id="L70">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_PATH_ICON, new Dimension(BUTTONSIZE, BUTTONSIZE)));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L74">		}</span>
+
+	};
+
+<span class="nc" id="L78">	protected AbstractAction startWLA = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L83">			putValue(Action.SHORT_DESCRIPTION, &quot;Workload analyzer&quot;);</span>
+<span class="nc" id="L84">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_WL_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			//WorkloadAnalysisWizard.main(new String[]{&quot;load&quot;});
+<span class="nc" id="L89">			JWatStartScreen.this.dispose();</span>
+<span class="nc" id="L90">		}</span>
+
+	};
+
+<span class="nc" id="L94">	protected AbstractAction startTraffic = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L99">			putValue(Action.SHORT_DESCRIPTION, &quot;Traffic Analysis - Burstiness&quot;);</span>
+<span class="nc" id="L100">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_TRAFFIC_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			//BurstWizard.main(null);
+<span class="nc" id="L105">			JWatStartScreen.this.dispose();</span>
+<span class="nc" id="L106">		}</span>
+
+	};
+
+<span class="nc" id="L110">	protected AbstractAction startLoad = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L115">			putValue(Action.SHORT_DESCRIPTION, &quot;Open a demo file&quot;);</span>
+<span class="nc" id="L116">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(IMG_SAVE_ICON, new Dimension(BUTTONSIZE + 10, BUTTONSIZE + 10)));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			//WorkloadAnalysisWizard.main(new String[]{&quot;demo&quot;});
+<span class="nc" id="L121">			JWatStartScreen.this.dispose();</span>
+<span class="nc" id="L122">		}</span>
+
+	};
+
+<span class="nc" id="L126">	protected AbstractAction empty = new AbstractAction() {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L134">		}</span>
+
+	};
+
+	//Arrays of abstract actions for tool buttons
+<span class="nc" id="L139">	private AbstractAction[] buttonAction = { startPath, startWLA, startTraffic, empty, startLoad };</span>
+
+	/**
+	 * JWAT Constructor.
+	 */
+<span class="nc" id="L144">	public JWatStartScreen() {</span>
+<span class="nc" id="L145">		initGUI();</span>
+<span class="nc" id="L146">		addListeners();</span>
+<span class="nc" id="L147">	}</span>
+
+	/*
+	 * Initializes JWAT start screen GUI
+	 */
+	private void initGUI() {
+<span class="nc" id="L153">		this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());</span>
+<span class="nc" id="L154">		this.setResizable(false);</span>
+<span class="nc" id="L155">		this.setTitle(&quot;JWAT&quot;);</span>
+<span class="nc" id="L156">		this.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT_STARTSCREEN, CommonConstants.MAX_GUI_HEIGHT_JWAT_STARTSCREEN);</span>
+		//Image image = new ImageIcon(imageURL).getImage();
+		//image = image.getScaledInstance(400, 315, Image.SCALE_SMOOTH);
+<span class="nc" id="L159">		JPanel eastPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L160">		eastPanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);</span>
+<span class="nc" id="L161">		JPanel buttonPanel = new JPanel(new GridLayout(buttonAction.length, 1, 2, 2));</span>
+<span class="nc" id="L162">		eastPanel.add(buttonPanel, BorderLayout.CENTER);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		for (AbstractAction element : buttonAction) {</span>
+<span class="nc" id="L164">			buttonPanel.add(createButton(element));</span>
+		}
+<span class="nc" id="L166">		JLabel imageLabel = new JLabel();</span>
+<span class="nc" id="L167">		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));</span>
+<span class="nc" id="L168">		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(400, 315)));</span>
+<span class="nc" id="L169">		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);</span>
+<span class="nc" id="L170">		imageLabel.setVerticalAlignment(SwingConstants.NORTH);</span>
+<span class="nc" id="L171">		this.getContentPane().add(imageLabel, BorderLayout.CENTER);</span>
+<span class="nc" id="L172">		this.getContentPane().add(eastPanel, BorderLayout.EAST);</span>
+<span class="nc" id="L173">	}</span>
+
+	/*
+	 * Add all listeners to start screen 
+	 */
+	private void addListeners() {
+<span class="nc" id="L179">		this.addWindowListener(new WindowAdapter() {</span>
+			/**
+			 * Invoked when a window is in the process of being closed.
+			 */
+			@Override
+			public void windowClosing(WindowEvent e) {
+<span class="nc" id="L185">				Manager.exit(JWatStartScreen.this);</span>
+<span class="nc" id="L186">			}</span>
+
+			/**
+			 * Invoked when a window has been closed.
+			 */
+			@Override
+			public void windowClosed(WindowEvent e) {
+<span class="nc" id="L193">				Manager.exit(JWatStartScreen.this);</span>
+<span class="nc" id="L194">			}</span>
+		});
+<span class="nc" id="L196">	}</span>
+
+	/**
+	 * Helper method used to create a button inside a JPanel
+	 * @param action action associated to that button
+	 * @return created component
+	 */
+	private JComponent createButton(AbstractAction action) {
+<span class="nc" id="L204">		JPanel panel = new JPanel(); // Use gridbag as centers by default</span>
+<span class="nc" id="L205">		JButton button = new JButton(action);</span>
+<span class="nc" id="L206">		button.setHorizontalTextPosition(SwingConstants.CENTER);</span>
+<span class="nc" id="L207">		button.setVerticalTextPosition(SwingConstants.BOTTOM);</span>
+<span class="nc" id="L208">		button.setPreferredSize(new Dimension((int) (BUTTONSIZE * 3.5), (BUTTONSIZE * 2)));</span>
+<span class="nc" id="L209">		button.addMouseListener(rollover);</span>
+<span class="nc bnc" id="L210" title="All 2 branches missed.">		if (action == buttonAction[3]) {</span>
+<span class="nc" id="L211">			button.setVisible(false);</span>
+		}
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		if (action == buttonAction[0]) {</span>
+<span class="nc" id="L214">			button.setEnabled(false);</span>
+		}
+		//if (action == buttonAction[2]) button.setEnabled(false);
+		//if (action == buttonAction[4]) button.setEnabled(false);
+<span class="nc" id="L218">		panel.add(button);</span>
+<span class="nc" id="L219">		return panel;</span>
+	}
+
+	/**
+	 * This class is used to perform rollover on the buttons by changing background
+	 */
+	public class Rollover extends MouseAdapter {
+
+		private Color normal;
+		private Color rollover;
+
+<span class="nc" id="L230">		public Rollover() {</span>
+<span class="nc" id="L231">			normal = new JButton().getBackground();</span>
+<span class="nc" id="L232">			rollover = new Color(83, 126, 126);</span>
+<span class="nc" id="L233">		}</span>
+
+		/**
+		 * Invoked when the mouse enters a component.
+		 */
+		@Override
+		public void mouseEntered(MouseEvent e) {
+<span class="nc" id="L240">			((Component) e.getSource()).setBackground(rollover);</span>
+<span class="nc" id="L241">		}</span>
+
+		/**
+		 * Invoked when the mouse exits a component.
+		 */
+		@Override
+		public void mouseExited(MouseEvent e) {
+<span class="nc" id="L248">			((Component) e.getSource()).setBackground(normal);</span>
+<span class="nc" id="L249">		}</span>
+
+	}
+
+	/**
+	 * Main method.
+	 * @param args no args.
+	 */
+	public static void main(String[] args) {
+<span class="nc" id="L258">		new JWatStartScreen().setVisible(true);</span>
+<span class="nc" id="L259">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

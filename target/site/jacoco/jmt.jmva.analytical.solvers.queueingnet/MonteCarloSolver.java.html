@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MonteCarloSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet</a> &gt; <span class="el_source">MonteCarloSolver.java</span></div><h1>MonteCarloSolver.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Linearizer;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Solver;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Linearizer;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Solver;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+public class MonteCarloSolver extends QNSolver {
+
+	private int maxSamples;
+
+	private double tolerance;
+
+	private int N; // Number of queues
+
+	private PopulationVector pop; // Population
+
+	private int M; // Number of classes
+
+	private ArrayList&lt;Double&gt; samplingParam;
+
+	private double[][] load;
+
+	// Values to analyse the accuracy
+<span class="nc" id="L59">	private static int I = 1000;</span>
+<span class="nc" id="L60">	private static double CRITICAL_VALUE = 2.575;</span>
+
+	// Number of threads for sampling
+<span class="nc" id="L63">	private static int NUMBER_OF_TASKS = 10;</span>
+
+	public MonteCarloSolver(QNModel qnm, double tolerance, int maxSamples) throws InternalErrorException {
+<span class="nc" id="L66">		super(qnm);</span>
+<span class="nc" id="L67">		this.tolerance = tolerance;</span>
+<span class="nc" id="L68">		this.maxSamples = maxSamples;</span>
+<span class="nc" id="L69">		setUp(qnm.getMultiplicitiesVector(), qnm.getPopulationVector());</span>
+<span class="nc" id="L70">	}</span>
+
+	private void setUp(MultiplicitiesVector m, PopulationVector p) {
+<span class="nc" id="L73">		this.pop = p;</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">		for (int i = 0; i &lt; m.size(); i++) {</span>
+<span class="nc" id="L75">			N += m.get(i);</span>
+		}
+<span class="nc" id="L77">		M = qnm.R;</span>
+<span class="nc" id="L78">		load = new double[N][M];</span>
+
+<span class="nc" id="L80">		int currIndex = 0;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">		for (int i = 0; i &lt; qnm.M; i++) {</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			for (int k = 0; k &lt; m.get(i); k++) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">				for (int j = 0; j &lt; qnm.R; j++) {</span>
+<span class="nc" id="L84">					load[currIndex][j] = qnm.getDemand(i, j);</span>
+				}
+<span class="nc" id="L86">				currIndex++;</span>
+			}
+		}
+
+<span class="nc" id="L90">		int stationNo = N;</span>
+<span class="nc" id="L91">		samplingParam = new ArrayList&lt;Double&gt;(stationNo);</span>
+<span class="nc" id="L92">		Integer[] population = new Integer[p.size()];</span>
+<span class="nc" id="L93">		population = p.toArray(population);</span>
+<span class="nc" id="L94">		int[] pop = new int[population.length];</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for (int i = 0; i &lt; population.length; i++) {</span>
+<span class="nc" id="L96">			pop[i] = population[i];</span>
+		}
+
+<span class="nc" id="L99">		Linearizer linearizer = new Linearizer(M, stationNo, pop, false);</span>
+<span class="nc" id="L100">		String[] stationName = new String[stationNo];</span>
+<span class="nc" id="L101">		int[] stationType = new int[stationNo];</span>
+<span class="nc" id="L102">		double[][][] s = new double[stationNo][M][1];</span>
+<span class="nc" id="L103">		double[][] v = new double[stationNo][M];</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int i = 0; i &lt; stationNo; i++) {</span>
+<span class="nc" id="L106">			stationType[i] = Solver.LI;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">			for (int j = 0; j &lt; M; j++) {</span>
+<span class="nc" id="L108">				v[i][j] = 1;</span>
+<span class="nc" id="L109">				s[i][j][0] = load[i][j];</span>
+			}
+		}
+
+<span class="nc" id="L113">		linearizer.input(stationName, stationType, s, v);</span>
+<span class="nc" id="L114">		linearizer.solveLI();</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		for (int i = 0; i &lt; stationNo; i++) {</span>
+<span class="nc" id="L116">			double util = linearizer.getAggrUtilization(i);</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">			if (util &lt; 0.9) {</span>
+<span class="nc" id="L118">				samplingParam.add(1 - util);</span>
+			} else {
+<span class="nc" id="L120">				samplingParam.add(1 / Math.sqrt(Collections.max(Arrays.asList((population)))));</span>
+			}
+		}
+<span class="nc" id="L123">	}</span>
+
+	private BigRational computeNotSetNormalisingConstant() {
+<span class="nc" id="L126">		ExecutorService pool = Executors.newFixedThreadPool(NUMBER_OF_TASKS);</span>
+<span class="nc" id="L127">		List&lt;MonteCarloSamplingTask&gt; tasks = new ArrayList&lt;MonteCarloSamplingTask&gt;(NUMBER_OF_TASKS);</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		for (int i = 0; i &lt; NUMBER_OF_TASKS; i++) {</span>
+<span class="nc" id="L129">			tasks.add(new MonteCarloSamplingTask(I / NUMBER_OF_TASKS));</span>
+		}
+<span class="nc" id="L131">		double currentSum = 0;</span>
+<span class="nc" id="L132">		double currentSumSquared = 0;</span>
+<span class="nc" id="L133">		int currentSamples = I;</span>
+<span class="nc" id="L134">		double mean = currentSum / currentSamples;</span>
+<span class="nc" id="L135">		double variance = (currentSumSquared - currentSum * currentSum / currentSamples) / currentSamples;</span>
+		try {
+			do {
+<span class="nc" id="L138">				List&lt;Future&lt;Tuple&lt;Double, Double&gt;&gt;&gt; results = pool.invokeAll(tasks);</span>
+
+<span class="nc bnc" id="L140" title="All 2 branches missed.">				for (Future&lt;Tuple&lt;Double, Double&gt;&gt; result : results) {</span>
+<span class="nc" id="L141">					Tuple&lt;Double, Double&gt; t = result.get();</span>
+<span class="nc" id="L142">					currentSum = currentSum + (t.getX());</span>
+<span class="nc" id="L143">					currentSumSquared = currentSumSquared + (t.getY());</span>
+<span class="nc" id="L144">				}</span>
+<span class="nc" id="L145">				currentSamples += I;</span>
+<span class="nc" id="L146">				mean = currentSum / currentSamples;</span>
+<span class="nc" id="L147">				variance = (currentSumSquared - currentSum * currentSum / currentSamples) / currentSamples;</span>
+<span class="nc bnc" id="L148" title="All 4 branches missed.">			} while (getConfidenceLevel(variance, currentSamples) &gt; tolerance * mean &amp;&amp; currentSamples &lt; maxSamples);</span>
+<span class="nc" id="L149">		} catch (Exception e) {</span>
+<span class="nc" id="L150">			e.printStackTrace();</span>
+<span class="nc" id="L151">		}</span>
+
+<span class="nc" id="L153">		System.out.println(</span>
+<span class="nc" id="L154">				&quot;Monte Carlo : &quot; + mean + &quot; with confidence level: &quot; + getConfidenceLevel(variance, currentSamples));</span>
+<span class="nc" id="L155">		pool.shutdown();</span>
+<span class="nc" id="L156">		return new BigRational(mean);</span>
+	}
+
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException {
+<span class="nc" id="L161">		totalTimer.start();</span>
+<span class="nc" id="L162">		qnm.setNormalisingConstant(computeNotSetNormalisingConstant());</span>
+<span class="nc" id="L163">		System.out.println(&quot;MonteCarlo&quot;);</span>
+<span class="nc" id="L164">		System.out.println(qnm.getNormalisingConstant().approximateAsDouble());</span>
+<span class="nc" id="L165">		totalTimer.pause();</span>
+<span class="nc" id="L166">		memUsage = MemoryUsageUtils.memoryUsage();</span>
+<span class="nc" id="L167">		printTimeStatistics();</span>
+<span class="nc" id="L168">		printMemUsage();</span>
+<span class="nc" id="L169">	}</span>
+
+	private double getConfidenceLevel(double variance, int i) {
+<span class="nc" id="L172">		double sd = Math.sqrt(variance);</span>
+<span class="nc" id="L173">		return CRITICAL_VALUE * sd / (Math.sqrt(i));</span>
+	}
+
+	@Override
+	public void computePerformanceMeasures() throws InternalErrorException {
+		// Array of Mean Throughputs per class
+<span class="nc" id="L179">		BigRational[] X = new BigRational[qnm.R];</span>
+
+		// Array of Mean Queue Lengths
+<span class="nc" id="L182">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+
+<span class="nc" id="L184">		PopulationVector p = qnm.getPopulationVector();</span>
+<span class="nc" id="L185">		MultiplicitiesVector m = qnm.getMultiplicitiesVector();</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		for (int i = 0; i &lt; qnm.R; i++) {</span>
+<span class="nc" id="L187">			p.minusOne(i + 1);</span>
+<span class="nc" id="L188">			setUp(m, p);</span>
+<span class="nc" id="L189">			BigRational tempNormalisingCons = computeNotSetNormalisingConstant();</span>
+<span class="nc" id="L190">			p.restore();</span>
+<span class="nc" id="L191">			X[i] = tempNormalisingCons.divide(qnm.getNormalisingConstant());</span>
+		}
+
+<span class="nc bnc" id="L194" title="All 2 branches missed.">		for (int i = 0; i &lt; qnm.M; i++) {</span>
+<span class="nc" id="L195">			m.plusOne(i + 1);</span>
+<span class="nc bnc" id="L196" title="All 2 branches missed.">			for (int j = 0; j &lt; qnm.R; j++) {</span>
+<span class="nc" id="L197">				p.minusOne(j + 1);</span>
+<span class="nc" id="L198">				setUp(m, p);</span>
+<span class="nc" id="L199">				BigRational tempNormalisingCons = computeNotSetNormalisingConstant();</span>
+<span class="nc" id="L200">				Q[i][j] = qnm.getDemandAsBigRational(i, j).multiply(tempNormalisingCons)</span>
+<span class="nc" id="L201">						.divide(qnm.getNormalisingConstant());</span>
+<span class="nc" id="L202">				p.restore();</span>
+			}
+<span class="nc" id="L204">			m.restore();</span>
+		}
+<span class="nc" id="L206">		qnm.setPerformanceMeasures(Q, X);</span>
+<span class="nc" id="L207">		qnm.printPerformanceMeasures();</span>
+<span class="nc" id="L208">	}</span>
+
+	private class MonteCarloSamplingTask implements Callable&lt;Tuple&lt;Double, Double&gt;&gt; {
+
+		private int sampleNo;
+
+<span class="nc" id="L214">		public MonteCarloSamplingTask(int sampleNo) {</span>
+<span class="nc" id="L215">			this.sampleNo = sampleNo;</span>
+<span class="nc" id="L216">		}</span>
+
+		@Override
+		public Tuple&lt;Double, Double&gt; call() {
+			double currentSample;
+<span class="nc" id="L221">			double currentSum = 0;</span>
+<span class="nc" id="L222">			double currentSumSquared = 0;</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">			for (int i = 0; i &lt; sampleNo; i++) {</span>
+<span class="nc" id="L224">				currentSample = getSampleZ();</span>
+				// Update sum and sum Squared
+<span class="nc" id="L226">				currentSum = currentSum + (currentSample);</span>
+<span class="nc" id="L227">				currentSumSquared = currentSumSquared + (currentSample * currentSample);</span>
+			}
+<span class="nc" id="L229">			return new Tuple&lt;Double, Double&gt;(currentSum, currentSumSquared);</span>
+		}
+
+		// Generate Zi based on (1)
+		private double getSampleZ() {
+<span class="nc" id="L234">			ArrayList&lt;Double&gt; sample = getSample(samplingParam.size());</span>
+<span class="nc" id="L235">			double left = 1;</span>
+<span class="nc" id="L236">			double sum = 0;</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">			for (int i = 0; i &lt; sample.size(); i++) {</span>
+<span class="nc" id="L238">				left *= samplingParam.get(i);</span>
+<span class="nc" id="L239">				sum -= (1 - samplingParam.get(i)) * sample.get(i);</span>
+			}
+<span class="nc" id="L241">			double middle = Math.exp(sum);</span>
+
+			// topRight
+<span class="nc" id="L244">			double topRight = 1;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">			for (int i = 0; i &lt; M; i++) {</span>
+<span class="nc" id="L246">				int nj = pop.get(i);</span>
+<span class="nc" id="L247">				double subSum = 0;</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">				for (int j = 0; j &lt; samplingParam.size(); j++) {</span>
+<span class="nc" id="L249">					double rightFirst = load[j][i];</span>
+<span class="nc" id="L250">					double right = rightFirst * sample.get(j);</span>
+<span class="nc" id="L251">					subSum = subSum + right;</span>
+				}
+<span class="nc" id="L253">				topRight = topRight * Math.pow(qnm.getDelay(i) + subSum, nj);</span>
+<span class="nc" id="L254">				Map&lt;Integer, BigRational&gt; map = MiscMathsFunctions.computeFactorials(nj);</span>
+<span class="nc" id="L255">				topRight = topRight / map.get(nj).approximateAsDouble();</span>
+			}
+<span class="nc" id="L257">			return middle * topRight / left;</span>
+		}
+
+		// Generate elements based on exponential distribution
+		private ArrayList&lt;Double&gt; getSample(int length) {
+<span class="nc" id="L262">			ArrayList&lt;Double&gt; returnList = new ArrayList&lt;Double&gt;(length);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">			for (int i = 0; i &lt; length; i++) {</span>
+<span class="nc" id="L264">				Random random = new Random();</span>
+<span class="nc" id="L265">				Double randomNumber = random.nextDouble();</span>
+<span class="nc" id="L266">				double x = Math.log(1 - randomNumber) / (-samplingParam.get(i));</span>
+<span class="nc" id="L267">				returnList.add(x);</span>
+			}
+<span class="nc" id="L269">			return returnList;</span>
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

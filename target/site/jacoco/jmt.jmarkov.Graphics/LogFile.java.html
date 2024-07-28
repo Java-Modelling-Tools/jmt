@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogFile.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov.Graphics</a> &gt; <span class="el_source">LogFile.java</span></div><h1>LogFile.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ *  
+ *
+ */
+package jmt.jmarkov.Graphics;
+
+import java.awt.Component;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.LinkedList;
+
+import javax.swing.JOptionPane;
+
+import jmt.jmarkov.utils.Formatter;
+
+// this is using for saving log in to the csv file
+public class LogFile implements Notifier {
+<span class="nc" id="L40">	private static final String newline = System.getProperty(&quot;line.separator&quot;);</span>
+	public static final int TABBED_DELIMITED = 0;
+	public static final int COMMA_DELIMITED = 1;
+	public static final int SEMI_COLON_DELIMITED = 2;
+<span class="nc" id="L44">	private LinkedList&lt;Object&gt; tempList = new LinkedList&lt;Object&gt;();</span>
+<span class="nc" id="L45">	private int lastGeneratedRow = 0;</span>
+
+<span class="nc" id="L47">	private static String columnNames[] = { &quot;Cust. ID&quot;, &quot;Arrival Time&quot;, &quot;Start Execution&quot;, &quot;Server ID&quot;, &quot;Exit System&quot; };</span>
+	private int delimiterType;
+	private Writer output;
+<span class="nc" id="L50">	private boolean logging = false;</span>
+
+	/**
+	 * 
+	 */
+	public LogFile() {
+<span class="nc" id="L56">		super();</span>
+<span class="nc" id="L57">	}</span>
+
+	private void writeFile(int row, int column, Object value) {
+		//this while is generate a new row for this job(note: the id is starting from 1)
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		while (lastGeneratedRow &lt; row) {</span>
+<span class="nc" id="L62">			lastGeneratedRow++;</span>
+<span class="nc" id="L63">			tempList.add(new Integer(lastGeneratedRow));</span>
+<span class="nc" id="L64">			tempList.add(null);</span>
+<span class="nc" id="L65">			tempList.add(null);</span>
+<span class="nc" id="L66">			tempList.add(null);</span>
+<span class="nc" id="L67">			tempList.add(null);</span>
+		}
+
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		if (column == 0) {</span>
+<span class="nc" id="L71">			return;</span>
+		}
+
+<span class="nc" id="L74">		int i = 0;//searching the given id element in the list</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		while (((Integer) tempList.get(i * 5)).intValue() != row) {</span>
+<span class="nc" id="L76">			i++;</span>
+		}
+<span class="nc" id="L78">		tempList.set(i * 5 + column, value);</span>
+
+<span class="nc bnc" id="L80" title="All 4 branches missed.">		while (tempList.size() &gt; 0 &amp;&amp; tempList.get(4) != null) {</span>
+			try {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">				for (int k = 0; k &lt; 5; k++) {</span>
+<span class="nc" id="L83">					output.write(tempList.remove().toString());</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">					if (delimiterType == TABBED_DELIMITED) {</span>
+<span class="nc" id="L85">						output.write(&quot;\t&quot;);</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">					} else if (delimiterType == COMMA_DELIMITED) {</span>
+<span class="nc" id="L87">						output.write(&quot;,&quot;);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">					} else if (delimiterType == SEMI_COLON_DELIMITED) {</span>
+<span class="nc" id="L89">						output.write(&quot;;&quot;);</span>
+					}
+				}
+<span class="nc" id="L92">				output.write(newline);</span>
+<span class="nc" id="L93">			} catch (IOException e) {</span>
+<span class="nc" id="L94">				e.printStackTrace();</span>
+<span class="nc" id="L95">			}</span>
+		}
+<span class="nc" id="L97">	}</span>
+
+	private void setLogValue(int row, int column, Object value) {
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		if (logging) {</span>
+<span class="nc" id="L101">			writeFile(row, column, value);</span>
+		}
+<span class="nc" id="L103">	}</span>
+
+	private void setLogValue(int row, int column, String value) {
+<span class="nc" id="L106">		setLogValue(row, column, (Object) value);</span>
+<span class="nc" id="L107">	}</span>
+
+	private void setLogValue(int row, int column, int value) {
+<span class="nc" id="L110">		setLogValue(row, column, Formatter.formatNumber(value, 0, false));</span>
+<span class="nc" id="L111">	}</span>
+
+	private void setLogValue(int row, int column, double value) {
+<span class="nc" id="L114">		setLogValue(row, column, Formatter.formatNumber(value, 2, false));</span>
+<span class="nc" id="L115">	}</span>
+
+	public void enterProcessor(int jobId, int processorId, double time, double executionTime) {
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		if (logging) {</span>
+<span class="nc" id="L119">			setLogValue(jobId, 2, time / 1000);</span>
+<span class="nc" id="L120">			setLogValue(jobId, 3, processorId);</span>
+		}
+<span class="nc" id="L122">	}</span>
+
+	public void enterQueue(int jobId, double time) {
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if (logging) {</span>
+<span class="nc" id="L126">			setLogValue(jobId, 0, jobId);</span>
+<span class="nc" id="L127">			setLogValue(jobId, 1, time / 1000);</span>
+		}
+<span class="nc" id="L129">	}</span>
+
+	public void exitProcessor(int jobId, int processorId, double time) {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		if (logging) {</span>
+<span class="nc" id="L133">			setLogValue(jobId, 4, time / 1000);</span>
+		}
+<span class="nc" id="L135">	}</span>
+
+	public void exitQueue(int jobId, double time) {
+<span class="nc" id="L138">	}</span>
+
+	public void exitSystem(int jobId, int processorId, double enterQueueTime, double enterCpuTime, double exitSystemTime) {
+<span class="nc" id="L141">	}</span>
+
+	public void jobLost(int jobId, double time) {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		if (logging) {</span>
+<span class="nc" id="L145">			setLogValue(jobId, 0, jobId);</span>
+<span class="nc" id="L146">			setLogValue(jobId, 1, time / 1000);</span>
+<span class="nc" id="L147">			setLogValue(jobId, 2, &quot;Dropped&quot;);</span>
+<span class="nc" id="L148">			setLogValue(jobId, 3, &quot;Dropped&quot;);</span>
+<span class="nc" id="L149">			setLogValue(jobId, 4, &quot;Dropped&quot;);</span>
+		}
+<span class="nc" id="L151">	}</span>
+
+	public void reset() {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		if (logging) {</span>
+			Object tempObj;
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			while (tempList.size() &gt; 0) {</span>
+				try {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">					for (int k = 0; k &lt; 5; k++) {</span>
+<span class="nc" id="L159">						tempObj = tempList.remove();</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">						if (tempObj != null) {</span>
+<span class="nc" id="L161">							output.write(tempObj.toString());</span>
+						}
+
+<span class="nc bnc" id="L164" title="All 2 branches missed.">						if (delimiterType == TABBED_DELIMITED) {</span>
+<span class="nc" id="L165">							output.write(&quot;\t&quot;);</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">						} else if (delimiterType == COMMA_DELIMITED) {</span>
+<span class="nc" id="L167">							output.write(&quot;,&quot;);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">						} else if (delimiterType == SEMI_COLON_DELIMITED) {</span>
+<span class="nc" id="L169">							output.write(&quot;;&quot;);</span>
+						}
+					}
+<span class="nc" id="L172">					output.write(newline);</span>
+<span class="nc" id="L173">				} catch (IOException e) {</span>
+<span class="nc" id="L174">					e.printStackTrace();</span>
+<span class="nc" id="L175">				}</span>
+			}
+			try {
+<span class="nc" id="L178">				output.close();</span>
+<span class="nc" id="L179">				output = null;</span>
+<span class="nc" id="L180">			} catch (IOException e) {</span>
+<span class="nc" id="L181">				e.printStackTrace();</span>
+<span class="nc" id="L182">			}</span>
+		}
+<span class="nc" id="L184">		tempList.clear();</span>
+<span class="nc" id="L185">		setLogging(false);</span>
+<span class="nc" id="L186">		lastGeneratedRow = 0;</span>
+
+<span class="nc" id="L188">	}</span>
+
+	public void updateProcessor(int jobId, int processorId, double remainingTime, double time) {
+<span class="nc" id="L191">	}</span>
+
+	public void updateQueue(int jobId, double time) {
+<span class="nc" id="L194">	}</span>
+
+	public void setLogFile(File file, int type, Component parentC) {
+<span class="nc" id="L197">		delimiterType = type;</span>
+		try {
+			// use buffering
+<span class="nc" id="L200">			output = new BufferedWriter(new FileWriter(file));</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			for (String columnName : columnNames) {</span>
+<span class="nc" id="L202">				output.write(columnName);</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">				if (delimiterType == TABBED_DELIMITED) {</span>
+<span class="nc" id="L204">					output.write(&quot;\t&quot;);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">				} else if (delimiterType == COMMA_DELIMITED) {</span>
+<span class="nc" id="L206">					output.write(&quot;,&quot;);</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				} else if (delimiterType == SEMI_COLON_DELIMITED) {</span>
+<span class="nc" id="L208">					output.write(&quot;;&quot;);</span>
+				}
+			}
+<span class="nc" id="L211">			output.write(newline);</span>
+
+<span class="nc" id="L213">		} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L214">			JOptionPane.showMessageDialog(parentC, e.getMessage(), &quot;File not found&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L215">			System.exit(0);</span>
+<span class="nc" id="L216">		} catch (Exception e) {</span>
+<span class="nc" id="L217">			e.printStackTrace();</span>
+<span class="nc" id="L218">		}</span>
+<span class="nc" id="L219">	}</span>
+
+	public void refresh() {
+<span class="nc bnc" id="L222" title="All 2 branches missed.">		if (logging) {</span>
+			try {
+<span class="nc" id="L224">				output.flush();</span>
+<span class="nc" id="L225">			} catch (IOException e) {</span>
+<span class="nc" id="L226">				e.printStackTrace();</span>
+<span class="nc" id="L227">			}</span>
+		}
+<span class="nc" id="L229">	}</span>
+
+	public boolean isLogging() {
+<span class="nc" id="L232">		return logging;</span>
+	}
+
+	public void setLogging(boolean logging) {
+<span class="nc" id="L236">		this.logging = logging;</span>
+<span class="nc" id="L237">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimpleSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystemSolver</a> &gt; <span class="el_source">SimpleSolver.java</span></div><h1>SimpleSolver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.linearSystemSolver;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+import javax.naming.OperationNotSupportedException;
+
+/**
+ * Class which defines a SimpleSolver object, which solves the
+ * system using Gaussian elimination with partial pivoting.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class SimpleSolver extends Solver {
+
+    /**
+     * Constructs a SimpleSolver object.
+     */
+    public SimpleSolver() {
+<span class="nc" id="L38">        super();</span>
+<span class="nc" id="L39">        System.out.println(&quot;Using simple solver&quot;);</span>
+<span class="nc" id="L40">    }</span>
+
+    /**
+     * Solves the linear system using Gaussian elimination with partial pivoting
+     * @param b The vector b of the linear system Ax = b
+     * @return A vector containing the solutions of the linear system
+     * @throws OperationNotSupportedException Thrown when the system cannot be solved due to bad vector b size
+     */
+    @Override
+    public BigRational[] solve(BigRational[] b) throws OperationNotSupportedException, InconsistentLinearSystemException {
+<span class="nc" id="L50">        t.start();</span>
+<span class="nc" id="L51">        boolean existsDefinedOrNonZero = false;</span>
+        /*System.out.println(&quot;Matrix A:&quot;);
+        MiscMathsFunctions.printMatrix(A);
+        System.out.println(&quot;Matrix b:&quot;);
+        MiscMathsFunctions.printMatrix(b);*/
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">        if (N != b.length) {</span>
+<span class="nc" id="L58">            throw new OperationNotSupportedException(&quot;Wrong size of vector b.&quot;);</span>
+        }
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (N &gt; 100) {</span>
+<span class="nc" id="L61">            System.out.print(&quot;Solving LinSys.&quot;);</span>
+        }
+
+<span class="nc bnc" id="L64" title="All 2 branches missed.">        for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L65" title="All 4 branches missed.">            if (!b[i].isUndefined() &amp;&amp; !b[i].isZero()) {</span>
+<span class="nc" id="L66">                existsDefinedOrNonZero = true;</span>
+<span class="nc" id="L67">                break;</span>
+            }
+        }
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">        if (!existsDefinedOrNonZero) {</span>
+<span class="nc" id="L72">            throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+        }
+<span class="nc" id="L74">        int swapCount = 0;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        for (int p = 0; p &lt; N; p++) {</span>
+            // find pivot row and swap
+<span class="nc" id="L77">            int max = p;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">            for (int i = p + 1; i &lt; N; i++) {</span>
+                //if (Math.abs(A[i][p]) &gt; Math.abs(A[max][p])) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">                if (A[i][p].abs().greaterThan(A[max][p].abs())) {</span>
+<span class="nc" id="L81">                    max = i;</span>
+                }
+            }
+<span class="nc bnc" id="L84" title="All 2 branches missed.">            if (max != p) {</span>
+<span class="nc" id="L85">                swapCount++;</span>
+            }
+<span class="nc" id="L87">            BigRational[] temp = A[p];</span>
+<span class="nc" id="L88">            A[p] = A[max];</span>
+<span class="nc" id="L89">            A[max] = temp;</span>
+<span class="nc" id="L90">            BigRational tmp = b[p];</span>
+<span class="nc" id="L91">            b[p] = b[max];</span>
+<span class="nc" id="L92">            b[max] = tmp;</span>
+
+            // singular or nearly singular
+            //if (Math.abs(A[p][p]) &lt;= EPSILON) {
+            BigRational element;
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            if (A[p][p].abs().isZero()) {</span>
+                //MiscMathsFunctions.printMatrix(A);
+                //throw new RuntimeException(&quot;Matrix is singular&quot;);
+<span class="nc" id="L100">                element = BigRational.ONE;</span>
+            } else {
+<span class="nc" id="L102">                element = A[p][p];</span>
+            }
+
+            // pivot within A and b
+<span class="nc bnc" id="L106" title="All 2 branches missed.">            for (int i = p + 1; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                if (!b[i].isUndefined()) {</span>
+<span class="nc" id="L108">                    b[i] = b[i].subtract(A[i][p].divide(element).multiply(b[p]));</span>
+                }
+<span class="nc bnc" id="L110" title="All 2 branches missed.">                for (int j = p + 1; j &lt; N; j++) {</span>
+<span class="nc" id="L111">                    A[i][j] = A[i][j].subtract(A[i][p].divide(element).multiply(A[p][j]));</span>
+                }
+            }
+        }
+
+        // back substitution
+<span class="nc" id="L117">        BigRational[] x = new BigRational[N];</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        for (int i = N - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L119">            BigRational sum = BigRational.ZERO;</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            for (int j = i + 1; j &lt; N; j++) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                if (!A[i][j].isZero()) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                    if (!x[j].isUndefined()) {</span>
+<span class="nc" id="L123">                        sum = sum.add(A[i][j].multiply(x[j]));</span>
+                    } else {
+                        // x[i] must become undefined in this case
+<span class="nc" id="L126">                        x[i] = new BigRational(-1);</span>
+<span class="nc" id="L127">                        x[i].makeUndefined();</span>
+                        // We do not need to consider further A[i][j]s
+<span class="nc" id="L129">                        break;</span>
+                    }
+                }
+            }
+            // This is to skip current loop when we have already decided that x[i] should be undefined.
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            if (x[i] != null) {</span>
+<span class="nc" id="L135">                continue;</span>
+            }
+<span class="nc bnc" id="L137" title="All 4 branches missed.">            if (!A[i][i].isZero() &amp;&amp; (!b[i].isUndefined())) {</span>
+<span class="nc" id="L138">                x[i] = (b[i].subtract(sum)).divide(A[i][i]);</span>
+            } else {
+                //x[i] = BigRational.ZERO;
+<span class="nc" id="L141">                x[i] = new BigRational(-1);</span>
+<span class="nc" id="L142">                x[i].makeUndefined();</span>
+            }
+        }
+
+<span class="nc" id="L146">        BigRational det = BigRational.ONE;</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">        for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            if (!x[i].isUndefined()) {</span>
+<span class="nc" id="L149">                det = det.multiply(A[i][i]);</span>
+            }
+        }
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if (swapCount % 2 == 1) {</span>
+<span class="nc" id="L153">            det = det.negate();</span>
+        }
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">        if (N &gt; 100) {</span>
+<span class="nc" id="L157">            System.out.print(&quot;.&quot;);</span>
+        }
+
+        // Restore original matrix
+<span class="nc" id="L161">        MiscMathsFunctions.arrayCopy(cleanA, A);</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        if (N &gt; 100) {</span>
+<span class="nc" id="L164">            System.out.println(&quot;.OK!&quot;);</span>
+        }
+
+        //System.out.println(&quot;Solution: (det=&quot; + det + &quot;)&quot;);
+        //MiscMathsFunctions.printMatrix(x);
+<span class="nc" id="L169">        t.pause();</span>
+<span class="nc" id="L170">        return x;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

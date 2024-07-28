@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bernoulli.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.discrete</a> &gt; <span class="el_source">Bernoulli.java</span></div><h1>Bernoulli.java</h1><pre class="source lang-java linenums">package jmt.engine.random.discrete;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.Parameter;
+
+// extend the `AbstractDistribution` to get the random engine.
+// implement the `DiscreteDistribution` to define the behavior of this distribution.
+public class Bernoulli extends DiscreteDistribution {
+
+	private double probability;
+
+	// Constructor with NO parameter, because the XML initialized the distribution parameter through Parameter.
+<span class="nc" id="L13">	public Bernoulli() { super(); }</span>
+
+<span class="nc" id="L15">	public Bernoulli(double p) throws IncorrectDistributionParameterException {</span>
+<span class="nc bnc" id="L16" title="All 4 branches missed.">		if ( p&lt;0 || p&gt;1 ) {</span>
+<span class="nc" id="L17">			throw new IncorrectDistributionParameterException(&quot;The probability should belong to [0,1]&quot;);</span>
+		}
+<span class="nc" id="L19">		outdated();</span>
+<span class="nc" id="L20">		this.probability = p;</span>
+<span class="nc" id="L21">		this.cached = true;</span>
+<span class="nc" id="L22">	}</span>
+	public Bernoulli(Double p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L24">		this(p.doubleValue());</span>
+<span class="nc" id="L25">	}</span>
+
+	public boolean updatePar(double p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L28" title="All 4 branches missed.">		if ( p&lt;0 || p&gt;1 ) {</span>
+<span class="nc" id="L29">			throw new IncorrectDistributionParameterException(&quot;The probability should belong to [0,1]&quot;);</span>
+		}
+<span class="nc" id="L31">		outdated();</span>
+<span class="nc" id="L32">		this.probability = p;</span>
+<span class="nc" id="L33">		this.cached = true;</span>
+<span class="nc" id="L34">		return true;</span>
+	}
+
+	@Override
+	public boolean updatePar(Parameter p) throws IncorrectDistributionParameterException{
+<span class="nc bnc" id="L39" title="All 4 branches missed.">		if (p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L40">			return updatePar(((BernoulliPar) p).getProbability());</span>
+		}
+<span class="nc" id="L42">		return false;</span>
+	}
+
+	@Override
+	public int getUpper() {
+<span class="nc" id="L47">		return 1;</span>
+	}
+
+	@Override
+	public int getlower() {
+<span class="nc" id="L52">		return 0;</span>
+	}
+
+
+	@Override
+	public int nextRand() {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">			return engine.raw()&lt;probability ? 1 : 0;</span>
+		}
+<span class="nc" id="L61">		return -1;</span>
+	}
+
+	@Override
+	public double pmf(int x) {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if(x==1){</span>
+<span class="nc" id="L68">				return probability;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			} else if (x==0){</span>
+<span class="nc" id="L70">				return (1-probability);</span>
+			} else{
+<span class="nc" id="L72">				return 0.0;</span>
+			}
+		}
+<span class="nc" id="L75">		return -1.0;</span>
+	}
+
+	@Override
+	public double cdf(int x) {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			if(x&lt;0){</span>
+<span class="nc" id="L82">				return 0.0;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">			}else if(x&lt;1){		// x belongs to [0,1)</span>
+<span class="nc" id="L84">				return (1-probability);</span>
+			}else {				// x belongs to [1,infinity)
+<span class="nc" id="L86">				return 1.0;</span>
+			}
+		}
+<span class="nc" id="L89">		return -1.0;</span>
+	}
+
+	@Override
+	public double theorMean() {
+<span class="nc bnc" id="L94" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc" id="L95">			return probability;</span>
+		}
+<span class="nc" id="L97">		return -1.0;</span>
+	}
+
+	@Override
+	public double theorVariance() {
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		if(cached){</span>
+<span class="nc" id="L103">			return probability * (1 - probability);</span>
+		}
+<span class="nc" id="L105">		return -1.0;</span>
+	}
+
+	@Override
+	public int nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L110" title="All 4 branches missed.">		if(p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L111">			double probability = ((BernoulliPar) p).getProbability();</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			return engine.raw()&lt;probability ? 1 : 0;</span>
+		} else {
+<span class="nc" id="L114">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Error: The probability should belong to [0,1]\n&quot;+
+					&quot;Error: the Parameter must be the `BernoulliPar`&quot;);
+		}
+	}
+
+	@Override
+	public double pmf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L122" title="All 4 branches missed.">		if(p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L123">			double probability = ((BernoulliPar) p).getProbability();</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			if(x==1){</span>
+<span class="nc" id="L125">				return probability;</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">			} else if (x==0){</span>
+<span class="nc" id="L127">				return (1-probability);</span>
+			} else{
+<span class="nc" id="L129">				return 0.0;</span>
+			}
+		} else {
+<span class="nc" id="L132">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Error: The probability should belong to [0,1]\n&quot;+
+					&quot;Error: the Parameter must be the `BernoulliPar`&quot;);
+		}
+	}
+
+	@Override
+	public double cdf(int x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L140" title="All 4 branches missed.">		if(p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L141">			double probability = ((BernoulliPar) p).getProbability();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if(x&lt;0){</span>
+<span class="nc" id="L143">				return 0.0;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">			}else if(x&lt;1){		// x belongs to [0,1)</span>
+<span class="nc" id="L145">				return (1-probability);</span>
+			}else {				// x belongs to [1,infinity)
+<span class="nc" id="L147">				return 1.0;</span>
+			}
+		} else {
+<span class="nc" id="L150">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Error: The probability should belong to [0,1]\n&quot;+
+					&quot;Error: the Parameter must be the `BernoulliPar`&quot;);
+		}
+	}
+
+	@Override
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L158" title="All 4 branches missed.">		if(p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L159">			return ((BernoulliPar) p).getProbability();</span>
+		} else {
+<span class="nc" id="L161">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Error: The probability should belong to [0,1]\n&quot;+
+					&quot;Error: the Parameter must be the `BernoulliPar`&quot;);
+		}
+	}
+
+	@Override
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L169" title="All 4 branches missed.">		if(p instanceof BernoulliPar &amp;&amp; p.check()){</span>
+<span class="nc" id="L170">			double probability = ((BernoulliPar) p).getProbability();</span>
+<span class="nc" id="L171">			return probability * (1 - probability);</span>
+		} else {
+<span class="nc" id="L173">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Error: The probability should belong to [0,1]\n&quot;+
+					&quot;Error: the Parameter must be the `BernoulliPar`&quot;);
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

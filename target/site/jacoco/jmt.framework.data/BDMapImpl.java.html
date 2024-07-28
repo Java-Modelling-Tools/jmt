@@ -1,0 +1,467 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BDMapImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.data</a> &gt; <span class="el_source">BDMapImpl.java</span></div><h1>BDMapImpl.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.data;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 14-giu-2005
+ * Time: 13.46.33
+ * To change this template use Options | File Templates.
+ */
+<span class="fc" id="L33">public class BDMapImpl implements BDMap {</span>
+
+	//contains all of the elements inserted into this BDMapImpl
+<span class="fc" id="L36">	private Object[][] contents = new Object[0][0];</span>
+
+<span class="fc" id="L38">	private Object[] xKeys = new Object[0];</span>
+
+<span class="fc" id="L40">	private Object[] yKeys = new Object[0];</span>
+
+	/**returns keyset along a single dimension.
+	 * @param coordName name of dimension.
+	 * @return set containing search keys for specified dimension.*/
+	public Set&lt;Object&gt; keySet(int coordName) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">		if (coordName == X) {</span>
+<span class="fc" id="L47">			return getSetFromArray(xKeys);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="fc" id="L49">			return getSetFromArray(yKeys);</span>
+		} else {
+<span class="nc" id="L51">			return null;</span>
+		}
+	}
+
+	//returns a set containing elements of an array
+	private Set&lt;Object&gt; getSetFromArray(Object[] array) {
+<span class="fc" id="L57">		Set&lt;Object&gt; s = new TreeSet&lt;Object&gt;();</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">		for (Object element : array) {</span>
+<span class="fc" id="L59">			s.add(element);</span>
+		}
+<span class="fc" id="L61">		return s;</span>
+	}
+
+	/**tells whether a key mapping is present in this BDMap along a specified coord
+	 * @param coordName: name of coordinate along which search must be performed.
+	 * @param key: key to be searched.
+	 * @return : true if mapping for specified key has been defined, false otherwise.*/
+	public boolean containsKey(Object key, int coordName) {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if (coordName == X) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">			return -1 != getIndex(xKeys, key);</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			return -1 != getIndex(yKeys, key);</span>
+		} else {
+<span class="nc" id="L74">			return false;</span>
+		}
+	}
+
+	//checks if an object is contained into an array
+	private int getIndex(Object[] array, Object key) {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">		for (int i = 0; i &lt; array.length; i++) {</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">			if (array[i] != null) {</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">				if (array[i].equals(key)) {</span>
+<span class="fc" id="L83">					return i;</span>
+				}
+			}
+		}
+<span class="fc" id="L87">		return -1;</span>
+	}
+
+	/**Tells whether this BDMap is empty.*/
+	public boolean isEmpty() {
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		return contents.length == 0;</span>
+	}
+
+	/**Puts a value into this BDMap, given keys along the two coordinates
+	 * @param keyX: key along x coordinate.
+	 * @param keyY: key along y coordinate.
+	 * @param value: value to be stored inside bdmap.*/
+	public void put(Object keyX, Object keyY, Object value) {
+<span class="fc" id="L100">		int i = getIndex(yKeys, keyY);</span>
+<span class="fc" id="L101">		int j = getIndex(xKeys, keyX);</span>
+		//if index of row was not found, add a row
+<span class="fc bfc" id="L103" title="All 2 branches covered.">		if (i == -1) {</span>
+<span class="fc" id="L104">			i = yKeys.length;</span>
+<span class="fc" id="L105">			addRow(yKeys.length, new Object[xKeys.length]);</span>
+<span class="fc" id="L106">			yKeys = add(yKeys, yKeys.length, keyY);</span>
+		}
+		//if index of row was not found, add a row
+<span class="fc bfc" id="L109" title="All 2 branches covered.">		if (j == -1) {</span>
+<span class="fc" id="L110">			j = xKeys.length;</span>
+<span class="fc" id="L111">			addColumn(xKeys.length, new Object[yKeys.length]);</span>
+<span class="fc" id="L112">			xKeys = add(xKeys, xKeys.length, keyX);</span>
+		}
+<span class="fc" id="L114">		contents[i][j] = value;</span>
+<span class="fc" id="L115">	}</span>
+
+	/**Puts a map into this BDMap, e.g. puts a row or a column into the table
+	 * represented by this BDMap. If, for example, a map is to be added on the
+	 * X coordinate, this hashmap should contain mapping for each entry along Y
+	 * coordinate, otherwise new mapping (returning null value) are created. All of
+	 * the mappings contained inside given map and not defined along Y coord will be
+	 * deleted
+	 * @param key: key along specified coordinate.
+	 * @param coordName: coordinate along which mapping should be added.
+	 * @param newMap: new row or column to be added.*/
+	public void put(Object key, int coordName, Map newMap) {
+		//Object array to be inserted as a column
+		Object[] objects;
+		//index of key, if present
+<span class="fc" id="L130">		int keyIndex = -1;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">		if (coordName == X) {</span>
+<span class="fc" id="L132">			keyIndex = getIndex(xKeys, key);</span>
+<span class="fc" id="L133">			objects = new Object[yKeys.length];</span>
+			//prepare array to be inserted as a column
+<span class="fc bfc" id="L135" title="All 2 branches covered.">			for (int i = 0; i &lt; yKeys.length; i++) {</span>
+				//if key is contained in given map, put correspondent object in the array
+<span class="fc" id="L137">				objects[i] = newMap.get(yKeys[i]);</span>
+			}
+			//if key was found, replace current column, otherwise add mapping and column
+<span class="pc bpc" id="L140" title="1 of 2 branches missed.">			if (keyIndex != -1) {</span>
+<span class="nc" id="L141">				replaceColumn(keyIndex, objects);</span>
+			} else {
+<span class="fc" id="L143">				addColumn(xKeys.length, objects);</span>
+<span class="fc" id="L144">				xKeys = add(xKeys, xKeys.length, key);</span>
+			}
+<span class="pc bpc" id="L146" title="1 of 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="fc" id="L147">			keyIndex = getIndex(yKeys, key);</span>
+<span class="fc" id="L148">			objects = new Object[xKeys.length];</span>
+			//prepare array to be inserted as a row
+<span class="fc bfc" id="L150" title="All 2 branches covered.">			for (int i = 0; i &lt; xKeys.length; i++) {</span>
+				//if key is contained in given map, put correspondent object in the array
+<span class="fc" id="L152">				objects[i] = newMap.get(xKeys[i]);</span>
+			}
+			//if key was found, replace current row, otherwise add mapping and column
+<span class="pc bpc" id="L155" title="1 of 2 branches missed.">			if (keyIndex != -1) {</span>
+<span class="nc" id="L156">				replaceRow(keyIndex, objects);</span>
+			} else {
+<span class="fc" id="L158">				addRow(yKeys.length, objects);</span>
+<span class="fc" id="L159">				yKeys = add(yKeys, yKeys.length, key);</span>
+			}
+		}
+<span class="fc" id="L162">	}</span>
+
+	/**Removes an entry from this BDMAp, given the two search keys pointing to it.
+	 * @param keyX: key along x coordinate.
+	 * @param keyY: key along y coordinate.
+	 * @return : object removed from bdmap.
+	 */
+	public Object remove(Object keyX, Object keyY) {
+<span class="nc" id="L170">		Object retval = null;</span>
+<span class="nc" id="L171">		int xIndex = getIndex(xKeys, keyX), yIndex = getIndex(yKeys, keyY);</span>
+<span class="nc bnc" id="L172" title="All 4 branches missed.">		if (xIndex != -1 &amp;&amp; yIndex != -1) {</span>
+<span class="nc" id="L173">			retval = contents[yIndex][xIndex];</span>
+<span class="nc" id="L174">			contents[yIndex][xIndex] = null;</span>
+		}
+<span class="nc" id="L176">		return retval;</span>
+	}
+
+	/**Removes an entry from this BDMap, given the two search keys pointing to it.
+	 * @param key: key along specified coordinate.
+	 * @param coordName: coordinate along which mapping should be removed.
+	 * @return : map containing objects removed from this BDMap. Returned map contains
+	 * mappings for the other coordinate search keys {@see put(Object key, int coordName,
+	        *  HashMap newMap)}
+	 */
+	public Map remove(Object key, int coordName) {
+		//creating returned map optimized on maximum dimension.
+<span class="nc" id="L188">		Map retval = null;</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">		if (coordName == X) {</span>
+<span class="nc" id="L190">			retval = new HashMap(yKeys.length);</span>
+<span class="nc" id="L191">			int index = getIndex(xKeys, key);</span>
+			//key not found
+<span class="nc bnc" id="L193" title="All 2 branches missed.">			if (index == -1) {</span>
+<span class="nc" id="L194">				return null;</span>
+			} else {
+				//build returned map
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				for (int i = 0; i &lt; yKeys.length; i++) {</span>
+<span class="nc" id="L198">					retval.put(yKeys[i], contents[i][index]);</span>
+				}
+<span class="nc" id="L200">				deleteColumn(index);</span>
+<span class="nc" id="L201">				xKeys = delete(xKeys, index);</span>
+<span class="nc" id="L202">				return retval;</span>
+			}
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="nc" id="L205">			retval = new HashMap(xKeys.length);</span>
+<span class="nc" id="L206">			int index = getIndex(yKeys, key);</span>
+			//key not found
+<span class="nc bnc" id="L208" title="All 2 branches missed.">			if (index == -1) {</span>
+<span class="nc" id="L209">				return null;</span>
+			} else {
+				//build returned map
+<span class="nc bnc" id="L212" title="All 2 branches missed.">				for (int i = 0; i &lt; xKeys.length; i++) {</span>
+<span class="nc" id="L213">					retval.put(xKeys[i], contents[index][i]);</span>
+				}
+<span class="nc" id="L215">				deleteRow(index);</span>
+<span class="nc" id="L216">				yKeys = delete(yKeys, index);</span>
+<span class="nc" id="L217">				return retval;</span>
+			}
+		}
+<span class="nc" id="L220">		return null;</span>
+	}
+
+	public Object get(Object keyX, Object keyY) {
+<span class="fc" id="L224">		int xIndex = getIndex(xKeys, keyX), yIndex = getIndex(yKeys, keyY);</span>
+<span class="fc bfc" id="L225" title="All 4 branches covered.">		if (xIndex != -1 &amp;&amp; yIndex != -1) {</span>
+<span class="fc" id="L226">			return contents[yIndex][xIndex];</span>
+		} else {
+<span class="fc" id="L228">			return null;</span>
+		}
+	}
+
+	public Map get(Object key, int coordName) {
+		//creating returned map.
+<span class="fc" id="L234">		Map retval = null;</span>
+<span class="fc bfc" id="L235" title="All 2 branches covered.">		if (coordName == X) {</span>
+<span class="fc" id="L236">			retval = new HashMap(yKeys.length);</span>
+<span class="fc" id="L237">			int index = getIndex(xKeys, key);</span>
+			//key not found
+<span class="pc bpc" id="L239" title="1 of 2 branches missed.">			if (index == -1) {</span>
+<span class="nc" id="L240">				return null;</span>
+			} else {
+				//build returned map
+<span class="fc bfc" id="L243" title="All 2 branches covered.">				for (int i = 0; i &lt; yKeys.length; i++) {</span>
+<span class="fc" id="L244">					retval.put(yKeys[i], contents[i][index]);</span>
+				}
+<span class="fc" id="L246">				return retval;</span>
+			}
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="fc" id="L249">			retval = new HashMap(xKeys.length);</span>
+<span class="fc" id="L250">			int index = getIndex(yKeys, key);</span>
+			//key not found
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">			if (index == -1) {</span>
+<span class="nc" id="L253">				return null;</span>
+			} else {
+				//build returned map
+<span class="fc bfc" id="L256" title="All 2 branches covered.">				for (int i = 0; i &lt; xKeys.length; i++) {</span>
+<span class="fc" id="L257">					retval.put(xKeys[i], contents[index][i]);</span>
+				}
+<span class="fc" id="L259">				return retval;</span>
+			}
+		}
+<span class="nc" id="L262">		return null;</span>
+	}
+
+	/**returns size of this BDMap along specified coordinate. For example, if x coordinate
+	 * is specified, where x is the coordinate for cells in a row of table represented by
+	 * this BDMap, total number of columns is returned.
+	 * @param coordName: name of the coordinate along which size must be given*/
+	public int size(int coordName) {
+<span class="nc bnc" id="L270" title="All 2 branches missed.">		if (coordName == X) {</span>
+<span class="nc" id="L271">			return xKeys.length;</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		} else if (coordName == Y) {</span>
+<span class="nc" id="L273">			return yKeys.length;</span>
+		} else {
+<span class="nc" id="L275">			return 0;</span>
+		}
+	}
+
+	//adds a row to bidimensional array
+	private void addRow(int index, Object[] row) {
+		//index out of bounds, do nothing
+<span class="pc bpc" id="L282" title="2 of 4 branches missed.">		if (index &gt; contents.length || index &lt; 0) {</span>
+<span class="nc" id="L283">			return;</span>
+		}
+<span class="fc bfc" id="L285" title="All 2 branches covered.">		if (contents.length == 0) {</span>
+<span class="fc" id="L286">			contents = new Object[][] { row };</span>
+<span class="fc" id="L287">			return;</span>
+		}
+<span class="fc" id="L289">		Object[][] newConts = new Object[contents.length + 1][contents[0].length];</span>
+<span class="fc" id="L290">		System.arraycopy(contents, 0, newConts, 0, index);</span>
+<span class="fc" id="L291">		newConts[index] = row;</span>
+<span class="fc" id="L292">		System.arraycopy(contents, index, newConts, index + 1, contents.length - index);</span>
+<span class="fc" id="L293">		contents = newConts;</span>
+<span class="fc" id="L294">	}</span>
+
+	//replaces  a row into bidimensional array and returns former one
+	private Object[] replaceRow(int index, Object[] row) {
+		//index out of bounds, do nothing
+<span class="nc bnc" id="L299" title="All 4 branches missed.">		if (index &gt;= contents.length || index &lt; 0) {</span>
+<span class="nc" id="L300">			return null;</span>
+		}
+<span class="nc bnc" id="L302" title="All 2 branches missed.">		if (contents.length == 0) {</span>
+<span class="nc" id="L303">			return null;</span>
+		}
+		//if row has not same size as it should, resize it
+<span class="nc" id="L306">		int correctRowSize = contents[0].length;</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">		if (row.length != correctRowSize) {</span>
+<span class="nc" id="L308">			Object[] newRow = new Object[correctRowSize];</span>
+<span class="nc" id="L309">			System.arraycopy(row, 0, newRow, 0, Math.min(correctRowSize, row.length));</span>
+<span class="nc" id="L310">			row = newRow;</span>
+		}
+<span class="nc" id="L312">		Object[] retval = contents[index];</span>
+<span class="nc" id="L313">		contents[index] = row;</span>
+<span class="nc" id="L314">		return retval;</span>
+	}
+
+	//deletes a row from bidimensional array
+	private Object[] deleteRow(int index) {
+		//index out of bounds, do nothing
+<span class="nc bnc" id="L320" title="All 4 branches missed.">		if (index &gt;= contents.length || index &lt; 0) {</span>
+<span class="nc" id="L321">			return null;</span>
+		}
+<span class="nc bnc" id="L323" title="All 2 branches missed.">		if (contents.length == 0) {</span>
+<span class="nc" id="L324">			return null;</span>
+		}
+<span class="nc" id="L326">		Object[][] newConts = new Object[contents.length - 1][contents[0].length];</span>
+<span class="nc" id="L327">		Object[] retVal = contents[index];</span>
+<span class="nc" id="L328">		System.arraycopy(contents, 0, newConts, 0, index);</span>
+<span class="nc" id="L329">		System.arraycopy(contents, index + 1, newConts, index, newConts.length - index);</span>
+<span class="nc" id="L330">		contents = newConts;</span>
+<span class="nc" id="L331">		return retVal;</span>
+	}
+
+	//replaces  a column into bidimensional array and returns former one
+	private Object[] replaceColumn(int index, Object[] column) {
+<span class="nc bnc" id="L336" title="All 2 branches missed.">		if (contents.length == 0) {</span>
+<span class="nc" id="L337">			return null;</span>
+		}
+		//index out of bounds, do nothing
+<span class="nc bnc" id="L340" title="All 4 branches missed.">		if (index &gt;= contents[0].length || index &lt; 0) {</span>
+<span class="nc" id="L341">			return null;</span>
+		}
+		//if row has not same size as it should, resize it
+<span class="nc" id="L344">		int correctColSize = contents.length;</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">		if (column.length != correctColSize) {</span>
+<span class="nc" id="L346">			Object[] newCol = new Object[correctColSize];</span>
+<span class="nc" id="L347">			System.arraycopy(column, 0, newCol, 0, Math.min(correctColSize, column.length));</span>
+<span class="nc" id="L348">			column = newCol;</span>
+		}
+<span class="nc" id="L350">		Object[] retval = contents[index];</span>
+<span class="nc bnc" id="L351" title="All 2 branches missed.">		for (int i = 0; i &lt; contents.length; i++) {</span>
+<span class="nc" id="L352">			retval[i] = contents[i][index];</span>
+<span class="nc" id="L353">			contents[i][index] = column[i];</span>
+		}
+<span class="nc" id="L355">		return retval;</span>
+	}
+
+	//adds a column to the bidimensional array
+	private void addColumn(int index, Object[] column) {
+<span class="fc bfc" id="L360" title="All 2 branches covered.">		if (contents.length == 0) {</span>
+<span class="fc" id="L361">			contents = new Object[column.length][1];</span>
+<span class="pc bpc" id="L362" title="1 of 2 branches missed.">			for (int i = 0; i &lt; contents.length; i++) {</span>
+<span class="nc" id="L363">				contents[i][0] = column[i];</span>
+			}
+<span class="fc" id="L365">			return;</span>
+		}
+		//index out of bounds, do nothing
+<span class="pc bpc" id="L368" title="2 of 4 branches missed.">		if (index &gt; contents[0].length || index &lt; 0) {</span>
+<span class="nc" id="L369">			return;</span>
+		}
+<span class="fc bfc" id="L371" title="All 2 branches covered.">		for (int i = 0; i &lt; contents.length; i++) {</span>
+<span class="fc" id="L372">			contents[i] = add(contents[i], index, column[i]);</span>
+		}
+<span class="fc" id="L374">	}</span>
+
+	//deletes a column from bidimensional array
+	private Object[] deleteColumn(int index) {
+<span class="nc bnc" id="L378" title="All 2 branches missed.">		if (contents.length == 0) {</span>
+<span class="nc" id="L379">			return null;</span>
+		}
+		//index out of bounds, do nothing
+<span class="nc bnc" id="L382" title="All 4 branches missed.">		if (index &gt;= contents[0].length || index &lt; 0) {</span>
+<span class="nc" id="L383">			return null;</span>
+		}
+<span class="nc" id="L385">		Object[] retval = new Object[contents.length];</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">		for (int i = 0; i &lt; contents.length; i++) {</span>
+<span class="nc" id="L387">			retval[i] = contents[i][index];</span>
+<span class="nc" id="L388">			contents[i] = delete(contents[i], index);</span>
+		}
+<span class="nc" id="L390">		return retval;</span>
+	}
+
+	//inserts a null value to specified array at specified index resizing it
+	private static Object[] add(Object[] array, int index, Object toAdd) {
+<span class="pc bpc" id="L395" title="2 of 4 branches missed.">		if (index &lt; 0 || index &gt; array.length) {</span>
+<span class="nc" id="L396">			return array;</span>
+		}
+<span class="fc bfc" id="L398" title="All 2 branches covered.">		if (array.length == 0) {</span>
+<span class="fc" id="L399">			return new Object[] { toAdd };</span>
+		}
+<span class="fc" id="L401">		Object[] newArray = new Object[array.length + 1];</span>
+<span class="fc" id="L402">		System.arraycopy(array, 0, newArray, 0, index);</span>
+<span class="fc" id="L403">		newArray[index] = toAdd;</span>
+<span class="fc" id="L404">		System.arraycopy(array, index, newArray, index + 1, array.length - index);</span>
+<span class="fc" id="L405">		return newArray;</span>
+	}
+
+	//deletes an object from specified array at specified index
+	private static Object[] delete(Object[] array, int index) {
+<span class="nc bnc" id="L410" title="All 4 branches missed.">		if (index &lt; 0 || index &gt;= array.length) {</span>
+<span class="nc" id="L411">			return null;</span>
+		}
+<span class="nc bnc" id="L413" title="All 2 branches missed.">		if (array.length == 0) {</span>
+<span class="nc" id="L414">			return new Object[0];</span>
+		}
+<span class="nc" id="L416">		Object[] newArray = new Object[array.length - 1];</span>
+<span class="nc" id="L417">		System.arraycopy(array, 0, newArray, 0, index);</span>
+<span class="nc" id="L418">		System.arraycopy(array, index + 1, newArray, index, newArray.length - index);</span>
+<span class="nc" id="L419">		return newArray;</span>
+	}
+
+	public static void main(String[] args) {
+<span class="nc" id="L423">		BDMapImpl bdmi = new BDMapImpl();</span>
+<span class="nc" id="L424">		int testSize = 3, tstSize2 = 2;</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">		for (int i = 0; i &lt; testSize; i++) {</span>
+<span class="nc bnc" id="L426" title="All 2 branches missed.">			for (int j = 0; j &lt; testSize; j++) {</span>
+<span class="nc" id="L427">				String str = &quot;elemento (&quot; + i + &quot;,&quot; + j + &quot;)&quot;;</span>
+<span class="nc" id="L428">				System.out.println(&quot;adding &quot; + str);</span>
+<span class="nc" id="L429">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys.length + &quot;, yKeys: &quot; + bdmi.yKeys.length + &quot; elements&quot;);</span>
+<span class="nc" id="L430">				bdmi.put(new Integer(i), new Integer(j), str);</span>
+<span class="nc" id="L431">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys.length + &quot;, yKeys: &quot; + bdmi.yKeys.length + &quot; elements&quot;);</span>
+			}
+		}
+<span class="nc bnc" id="L434" title="All 2 branches missed.">		for (int i = 0; i &lt; tstSize2; i++) {</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">			for (int j = 0; j &lt; tstSize2; j++) {</span>
+<span class="nc" id="L436">				String str = &quot;element (&quot; + i + &quot;,&quot; + j + &quot;)&quot;;</span>
+<span class="nc" id="L437">				System.out.println(&quot;adding &quot; + str);</span>
+<span class="nc" id="L438">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys.length + &quot;, yKeys: &quot; + bdmi.yKeys.length + &quot; elements&quot;);</span>
+<span class="nc" id="L439">				bdmi.put(new Integer(i), new Integer(j), str);</span>
+<span class="nc" id="L440">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys.length + &quot;, yKeys: &quot; + bdmi.yKeys.length + &quot; elements&quot;);</span>
+			}
+		}
+<span class="nc bnc" id="L443" title="All 2 branches missed.">		for (int i = 0; i &lt; testSize; i++) {</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">			for (int j = 0; j &lt; testSize; j++) {</span>
+<span class="nc" id="L445">				String str = &quot;elemento (&quot; + i + &quot;,&quot; + j + &quot;)&quot;;</span>
+<span class="nc" id="L446">				System.out.println(&quot;requiring element &quot; + str + &quot;: &quot; + bdmi.get(new Integer(i), new Integer(j)));</span>
+			}
+		}
+<span class="nc bnc" id="L449" title="All 2 branches missed.">		for (int i = 0; i &lt; testSize; i++) {</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">			for (int j = 0; j &lt; testSize; j++) {</span>
+<span class="nc" id="L451">				String str = &quot;elemento (&quot; + i + &quot;,&quot; + j + &quot;)&quot;;</span>
+<span class="nc" id="L452">				System.out.println(&quot;deleting &quot; + str);</span>
+<span class="nc" id="L453">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys.length + &quot;, yKeys: &quot; + bdmi.yKeys.length + &quot; elements&quot;);</span>
+<span class="nc" id="L454">				bdmi.remove(new Integer(i), new Integer(j));</span>
+<span class="nc" id="L455">				System.out.println(&quot;xKeys: &quot; + bdmi.xKeys[i] + &quot;, yKeys: &quot; + bdmi.yKeys[j]);</span>
+			}
+		}
+<span class="nc bnc" id="L458" title="All 2 branches missed.">		for (int i = 0; i &lt; testSize; i++) {</span>
+<span class="nc bnc" id="L459" title="All 2 branches missed.">			for (int j = 0; j &lt; testSize; j++) {</span>
+<span class="nc" id="L460">				String str = &quot;elemento (&quot; + i + &quot;,&quot; + j + &quot;)&quot;;</span>
+<span class="nc" id="L461">				System.out.println(&quot;requiring element &quot; + str + &quot;: &quot; + bdmi.get(new Integer(i), new Integer(j)));</span>
+			}
+		}
+<span class="nc" id="L464">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

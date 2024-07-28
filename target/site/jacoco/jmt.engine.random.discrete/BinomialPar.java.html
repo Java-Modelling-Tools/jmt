@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BinomialPar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random.discrete</a> &gt; <span class="el_source">BinomialPar.java</span></div><h1>BinomialPar.java</h1><pre class="source lang-java linenums">package jmt.engine.random.discrete;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.AbstractParameter;
+import jmt.engine.random.Parameter;
+
+public class BinomialPar extends AbstractParameter implements Parameter {
+
+	private int n;
+	private double probability;
+
+<span class="nc" id="L12">	public BinomialPar(int n, double probability) throws IncorrectDistributionParameterException {</span>
+<span class="nc bnc" id="L13" title="All 2 branches missed.">		if ( n&lt;0) {</span>
+<span class="nc" id="L14">			throw new IncorrectDistributionParameterException(&quot;`numberOfElements` should be positive.&quot;);</span>
+		}
+<span class="nc bnc" id="L16" title="All 4 branches missed.">		if (probability&lt;0 || probability&gt;1) {</span>
+<span class="nc" id="L17">			throw new IncorrectDistributionParameterException(&quot;`probability` should be in range [0, 1]&quot;);</span>
+		}
+
+<span class="nc" id="L20">		this.n = n;</span>
+<span class="nc" id="L21">		this.probability = probability;</span>
+<span class="nc" id="L22">	}</span>
+
+	// Because the input is number of items, and the input of Binomial distribution is number of experiments.
+	public BinomialPar(Integer numberOfItems, Double probability) throws IncorrectDistributionParameterException {
+<span class="nc" id="L26">		this(numberOfItems.intValue()-1, probability.doubleValue());</span>
+<span class="nc" id="L27">	}</span>
+	public BinomialPar(Double probability, Integer numberOfItems) throws IncorrectDistributionParameterException {
+<span class="nc" id="L29">		this(numberOfItems.intValue()-1, probability.doubleValue());</span>
+<span class="nc" id="L30">	}</span>
+
+	@Override
+	public boolean check(){
+<span class="nc bnc" id="L34" title="All 6 branches missed.">		return n&gt;=0 &amp;&amp; probability&gt;=0 &amp;&amp; probability&lt;=1;</span>
+	}
+
+	public int getNumberOfExperiment(){
+<span class="nc" id="L38">		return n;</span>
+	}
+
+	public double getProbability(){
+<span class="nc" id="L42">		return probability;</span>
+	}
+
+	public void setNumberOfExperiment(int n ) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L46" title="All 2 branches missed.">		if ( n&lt;0) {</span>
+<span class="nc" id="L47">			throw new IncorrectDistributionParameterException(&quot;`numberOfElements` should be positive.&quot;);</span>
+		}
+<span class="nc" id="L49">		this.n = n;</span>
+<span class="nc" id="L50">	}</span>
+
+	public void setProbability(double probability ) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L53" title="All 4 branches missed.">		if (probability&lt;0 || probability&gt;1) {</span>
+<span class="nc" id="L54">			throw new IncorrectDistributionParameterException(&quot;`probability` should be in range [0, 1]&quot;);</span>
+		}
+<span class="nc" id="L56">		this.probability = probability;</span>
+<span class="nc" id="L57">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

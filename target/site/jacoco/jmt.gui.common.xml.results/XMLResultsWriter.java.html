@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>XMLResultsWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.results</a> &gt; <span class="el_source">XMLResultsWriter.java</span></div><h1>XMLResultsWriter.java</h1><pre class="source lang-java linenums">/**
+ * &lt;p&gt;Title: XML Results Writer&lt;/p&gt;
+ * &lt;p&gt;Description: Refactored replacement for the legacy {@code XMLResultsWriter}.
+ * Writes simulation results to XML using the two-phase Map → Serialize pipeline.&lt;/p&gt;
+ *
+ * &lt;p&gt;Phase 1 — {@link ResultsDescriptorMapper}: {@link MeasureDefinition} → {@link ResultsDescriptor}&lt;/p&gt;
+ * &lt;p&gt;Phase 2 — {@link ResultsSerializer}: {@link ResultsDescriptor} → DOM {@link Document}&lt;/p&gt;
+ *
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.results;
+
+import jmt.gui.common.definitions.MeasureDefinition;
+import jmt.gui.common.xml.XMLResultsConstants;
+import jmt.gui.common.xml.results.dto.ResultsDescriptor;
+import jmt.gui.common.xml.results.mapper.*;
+import jmt.gui.common.xml.results.serializer.ResultsSerializer;
+import org.w3c.dom.Document;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.OutputStream;
+
+public class XMLResultsWriter implements XMLResultsConstants {
+
+    private XMLResultsWriter() { /* utility class */ }
+
+    // -----------------------------------------------------------------------
+    // Public write methods (mirror the legacy API)
+    // -----------------------------------------------------------------------
+
+    public static void writeXML(String fileName, MeasureDefinition measure) {
+<span class="nc" id="L37">        writeToResult(new StreamResult(new File(fileName)), measure);</span>
+<span class="nc" id="L38">    }</span>
+
+    public static void writeXML(File xmlFile, MeasureDefinition measure) {
+<span class="nc" id="L41">        writeToResult(new StreamResult(xmlFile), measure);</span>
+<span class="nc" id="L42">    }</span>
+
+    public static void writeXML(OutputStream out, MeasureDefinition measure) {
+<span class="nc" id="L45">        writeToResult(new StreamResult(out), measure);</span>
+<span class="nc" id="L46">    }</span>
+
+    /**
+     * Builds the DOM {@link Document} from the given {@link MeasureDefinition}.
+     * Called by {@link jmt.gui.common.xml.XMLArchiver} when assembling the archive root.
+     */
+    public static Document getDocument(MeasureDefinition measure) {
+        // Phase 1: map model → DTO
+<span class="fc" id="L54">        ResultsDescriptorMapper mapper = new ResultsDescriptorMapper();</span>
+<span class="fc" id="L55">        ResultsDescriptor dto = mapper.mapModelToDto(measure);</span>
+
+        // Phase 2: serialize DTO → DOM Document
+<span class="fc" id="L58">        ResultsSerializer serializer = new ResultsSerializer();</span>
+<span class="fc" id="L59">        return serializer.serialize(dto);</span>
+    }
+
+    // -----------------------------------------------------------------------
+    // Internal helpers
+    // -----------------------------------------------------------------------
+
+    private static void writeToResult(Result result, MeasureDefinition measure) {
+<span class="nc" id="L67">        Document doc = getDocument(measure);</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (doc == null) return;</span>
+        try {
+<span class="nc" id="L70">            Transformer transformer = createSecureTransformer();</span>
+<span class="nc" id="L71">            transformer.transform(new DOMSource(doc), result);</span>
+<span class="nc" id="L72">        } catch (TransformerFactoryConfigurationError | TransformerException e) {</span>
+<span class="nc" id="L73">            e.printStackTrace();</span>
+<span class="nc" id="L74">        }</span>
+<span class="nc" id="L75">    }</span>
+
+    private static Transformer createSecureTransformer() throws TransformerConfigurationException {
+<span class="nc" id="L78">        TransformerFactory factory = TransformerFactory.newInstance();</span>
+<span class="nc" id="L79">        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, &quot;&quot;);</span>
+<span class="nc" id="L80">        factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, &quot;&quot;);</span>
+<span class="nc" id="L81">        Transformer transformer = factory.newTransformer();</span>
+<span class="nc" id="L82">        transformer.setOutputProperty(OutputKeys.ENCODING, &quot;ISO-8859-1&quot;);</span>
+<span class="nc" id="L83">        transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</span>
+<span class="nc" id="L84">        return transformer;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

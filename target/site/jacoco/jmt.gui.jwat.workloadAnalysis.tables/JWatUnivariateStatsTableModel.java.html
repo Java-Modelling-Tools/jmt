@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWatUnivariateStatsTableModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.tables</a> &gt; <span class="el_source">JWatUnivariateStatsTableModel.java</span></div><h1>JWatUnivariateStatsTableModel.java</h1><pre class="source lang-java linenums">package jmt.gui.jwat.workloadAnalysis.tables;
+
+import javax.swing.table.AbstractTableModel;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.gui.jwat.JWATConstants;
+
+public class JWatUnivariateStatsTableModel extends AbstractTableModel implements JWATConstants {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// TODO: Deve essergli passata una istanza di matrixObservazioni o array di variabili
+	// Nomi delle colonne della tabella
+<span class="nc" id="L16">	protected String[] columnNames = new String[] { &quot;Variable&quot;, &quot;Mean&quot;, &quot;Variance&quot;, &quot;Std. Dev.&quot;, &quot;Coeff. of var.&quot;, &quot;Minimum&quot;, &quot;Maximum&quot;, &quot;Range&quot;,</span>
+			&quot;Median&quot;, &quot;Kurtosis&quot;, &quot;Skewness&quot;, &quot;Num. Obs.&quot; };
+
+<span class="nc" id="L19">	private MatrixObservations data = null;</span>
+
+	//private DecimalFormat format = new DecimalFormat(&quot;####.####E0&quot;);
+
+<span class="nc" id="L23">	public JWatUnivariateStatsTableModel(MatrixObservations model) {</span>
+<span class="nc" id="L24">		data = model;</span>
+<span class="nc" id="L25">	}</span>
+
+	public int getRowCount() {
+<span class="nc bnc" id="L28" title="All 2 branches missed.">		if (data == null) {</span>
+<span class="nc" id="L29">			return 0;</span>
+		}
+<span class="nc" id="L31">		return data.getVariables().length;</span>
+	}
+
+	public int getColumnCount() {
+<span class="nc" id="L35">		return columnNames.length;</span>
+	}
+
+	public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L39" title="All 2 branches missed.">		if (rowIndex &gt;= 0) {</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L41">				return data.getVariables()[rowIndex].getName();</span>
+			}
+<span class="nc bnc" id="L43" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+<span class="nc" id="L44">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getMean());</span>
+			}
+<span class="nc bnc" id="L46" title="All 2 branches missed.">			if (columnIndex == 2) {</span>
+<span class="nc" id="L47">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getVariance());</span>
+			}
+<span class="nc bnc" id="L49" title="All 2 branches missed.">			if (columnIndex == 3) {</span>
+<span class="nc" id="L50">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getDevStd());</span>
+			}
+<span class="nc bnc" id="L52" title="All 2 branches missed.">			if (columnIndex == 4) {</span>
+<span class="nc" id="L53">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getDevStd()</span>
+<span class="nc" id="L54">						/ data.getVariables()[rowIndex].getUniStats().getMean());</span>
+			}
+<span class="nc bnc" id="L56" title="All 2 branches missed.">			if (columnIndex == 5) {</span>
+<span class="nc" id="L57">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getMinValue());</span>
+			}
+<span class="nc bnc" id="L59" title="All 2 branches missed.">			if (columnIndex == 6) {</span>
+<span class="nc" id="L60">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getMaxValue());</span>
+			}
+<span class="nc bnc" id="L62" title="All 2 branches missed.">			if (columnIndex == 7) {</span>
+<span class="nc" id="L63">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getRangeValue());</span>
+			}
+<span class="nc bnc" id="L65" title="All 2 branches missed.">			if (columnIndex == 8) {</span>
+<span class="nc" id="L66">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getMedian());</span>
+			}
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			if (columnIndex == 9) {</span>
+<span class="nc" id="L69">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getKurtosis());</span>
+			}
+<span class="nc bnc" id="L71" title="All 2 branches missed.">			if (columnIndex == 10) {</span>
+<span class="nc" id="L72">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getSkewness());</span>
+			}
+<span class="nc bnc" id="L74" title="All 2 branches missed.">			if (columnIndex == 11) {</span>
+<span class="nc" id="L75">				return defaultFormat.format(data.getVariables()[rowIndex].getUniStats().getNumObs());</span>
+			}
+		}
+<span class="nc" id="L78">		return null;</span>
+	}
+
+	/**
+	 * Returns name for each column (given its index) to be displayed inside
+	 * table header
+	 */
+	@Override
+	public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if (columnIndex &lt; columnNames.length) {</span>
+<span class="nc" id="L88">			return columnNames[columnIndex];</span>
+		} else {
+<span class="nc" id="L90">			return null;</span>
+		}
+	}
+
+	/**
+	 * Tells whether data contained in a specific cell(given row and column
+	 * index) is editable or not. In this case distribution column is not
+	 * editable, as editing functionality is implemented via edit button
+	 */
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L101">		return false;</span>
+	}
+
+	@Override
+	public Class getColumnClass(int index) {
+<span class="nc" id="L106">		return String.class;</span>
+	}
+
+	public void setMatrixObs(MatrixObservations m) {
+<span class="nc" id="L110">		data = m;</span>
+<span class="nc" id="L111">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

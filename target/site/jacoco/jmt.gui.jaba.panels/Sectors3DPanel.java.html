@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Sectors3DPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.panels</a> &gt; <span class="el_source">Sectors3DPanel.java</span></div><h1>Sectors3DPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jaba.panels;
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
+import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import jmt.engine.jaba.Sector3D;
+import jmt.engine.jaba.grahamScan;
+import jmt.engine.jaba.newPoint;
+
+/**
+ * &lt;p&gt;Title: Sectors 3D Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to show saturation sectors on 3-class models.&lt;/p&gt;
+ * &lt;p&gt;This was heavily modified by Bertoli Marco to allow smart label positioning and
+ * skipping if too many labels must be shown on the image. Now it allows resizing too.&lt;/p&gt;
+ *
+ * @author Bertoli Marco, Zanzottera Andrea
+ *         Date: 8-feb-2006
+ *         Time: 11.42.37
+ */
+public class Sectors3DPanel extends JPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// Colors for sectors and lines
+<span class="nc" id="L60">	private static final Color SINGLE = new Color(255, 200, 0);</span>
+<span class="nc" id="L61">	private static final Color DOUBLE = new Color(255, 150, 75);</span>
+<span class="nc" id="L62">	private static final Color MORE = new Color(192, 0, 0);</span>
+<span class="nc" id="L63">	private static final Color LINESINGLE = Color.GRAY;</span>
+<span class="nc" id="L64">	private static final Color LINEDOUBLE = Color.CYAN;</span>
+<span class="nc" id="L65">	private static final Color LINEMORE = Color.BLUE;</span>
+<span class="nc" id="L66">	private static final Color BLACK = new Color(0, 0, 0);</span>
+<span class="nc" id="L67">	private static final Color GREY = new Color(100, 100, 100);</span>
+	// Background
+<span class="nc" id="L69">	private static final Color BGCOLOR = new Color(255, 255, 255);</span>
+	// Stroke styles
+<span class="nc" id="L71">	private static final BasicStroke LABEL_LINE = new BasicStroke(2);</span>
+<span class="nc" id="L72">	private static final BasicStroke SECTORS = new BasicStroke(1);</span>
+<span class="nc" id="L73">	private static final BasicStroke LINES = new BasicStroke(1);</span>
+	// Constants
+<span class="nc" id="L75">	private final double rad3 = Math.sqrt(3);</span>
+<span class="nc" id="L76">	private final double rad3d2 = Math.sqrt(3) / 2;</span>
+<span class="nc" id="L77">	private final double rad3d3 = Math.sqrt(3) / 3;</span>
+	// Used to format numbers
+<span class="nc" id="L79">	private static final DecimalFormat formatter = new DecimalFormat(&quot;0.000&quot;);</span>
+	// Resulta data and class names
+	private Vector&lt;Object&gt; s3d;
+	private String[] classNames;
+
+	// Used to immagazine traslation coordinates
+	private double traslationX;
+	private double traslationY;
+
+	// Tells if graph is shown
+<span class="nc" id="L89">	private boolean isShown = false;</span>
+	// Stores height of the graph
+	private int height;
+
+	// Label to show coordinates
+	private JLabel coordLabel;
+
+	/**
+	 * Builds a new Sectors3D Panel to show results of 3-class models
+	 * @param s3d results vector
+	 * @param classNames array with class names
+	 */
+	public Sectors3DPanel(Vector&lt;Object&gt; s3d, String[] classNames) {
+<span class="nc" id="L102">		super(new BorderLayout());</span>
+<span class="nc" id="L103">		this.s3d = s3d;</span>
+<span class="nc" id="L104">		this.classNames = classNames;</span>
+<span class="nc" id="L105">		this.setBackground(BGCOLOR);</span>
+<span class="nc" id="L106">		this.setBorder(BorderFactory.createEtchedBorder());</span>
+
+		// Label to show coordinates
+<span class="nc" id="L109">		coordLabel = new JLabel();</span>
+<span class="nc" id="L110">		coordLabel.setBorder(BorderFactory.createEtchedBorder());</span>
+<span class="nc" id="L111">		coordLabel.setVisible(false);</span>
+<span class="nc" id="L112">		coordLabel.setOpaque(true);</span>
+		// Puts label on south-east corner
+<span class="nc" id="L114">		JPanel tmp = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L115">		tmp.add(coordLabel, BorderLayout.EAST);</span>
+<span class="nc" id="L116">		tmp.setOpaque(false);</span>
+<span class="nc" id="L117">		this.add(tmp, BorderLayout.SOUTH);</span>
+
+		// Adds a mouseListener to show graph coordinates
+<span class="nc" id="L120">		this.addMouseMotionListener(new MouseMotionAdapter() {</span>
+			@Override
+			public void mouseMoved(MouseEvent e) {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">				if (isShown) {</span>
+<span class="nc" id="L124">					String coord = getCoordinates(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">					if (coord != null) {</span>
+<span class="nc" id="L126">						coordLabel.setText(coord);</span>
+<span class="nc" id="L127">						coordLabel.setVisible(true);</span>
+<span class="nc" id="L128">						Sectors3DPanel.this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));</span>
+					} else {
+<span class="nc" id="L130">						coordLabel.setText(&quot;&quot;);</span>
+<span class="nc" id="L131">						coordLabel.setVisible(false);</span>
+<span class="nc" id="L132">						Sectors3DPanel.this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));</span>
+					}
+				}
+<span class="nc" id="L135">			}</span>
+		});
+<span class="nc" id="L137">	}</span>
+
+	/**
+	 * Overrides default paint method to draw graph
+	 * @param g graphic object. &lt;b&gt;Must&lt;/b&gt; be an instance of Graphics2D
+	 */
+	@Override
+	public void paint(Graphics g) {
+<span class="nc" id="L145">		isShown = false;</span>
+		// This is the height of the graph
+
+<span class="nc" id="L148">		super.paint(g);</span>
+		Graphics2D g2;
+
+		// If g is not instance of Graphic2D, aborts method
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		if (g instanceof Graphics2D) {</span>
+<span class="nc" id="L153">			g2 = (Graphics2D) g;</span>
+		} else {
+<span class="nc" id="L155">			return;</span>
+		}
+
+		Color sectorcolor;
+
+<span class="nc" id="L160">		int maxStationNameWidth = (int) g2.getFontMetrics().getStringBounds(&quot;StationX&quot;, g2).getWidth();</span>
+
+		int limitHeight, limitWidth;
+
+<span class="nc" id="L164">		limitHeight = (int) (getHeight() * 7.5 / 10.0);</span>
+<span class="nc" id="L165">		limitWidth = (int) (((getWidth() / rad3) - maxStationNameWidth * 3 - 20) * .95);</span>
+
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		height = (limitHeight &lt; limitWidth) ? limitHeight : limitWidth;</span>
+
+		// If height is too small, aborts paint
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		if (height &lt; 20) {</span>
+<span class="nc" id="L171">			return;</span>
+		}
+
+		// Sets traslation coordinates
+<span class="nc" id="L175">		traslationX = .1 * height + 15;</span>
+<span class="nc" id="L176">		traslationY = getHeight() - height * 0.1 - 10;</span>
+
+		// Now traslates image
+<span class="nc" id="L179">		AffineTransform aT = g2.getTransform();</span>
+<span class="nc" id="L180">		aT.setToTranslation(.1 * height + 15, getHeight() - height * 0.1 - 10);</span>
+<span class="nc" id="L181">		g2.transform(aT);</span>
+
+// Change the Stroke and color to highlight the line
+<span class="nc" id="L184">		g2.setStroke(SECTORS);</span>
+
+// Draw the background of the triangle
+<span class="nc" id="L187">		int[] xt = { 0, (int) Math.floor(rad3d2 * height), (int) Math.floor(rad3 * height) };</span>
+<span class="nc" id="L188">		int[] yt = { 0, -1 * height, 0 };</span>
+<span class="nc" id="L189">		g2.setColor(SINGLE);</span>
+<span class="nc" id="L190">		g2.fillPolygon(xt, yt, 3);</span>
+
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		if (s3d != null) {</span>
+			// Used to sort label ascendingly by position
+<span class="nc" id="L194">			TreeSet&lt;Caption&gt; labels = new TreeSet&lt;Caption&gt;();</span>
+
+			// foreach sector
+<span class="nc bnc" id="L197" title="All 2 branches missed.">			for (int i = 0; i &lt; s3d.size(); i++) {</span>
+<span class="nc" id="L198">				Sector3D sector = (Sector3D) s3d.get(i);</span>
+				//System.out.println(&quot;Totale: &quot;+s3d.size()+&quot;, Parziale: &quot;+i);
+// These are the coordinates of the points that will be passed to the fillPolygon method
+<span class="nc" id="L201">				int[] xxp = new int[sector.CountPoint()];</span>
+<span class="nc" id="L202">				int[] yyp = new int[sector.CountPoint()];</span>
+
+<span class="nc" id="L204">				Vector&lt;newPoint&gt; points = new Vector&lt;newPoint&gt;();</span>
+
+// for each point of a sector
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				for (int j = 0; j &lt; sector.CountPoint(); j++) {</span>
+
+<span class="nc" id="L209">					double pb11 = sector.getx(j);</span>
+<span class="nc" id="L210">					double pb12 = sector.gety(j);</span>
+
+<span class="nc" id="L212">					int pb1 = (int) Math.floor(pb11 * height);</span>
+<span class="nc" id="L213">					int pb2 = (int) Math.floor(pb12 * height);</span>
+
+//Add the dot to the vector to pass to the Grahamscan
+<span class="nc" id="L216">					newPoint temp = new newPoint(pb1, pb2);</span>
+<span class="nc" id="L217">					points.addElement(temp);</span>
+				}
+
+				//Color the sector based on the number of stations that saturate
+<span class="nc" id="L221">				int numstat = sector.getType();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">				if (numstat &gt; 2) {</span>
+<span class="nc" id="L223">					sectorcolor = MORE;</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">				} else if (numstat == 2) {</span>
+<span class="nc" id="L225">					sectorcolor = DOUBLE;</span>
+				} else {
+<span class="nc" id="L227">					sectorcolor = SINGLE;</span>
+				}
+
+<span class="nc" id="L230">				grahamScan gr = new grahamScan();</span>
+<span class="nc" id="L231">				Vector&lt;newPoint&gt; ordpoint = gr.doGraham(points);</span>
+
+<span class="nc bnc" id="L233" title="All 2 branches missed.">				for (int j = 0; j &lt; ordpoint.size(); j++) {</span>
+<span class="nc" id="L234">					xxp[j] = ordpoint.get(j).x;</span>
+<span class="nc" id="L235">					yyp[j] = -ordpoint.get(j).y;</span>
+				}
+
+				// Disegna i settori di saturazione
+<span class="nc" id="L239">				g2.setColor(sectorcolor);</span>
+<span class="nc" id="L240">				g2.fillPolygon(xxp, yyp, sector.CountPoint());</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">				if (numstat != 1) {</span>
+<span class="nc" id="L242">					g2.setColor(Color.BLACK);</span>
+<span class="nc" id="L243">					g2.draw(new Polygon(xxp, yyp, sector.CountPoint()));</span>
+				}
+
+				// Adds this sector to labels
+<span class="nc" id="L247">				double[] centre = sector.getCentre();</span>
+<span class="nc" id="L248">				labels.add(new Caption(sector.getName(), centre[0], centre[1], sector.getType()));</span>
+
+			}//for each sector
+
+			// Now draws captions and link them to the corresponding sector
+<span class="nc" id="L253">			Iterator&lt;Caption&gt; i = labels.iterator();</span>
+			// Stores prevoius y value to avoid collision
+<span class="nc" id="L255">			float previousy = Float.NEGATIVE_INFINITY;</span>
+			// Value where label should be placed
+			float yvalue;
+
+<span class="nc" id="L259">			boolean skipSingle = false, skipDouble = false;</span>
+
+			// Skips single and double sector labels if they are too many
+<span class="nc" id="L262">			Caption first = labels.first();</span>
+<span class="nc" id="L263">			float textHeight = (float) g2.getFontMetrics().getStringBounds(first.getLabel(), g2).getHeight();</span>
+<span class="nc bnc" id="L264" title="All 2 branches missed.">			if (first.getY() * height + textHeight * labels.size() &gt; getHeight()) {</span>
+<span class="nc" id="L265">				skipSingle = true;</span>
+				// now checks if double have to be skipped too
+<span class="nc" id="L267">				int count = 0;</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">				while (i.hasNext()) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">					if (i.next().getStatN() &gt; 1) {</span>
+<span class="nc" id="L270">						count++;</span>
+					}
+				}
+				// resets iterator for next cycle
+<span class="nc" id="L274">				i = labels.iterator();</span>
+				// Decides if doubles have to be skipped too
+<span class="nc bnc" id="L276" title="All 2 branches missed.">				if (first.getY() * height + textHeight * count &gt; getHeight()) {</span>
+<span class="nc" id="L277">					skipDouble = true;</span>
+				}
+			}
+
+<span class="nc bnc" id="L281" title="All 2 branches missed.">			while (i.hasNext()) {</span>
+<span class="nc" id="L282">				Caption c = i.next();</span>
+				// Performs skipping if needed
+<span class="nc bnc" id="L284" title="All 4 branches missed.">				if (skipSingle &amp;&amp; c.getStatN() == 1) {</span>
+<span class="nc" id="L285">					continue;</span>
+<span class="nc bnc" id="L286" title="All 4 branches missed.">				} else if (skipDouble &amp;&amp; c.getStatN() == 2) {</span>
+<span class="nc" id="L287">					continue;</span>
+				}
+
+				// Select color basing on number of station in this sector
+<span class="nc bnc" id="L291" title="All 2 branches missed.">				if (c.getStatN() == 1) {</span>
+<span class="nc" id="L292">					g2.setColor(LINESINGLE);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">				} else if (c.getStatN() == 2) {</span>
+<span class="nc" id="L294">					g2.setColor(LINEDOUBLE);</span>
+				} else {
+<span class="nc" id="L296">					g2.setColor(LINEMORE);</span>
+				}
+
+<span class="nc" id="L299">				yvalue = (float) c.getY() * height;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">				if (yvalue &lt; previousy) {</span>
+					// collision detected
+<span class="nc" id="L302">					yvalue = previousy;</span>
+				}
+
+				// Writes label and draw its line
+<span class="nc" id="L306">				g2.setStroke(LABEL_LINE);</span>
+<span class="nc" id="L307">				g2.draw(new Line2D.Double(height * (rad3 + .1) + 10 - 4, -yvalue, c.getX() * height, -c.getY() * height));</span>
+<span class="nc" id="L308">				g2.setStroke(LINES);</span>
+<span class="nc" id="L309">				g2.setColor(BLACK);</span>
+<span class="nc" id="L310">				g2.drawString(c.getLabel(), (float) (height * (rad3 + .1) + 10), -yvalue</span>
+<span class="nc" id="L311">						+ (float) g2.getFontMetrics().getStringBounds(c.getLabel(), g2).getHeight() / 2 - 4);</span>
+				// updates previousy adding height of this label
+<span class="nc" id="L313">				previousy = yvalue + (float) g2.getFontMetrics().getStringBounds(c.getLabel(), g2).getHeight();</span>
+<span class="nc" id="L314">			}</span>
+
+			// Draw axes
+<span class="nc" id="L317">			g2.setStroke(LINES);</span>
+<span class="nc" id="L318">			sectorcolor = BLACK;</span>
+<span class="nc" id="L319">			g2.setColor(sectorcolor);</span>
+<span class="nc" id="L320">			Line2D class3 = new Line2D.Double(rad3d2 * height, -1 * height, rad3d2 * height, -1.1 * height);</span>
+<span class="nc" id="L321">			Line2D class2 = new Line2D.Double(rad3 * height, 0, rad3 * height + .1 * height, .05 * height);</span>
+<span class="nc" id="L322">			Line2D class1 = new Line2D.Double(0, 0, -.1 * height, .05 * height);</span>
+<span class="nc" id="L323">			g2.draw(class3);</span>
+<span class="nc" id="L324">			g2.draw(class2);</span>
+<span class="nc" id="L325">			g2.draw(class1);</span>
+
+			// Arrow on class 3 axis
+<span class="nc" id="L328">			Line2D fclass31 = new Line2D.Double(rad3d2 * height, -1.1 * height, rad3d2 * height - 0.05 * height, -1.1 * height + 0.05 * height);</span>
+<span class="nc" id="L329">			Line2D fclass32 = new Line2D.Double(rad3d2 * height, -1.1 * height, rad3d2 * height + 0.05 * height, -1.1 * height + 0.05 * height);</span>
+<span class="nc" id="L330">			g2.draw(fclass31);</span>
+<span class="nc" id="L331">			g2.draw(fclass32);</span>
+
+			// Arrow on class 2 axis
+<span class="nc" id="L334">			Line2D fclass21 = new Line2D.Double(rad3 * height + .1 * height, .05 * height, rad3 * height + .1 * height - .06 * height, .05 * height</span>
+					+ .03 * height);
+<span class="nc" id="L336">			Line2D fclass22 = new Line2D.Double(rad3 * height + .1 * height, .05 * height, rad3 * height + .1 * height - .03 * height, .05 * height</span>
+					- .06 * height);
+<span class="nc" id="L338">			g2.draw(fclass21);</span>
+<span class="nc" id="L339">			g2.draw(fclass22);</span>
+
+			// Arrow on class 1 axis
+<span class="nc" id="L342">			Line2D fclass11 = new Line2D.Double(-.1 * height, .05 * height, -.1 * height + .06 * height, .05 * height + 0.03 * height);</span>
+<span class="nc" id="L343">			Line2D fclass12 = new Line2D.Double(-.1 * height, .05 * height, -.1 * height + .03 * height, .05 * height - 0.06 * height);</span>
+<span class="nc" id="L344">			g2.draw(fclass11);</span>
+<span class="nc" id="L345">			g2.draw(fclass12);</span>
+
+			// Axis labels
+<span class="nc" id="L348">			g2.setColor(GREY);</span>
+<span class="nc" id="L349">			g2.drawString(classNames[2] + &quot; %&quot;, (float) (height * rad3d2 - g2.getFontMetrics().getStringBounds(classNames[2] + &quot; %&quot;, g2).getWidth()),</span>
+					-height);
+<span class="nc" id="L351">			g2.drawString(classNames[1] + &quot; %&quot;, (float) (height * rad3 - g2.getFontMetrics().getStringBounds(classNames[1] + &quot; %&quot;, g2).getWidth()),</span>
+					15);
+<span class="nc" id="L353">			g2.drawString(classNames[0] + &quot; %&quot;, 0, 15);</span>
+			// Graph is shown
+<span class="nc" id="L355">			isShown = true;</span>
+
+			// Draw triangle perimeter
+<span class="nc" id="L358">			g2.setColor(Color.BLACK);</span>
+<span class="nc" id="L359">			g2.draw(new Polygon(xt, yt, 3));</span>
+		}
+<span class="nc" id="L361">	}</span>
+
+	/**
+	 * This method will calculate mouse position in beta coordinates
+	 * @param x mouse position x coordinate
+	 * @param y mouse position y coordinate
+	 * @return  string with mouse position in beta coordinates or null if mouse is out of
+	 * graph
+	 */
+	protected String getCoordinates(int x, int y) {
+<span class="nc" id="L371">		double b1 = rad3d3 * (x - traslationX) / height - 0.5 * (traslationY - y) / height;</span>
+<span class="nc" id="L372">		double b2 = (traslationY - y) / height;</span>
+<span class="nc" id="L373">		double b0 = 1 - b1 - b2;</span>
+
+<span class="nc bnc" id="L375" title="All 12 branches missed.">		if (b0 &gt;= 0 &amp;&amp; b0 &lt;= 1 &amp;&amp; b1 &gt;= 0 &amp;&amp; b1 &lt;= 1 &amp;&amp; b2 &gt;= 0 &amp;&amp; b2 &lt;= 1) {</span>
+<span class="nc" id="L376">			return classNames[0] + &quot;: &quot; + formatter.format(b0) + &quot;% &quot; + classNames[1] + &quot;: &quot; + formatter.format(b1) + &quot;% &quot; + classNames[2] + &quot;: &quot;</span>
+<span class="nc" id="L377">					+ formatter.format(b2) + &quot;%&quot;;</span>
+		} else {
+<span class="nc" id="L379">			return null;</span>
+		}
+	}
+
+	/**
+	 * Inner class used to sort sector captions
+	 * &lt;br&gt; Author: Bertoli Marco
+	 */
+	protected class Caption implements Comparable {
+		private double x;
+		private double y;
+		private String label;
+		private int statN;
+
+		/**
+		 * Builds a new Caption object
+		 * @param label label of the caption
+		 * @param x value of x coordinate
+		 * @param y value of y coordinate
+		 * @param statN number of stations
+		 */
+<span class="nc" id="L400">		public Caption(String label, double x, double y, int statN) {</span>
+<span class="nc" id="L401">			this.label = label;</span>
+<span class="nc" id="L402">			this.x = x;</span>
+<span class="nc" id="L403">			this.y = y;</span>
+<span class="nc" id="L404">			this.statN = statN;</span>
+<span class="nc" id="L405">		}</span>
+
+		/**
+		 * Gets value of x
+		 * @return value of x
+		 */
+		public double getX() {
+<span class="nc" id="L412">			return x;</span>
+		}
+
+		/**
+		 * value of y
+		 * @return value of y
+		 */
+		public double getY() {
+<span class="nc" id="L420">			return y;</span>
+		}
+
+		/**
+		 * Gets label caption
+		 * @return label caption
+		 */
+		public String getLabel() {
+<span class="nc" id="L428">			return label;</span>
+		}
+
+		/**
+		 * Gets station number in this sector
+		 * @return station number in this sector
+		 */
+		public int getStatN() {
+<span class="nc" id="L436">			return statN;</span>
+		}
+
+		/**
+		 * &lt;p&gt;Compares this object with the specified object for order.  Returns a
+		 * negative integer, zero, or a positive integer as this object is less
+		 * than, equal to, or greater than the specified object.&lt;/p&gt;
+		 * &lt;p&gt;Compares y values and if they are equals compares x values.&lt;/p&gt;
+		 *
+		 * @param o the Object to be compared.
+		 * @return a negative integer, zero, or a positive integer as this object
+		 *         is less than, equal to, or greater than the specified object.
+		 * @throws ClassCastException if the specified object's type prevents it
+		 *                            from being compared to this Object.
+		 */
+		public int compareTo(Object o) {
+<span class="nc" id="L452">			Caption c = (Caption) o;</span>
+			// Compares y values and if they are equals, compares x
+<span class="nc bnc" id="L454" title="All 2 branches missed.">			if (y &lt; c.y) {</span>
+<span class="nc" id="L455">				return -1;</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">			} else if (y &gt; c.y) {</span>
+<span class="nc" id="L457">				return 1;</span>
+			} else {
+<span class="nc bnc" id="L459" title="All 2 branches missed.">				if (x &lt; c.x) {</span>
+<span class="nc" id="L460">					return -1;</span>
+<span class="nc bnc" id="L461" title="All 2 branches missed.">				} else if (x &gt; c.x) {</span>
+<span class="nc" id="L462">					return 1;</span>
+				} else {
+<span class="nc" id="L464">					return 0;</span>
+				}
+			}
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

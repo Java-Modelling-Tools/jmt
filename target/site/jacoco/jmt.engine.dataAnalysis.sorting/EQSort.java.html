@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EQSort.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.dataAnalysis.sorting</a> &gt; <span class="el_source">EQSort.java</span></div><h1>EQSort.java</h1><pre class="source lang-java linenums">package jmt.engine.dataAnalysis.sorting;
+
+//
+// Modified by Lev Shereshevsky (leo@aeriesoft.ru) 98/03/20
+//
+
+/*
+ * @(#)EQSort.java     1.0 95/06/26 Jim Boritz
+ *
+ * Copyright (c) 1995 UBC Microsystems, Inc. All Rights Reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software
+ * and its documentation for NON-COMMERCIAL purposes and without
+ * fee is hereby granted provided that this copyright notice
+ * appears in all copies. Please refer to the file &quot;copyright.html&quot;
+ * for further important copyright and licensing information.
+ *
+ * UBC MAKES NO REPRESENTATIONS OR WARRANTIES ABOUT THE SUITABILITY OF
+ * THE SOFTWARE, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+ * PARTICULAR PURPOSE, OR NON-INFRINGEMENT. UBC SHALL NOT BE LIABLE FOR
+ * ANY DAMAGES SUFFERED BY LICENSEE AS A RESULT OF USING, MODIFYING OR
+ * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
+ */
+
+/**
+ * 19 Feb 1996: Fixed to avoid infinite loop discovered by Paul Haberli.
+ *              Misbehaviour expressed when the pivot element was not unique.
+ *              -Jason Harrison
+ *
+ * 21 Jun 1996: Modified code based on comments from Paul Haeberli, and
+ *              Peter Schweizer (Peter.Schweizer@mni.fh-giessen.de).
+ *              Used Daeron Meyer's (daeron@geom.umn.edu) code for the
+ *              new pivoting code. - Jason Harrison
+ *
+ * 09 Jan 1998: Another set of bug fixes by Thomas Everth (everth@wave.co.nz)
+ *              and John Brzustowski (jbrzusto@gpu.srv.ualberta.ca).
+ */
+
+/**
+ * An enhanced quick sort demonstration algorithm.
+ * SortAlgorithm.java, Thu Oct 27 10:32:35 1994
+ *
+ * @author Jim Boritz
+ * @version     1.0, 26 Jun 1995
+ */
+
+<span class="nc" id="L48">public class EQSort implements SortAlgorithm {</span>
+	void brute(double a[], int lo, int hi) {
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		if ((hi - lo) == 1) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">			if (a[hi] &lt; a[lo]) {</span>
+<span class="nc" id="L52">				double T = a[lo];</span>
+<span class="nc" id="L53">				a[lo] = a[hi];</span>
+<span class="nc" id="L54">				a[hi] = T;</span>
+			}
+		}
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if ((hi - lo) == 2) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">			int pmin = a[lo] &lt; a[lo + 1] ? lo : lo + 1;</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">			pmin = a[pmin] &lt; a[lo + 2] ? pmin : lo + 2;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			if (pmin != lo) {</span>
+<span class="nc" id="L61">				double T = a[lo];</span>
+<span class="nc" id="L62">				a[lo] = a[pmin];</span>
+<span class="nc" id="L63">				a[pmin] = T;</span>
+			}
+<span class="nc" id="L65">			brute(a, lo + 1, hi);</span>
+		}
+<span class="nc bnc" id="L67" title="All 2 branches missed.">		if ((hi - lo) == 3) {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			int pmin = a[lo] &lt; a[lo + 1] ? lo : lo + 1;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			pmin = a[pmin] &lt; a[lo + 2] ? pmin : lo + 2;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">			pmin = a[pmin] &lt; a[lo + 3] ? pmin : lo + 3;</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">			if (pmin != lo) {</span>
+<span class="nc" id="L72">				double T = a[lo];</span>
+<span class="nc" id="L73">				a[lo] = a[pmin];</span>
+<span class="nc" id="L74">				a[pmin] = T;</span>
+			}
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			int pmax = a[hi] &gt; a[hi - 1] ? hi : hi - 1;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			pmax = a[pmax] &gt; a[hi - 2] ? pmax : hi - 2;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			if (pmax != hi) {</span>
+<span class="nc" id="L79">				double T = a[hi];</span>
+<span class="nc" id="L80">				a[hi] = a[pmax];</span>
+<span class="nc" id="L81">				a[pmax] = T;</span>
+			}
+<span class="nc" id="L83">			brute(a, lo + 1, hi - 1);</span>
+		}
+<span class="nc" id="L85">	}</span>
+
+	void sort(double a[], int lo0, int hi0) {
+<span class="nc" id="L88">		int lo = lo0;</span>
+<span class="nc" id="L89">		int hi = hi0;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if ((hi - lo) &lt;= 3) {</span>
+<span class="nc" id="L91">			brute(a, lo, hi);</span>
+<span class="nc" id="L92">			return;</span>
+		}
+
+		/*
+		 *  Pick a pivot and move it out of the way
+		 */
+<span class="nc" id="L98">		double pivot = a[(lo + hi) / 2];</span>
+<span class="nc" id="L99">		a[(lo + hi) / 2] = a[hi];</span>
+<span class="nc" id="L100">		a[hi] = pivot;</span>
+
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		while (lo &lt; hi) {</span>
+			/*
+			 *  Search forward from a[lo] until an element is found that
+			 *  is greater than the pivot or lo &gt;= hi
+			 */
+<span class="nc bnc" id="L107" title="All 4 branches missed.">			while ((a[lo] &lt;= pivot) &amp;&amp; lo &lt; hi) {</span>
+<span class="nc" id="L108">				lo++;</span>
+			}
+
+			/*
+			 *  Search backward from a[hi] until element is found that
+			 *  is less than the pivot, or hi &lt;= lo
+			 */
+<span class="nc bnc" id="L115" title="All 4 branches missed.">			while ((pivot &lt;= a[hi]) &amp;&amp; lo &lt; hi) {</span>
+<span class="nc" id="L116">				hi--;</span>
+			}
+
+			/*
+			 *  Swap elements a[lo] and a[hi]
+			 */
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if (lo &lt; hi) {</span>
+<span class="nc" id="L123">				double T = a[lo];</span>
+<span class="nc" id="L124">				a[lo] = a[hi];</span>
+<span class="nc" id="L125">				a[hi] = T;</span>
+<span class="nc" id="L126">			}</span>
+		}
+
+		/*
+		 *  Put the median in the &quot;center&quot; of the list
+		 */
+<span class="nc" id="L132">		a[hi0] = a[hi];</span>
+<span class="nc" id="L133">		a[hi] = pivot;</span>
+
+		/*
+		 *  Recursive calls, elements a[lo0] to a[lo-1] are less than or
+		 *  equal to pivot, elements a[hi+1] to a[hi0] are greater than
+		 *  pivot.
+		 */
+<span class="nc" id="L140">		sort(a, lo0, lo - 1);</span>
+<span class="nc" id="L141">		sort(a, hi + 1, hi0);</span>
+<span class="nc" id="L142">	}</span>
+
+	public void sort(double[] data) {
+<span class="nc" id="L145">		sort(data, 0, data.length - 1);</span>
+<span class="nc" id="L146">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

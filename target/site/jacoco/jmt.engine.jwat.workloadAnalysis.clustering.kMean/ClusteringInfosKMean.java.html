@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClusteringInfosKMean.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.workloadAnalysis.clustering.kMean</a> &gt; <span class="el_source">ClusteringInfosKMean.java</span></div><h1>ClusteringInfosKMean.java</h1><pre class="source lang-java linenums">package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.Observation;
+import jmt.engine.jwat.workloadAnalysis.clustering.ClusteringInfos;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMeanClusteringEngine.TempClusterStatistics;
+
+public class ClusteringInfosKMean implements ClusteringInfos {
+
+	public ClusterInfoKMean[] infoCluster;
+
+public int isGoodCluster; // -1 not present; 0 not great; 1 excellent
+public double omsr; // overall
+public double ratio; // ratio
+
+public int[] numElem; // number of elements of each single cluster
+public double[] percent; // percentage of the total
+
+	public int numCluster;
+
+	public double passw;
+
+<span class="nc" id="L23">	public ClusteringInfosKMean(int numCluster, int nvars) {</span>
+<span class="nc" id="L24">		ratio = -1;</span>
+<span class="nc" id="L25">		isGoodCluster = 0;</span>
+<span class="nc" id="L26">		numElem = new int[numCluster + 1];</span>
+<span class="nc" id="L27">		infoCluster = new ClusterInfoKMean[numCluster + 1];</span>
+<span class="nc bnc" id="L28" title="All 2 branches missed.">		for (int i = 0; i &lt; numCluster + 1; i++) {</span>
+<span class="nc" id="L29">			infoCluster[i] = new ClusterInfoKMean(nvars);</span>
+		}
+<span class="nc" id="L31">		percent = new double[numCluster + 1];</span>
+<span class="nc" id="L32">		this.numCluster = numCluster;</span>
+<span class="nc" id="L33">	}</span>
+
+	public void Output(int[] varSel, TempClusterStatistics[][] sum, short[] clusAssign, MatrixObservations m, double oldPassw) //Deve valere assw precedentemente calcolato 
+	{
+
+<span class="nc" id="L38">		passw = oldPassw;</span>
+
+double ssb; // variance between classes on variable j
+double ssw; // internal variance on variable j
+<span class="nc" id="L42">double dfw = 0; // degree of internal freedom between classes</span>
+<span class="nc" id="L43">double assw = 0;// total error in partition</span>
+
+		double sd, sc, r[];
+<span class="nc" id="L46">		r = new double[varSel.length];</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		for (int i = 0; i &lt; varSel.length; i++) {</span>
+<span class="nc" id="L48">			r[i] = 0;</span>
+		}
+
+<span class="nc" id="L51">		double th = Math.pow(10, -10);</span>
+<span class="nc" id="L52">		double dfb = numCluster + 1;</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		for (int j = 0; j &lt; varSel.length; j++) {</span>
+
+<span class="nc" id="L56">			sd = 0;</span>
+<span class="nc" id="L57">			sc = 0;</span>
+<span class="nc" id="L58">			ssb = 0;</span>
+<span class="nc" id="L59">			ssw = 0;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">			for (int k = 0; k &lt;= numCluster; k++) {</span>
+<span class="nc" id="L61">				sd += (sum[j][k].Media * sum[j][k].numOs);</span>
+<span class="nc" id="L62">				ssb += (Math.pow(sum[j][k].Media, 2) * sum[j][k].numOs);</span>
+<span class="nc" id="L63">				ssw += sum[j][k].SSDev;</span>
+<span class="nc" id="L64">				sc += sum[j][k].numOs;</span>
+			}
+
+<span class="nc" id="L67">			dfw = sc - dfb - 2;</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			if (sc == 0.) {</span>
+<span class="nc" id="L69">				sc = th;</span>
+			}
+<span class="nc bnc" id="L71" title="All 2 branches missed.">			if (dfw == 0.) {</span>
+<span class="nc" id="L72">				dfw = th;</span>
+			}
+<span class="nc bnc" id="L74" title="All 2 branches missed.">			if (dfb == 0.) {</span>
+<span class="nc" id="L75">				dfb = th;</span>
+			}
+<span class="nc" id="L77">			assw += ssw;</span>
+<span class="nc" id="L78">			ssb -= (Math.pow(sd, 2) / sc);</span>
+<span class="nc" id="L79">			ssb /= dfb;</span>
+<span class="nc" id="L80">			ssw /= dfw;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			if (ssw == 0.) {</span>
+<span class="nc" id="L82">				ssw = th;</span>
+			}
+
+<span class="nc" id="L85">ratio = 0; // variance ratio for variable j</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">if (ssw != 0) { // I don't think it is needed..</span>
+<span class="nc" id="L87">				ratio = (r[j] / ssw - 1) * (1 + dfw) + 1;</span>
+<span class="nc" id="L88">				r[j] = ssw;</span>
+
+			}
+		}
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if (assw == 0) {</span>
+<span class="nc" id="L94">			omsr = 0;</span>
+		} else {
+<span class="nc" id="L96">			omsr = ((passw) / assw - 1) * dfw;</span>
+		}
+
+<span class="nc" id="L99">		passw = assw;</span>
+
+/* Determine for each cluster the number of points that fall into each cluster */
+<span class="nc bnc" id="L102" title="All 2 branches missed.">		for (int xx = 0; xx &lt; m.getNumOfObs(); xx++) {</span>
+<span class="nc" id="L103">			numElem[clusAssign[xx]]++;</span>
+		}
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int xx = 0; xx &lt; numCluster + 1; xx++) {</span>
+<span class="nc" id="L106">			percent[xx] = (double) numElem[xx] / (double) m.getNumOfObs();</span>
+		}
+
+<span class="nc" id="L109">	}</span>
+
+	public void DOStat(int[] varSel, short[] clusAssign, MatrixObservations m) {
+<span class="nc" id="L112">		boolean[] bValidVar = new boolean[m.getNumVariables()];</span>
+
+<span class="nc" id="L114">		int df = 0;</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		for (int sk = 0; sk &lt; bValidVar.length; sk++) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">			if (varSel[df] == sk) {</span>
+<span class="nc" id="L117">				bValidVar[sk] = true;</span>
+<span class="nc" id="L118">				df++;</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">				if (df == varSel.length) {</span>
+<span class="nc" id="L120">					break;</span>
+				}
+			} else {
+<span class="nc" id="L123">				bValidVar[sk] = false;</span>
+			}
+		}
+<span class="nc" id="L126">		DoStat(m, varSel.length, clusAssign, bValidVar);</span>
+<span class="nc" id="L127">	}</span>
+
+	private void DoStat(MatrixObservations m, int nNumUsed, short[] arrNClus, boolean[] bValidVar) {
+
+<span class="nc" id="L131">		double absoluteVal[][] = new double[arrNClus.length][m.getNumVariables()];</span>
+
+		int nclus;
+//Observation[] currObs=m.getListObs(); //Current value of each variable
+<span class="nc" id="L135">		Observation[] currObs = m.getVariables()[0].getCurObs();</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		for (int count = 0; count &lt; m.getNumOfObs(); count++) {</span>
+
+//nclus = Integer.parseInt(arrNClus.get(count).toString());
+<span class="nc" id="L139">nclus = arrNClus[currObs[count].getID() - 1];</span>
+<span class="nc" id="L140">infoCluster[nclus].numObs++;</span>
+
+//Port of stat1cl
+//Calculate sum, squared sum. etc.
+
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			for (int i = 0; i &lt; m.getNumVariables(); i++) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">				if (currObs[count].getIndex(i) != 0) {</span>
+<span class="nc" id="L147">					infoCluster[nclus].statClust[i].iNotZr++;</span>
+				}
+<span class="nc bnc" id="L149" title="All 2 branches missed.">				if (infoCluster[nclus].numObs == 1) {</span>
+<span class="nc" id="L150">					infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);</span>
+<span class="nc" id="L151">					infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);</span>
+				} else {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">					if (infoCluster[nclus].statClust[i].dMaxObs &lt; currObs[count].getIndex(i)) {</span>
+<span class="nc" id="L154">						infoCluster[nclus].statClust[i].dMaxObs = currObs[count].getIndex(i);</span>
+					}
+<span class="nc bnc" id="L156" title="All 2 branches missed.">					if (infoCluster[nclus].statClust[i].dMinObs &gt; currObs[count].getIndex(i)) {</span>
+<span class="nc" id="L157">						infoCluster[nclus].statClust[i].dMinObs = currObs[count].getIndex(i);</span>
+					}
+				}
+<span class="nc" id="L160">				infoCluster[nclus].statClust[i].dSum += currObs[count].getIndex(i);</span>
+<span class="nc" id="L161">				absoluteVal[nclus][i] += Math.abs(currObs[count].getIndex(i));</span>
+<span class="nc" id="L162">				infoCluster[nclus].statClust[i].dSQuad += Math.pow(currObs[count].getIndex(i), 2);</span>
+<span class="nc" id="L163">				infoCluster[nclus].statClust[i].dSThird += Math.pow(currObs[count].getIndex(i), 3);</span>
+<span class="nc" id="L164">				infoCluster[nclus].statClust[i].dSFourth += Math.pow(currObs[count].getIndex(i), 4);</span>
+
+			}
+		}
+
+		double sum_per_var;
+		double abs_sum_per_var;
+		//Calcola percentuale della variabile usata nel cluster
+
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		for (int i = 0; i &lt; m.getNumVariables(); i++) {</span>
+<span class="nc" id="L174">			sum_per_var = 0;</span>
+<span class="nc" id="L175">			abs_sum_per_var = 0;</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			for (int l = 0; l &lt;= numCluster; l++) {</span>
+<span class="nc" id="L177">				sum_per_var += infoCluster[l].statClust[i].dSum;</span>
+<span class="nc" id="L178">				abs_sum_per_var += absoluteVal[l][i];</span>
+			}
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			for (int l = 0; l &lt;= numCluster; l++) {</span>
+<span class="nc" id="L182">				infoCluster[l].percVar[i] = absoluteVal[l][i] / abs_sum_per_var;</span>
+				//infoCluster[l].percVar[i] = infoCluster[l].statClust[i].dSum / sum_per_var;
+			}
+		}
+
+		//Porting di stat2cl
+		//Calcola media, varianza, etc,etc
+		double dPerc5, dPerc6, dPerc7;
+
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		for (int l = 0; l &lt;= numCluster; l++) {</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">			for (int i = 0; i &lt; m.getNumVariables(); i++) {</span>
+<span class="nc" id="L194">				infoCluster[l].statClust[i].dRange = infoCluster[l].statClust[i].dMaxObs - infoCluster[l].statClust[i].dMinObs;</span>
+<span class="nc" id="L195">				infoCluster[l].statClust[i].dMean = infoCluster[l].statClust[i].dSum / infoCluster[l].numObs;</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">				if (infoCluster[l].numObs != 1) {</span>
+<span class="nc" id="L198">					dPerc5 = Math.pow(infoCluster[l].statClust[i].dMean, 2);</span>
+<span class="nc" id="L199">					dPerc6 = Math.pow(infoCluster[l].statClust[i].dMean, 3);</span>
+<span class="nc" id="L200">					dPerc7 = Math.pow(infoCluster[l].statClust[i].dMean, 4);</span>
+
+<span class="nc" id="L202">					infoCluster[l].statClust[i].dVarnc = (infoCluster[l].statClust[i].dSQuad - infoCluster[l].numObs * dPerc5)</span>
+							/ (infoCluster[l].numObs - 1);
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">					if (infoCluster[l].statClust[i].dVarnc != 0) {</span>
+<span class="nc" id="L206">						infoCluster[l].statClust[i].dStdDv = Math.sqrt(infoCluster[l].statClust[i].dVarnc);</span>
+<span class="nc" id="L207">						infoCluster[l].statClust[i].dStdEr = infoCluster[l].statClust[i].dStdDv / Math.sqrt(infoCluster[l].numObs);</span>
+
+<span class="nc" id="L209">						infoCluster[l].statClust[i].dSkewn = infoCluster[l].statClust[i].dSThird - 3 * infoCluster[l].statClust[i].dMean</span>
+								* infoCluster[l].statClust[i].dSQuad + 3 * dPerc5 * infoCluster[l].statClust[i].dSum;
+<span class="nc" id="L211">						infoCluster[l].statClust[i].dSkewn /= infoCluster[l].numObs;</span>
+<span class="nc" id="L212">						infoCluster[l].statClust[i].dSkewn -= dPerc6;</span>
+<span class="nc" id="L213">						infoCluster[l].statClust[i].dSkewn /= Math.pow(infoCluster[l].statClust[i].dVarnc, 1.5);</span>
+
+<span class="nc" id="L215">						infoCluster[l].statClust[i].dKurto = infoCluster[l].statClust[i].dSFourth - 4 * infoCluster[l].statClust[i].dMean</span>
+								* infoCluster[l].statClust[i].dSThird + 6 * dPerc5 * infoCluster[l].statClust[i].dSQuad - 4 * dPerc6
+								* infoCluster[l].statClust[i].dSum;
+<span class="nc" id="L218">						infoCluster[l].statClust[i].dKurto /= infoCluster[l].numObs;</span>
+<span class="nc" id="L219">						infoCluster[l].statClust[i].dKurto += dPerc7;</span>
+<span class="nc" id="L220">						infoCluster[l].statClust[i].dKurto /= Math.pow(infoCluster[l].statClust[i].dVarnc, 2);</span>
+<span class="nc" id="L221">						infoCluster[l].statClust[i].dKurto -= 3;</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L226">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

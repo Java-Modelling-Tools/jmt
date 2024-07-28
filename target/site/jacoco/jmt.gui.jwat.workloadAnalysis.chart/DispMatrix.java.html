@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DispMatrix.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.chart</a> &gt; <span class="el_source">DispMatrix.java</span></div><h1>DispMatrix.java</h1><pre class="source lang-java linenums">package jmt.gui.jwat.workloadAnalysis.chart;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
+
+import jmt.engine.jwat.TimeConsumingWorker;
+import jmt.engine.jwat.VariableNumber;
+import jmt.engine.jwat.input.ProgressMonitorShow;
+import jmt.engine.jwat.workloadAnalysis.utils.ChangeVariableListener;
+import jmt.engine.jwat.workloadAnalysis.utils.JWatWorkloadManager;
+import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+
+import jmt.gui.common.CommonConstants;
+import org.freehep.graphics2d.VectorGraphics;
+import org.freehep.graphicsbase.util.export.ExportDialog;
+
+//TODO: Add listener to model to change observation array
+public class DispMatrix extends JScrollPane {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private ModelWorkloadAnalysis model;
+	private DispersionPanel panel;
+<span class="nc" id="L43">	private ChangeVariableListener listener = new ChangeVariableListener() {</span>
+		public void onChangeVariableValues() {
+<span class="nc" id="L45">			panel.Redraw = true;</span>
+<span class="nc" id="L46">		}</span>
+	};
+
+	public DispMatrix() {
+<span class="nc" id="L50">		super(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L51">		this.setPreferredSize(new Dimension((int)(420 * CommonConstants.widthScaling), (int)(420 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L52">		panel = new DispersionPanel();</span>
+<span class="nc" id="L53">		this.setViewportView(panel);</span>
+<span class="nc" id="L54">	}</span>
+
+	public DispMatrix(ModelWorkloadAnalysis m) {
+		/* Richiamo il costruttore della classe JScorllPanel impostando le barre di scorrimento solo se necessarie */
+<span class="nc" id="L58">		super(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L59">		this.model = m;</span>
+		/* Settaggio delle proprieta' del pannello di scroll */
+<span class="nc" id="L61">		this.setPreferredSize(new Dimension((int)(420 * CommonConstants.widthScaling), (int)(420 * CommonConstants.heightScaling)));</span>
+		/* Creazione e aggiunta del Pannello di visualizzazione della matrice di dispersione */
+<span class="nc" id="L63">		panel = new DispersionPanel(model);</span>
+<span class="nc" id="L64">		panel.setPreferredSize(new Dimension(DispersionPanel.WIDTH_TOT * model.getMatrix().getNumVariables(), DispersionPanel.HEIGHT_TOT</span>
+<span class="nc" id="L65">				* model.getMatrix().getNumVariables()));</span>
+<span class="nc" id="L66">		this.setViewportView(panel);</span>
+<span class="nc" id="L67">		addListener();</span>
+<span class="nc" id="L68">	}</span>
+
+	public void setModel(ModelWorkloadAnalysis m) {
+<span class="nc" id="L71">		model = m;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		if (model.getMatrix() != null) {</span>
+<span class="nc" id="L73">			panel.setModel(m);</span>
+<span class="nc" id="L74">			panel.setPreferredSize(new Dimension(DispersionPanel.WIDTH_TOT * model.getMatrix().getNumVariables(), DispersionPanel.HEIGHT_TOT</span>
+<span class="nc" id="L75">					* model.getMatrix().getNumVariables()));</span>
+<span class="nc" id="L76">			this.setViewportView(panel);</span>
+<span class="nc" id="L77">			addListener();</span>
+		}
+<span class="nc" id="L79">	}</span>
+
+	private void addListener() {
+<span class="nc" id="L82">		model.addOnChangeVariableValue(listener);</span>
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	protected void paintComponent(Graphics g) {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if (g == null) {</span>
+<span class="nc" id="L88">			return;</span>
+		}
+<span class="nc" id="L90">		VectorGraphics vg = VectorGraphics.create(g);</span>
+<span class="nc" id="L91">		super.paintComponent(vg);</span>
+<span class="nc" id="L92">	}</span>
+
+	class DispersionPanel extends JPanel {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L101">		public DispersionPanel() {</span>
+<span class="nc" id="L102">			setCursor(new Cursor(Cursor.HAND_CURSOR));</span>
+<span class="nc" id="L103">		}</span>
+
+<span class="nc" id="L105">		public DispersionPanel(ModelWorkloadAnalysis m) {</span>
+<span class="nc" id="L106">			setCursor(new Cursor(Cursor.HAND_CURSOR));</span>
+<span class="nc" id="L107">			model = m;</span>
+<span class="nc" id="L108">			initComponent();</span>
+
+<span class="nc" id="L110">		}</span>
+
+		public void setModel(ModelWorkloadAnalysis m) {
+<span class="nc" id="L113">			model = m;</span>
+<span class="nc" id="L114">			initComponent();</span>
+<span class="nc" id="L115">		}</span>
+
+		private void initComponent() {
+			/* Create buffer for image */
+<span class="nc" id="L119">			chart = new BufferedImage(WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1,</span>
+					BufferedImage.TYPE_USHORT_555_RGB);
+<span class="nc" id="L121">			Redraw = true;</span>
+			/* Addition of the mouse listener for displaying the corresponding scatter plot in case of pressing the left button on the panel
+or display the possibility of saving the image in .png format with the right button */
+<span class="nc bnc" id="L124" title="All 2 branches missed.">			if (this.getMouseListeners().length &gt; 0) {</span>
+<span class="nc" id="L125">				this.removeMouseListener(this.getMouseListeners()[0]);</span>
+			}
+<span class="nc" id="L127">			this.addMouseListener(new MouseAdapter() {</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					/* Visualizzazione dello scatter plot dettagliato */
+<span class="nc bnc" id="L131" title="All 4 branches missed.">					if (e.getButton() == MouseEvent.BUTTON1 &amp;&amp; e.getClickCount() == 2) {</span>
+<span class="nc" id="L132">						int x = model.getMatrix().getNumVariables() * WIDTH_TOT;</span>
+<span class="nc" id="L133">						int y = model.getMatrix().getNumVariables() * HEIGHT_TOT;</span>
+<span class="nc bnc" id="L134" title="All 6 branches missed.">						if (e.getX() &lt; x &amp;&amp; e.getY() &lt; y &amp;&amp; e.getX() / WIDTH_TOT != e.getY() / HEIGHT_TOT) {</span>
+<span class="nc" id="L135">							final JFrame f = new JFrame();</span>
+
+<span class="nc" id="L137">							JWatWorkloadManager.addJMTWindow(f);</span>
+<span class="nc" id="L138">							f.addWindowListener(new WindowAdapter() {</span>
+								@Override
+								public void windowClosing(WindowEvent e) {
+<span class="nc" id="L141">									JWatWorkloadManager.exit(f);</span>
+<span class="nc" id="L142">								}</span>
+
+								@Override
+								public void windowClosed(WindowEvent e) {
+<span class="nc" id="L146">									JWatWorkloadManager.exit(f);</span>
+<span class="nc" id="L147">								}</span>
+							});
+
+<span class="nc" id="L150">							f.setSize(640, 690);</span>
+<span class="nc" id="L151">							f.setTitle(&quot;Scatter Plot &quot; + model.getMatrix().getVariables()[e.getX() / WIDTH_TOT].getName() + &quot; - &quot;</span>
+<span class="nc" id="L152">									+ model.getMatrix().getVariables()[e.getY() / HEIGHT_TOT].getName());</span>
+<span class="nc" id="L153">							f.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);</span>
+<span class="nc" id="L154">							f.setContentPane(new Scatter(e.getX() / WIDTH_TOT, e.getY() / HEIGHT_TOT, model, f));</span>
+<span class="nc" id="L155">							f.setVisible(true);</span>
+						}
+					}
+					/* Image saving option */
+<span class="nc bnc" id="L159" title="All 2 branches missed.">					if (e.getButton() == MouseEvent.BUTTON3) {</span>
+<span class="nc" id="L160">						showScreenShotDialog();</span>
+						/* inserimento del nome per il salvataggio nel file */
+						/*String inputValue = JOptionPane.showInputDialog(&quot;Please insert name: &quot;);
+						if (inputValue != null)
+						{
+							File file = new File(inputValue + &quot;.png&quot;);
+							try {
+								ImageIO.write(chart,&quot;PNG&quot;,file);
+							} catch (Exception ex) {
+								System.out.println(&quot;Saving error, please try again&quot;);
+							}
+						}*/
+					}
+<span class="nc" id="L173">				}</span>
+			});
+<span class="nc" id="L175">		}</span>
+
+		@Override
+		public void paintComponent(Graphics g) {
+<span class="nc bnc" id="L179" title="All 2 branches missed.">			if (g == null) {</span>
+<span class="nc" id="L180">				return;</span>
+			}
+
+<span class="nc" id="L183">			VectorGraphics vg = VectorGraphics.create(g);</span>
+<span class="nc" id="L184">			super.paintComponent(vg);</span>
+<span class="nc" id="L185">			super.paintComponent(g);</span>
+<span class="nc bnc" id="L186" title="All 4 branches missed.">			if (Redraw &amp;&amp; model.getMatrix() != null) {</span>
+<span class="nc" id="L187">				Redraw = false;</span>
+<span class="nc" id="L188">				Graphics grap = chart.getGraphics();</span>
+<span class="nc" id="L189">				grap.setColor(Color.GRAY);</span>
+<span class="nc" id="L190">				grap.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);</span>
+<span class="nc" id="L191">				grap.drawImage(chart, 0, 0, null);</span>
+				//SwingWorker worker = new SwingWorker()
+<span class="nc" id="L193">				TimeConsumingWorker worker = new TimeConsumingWorker(new ProgressMonitorShow(DispMatrix.this, &quot;Plotting scatters...&quot;, 1)) {</span>
+					@Override
+					public Object construct() {
+						//doWork();
+<span class="nc" id="L197">						Graphics g = chart.getGraphics();</span>
+<span class="nc" id="L198">						VariableNumber Elenco[] = model.getMatrix().getVariables();</span>
+						try {
+							// Image cleaning
+<span class="nc" id="L201">							g.setColor(Color.WHITE);</span>
+<span class="nc" id="L202">							g.fillRect(0, 0, WIDTH_TOT * Elenco.length + 1, HEIGHT_TOT * Elenco.length + 1);</span>
+
+<span class="nc" id="L204">							initShow(10000 * (Elenco.length * Elenco.length));</span>
+
+							// Graph drawing
+<span class="nc bnc" id="L207" title="All 2 branches missed.">							for (int row = 0; row &lt; Elenco.length; row++) {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">								for (int col = 0; col &lt; Elenco.length; col++) {</span>
+<span class="nc" id="L209">									g.setColor(Color.BLACK);</span>
+<span class="nc" id="L210">									g.drawRect(col * WIDTH_TOT, row * HEIGHT_TOT, WIDTH_TOT, HEIGHT_TOT);</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">									if (col == row) {</span>
+										// Write variable
+<span class="nc" id="L213">										Graphics2D gr = (Graphics2D) g;</span>
+<span class="nc" id="L214">										gr.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 13));</span>
+<span class="nc" id="L215">										FontRenderContext context = gr.getFontRenderContext();</span>
+<span class="nc" id="L216">										Font f = new Font(&quot;Arial&quot;, Font.BOLD, 12);</span>
+<span class="nc" id="L217">										Rectangle2D bounds = f.getStringBounds(Elenco[row].getName(), context);</span>
+
+<span class="nc" id="L219">										g.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 12));</span>
+<span class="nc" id="L220">										g.drawString(Elenco[row].getName(), col * WIDTH_TOT + (WIDTH_TOT - (int) bounds.getWidth()) / 2, row</span>
+<span class="nc" id="L221">												* HEIGHT_TOT - (int) bounds.getY() + (HEIGHT_TOT - (int) bounds.getHeight()) / 2);</span>
+<span class="nc" id="L222">										g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 12));</span>
+									} else {
+										/*// Graph step calculation
+										double yFoot = HEIGHT_GRAPH / Elenco[row].getUniStats().getRangeValue();
+										double xFoot = WIDTH_GRAPH / Elenco[col].getUniStats().getRangeValue();
+										// Graph plotting
+										g.setColor(Color.RED);
+										for (int i = 1; i &lt;= WIDTH_GRAPH; i++) {
+											boolean[] done = new boolean[101];
+											int k = 1;
+											for (int j = Elenco[col].getStartInt(i); j &lt; Elenco[col].getEndInt(i); j++) {
+												if ((int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot) &gt; 0) {
+													if (!done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)]) {
+														updateInfos(((row * Elenco.length) + (col)) * 10000 + i + (k++), &quot;Plotting scatter &quot;
+																+ ((row * Elenco.length) + (col + 1)), false);
+														g.fillOval(col * WIDTH_TOT + 5 +
+																(int) (((Elenco[col].getValue(j) - Elenco[col].getUniStats().getMinValue())) * xFoot) - 1,
+																(((row + 1) * HEIGHT_TOT) - 5 - (int) (((Elenco[col].getValue(j, row) - Elenco[row]
+																		.getUniStats().getMinValue())) * yFoot)), 1, 1);
+														done[(int) ((Elenco[col].getValue(j, row) - Elenco[row].getUniStats().getMinValue()) * yFoot)] = true;
+													}
+												}
+											}
+										}*/
+									}
+								}
+							}
+<span class="nc" id="L249">						} catch (Exception e) {</span>
+<span class="nc" id="L250">							g.setColor(Color.WHITE);</span>
+<span class="nc" id="L251">							g.fillRect(0, 0, WIDTH_TOT * model.getMatrix().getNumVariables() + 1, HEIGHT_TOT * model.getMatrix().getNumVariables() + 1);</span>
+<span class="nc" id="L252">							DispersionPanel.this.repaint();</span>
+<span class="nc" id="L253">						}</span>
+<span class="nc" id="L254">						updateInfos(10000 * (Elenco.length * Elenco.length) + 1, &quot;End&quot;, false);</span>
+<span class="nc" id="L255">						return null;</span>
+					}
+
+					@Override
+					public void finished() {
+<span class="nc" id="L260">						DispersionPanel.this.repaint();</span>
+<span class="nc" id="L261">					}</span>
+				};
+<span class="nc" id="L263">				worker.start();</span>
+<span class="nc" id="L264">			} else {</span>
+<span class="nc" id="L265">				g.drawImage(chart, 0, 0, null);</span>
+			}
+<span class="nc" id="L267">		}</span>
+
+		/**
+		 * Shows a screenshot dialog used to select screenshot format
+		 */
+		public void showScreenShotDialog() {
+<span class="nc" id="L273">			ExportDialog export = new ExportDialog(&quot;JWAT - version ???&quot;);</span>
+<span class="nc" id="L274">			export.showExportDialog(this, &quot;Export as image...&quot;, this, &quot;graph&quot;);</span>
+<span class="nc" id="L275">		}</span>
+
+		/* List of variables to visualize */
+		private ModelWorkloadAnalysis model;
+		/* Image buffer */
+		private BufferedImage chart;
+		/* Indicates whether or not the image should be redrawn */
+		private boolean Redraw;
+		/* COSTANTI */
+		private static final int HEIGHT_GRAPH = 100;
+		private static final int WIDTH_GRAPH = 100;
+		public static final int HEIGHT_TOT = 110;
+		public static final int WIDTH_TOT = 110;
+		/* Finestra principale */
+		private JFrame jframeOwner;
+		private JFrame jFrameTot;
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

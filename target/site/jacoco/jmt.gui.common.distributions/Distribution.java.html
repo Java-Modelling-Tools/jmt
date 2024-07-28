@@ -1,0 +1,792 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Distribution.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.distributions</a> &gt; <span class="el_source">Distribution.java</span></div><h1>Distribution.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.distributions;
+
+import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
+import java.util.Locale;
+
+import javax.swing.ImageIcon;
+
+import jmt.gui.common.serviceStrategies.ServiceStrategy;
+
+/**
+ * &lt;p&gt;Title: Distribution&lt;/p&gt;
+ * &lt;p&gt;Description: This abstract class provides a generic pattern used to specify a
+ * distribution.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 25-giu-2005
+ *         Time: 14.47.12
+ */
+public abstract class Distribution implements ServiceStrategy {
+
+<span class="fc" id="L42">	protected static Distribution[] all = null; // Used to store all distributions</span>
+<span class="fc" id="L43">	protected static Distribution[] allWithMean = null; // Used to store all distributions with Mean value adjustable</span>
+<span class="fc" id="L44">	protected static Distribution[] nestableDistributions = null; // Used to store nestable distributions</span>
+<span class="fc" id="L45">	protected static Distribution[] discreteDistributions = null; // Used to store discrete distributions</span>
+<span class="fc" id="L46">	protected static DecimalFormat df = new DecimalFormat();</span>
+
+	static {
+<span class="fc" id="L49">		df.setDecimalFormatSymbols(new DecimalFormatSymbols(Locale.ENGLISH));</span>
+<span class="fc" id="L50">	}</span>
+
+	protected String classpath;
+	protected String name;
+	protected String parameterClasspath;
+	protected Parameter[] parameters;
+	protected String description;
+	protected ImageIcon image;
+	protected ValueChecker checker;
+	protected String precondition;
+	protected boolean hasMean; // Used to provide input parameters with the tuple (mean, C)
+	protected boolean hasC;
+	protected double mean;
+	protected double c;
+	protected boolean isNestable;
+
+	/**
+	 * Constructs a new Distribution object. Initialize all internal objects calling abstract
+	 * methods setParameterNames(), setParameterClasses(), setParameterValues().
+	 * @param name Name of the distribution
+	 * @param classpath engine's classpath for this distribution
+	 * @param parameterClasspath engine's classpath for this distribution's parameters
+	 * @param description description of this distribution
+	 */
+<span class="fc" id="L74">	public Distribution(String name, String classpath, String parameterClasspath, String description) {</span>
+<span class="fc" id="L75">		this.classpath = classpath;</span>
+<span class="fc" id="L76">		this.name = name;</span>
+<span class="fc" id="L77">		this.parameterClasspath = parameterClasspath;</span>
+<span class="fc" id="L78">		this.description = description;</span>
+<span class="fc" id="L79">		this.parameters = setParameters();</span>
+<span class="fc" id="L80">		this.image = setImage();</span>
+<span class="fc" id="L81">		updateCM();</span>
+<span class="fc" id="L82">	}</span>
+
+	/**
+	 * Gets engine's classpath for this distribution
+	 * @return classpath
+	 */
+	public String getClassPath() {
+<span class="fc" id="L89">		return classpath;</span>
+	}
+
+	/**
+	 * Gets engine's classpath for this distribution's parameters (This is needed as each
+	 * distribution in the engine has a Distribution object and a Parameter object which
+	 * are distinct classes)
+	 * @return parameter's classpath
+	 */
+	public String getParameterClassPath() {
+<span class="fc" id="L99">		return parameterClasspath;</span>
+	}
+
+	/**
+	 * Gets this distribution's name
+	 * @return distribution's name
+	 */
+	public String getName() {
+<span class="fc" id="L107">		return name;</span>
+	}
+
+	/**
+	 * Gets this distribution description
+	 * @return distribution's description
+	 */
+	public String getDescription() {
+<span class="nc" id="L115">		return description;</span>
+	}
+
+	/**
+	 * Returns number of parameters for this distribution
+	 * @return number of parameters
+	 */
+	public int getNumberOfParameters() {
+<span class="fc" id="L123">		return parameters.length;</span>
+	}
+
+	/**
+	 * Gets a parameter data structure of this distribution, given its index
+	 * @param num index of requested parameter
+	 * @return requested parameter
+	 * @throws java.lang.ArrayIndexOutOfBoundsException if num is not inside bounds
+	 */
+	public Parameter getParameter(int num) {
+<span class="fc" id="L133">		return parameters[num];</span>
+	}
+
+	/**
+	 * Gets a parameter data structure of this distribution, given its name
+	 * @param name name of parameter to be retrieved
+	 * @return requested parameter or null if a parameter with specified name does not exist
+	 */
+	public Parameter getParameter(String name) {
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">		for (Parameter parameter : parameters) {</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">			if (parameter.getName().equals(name)) {</span>
+<span class="fc" id="L144">				return parameter;</span>
+			}
+		}
+<span class="nc" id="L147">		return null;</span>
+	}
+
+	/**
+	 * Gets explicative image of this distribution used, together with description, to help the
+	 * user to understand meaning of parameters.
+	 * @return explicative image
+	 */
+	public ImageIcon getImage() {
+<span class="nc" id="L156">		return image;</span>
+	}
+
+	/**
+	 * Checks if all parameters' values are correct for this distribution type
+	 * @return true if no check has to be performed or parameters are correct, false otherwise.
+	 */
+	public boolean checkValue() {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">		if (checker != null) {</span>
+<span class="nc" id="L165">			return checker.checkValue(this);</span>
+		} else {
+<span class="nc" id="L167">			return true;</span>
+		}
+	}
+
+	/**
+	 * Returns precondition that parameters' values must satisfy for this distribution to be valid
+	 * Every Distribution that provides a checker must provide a valid precondition message too.
+	 * @return Message describing distribution's preconditions
+	 */
+	public String getPrecondition() {
+<span class="nc" id="L177">		return precondition;</span>
+	}
+
+	/**
+	 * Returns a deep copy of this Distribution
+	 * @return a clone of this distribution
+	 */
+	@Override
+	public Distribution clone() {
+		// Gets subtype of this class to instantiate new object through reflection
+<span class="fc" id="L187">		Class&lt;? extends Distribution&gt; instance = this.getClass();</span>
+<span class="fc" id="L188">		Distribution tmp = null;</span>
+		try {
+<span class="fc" id="L190">			tmp = instance.newInstance();</span>
+			// Newly created instance will have default parameters. Now will clone parameters
+			// of this and sets them as parameters of new instance.
+<span class="fc" id="L193">			Parameter[] parameters = new Parameter[this.parameters.length];</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">			for (int i = 0; i &lt; this.parameters.length; i++) {</span>
+<span class="fc" id="L195">				parameters[i] = (Parameter) this.parameters[i].clone();</span>
+			}
+<span class="fc" id="L197">			tmp.parameters = parameters;</span>
+<span class="fc" id="L198">			tmp.mean = mean;</span>
+<span class="fc" id="L199">			tmp.c = c;</span>
+<span class="nc" id="L200">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L201">			System.err.println(&quot;Error: Cannot clone Distribution object: cannot access to correct class&quot;);</span>
+<span class="nc" id="L202">			e.printStackTrace();</span>
+<span class="nc" id="L203">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L204">			System.err.println(&quot;Error: Cannot clone Distribution object: instantiation problem during reflection&quot;);</span>
+<span class="nc" id="L205">			e.printStackTrace();</span>
+<span class="pc" id="L206">		}</span>
+<span class="fc" id="L207">		return tmp;</span>
+	}
+
+	/**
+	 * Returns if this distribution can be initialized providing its mean value
+	 * @return true iff this distribution can be initialized using its mean value
+	 */
+	public boolean hasMean() {
+<span class="fc" id="L215">		return hasMean;</span>
+	}
+
+	/**
+	 * Returns if this distribution can be initialized providing variation coefficient C
+	 * @return true iff this distribution can be initialized using variation coefficient C
+	 */
+	public boolean hasC() {
+<span class="nc" id="L223">		return hasC;</span>
+	}
+
+	/**
+	 * Returns distribution mean only if &lt;code&gt;hasMean()&lt;/code&gt; is true
+	 * @return distribution Mean
+	 */
+	public double getMean() {
+<span class="fc" id="L231">		return mean;</span>
+	}
+
+	/**
+	 * Returns distribution variation coefficient C only if &lt;code&gt;hasC()&lt;/code&gt; is true
+	 * @return variation coefficient C
+	 */
+	public double getC() {
+<span class="nc" id="L239">		return c;</span>
+	}
+
+	/**
+	 * Sets a value checker for this entire distribution (checks intra-parameters preconditions)
+	 * @param checker checker to be set to this distribution
+	 */
+	protected void setValueChecker(ValueChecker checker) {
+<span class="fc" id="L247">		this.checker = checker;</span>
+<span class="fc" id="L248">	}</span>
+
+	/**
+	 * Returns whether a distribution can be used as nested distribution inside another distribution
+	 * @return true if it can be nested. false otherwise
+	 */
+	public boolean isNestable() {
+<span class="nc" id="L255">		return isNestable;</span>
+	}
+
+	/**
+	 * Helper method used to format given number into string according to default rules.
+	 * @param d double to be converted
+	 * @return string representation of given number
+	 */
+	public String formatNumber(double d) {
+<span class="nc bnc" id="L264" title="All 6 branches missed.">		if (d == 0.0 || (Math.abs(d) &gt;= 1e-3 &amp;&amp; Math.abs(d) &lt; 1e3)) {</span>
+<span class="nc" id="L265">			df.applyPattern(&quot;#.###&quot;);</span>
+<span class="nc" id="L266">			return df.format(d);</span>
+		} else {
+<span class="nc" id="L268">			df.applyPattern(&quot;0.00E00&quot;);</span>
+<span class="nc" id="L269">			return df.format(d);</span>
+		}
+	}
+
+	/**
+	 * Returns an array with an instance of every allowed Distribution. Uses internal
+	 * caching to search for distributions only the first time that this method is called.
+	 * Note: this method is used to get all &lt;b&gt;continuous&lt;/b&gt; distributions. If you need
+	 * discrete distributions, use &lt;code&gt;findAllDiscrete()&lt;/code&gt;.
+	 * @return an array with an instance of every allowed Distribution
+	 */
+	public static Distribution[] findAll() {
+<span class="fc bfc" id="L281" title="All 2 branches covered.">		if (all != null) {</span>
+<span class="fc" id="L282">			return all;</span>
+		}
+<span class="fc" id="L284">		String path = &quot;jmt.gui.common.distributions.&quot;;</span>
+<span class="fc" id="L285">		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();</span>
+<span class="fc" id="L286">		ArrayList&lt;Distribution&gt; tmp = new ArrayList&lt;Distribution&gt;();</span>
+		try {
+<span class="fc bfc" id="L288" title="All 2 branches covered.">			for (Field field : fields) {</span>
+<span class="fc bfc" id="L289" title="All 4 branches covered.">				if (field.getName().startsWith(&quot;DISTRIBUTION_&quot;) &amp;&amp; !field.getName().endsWith(&quot;_DISCRETE&quot;)) {</span>
+<span class="fc" id="L290">					tmp.add((Distribution) Class.forName(path + (String) field.get(null)).newInstance());</span>
+				}
+			}
+<span class="nc" id="L293">		} catch (IllegalAccessException ex) {</span>
+<span class="nc" id="L294">			System.err.println(&quot;A security manager has blocked reflection&quot;);</span>
+<span class="nc" id="L295">			ex.printStackTrace();</span>
+<span class="nc" id="L296">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L297">			System.err.println(&quot;Reflection Error: cannot access to distribution's implementation&quot;);</span>
+<span class="nc" id="L298">			e.printStackTrace();</span>
+<span class="nc" id="L299">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L300">			System.err.println(&quot;Reflection Error: Cannot instantiate a distribution&quot;);</span>
+<span class="nc" id="L301">			e.printStackTrace();</span>
+<span class="pc" id="L302">		}</span>
+<span class="fc" id="L303">		all = new Distribution[tmp.size()];</span>
+<span class="fc bfc" id="L304" title="All 2 branches covered.">		for (int i = 0; i &lt; tmp.size(); i++) {</span>
+<span class="fc" id="L305">			all[i] = tmp.get(i);</span>
+		}
+<span class="fc" id="L307">		return all;</span>
+	}
+
+	/**
+	 * Returns an array with an instance of every Distribution that allows mean setting. Uses internal
+	 * caching to search for distributions only the first time that this method is called.
+	 * @return an array with an instance of every Distribution in which mean value can be specified
+	 */
+	public static Distribution[] findAllWithMean() {
+<span class="nc bnc" id="L316" title="All 2 branches missed.">		if (allWithMean != null) {</span>
+<span class="nc" id="L317">			return allWithMean;</span>
+		}
+<span class="nc" id="L319">		Distribution[] all = findAll();</span>
+<span class="nc" id="L320">		Distribution[] tmp = new Distribution[all.length];</span>
+<span class="nc" id="L321">		int n = 0;</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		for (Distribution element : all) {</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">			if (element.hasMean()) {</span>
+<span class="nc" id="L324">				tmp[n++] = element;</span>
+			}
+		}
+		// Now removes empty elements into tmp array
+<span class="nc" id="L328">		allWithMean = new Distribution[n];</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L330">			allWithMean[i] = tmp[i];</span>
+		}
+<span class="nc" id="L332">		return allWithMean;</span>
+	}
+
+	/**
+	 * Returns an array with an instance of every nestable Distribution. Uses internal
+	 * caching to search for distributions only the first time that this method is called.
+	 * @return an array with an instance of every nestable Distribution
+	 */
+	public static Distribution[] findNestableDistributions() {
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		if (nestableDistributions != null) {</span>
+<span class="nc" id="L342">			return nestableDistributions;</span>
+		}
+<span class="nc" id="L344">		Distribution[] all = findAll();</span>
+<span class="nc" id="L345">		Distribution[] tmp = new Distribution[all.length];</span>
+<span class="nc" id="L346">		int n = 0;</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">		for (Distribution element : all) {</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">			if (element.isNestable()) {</span>
+<span class="nc" id="L349">				tmp[n++] = element;</span>
+			}
+		}
+		// Now removes empty elements into tmp array
+<span class="nc" id="L353">		nestableDistributions = new Distribution[n];</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">		for (int i = 0; i &lt; n; i++) {</span>
+<span class="nc" id="L355">			nestableDistributions[i] = tmp[i];</span>
+		}
+<span class="nc" id="L357">		return nestableDistributions;</span>
+	}
+
+	/**
+	 * Returns an array with an instance of every discrete Distribution. Uses internal
+	 * caching to search for distributions only the first time that this method is called.
+	 * @return an array with an instance of every discrete Distribution
+	 */
+	public static Distribution[] findAllDiscrete() {
+<span class="fc bfc" id="L366" title="All 2 branches covered.">		if (discreteDistributions != null) {</span>
+<span class="fc" id="L367">			return discreteDistributions;</span>
+		}
+<span class="fc" id="L369">		String path = &quot;jmt.gui.common.distributions.discrete.&quot;;</span>
+<span class="fc" id="L370">		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();</span>
+<span class="fc" id="L371">		ArrayList&lt;Distribution&gt; tmp = new ArrayList&lt;Distribution&gt;();</span>
+		try {
+<span class="fc bfc" id="L373" title="All 2 branches covered.">			for (Field field : fields) {</span>
+<span class="fc bfc" id="L374" title="All 4 branches covered.">				if (field.getName().startsWith(&quot;DISTRIBUTION_&quot;) &amp;&amp; field.getName().endsWith(&quot;_DISCRETE&quot;)) {</span>
+<span class="fc" id="L375">					tmp.add((Distribution) Class.forName(path + (String) field.get(null)).newInstance());</span>
+				}
+			}
+<span class="nc" id="L378">		} catch (IllegalAccessException ex) {</span>
+<span class="nc" id="L379">			System.err.println(&quot;A security manager has blocked reflection&quot;);</span>
+<span class="nc" id="L380">			ex.printStackTrace();</span>
+<span class="nc" id="L381">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L382">			System.err.println(&quot;Reflection Error: cannot access to distribution's implementation&quot;);</span>
+<span class="nc" id="L383">			e.printStackTrace();</span>
+<span class="nc" id="L384">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L385">			System.err.println(&quot;Reflection Error: Cannot instantiate a distribution&quot;);</span>
+<span class="nc" id="L386">			e.printStackTrace();</span>
+<span class="pc" id="L387">		}</span>
+<span class="fc" id="L388">		discreteDistributions = new Distribution[tmp.size()];</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">		for (int i = 0; i &lt; tmp.size(); i++) {</span>
+<span class="fc" id="L390">			discreteDistributions[i] = tmp.get(i);</span>
+		}
+<span class="fc" id="L392">		return discreteDistributions;</span>
+	}
+
+	/**
+	 * Checks if the entries of an probability vector sum up to one.
+	 * @param v vector to be checked
+	 * @return true if the vector satisfies the condition, false otherwise
+	 */
+	public boolean checkProbabilityVector(Object[][] v) {
+<span class="nc" id="L401">		double sum = 0.0;</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">		for (int i = 0; i &lt; v[0].length; i++) {</span>
+<span class="nc" id="L403">			Double d = (Double) v[0][i];</span>
+<span class="nc" id="L404">			sum += d.doubleValue();</span>
+		}
+<span class="nc bnc" id="L406" title="All 2 branches missed.">		if (Math.abs(sum - 1.0) &gt; 1e-6) {</span>
+<span class="nc" id="L407">			return false;</span>
+		}
+<span class="nc" id="L409">		return true;</span>
+	}
+
+	/**
+	 * Normalizes the entries of a probability vector to sum up to one.
+	 * @param v vector to be normalized
+	 */
+	public void normalizeProbabilityVector(Object[][] v) {
+<span class="nc" id="L417">		double sum = 0.0;</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">		for (int i = 0; i &lt; v[0].length; i++) {</span>
+<span class="nc" id="L419">			Double d = (Double) v[0][i];</span>
+<span class="nc" id="L420">			sum += d.doubleValue();</span>
+		}
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		for (int i = 0; i &lt; v[0].length; i++) {</span>
+<span class="nc" id="L423">			Double d = (Double) v[0][i];</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">			if (sum == 0.0) {</span>
+<span class="nc" id="L425">				v[0][i] = Double.valueOf(1.0 / v[0].length);</span>
+			} else {
+<span class="nc" id="L427">				v[0][i] = Double.valueOf(d.doubleValue() / sum);</span>
+			}
+		}
+<span class="nc" id="L430">	}</span>
+
+	/**
+	 * Checks if the diagonal of a transition rate matrix only contains negative entries
+	 * and if the entries in each row of the matrix sum up to a non-positive value.
+	 * @param m matrix to be checked
+	 * @return true if the matrix satisfies the condition, false otherwise
+	 */
+	public boolean checkTransitionRateMatrix(Object[][] m) {
+<span class="nc bnc" id="L439" title="All 2 branches missed.">		for (int i = 0; i &lt; m.length; i++) {</span>
+<span class="nc" id="L440">			double sum = 0.0;</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">			for (int j = 0; j &lt; m[i].length; j++) {</span>
+<span class="nc" id="L442">				Double d = (Double) m[i][j];</span>
+<span class="nc bnc" id="L443" title="All 4 branches missed.">				if (i == j &amp;&amp; d.doubleValue() &gt;= 0.0) {</span>
+<span class="nc" id="L444">					return false;</span>
+				}
+<span class="nc" id="L446">				sum += d.doubleValue();</span>
+			}
+<span class="nc bnc" id="L448" title="All 2 branches missed.">			if (sum &gt; 1e-6) {</span>
+<span class="nc" id="L449">				return false;</span>
+			}
+		}
+<span class="nc" id="L452">		return true;</span>
+	}
+
+	/**
+	 * Checks if the entries in each row of an infinitesimal generator matrix sum up to
+	 * zero.
+	 * @param m0 hidden matrix to be checked
+	 * @param m1 observable matrix to be checked
+	 * @return true if the matrix satisfies the condition, false otherwise
+	 */
+	public boolean checkInfinitesimalGeneratorMatrix(Object[][] m0, Object[][] m1) {
+<span class="nc bnc" id="L463" title="All 2 branches missed.">		for (int i = 0; i &lt; m0.length; i++) {</span>
+<span class="nc" id="L464">			double sum = 0.0;</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">			for (int j = 0; j &lt; m0[i].length; j++) {</span>
+<span class="nc" id="L466">				Double d0 = (Double) m0[i][j];</span>
+<span class="nc" id="L467">				Double d1 = (Double) m1[i][j];</span>
+<span class="nc" id="L468">				sum += (d0.doubleValue() + d1.doubleValue());</span>
+			}
+<span class="nc bnc" id="L470" title="All 2 branches missed.">			if (Math.abs(sum) &gt; 1e-6) {</span>
+<span class="nc" id="L471">				return false;</span>
+			}
+		}
+<span class="nc" id="L474">		return true;</span>
+	}
+
+	/**
+	 * Tells if this distribution is equivalent to another one.
+	 * @param o other distribution
+	 * @return true if equals, false otherwise
+	 */
+	@Override
+	public boolean equals(Object o) {
+<span class="fc bfc" id="L484" title="All 2 branches covered.">		if (!(o instanceof Distribution)) {</span>
+<span class="fc" id="L485">			return false;</span>
+		}
+<span class="fc" id="L487">		Distribution d = (Distribution) o;</span>
+		// Check if class is the same
+<span class="fc bfc" id="L489" title="All 2 branches covered.">		if (!getClass().equals(d.getClass())) {</span>
+<span class="fc" id="L490">			return false;</span>
+		}
+		// Check if all parameters are equals
+<span class="fc bfc" id="L493" title="All 2 branches covered.">		for (int i = 0; i &lt; getNumberOfParameters(); i++) {</span>
+<span class="pc bpc" id="L494" title="3 of 4 branches missed.">			if (getParameter(i).getValue() == null ? d.getParameter(i).getValue() != null</span>
+<span class="fc bfc" id="L495" title="All 2 branches covered.">					: !getParameter(i).getValue().equals(d.getParameter(i).getValue())) {</span>
+<span class="fc" id="L496">				return false;</span>
+			}
+		}
+<span class="fc" id="L499">		return true;</span>
+	}
+
+	// ----- Abastract Methods that must be implemented by all distributions ------------------------------
+
+	/**
+	 * Used to set parameters of this distribution
+	 * @return distribution parameters
+	 */
+	protected abstract Parameter[] setParameters();
+
+	/**
+	 * Sets explicative image of this distribution used, together with description, to help the
+	 * user to understand meaning of parameters
+	 * @return explicative image
+	 */
+	protected abstract ImageIcon setImage();
+
+	/**
+	 * Returns this distribution's short description
+	 * @return distribution's short description
+	 */
+	@Override
+	public abstract String toString();
+
+	// ----- Methods that must be implemented ONLY if hasMean or hasC are true ----------------------------
+
+	/**
+	 * Sets the mean for this distribution
+	 * @param value mean value
+	 */
+	public void setMean(double value) {
+<span class="nc" id="L531">		mean = value;</span>
+<span class="nc" id="L532">	}</span>
+
+	/**
+	 * Sets the variation coefficient C for this distribution
+	 * @param value variation coefficient C value
+	 */
+	public void setC(double value) {
+<span class="nc" id="L539">		c = value;</span>
+<span class="nc" id="L540">	}</span>
+
+	/**
+	 * This method has to be called whenever a parameter changes and &lt;code&gt;hasMean&lt;/code&gt; or
+	 * &lt;code&gt;hasC&lt;/code&gt; is true
+	 */
+	public void updateCM() {
+<span class="fc" id="L547">	}</span>
+
+	// ----- Inner class used to store parameters ---------------------------------------------------------
+
+	/**
+	 * This class describes a parameter. It can be instantiated only by Distribution and its subclassses
+	 * but will be accessed with public methods
+	 */
+	public class Parameter implements Cloneable {
+
+		protected Class&lt;?&gt; valueClass;
+		protected Object value;
+		protected String name;
+		protected String description;
+		protected ValueChecker checker;
+		protected boolean directParameter;
+
+		/**
+		 * Constructs a new Parameter object. If a custom check on input values is needed, a call
+		 * to &lt;code&gt;setValueChecker(ValueChecker checker)&lt;/code&gt; method must be performed.
+		 * @param name name of this parameter
+		 * @param description brief description of this parameter usage
+		 * @param valueClass Class type of value of this parameter
+		 * @param defaultValue initial value for this parameter
+		 * &lt;code&gt;getParameterClasspath()&lt;/code&gt; for more details.
+		 */
+		public Parameter(String name, String description, Class&lt;?&gt; valueClass, Object defaultValue) {
+<span class="fc" id="L574">			this(name, description, valueClass, defaultValue, false);</span>
+<span class="fc" id="L575">		}</span>
+
+		/**
+		 * 
+		 * Constructs a new Parameter object. If a custom check on input values is needed, a call
+		 * to &lt;code&gt;setValueChecker(ValueChecker checker)&lt;/code&gt; method must be performed.
+		 * @param name name of this parameter
+		 * @param description brief description of this parameter usage
+		 * @param valueClass Class type of value of this parameter
+		 * @param defaultValue initial value for this parameter
+		 * @param directParameter indicates if this parameter will be added to the distribution of the parameter object when translating it to XML
+		 * &lt;code&gt;getParameterClasspath()&lt;/code&gt; for more details.
+		 */
+<span class="fc" id="L588">		public Parameter(String name, String description, Class&lt;?&gt; valueClass, Object defaultValue, boolean directParameter) {</span>
+<span class="fc" id="L589">			this.name = name;</span>
+<span class="fc" id="L590">			this.description = description;</span>
+<span class="fc" id="L591">			this.valueClass = valueClass;</span>
+<span class="fc" id="L592">			this.value = defaultValue;</span>
+<span class="fc" id="L593">			checker = null;</span>
+<span class="fc" id="L594">			this.directParameter = directParameter;</span>
+<span class="fc" id="L595">		}</span>
+
+		/**
+		 * Sets a ValueChecker to check if a parameter's value is in the correct
+		 * range. If no checks are required do not call this method
+		 * 
+		 * @param checker
+		 *            Instance of ValueChecker Interface
+		 */
+		public void setValueChecker(ValueChecker checker) {
+<span class="fc" id="L605">			this.checker = checker;</span>
+<span class="fc" id="L606">		}</span>
+
+		/**
+		 * Gets a ValueChecker to check if a parameter's value is in the correct
+		 * range. If no checks are required do not call this method
+		 * 
+		 * @return checker
+		 *             Instance of ValueChecker Interface
+		 */
+		public ValueChecker getValueChecker() {
+<span class="nc" id="L616">			return checker;</span>
+		}
+
+		/**
+		 * Sets value for this parameter. Returns if parameter could be assigned correctly
+		 * @param value value to be assigned to this parameter
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * valid, returns false, otherwise true
+		 */
+		public boolean setValue(Object value) {
+			// if instance is not correct returns false
+<span class="fc bfc" id="L627" title="All 2 branches covered.">			if (valueClass.isInstance(value)) {</span>
+				// If checker exists and its check is not satisfied returns false
+<span class="pc bpc" id="L629" title="1 of 4 branches missed.">				if (checker != null &amp;&amp; !checker.checkValue(value)) {</span>
+<span class="nc" id="L630">					return false;</span>
+				}
+				// Otherwise sets value and returns true
+<span class="fc" id="L633">				this.value = value;</span>
+<span class="fc" id="L634">				return true;</span>
+			}
+<span class="fc" id="L636">			return false;</span>
+		}
+
+		/**
+		 * Sets value for this parameter. Returns if parameter could be assigned correctly
+		 * @param value value to be assigned to this parameter
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * valid, returns false, otherwise true
+		 */
+		public boolean setValue(Object[][] value) {
+			// if instance is not correct returns false
+<span class="pc bpc" id="L647" title="1 of 2 branches missed.">			if (valueClass.isInstance(value[0][0])) {</span>
+				// If checker exists and its check is not satisfied returns false
+<span class="pc bpc" id="L649" title="2 of 4 branches missed.">				if (checker != null &amp;&amp; !checker.checkValue(value)) {</span>
+<span class="nc" id="L650">					return false;</span>
+				}
+				// Otherwise sets value and returns true
+<span class="fc" id="L653">				this.value = value;</span>
+<span class="fc" id="L654">				return true;</span>
+			}
+<span class="nc" id="L656">			return false;</span>
+		}
+
+		/**
+		 * Sets value for this parameter. If parameter class is String sets it, otherwise
+		 * try to parse string if parameter is of a known numeric type. Returns if parameter
+		 * could be assigned correctly.
+		 * @param value to be assigned to this parameter or to be parsed
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * parsable or valid, returns false, otherwise true
+		 */
+		public boolean setValue(String value) {
+			// If parameter is of the correct type, sets it and return
+<span class="pc bpc" id="L669" title="1 of 2 branches missed.">			if (setValue((Object) value)) {</span>
+<span class="nc" id="L670">				return true;</span>
+			}
+			// Otherwise if it is of a known numeric type, try to decode it
+<span class="fc" id="L673">			Object objval = parseValue(value);</span>
+<span class="pc bpc" id="L674" title="1 of 2 branches missed.">			if (objval == null) {</span>
+<span class="nc" id="L675">				return false;</span>
+			}
+<span class="fc" id="L677">			return setValue(objval);</span>
+		}
+
+		/**
+		 * Parses string if parameter is of a known numeric type.
+		 * @param value value to be parsed
+		 * @return If value.class is different from valueClass, or parameter value is not
+		 * parsable, returns null, otherwise number
+		 */
+		public Object parseValue(String value) {
+<span class="fc" id="L687">			Object objval = null;</span>
+			try {
+<span class="pc bpc" id="L689" title="1 of 2 branches missed.">				if (valueClass.equals(Integer.class)) {</span>
+<span class="nc" id="L690">					objval = Integer.decode(value);</span>
+<span class="pc bpc" id="L691" title="1 of 2 branches missed.">				} else if (valueClass.equals(Long.class)) {</span>
+<span class="nc" id="L692">					objval = Long.decode(value);</span>
+<span class="pc bpc" id="L693" title="1 of 2 branches missed.">				} else if (valueClass.equals(Short.class)) {</span>
+<span class="nc" id="L694">					objval = Short.decode(value);</span>
+<span class="pc bpc" id="L695" title="1 of 2 branches missed.">				} else if (valueClass.equals(Byte.class)) {</span>
+<span class="nc" id="L696">					objval = Byte.decode(value);</span>
+<span class="pc bpc" id="L697" title="1 of 2 branches missed.">				} else if (valueClass.equals(Float.class)) {</span>
+<span class="nc" id="L698">					objval = Float.valueOf(value);</span>
+<span class="fc bfc" id="L699" title="All 2 branches covered.">				} else if (valueClass.equals(Double.class)) {</span>
+<span class="fc" id="L700">					objval = Double.valueOf(value);</span>
+<span class="pc bpc" id="L701" title="1 of 2 branches missed.">				} else if (valueClass.equals(Boolean.class)) {</span>
+<span class="fc" id="L702">					objval = Boolean.valueOf(value);</span>
+				}
+<span class="nc" id="L704">			} catch (NumberFormatException e) {</span>
+<span class="fc" id="L705">			}</span>
+<span class="fc" id="L706">			return objval;</span>
+		}
+
+		/**
+		 * Gets this parameter's value
+		 * @return this parameter's value
+		 */
+		public Object getValue() {
+<span class="fc" id="L714">			return value;</span>
+		}
+
+		/**
+		 * Gets this parameter value's class, ie the class of which parameter value is instance of.
+		 * @return parameter value's class
+		 */
+		public Class&lt;?&gt; getValueClass() {
+<span class="fc" id="L722">			return valueClass;</span>
+		}
+
+		/**
+		 * Gets a brief description of this parameter, used on distributionpanel
+		 * @return parameter's description
+		 */
+		public String getDescription() {
+<span class="nc" id="L730">			return description;</span>
+		}
+
+		/**
+		 * Gets the name of this parameter
+		 * @return this parameter's name
+		 */
+		public String getName() {
+<span class="fc" id="L738">			return name;</span>
+		}
+
+		/**
+		 * Returns if this parameter has to be added directly to the distribution when translating it into XML
+		 * @return true if the parameter has to be added to the distribution. false otherwise
+		 */
+		public boolean isDirectParameter() {
+<span class="fc" id="L746">			return directParameter;</span>
+		}
+
+		/**
+		 * Returns a shallow copy of this Parameter. Note that as nothing can be inferred about
+		 * all values clonability, so parameters are only referenced and not cloned. This should
+		 * not be a problem as every value should be an immutable type.
+		 * @return a copy of this parameter
+		 */
+		@Override
+		public Object clone() {
+<span class="fc" id="L757">			Parameter tmp = new Parameter(this.name, this.description, this.valueClass, this.value, this.directParameter);</span>
+<span class="fc bfc" id="L758" title="All 2 branches covered.">			if (this.value instanceof Object[][]) {</span>
+<span class="fc" id="L759">				Object[][] om = (Object[][]) this.value;</span>
+<span class="fc" id="L760">				Object[][] cm = new Object[om.length][];</span>
+<span class="fc bfc" id="L761" title="All 2 branches covered.">				for (int i = 0; i &lt; om.length; i++) {</span>
+<span class="fc" id="L762">					cm[i] = new Object[om[i].length];</span>
+<span class="fc bfc" id="L763" title="All 2 branches covered.">					for (int j = 0; j &lt; om[i].length; j++) {</span>
+<span class="fc" id="L764">						cm[i][j] = om[i][j];</span>
+					}
+				}
+<span class="fc" id="L767">				tmp.value = cm;</span>
+			}
+<span class="fc" id="L769">			tmp.setValueChecker(this.checker);</span>
+<span class="fc" id="L770">			return tmp;</span>
+		}
+
+	}
+
+	/**
+	 * This interface is used to specify a custom check method on parameter's value (for example
+	 * value's range).
+	 */
+	public interface ValueChecker {
+
+		/**
+		 * Checks if value of this object is correct. Note that when this method is called,
+		 * parameter's value is granted to be instance of the correct class.
+		 * @param value value to be checked
+		 * @return true iff value is correct for this distribution parameter
+		 */
+		public boolean checkValue(Object value);
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

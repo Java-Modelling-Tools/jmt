@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Sectors2DPlacer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.label</a> &gt; <span class="el_source">Sectors2DPlacer.java</span></div><h1>Sectors2DPlacer.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jaba.label;
+
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.awt.geom.Line2D;
+import java.util.ArrayList;
+
+import jmt.engine.jaba.DPoint;
+
+/**
+ * This class places orderly (hopefully) the labels on the saturation
+ * sector graph
+ * 
+ * @author Sebastiano Spicuglia
+ * 
+ */
+public class Sectors2DPlacer extends LabelPlacer {
+
+	private static final int DISTANCE_BETWEEN_TWO_LABELS = 5;
+
+	public Sectors2DPlacer(ArrayList&lt;String&gt; labels, ArrayList&lt;DPoint&gt; points) {
+<span class="nc" id="L39">		super(labels, points);</span>
+<span class="nc" id="L40">	}</span>
+
+	public void place(Graphics2D g, int xCoord) {
+		int i;
+		int previousY, newY;
+		String l;
+		DPoint p;
+		FontMetrics fm;
+
+<span class="nc" id="L49">		p = points.get(0);</span>
+<span class="nc" id="L50">		l = labels.get(0);</span>
+<span class="nc" id="L51">		previousY = Integer.MAX_VALUE;</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		for (i = 0; i &lt; labels.size(); i++) {</span>
+<span class="nc" id="L53">			l = labels.get(labels.size() - i - 1);</span>
+<span class="nc" id="L54">			p = points.get(points.size() - i - 1);</span>
+<span class="nc" id="L55">			fm = g.getFontMetrics();</span>
+
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if (fm != null) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">				if (p.getY() + fm.getStringBounds(l, g).getHeight()</span>
+						+ DISTANCE_BETWEEN_TWO_LABELS &gt; previousY) {
+					// overlapping
+<span class="nc" id="L61">					newY = (int) (previousY</span>
+<span class="nc" id="L62">							- fm.getStringBounds(l, g).getHeight() - DISTANCE_BETWEEN_TWO_LABELS);</span>
+				} else {
+<span class="nc" id="L64">					newY = (int) p.getY();</span>
+				}
+<span class="nc" id="L66">				g.drawString(l, xCoord + 1,</span>
+<span class="nc" id="L67">						(int) (newY + fm.getStringBounds(l, g).getHeight() / 4));</span>
+			} else {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">				if (p.getY() + DISTANCE_BETWEEN_TWO_LABELS &gt; previousY) {</span>
+					// overlapping
+<span class="nc" id="L71">					newY = (int) (previousY - DISTANCE_BETWEEN_TWO_LABELS);</span>
+				} else {
+<span class="nc" id="L73">					newY = (int) p.getY();</span>
+				}
+<span class="nc" id="L75">				g.drawString(l, xCoord + 1, (int) (newY));</span>
+			}
+<span class="nc" id="L77">			g.draw(new Line2D.Double(p.getX(), p.getY(), xCoord, newY));</span>
+<span class="nc" id="L78">			previousY = newY;</span>
+		}
+<span class="nc" id="L80">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

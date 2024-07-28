@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BetaFun.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">BetaFun.java</span></div><h1>BetaFun.java</h1><pre class="source lang-java linenums">/*
+ * BetaFun.java
+ *
+ * Created on 1 novembre 2002, 0.42
+ */
+
+package jmt.engine.math;
+
+/** * @(#)pf.js * * Copyright (c) 2000 by Sundar Dorai-Raj
+ * * @author Sundar Dorai-Raj
+ * * Email: sdoraira@vt.edu
+ * * This program is free software; you can redistribute it and/or
+ * * modify it under the terms of the GNU General Public License
+ * * as published by the Free Software Foundation; either version 2
+ * * of the License, or (at your option) any later version,
+ * * provided that any use properly credits the author.
+ * * This program is distributed in the hope that it will be useful,
+ * * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * * GNU General Public License for more details at http://www.gnu.org * * */
+<span class="nc" id="L21">public class BetaFun {</span>
+
+	public static double lnBeta(double a, double b) {
+<span class="nc" id="L24">		return (GammaFun.lnGamma(a) + GammaFun.lnGamma(b) - GammaFun.lnGamma(a + b));</span>
+	}
+
+	public static double betaInv(double x1, double p, double q) {
+		// ALGORITHM AS 63 APPL. STATIST. VOL.32, NO.1
+		// Computes P(Beta&gt;x)
+		double beta, acu, psq, cx, x2, pp, qq, term, ai, betain, ns, rx, temp;
+		boolean indx;
+<span class="nc" id="L32">		beta = lnBeta(p, q);</span>
+<span class="nc" id="L33">		acu = 1e-14;</span>
+<span class="nc bnc" id="L34" title="All 4 branches missed.">		if (p &lt;= 0 || q &lt;= 0) {</span>
+<span class="nc" id="L35">			throw new IllegalArgumentException(&quot;the degrees of freedom of a Fisher distribution must be &gt; 0&quot;);</span>
+		}
+<span class="nc bnc" id="L37" title="All 4 branches missed.">		if (x1 &lt;= 0 || x1 &gt;= 1) {</span>
+<span class="nc" id="L38">			throw new IllegalArgumentException(&quot;probability must be &gt; 0 and &lt; 1&quot;);</span>
+		}
+<span class="nc" id="L40">		psq = p + q;</span>
+<span class="nc" id="L41">		cx = 1 - x1;</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		if (p &lt; psq * x1) {</span>
+<span class="nc" id="L43">			x2 = cx;</span>
+<span class="nc" id="L44">			cx = x1;</span>
+<span class="nc" id="L45">			pp = q;</span>
+<span class="nc" id="L46">			qq = p;</span>
+<span class="nc" id="L47">			indx = true;</span>
+		} else {
+<span class="nc" id="L49">			x2 = x1;</span>
+<span class="nc" id="L50">			pp = p;</span>
+<span class="nc" id="L51">			qq = q;</span>
+<span class="nc" id="L52">			indx = false;</span>
+		}
+<span class="nc" id="L54">		term = 1;</span>
+<span class="nc" id="L55">		ai = 1;</span>
+<span class="nc" id="L56">		betain = 1;</span>
+<span class="nc" id="L57">		ns = qq + cx * psq;</span>
+<span class="nc" id="L58">		rx = x2 / cx;</span>
+<span class="nc" id="L59">		temp = qq - ai;</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		if (ns == 0) {</span>
+<span class="nc" id="L61">			rx = x2;</span>
+		}
+<span class="nc bnc" id="L63" title="All 4 branches missed.">		while (temp &gt; acu &amp;&amp; temp &gt; acu * betain) {</span>
+<span class="nc" id="L64">			term = term * temp * rx / (pp + ai);</span>
+<span class="nc" id="L65">			betain = betain + term;</span>
+<span class="nc" id="L66">			temp = Math.abs(term);</span>
+<span class="nc bnc" id="L67" title="All 4 branches missed.">			if (temp &gt; acu &amp;&amp; temp &gt; acu * betain) {</span>
+<span class="nc" id="L68">				ai++;</span>
+<span class="nc" id="L69">				ns--;</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">				if (ns &gt;= 0) {</span>
+<span class="nc" id="L71">					temp = qq - ai;</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">					if (ns == 0) {</span>
+<span class="nc" id="L73">						rx = x2;</span>
+					}
+				} else {
+<span class="nc" id="L76">					temp = psq;</span>
+<span class="nc" id="L77">					psq += 1;</span>
+				}
+			}
+		}
+<span class="nc" id="L81">		betain *= Math.exp(pp * Math.log(x2) + (qq - 1) * Math.log(cx) - beta) / pp;</span>
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if (indx) {</span>
+<span class="nc" id="L83">			betain = 1 - betain;</span>
+		}
+<span class="nc" id="L85">		return betain;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

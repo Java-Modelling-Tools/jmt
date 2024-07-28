@@ -1,0 +1,757 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExactTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.table</a> &gt; <span class="el_source">ExactTable.java</span></div><h1>ExactTable.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.table;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JViewport;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.border.Border;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
+import javax.swing.plaf.UIResource;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import jmt.gui.common.CommonConstants;
+
+import jmt.gui.common.JMTImageLoader;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 15-set-2003
+ * Time: 20.39.53
+
+ */
+
+/**
+ * a table with some improvements:
+ * &lt;li&gt;has a click-aware header
+ * &lt;li&gt;has a click-aware row header
+ * &lt;li&gt;&quot;more rows&quot; and &quot;more columns&quot; warning icons
+ * &lt;li&gt;clipboard transfer of cell values (support depends on the underlying data model) - CTRL+C, CTRL+X, CTRL+V
+ * &lt;li&gt;can clear selected cells - DELETE
+ */
+public class ExactTable extends JTable {
+
+	private static final long serialVersionUID = 1L;
+
+	protected RowHeader rowHeader;
+<span class="nc" id="L83">	protected int rowHeaderWidth = 80;</span>
+	protected JButton selectAllButton;
+	protected JLabel moreColumnsLabel;
+
+	protected JLabel moreRowsLabel;
+<span class="nc" id="L88">	protected boolean displaysScrollLabels = true;</span>
+<span class="nc" id="L89">	protected boolean selectAllEnabled = true;</span>
+<span class="nc" id="L90">	protected boolean batchEditingEnabled = false;</span>
+	protected TableSelectionListener selectionListener;
+	protected MouseHandler mouseHandler;
+<span class="nc" id="L93">	protected boolean mouseMenuEnabled = true;</span>
+
+	protected Clipboard clipboard;
+
+	protected String selectAllTooltip;//&quot;Click to select the whole table&quot;;
+	protected String moreColumnsTooltip;//&quot;Scroll right to see more columns...&quot;;
+	protected String moreRowsTooltip;//&quot;Scroll down to see more rows...&quot;;
+
+<span class="nc" id="L101">	protected AbstractAction selectAction = new AbstractAction() {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc bnc" id="L106" title="All 4 branches missed.">			if (getRowSelectionAllowed() || getColumnSelectionAllowed()) {</span>
+<span class="nc" id="L107">				putValue(Action.SHORT_DESCRIPTION, selectAllTooltip);</span>
+<span class="nc" id="L108">				putValue(Action.NAME, &quot;*&quot;);</span>
+			} else {
+<span class="nc" id="L110">				putValue(Action.SHORT_DESCRIPTION, null);</span>
+<span class="nc" id="L111">				putValue(Action.NAME, &quot; &quot;);</span>
+			}
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L116">			stopEditing();</span>
+<span class="nc" id="L117">			selectAll();</span>
+<span class="nc" id="L118">			requestFocus();</span>
+<span class="nc" id="L119">		}</span>
+
+	};
+
+	/**
+	 * updates the label state when the table is scrolled
+	 */
+<span class="nc" id="L126">	private ChangeListener scrollListener = new ChangeListener() {</span>
+		public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			if (displaysScrollLabels) {</span>
+<span class="nc" id="L129">				updateScrollLabels();</span>
+			}
+<span class="nc" id="L131">		}</span>
+	};
+
+	public ExactTable(TableModel dm) {
+<span class="nc" id="L135">		super(dm);</span>
+
+		/* apply default settings */
+<span class="nc" id="L138">		setDefaultRenderer(Object.class, new ExactCellRenderer());</span>
+<span class="nc" id="L139">		setDefaultEditor(Object.class, new ExactCellEditor());</span>
+
+		/* try to resize the columns in a not-so-stupid way */
+<span class="nc" id="L142">		sizeColumns();</span>
+
+<span class="nc" id="L144">		moreColumnsLabel = new JLabel();</span>
+<span class="nc" id="L145">		moreRowsLabel = new JLabel();</span>
+<span class="nc" id="L146">		selectAllButton = new JButton(selectAction);</span>
+
+<span class="nc" id="L148">		rowHeader = new RowHeader(dataModel);</span>
+
+<span class="nc" id="L150">		selectionModel.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);</span>
+<span class="nc" id="L151">		columnModel.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);</span>
+
+<span class="nc" id="L153">		setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L154">		setRowSelectionAllowed(true);</span>
+<span class="nc" id="L155">		setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);</span>
+
+<span class="nc" id="L157">		installKeyboard();</span>
+<span class="nc" id="L158">		installMouse();</span>
+
+<span class="nc" id="L160">		selectionListener = new TableSelectionListener() {</span>
+			@Override
+			protected void selectionChanged(JTable table, ListSelectionEvent e, int type) {
+<span class="nc" id="L163">				updateActions();</span>
+<span class="nc" id="L164">			}</span>
+		};
+<span class="nc" id="L166">		selectionListener.install(this);</span>
+
+<span class="nc" id="L168">		clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();</span>
+<span class="nc" id="L169">	}</span>
+
+	protected void installKeyboard() {
+<span class="nc" id="L172">		InputMap im = getInputMap();</span>
+<span class="nc" id="L173">		ActionMap am = getActionMap();</span>
+<span class="nc" id="L174">		installKeyboardAction(im, am, CUT_ACTION);</span>
+<span class="nc" id="L175">		installKeyboardAction(im, am, COPY_ACTION);</span>
+<span class="nc" id="L176">		installKeyboardAction(im, am, PASTE_ACTION);</span>
+<span class="nc" id="L177">		installKeyboardAction(im, am, CLEAR_ACTION);</span>
+<span class="nc" id="L178">	}</span>
+
+	protected void installKeyboardAction(Action a) {
+<span class="nc" id="L181">		installKeyboardAction(getInputMap(), getActionMap(), a);</span>
+<span class="nc" id="L182">	}</span>
+
+	protected void installKeyboardAction(InputMap im, ActionMap am, Action a) {
+<span class="nc" id="L185">		Object name = a.getValue(Action.NAME);</span>
+<span class="nc" id="L186">		KeyStroke key = (KeyStroke) a.getValue(Action.ACCELERATOR_KEY);</span>
+<span class="nc" id="L187">		im.put(key, name);</span>
+<span class="nc" id="L188">		am.put(name, a);</span>
+<span class="nc" id="L189">	}</span>
+
+	protected void installMouse() {
+<span class="nc" id="L192">		mouseHandler = new MouseHandler(makeMouseMenu());</span>
+<span class="nc" id="L193">		mouseHandler.install();</span>
+<span class="nc" id="L194">	}</span>
+
+	protected JPopupMenu makeMouseMenu() {
+<span class="nc" id="L197">		JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L198">		menu.add(CUT_ACTION);</span>
+<span class="nc" id="L199">		menu.add(COPY_ACTION);</span>
+<span class="nc" id="L200">		menu.add(PASTE_ACTION);</span>
+<span class="nc" id="L201">		menu.add(CLEAR_ACTION);</span>
+<span class="nc" id="L202">		return menu;</span>
+	}
+
+	/**
+	 * Overridden to make sure column sizes are maintained
+	 */
+	@Override
+	public void tableChanged(TableModelEvent e) {
+<span class="nc" id="L210">		super.tableChanged(e);</span>
+<span class="nc bnc" id="L211" title="All 4 branches missed.">		if ((e == null || e.getFirstRow() == TableModelEvent.HEADER_ROW)) {</span>
+<span class="nc" id="L212">			sizeColumns();</span>
+		}
+<span class="nc" id="L214">	}</span>
+
+	private void sizeColumns() {
+		/* try and resize columns according to their header and (if available) prototype width*/
+		/* taken from Sun's JTable tutorial, with some added features */
+<span class="nc" id="L219">		int colnum = dataModel.getColumnCount();</span>
+		TableColumn col;
+		Component comp;
+<span class="nc" id="L222">		PrototypedTableModel ptm = null;</span>
+<span class="nc" id="L223">		boolean hasPrototypes = false;</span>
+		int autoWidth;
+
+<span class="nc bnc" id="L226" title="All 2 branches missed.">		if (dataModel instanceof PrototypedTableModel) {</span>
+<span class="nc" id="L227">			hasPrototypes = true;</span>
+<span class="nc" id="L228">			ptm = (PrototypedTableModel) dataModel;</span>
+		}
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">		if (tableHeader == null) {</span>
+<span class="nc" id="L232">			return; // hack: skip column sizing until we actually have a header</span>
+		}
+
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		for (int i = 0; i &lt; colnum; i++) {</span>
+<span class="nc" id="L236">			col = columnModel.getColumn(i);</span>
+
+<span class="nc" id="L238">			comp = tableHeader.getDefaultRenderer().getTableCellRendererComponent(null, col.getHeaderValue(), false, false, 0, i);</span>
+<span class="nc" id="L239">			autoWidth = comp.getPreferredSize().width;</span>
+
+<span class="nc bnc" id="L241" title="All 2 branches missed.">			if (hasPrototypes) {</span>
+				//comp = getDefaultRenderer(dataModel.getColumnClass(i)).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);
+<span class="nc" id="L243">				comp = getDefaultRenderer(Object.class).getTableCellRendererComponent(this, ptm.getPrototype(i), false, false, 0, i);</span>
+<span class="nc" id="L244">				autoWidth = Math.max(autoWidth, comp.getPreferredSize().width);</span>
+			}
+
+<span class="nc" id="L247">			col.setPreferredWidth(autoWidth);</span>
+		}
+<span class="nc" id="L249">	}</span>
+
+	@Override
+	public void setRowSelectionAllowed(boolean allowed) {
+<span class="nc" id="L253">		super.setRowSelectionAllowed(allowed);</span>
+<span class="nc" id="L254">		allowed = getRowSelectionAllowed();</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		if (rowHeader != null) {</span>
+<span class="nc" id="L256">			rowHeader.setAllowsClickRowSelection(allowed);</span>
+		}
+<span class="nc bnc" id="L258" title="All 4 branches missed.">		setSelectAllStatus(allowed || getColumnSelectionAllowed());</span>
+<span class="nc" id="L259">	}</span>
+
+	@Override
+	public void setColumnSelectionAllowed(boolean allowed) {
+<span class="nc" id="L263">		super.setColumnSelectionAllowed(allowed);</span>
+<span class="nc" id="L264">		allowed = getColumnSelectionAllowed();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (tableHeader instanceof ClickableTableHeader) {</span>
+<span class="nc" id="L266">			((ClickableTableHeader) tableHeader).setAllowsClickColumnSelection(allowed);</span>
+		}
+<span class="nc bnc" id="L268" title="All 4 branches missed.">		setSelectAllStatus(allowed || getRowSelectionAllowed());</span>
+<span class="nc" id="L269">	}</span>
+
+	public void setSelectAllStatus(boolean allowed) {
+<span class="nc bnc" id="L272" title="All 4 branches missed.">		if (allowed &amp;&amp; !selectAllEnabled) {</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">			if (selectAction != null) {</span>
+<span class="nc" id="L274">				selectAction.setEnabled(true);</span>
+<span class="nc" id="L275">				selectAction.putValue(Action.NAME, &quot;*&quot;);</span>
+<span class="nc" id="L276">				selectAction.putValue(Action.SHORT_DESCRIPTION, selectAllTooltip);</span>
+			}
+<span class="nc" id="L278">			selectAllEnabled = true;</span>
+<span class="nc bnc" id="L279" title="All 4 branches missed.">		} else if (!allowed &amp;&amp; selectAllEnabled) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			if (selectAction != null) {</span>
+<span class="nc" id="L281">				selectAction.setEnabled(false);</span>
+<span class="nc" id="L282">				selectAction.putValue(Action.NAME, &quot; &quot;);</span>
+<span class="nc" id="L283">				selectAction.putValue(Action.SHORT_DESCRIPTION, null);</span>
+			}
+<span class="nc" id="L285">			selectAllEnabled = false;</span>
+		}
+<span class="nc" id="L287">	}</span>
+
+	/**
+	 * Overridden to return our nifty header
+	 */
+	@Override
+	protected JTableHeader createDefaultTableHeader() {
+<span class="nc" id="L294">		return new ClickableTableHeader(columnModel);</span>
+	}
+
+	/**
+	 * duplicated to avoid repeating the same checks multiple times
+	 */
+	@Override
+	protected void configureEnclosingScrollPane() {
+<span class="nc" id="L302">		Container p = getParent();</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">		if (p instanceof JViewport) {</span>
+<span class="nc" id="L304">			Container gp = p.getParent();</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">			if (gp instanceof JScrollPane) {</span>
+<span class="nc" id="L306">				JScrollPane scrollPane = (JScrollPane) gp;</span>
+				// Make certain we are the viewPort's view and not, for
+				// example, the rowHeaderView of the scrollPane -
+				// an implementor of fixed columns might do this.
+<span class="nc" id="L310">				JViewport viewport = scrollPane.getViewport();</span>
+<span class="nc bnc" id="L311" title="All 4 branches missed.">				if (viewport == null || viewport.getView() != this) {</span>
+<span class="nc" id="L312">					return;</span>
+				}
+<span class="nc" id="L314">				scrollPane.setColumnHeaderView(getTableHeader());</span>
+<span class="nc" id="L315">				Border border = scrollPane.getBorder();</span>
+<span class="nc bnc" id="L316" title="All 4 branches missed.">				if (border == null || border instanceof UIResource) {</span>
+<span class="nc" id="L317">					scrollPane.setBorder(UIManager.getBorder(&quot;Table.scrollPaneBorder&quot;));</span>
+				}
+				//rowHeader = new RowHeader(dataModel);
+<span class="nc" id="L320">				rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L321">				rowHeader.install(this, scrollPane);</span>
+<span class="nc" id="L322">				installLabels(scrollPane);</span>
+<span class="nc" id="L323">				installSelectAllButton(scrollPane);</span>
+<span class="nc" id="L324">				viewport.addChangeListener(scrollListener);</span>
+			}
+		}
+<span class="nc" id="L327">	}</span>
+
+	@Override
+	protected void unconfigureEnclosingScrollPane() {
+<span class="nc" id="L331">		Container p = getParent();</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		if (p instanceof JViewport) {</span>
+<span class="nc" id="L333">			Container gp = p.getParent();</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">			if (gp instanceof JScrollPane) {</span>
+<span class="nc" id="L335">				JScrollPane scrollPane = (JScrollPane) gp;</span>
+				// Make certain we are the viewPort's view and not, for
+				// example, the rowHeaderView of the scrollPane -
+				// an implementor of fixed columns might do this.
+<span class="nc" id="L339">				JViewport viewport = scrollPane.getViewport();</span>
+<span class="nc bnc" id="L340" title="All 4 branches missed.">				if (viewport == null || viewport.getView() != this) {</span>
+<span class="nc" id="L341">					return;</span>
+				}
+<span class="nc" id="L343">				scrollPane.setColumnHeaderView(null);</span>
+<span class="nc" id="L344">				scrollPane.setRowHeaderView(null);</span>
+
+<span class="nc" id="L346">				viewport.removeChangeListener(scrollListener);</span>
+<span class="nc" id="L347">				rowHeader.uninstall();</span>
+			}
+		}
+<span class="nc" id="L350">	}</span>
+
+	private void installSelectAllButton(JScrollPane scrollPane) {
+<span class="nc" id="L353">		selectAllButton.setFocusable(false);</span>
+<span class="nc" id="L354">		selectAllButton.setBorder(UIManager.getBorder(&quot;TableHeader.cellBorder&quot;));</span>
+<span class="nc" id="L355">		scrollPane.setCorner(ScrollPaneConstants.UPPER_LEFT_CORNER, selectAllButton);</span>
+<span class="nc" id="L356">	}</span>
+
+	private void installLabels(JScrollPane scrollPane) {
+<span class="nc" id="L359">		moreColumnsLabel.setIcon(JMTImageLoader.loadImage(&quot;table_rightarrow&quot;));</span>
+<span class="nc" id="L360">		moreColumnsLabel.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L361">		moreColumnsLabel.setToolTipText(moreColumnsTooltip);</span>
+<span class="nc" id="L362">		moreColumnsLabel.setVisible(false);</span>
+
+<span class="nc" id="L364">		moreRowsLabel.setIcon(JMTImageLoader.loadImage(&quot;table_downarrow&quot;));</span>
+<span class="nc" id="L365">		moreRowsLabel.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L366">		moreRowsLabel.setToolTipText(moreRowsTooltip);</span>
+<span class="nc" id="L367">		moreRowsLabel.setVisible(false);</span>
+
+<span class="nc" id="L369">		scrollPane.setCorner(ScrollPaneConstants.UPPER_RIGHT_CORNER, moreColumnsLabel);</span>
+<span class="nc" id="L370">		scrollPane.setCorner(ScrollPaneConstants.LOWER_LEFT_CORNER, moreRowsLabel);</span>
+
+<span class="nc bnc" id="L372" title="All 2 branches missed.">		if (displaysScrollLabels) {</span>
+<span class="nc" id="L373">			updateScrollLabels();</span>
+		}
+<span class="nc" id="L375">	}</span>
+
+	/**
+	 *  Make sure we're not editing a cell. NOTE: requires the editor to honor stopCellEditing() or
+	 *  cancelCellEditing() calls.
+	 */
+	public void stopEditing() {
+<span class="nc bnc" id="L382" title="All 2 branches missed.">		if (cellEditor != null) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">			if (!cellEditor.stopCellEditing()) {</span>
+<span class="nc" id="L384">				cellEditor.cancelCellEditing();</span>
+			}
+		}
+<span class="nc" id="L387">	}</span>
+
+	/**
+	 * selects a cell
+	 */
+	public void setSelectedCell(int row, int col) {
+<span class="nc" id="L393">		setColumnSelectionInterval(col, col);</span>
+<span class="nc" id="L394">		setRowSelectionInterval(row, row);</span>
+<span class="nc" id="L395">	}</span>
+
+	/**
+	 * Overridden to stop editing
+	 */
+	@Override
+	public void selectAll() {
+<span class="nc" id="L402">		stopEditing();</span>
+<span class="nc" id="L403">		super.selectAll();</span>
+<span class="nc" id="L404">	}</span>
+
+	/**
+	 * Updates the state of the actions. called whenever the selection state of the table changes.
+	 */
+	protected void updateActions() {
+<span class="nc" id="L410">		int cols = getSelectedColumnCount();</span>
+<span class="nc" id="L411">		int rows = getSelectedRowCount();</span>
+<span class="nc bnc" id="L412" title="All 4 branches missed.">		boolean somethingSelected = (rows &gt; 0 || cols &gt; 0);</span>
+<span class="nc bnc" id="L413" title="All 4 branches missed.">		CUT_ACTION.setEnabled(batchEditingEnabled &amp;&amp; somethingSelected);</span>
+<span class="nc" id="L414">		COPY_ACTION.setEnabled(somethingSelected);</span>
+<span class="nc bnc" id="L415" title="All 6 branches missed.">		PASTE_ACTION.setEnabled(batchEditingEnabled &amp;&amp; somethingSelected &amp;&amp; canPaste());</span>
+<span class="nc bnc" id="L416" title="All 4 branches missed.">		CLEAR_ACTION.setEnabled(batchEditingEnabled &amp;&amp; somethingSelected);</span>
+<span class="nc" id="L417">	}</span>
+
+	private void updateScrollLabels() {
+<span class="nc" id="L420">		Rectangle vr = getVisibleRect();</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">		moreColumnsLabel.setVisible(vr.x + vr.width &lt; getWidth());</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		moreRowsLabel.setVisible(vr.y + vr.height &lt; getHeight());</span>
+<span class="nc" id="L423">	}</span>
+
+	public void updateStructure() {
+<span class="nc" id="L426">		tableChanged(new TableModelEvent(dataModel, TableModelEvent.HEADER_ROW));</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">		if (rowHeader != null) {</span>
+<span class="nc" id="L428">			rowHeader.updateStructure();</span>
+		}
+<span class="nc" id="L430">	}</span>
+
+	public void update() {
+<span class="nc" id="L433">		tableChanged(new TableModelEvent(dataModel));</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">		if (rowHeader != null) {</span>
+<span class="nc" id="L435">			rowHeader.update();</span>
+		}
+<span class="nc" id="L437">	}</span>
+
+	public void updateRow(int row) {
+<span class="nc" id="L440">		updateRows(row, row);</span>
+<span class="nc" id="L441">	}</span>
+
+	public void updateRows(int firstRow, int lastRow) {
+<span class="nc" id="L444">		tableChanged(new TableModelEvent(dataModel, firstRow, lastRow));</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">		if (rowHeader != null) {</span>
+<span class="nc" id="L446">			rowHeader.updateRows(firstRow, lastRow);</span>
+		}
+<span class="nc" id="L448">	}</span>
+
+	public int getRowHeaderWidth() {
+<span class="nc" id="L451">		return rowHeaderWidth;</span>
+	}
+
+	public void setRowHeaderWidth(int rowHeaderWidth) {
+<span class="nc" id="L455">		this.rowHeaderWidth = rowHeaderWidth;</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">		if (rowHeader != null) {</span>
+<span class="nc" id="L457">			rowHeader.setWidth(rowHeaderWidth);</span>
+		}
+<span class="nc" id="L459">	}</span>
+
+	public String getSelectAllTooltip() {
+<span class="nc" id="L462">		return selectAllTooltip;</span>
+	}
+
+	public void setSelectAllTooltip(String selectAllTooltip) {
+<span class="nc" id="L466">		this.selectAllTooltip = selectAllTooltip;</span>
+<span class="nc" id="L467">		selectAction.putValue(Action.SHORT_DESCRIPTION, selectAllTooltip);</span>
+<span class="nc" id="L468">	}</span>
+
+	public String getMoreRowsTooltip() {
+<span class="nc" id="L471">		return moreRowsTooltip;</span>
+	}
+
+	public void setMoreRowsTooltip(String moreRowsTooltip) {
+<span class="nc" id="L475">		this.moreRowsTooltip = moreRowsTooltip;</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">		if (moreRowsLabel != null) {</span>
+<span class="nc" id="L477">			moreRowsLabel.setToolTipText(moreRowsTooltip);</span>
+		}
+<span class="nc" id="L479">	}</span>
+
+	public String getMoreColumnsTooltip() {
+<span class="nc" id="L482">		return moreColumnsTooltip;</span>
+	}
+
+	public void setMoreColumnsTooltip(String moreColumnsTooltip) {
+<span class="nc" id="L486">		this.moreColumnsTooltip = moreColumnsTooltip;</span>
+<span class="nc bnc" id="L487" title="All 2 branches missed.">		if (moreColumnsLabel != null) {</span>
+<span class="nc" id="L488">			moreColumnsLabel.setToolTipText(moreColumnsTooltip);</span>
+		}
+<span class="nc" id="L490">	}</span>
+
+	public boolean displaysScrollLabels() {
+<span class="nc" id="L493">		return displaysScrollLabels;</span>
+	}
+
+	public void setDisplaysScrollLabels(boolean displaysScrollLabels) {
+<span class="nc" id="L497">		this.displaysScrollLabels = displaysScrollLabels;</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">		if (!displaysScrollLabels) {</span>
+<span class="nc" id="L499">			moreColumnsLabel.setVisible(false);</span>
+<span class="nc" id="L500">			moreRowsLabel.setVisible(false);</span>
+		} else {
+<span class="nc" id="L502">			updateScrollLabels();</span>
+		}
+<span class="nc" id="L504">	}</span>
+
+	/**
+	 * Try to keep the viewport aligned on column boundaries in the direction of interest
+	 */
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+<span class="nc bnc" id="L511" title="All 2 branches missed.">		if (orientation == SwingConstants.HORIZONTAL) {</span>
+<span class="nc" id="L512">			return 80;</span>
+		}
+<span class="nc" id="L514">		return getRowHeight();</span>
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+		/* borrowed from JTable */
+<span class="nc bnc" id="L520" title="All 2 branches missed.">		if (orientation == SwingConstants.HORIZONTAL) {</span>
+<span class="nc" id="L521">			return 5 * getScrollableUnitIncrement(visibleRect, orientation, direction);</span>
+		}
+<span class="nc" id="L523">		return super.getScrollableBlockIncrement(visibleRect, orientation, direction);</span>
+	}
+
+	public boolean isBatchEditingEnabled() {
+<span class="nc" id="L527">		return batchEditingEnabled;</span>
+	}
+
+	public void setBatchEditingEnabled(boolean batchEditingEnabled) {
+<span class="nc" id="L531">		this.batchEditingEnabled = batchEditingEnabled;</span>
+<span class="nc" id="L532">	}</span>
+
+	public boolean isMouseMenuEnabled() {
+<span class="nc" id="L535">		return mouseMenuEnabled;</span>
+	}
+
+	public void setMouseMenuEnabled(boolean mouseMenuEnabled) {
+<span class="nc" id="L539">		this.mouseMenuEnabled = mouseMenuEnabled;</span>
+<span class="nc" id="L540">	}</span>
+
+	/* cut/copy/paste/clear stuff -------------------------------------*/
+
+	public void copyCells() {
+<span class="nc" id="L545">		int numrows = getSelectedRowCount();</span>
+<span class="nc" id="L546">		int numcols = getSelectedColumnCount();</span>
+<span class="nc" id="L547">		int[] rowsselected = getSelectedRows();</span>
+<span class="nc" id="L548">		int[] colsselected = getSelectedColumns();</span>
+<span class="nc bnc" id="L549" title="All 8 branches missed.">		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &amp;&amp; numrows == rowsselected.length) &amp;&amp; (numcols - 1 == colsselected[colsselected.length - 1]</span>
+				- colsselected[0] &amp;&amp; numcols == colsselected.length))) {
+<span class="nc" id="L551">			JOptionPane.showMessageDialog(null, &quot;Invalid Copy Selection&quot;, &quot;Invalid Copy Selection&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L552">			return;</span>
+		}
+
+<span class="nc" id="L555">		StringBuffer sbf = new StringBuffer();</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">		for (int i = 0; i &lt; numrows; i++) {</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">			for (int j = 0; j &lt; numcols; j++) {</span>
+<span class="nc" id="L558">				sbf.append(getValueAt(rowsselected[i], colsselected[j]));</span>
+<span class="nc bnc" id="L559" title="All 2 branches missed.">				if (j &lt; numcols - 1) {</span>
+<span class="nc" id="L560">					sbf.append(&quot;\t&quot;);</span>
+				}
+			}
+<span class="nc" id="L563">			sbf.append(&quot;\n&quot;);</span>
+		}
+<span class="nc" id="L565">		StringSelection ssel = new StringSelection(sbf.toString());</span>
+<span class="nc" id="L566">		clipboard.setContents(ssel, ssel);</span>
+<span class="nc" id="L567">	}</span>
+
+	public void clearCells() {
+<span class="nc" id="L570">		int numrows = getSelectedRowCount();</span>
+<span class="nc" id="L571">		int numcols = getSelectedColumnCount();</span>
+<span class="nc" id="L572">		int[] rowsselected = getSelectedRows();</span>
+<span class="nc" id="L573">		int[] colsselected = getSelectedColumns();</span>
+<span class="nc bnc" id="L574" title="All 8 branches missed.">		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &amp;&amp; numrows == rowsselected.length) &amp;&amp; (numcols - 1 == colsselected[colsselected.length - 1]</span>
+				- colsselected[0] &amp;&amp; numcols == colsselected.length))) {
+<span class="nc" id="L576">			JOptionPane.showMessageDialog(null, &quot;Invalid Clear Selection&quot;, &quot;Invalid Clear Selection&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L577">			return;</span>
+		}
+
+<span class="nc" id="L580">		boolean hasClear = false;</span>
+<span class="nc" id="L581">		ExactTableModel etm = null;</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">		if (dataModel instanceof ExactTableModel) {</span>
+<span class="nc" id="L583">			hasClear = true;</span>
+<span class="nc" id="L584">			etm = (ExactTableModel) dataModel;</span>
+		}
+<span class="nc bnc" id="L586" title="All 2 branches missed.">		for (int i = 0; i &lt; numrows; i++) {</span>
+<span class="nc bnc" id="L587" title="All 2 branches missed.">			for (int j = 0; j &lt; numcols; j++) {</span>
+<span class="nc bnc" id="L588" title="All 2 branches missed.">				if (hasClear) {</span>
+<span class="nc" id="L589">					etm.clear(rowsselected[i], colsselected[j]);</span>
+				} else {
+<span class="nc" id="L591">					setValueAt(null, rowsselected[i], colsselected[j]);</span>
+				}
+			}
+		}
+<span class="nc" id="L595">		updateRows(rowsselected[0], rowsselected[numrows - 1]);</span>
+<span class="nc" id="L596">	}</span>
+
+	public void pasteCells() {
+<span class="nc bnc" id="L599" title="All 2 branches missed.">		if (!canPaste()) {</span>
+<span class="nc" id="L600">			return;</span>
+		}
+<span class="nc" id="L602">		int numrows = getSelectedRowCount();</span>
+<span class="nc" id="L603">		int numcols = getSelectedColumnCount();</span>
+<span class="nc" id="L604">		int[] rowsselected = getSelectedRows();</span>
+<span class="nc" id="L605">		int[] colsselected = getSelectedColumns();</span>
+<span class="nc bnc" id="L606" title="All 8 branches missed.">		if (!((numrows - 1 == rowsselected[rowsselected.length - 1] - rowsselected[0] &amp;&amp; numrows == rowsselected.length) &amp;&amp; (numcols - 1 == colsselected[colsselected.length - 1]</span>
+				- colsselected[0] &amp;&amp; numcols == colsselected.length))) {
+<span class="nc" id="L608">			JOptionPane.showMessageDialog(null, &quot;Invalid Paste Selection&quot;, &quot;Invalid Paste Selection&quot;, JOptionPane.ERROR_MESSAGE);</span>
+<span class="nc" id="L609">			return;</span>
+		}
+
+		try {
+<span class="nc" id="L613">			String s = ((String) (clipboard.getContents(this).getTransferData(DataFlavor.stringFlavor))).trim();</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">			String[] rows = s.contains(&quot;;&quot;) ? s.split(&quot;\\s*;\\s*&quot;) : s.split(&quot;\\s*\\n\\s*&quot;);</span>
+<span class="nc bnc" id="L615" title="All 4 branches missed.">			if (numrows == 1 &amp;&amp; numcols == 1) {</span>
+<span class="nc" id="L616">				numrows = Math.min(rows.length, getRowCount() - rowsselected[0]);</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">				for (int i = 0; i &lt; numrows; i++) {</span>
+<span class="nc" id="L618">					String row = rows[i];</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">					String[] cells = row.contains(&quot;,&quot;) ? row.split(&quot;\\s*,\\s*&quot;) : row.split(&quot;\\s+&quot;);</span>
+<span class="nc" id="L620">					numcols = Math.min(cells.length, getColumnCount() - colsselected[0]);</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">					for (int j = 0; j &lt; numcols; j++) {</span>
+<span class="nc" id="L622">						setValueAt(cells[j], rowsselected[0] + i, colsselected[0] + j);</span>
+					}
+				}
+<span class="nc" id="L625">				setRowSelectionInterval(rowsselected[0], rowsselected[0] + numrows - 1);</span>
+<span class="nc" id="L626">				setColumnSelectionInterval(colsselected[0], colsselected[0] + numcols - 1);</span>
+			} else {
+<span class="nc bnc" id="L628" title="All 2 branches missed.">				for (int i = 0; i &lt; numrows; i++) {</span>
+<span class="nc" id="L629">					String row = rows[i % rows.length];</span>
+<span class="nc bnc" id="L630" title="All 2 branches missed.">					String[] cells = row.contains(&quot;,&quot;) ? row.split(&quot;\\s*,\\s*&quot;) : row.split(&quot;\\s+&quot;);</span>
+<span class="nc bnc" id="L631" title="All 2 branches missed.">					for (int j = 0; j &lt; numcols; j++) {</span>
+<span class="nc" id="L632">						setValueAt(cells[j % cells.length], rowsselected[0] + i, colsselected[0] + j);</span>
+					}
+				}
+			}
+<span class="nc" id="L636">			updateRows(rowsselected[0], rowsselected[0] + numrows - 1);</span>
+<span class="nc" id="L637">		} catch (Exception e) {</span>
+<span class="nc" id="L638">			e.printStackTrace();</span>
+<span class="nc" id="L639">		}</span>
+<span class="nc" id="L640">	}</span>
+
+	public boolean canPaste() {
+<span class="nc" id="L643">		return clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor);</span>
+	}
+
+<span class="nc" id="L646">	public AbstractAction CUT_ACTION = new AbstractAction(&quot;Cut&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L651">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_X, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L652">			putValue(Action.SHORT_DESCRIPTION, &quot;Copies selected cells to the system clipboard and clears them&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L656">			copyCells();</span>
+<span class="nc" id="L657">			clearCells();</span>
+<span class="nc" id="L658">		}</span>
+
+	};
+
+<span class="nc" id="L662">	public AbstractAction COPY_ACTION = new AbstractAction(&quot;Copy&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L667">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L668">			putValue(Action.SHORT_DESCRIPTION, &quot;Copies selected cells to the system clipboard&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L672">			copyCells();</span>
+<span class="nc" id="L673">		}</span>
+
+	};
+
+<span class="nc" id="L677">	public AbstractAction PASTE_ACTION = new AbstractAction(&quot;Paste&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L682">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L683">			putValue(Action.SHORT_DESCRIPTION, &quot;Pastes cells from the system clipboard, starting from the currently focused cell&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L687">			pasteCells();</span>
+<span class="nc" id="L688">		}</span>
+
+	};
+
+<span class="nc" id="L692">	public AbstractAction CLEAR_ACTION = new AbstractAction(&quot;Clear&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L697">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L698">			putValue(Action.SHORT_DESCRIPTION, &quot;Clears selected cells&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L702">			clearCells();</span>
+<span class="nc" id="L703">		}</span>
+
+	};
+
+	protected class MouseHandler extends MouseAdapter {
+
+		private boolean isInstalled;
+		private JPopupMenu menu;
+
+<span class="nc" id="L712">		public MouseHandler(JPopupMenu menu) {</span>
+<span class="nc" id="L713">			this.menu = menu;</span>
+<span class="nc" id="L714">		}</span>
+
+		public void install() {
+<span class="nc bnc" id="L717" title="All 2 branches missed.">			if (!isInstalled) {</span>
+<span class="nc" id="L718">				addMouseListener(this);</span>
+<span class="nc" id="L719">				isInstalled = true;</span>
+			}
+<span class="nc" id="L721">		}</span>
+
+		public void uninstall() {
+<span class="nc bnc" id="L724" title="All 2 branches missed.">			if (isInstalled) {</span>
+<span class="nc" id="L725">				removeMouseListener(this);</span>
+<span class="nc" id="L726">				isInstalled = false;</span>
+			}
+<span class="nc" id="L728">		}</span>
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+<span class="nc" id="L732">			processME(e);</span>
+<span class="nc" id="L733">		}</span>
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L737">			processME(e);</span>
+<span class="nc" id="L738">		}</span>
+
+		protected void processME(MouseEvent e) {
+<span class="nc bnc" id="L741" title="All 2 branches missed.">			if (!mouseMenuEnabled) {</span>
+<span class="nc" id="L742">				return;</span>
+			}
+<span class="nc bnc" id="L744" title="All 2 branches missed.">			if (e.isPopupTrigger()) {</span>
+<span class="nc" id="L745">				updateActions();</span>
+<span class="nc" id="L746">				menu.show(e.getComponent(), e.getX(), e.getY());</span>
+			}
+<span class="nc" id="L748">		}</span>
+
+		public JPopupMenu getMenu() {
+<span class="nc" id="L751">			return menu;</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

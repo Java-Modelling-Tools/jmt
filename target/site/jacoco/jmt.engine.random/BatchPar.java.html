@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BatchPar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">BatchPar.java</span></div><h1>BatchPar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+
+/**
+ *
+ * This is the parameter that should be passed to the Batched distribution.
+ *
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Jerry Zhu
+ *
+ */
+public class BatchPar extends AbstractParameter implements Parameter {
+    /** The base distribution */
+    private Distribution base;
+
+    /** The parameters of the parent distribution */
+    private Parameter baseParameter;
+
+    /** The batch size distribution */
+    private Distribution batchSize;
+
+    /** The parameter of the batch size distribution */
+    private Parameter batchSizeParameter;
+
+    /** The fixed batch size value, will be used instead of [batchSize] if IsFixedBatchedSize is true */
+    private int fixedBatchSize;
+
+    /** If true, the batch size is a fixed value instead of a random variable */
+    private boolean isFixedBatchSize;
+
+    /**
+     * It creates a new batched parameter.
+     */
+    public BatchPar(
+            DistributionContainer base,
+            DistributionContainer batchSize,
+            Integer fixedBatchSize,
+<span class="nc" id="L58">            Boolean IsFixedBatchSize) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L59">        this.base = base.getDistribution();</span>
+<span class="nc" id="L60">        this.baseParameter = base.getParameter();</span>
+<span class="nc" id="L61">        this.isFixedBatchSize = IsFixedBatchSize;</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        if (isFixedBatchSize) {</span>
+<span class="nc" id="L63">            this.fixedBatchSize = fixedBatchSize;</span>
+        } else {
+<span class="nc" id="L65">            this.batchSize = batchSize.getDistribution();</span>
+<span class="nc" id="L66">            this.batchSizeParameter = batchSize.getParameter();</span>
+        }
+<span class="nc" id="L68">    }</span>
+
+    /**
+     * An empty constructor.
+     */
+<span class="nc" id="L73">    public BatchPar() { }</span>
+
+    /**
+     * It checks if the parameter is correct or not.
+     */
+    @Override
+    public boolean check() {
+<span class="nc bnc" id="L80" title="All 2 branches missed.">        if (isFixedBatchSize) {</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">            return fixedBatchSize &gt; 0;</span>
+        } else {
+<span class="nc" id="L83">            return true;</span>
+        }
+    }
+
+    /**
+     * Getters and setters
+     */
+
+    public Distribution getBase() {
+<span class="nc" id="L92">        return base;</span>
+    }
+
+    public void setBase(Distribution base) {
+<span class="nc" id="L96">        this.base = base;</span>
+<span class="nc" id="L97">    }</span>
+
+    public Parameter getBaseParameter() {
+<span class="nc" id="L100">        return baseParameter;</span>
+    }
+
+    public void setBaseParameter(Parameter baseParameter) {
+<span class="nc" id="L104">        this.baseParameter = baseParameter;</span>
+<span class="nc" id="L105">    }</span>
+
+    public Distribution getBatchSize() {
+<span class="nc" id="L108">        return batchSize;</span>
+    }
+
+    public void setBatchSize(Distribution batchSize) {
+<span class="nc" id="L112">        this.batchSize = batchSize;</span>
+<span class="nc" id="L113">    }</span>
+
+    public Parameter getBatchSizeParameter() {
+<span class="nc" id="L116">        return batchSizeParameter;</span>
+    }
+
+    public void setBatchSizeParameter(Parameter batchSizeParameter) {
+<span class="nc" id="L120">        this.batchSizeParameter = batchSizeParameter;</span>
+<span class="nc" id="L121">    }</span>
+
+    public int getFixedBatchSize() {
+<span class="nc" id="L124">        return fixedBatchSize;</span>
+    }
+
+    public void setFixedBatchSize(int fixedBatchSize) {
+<span class="nc" id="L128">        this.fixedBatchSize = fixedBatchSize;</span>
+<span class="nc" id="L129">    }</span>
+
+    public boolean getIsFixedBatchSize() {
+<span class="nc" id="L132">        return isFixedBatchSize;</span>
+    }
+
+    public void setIsFixedBatchSize(boolean IsFixedBatchSize) {
+<span class="nc" id="L136">        this.isFixedBatchSize = IsFixedBatchSize;</span>
+<span class="nc" id="L137">    }</span>
+} // end BatchedExponentialPar
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

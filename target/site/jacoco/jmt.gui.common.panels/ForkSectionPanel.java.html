@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ForkSectionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">ForkSectionPanel.java</span></div><h1>ForkSectionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+
+/**
+ * &lt;p&gt;Title: ForkSection Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to parametrize fork special behaviour&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 15-mar-2006
+ *         Time: 14.25.36
+ *         
+ *  Modified by Ashanka (Dec 09)
+ *  Desc: Minor Cosmetic changes in the label. Changed some Label regarding the Definitions for better understanding of Users.
+ */
+public class ForkSectionPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+	protected StationDefinition sd;
+	protected ClassDefinition cd;
+	protected Object stationKey;
+	protected JSpinner numForkSpinner, blockSpinner;
+
+	/**
+	 * Sets data for this panel
+	 * @param sd station definition data structure
+	 * @param cd class definition data structure
+	 * @param stationKey search's key for input station
+	 */
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
+<span class="nc" id="L68">		this.removeAll();</span>
+<span class="nc" id="L69">		this.stationKey = stationKey;</span>
+<span class="nc" id="L70">		this.sd = sd;</span>
+<span class="nc" id="L71">		this.cd = cd;</span>
+<span class="nc" id="L72">		updateSpinners();</span>
+<span class="nc" id="L73">		initComponents();</span>
+<span class="nc" id="L74">	}</span>
+
+	/**
+	 * Builds a new panel to specify fork section parameters
+	 * @param sd station definition data structure
+	 * @param cd class definition data structure
+	 * @param stationKey search's key for input station
+	 */
+	public ForkSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {
+<span class="nc" id="L83">		super();</span>
+<span class="nc" id="L84">		setData(sd, cd, stationKey);</span>
+<span class="nc" id="L85">	}</span>
+
+	/**
+	 * Initialize layout
+	 */
+	private void initComponents() {
+		//building mainPanel
+<span class="nc" id="L92">		this.setLayout(new GridLayout(2, 1));</span>
+<span class="nc" id="L93">		this.setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+		
+		//layout of block panel
+<span class="nc" id="L96">		JPanel block = new JPanel(new BorderLayout(10, 10));</span>
+<span class="nc" id="L97">		block.setBorder(new TitledBorder(new EtchedBorder(), &quot;Fork-Join Section Capacity&quot;));</span>
+<span class="nc" id="L98">		this.add(block);</span>
+
+		// Adds a checkbox to block panel to select block function
+<span class="nc" id="L101">		final JCheckBox check = new JCheckBox();</span>
+<span class="nc" id="L102">		check.setText(&quot;Enable Finite Capacity: limit maximum number of jobs (customers) inside a fork-join section&quot;);</span>
+<span class="nc" id="L103">		check.setToolTipText(&quot;Limit the maximum number of jobs allowed inside a fork-join section. Following jobs will be queued.&quot;);</span>
+
+		// Adds a spinner to block panel to select block number
+<span class="nc" id="L106">		JLabel label = new JLabel(&quot;Capacity (max number of jobs, NOT tasks): &quot;);</span>
+<span class="nc" id="L107">		label.setLabelFor(blockSpinner);</span>
+
+		// Initial values
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (sd.getForkBlock(stationKey).intValue() &lt; 0) {</span>
+<span class="nc" id="L111">			check.setSelected(false);</span>
+<span class="nc" id="L112">			blockSpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L113">			blockSpinner.setEnabled(false);</span>
+		} else {
+<span class="nc" id="L115">			check.setSelected(true);</span>
+<span class="nc" id="L116">			blockSpinner.setValue(sd.getForkBlock(stationKey));</span>
+<span class="nc" id="L117">			blockSpinner.setEnabled(true);</span>
+		}
+
+		// Adds action listeners
+<span class="nc" id="L121">		check.addActionListener(new ActionListener() {</span>
+			/**
+			 * Toggles block property
+			 */
+			public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L126" title="All 2 branches missed.">				if (check.isSelected()) {</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">					if (Defaults.getAsInteger(&quot;forkBlock&quot;).intValue() &gt; 0) {</span>
+<span class="nc" id="L128">						sd.setForkBlock(stationKey, Defaults.getAsInteger(&quot;forkBlock&quot;));</span>
+					} else {
+<span class="nc" id="L130">						sd.setForkBlock(stationKey, new Integer(1));</span>
+					}
+<span class="nc" id="L132">					blockSpinner.setValue(sd.getForkBlock(stationKey));</span>
+<span class="nc" id="L133">					blockSpinner.setEnabled(true);</span>
+				} else {
+<span class="nc" id="L135">					sd.setForkBlock(stationKey, new Integer(-1));</span>
+<span class="nc" id="L136">					blockSpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L137">					blockSpinner.setEnabled(false);</span>
+				}
+<span class="nc" id="L139">			}</span>
+		});
+
+		// Creates a temp panel for blockSpinner and its label
+<span class="nc" id="L143">		JPanel tmp = new JPanel();</span>
+<span class="nc" id="L144">		tmp.add(label);</span>
+<span class="nc" id="L145">		tmp.add(blockSpinner);</span>
+
+<span class="nc" id="L147">		block.add(check, BorderLayout.NORTH);</span>
+<span class="nc" id="L148">		block.add(tmp, BorderLayout.CENTER);</span>
+<span class="nc" id="L149">	}</span>
+
+	/**
+	 * Creates spinner to choose number of splits for each output link
+	 * and to choose blocking region number of jobs
+	 */
+	private void updateSpinners() {
+<span class="nc" id="L156">		numForkSpinner = new JSpinner();</span>
+<span class="nc" id="L157">		numForkSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L158">		numForkSpinner.setValue(sd.getStationNumberOfServers(stationKey));</span>
+<span class="nc" id="L159">		numForkSpinner.setToolTipText(&quot;Number of tasks created for each input job on each output link&quot;);</span>
+<span class="nc" id="L160">		numForkSpinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L162" title="All 2 branches missed.">				if (numForkSpinner.getValue() instanceof Integer) {</span>
+<span class="nc" id="L163">					Integer serverNum = (Integer) numForkSpinner.getValue();</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">					if (serverNum.intValue() &lt; 1) {</span>
+<span class="nc" id="L165">						serverNum = new Integer(1);</span>
+<span class="nc" id="L166">						numForkSpinner.setValue(serverNum);</span>
+					}
+<span class="nc" id="L168">					sd.setStationNumberOfServers(stationKey, serverNum);</span>
+				}
+<span class="nc" id="L170">			}</span>
+		});
+
+<span class="nc" id="L173">		blockSpinner = new JSpinner();</span>
+<span class="nc" id="L174">		blockSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L175">		blockSpinner.setToolTipText(&quot;Maximum allowed number of jobs inside a fork-join section. Following jobs will be queued.&quot;);</span>
+<span class="nc" id="L176">		blockSpinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">				if (blockSpinner.getValue() instanceof Integer) {</span>
+<span class="nc" id="L179">					Integer blockNum = (Integer) blockSpinner.getValue();</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">					if (blockNum.intValue() &lt; 1) {</span>
+<span class="nc" id="L181">						blockNum = new Integer(1);</span>
+<span class="nc" id="L182">						blockSpinner.setValue(blockNum);</span>
+					}
+<span class="nc" id="L184">					sd.setForkBlock(stationKey, blockNum);</span>
+				}
+<span class="nc" id="L186">			}</span>
+		});
+<span class="nc" id="L188">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L195">		return &quot;Capacity Section&quot;;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

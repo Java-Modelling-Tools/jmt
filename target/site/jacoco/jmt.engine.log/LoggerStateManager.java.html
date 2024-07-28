@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoggerStateManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.log</a> &gt; <span class="el_source">LoggerStateManager.java</span></div><h1>LoggerStateManager.java</h1><pre class="source lang-java linenums">package jmt.engine.log;
+
+public class LoggerStateManager {
+<span class="nc" id="L4">    private static final LoggerStateManager instance = new LoggerStateManager();</span>
+<span class="nc" id="L5">    private boolean logCalenderOn = false;</span>
+    //a list of strong of allowed events
+<span class="nc" id="L7">    private static String[] allowedEvents = {};</span>
+<span class="nc" id="L8">    private LoggerStateManager() {}</span>
+
+    public static void addAllowedEvent(String event) {
+<span class="nc bnc" id="L11" title="All 2 branches missed.">        if (event == null) {</span>
+<span class="nc" id="L12">            return;</span>
+        }
+<span class="nc bnc" id="L14" title="All 2 branches missed.">        for (String allowedEvent : allowedEvents) {</span>
+<span class="nc bnc" id="L15" title="All 2 branches missed.">            if (allowedEvent.equals(event)) {</span>
+<span class="nc" id="L16">                return;</span>
+            }
+        }
+<span class="nc" id="L19">        String[] newAllowedEvents = new String[allowedEvents.length + 1];</span>
+<span class="nc" id="L20">        System.arraycopy(allowedEvents, 0, newAllowedEvents, 0, allowedEvents.length);</span>
+<span class="nc" id="L21">        newAllowedEvents[allowedEvents.length] = event;</span>
+<span class="nc" id="L22">        allowedEvents = newAllowedEvents;</span>
+<span class="nc" id="L23">    }</span>
+
+    public static void deleteAllowedEvent(String event) {
+<span class="nc bnc" id="L26" title="All 2 branches missed.">        if (event == null) {</span>
+<span class="nc" id="L27">            return;</span>
+        }
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        for (int i = 0; i &lt; allowedEvents.length; i++) {</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">            if (allowedEvents[i].equals(event)) {</span>
+<span class="nc" id="L31">                String[] newAllowedEvents = new String[allowedEvents.length - 1];</span>
+<span class="nc" id="L32">                System.arraycopy(allowedEvents, 0, newAllowedEvents, 0, i);</span>
+<span class="nc" id="L33">                System.arraycopy(allowedEvents, i + 1, newAllowedEvents, i, allowedEvents.length - i - 1);</span>
+<span class="nc" id="L34">                allowedEvents = newAllowedEvents;</span>
+<span class="nc" id="L35">                return;</span>
+            }
+        }
+<span class="nc" id="L38">    }</span>
+
+    public static void clearAllowedEvents() {
+<span class="nc" id="L41">        allowedEvents = new String[0];</span>
+<span class="nc" id="L42">    }</span>
+
+    public static String[] getAllowedEvents() {
+<span class="nc" id="L45">        return allowedEvents;</span>
+    }
+
+    public static LoggerStateManager getInstance() {
+<span class="nc" id="L49">        return instance;</span>
+    }
+
+    public void setLogCalenderOn(boolean logCalenderOn) {
+<span class="nc" id="L53">        this.logCalenderOn = logCalenderOn;</span>
+<span class="nc" id="L54">    }</span>
+
+    public boolean isLogCalenderOn() {
+<span class="nc" id="L57">        return logCalenderOn;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

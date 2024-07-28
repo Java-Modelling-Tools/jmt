@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>YMicroBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks</a> &gt; <span class="el_source">YMicroBlock.java</span></div><h1>YMicroBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationChangeVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.exceptions.UndefinedMultiplyException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class implements the Micro Blocks of the X block of the A matrix.
+ * 
+ * It extends MatrixMicroBlock and implements the methods to insert the correct coefficients into
+ * the block for given equations.
+ * 
+ * @author Jack Bradshaw
+ */
+public class YMicroBlock extends MatrixMicroBlock {
+
+	public YMicroBlock(QNModel qnm, CoMoMBasis basis, Position position, int h) throws InternalErrorException {
+<span class="nc" id="L24">		super(qnm, basis, position, h);</span>
+<span class="nc" id="L25">		computeDimensions();</span>
+<span class="nc" id="L26">		initialise();</span>
+<span class="nc" id="L27">	}</span>
+
+	public YMicroBlock(YMicroBlock micro_block, int current_class) {
+<span class="nc" id="L30">		super(micro_block, current_class);</span>
+<span class="nc" id="L31">	}</span>
+
+	@Override
+	protected MicroBlock subBlockCopy(int current_class) {
+<span class="nc" id="L35">		return new YMicroBlock(this, current_class);</span>
+	}
+	
+	@Override
+	protected void computeDimensions() {
+<span class="nc" id="L40">		size.col = MiscMathsFunctions.binomialCoefficient(qnm.M, h);</span>
+<span class="nc" id="L41">		size.row  = size.col * qnm.M;</span>
+
+<span class="nc" id="L43">	}	</span>
+
+	@Override
+	public int addCE(int row, PopulationChangeVector n, int queue)
+			throws BTFMatrixErrorException, InternalErrorException {
+		
+<span class="nc" id="L49">		int col = basis.indexOf(n, 0);	</span>
+<span class="nc" id="L50">		int insertion_row = row;</span>
+<span class="nc" id="L51">		col -= position.col;</span>
+<span class="nc" id="L52">		insertion_row -= position.row;</span>
+			
+<span class="nc bnc" id="L54" title="All 4 branches missed.">		if (col &lt; 0 || col &gt;= size.col) throw new BTFMatrixErrorException(&quot;Column &quot; + col + &quot; not in micro block, when considering n:&quot; + n +&quot; queue: 0&quot;);</span>
+<span class="nc bnc" id="L55" title="All 4 branches missed.">		if (insertion_row &lt; 0 || insertion_row &gt;= size.row) throw new BTFMatrixErrorException(&quot;Row &quot; + row + &quot; not in micro block, when considering n:&quot; + n +&quot; queue: 0&quot;);</span>
+			
+<span class="nc" id="L57">		array[insertion_row][col] = BigRational.MINUS_ONE;</span>
+		
+<span class="nc" id="L59">		return row;			</span>
+	}
+
+	@Override
+	public int addPC(int row, PopulationChangeVector n, int _class)
+			throws BTFMatrixErrorException, InternalErrorException {
+		
+<span class="nc" id="L66">		n.minusOne(_class);</span>
+<span class="nc" id="L67">		int col = basis.indexOf(n, 0);	</span>
+		
+<span class="nc" id="L69">		int insertion_row = row;</span>
+		
+<span class="nc" id="L71">		col -= position.col;</span>
+<span class="nc" id="L72">		insertion_row -= position.row;		</span>
+		
+<span class="nc bnc" id="L74" title="All 4 branches missed.">		if (col &gt;= 0 &amp;&amp; col &lt; size.col) { //column is in this block</span>
+<span class="nc" id="L75">			array[insertion_row][col] = qnm.N.getAsBigRational(_class - 1).subtract(n.getAsBigRational(_class - 1)); </span>
+		}		
+<span class="nc" id="L77">		n.restore();</span>
+		
+<span class="nc" id="L79">		col = basis.indexOf(n, 0);	</span>
+<span class="nc" id="L80">		insertion_row = row;</span>
+<span class="nc" id="L81">		col -= position.col;</span>
+<span class="nc" id="L82">		insertion_row -= position.row;</span>
+			
+		
+<span class="nc bnc" id="L85" title="All 4 branches missed.">		if (col &lt; 0 || col &gt;= size.col) throw new BTFMatrixErrorException(&quot;Column &quot; + col + &quot; not in micro block, when considering n:&quot; + n +&quot; queue: 0&quot;);</span>
+<span class="nc bnc" id="L86" title="All 4 branches missed.">		if (insertion_row &lt; 0 || insertion_row &gt;= size.row) throw new BTFMatrixErrorException(&quot;Row &quot; + row + &quot; not in micro block, when considering n:&quot; + n +&quot; queue: 0&quot;);</span>
+			
+<span class="nc" id="L88">		array[insertion_row][col] = qnm.getDelayAsBigRational(_class - 1).negate();				 		</span>
+		
+<span class="nc" id="L90">		return row;</span>
+	}
+
+	@Override
+	public void solve(BigRational[] rhs) throws BTFMatrixErrorException {			
+			
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if (position.col + size.col &gt; basis.getSize()) throw new BTFMatrixErrorException(&quot;Matrix exceeds end of vector when multiplying&quot;);</span>
+		
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		for (int i = 0; i &lt; size.row; i++) { 			        </span>
+	        try {
+<span class="nc" id="L100">	        	rhs[position.row + i] = rhs[position.row + i].add(multiplyRow(i).negate());</span>
+<span class="nc" id="L101">			} catch (UndefinedMultiplyException e) {</span>
+<span class="nc" id="L102">				rhs[position.row + i] = new BigRational(-1);</span>
+<span class="nc" id="L103">	            rhs[position.row + i].makeUndefined();				</span>
+<span class="nc" id="L104">			}</span>
+		}
+<span class="nc" id="L106">	}</span>
+		
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

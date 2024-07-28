@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PhaseTypeDistr.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">PhaseTypeDistr.java</span></div><h1>PhaseTypeDistr.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+
+/**
+ * 
+ * This is the Phase-Type distribution.
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2017
+ * &lt;br&gt;Imperial Collge London - Department of Computing
+ * @author Lulai Zhu
+ * 
+ */
+public class PhaseTypeDistr extends AbstractDistribution implements Distribution {
+
+	private int curState;
+	private Exponential expDistr;
+	private ExponentialPar expPar;
+
+	/**
+	 * This is the constructor. It creates a new phase-type distribution which
+	 * is constituted by arbitrary exponential phases.
+	 *
+	 */
+<span class="nc" id="L43">	public PhaseTypeDistr() {</span>
+<span class="nc" id="L44">		curState = -1;</span>
+<span class="nc" id="L45">		expDistr = new Exponential();</span>
+<span class="nc" id="L46">		expPar = new ExponentialPar();</span>
+<span class="nc" id="L47">	}</span>
+
+	/**
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the phase-type distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the probability distribution function evaluated in x.
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L59">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the phase-type distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the cumulative distribution function evaluated in x.
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L72">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the phase-type distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L84">		return ((PhaseTypePar) p).getMean();</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
+	 *
+	 * @param p parameter of the phase-type distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic variance of the distribution.
+	 */
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L96">		return ((PhaseTypePar) p).getVar();</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the next number distributed
+	 * according to the distribution parameter.
+	 *
+	 * @param p parameter of the phase-type distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the next random number of this distribution.
+	 */
+	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L108">		double sample = 0.0;</span>
+<span class="nc" id="L109">		double[] alpha = ((PhaseTypePar) p).getAlpha();</span>
+<span class="nc" id="L110">		double[] lambda = ((PhaseTypePar) p).getLambda();</span>
+<span class="nc" id="L111">		double[][] P = ((PhaseTypePar) p).getP();</span>
+
+<span class="nc" id="L113">		double rand = engine.raw();</span>
+<span class="nc" id="L114">		double sum = 0.0;</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		for (int i = 0; i &lt; alpha.length; i++) {</span>
+<span class="nc" id="L116">			sum += alpha[i];</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">			if (sum &gt;= rand) {</span>
+<span class="nc" id="L118">				curState = i;</span>
+<span class="nc" id="L119">				break;</span>
+			}
+		}
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if (expDistr.engine == null) {</span>
+<span class="nc" id="L124">			expDistr.setRandomEngine(engine);</span>
+		}
+		
+		OUTER_LOOP:
+		while (true) {
+<span class="nc" id="L129">			expPar.setLambda(lambda[curState]);</span>
+<span class="nc" id="L130">			sample += expDistr.nextRand(expPar);</span>
+
+<span class="nc" id="L132">			rand = engine.raw();</span>
+<span class="nc" id="L133">			sum = 0.0;</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			for (int i = 0; i &lt; alpha.length; i++) {</span>
+<span class="nc" id="L135">				sum += P[curState][i];</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">				if (sum &gt;= rand) {</span>
+<span class="nc" id="L137">					curState = i;</span>
+<span class="nc" id="L138">					continue OUTER_LOOP;</span>
+				}
+			}
+<span class="nc" id="L141">			break;</span>
+		}
+
+<span class="nc" id="L144">		return sample;</span>
+	}
+
+} // end PhaseTypeDistr
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

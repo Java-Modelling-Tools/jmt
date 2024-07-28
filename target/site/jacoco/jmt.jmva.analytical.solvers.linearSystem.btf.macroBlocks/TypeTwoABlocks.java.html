@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TypeTwoABlocks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks</a> &gt; <span class="el_source">TypeTwoABlocks.java</span></div><h1>TypeTwoABlocks.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks;
+
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks.MicroBlock;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * A policy that selects the type 2(a) Micro Blocks from the full block for use in lower class linear systesms
+ * @author Jack Bradshaw
+ */
+public class TypeTwoABlocks extends MicroBlockSelectionPolicy {
+
+	protected TypeTwoABlocks(QNModel qnm, MacroBlock full_block) {
+<span class="nc" id="L14">		super(qnm, full_block);		</span>
+<span class="nc" id="L15">	}</span>
+
+	@Override
+	protected MicroBlock[] selectMicroBlocks(int current_class) {
+		//The number of micro blocks at the head of the list that we are NOT taking
+<span class="nc" id="L20">		int number_of_type1_blocks = 0;</span>
+<span class="nc bnc" id="L21" title="All 2 branches missed.">		if (full_block.h &lt; current_class) {</span>
+<span class="nc" id="L22">			number_of_type1_blocks = MiscMathsFunctions.binomialCoefficient(current_class - 1, full_block.h);</span>
+		}
+
+		//The number of blocks we ARE taking
+<span class="nc" id="L26">		int number_of_type2a_blocks = 0;</span>
+<span class="nc bnc" id="L27" title="All 4 branches missed.">		if (current_class &lt; qnm.R &amp;&amp; full_block.h &lt;= current_class) {</span>
+<span class="nc" id="L28">			number_of_type2a_blocks = MiscMathsFunctions.binomialCoefficient(current_class - 1, full_block.h - 1);</span>
+		}
+
+		//Take required macro blocks
+<span class="nc" id="L32">		MicroBlock[] micro_blocks = new MicroBlock[number_of_type2a_blocks];</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">		for (int i = 0; i &lt; micro_blocks.length; i++) {</span>
+<span class="nc" id="L34">			micro_blocks[i] = full_block.micro_blocks[i + number_of_type1_blocks].subBlock(current_class);</span>
+		}
+<span class="nc" id="L36">		return micro_blocks;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

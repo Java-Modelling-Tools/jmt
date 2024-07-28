@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CachedHashMap.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.data</a> &gt; <span class="el_source">CachedHashMap.java</span></div><h1>CachedHashMap.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.data;
+
+import java.util.HashMap;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 28-giu-2005
+ * Time: 17.07.42
+ * This class is an optimized version of an {@link java.util.HashMap}. Optimization
+ * is focused on multiple acesses. This implementation provides a single-element cache
+ * for speed-up of data search operations, in particular the most recently requested
+ * element is stored to assure a faster search.
+ */
+<span class="fc" id="L33">public class CachedHashMap&lt;E, F&gt; extends HashMap&lt;E, F&gt; {</span>
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	//Most recently used key and relative value.
+	private F mruValue;
+	private Object mruKey;
+
+	/**Returns requested object. If this object was requested before, search
+	 * operation is faster.*/
+	@Override
+	public F get(Object key) {
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">		if (key != null) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">			if (key.equals(mruKey)) {</span>
+<span class="fc" id="L49">				return mruValue;</span>
+			}
+		}
+<span class="fc" id="L52">		mruKey = key;</span>
+<span class="fc" id="L53">		mruValue = super.get(key);</span>
+<span class="fc" id="L54">		return mruValue;</span>
+	}
+
+	/**Method overridden to avoid aliasing between currently stored value and
+	 * superclass matching.*/
+	@Override
+	public F put(E key, F value) {
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">		if (key != null) {</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">			if (key.equals(mruKey)) {</span>
+<span class="nc" id="L63">				mruValue = value;</span>
+			}
+		}
+<span class="fc" id="L66">		return super.put(key, value);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

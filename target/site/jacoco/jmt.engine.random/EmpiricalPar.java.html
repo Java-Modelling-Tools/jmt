@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmpiricalPar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">EmpiricalPar.java</span></div><h1>EmpiricalPar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+
+/**
+ * 
+ * This is the parameter that should be passed to the empirical
+ * distribution.
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Fabrizio Frontera - ffrontera@yahoo.it
+ * 
+ */
+public class EmpiricalPar extends AbstractParameter implements Parameter {
+
+	/** cumulative distribution function*/
+	protected double[] cdf;
+	/** probability distribution function*/
+	protected double[] pdf;
+
+	/** values of the parameter*/
+	protected Object[] values;
+
+	/**
+	 * This is the default constructor. It creates a new empty empirical parameter
+	 * that must be set with the setPDF method before being used.
+	 *
+	 */
+<span class="nc" id="L48">	public EmpiricalPar() {</span>
+<span class="nc" id="L49">	}</span>
+
+	/**
+	 * It creates a new empirical parameter. It accepts an array of double greater or
+	 * equal to zero and verifies that the sum of all these data is one or zero.
+	 *
+	 * @param pdf array of &lt;code&gt;double&lt;/code&gt; for the new empirical distribution.
+	 * @throws IncorrectDistributionParameterException when any of the provided data
+	 * is less than zero or the sum of all of them is not one or zero.
+	 *
+	 */
+<span class="nc" id="L60">	public EmpiricalPar(double[] pdf) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L61">		setPDF(pdf);</span>
+<span class="nc" id="L62">	}</span>
+
+	/**
+	 * It creates a new empirical parameter. It accepts an array of Double greater or
+	 * equal to zero and verifies that the sum of all these data is one or zero.
+	 *
+	 * @param wpdf array of &lt;code&gt;Double&lt;/code&gt; for the new empirical distribution.
+	 * @throws IncorrectDistributionParameterException when any of the provided data
+	 * is less than zero or the sum of all of them is not one or zero.
+	 *
+	 */
+<span class="nc" id="L73">	public EmpiricalPar(Double[] wpdf) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L74">		double[] wpdf2pdf = new double[wpdf.length];</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		for (int i = 0; i &lt; wpdf.length; i++) {</span>
+<span class="nc" id="L76">			wpdf2pdf[i] = wpdf[i].doubleValue();</span>
+		}
+<span class="nc" id="L78">		this.setPDF(wpdf2pdf);</span>
+<span class="nc" id="L79">	}</span>
+
+	/**
+	 * Creates an empirical parameter with these entries (each entry contains a value
+	 * and a probability). The Empirical can return not only an integer, but also
+	 * directly an object, given the right probability table.
+	 *
+	 * @param entries Empirical entries.
+	 * @throws IncorrectDistributionParameterException
+	 */
+<span class="nc" id="L89">	public EmpiricalPar(EmpiricalEntry[] entries) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L90">		values = new Object[entries.length];</span>
+<span class="nc" id="L91">		double prob[] = new double[entries.length];</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">		for (int i = 0; i &lt; entries.length; i++) {</span>
+<span class="nc" id="L93">			EmpiricalEntry entry = entries[i];</span>
+<span class="nc" id="L94">			values[i] = entry.getValue();</span>
+<span class="nc" id="L95">			prob[i] = entry.getProbability();</span>
+		}
+<span class="nc" id="L97">		setPDF(prob);</span>
+<span class="nc" id="L98">	}</span>
+
+	/**
+	 * It returns the value of the parameters for the empirical distribution, that is
+	 * the vector of double representing the probabilities provided by the user.
+	 *
+	 * @return array of double with the probability distribution function tabulated.
+	 */
+	public double[] getPDF() {
+<span class="nc" id="L107">		return pdf;</span>
+	}
+
+	/**
+	 * It returns the value of the parameters for the empirical distribution, that is
+	 * the vector of double representing the cumulative distribution function tabulated.
+	 *
+	 * @return array of double with the cumulative distribution function tabulated.
+	 */
+	public double[] getCDF() {
+<span class="nc" id="L117">		return cdf;</span>
+	}
+
+	/**
+	 * It allows the user to change the value of the parameter of the empirical distribution.
+	 * Takes an existent array of pdf and tries to convert it in a pdf for an empirical
+	 * distribution, checking the conditions which must be respected.
+	 *
+	 * @param pdf array of double containing an existent pdf.
+	 * @throws IncorrectDistributionParameterException if, among the provided data, there is
+	 * a value less than zero or the sum of all of them is not one or zero.
+	 *
+	 */
+	public void setPDF(double[] pdf) throws IncorrectDistributionParameterException {
+<span class="nc" id="L131">		double sumProb = 0.0;</span>
+<span class="nc" id="L132">		this.pdf = new double[pdf.length];</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">		for (int i = 0; i &lt; pdf.length; i++) {</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">			if (pdf[i] &gt;= 0.0) {</span>
+<span class="nc" id="L135">				this.pdf[i] = pdf[i];</span>
+<span class="nc" id="L136">				sumProb += this.pdf[i];</span>
+			} else {
+				//negative probability not allowed
+<span class="nc" id="L139">				throw new IncorrectDistributionParameterException(&quot;Found a probability less than zero. Only values equal to or greater than zero are allowed.&quot;);</span>
+			}
+		}
+
+<span class="nc bnc" id="L143" title="All 4 branches missed.">		if (Math.abs(sumProb - 1.0) &gt; 1e-6 &amp;&amp; Math.abs(sumProb - 0.0) &gt; 1e-6) {</span>
+			//total probability must be near 1 or 0 (1e-6 error allowed)
+<span class="nc" id="L145">			throw new IncorrectDistributionParameterException(&quot;The sum of the probabilities must be one or zero, but the input values sum up to &quot; + sumProb);</span>
+		}
+
+		//sets the cdf with the new probabilities
+<span class="nc" id="L149">		setCDF();</span>
+<span class="nc" id="L150">	}</span>
+
+	/**
+	 * Generates the CDF from the PDF. This is only a helper method called by setPdf.
+	 * Each new cdf value is the sum of the previous cdf value and the current pdf value.
+	 *
+	 */
+	private void setCDF() {
+<span class="nc" id="L158">		int nBins = pdf.length;</span>
+<span class="nc" id="L159">		this.cdf = new double[nBins + 1];</span>
+<span class="nc" id="L160">		this.cdf[0] = 0.0;</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		for (int ptn = 0; ptn &lt; nBins; ptn++) {</span>
+<span class="nc" id="L162">			this.cdf[ptn + 1] = cdf[ptn] + pdf[ptn];</span>
+		}
+<span class="nc" id="L164">	}</span>
+
+	/**
+	 * It controls if the parameter is correct or not. For the empirical distribution,
+	 * the parameter is correct if the values in the pdf array are equal to or greater
+	 * than zero and they sum up to one or zero.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	@Override
+	public boolean check() {
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		return (!(cdf == null));</span>
+	}
+
+	/**
+	 * Checks whether a parameter value is correct.
+	 *
+	 * @param parameterName
+	 * @param value
+	 */
+	public static boolean guiCheck(String parameterName, Double value) {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (parameterName.compareTo(&quot;pdf&quot;) == 0) {</span>
+			//the string parameterName is equal to &quot;pdf&quot;
+<span class="nc bnc" id="L188" title="All 4 branches missed.">			if ((value.doubleValue() &gt;= 0.0) &amp;&amp; (value.doubleValue() &lt;= 1.0)) {</span>
+<span class="nc" id="L189">				return true;</span>
+			}
+		}
+<span class="nc" id="L192">		return false;</span>
+	}
+
+	public static String guiGetErrorMsg(String parameterName) {
+<span class="nc bnc" id="L196" title="All 2 branches missed.">		if (parameterName.compareTo(&quot;pdf&quot;) == 0) {</span>
+			//the string parameterName is equal to &quot;pdf&quot;
+<span class="nc" id="L198">			return &quot;&lt;html&gt;The parameter &lt;font color=#0000ff&gt;&lt;b&gt;&quot; + parameterName</span>
+					+ &quot;&lt;/b&gt;&lt;/font&gt; must be &lt;font color=#ff0000&gt;&lt;b&gt; in [0, 1]&lt;/b&gt;&lt;/font&gt;.&lt;/html&gt;&quot;;
+		}
+<span class="nc" id="L201">		return &quot;&quot;;</span>
+	}
+
+	/**
+	 * Returns the value in the corresponding position: generally only the
+	 * empirical distribution needs to access this method (generates the random
+	 * number then ask for the corresponding value).
+	 *
+	 * @param position
+	 * @return value
+	 */
+	public Object getValue(int position) {
+<span class="nc" id="L213">		return values[position];</span>
+	}
+
+	/**
+	 * Returns all the values.
+	 *
+	 * @return values
+	 */
+	public Object[] getValues() {
+<span class="nc" id="L222">		return values;</span>
+	}
+
+} // end EmpiricalPar
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

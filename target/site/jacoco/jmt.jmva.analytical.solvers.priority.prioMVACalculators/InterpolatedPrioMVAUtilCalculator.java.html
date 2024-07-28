@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InterpolatedPrioMVAUtilCalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.priority.prioMVACalculators</a> &gt; <span class="el_source">InterpolatedPrioMVAUtilCalculator.java</span></div><h1>InterpolatedPrioMVAUtilCalculator.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.priority.prioMVACalculators;
+
+import jmt.jmva.analytical.solvers.priority.interpolators.Interpolator;
+import jmt.jmva.analytical.solvers.priority.interpolators.LinearInterpolator;
+import jmt.jmva.analytical.solvers.utilities.MVAPopulation;
+
+public abstract class InterpolatedPrioMVAUtilCalculator extends BasePrioMVAUtilCalculator {
+
+    /**
+     * Allows for a generalisation of the CL version of PrioMVA so instead of
+     * just linear interpolation any interpolation can be used
+     */
+
+    /**
+     * y_2 can equal 0
+     * (when the queue length rounds up to population of the class so
+     * N_class - x2 = 0 and the utilisation at 0 is 0)
+     * and in this situation,
+     * the following ints decide what should be done
+     */
+    protected static final int NO_CHANGE = 0;
+    protected static final int RETURN_Y_ONE = 1;
+    protected static final int RETURN_ZERO = 2;
+    protected static final int LINEAR_INTERPOLATE = 3;
+
+    private final Interpolator interpolator;
+    private final int behaviourWhenZero;
+    private Interpolator linearInterpolator;
+
+<span class="nc" id="L30">    protected InterpolatedPrioMVAUtilCalculator(Interpolator interpolator, int behaviourWhenZero) {</span>
+<span class="nc" id="L31">        this.interpolator = interpolator;</span>
+<span class="nc" id="L32">        this.behaviourWhenZero = behaviourWhenZero;</span>
+<span class="nc bnc" id="L33" title="All 2 branches missed.">        if (behaviourWhenZero == LINEAR_INTERPOLATE) {</span>
+<span class="nc" id="L34">            linearInterpolator = new LinearInterpolator();</span>
+        }
+<span class="nc" id="L36">    }</span>
+
+    @Override
+    public double getNonEmptyClosedUtilisation(MVAPopulation population, int numCustomers, int station, int clas) {
+<span class="nc" id="L40">        double queueLength = queueLengthMap.get(population)[station][clas];</span>
+<span class="nc" id="L41">        double higherQueueLength = Math.ceil(queueLength);</span>
+<span class="nc" id="L42">        double lowerQueueLength = Math.floor(queueLength);</span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">        if (higherQueueLength == lowerQueueLength) {</span>
+<span class="nc" id="L45">            population.decClassPopulation(clas, queueLength);</span>
+<span class="nc" id="L46">            double util = utilMap.get(population)[station][clas];</span>
+<span class="nc" id="L47">            population.incClassPopulation(clas, queueLength);</span>
+<span class="nc" id="L48">            return util;</span>
+        }
+
+<span class="nc" id="L51">        population.decClassPopulation(clas, higherQueueLength);</span>
+<span class="nc" id="L52">        double higherUtil = utilMap.get(population)[station][clas];</span>
+<span class="nc" id="L53">        population.incClassPopulation(clas, higherQueueLength);</span>
+
+<span class="nc" id="L55">        population.decClassPopulation(clas, lowerQueueLength);</span>
+        // The lower util is greater than higher util as less is being subtracted
+        // from the population so lowerUtil is just the util associated to the lower util
+<span class="nc" id="L58">        double lowerUtil = utilMap.get(population)[station][clas];</span>
+<span class="nc" id="L59">        population.incClassPopulation(clas, lowerQueueLength);</span>
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">        if (higherUtil == 0) {</span>
+<span class="nc" id="L62">            return interpolateWhenYTwoIsZero(lowerQueueLength, lowerUtil, higherQueueLength, higherUtil, queueLength);</span>
+        }
+
+<span class="nc" id="L65">        return interpolator.interpolate(lowerQueueLength, lowerUtil, higherQueueLength, higherUtil, queueLength);</span>
+    }
+
+    public double interpolateWhenYTwoIsZero(double lowerQueueLength, double lowerUtil, double higherQueueLength,
+                                            double higherUtil, double queueLength) {
+<span class="nc bnc" id="L70" title="All 5 branches missed.">        switch (behaviourWhenZero) {</span>
+        case NO_CHANGE:
+<span class="nc" id="L72">            return interpolator.interpolate(lowerQueueLength, lowerUtil, higherQueueLength, higherUtil, queueLength);</span>
+        case RETURN_Y_ONE:
+<span class="nc" id="L74">            return lowerUtil;</span>
+        case RETURN_ZERO:
+<span class="nc" id="L76">            return 0.0;</span>
+        case LINEAR_INTERPOLATE:
+<span class="nc" id="L78">            return linearInterpolator.interpolate(lowerQueueLength, lowerUtil, higherQueueLength, higherUtil, queueLength);</span>
+        default:
+<span class="nc" id="L80">            throw new RuntimeException(&quot;Behaviour when y2 = 0 not specified&quot;);</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

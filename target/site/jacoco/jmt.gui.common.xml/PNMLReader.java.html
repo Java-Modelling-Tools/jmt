@@ -1,0 +1,561 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PNMLReader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">PNMLReader.java</span></div><h1>PNMLReader.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.xml;
+
+import java.awt.Color;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import jmt.gui.common.definitions.ServerType;
+import org.apache.xerces.parsers.DOMParser;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import ch.qos.logback.classic.LoggerContext;
+import fr.lip6.move.pnml.framework.general.PNType;
+import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
+import fr.lip6.move.pnml.framework.utils.PNMLUtils;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Distribution.Parameter;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+
+/**
+ * &lt;p&gt;Title: PNML Reader&lt;/p&gt;
+ * &lt;p&gt;Description: Reads model information from a PNML file. This class provides
+ * methods for model import.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 25-01-2017
+ * Time: 12.00.00
+ */
+<span class="nc" id="L61">public class PNMLReader implements PNMLConstants, CommonConstants {</span>
+
+	private static DOMParser parser;
+	private static Map&lt;String, Distribution&gt; distributionMap;
+
+	private static String referenceNodeName;
+	private static String arcType;
+
+	/**
+	 * Imports an external model from a PNML file
+	 * @param file file that the model is imported from
+	 * @param model data structure of the model
+	 * @return true if the model was imported, false otherwise
+	 */
+	public static boolean importModel(File file, CommonModel model) throws Exception {
+		try {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if (parser == null) {</span>
+<span class="nc" id="L78">				parser = new DOMParser();</span>
+			}
+<span class="nc bnc" id="L80" title="All 2 branches missed.">			if (distributionMap == null) {</span>
+<span class="nc" id="L81">				distributionMap = new TreeMap&lt;String, Distribution&gt;();</span>
+<span class="nc" id="L82">				Distribution[] all = Distribution.findAll();</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">				for (Distribution d : all) {</span>
+<span class="nc" id="L84">					distributionMap.put(d.getName(), d);</span>
+				}
+<span class="nc" id="L86">				Distribution[] allDiscrete = Distribution.findAllDiscrete();</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">				for (Distribution d : allDiscrete) {</span>
+<span class="nc" id="L88">					distributionMap.put(d.getName(), d);</span>
+				}
+			}
+
+<span class="nc" id="L92">			HLAPIRootClass docApi = PNMLUtils.importPnmlDocument(file, false);</span>
+<span class="nc" id="L93">			PNType type = PNMLUtils.determinePNType(docApi);</span>
+<span class="nc bnc" id="L94" title="All 3 branches missed.">			switch (type) {</span>
+				case COREMODEL:
+<span class="nc" id="L96">					readCoreModel((fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI) docApi, model);</span>
+<span class="nc" id="L97">					break;</span>
+				case PTNET:
+<span class="nc" id="L99">					readPTNet((fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) docApi, model);</span>
+<span class="nc" id="L100">					break;</span>
+				default:
+<span class="nc" id="L102">					((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L103">					return false;</span>
+			}
+<span class="nc" id="L105">			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L106">			return true;</span>
+<span class="nc" id="L107">		} catch (Exception e) {</span>
+<span class="nc" id="L108">			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();</span>
+<span class="nc" id="L109">			throw e;</span>
+		}
+	}
+
+	/**
+	 * Reads an external model from a PNML core model document
+	 * @param doc PNML document that the model is read from
+	 * @param model data structure of the model
+	 */
+	private static void readCoreModel(fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetDocHLAPI doc, CommonModel model)
+			throws SAXException, IOException {
+<span class="nc" id="L120">		fr.lip6.move.pnml.pnmlcoremodel.hlapi.PetriNetHLAPI net = doc.getNetsHLAPI().get(0);</span>
+<span class="nc" id="L121">		fr.lip6.move.pnml.pnmlcoremodel.hlapi.PageHLAPI page = net.getPagesHLAPI().get(0);</span>
+<span class="nc" id="L122">		List&lt;fr.lip6.move.pnml.pnmlcoremodel.hlapi.PlaceHLAPI&gt; places = page.getObjects_PlaceHLAPI();</span>
+<span class="nc" id="L123">		List&lt;fr.lip6.move.pnml.pnmlcoremodel.hlapi.TransitionHLAPI&gt; transitions = page.getObjects_TransitionHLAPI();</span>
+<span class="nc" id="L124">		List&lt;fr.lip6.move.pnml.pnmlcoremodel.hlapi.ArcHLAPI&gt; arcs = page.getObjects_ArcHLAPI();</span>
+
+<span class="nc" id="L126">		Map&lt;String, Object&gt; nodeMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.PlaceHLAPI p : places) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			String name = (p.getName() != null) ? p.getName().getText() : p.getId();</span>
+<span class="nc" id="L129">			Object key = model.addStation(name, STATION_TYPE_PLACE, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L130">			nodeMap.put(p.getId(), key);</span>
+
+<span class="nc bnc" id="L132" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L133">				List&lt;fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI&gt; specifics = p.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">				for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L135">					Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">					if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L137">						parseSpecificNodeGraphics(elem, (JSimGraphModel) model, key);</span>
+					}
+<span class="nc" id="L139">				}</span>
+
+<span class="nc" id="L141">				fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI graphics = p.getNodegraphicsHLAPI();</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">				if (graphics != null) {</span>
+<span class="nc" id="L143">					JMTPoint point = ((JSimGraphModel) model).getStationPosition(key);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">					if (point == null) {</span>
+<span class="nc" id="L145">						point = new JMTPoint(0, 0, false);</span>
+<span class="nc" id="L146">						((JSimGraphModel) model).setStationPosition(key, point);</span>
+					}
+<span class="nc" id="L148">					point.setX(graphics.getPositionHLAPI().getX().doubleValue());</span>
+<span class="nc" id="L149">					point.setY(graphics.getPositionHLAPI().getY().doubleValue());</span>
+				}
+			}
+<span class="nc" id="L152">		}</span>
+
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.TransitionHLAPI t : transitions) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">			String name = (t.getName() != null) ? t.getName().getText() : t.getId();</span>
+<span class="nc" id="L156">			Object key = model.addStation(name, STATION_TYPE_TRANSITION, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L157">			nodeMap.put(t.getId(), key);</span>
+
+<span class="nc bnc" id="L159" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L160">				List&lt;fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI&gt; specifics = t.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L162">					Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">					if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L164">						parseSpecificNodeGraphics(elem, (JSimGraphModel) model, key);</span>
+					}
+<span class="nc" id="L166">				}</span>
+
+<span class="nc" id="L168">				fr.lip6.move.pnml.pnmlcoremodel.hlapi.NodeGraphicsHLAPI graphics = t.getNodegraphicsHLAPI();</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">				if (graphics != null) {</span>
+<span class="nc" id="L170">					JMTPoint point = ((JSimGraphModel) model).getStationPosition(key);</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">					if (point == null) {</span>
+<span class="nc" id="L172">						point = new JMTPoint(0, 0, false);</span>
+<span class="nc" id="L173">						((JSimGraphModel) model).setStationPosition(key, point);</span>
+					}
+<span class="nc" id="L175">					point.setX(graphics.getPositionHLAPI().getX().doubleValue());</span>
+<span class="nc" id="L176">					point.setY(graphics.getPositionHLAPI().getY().doubleValue());</span>
+				}
+			}
+<span class="nc" id="L179">		}</span>
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		for (fr.lip6.move.pnml.pnmlcoremodel.hlapi.ArcHLAPI a : arcs) {</span>
+<span class="nc" id="L182">			Object sourceKey = nodeMap.get(a.getSourceHLAPI().getId());</span>
+<span class="nc" id="L183">			Object targetKey = nodeMap.get(a.getTargetHLAPI().getId());</span>
+<span class="nc bnc" id="L184" title="All 4 branches missed.">			if (sourceKey != null &amp;&amp; targetKey != null) {</span>
+<span class="nc" id="L185">				model.setConnected(sourceKey, targetKey, true);</span>
+			}
+<span class="nc" id="L187">		}</span>
+<span class="nc" id="L188">	}</span>
+
+	/**
+	 * Reads an external model from a PNML P/T net document
+	 * @param doc PNML document that the model is read from
+	 * @param model data structure of the model
+	 */
+	private static void readPTNet(fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI doc, CommonModel model)
+			throws SAXException, IOException {
+<span class="nc" id="L197">		fr.lip6.move.pnml.ptnet.hlapi.PetriNetHLAPI net = doc.getNetsHLAPI().get(0);</span>
+<span class="nc" id="L198">		fr.lip6.move.pnml.ptnet.hlapi.PageHLAPI page = net.getPagesHLAPI().get(0);</span>
+<span class="nc" id="L199">		List&lt;fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI&gt; places = page.getObjects_PlaceHLAPI();</span>
+<span class="nc" id="L200">		List&lt;fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI&gt; transitions = page.getObjects_TransitionHLAPI();</span>
+<span class="nc" id="L201">		List&lt;fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI&gt; arcs = page.getObjects_ArcHLAPI();</span>
+
+<span class="nc" id="L203">		Object classKey = model.addClass(&quot;Token&quot;, Defaults.getAsInteger(&quot;classType&quot;).intValue(),</span>
+<span class="nc" id="L204">				Defaults.getAsInteger(&quot;classPriority&quot;), Defaults.getAsDouble(&quot;classSoftDeadline&quot;),</span>
+<span class="nc" id="L205">				Defaults.getAsInteger(&quot;classPopulation&quot;),</span>
+<span class="nc" id="L206">				Defaults.getAsNewInstance(&quot;classDistribution&quot;));</span>
+<span class="nc" id="L207">		referenceNodeName = null;</span>
+<span class="nc" id="L208">		List&lt;fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI&gt; specifics = net.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">		for (fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L210">			Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">			if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L212">				parseSpecificNetParameters(elem, model);</span>
+			}
+<span class="nc" id="L214">		}</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		if (model.getClassType(classKey) == CLASS_TYPE_CLOSED) {</span>
+<span class="nc" id="L216">			int population = 0;</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">				population += (p.getInitialMarking() != null) ? p.getInitialMarking().getText().intValue() : 0;</span>
+<span class="nc" id="L219">			}</span>
+<span class="nc" id="L220">			model.setClassPopulation(classKey, Integer.valueOf(population));</span>
+		}
+
+<span class="nc" id="L223">		Map&lt;String, Object&gt; nodeMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">		for (fr.lip6.move.pnml.ptnet.hlapi.PlaceHLAPI p : places) {</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			String name = (p.getName() != null) ? p.getName().getText() : p.getId();</span>
+<span class="nc" id="L226">			Object key = model.addStation(name, STATION_TYPE_PLACE, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L227">			nodeMap.put(p.getId(), key);</span>
+
+<span class="nc bnc" id="L229" title="All 2 branches missed.">			int marking = (p.getInitialMarking() != null) ? p.getInitialMarking().getText().intValue() : 0;</span>
+<span class="nc" id="L230">			model.setPreloadedJobs(key, classKey, Integer.valueOf(marking));</span>
+
+<span class="nc" id="L232">			specifics = p.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			for (fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L234">				Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">				if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L236">					parseSpecificPlaceParameters(elem, model, key);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">					if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L238">						parseSpecificNodeGraphics(elem, (JSimGraphModel) model, key);</span>
+					}
+				}
+<span class="nc" id="L241">			}</span>
+
+<span class="nc bnc" id="L243" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L244">				fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI graphics = p.getNodegraphicsHLAPI();</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">				if (graphics != null) {</span>
+<span class="nc" id="L246">					JMTPoint point = ((JSimGraphModel) model).getStationPosition(key);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">					if (point == null) {</span>
+<span class="nc" id="L248">						point = new JMTPoint(0, 0, false);</span>
+<span class="nc" id="L249">						((JSimGraphModel) model).setStationPosition(key, point);</span>
+					}
+<span class="nc" id="L251">					point.setX(graphics.getPositionHLAPI().getX().doubleValue());</span>
+<span class="nc" id="L252">					point.setY(graphics.getPositionHLAPI().getY().doubleValue());</span>
+				}
+			}
+<span class="nc" id="L255">		}</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">		for (fr.lip6.move.pnml.ptnet.hlapi.TransitionHLAPI t : transitions) {</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">			String name = (t.getName() != null) ? t.getName().getText() : t.getId();</span>
+<span class="nc" id="L259">			Object key = model.addStation(name, STATION_TYPE_TRANSITION, 1, new ArrayList&lt;ServerType&gt;());</span>
+<span class="nc" id="L260">			nodeMap.put(t.getId(), key);</span>
+
+<span class="nc" id="L262">			specifics = t.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">			for (fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L264">				Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">				if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L266">					parseSpecificTransitionParameters(elem, model, key);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">					if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L268">						parseSpecificNodeGraphics(elem, (JSimGraphModel) model, key);</span>
+					}
+				}
+<span class="nc" id="L271">			}</span>
+
+<span class="nc bnc" id="L273" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L274">				fr.lip6.move.pnml.ptnet.hlapi.NodeGraphicsHLAPI graphics = t.getNodegraphicsHLAPI();</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">				if (graphics != null) {</span>
+<span class="nc" id="L276">					JMTPoint point = ((JSimGraphModel) model).getStationPosition(key);</span>
+<span class="nc bnc" id="L277" title="All 2 branches missed.">					if (point == null) {</span>
+<span class="nc" id="L278">						point = new JMTPoint(0, 0, false);</span>
+<span class="nc" id="L279">						((JSimGraphModel) model).setStationPosition(key, point);</span>
+					}
+<span class="nc" id="L281">					point.setX(graphics.getPositionHLAPI().getX().doubleValue());</span>
+<span class="nc" id="L282">					point.setY(graphics.getPositionHLAPI().getY().doubleValue());</span>
+				}
+			}
+<span class="nc" id="L285">		}</span>
+
+<span class="nc bnc" id="L287" title="All 2 branches missed.">		if (STATION_TYPE_TRANSITION.equals(referenceNodeName)) {</span>
+<span class="nc" id="L288">			model.setClassRefStation(classKey, STATION_TYPE_TRANSITION);</span>
+		} else {
+<span class="nc" id="L290">			model.setClassRefStation(classKey, model.getStationByName(referenceNodeName));</span>
+		}
+
+<span class="nc bnc" id="L293" title="All 2 branches missed.">		for (fr.lip6.move.pnml.ptnet.hlapi.ArcHLAPI a : arcs) {</span>
+<span class="nc" id="L294">			Object sourceKey = nodeMap.get(a.getSourceHLAPI().getId());</span>
+<span class="nc" id="L295">			Object targetKey = nodeMap.get(a.getTargetHLAPI().getId());</span>
+<span class="nc bnc" id="L296" title="All 4 branches missed.">			if (sourceKey != null &amp;&amp; targetKey != null) {</span>
+<span class="nc" id="L297">				model.setConnected(sourceKey, targetKey, true);</span>
+
+<span class="nc" id="L299">				arcType = PNML_JSIM_V_ARC_TYPE_NORMAL;</span>
+<span class="nc" id="L300">				specifics = a.getToolspecificsHLAPI();</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">				for (fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI s : specifics) {</span>
+<span class="nc" id="L302">					Element elem = createSpecificRootElement(s);</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">					if (PNML_JSIM.equals(s.getTool())) {</span>
+<span class="nc" id="L304">						parseSpecificArcParameters(elem);</span>
+					}
+<span class="nc" id="L306">				}</span>
+
+<span class="nc bnc" id="L308" title="All 2 branches missed.">				int inscription = (a.getInscriptionHLAPI() != null) ? a.getInscriptionHLAPI().getText().intValue() : 1;</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">				if (STATION_TYPE_TRANSITION.equals(model.getStationType(targetKey))) {</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">					if (PNML_JSIM_V_ARC_TYPE_NORMAL.equals(arcType)) {</span>
+<span class="nc" id="L311">						model.setEnablingCondition(targetKey, 0, sourceKey, classKey, Integer.valueOf(inscription));</span>
+					} else {
+<span class="nc" id="L313">						model.setInhibitingCondition(targetKey, 0, sourceKey, classKey, Integer.valueOf(inscription));</span>
+					}
+				} else {
+<span class="nc" id="L316">					model.setFiringOutcome(sourceKey, 0, targetKey, classKey, Integer.valueOf(inscription));</span>
+				}
+			}
+<span class="nc" id="L319">		}</span>
+<span class="nc" id="L320">	}</span>
+
+	/**
+	 * Creates an root element representing a specific
+	 * @param specific data structure of the specific
+	 * @return element representing the specific
+	 */
+	private static Element createSpecificRootElement(fr.lip6.move.pnml.pnmlcoremodel.hlapi.ToolInfoHLAPI specific)
+			throws SAXException, IOException {
+<span class="nc" id="L329">		StringBuffer buffer = specific.getFormattedXMLBuffer();</span>
+<span class="nc" id="L330">		parser.parse(new InputSource(new StringReader(buffer.toString())));</span>
+<span class="nc" id="L331">		return parser.getDocument().getDocumentElement();</span>
+	}
+
+	/**
+	 * Creates an root element representing a specific
+	 * @param specific data structure of the specific
+	 * @return element representing the specific
+	 */
+	private static Element createSpecificRootElement(fr.lip6.move.pnml.ptnet.hlapi.ToolInfoHLAPI specific)
+			throws SAXException, IOException {
+<span class="nc" id="L341">		StringBuffer buffer = specific.getFormattedXMLBuffer();</span>
+<span class="nc" id="L342">		parser.parse(new InputSource(new StringReader(buffer.toString())));</span>
+<span class="nc" id="L343">		return parser.getDocument().getDocumentElement();</span>
+	}
+
+	/**
+	 * Parses the specific graphics of a node from a root element
+	 * @param elem specific that the graphics are parsed from
+	 * @param model data structure of the model
+	 * @param node search key for the node
+	 */
+	private static void parseSpecificNodeGraphics(Element elem, JSimGraphModel model, Object node) {
+<span class="nc" id="L353">		Element graphics = getFirstChildElementByTagName(elem, PNML_JSIM_E_NODE_GRAPHICS);</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">		if (graphics != null) {</span>
+<span class="nc" id="L355">			Element rotate = getFirstChildElementByTagName(graphics, PNML_JSIM_E_NODE_GRAPHICS_ROTATE);</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">			if (rotate != null) {</span>
+<span class="nc" id="L357">				JMTPoint point = ((JSimGraphModel) model).getStationPosition(node);</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">				if (point == null) {</span>
+<span class="nc" id="L359">					point = new JMTPoint(0, 0, false);</span>
+<span class="nc" id="L360">					((JSimGraphModel) model).setStationPosition(node, point);</span>
+				}
+<span class="nc" id="L362">				point.setRotate(Boolean.parseBoolean(rotate.getTextContent()));</span>
+			}
+		}
+<span class="nc" id="L365">	}</span>
+
+	/**
+	 * Parses the specific parameters of a net from a root element
+	 * @param elem element that the parameters are parsed from
+	 * @param model data structure of the model
+	 */
+	private static void parseSpecificNetParameters(Element elem, CommonModel model) {
+<span class="nc" id="L373">		Object classKey = model.getClassKeys().get(0);</span>
+<span class="nc" id="L374">		Element tokens = getFirstChildElementByTagName(elem, PNML_JSIM_E_NET_TOKENS);</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">		if (tokens != null) {</span>
+<span class="nc" id="L376">			Element name = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_CLASS_NAME);</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">			if (name != null) {</span>
+<span class="nc" id="L378">				model.setClassName(classKey, name.getTextContent());</span>
+			}
+
+<span class="nc" id="L381">			Element type = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_CLASS_TYPE);</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">			if (type != null) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">				if (PNML_JSIM_V_NET_TOKENS_CLASS_TYPE_OPEN.equals(type.getTextContent())) {</span>
+<span class="nc" id="L384">					model.setClassType(classKey, CLASS_TYPE_OPEN);</span>
+				} else {
+<span class="nc" id="L386">					model.setClassType(classKey, CLASS_TYPE_CLOSED);</span>
+				}
+			}
+
+<span class="nc" id="L390">			Element referenceNode = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_REFERENCE_NODE);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">			if (referenceNode != null) {</span>
+<span class="nc" id="L392">				referenceNodeName = referenceNode.getTextContent();</span>
+			}
+
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L396">				Element graphics = getFirstChildElementByTagName(tokens, PNML_JSIM_E_NET_TOKENS_GRAPHICS);</span>
+<span class="nc bnc" id="L397" title="All 2 branches missed.">				if (graphics != null) {</span>
+<span class="nc" id="L398">					Element color = getFirstChildElementByTagName(graphics, PNML_JSIM_E_NET_TOKENS_GRAPHICS_COLOR);</span>
+<span class="nc bnc" id="L399" title="All 2 branches missed.">					if (color != null) {</span>
+<span class="nc" id="L400">						String rgbaCode = color.getTextContent();</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">						if (rgbaCode.startsWith(&quot;#&quot;)) {</span>
+<span class="nc" id="L402">							rgbaCode = rgbaCode.substring(1, rgbaCode.length());</span>
+						}
+<span class="nc" id="L404">						int rgbaValue = (int) Long.parseLong(rgbaCode, 16);</span>
+<span class="nc" id="L405">						((JSimGraphModel) model).setClassColor(classKey, new Color(rgbaValue, true));</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L410">	}</span>
+
+	/**
+	 * Parses the specific parameters of a place from a root element
+	 * @param elem element that the parameters are parsed from
+	 * @param model data structure of the model
+	 * @param place search key for the place
+	 */
+	private static void parseSpecificPlaceParameters(Element elem, CommonModel model, Object place) {
+<span class="nc" id="L419">		Object classKey = model.getClassKeys().get(0);</span>
+<span class="nc" id="L420">		Element capacity = getFirstChildElementByTagName(elem, PNML_JSIM_E_PLACE_CAPACITY);</span>
+<span class="nc bnc" id="L421" title="All 2 branches missed.">		if (capacity != null) {</span>
+<span class="nc" id="L422">			model.setQueueCapacity(place, classKey, Integer.valueOf(capacity.getTextContent()));</span>
+		}
+<span class="nc" id="L424">	}</span>
+
+	/**
+	 * Parses the specific parameters of a transition from a root element
+	 * @param elem element that the parameters are parsed from
+	 * @param model data structure of the model
+	 * @param transition search key for the transition
+	 */
+	private static void parseSpecificTransitionParameters(Element elem, CommonModel model, Object transition) {
+<span class="nc" id="L433">		Element numberOfServers = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_NUMBER_OF_SERVERS);</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">		if (numberOfServers != null) {</span>
+<span class="nc" id="L435">			model.setNumberOfServers(transition, 0, Integer.valueOf(numberOfServers.getTextContent()));</span>
+		}
+
+<span class="nc" id="L438">		Element timingStrategy = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_TIMING_STRATEGY);</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">		if (timingStrategy != null) {</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">			if (PNML_JSIM_V_TRANSITION_TIMING_STRATEGY_TIMED.equals(timingStrategy.getTextContent())) {</span>
+<span class="nc" id="L441">				model.setFiringTimeDistribution(transition, 0, Defaults.getAsNewInstance(&quot;transitionTimedModeFiringTimeDistribution&quot;));</span>
+<span class="nc" id="L442">				model.setFiringPriority(transition, 0, Defaults.getAsInteger(&quot;transitionTimedModeFiringPriority&quot;));</span>
+<span class="nc" id="L443">				model.setFiringWeight(transition, 0, Defaults.getAsDouble(&quot;transitionTimedModeFiringWeight&quot;));</span>
+
+<span class="nc" id="L445">				Element firingTimeDistribution = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_TIME_DISTRIBUTION);</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">				if (firingTimeDistribution != null) {</span>
+<span class="nc" id="L447">					Element distribution = getFirstChildElementByTagName(firingTimeDistribution, PNML_JSIM_E_DISTRIBUTION);</span>
+<span class="nc" id="L448">					model.setFiringTimeDistribution(transition, 0, parseDistribution(distribution));</span>
+				}
+<span class="nc" id="L450">			} else {</span>
+<span class="nc" id="L451">				model.setFiringTimeDistribution(transition, 0, Defaults.getAsNewInstance(&quot;transitionImmediateModeFiringTimeDistribution&quot;));</span>
+<span class="nc" id="L452">				model.setFiringPriority(transition, 0, Defaults.getAsInteger(&quot;transitionImmediateModeFiringPriority&quot;));</span>
+<span class="nc" id="L453">				model.setFiringWeight(transition, 0, Defaults.getAsDouble(&quot;transitionImmediateModeFiringWeight&quot;));</span>
+
+<span class="nc" id="L455">				Element firingPriority = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_PRIORITY);</span>
+<span class="nc bnc" id="L456" title="All 2 branches missed.">				if (firingPriority != null) {</span>
+<span class="nc" id="L457">					model.setFiringPriority(transition, 0, Integer.valueOf(firingPriority.getTextContent()));</span>
+				}
+<span class="nc" id="L459">				Element firingWeight = getFirstChildElementByTagName(elem, PNML_JSIM_E_TRANSITION_FIRING_WEIGHT);</span>
+<span class="nc bnc" id="L460" title="All 2 branches missed.">				if (firingWeight != null) {</span>
+<span class="nc" id="L461">					model.setFiringWeight(transition, 0, Double.valueOf(firingWeight.getTextContent()));</span>
+				}
+			}
+		}
+<span class="nc" id="L465">	}</span>
+
+	/**
+	 * Parses the specific parameters of an arc from a root element
+	 * @param elem element that the parameters are parsed from
+	 */
+	private static void parseSpecificArcParameters(Element elem) {
+<span class="nc" id="L472">		Element type = getFirstChildElementByTagName(elem, PNML_JSIM_E_ARC_TYPE);</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">		if (type != null) {</span>
+<span class="nc" id="L474">			arcType = type.getTextContent();</span>
+		}
+<span class="nc" id="L476">	}</span>
+
+	/**
+	 * Parses an element representing a distribution
+	 * @param distribution element representing a distribution
+	 * @return data structure of the distribution
+	 */
+	private static Distribution parseDistribution(Element distribution) {
+<span class="nc" id="L484">		Element type = getFirstChildElementByTagName(distribution, PNML_JSIM_E_DISTRIBUTION_TYPE);</span>
+<span class="nc" id="L485">		Distribution d = distributionMap.get(type.getTextContent()).clone();</span>
+<span class="nc" id="L486">		List&lt;Element&gt; parameters = getChildElementsByTagName(distribution, PNML_JSIM_E_DISTRIBUTION_PARAMETER);</span>
+<span class="nc bnc" id="L487" title="All 2 branches missed.">		for (int i = 0; i &lt; parameters.size(); i++) {</span>
+<span class="nc" id="L488">			Element parameter = parameters.get(i);</span>
+<span class="nc" id="L489">			Element name = getFirstChildElementByTagName(parameter, PNML_JSIM_E_DISTRIBUTION_PARAMETER_NAME);</span>
+<span class="nc" id="L490">			Parameter p = d.getParameter(name.getTextContent());</span>
+<span class="nc" id="L491">			Element value = getFirstChildElementByTagName(parameter, PNML_JSIM_E_DISTRIBUTION_PARAMETER_VALUE);</span>
+<span class="nc" id="L492">			Element nestedDistribution = getFirstChildElementByTagName(value, PNML_JSIM_E_DISTRIBUTION);</span>
+<span class="nc" id="L493">			Element matrix = getFirstChildElementByTagName(value, PNML_JSIM_E_MATRIX);</span>
+<span class="nc bnc" id="L494" title="All 2 branches missed.">			if (nestedDistribution != null) {</span>
+<span class="nc" id="L495">				p.setValue(parseDistribution(nestedDistribution));</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">			} else if (matrix != null) {</span>
+<span class="nc" id="L497">				Object[][] m = null;</span>
+<span class="nc" id="L498">				List&lt;Element&gt; vectors = getChildElementsByTagName(matrix, PNML_JSIM_E_MATRIX_VECTOR);</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">				for (int j = 0; j &lt; vectors.size(); j++) {</span>
+<span class="nc bnc" id="L500" title="All 2 branches missed.">					if (j == 0) {</span>
+<span class="nc" id="L501">						m = new Object[vectors.size()][];</span>
+					}
+<span class="nc" id="L503">					Element vector = vectors.get(j);</span>
+<span class="nc" id="L504">					List&lt;Element&gt; entries = getChildElementsByTagName(vector, PNML_JSIM_E_MATRIX_VECTOR_ENTRY);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">					for (int k = 0; k &lt; entries.size(); k++) {</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">						if (k == 0) {</span>
+<span class="nc" id="L507">							m[j] = new Object[entries.size()];</span>
+						}
+<span class="nc" id="L509">						Element entry = entries.get(k);</span>
+<span class="nc" id="L510">						m[j][k] = p.parseValue(entry.getTextContent());</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">						if (m[j][k] == null) {</span>
+<span class="nc" id="L512">							m[j][k] = p.parseValue(&quot;0&quot;);</span>
+						}
+					}
+				}
+<span class="nc" id="L516">				p.setValue(m);</span>
+<span class="nc" id="L517">			} else {</span>
+<span class="nc" id="L518">				p.setValue(value.getTextContent());</span>
+			}
+		}
+<span class="nc" id="L521">		d.updateCM();</span>
+<span class="nc" id="L522">		return d;</span>
+	}
+
+	/**
+	 * Gets the first child element of an element by a tag name
+	 * @param elem element whose child nodes are traversed
+	 * @param name name of the tag that is of interest
+	 * @return first child element with the tag name
+	 */
+	private static Element getFirstChildElementByTagName(Element elem, String name) {
+<span class="nc" id="L532">		NodeList childNodes = elem.getChildNodes();</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">		for (int i = 0; i &lt; childNodes.getLength(); i++) {</span>
+<span class="nc" id="L534">			Node cn = childNodes.item(i);</span>
+<span class="nc bnc" id="L535" title="All 4 branches missed.">			if (cn.getNodeType() == Node.ELEMENT_NODE &amp;&amp; cn.getNodeName().equals(name)) {</span>
+<span class="nc" id="L536">				return (Element) cn;</span>
+			}
+		}
+<span class="nc" id="L539">		return null;</span>
+	}
+
+	/**
+	 * Gets the child elements of an element by a tag name
+	 * @param elem element whose child nodes are traversed
+	 * @param name name of the tag that is of interest
+	 * @return child elements with the tag name
+	 */
+	private static List&lt;Element&gt; getChildElementsByTagName(Element elem, String name) {
+<span class="nc" id="L549">		List&lt;Element&gt; childElems = new ArrayList&lt;Element&gt;();</span>
+<span class="nc" id="L550">		NodeList childNodes = elem.getChildNodes();</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">		for (int i = 0; i &lt; childNodes.getLength(); i++) {</span>
+<span class="nc" id="L552">			Node cn = childNodes.item(i);</span>
+<span class="nc bnc" id="L553" title="All 4 branches missed.">			if (cn.getNodeType() == Node.ELEMENT_NODE &amp;&amp; cn.getNodeName().equals(name)) {</span>
+<span class="nc" id="L554">				childElems.add((Element) cn);</span>
+			}
+		}
+<span class="nc" id="L557">		return childElems;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

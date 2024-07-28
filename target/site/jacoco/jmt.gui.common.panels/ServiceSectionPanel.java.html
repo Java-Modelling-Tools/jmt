@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServiceSectionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">ServiceSectionPanel.java</span></div><h1>ServiceSectionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.ServerType;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.editors.DistributionsEditor;
+import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.common.editors.LDStrategyEditor;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.jsimgraph.DialogFactory;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 30-giu-2005
+ * Time: 14.01.23
+ * Modified by Bertoli Marco 7-oct-2005  --&gt; Added load Dependent
+ *                           9-jan-2006  --&gt; ComboBoxCellEditor
+ */
+public class ServiceSectionPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	protected Object stationKey;
+	protected StationDefinition data;
+	protected ClassDefinition classData;
+
+	private ServiceTable serviceTable;
+	private JSpinner serverNumSpinner;
+	private JButton serverFeatureButton;
+	private ServerFeaturePanel serverFeaturePanel;
+
+	private WarningScrollTable ServiceSectionTable;
+	private JTabbedPane heterogeneousServersTabbedPane;
+
+	/** Used to display classes with icon */
+	protected ImagedComboBoxCellEditorFactory classEditor;
+
+	//editing of arrival time distribution
+<span class="nc" id="L80">	protected AbstractAction editDistribution = new AbstractAction(&quot;Edit&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L85">			putValue(Action.SHORT_DESCRIPTION, &quot;Edits Service Time Distribution&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			// ---- Bertoli Marco ----
+			JTable table;
+<span class="nc" id="L91">			Object serverTypeKey = null;</span>
+<span class="nc bnc" id="L92" title="All 4 branches missed.">			if (data.getHeterogeneousServersEnabled(stationKey) != null &amp;&amp; data.getHeterogeneousServersEnabled(stationKey)) {</span>
+<span class="nc" id="L93">				table = ((WarningScrollTable) heterogeneousServersTabbedPane.getSelectedComponent()).table;</span>
+<span class="nc" id="L94">				serverTypeKey = ((ServiceTable) table).serverTypeKey;</span>
+			} else {
+<span class="nc" id="L96">				table = serviceTable;</span>
+			}
+<span class="nc" id="L98">			int index = table.getSelectedRow();</span>
+<span class="nc bnc" id="L99" title="All 4 branches missed.">			if (index &gt;= 0 &amp;&amp; index &lt; table.getRowCount()) {</span>
+<span class="nc" id="L100">				Object key = classData.getClassKeys().elementAt(index);</span>
+<span class="nc" id="L101">				Object service = data.getServiceTimeDistribution(stationKey, key, serverTypeKey);</span>
+				// If it is a Distribution, shows Distribution Editor
+<span class="nc bnc" id="L103" title="All 2 branches missed.">				if (service instanceof Distribution) {</span>
+<span class="nc" id="L104">					DistributionsEditor editor = DistributionsEditor.getInstanceWithoutBatch(ServiceSectionPanel.this.getParent(), (Distribution) service);</span>
+					// Sets editor window title
+<span class="nc" id="L106">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(key) + &quot; Service Time Distribution...&quot;);</span>
+					// Shows editor window
+<span class="nc" id="L108">					editor.show();</span>
+					// Sets new Distribution to selected class
+<span class="nc" id="L110">					data.setServiceTimeDistribution(stationKey, key, serverTypeKey, editor.getResult());</span>
+
+					// Updates table view. This is needed as Distribution is not contained
+					// into edited cell (but in its left one)
+<span class="nc" id="L114">					table.repaint();</span>
+<span class="nc" id="L115">				}</span>
+				// Otherwise shows LDStrategy Editor
+				else {
+<span class="nc" id="L118">					LDStrategyEditor editor = LDStrategyEditor.getInstance(ServiceSectionPanel.this.getParent(), (LDStrategy) service);</span>
+					// Sets editor window title
+<span class="nc" id="L120">					editor.setTitle(&quot;Editing &quot; + classData.getClassName(key) + &quot; Load Dependent Service Strategy...&quot;);</span>
+					// Shows editor window
+<span class="nc" id="L122">					editor.show();</span>
+<span class="nc" id="L123">					table.repaint();</span>
+				}
+			}
+			// ---- end ----
+<span class="nc" id="L127">		}</span>
+
+	};
+
+<span class="nc" id="L131">	protected AbstractAction editFeatures = new AbstractAction(&quot;Edit&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L136">			putValue(Action.SHORT_DESCRIPTION, &quot;Edits Server Configuration&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L140">			DialogFactory factory = new DialogFactory(null);</span>
+<span class="nc" id="L141">			factory.getDialog(serverFeaturePanel, &quot;Editing Server Configuration&quot;,</span>
+					MAX_GUI_WIDTH_SERVER_FEATURES, MAX_GUI_HEIGHT_SERVER_FEATURES, false, &quot;&quot;, &quot;&quot;);
+<span class="nc" id="L143">			gotFocus();</span>
+<span class="nc" id="L144">		}</span>
+
+	};
+
+<span class="nc" id="L148">	public ServiceSectionPanel(StationDefinition sd, ClassDefinition cd, Object stationKey) {</span>
+<span class="nc" id="L149">		classEditor = new ImagedComboBoxCellEditorFactory(cd);</span>
+<span class="nc" id="L150">		setData(sd, cd, stationKey);</span>
+<span class="nc" id="L151">	}</span>
+
+	private void initComponents() {
+		//building mainPanel
+<span class="nc" id="L155">		this.setLayout(new BorderLayout(5, 5));</span>
+<span class="nc" id="L156">		this.setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+
+		// server configuration panel
+<span class="nc" id="L159">		JPanel serverConfigPanel = new JPanel();</span>
+<span class="nc" id="L160">		serverConfigPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Server Configuration&quot;));</span>
+<span class="nc" id="L161">		serverConfigPanel.add(new JLabel(&quot;Number of Servers:&quot;));</span>
+<span class="nc" id="L162">		serverConfigPanel.add(serverNumSpinner);</span>
+<span class="nc" id="L163">		serverConfigPanel.add(new JLabel(&quot;         Advanced Features:&quot;));</span>
+<span class="nc" id="L164">		serverConfigPanel.add(serverFeatureButton);</span>
+<span class="nc" id="L165">		this.add(serverConfigPanel, BorderLayout.NORTH);</span>
+
+		// service time distributions panel
+<span class="nc" id="L168">		ServiceSectionTable = new WarningScrollTable(serviceTable, WARNING_CLASS);</span>
+<span class="nc" id="L169">		ServiceSectionTable.setBorder(new TitledBorder(new EtchedBorder(), &quot;Service Time Distributions&quot;));</span>
+<span class="nc" id="L170">		this.add(ServiceSectionTable, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L172">		heterogeneousServersTabbedPane = new JTabbedPane();</span>
+<span class="nc" id="L173">		heterogeneousServersTabbedPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Service Time Distributions&quot;));</span>
+<span class="nc" id="L174">	}</span>
+
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey) {
+<span class="nc" id="L177">		this.removeAll();</span>
+<span class="nc" id="L178">		this.stationKey = stationKey;</span>
+<span class="nc" id="L179">		data = sd;</span>
+<span class="nc" id="L180">		classData = cd;</span>
+<span class="nc" id="L181">		serviceTable = new ServiceTable();</span>
+<span class="nc" id="L182">		serverNumSpinner = new JSpinner();</span>
+<span class="nc" id="L183">		serverNumSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L184">		serverFeatureButton = new JButton(editFeatures);</span>
+<span class="nc" id="L185">		serverFeatureButton.setPreferredSize(DIM_BUTTON_XS);</span>
+		//if (data.getStationType(stationKey).equals(STATION_TYPE_SERVER)) {
+<span class="nc" id="L187">		serverFeaturePanel = new ServerFeaturePanel();</span>
+<span class="nc" id="L188">		serverFeaturePanel.setData(data, classData, stationKey);</span>
+		//}
+
+<span class="nc" id="L191">		classEditor.setData(cd);</span>
+<span class="nc" id="L192">		initComponents();</span>
+<span class="nc" id="L193">		updateServerPreferences();</span>
+<span class="nc" id="L194">		addDataManagers();</span>
+<span class="nc" id="L195">	}</span>
+
+	private void updateServerPreferences() {
+<span class="nc" id="L198">		String stationType = data.getStationType(stationKey);</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">		if (stationType.equals(STATION_TYPE_DELAY)) {</span>
+<span class="nc" id="L200">			serverNumSpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L201">			serverNumSpinner.setEnabled(false);</span>
+			//serverFeatureButton.setEnabled(false);
+		} else {
+<span class="nc" id="L204">			serverNumSpinner.setValue(data.getStationNumberOfServers(stationKey));</span>
+			//serverNumSpinner.setEnabled(true);
+<span class="nc" id="L206">			String queuePolicy = data.getStationQueueStrategy(stationKey);</span>
+			//if (queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE)
+			//		|| queuePolicy.equals(STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY)) {
+<span class="nc" id="L209">			serverFeatureButton.setEnabled(true);</span>
+			//} else {
+			//	serverFeatureButton.setEnabled(false);
+			//}
+		}
+<span class="nc" id="L214">	}</span>
+
+	private void addDataManagers() {
+<span class="nc" id="L217">		serverNumSpinner.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L219">				lostFocus();</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">				if (serverNumSpinner.getValue() instanceof Integer) {</span>
+<span class="nc" id="L221">					Integer serverNum = (Integer) serverNumSpinner.getValue();</span>
+<span class="nc bnc" id="L222" title="All 4 branches missed.">					if (serverNum.intValue() &lt; 1 &amp;&amp; serverNumSpinner.isEnabled()) {</span>
+<span class="nc" id="L223">						serverNum = new Integer(1);</span>
+<span class="nc" id="L224">						serverNumSpinner.setValue(serverNum);</span>
+					}
+<span class="nc" id="L226">					data.setStationNumberOfServers(stationKey, serverNum);</span>
+<span class="nc" id="L227">					data.updateNumOfServers(stationKey,serverNum);</span>
+				}
+<span class="nc" id="L229">			}</span>
+		});
+<span class="nc" id="L231">	}</span>
+
+	@Override
+	public void repaint() {
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		if (serviceTable != null) {</span>
+<span class="nc" id="L236">			serviceTable.tableChanged(new TableModelEvent(serviceTable.getModel()));</span>
+		}
+<span class="nc" id="L238">		super.repaint();</span>
+<span class="nc" id="L239">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L246">		return &quot;Service Section&quot;;</span>
+	}
+
+	/**
+	 * called by the Wizard before when switching to another panel
+	 */
+	@Override
+	public void lostFocus() {
+		// Aborts editing of table
+<span class="nc" id="L255">		TableCellEditor editor = serviceTable.getCellEditor();</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L257">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L259">	}</span>
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L266">		classEditor.clearCache();</span>
+<span class="nc" id="L267">		updateServerPreferences();</span>
+<span class="nc" id="L268">		Boolean heterogeneousServersEnabled = data.getHeterogeneousServersEnabled(stationKey);</span>
+<span class="nc bnc" id="L269" title="All 4 branches missed.">		if (heterogeneousServersEnabled != null &amp;&amp; heterogeneousServersEnabled) {</span>
+<span class="nc" id="L270">			heterogeneousServersTabbedPane.removeAll();</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">			for (ServerType serverType : data.getServerTypes(stationKey)) {</span>
+<span class="nc" id="L272">				heterogeneousServersTabbedPane.add(serverType.getName(), new WarningScrollTable(new ServiceTable(serverType.getServerKey()), WARNING_CLASS));</span>
+<span class="nc" id="L273">			}</span>
+<span class="nc" id="L274">			this.remove(ServiceSectionTable);</span>
+<span class="nc" id="L275">			this.add(heterogeneousServersTabbedPane, BorderLayout.CENTER);</span>
+		} else {
+<span class="nc" id="L277">			this.remove(heterogeneousServersTabbedPane);</span>
+<span class="nc" id="L278">			this.add(ServiceSectionTable, BorderLayout.CENTER);</span>
+		}
+<span class="nc" id="L280">		this.revalidate();</span>
+<span class="nc" id="L281">		this.repaint();</span>
+<span class="nc" id="L282">	}</span>
+
+	protected class ServiceTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * This field is used to initialize elements shown on Service type selection - Bertoli Marco
+		 */
+<span class="nc" id="L291">		protected Object[] serviceType = new Object[] { SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO, SERVICE_DISABLED };</span>
+
+<span class="nc" id="L293">		JButton editButton = new JButton() {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			{
+<span class="nc" id="L298">				setText(&quot;Edit&quot;);</span>
+			}
+		};
+
+<span class="nc" id="L302">		int[] columnSizes = new int[] { 80, 80, 150, 30 };</span>
+
+		Object serverTypeKey;
+
+		public ServiceTable() {
+<span class="nc" id="L307">			this(null);</span>
+<span class="nc" id="L308">		}</span>
+
+<span class="nc" id="L310">		public ServiceTable(Object serverTypeKey) {</span>
+<span class="nc" id="L311">			this.serverTypeKey = serverTypeKey;</span>
+<span class="nc" id="L312">			setModel(new ServiceTableModel(serverTypeKey));</span>
+<span class="nc" id="L313">			sizeColumns();</span>
+<span class="nc" id="L314">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L315">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L316">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L317">		}</span>
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">			if (column == 0) {</span>
+<span class="nc" id="L322">				return classEditor.getRenderer();</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">			} else if (column == 1) {</span>
+<span class="nc" id="L324">				return ComboBoxCellEditor.getRendererInstance();</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">			} else if (column == 3) {</span>
+<span class="nc" id="L326">				return new DisabledButtonCellRenderer(editButton);</span>
+			} else {
+<span class="nc" id="L328">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L334" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L335">				return ComboBoxCellEditor.getEditorInstance(serviceType);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			} else if (column == 3) {</span>
+<span class="nc" id="L337">				return new ButtonCellEditor(new JButton(editDistribution));</span>
+			} else {
+<span class="nc" id="L339">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L344" title="All 4 branches missed.">			for (int i = 0; i &lt; columnSizes.length &amp;&amp; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L345">				this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);</span>
+			}
+<span class="nc" id="L347">		}</span>
+
+	}
+
+	protected class ServiceTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L354">		private String[] columnNames = new String[] { &quot;Class&quot;, &quot;Strategy&quot;, &quot;Service Time Distribution&quot;,&quot;&quot; };</span>
+<span class="nc" id="L355">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, String.class, String.class, Object.class };</span>
+		private Object serverTypeKey;
+
+<span class="nc" id="L358">		public ServiceTableModel(Object serverTypeKey) {</span>
+<span class="nc" id="L359">			this.serverTypeKey = serverTypeKey;</span>
+<span class="nc" id="L360">		}</span>
+
+		public int getRowCount() {
+<span class="nc" id="L363">			return classData.getClassKeys().size();</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L367">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L372">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L377">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L382">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L384">				return false;</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">			} else if (columnIndex == 2) {</span>
+<span class="nc" id="L386">				return false;</span>
+<span class="nc bnc" id="L387" title="All 4 branches missed.">			} else if (columnIndex == 3 &amp;&amp; data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof ZeroStrategy) {</span>
+<span class="nc" id="L388">				return false;</span>
+<span class="nc bnc" id="L389" title="All 4 branches missed.">			} else if (columnIndex == 3 &amp;&amp; data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof DisabledStrategy) {</span>
+<span class="nc" id="L390">				return false;</span>
+			} else {
+<span class="nc" id="L392">				return true;</span>
+			}
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L397">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L398" title="All 4 branches missed.">			switch (columnIndex) {</span>
+				case (0):
+<span class="nc" id="L400">					return classKey;</span>
+				case (1):
+					// Checks if current service section is load dependent or independent
+<span class="nc bnc" id="L403" title="All 2 branches missed.">					if (data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof LDStrategy) {</span>
+<span class="nc" id="L404">						return SERVICE_LOAD_DEPENDENT;</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">					} else if (data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof ZeroStrategy) {</span>
+<span class="nc" id="L406">						return SERVICE_ZERO;</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">					} else if (data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof DisabledStrategy) {</span>
+<span class="nc" id="L408">						return SERVICE_DISABLED;</span>
+					} else {
+<span class="nc" id="L410">						return SERVICE_LOAD_INDEPENDENT;</span>
+					}
+				case (2):
+<span class="nc" id="L413">					return data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey);</span>
+			}
+<span class="nc" id="L415">			return null;</span>
+		}
+
+		/**Puts edited values to the underlying data structure for model implementation*/
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L421">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">			switch (columnIndex) {</span>
+				// Load dependency
+				case (1):
+<span class="nc bnc" id="L425" title="All 2 branches missed.">					if (((String) aValue).equals(SERVICE_LOAD_DEPENDENT)) {</span>
+						// Puts a Load Dependent Service Strategy only if previously it was different
+<span class="nc bnc" id="L427" title="All 2 branches missed.">						if (!(data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof LDStrategy)) {</span>
+<span class="nc" id="L428">							data.setServiceTimeDistribution(stationKey, classKey, serverTypeKey, new LDStrategy());</span>
+						}
+<span class="nc bnc" id="L430" title="All 2 branches missed.">					} else if (((String) aValue).equals(SERVICE_ZERO)) {</span>
+						// Puts a Zero Service Time Strategy only if previously it was different
+<span class="nc bnc" id="L432" title="All 2 branches missed.">						if (!(data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof ZeroStrategy)) {</span>
+<span class="nc" id="L433">							data.setServiceTimeDistribution(stationKey, classKey, serverTypeKey, new ZeroStrategy());</span>
+						}
+<span class="nc bnc" id="L435" title="All 2 branches missed.">					} else if (((String) aValue).equals(SERVICE_DISABLED)) {</span>
+						// Puts a Disabled Service Time Strategy only if previously it was different
+<span class="nc bnc" id="L437" title="All 2 branches missed.">						if (!(data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof DisabledStrategy)) {</span>
+<span class="nc" id="L438">							data.setServiceTimeDistribution(stationKey, classKey, serverTypeKey, new DisabledStrategy());</span>
+						}
+					} else {
+						// Puts the default service strategy only if previously it was different
+<span class="nc bnc" id="L442" title="All 2 branches missed.">						if (!(data.getServiceTimeDistribution(stationKey, classKey, serverTypeKey) instanceof Distribution)) {</span>
+<span class="nc" id="L443">							Object distribution = Defaults.getAsNewInstance(&quot;stationServiceStrategy&quot;);</span>
+<span class="nc" id="L444">							data.setServiceTimeDistribution(stationKey, classKey, serverTypeKey, distribution);</span>
+						}
+					}
+<span class="nc" id="L447">					repaint();</span>
+			}
+<span class="nc" id="L449">		}</span>
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+<span class="nc" id="L459">		public DisabledButtonCellRenderer(JButton jbutt) {</span>
+<span class="nc" id="L460">			super(jbutt);</span>
+<span class="nc" id="L461">			button = jbutt;</span>
+<span class="nc" id="L462">		}</span>
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L466" title="All 2 branches missed.">			if (table.isCellEditable(row, column)) {</span>
+<span class="nc" id="L467">				button.setEnabled(true);</span>
+			} else {
+<span class="nc" id="L469">				button.setEnabled(false);</span>
+			}
+<span class="nc" id="L471">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

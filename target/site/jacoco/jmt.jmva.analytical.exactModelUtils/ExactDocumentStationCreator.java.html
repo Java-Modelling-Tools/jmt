@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExactDocumentStationCreator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.exactModelUtils</a> &gt; <span class="el_source">ExactDocumentStationCreator.java</span></div><h1>ExactDocumentStationCreator.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.exactModelUtils;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import static jmt.jmva.analytical.exactModelUtils.ExactDocumentConstants.*;
+import static jmt.jmva.analytical.exactModelUtils.ExactDocumentConstants.DOC_STATION_CUSTOMER_CLASS;
+
+<span class="nc" id="L13">public class ExactDocumentStationCreator {</span>
+
+    public static void addStations(ExactModel model, Document root, Element parametersElement) {
+<span class="nc" id="L16">        int stations = model.getStations();</span>
+<span class="nc" id="L17">        Element stationsElement = root.createElement(&quot;stations&quot;);</span>
+<span class="nc" id="L18">        parametersElement.appendChild(stationsElement);</span>
+<span class="nc" id="L19">        stationsElement.setAttribute(DOC_STATION_NUMBER, Integer.toString(stations));</span>
+<span class="nc bnc" id="L20" title="All 2 branches missed.">        for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L21">            stationsElement.appendChild(makeStationElement(model, root, i));</span>
+        }
+<span class="nc" id="L23">    }</span>
+
+    private static Element makeStationElement(ExactModel model, Document root, int stationNum) {
+        Element station_element;
+<span class="nc" id="L27">        int[] stationTypes = model.getStationTypes();</span>
+<span class="nc bnc" id="L28" title="All 6 branches missed.">        switch (stationTypes[stationNum]) {</span>
+
+        case ExactConstants.STATION_LI:
+<span class="nc" id="L31">            station_element = root.createElement(DOC_STATION_TYPE_LI);</span>
+<span class="nc" id="L32">            addServiceTimesAndVisitsNotLDWithNumServers(model, root, stationNum, station_element);</span>
+
+<span class="nc" id="L34">            break;</span>
+        case ExactConstants.STATION_DELAY:
+<span class="nc" id="L36">            station_element = root.createElement(DOC_STATION_TYPE_DELAY);</span>
+<span class="nc" id="L37">            addServiceTimesAndVisitsNotLD(model, root, stationNum, station_element);</span>
+
+<span class="nc" id="L39">            break;</span>
+        case ExactConstants.STATION_LD:
+<span class="nc" id="L41">            station_element = root.createElement(DOC_STATION_TYPE_LD);</span>
+<span class="nc" id="L42">            addServiceTimesAndVisitsLD(model, root, station_element, stationNum);</span>
+
+<span class="nc" id="L44">            break;</span>
+        case ExactConstants.STATION_PRS:
+<span class="nc" id="L46">            station_element = root.createElement(DOC_STATION_TYPE_PRS);</span>
+<span class="nc" id="L47">            addServiceTimesAndVisitsNotLDWithNumServers(model, root, stationNum, station_element);</span>
+
+<span class="nc" id="L49">            break;</span>
+        case ExactConstants.STATION_HOL:
+<span class="nc" id="L51">            station_element = root.createElement(DOC_STATION_TYPE_HOL);</span>
+<span class="nc" id="L52">            addServiceTimesAndVisitsNotLDWithNumServers(model, root, stationNum, station_element);</span>
+
+<span class="nc" id="L54">            break;</span>
+        default:
+<span class="nc" id="L56">            station_element = null;</span>
+        }//end switch
+<span class="nc" id="L58">        return station_element;</span>
+    }
+
+    private static void addServiceTimesAndVisitsLD(ExactModel model, Document root, Element station_element, int stationNum) {
+<span class="nc" id="L62">        int classes = model.getClasses();</span>
+<span class="nc" id="L63">        String[] stationNames = model.getStationNames();</span>
+<span class="nc" id="L64">        String[] classNames = model.getClassNames();</span>
+<span class="nc" id="L65">        int[] stationServers = model.getStationServers();</span>
+<span class="nc" id="L66">        double[][][] serviceTimes = model.getServiceTimes();</span>
+<span class="nc" id="L67">        double[][] visits = model.getVisits();</span>
+
+<span class="nc" id="L69">        station_element.setAttribute(DOC_STATION_NAME, stationNames[stationNum]);</span>
+<span class="nc" id="L70">        station_element.setAttribute(DOC_STATION_SERVERS, String.valueOf(stationServers[stationNum]));</span>
+
+        /* create the section for service times */
+<span class="nc" id="L73">        Node servicetimes_element = station_element.appendChild(root.createElement(DOC_STATION_SERVICE_TIMES));</span>
+<span class="nc" id="L74">        station_element.appendChild(servicetimes_element);</span>
+
+        /* create the section for visits */
+<span class="nc" id="L77">        Node visits_element = station_element.appendChild(root.createElement(DOC_STATION_VISITS));</span>
+<span class="nc" id="L78">        station_element.appendChild(visits_element);</span>
+
+        /* for each customer class */
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L82">            String class_name = classNames[j];</span>
+            /* set service times, one for each population (values are CSV formatted) */
+<span class="nc" id="L84">            Element st_element = root.createElement(DOC_STATION_SERVICE_TIMES);</span>
+<span class="nc" id="L85">            st_element.setAttribute(DOC_STATION_CUSTOMER_CLASS, class_name);</span>
+
+<span class="nc" id="L87">            String serv_t = ArrayUtils.toCSV(serviceTimes[stationNum][j]);</span>
+
+<span class="nc" id="L89">            st_element.appendChild(root.createTextNode(serv_t));</span>
+
+<span class="nc" id="L91">            servicetimes_element.appendChild(st_element);</span>
+            /* set visit */
+<span class="nc" id="L93">            Element visit_element = root.createElement(DOC_STATION_VISIT);</span>
+<span class="nc" id="L94">            visit_element.setAttribute(DOC_STATION_CUSTOMER_CLASS, class_name);</span>
+<span class="nc" id="L95">            visit_element.appendChild(root.createTextNode(Double.toString(visits[stationNum][j])));</span>
+<span class="nc" id="L96">            visits_element.appendChild(visit_element);</span>
+        }
+<span class="nc" id="L98">    }</span>
+
+    private static void addServiceTimesAndVisitsNotLDWithNumServers(ExactModel model, Document root, int stationNum,
+                                                                    Element station_element) {
+<span class="nc" id="L102">        int[] stationServers = model.getStationServers();</span>
+<span class="nc" id="L103">        station_element.setAttribute(DOC_STATION_SERVERS, String.valueOf(stationServers[stationNum]));</span>
+<span class="nc" id="L104">        addServiceTimesAndVisitsNotLD(model, root, stationNum, station_element);</span>
+<span class="nc" id="L105">    }</span>
+
+    /**
+     * Sets one value for service times and visits for each class
+     * not one value per amount of customers
+     */
+    private static void addServiceTimesAndVisitsNotLD(ExactModel model, Document root, int stationNum,
+                                                      Element station_element) {
+<span class="nc" id="L113">        String[] stationNames = model.getStationNames();</span>
+<span class="nc" id="L114">        station_element.setAttribute(DOC_STATION_NAME, stationNames[stationNum]);</span>
+
+        /* create the section for service times */
+<span class="nc" id="L117">        Node servicetimes_node = station_element.appendChild(root.createElement(DOC_STATION_SERVICE_TIMES));</span>
+<span class="nc" id="L118">        station_element.appendChild(servicetimes_node);</span>
+
+        /* create the section for visits */
+<span class="nc" id="L121">        Node visits_node = station_element.appendChild(root.createElement(DOC_STATION_VISITS));</span>
+<span class="nc" id="L122">        station_element.appendChild(visits_node);</span>
+
+        /* for each customer class */
+<span class="nc" id="L125">        setServiceTimesAndVisitsForEachClass(model, root, stationNum, servicetimes_node, visits_node);</span>
+<span class="nc" id="L126">    }</span>
+
+    private static void setServiceTimesAndVisitsForEachClass(ExactModel model, Document root, int stationNum,
+                                                             Node servicetimes_node, Node visits_node) {
+<span class="nc" id="L130">        int classes = model.getClasses();</span>
+<span class="nc" id="L131">        String[] classNames = model.getClassNames();</span>
+<span class="nc" id="L132">        double[][][] serviceTimes = model.getServiceTimes();</span>
+<span class="nc" id="L133">        double[][] visits = model.getVisits();</span>
+
+        /* for each customer class */
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L137">            String class_name = classNames[j];</span>
+            /* set service time */
+<span class="nc" id="L139">            Element st_element = root.createElement(DOC_STATION_SERVICE_TIME);</span>
+<span class="nc" id="L140">            st_element.setAttribute(DOC_STATION_CUSTOMER_CLASS, class_name);</span>
+<span class="nc" id="L141">            st_element.appendChild(root.createTextNode(Double.toString(serviceTimes[stationNum][j][0])));</span>
+<span class="nc" id="L142">            servicetimes_node.appendChild(st_element);</span>
+            /* set visit */
+<span class="nc" id="L144">            Element visit_element = root.createElement(DOC_STATION_VISIT);</span>
+<span class="nc" id="L145">            visit_element.setAttribute(DOC_STATION_CUSTOMER_CLASS, class_name);</span>
+<span class="nc" id="L146">            visit_element.appendChild(root.createTextNode(Double.toString(visits[stationNum][j])));</span>
+<span class="nc" id="L147">            visits_node.appendChild(visit_element);</span>
+        }
+<span class="nc" id="L149">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

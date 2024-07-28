@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UnivariateStatistics.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat</a> &gt; <span class="el_source">UnivariateStatistics.java</span></div><h1>UnivariateStatistics.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.engine.jwat;
+
+/**
+ * Description: 
+ * @author Brambilla Davide Matr 667986, Fumagalli Claudio 667971
+ * Class created 1-ago-2006 10.01.22 Darksch
+ * 
+ */
+public class UnivariateStatistics {
+	// Mean value
+<span class="nc" id="L28">	private double mean = 0;</span>
+	// Variance and Standard Deviation
+<span class="nc" id="L30">	private double variance = 0;</span>
+<span class="nc" id="L31">	private double devStd = 0;</span>
+<span class="nc" id="L32">	private double minimum = 0;</span>
+<span class="nc" id="L33">	private double maximum = 0;</span>
+	// Skewness
+<span class="nc" id="L35">	private double skewness = 0;</span>
+	// Kurtosis
+<span class="nc" id="L37">	private double kurtosis = 0;</span>
+	// Index of quantili
+<span class="nc" id="L39">	private int[] quantili = new int[99];</span>
+	// Observations list
+<span class="nc" id="L41">	private Observation[] list = null;</span>
+	private int nVar;
+
+	/**
+	 * Constructor: calculates univariate statistics using list observation array for the nVar-th variable
+	 * @param list list of observation sorted by nVar-th variable
+	 * @param nVar variable used to calculate univariate statistics 
+	 */
+<span class="nc" id="L49">	public UnivariateStatistics(Observation[] list, int nVar) {</span>
+<span class="nc" id="L50">		this.list = list;</span>
+<span class="nc" id="L51">		this.nVar = nVar;</span>
+<span class="nc" id="L52">		calculateStatistics();</span>
+<span class="nc" id="L53">	}</span>
+
+	/**
+	 * Returns Deviation Standard value
+	 * @return Deviation Standard value
+	 */
+	public double getDevStd() {
+<span class="nc" id="L60">		return devStd;</span>
+	}
+
+	/**
+	 * Return Kurtosis value
+	 * @return Kurtosis value
+	 */
+	public double getKurtosis() {
+<span class="nc" id="L68">		return kurtosis;</span>
+	}
+
+	/**
+	 * Returns Mean value
+	 * @return Mean value
+	 */
+	public double getMean() {
+<span class="nc" id="L76">		return mean;</span>
+	}
+
+	/**
+	 * Returns Quantili list
+	 * @return Quantili list
+	 */
+	public int[] getQuantili() {
+<span class="nc" id="L84">		return quantili;</span>
+	}
+
+	/**
+	 * Returns Skewness value
+	 * @return Skewness value
+	 */
+	public double getSkewness() {
+<span class="nc" id="L92">		return skewness;</span>
+	}
+
+	/**
+	 * Returns Variance value
+	 * @return Variance value
+	 */
+	public double getVariance() {
+<span class="nc" id="L100">		return variance;</span>
+	}
+
+	//TODO Verify this method
+	/**
+	 * Returns Median Value
+	 * @return Median Value
+	 */
+	public double getMedian() {
+<span class="nc" id="L109">		return list[quantili[49]].getIndex(nVar);</span>
+	}
+
+	/**
+	 * Returns Maximum value
+	 * @return Maximum value
+	 */
+	public double getMaxValue() {
+<span class="nc" id="L117">		return maximum;</span>
+	}
+
+	/**
+	 * REturns number of observations
+	 * @return number of observations
+	 */
+	public int getNumObs() {
+<span class="nc" id="L125">		return list.length;</span>
+	}
+
+	/**
+	 * Returns Minimum value
+	 * @return Minimum value
+	 */
+	public double getMinValue() {
+<span class="nc" id="L133">		return minimum;</span>
+	}
+
+	/**
+	 * Returns Range value
+	 * @return Range value
+	 */
+	public double getRangeValue() {
+<span class="nc" id="L141">		return getMaxValue() - getMinValue();</span>
+	}
+
+	/**
+	 * Restituisce la dimensione dell'intervallo per i grafici
+	 * @return
+	 */
+	public double getDimInt1000() {
+<span class="nc" id="L149">		return getRangeValue() / 1000;</span>
+	}
+
+	/**
+	 * Calculates univariate statistics 
+	 */
+	private void calculateStatistics() {
+		// Calculate mean and variance and quantili and interval
+<span class="nc" id="L157">		int qIndex = 1;</span>
+<span class="nc" id="L158">		int i = 0;</span>
+<span class="nc" id="L159">		minimum = list[0].getIndex(nVar);</span>
+<span class="nc" id="L160">		maximum = list[list.length - 1].getIndex(nVar);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">		for (i = 0; i &lt; list.length; i++) {</span>
+<span class="nc" id="L162">			mean += list[i].getIndex(nVar);</span>
+<span class="nc" id="L163">			variance += Math.pow(list[i].getIndex(nVar), 2);</span>
+			//Quantile index
+<span class="nc bnc" id="L165" title="All 2 branches missed.">			if (i == (qIndex * list.length / 100)) {</span>
+<span class="nc" id="L166">				quantili[qIndex - 1] = i;</span>
+<span class="nc" id="L167">				qIndex++;</span>
+			}
+		}
+		/*** MEAN ***/
+<span class="nc" id="L171">		mean = mean / list.length;</span>
+		/*** VARIANCE ***/
+<span class="nc" id="L173">		variance = (variance - (Math.pow(mean, 2) * list.length)) / (list.length - 1);</span>
+		/*** STANDARD DEVIATION ***/
+<span class="nc" id="L175">		devStd = Math.sqrt(variance);</span>
+		// Calculates skewness and kurtosis
+<span class="nc" id="L177">		double mu4 = 0;</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		for (i = 0; i &lt; list.length; i++) {</span>
+<span class="nc" id="L179">			skewness += Math.pow((list[i].getIndex(nVar) - mean), 3);</span>
+<span class="nc" id="L180">			mu4 += Math.pow((list[i].getIndex(nVar) - mean), 4);</span>
+		}
+		/*** SKEWNESS ***/
+<span class="nc" id="L183">		skewness *= list.length;</span>
+<span class="nc" id="L184">		skewness /= (list.length - 1);</span>
+<span class="nc" id="L185">		skewness /= (list.length - 2);</span>
+<span class="nc" id="L186">		skewness /= Math.sqrt(Math.pow(variance, 3));</span>
+		/*** KURTOSIS ***/
+<span class="nc" id="L188">		kurtosis = (float) (mu4 * (list.length - 1));</span>
+<span class="nc" id="L189">		kurtosis /= Math.pow(list.length * variance, 2);</span>
+<span class="nc" id="L190">		kurtosis -= 3;</span>
+<span class="nc" id="L191">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

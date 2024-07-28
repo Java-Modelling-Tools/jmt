@@ -1,0 +1,853 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PAResultsModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions</a> &gt; <span class="el_source">PAResultsModel.java</span></div><h1>PAResultsModel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.common.definitions;
+
+import java.util.HashMap;
+import java.util.Vector;
+
+import jmt.framework.gui.graph.MeasureValue;
+import jmt.gui.common.xml.XMLConstantNames;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: francesco
+ * Date: 22-feb-2006
+ * Time: 12.17.58
+ * To change this template use File | Settings | File Templates.
+ * 
+ * Modified by Ashanka (May 2010): 
+ * Patch: Multi-Sink Perf. Index 
+ * Description: Added new Performance index for capturing 
+ * 				1. global response time (ResponseTime per Sink)
+ *              2. global throughput (Throughput per Sink)
+ *              each sink per class.
+ * 
+ * Modified by Ashanka (Oct 2010):
+ * Patch: To bug fix Multi-Sink Indices.
+ * Description: Implemented the throughputPerSink and responseTimePerSink for the what if/parameteric simulation.
+ */
+public class PAResultsModel implements MeasureDefinition {
+
+	private Vector&lt;Measure&gt; measures; // An array with all Measures
+	private Vector&lt;Number&gt; parameterValues;
+
+<span class="pc" id="L49">	private Vector&lt;Integer&gt; queueLength = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L50">	private Vector&lt;Integer&gt; queueTime = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L51">	private Vector&lt;Integer&gt; responseTime = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L52">	private Vector&lt;Integer&gt; residenceTime = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L53">	private Vector&lt;Integer&gt; arrivalRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L54">	private Vector&lt;Integer&gt; throughput = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L55">	private Vector&lt;Integer&gt; utilization = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L56">	private Vector&lt;Integer&gt; tardiness = new Vector&lt;&gt;();</span>
+<span class="pc" id="L57">	private Vector&lt;Integer&gt; earliness = new Vector&lt;&gt;();</span>
+<span class="pc" id="L58">	private Vector&lt;Integer&gt; lateness = new Vector&lt;&gt;();</span>
+<span class="pc" id="L59">	private Vector&lt;Integer&gt; effectiveUtilization = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L60">	private Vector&lt;Integer&gt; dropRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L61">	private Vector&lt;Integer&gt; balkingRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L62">	private Vector&lt;Integer&gt; renegingRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L63">	private Vector&lt;Integer&gt; retrialAttemptsRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L64">	private Vector&lt;Integer&gt; retrialOrbitSize = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L65">	private Vector&lt;Integer&gt; retrialOrbitTime = new Vector&lt;Integer&gt;();</span>
+
+<span class="pc" id="L67">	private Vector&lt;Integer&gt; systemCustomerNumber = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L68">	private Vector&lt;Integer&gt; systemResponseTime = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L69">	private Vector&lt;Integer&gt; systemThroughput = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L70">	private Vector&lt;Integer&gt; systemDropRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L71">	private Vector&lt;Integer&gt; systemBalkingRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L72">	private Vector&lt;Integer&gt; systemRenegingRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L73">	private Vector&lt;Integer&gt; systemRetrialAttemptsRate = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L74">	private Vector&lt;Integer&gt; systemPower = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L75">	private Vector&lt;Integer&gt; systemTardiness = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L76">	private Vector&lt;Integer&gt; systemEarliness = new Vector&lt;&gt;();</span>
+<span class="pc" id="L77">	private Vector&lt;Integer&gt; systemLateness = new Vector&lt;&gt;();</span>
+
+<span class="pc" id="L79">	private Vector&lt;Integer&gt; responseTimePerSink = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L80">	private Vector&lt;Integer&gt; throughputPerSink = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L81">	private Vector&lt;Integer&gt; FCRTotalWeight = new Vector&lt;Integer&gt;(); </span>
+<span class="pc" id="L82">	private Vector&lt;Integer&gt; FCRMemoryOccupation = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L83">	private Vector&lt;Integer&gt; FJCustomerNumber = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L84">	private Vector&lt;Integer&gt; FJResponseTime = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L85">	private Vector&lt;Integer&gt; firingThroughput = new Vector&lt;Integer&gt;();</span>
+<span class="pc" id="L86">	private Vector&lt;Integer&gt; numberOfActiveServers = new Vector&lt;Integer&gt;();</span>
+
+<span class="pc" id="L88">	private HashMap&lt;String, Measure&gt; names = new HashMap&lt;String, Measure&gt;();</span>
+<span class="pc" id="L89">	private HashMap&lt;String, String&gt; serverTypes = new HashMap&lt;String, String&gt;();</span>
+
+	private String logDecimalSeparator;
+	private String logCsvDelimiter;
+
+	//private boolean[] finished;
+	//private boolean simulationFinished = false;
+
+<span class="nc" id="L97">	public PAResultsModel(CommonModel model) {</span>
+<span class="nc" id="L98">		Vector&lt;Object&gt; measureKeys = model.getMeasureKeys();</span>
+<span class="nc" id="L99">		measures = new Vector&lt;Measure&gt;(measureKeys.size());</span>
+<span class="nc" id="L100">		this.logCsvDelimiter = model.getLoggingGlbParameter(&quot;delim&quot;);</span>
+<span class="nc" id="L101">		this.logDecimalSeparator = model.getLoggingGlbParameter(&quot;decimalSeparator&quot;);</span>
+
+<span class="nc bnc" id="L103" title="All 2 branches missed.">		for (int i = 0; i &lt; measureKeys.size(); i++) {</span>
+<span class="nc" id="L104">			Object measureKey = measureKeys.get(i);</span>
+<span class="nc" id="L105">			String measureType = model.getMeasureType(measureKey);</span>
+<span class="nc" id="L106">			Object stationKey = model.getMeasureStation(measureKey);</span>
+<span class="nc" id="L107">			String stationName = null;</span>
+<span class="nc" id="L108">			String nodeType = null;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">			if (stationKey == null) {</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">				if (model.isGlobalMeasure(measureType)) {</span>
+<span class="nc" id="L111">					stationName = &quot;Network&quot;;</span>
+				} else {
+<span class="nc" id="L113">					stationName = &quot;&quot;;</span>
+				}
+<span class="nc" id="L115">				nodeType = &quot;&quot;;</span>
+			} else {
+<span class="nc bnc" id="L117" title="All 2 branches missed.">				if (model.getRegionKeys().contains(stationKey)) {</span>
+<span class="nc" id="L118">					stationName = model.getRegionName(stationKey);</span>
+<span class="nc" id="L119">					nodeType = XMLConstantNames.NODETYPE_REGION;</span>
+				} else {
+<span class="nc" id="L121">					stationName = model.getStationName(stationKey);</span>
+<span class="nc" id="L122">					nodeType = XMLConstantNames.NODETYPE_STATION;</span>
+				}
+			}
+
+<span class="nc" id="L126">			Object classKey = model.getMeasureClass(measureKey);</span>
+<span class="nc" id="L127">			String className = null;</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			if (measureType.equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">				className = (classKey == null) ? &quot;All modes&quot; : (String) classKey;</span>
+			} else {
+<span class="nc bnc" id="L131" title="All 2 branches missed.">				className = (classKey == null) ? &quot;All classes&quot; : model.getClassName(classKey);</span>
+			}
+<span class="nc" id="L133">			String measureName = stationName + &quot;_&quot; + className + &quot;_&quot; + measureType;</span>
+<span class="nc" id="L134">			Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);</span>
+<span class="nc" id="L135">			String serverTypeName = null;</span>
+<span class="nc bnc" id="L136" title="All 4 branches missed.">			if (serverTypeKey != null &amp;&amp; model.getServerType(serverTypeKey) != null) {</span>
+<span class="nc" id="L137">				serverTypeName = model.getServerTypeStationName(serverTypeKey);</span>
+<span class="nc" id="L138">				measureName = measureName.replace(stationName, serverTypeName);</span>
+			}
+<span class="nc" id="L140">			serverTypes.put(measureName, serverTypeName);</span>
+<span class="nc" id="L141">			double alpha = model.getMeasureAlpha(measureKey).doubleValue();</span>
+<span class="nc" id="L142">			double precision = model.getMeasurePrecision(measureKey).doubleValue();</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">			if (measureType.equals(SimulationDefinition.MEASURE_QL)) {</span>
+<span class="nc" id="L144">				queueLength.add(new Integer(i));</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_QT)) {</span>
+<span class="nc" id="L146">				queueTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_RP)) {</span>
+<span class="nc" id="L148">				responseTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_RD)) {</span>
+<span class="nc" id="L150">				residenceTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_AR)) {</span>
+<span class="nc" id="L152">				arrivalRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_X)) {</span>
+<span class="nc" id="L154">				throughput.add(new Integer(i));</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_U)) {</span>
+<span class="nc" id="L156">				utilization.add(new Integer(i));</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_T)) {</span>
+<span class="nc" id="L158">				tardiness.add(new Integer(i));</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_E)) {</span>
+<span class="nc" id="L160">				earliness.add(new Integer(i));</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_L)) {</span>
+<span class="nc" id="L162">				lateness.add(new Integer(i));</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_EU)) {</span>
+<span class="nc" id="L164">				effectiveUtilization.add(new Integer(i));</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_DR)) {</span>
+<span class="nc" id="L166">				dropRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_BR)) {</span>
+<span class="nc" id="L168">				balkingRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L169" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_RN)) {</span>
+<span class="nc" id="L170">				renegingRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_RT)) {</span>
+<span class="nc" id="L172">				retrialAttemptsRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_OS)) {</span>
+<span class="nc" id="L174">				retrialOrbitSize.add(new Integer(i));</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_OT)) {</span>
+<span class="nc" id="L176">				retrialOrbitTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_CN)) {</span>
+<span class="nc" id="L178">				systemCustomerNumber.add(new Integer(i));</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_RP)) {</span>
+<span class="nc" id="L180">				systemResponseTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_X)) {</span>
+<span class="nc" id="L182">				systemThroughput.add(new Integer(i));</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_DR)) {</span>
+<span class="nc" id="L184">				systemDropRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_BR)) {</span>
+<span class="nc" id="L186">				systemBalkingRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_RN)) {</span>
+<span class="nc" id="L188">				systemRenegingRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L189" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_RT)) {</span>
+<span class="nc" id="L190">				systemRetrialAttemptsRate.add(new Integer(i));</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_P)) {</span>
+<span class="nc" id="L192">				systemPower.add(new Integer(i));</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_T)) {</span>
+<span class="nc" id="L194">				systemTardiness.add(new Integer(i));</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_E)) {</span>
+<span class="nc" id="L196">				systemEarliness.add(new Integer(i));</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_S_L)) {</span>
+<span class="nc" id="L198">				systemLateness.add(new Integer(i));</span>
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {</span>
+<span class="nc" id="L200">				responseTimePerSink.add(new Integer(i));</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {</span>
+<span class="nc" id="L202">				throughputPerSink.add(new Integer(i));</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_FCR_TW)) {</span>
+<span class="nc" id="L204">				FCRTotalWeight.add(new Integer(i));</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_FCR_MO)) {</span>
+<span class="nc" id="L206">				FCRMemoryOccupation.add(new Integer(i));</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_FJ_CN)) {</span>
+<span class="nc" id="L208">				FJCustomerNumber.add(new Integer(i));</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_FJ_RP)) {</span>
+<span class="nc" id="L210">				FJResponseTime.add(new Integer(i));</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">			} else if (measureType.equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc" id="L212">				firingThroughput.add(new Integer(i));</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">			}else if(measureType.equals(SimulationDefinition.MEASURE_NS)){</span>
+<span class="nc" id="L214">				numberOfActiveServers.add(new Integer(i));</span>
+			} else {
+<span class="nc" id="L216">				queueLength.add(new Integer(i));</span>
+			}
+<span class="nc" id="L218">			Measure tmp = new Measure(measureName, stationName, className, alpha, precision, measureType, nodeType);</span>
+<span class="nc" id="L219">			measures.add(tmp);</span>
+<span class="nc" id="L220">			names.put(measureName, tmp);</span>
+		}
+<span class="nc" id="L222">		parameterValues = model.getParametricAnalysisModel().getParameterValues();</span>
+<span class="nc" id="L223">	}</span>
+
+<span class="fc" id="L225">	public PAResultsModel(CommonModel model, boolean loadFromFile) {</span>
+<span class="fc" id="L226">		measures = new Vector&lt;Measure&gt;();</span>
+<span class="fc" id="L227">		parameterValues = model.getParametricAnalysisModel().getParameterValues();</span>
+<span class="fc" id="L228">	}</span>
+
+	/**
+	 * Adds a new measure into this data structure.
+	 * @param name measure name
+	 * @param stationName reference station name
+	 * @param className reference class name
+	 * @param alpha measure alpha
+	 * @param precision measure precision
+	 * @param type type of the measure
+	 * @param nodeType node type of the measure
+	 */
+	public void addMeasure(String name, String stationName, String className, double alpha, double precision, String type, String nodeType) {
+<span class="fc" id="L241">		Measure tmp = new Measure(name, stationName, className, alpha, precision, type, nodeType);</span>
+<span class="fc" id="L242">		measures.add(tmp);</span>
+<span class="fc" id="L243">		names.put(name, tmp);</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">		if (type.equals(SimulationDefinition.MEASURE_QL)) {</span>
+<span class="fc" id="L245">			queueLength.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_QT)) {</span>
+<span class="nc" id="L247">			queueTime.add(new Integer(measures.size() - 1));</span>
+<span class="fc bfc" id="L248" title="All 2 branches covered.">		} else if (type.equals(SimulationDefinition.MEASURE_RP)) {</span>
+<span class="fc" id="L249">			responseTime.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_RD)) {</span>
+<span class="nc" id="L251">			residenceTime.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_AR)) {</span>
+<span class="nc" id="L253">			arrivalRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_X)) {</span>
+<span class="nc" id="L255">			throughput.add(new Integer(measures.size() - 1));</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">		} else if (type.equals(SimulationDefinition.MEASURE_U)) {</span>
+<span class="fc" id="L257">			utilization.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L258" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_T)) {</span>
+<span class="nc" id="L259">			tardiness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_E)) {</span>
+<span class="nc" id="L261">			earliness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L262" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_L)) {</span>
+<span class="nc" id="L263">			lateness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L264" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_EU)) {</span>
+<span class="nc" id="L265">			effectiveUtilization.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L266" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_DR)) {</span>
+<span class="nc" id="L267">			dropRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_BR)) {</span>
+<span class="nc" id="L269">			balkingRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_RN)) {</span>
+<span class="nc" id="L271">			renegingRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L272" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_RT)) {</span>
+<span class="nc" id="L273">			retrialAttemptsRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_OS)) {</span>
+<span class="nc" id="L275">			retrialOrbitSize.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_OT)) {</span>
+<span class="nc" id="L277">			retrialOrbitTime.add(new Integer(measures.size() - 1));</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">		} else if (type.equals(SimulationDefinition.MEASURE_S_CN)) {</span>
+<span class="fc" id="L279">			systemCustomerNumber.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_RP)) {</span>
+<span class="nc" id="L281">			systemResponseTime.add(new Integer(measures.size() - 1));</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">		} else if (type.equals(SimulationDefinition.MEASURE_S_X)) {</span>
+<span class="fc" id="L283">			systemThroughput.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_DR)) {</span>
+<span class="nc" id="L285">			systemDropRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_BR)) {</span>
+<span class="nc" id="L287">			systemBalkingRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_RN)) {</span>
+<span class="nc" id="L289">			systemRenegingRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_RT)) {</span>
+<span class="nc" id="L291">			systemRetrialAttemptsRate.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L292" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_P)) {</span>
+<span class="nc" id="L293">			systemPower.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L294" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_T)) {</span>
+<span class="nc" id="L295">			systemTardiness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_E)) {</span>
+<span class="nc" id="L297">			systemEarliness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_S_L)) {</span>
+<span class="nc" id="L299">			systemLateness.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L300" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_RP_PER_SINK)) {</span>
+<span class="nc" id="L301">			responseTimePerSink.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L302" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_X_PER_SINK)) {</span>
+<span class="nc" id="L303">			throughputPerSink.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L304" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_FCR_TW)) {</span>
+<span class="nc" id="L305">			FCRTotalWeight.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L306" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_FCR_MO)) {</span>
+<span class="nc" id="L307">			FCRMemoryOccupation.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_FJ_CN)) {</span>
+<span class="nc" id="L309">			FJCustomerNumber.add(new Integer(measures.size() - 1));</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_FJ_RP)) {</span>
+<span class="fc" id="L311">			FJResponseTime.add(new Integer(measures.size() - 1));</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">		} else if (type.equals(SimulationDefinition.MEASURE_FX)) {</span>
+<span class="nc" id="L313">			firingThroughput.add(new Integer(measures.size() - 1));</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">		}else if(type.equals(SimulationDefinition.MEASURE_NS)){</span>
+<span class="nc" id="L315">			numberOfActiveServers.add(new Integer(measures.size() - 1));</span>
+		} else {
+<span class="nc" id="L317">			queueLength.add(new Integer(measures.size() - 1));</span>
+		}
+<span class="fc" id="L319">	}</span>
+
+	public void addSample(int measureIndex, double lowerBound, double meanValue, double upperBound, boolean validity) {
+<span class="nc" id="L322">		Measure requested = measures.get(measureIndex);</span>
+<span class="nc" id="L323">		requested.addSample(meanValue, upperBound, lowerBound, validity);</span>
+<span class="nc" id="L324">	}</span>
+
+	public void addSample(String measureName, double lowerBound, double meanValue, double upperBound, boolean validity) {
+<span class="fc" id="L327">		Measure requested = names.get(measureName);</span>
+<span class="fc" id="L328">		requested.addSample(meanValue, upperBound, lowerBound, validity);</span>
+<span class="fc" id="L329">	}</span>
+	
+	public MeasureValue getEmptyMeasureValue() {
+<span class="nc" id="L332">		double avgupper = 0.0;</span>
+<span class="nc" id="L333">		double avgvalue = 0.0;</span>
+<span class="nc" id="L334">		double avglower = 0.0;		</span>
+<span class="nc" id="L335">		return new MeasureValueImpl(avgvalue, avgupper, avglower, false);</span>
+	}
+
+	public Vector&lt;Number&gt; getParameterValues() {
+<span class="fc" id="L339">		return parameterValues;</span>
+	}
+
+	/**
+	 * Returns the total number of measures
+	 * @return total number of measures
+	 */
+	public int getMeasureNumber() {
+<span class="fc" id="L347">		return measures.size();</span>
+	}
+
+	/**
+	 * Returns the name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return name of the measure
+	 */
+	public String getName(int measureIndex) {
+<span class="fc" id="L356">		return measures.get(measureIndex).name;</span>
+	}
+
+	/**
+	 * Returns the station name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return station name
+	 */
+	public String getStationName(int measureIndex) {
+<span class="fc" id="L365">		String name = measures.get(measureIndex).stationName;</span>
+<span class="fc" id="L366">		return name;</span>
+	}
+
+	/**
+	 * Returns the class name of a given measure
+	 * @param measureIndex index of the measure
+	 * @return class name
+	 */
+	public String getClassName(int measureIndex) {
+<span class="fc" id="L375">		String name = measures.get(measureIndex).className;</span>
+<span class="fc" id="L376">		return name;</span>
+	}
+
+	/**
+	 * Returns the alpha of a given measure
+	 * @param measureIndex index of the measure
+	 * @return alpha
+	 */
+	public double getAlpha(int measureIndex) {
+<span class="fc" id="L385">		return measures.get(measureIndex).alpha;</span>
+	}
+
+	/**
+	 * Returns the precision of a given measure
+	 * @param measureIndex index of the measure
+	 * @return precision
+	 */
+	public double getPrecision(int measureIndex) {
+<span class="fc" id="L394">		return measures.get(measureIndex).precision;</span>
+	}
+
+	/**
+	 * Returns the number of analyzed samples for a given measure
+	 * @param measureIndex index of the measure
+	 * @return number of analyzed samples
+	 */
+	public int getAnalyzedSamples(int measureIndex) {
+<span class="fc" id="L403">		return (measures.get(measureIndex)).samples;</span>
+	}
+
+	/**
+	 * Returns the state of a given measure
+	 * @param measureIndex index of the measure
+	 * @param measureStep step of the measure
+	 * @return measure state
+	 */
+	public boolean getMeasureState(int measureIndex, int measureStep) {
+<span class="nc" id="L413">		MeasureValueImpl value = (MeasureValueImpl) (getValues(measureIndex).get(measureStep));</span>
+<span class="nc" id="L414">		return value.isValid();</span>
+	}
+
+	/**
+	 * Returns the type of a given measure
+	 * @param measureIndex index of the measure
+	 * @return measure type
+	 */
+	public String getMeasureType(int measureIndex) {
+<span class="fc" id="L423">		return measures.get(measureIndex).type;</span>
+	}
+
+	/**
+	 * Returns the node type of a given measure
+	 * @param measureIndex index of the measure
+	 * @return node type
+	 */
+	public String getNodeType(int measureIndex) {
+<span class="fc" id="L432">		return measures.get(measureIndex).nodeType;</span>
+	}
+
+	/**
+	 * Returns the vector of values of a given measure. Each element of the vector
+	 * is an instance of &lt;code&gt;MeasureValue&lt;/code&gt; interface.
+	 * @param measureIndex index of the measure
+	 * @return vector of values
+	 */
+	public Vector&lt;MeasureValue&gt; getValues(int measureIndex) {
+<span class="fc" id="L442">		return measures.get(measureIndex).values;</span>
+	}
+
+	// --- List of getMeasure functions for each measure
+	/**
+	 * Helper method called by all getMeasure functions
+	 * Returns an array with the measureIndex of every vector measure
+	 * @return an array with measures' index
+	 */
+	private int[] getTmpArray(Vector&lt;Integer&gt; vector) {
+<span class="nc" id="L452">		int[] tmp = new int[vector.size()];</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">		for (int i = 0; i &lt; tmp.length; i++) {</span>
+<span class="nc" id="L454">			tmp[i] = vector.get(i).intValue();</span>
+		}
+<span class="nc" id="L456">		return tmp;</span>
+	}
+
+	public int[] getQueueLengthMeasures() {
+<span class="nc" id="L460">		return getTmpArray(queueLength);</span>
+	}
+
+	public int[] getQueueTimeMeasures() {
+<span class="nc" id="L464">		return getTmpArray(queueTime);</span>
+	}
+
+	public int[] getResponseTimeMeasures() {
+<span class="nc" id="L468">		return getTmpArray(responseTime);</span>
+	}
+
+	public int[] getResidenceTimeMeasures() {
+<span class="nc" id="L472">		return getTmpArray(residenceTime);</span>
+	}
+
+	public int[] getArrivalRateMeasures() {
+<span class="nc" id="L476">		return getTmpArray(arrivalRate);</span>
+	}
+
+	public int[] getThroughputMeasures() {
+<span class="nc" id="L480">		return getTmpArray(throughput);</span>
+	}
+
+	public int[] getUtilizationMeasures() {
+<span class="nc" id="L484">		return getTmpArray(utilization);</span>
+	}
+
+	public int[] getTardinessMeasures() {
+<span class="nc" id="L488">		return getTmpArray(tardiness);</span>
+	}
+
+	public int[] getEarlinessMeasures() {
+<span class="nc" id="L492">		return getTmpArray(earliness);</span>
+	}
+
+	public int[] getLatenessMeasures() {
+<span class="nc" id="L496">		return getTmpArray(lateness);</span>
+	}
+
+	public int[] getEffectiveUtilizationMeasures() {
+<span class="nc" id="L500">		return getTmpArray(effectiveUtilization);</span>
+	}
+
+	public int[] getDropRateMeasures() {
+<span class="nc" id="L504">		return getTmpArray(dropRate);</span>
+	}
+
+	public int[] getBalkingRateMeasures() {
+<span class="nc" id="L508">		return getTmpArray(balkingRate);</span>
+	}
+
+	public int[] getRenegingRateMeasures() {
+<span class="nc" id="L512">		return getTmpArray(renegingRate);</span>
+	}
+
+	public int[] getRetrialAttemptsRateMeasures() {
+<span class="nc" id="L516">		return getTmpArray(retrialAttemptsRate);</span>
+	}
+
+	public int[] getRetrialOrbitSizeMeasures() {
+<span class="nc" id="L520">		return getTmpArray(retrialOrbitSize);</span>
+	}
+
+	public int[] getRetrialOrbitTimeMeasures() {
+<span class="nc" id="L524">		return getTmpArray(retrialOrbitTime);</span>
+	}
+
+	public int[] getSystemCustomerNumberMeasures() {
+<span class="nc" id="L528">		return getTmpArray(systemCustomerNumber);</span>
+	}
+
+	public int[] getSystemResponseTimeMeasures() {
+<span class="nc" id="L532">		return getTmpArray(systemResponseTime);</span>
+	}
+
+	public int[] getSystemThroughputMeasures() {
+<span class="nc" id="L536">		return getTmpArray(systemThroughput);</span>
+	}
+
+	public int[] getSystemDropRateMeasures() {
+<span class="nc" id="L540">		return getTmpArray(systemDropRate);</span>
+	}
+
+	public int[] getSystemBalkingRateMeasures() {
+<span class="nc" id="L544">		return getTmpArray(systemBalkingRate);</span>
+	}
+
+	public int[] getSystemRenegingRateMeasures() {
+<span class="nc" id="L548">		return getTmpArray(systemRenegingRate);</span>
+	}
+
+	public int[] getSystemRetrialAttemptsRateMeasures() {
+<span class="nc" id="L552">		return getTmpArray(systemRetrialAttemptsRate);</span>
+	}
+
+	public int[] getSystemPowerMeasures() {
+<span class="nc" id="L556">		return getTmpArray(systemPower);</span>
+	}
+
+	public int[] getSystemTardinessMeasures() {
+<span class="nc" id="L560">		return getTmpArray(systemTardiness);</span>
+	}
+
+	public int[] getSystemEarlinessMeasures() {
+<span class="nc" id="L564">		return getTmpArray(systemEarliness);</span>
+	}
+
+	public int[] getSystemLatenessMeasures() {
+<span class="nc" id="L568">		return getTmpArray(systemLateness);</span>
+	}
+
+	public int[] getResponsetimePerSinkMeasures() {
+<span class="nc" id="L572">		return getTmpArray(responseTimePerSink);</span>
+	}
+
+	public int[] getThroughputPerSinkMeasures() {
+<span class="nc" id="L576">		return getTmpArray(throughputPerSink);</span>
+	}
+
+	public int[] getFCRTotalWeightMeasures() {
+<span class="nc" id="L580">		return getTmpArray(FCRTotalWeight);</span>
+	}
+
+	public int[] getFCRMemoryOccupationMeasures() {
+<span class="nc" id="L584">		return getTmpArray(FCRMemoryOccupation);</span>
+	}
+
+	public int[] getFJCustomerNumberMeasures() {
+<span class="nc" id="L588">		return getTmpArray(FJCustomerNumber);</span>
+	}
+
+	public int[] getFJResponseTimeMeasures() {
+<span class="nc" id="L592">		return getTmpArray(FJResponseTime);</span>
+	}
+
+	public int[] getFiringThroughputMeasures() {
+<span class="nc" id="L596">		return getTmpArray(firingThroughput);</span>
+	}
+
+	public int[] getNumberOfActiveServersMeasures(){
+<span class="nc" id="L600">		return getTmpArray(numberOfActiveServers);</span>
+	}
+
+	public String getServerType(String measureName) {
+<span class="nc" id="L604">		return serverTypes.get(measureName);</span>
+	}
+
+	// ------------------------- USELESS METHODS --------------------------------
+
+	/**
+	 * Not implemented
+	 *
+	 * @param measureIndex index of the measure that this listener should listen
+	 * @param listener listener to add or null to remove old one
+	 */
+	public void addMeasureListener(int measureIndex, MeasureListener listener) {
+		//Not implemented
+<span class="nc" id="L617">	}</span>
+
+	/**
+	 * Not implemented
+	 *
+	 * @param listener listener to be set or null to reset previous one
+	 */
+	public void setProgressListener(ProgressListener listener) {
+		//Not implemented
+<span class="nc" id="L626">	}</span>
+
+	public void setMalformedReplayerFileListener(MalformedReplayerFileListener listener) {
+		//Not implemented
+<span class="nc" id="L630">	}</span>
+
+	public void detectedMalformedReplayerFile(String msg) {
+		//Not implemented
+<span class="nc" id="L634">	}</span>
+
+	/**
+	 * Not implemented
+	 *
+	 * @return true
+	 */
+	public boolean isSimulationFinished() {
+<span class="nc" id="L642">		return true;</span>
+	}
+
+	/**
+	 * Not implemented
+	 *
+	 * @return 0
+	 */
+	public double getPollingInterval() {
+<span class="fc" id="L651">		return 0;</span>
+	}
+
+	/**
+	 * Not implemented
+	 *
+	 * @return 0
+	 */
+	public double getProgress() {
+<span class="nc" id="L660">		return 0;</span>
+	}
+
+	/**
+	 * Not implemented
+	 *
+	 * @return 0
+	 */
+	public long getElapsedTime() {
+<span class="fc" id="L669">		return 0;</span>
+	}
+
+	/**
+	 * Returns the number of discarded samples for a given measure
+	 * @param measureIndex the measure index
+	 * @return number of discarded samples
+	 */
+	public int getDiscardedSamples(int measureIndex) {
+<span class="nc" id="L678">		return 0;</span>
+	}
+
+	/**
+	 * Returns the state of a given measure
+	 * @param measureIndex index of the measure
+	 * @return measure state
+	 */
+	public int getMeasureState(int measureIndex) {
+<span class="nc" id="L687">		return 0;</span>
+	}
+
+	/**
+	 * Returns the log file name where a verbose measure was stored
+	 * @param measureIndex corresponding to a measure
+	 * @return full path of the log file including the measure
+	 */
+	public String getLogFileName(int measureIndex) {
+<span class="fc" id="L696">		return null;</span>
+	}
+
+	// ------------------------- end USELESS METHODS --------------------------------
+
+	/**
+	 * Inner class to store parameters of each measure
+	 */
+	protected class Measure {
+
+		public String name;
+		public String stationName;
+		public String className;
+		public double alpha;
+		public double precision;
+		public String type;
+		public String nodeType;
+		public int samples;
+		public Vector&lt;MeasureValue&gt; values;
+
+		/**
+		 * Construct a new Measure object
+		 * @param name measure name
+		 * @param stationName reference station name
+		 * @param className reference class name
+		 * @param alpha measure alpha
+		 * @param precision measure precision
+		 * @param type type of the measure
+		 * @param nodeType node type of the measure
+		 */
+<span class="fc" id="L726">		public Measure(String name, String stationName, String className, double alpha, double precision, String type, String nodeType) {</span>
+<span class="fc" id="L727">			this.name = name;</span>
+<span class="fc" id="L728">			this.stationName = stationName;</span>
+<span class="fc" id="L729">			this.className = className;</span>
+<span class="fc" id="L730">			this.alpha = alpha;</span>
+<span class="fc" id="L731">			this.precision = precision;</span>
+<span class="fc" id="L732">			this.type = type;</span>
+<span class="fc" id="L733">			this.nodeType = nodeType;</span>
+<span class="fc" id="L734">			values = new Vector&lt;MeasureValue&gt;();</span>
+<span class="fc" id="L735">		}</span>
+
+		/**
+		 * Adds a new sample to current measure
+		 * @param meanValue mean value of the sample
+		 * @param upperBound upper bound of the sample
+		 * @param lowerBound lower bound of the sample
+		 */
+		public void addSample(double meanValue, double upperBound, double lowerBound, boolean validity) {
+<span class="fc" id="L744">			MeasureValueImpl val = new MeasureValueImpl(meanValue, upperBound, lowerBound, validity);</span>
+<span class="fc" id="L745">			values.add(val);</span>
+<span class="fc" id="L746">			samples++;</span>
+<span class="fc" id="L747">		}</span>
+	}
+
+	/**
+	 * Inner class that implements Value interface
+	 */
+	public class MeasureValueImpl implements MeasureValue {
+
+		private double mean;
+		private double upper;
+		private double lower;
+		private boolean valid;
+
+		/**
+		 * Creates a new MeasureValue object
+		 * @param meanValue mean value of the sample
+		 * @param upperBound sample upper bound
+		 * @param lowerBound sample lower bound
+		 * @param isValid true if the measure could be computed with the requested precision
+		 */
+<span class="fc" id="L767">		public MeasureValueImpl(double meanValue, double upperBound, double lowerBound, boolean isValid) {</span>
+<span class="fc" id="L768">			mean = meanValue;</span>
+<span class="fc" id="L769">			upper = upperBound;</span>
+<span class="fc" id="L770">			lower = lowerBound;</span>
+<span class="fc" id="L771">			valid = isValid;</span>
+<span class="fc" id="L772">		}</span>
+
+		public double getMeanValue() {
+<span class="fc" id="L775">			return mean;</span>
+		}
+
+		public double getUpperBound() {
+<span class="fc" id="L779">			return upper;</span>
+		}
+
+		public double getLowerBound() {
+<span class="fc" id="L783">			return lower;</span>
+		}
+
+		public void setMeanValue(double x) {
+<span class="nc" id="L787">			this.mean = x;</span>
+<span class="nc" id="L788">		}</span>
+
+		public void setUpperBound(double x) {
+<span class="nc" id="L791">			this.upper = x;</span>
+<span class="nc" id="L792">		}</span>
+
+		public void setLowerBound(double x) {
+<span class="nc" id="L795">			this.lower = x;</span>
+<span class="nc" id="L796">		}</span>
+		
+		public void setValid(boolean x) {
+<span class="nc" id="L799">			this.valid = x;</span>
+<span class="nc" id="L800">		}</span>
+
+		public boolean isValid() {
+<span class="fc" id="L803">			return valid;</span>
+		}
+
+		@Override
+		public double getLastIntervalAvgValue() {
+			// TODO Auto-generated method stub
+<span class="nc" id="L809">			return 0;</span>
+		}
+
+		@Override
+		public double getSimTime() {
+			// TODO Auto-generated method stub
+<span class="nc" id="L815">			return 0;</span>
+		}
+
+	}
+
+	/**
+	 * Returns the decimal separator used in log files
+	 * @return the decimal separator used in log files
+	 */
+	public String getLogDecimalSeparator() {
+<span class="fc" id="L825">		return logDecimalSeparator;</span>
+	}
+
+	/**
+	 * Returns the CSV delimiter used in log files
+	 * @return the CSV delimiter used in log files
+	 */
+	public String getLogCsvDelimiter() {
+<span class="fc" id="L833">		return logCsvDelimiter;</span>
+	}
+
+	/**
+	 * Sets the decimal separator used in log files
+	 * @param logDecimalSeparator the decimal separator to set
+	 */
+	public void setLogDecimalSeparator(String logDecimalSeparator) {
+<span class="fc" id="L841">		this.logDecimalSeparator = logDecimalSeparator;</span>
+<span class="fc" id="L842">	}</span>
+
+	/**
+	 * Sets the CSV delimiter used in log files
+	 * @param logCsvDelimiter the CSV delimiter to set
+	 */
+	public void setLogCsvDelimiter(String logCsvDelimiter) {
+<span class="fc" id="L849">		this.logCsvDelimiter = logCsvDelimiter;</span>
+<span class="fc" id="L850">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

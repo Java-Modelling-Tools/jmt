@@ -1,0 +1,542 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LDEditingWindow.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jmva</a> &gt; <span class="el_source">LDEditingWindow.java</span></div><h1>LDEditingWindow.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jmva;
+
+import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SwingConstants;
+
+import jmt.common.exception.ExpressionParseException;
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.components.JMTDialog;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.jmva.eval.Evaluator;
+import jmt.gui.jmva.eval.FastEvaluator;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.jmva.gui.JMVAWizard;
+
+/**
+ * the editor window itself. Does not release the focus and follows the owner around the screen.
+ */
+public class LDEditingWindow extends JMTDialog {
+
+	private static final long serialVersionUID = 1L;
+
+	/* dummy arrays to keep the tablemodel happy during initialization */
+	private String className;
+<span class="nc" id="L72">	private double[] serviceTimes = new double[1];</span>
+
+	private HoverHelp help;
+	private Frame owner;
+<span class="nc" id="L76">	private Point baseloc = new Point();</span>
+<span class="nc" id="L77">	private Point offset = new Point();</span>
+
+<span class="nc" id="L79">	private Evaluator eval = new FastEvaluator();</span>
+	private LDHelpDialog helpDialog;
+
+	private LDTable ldTable;
+	//private JLabel ldTitle;
+	private JTextField ldExpression;
+
+	/* the Actions behind the various components */
+
+<span class="nc" id="L88">	public AbstractAction LD_CANCEL = new AbstractAction(&quot;Cancel&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent ae) {
+<span class="nc" id="L93">			hide();</span>
+<span class="nc" id="L94">			ldEditor.editingCanceled();</span>
+<span class="nc" id="L95">		}</span>
+
+	};
+
+<span class="nc" id="L99">	public AbstractAction LD_COMMIT = new AbstractAction(&quot;OK&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent ae) {
+<span class="nc" id="L104">			hide();</span>
+<span class="nc" id="L105">			commit();</span>
+<span class="nc" id="L106">			ldEditor.editingStopped();</span>
+<span class="nc" id="L107">		}</span>
+
+	};
+
+<span class="nc" id="L111">	public AbstractAction COPYDOWN_ACTION = new AbstractAction(&quot;Copy Down&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L116">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L117">			putValue(Action.SHORT_DESCRIPTION, &quot;Copies the value in the focused cell down to all cells in the same column&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L121">			ldTable.copyCellDown();</span>
+<span class="nc" id="L122">			ldTable.requestFocus();</span>
+<span class="nc" id="L123">		}</span>
+
+	};
+
+<span class="nc" id="L127">	public AbstractAction LD_HELP = new AbstractAction(&quot;Help&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L132">			showHelp();</span>
+<span class="nc" id="L133">		}</span>
+
+	};
+
+<span class="nc" id="L137">	public AbstractAction EVALUATE = new AbstractAction(&quot;Evaluate&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+			//putValue(Action.SHORT_DESCRIPTION,&quot;Fill in the selected cells by evaluating an expression&quot;);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L146">			int errLoc = -1;</span>
+<span class="nc" id="L147">			boolean error = false;</span>
+<span class="nc" id="L148">			String expr = ldExpression.getText().trim().toLowerCase();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">			if (!expr.equals(&quot;&quot;)) {</span>
+				try {
+<span class="nc" id="L151">					ldTable.fillCells(expr);</span>
+<span class="nc" id="L152">				} catch (ExpressionParseException epe) {</span>
+<span class="nc" id="L153">					error = true;</span>
+<span class="nc" id="L154">					errLoc = epe.getLoc();</span>
+<span class="nc" id="L155">					JOptionPane.showMessageDialog(LDEditingWindow.this, epe.getMessage(), &quot;Error parsing expression&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L156">				}</span>
+			}
+<span class="nc bnc" id="L158" title="All 2 branches missed.">			if (error) { //focus the textfield</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">				ldExpression.setCaretPosition((errLoc &lt; 0 ? 0 : errLoc));</span>
+<span class="nc" id="L160">				ldExpression.requestFocus();</span>
+			} else {
+<span class="nc" id="L162">				ldTable.requestFocus();</span>
+			}
+<span class="nc" id="L164">		}</span>
+
+	};
+
+	/**
+	 * adding this to a Window results in the window not releasing the focus
+	 */
+<span class="nc" id="L171">	private WindowFocusListener focusCaptor = new WindowFocusListener() {</span>
+		public void windowGainedFocus(WindowEvent e) {
+<span class="nc" id="L173">		}</span>
+
+		public void windowLostFocus(WindowEvent e) {
+<span class="nc" id="L176">			requestFocus();</span>
+<span class="nc" id="L177">		}</span>
+	};
+
+	/**
+	 * makes the editing window follow the wizard if it is moved
+	 */
+<span class="nc" id="L183">	private ComponentListener moveCatcher = new ComponentAdapter() {</span>
+		@Override
+		public void componentMoved(ComponentEvent e) {
+<span class="nc" id="L186">			setBase(owner.getLocation());</span>
+<span class="nc" id="L187">		}</span>
+	};
+
+	private LDEditor ldEditor;
+
+	LDEditingWindow(Frame owner, LDEditor ldEditor) {
+<span class="nc" id="L193">		super(owner, false);</span>
+<span class="nc" id="L194">		this.ldEditor = ldEditor;</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">		if (owner == null) {</span>
+<span class="nc" id="L196">			throw new IllegalArgumentException(&quot;owner must not be null!&quot;);</span>
+		}
+		// only height is fixed
+<span class="nc" id="L199">		setSize(CommonConstants.MAX_GUI_WIDTH_LDEDITING, CommonConstants.MAX_GUI_HEIGHT_LDEDITING);</span>
+		//setUndecorated(true);
+		//setResizable(false);
+<span class="nc" id="L202">		this.owner = owner;</span>
+<span class="nc" id="L203">		setTitle(&quot;LD Editor&quot;);</span>
+<span class="nc" id="L204">		help = ((JMVAWizard) owner).getHelp();</span>
+
+<span class="nc" id="L206">		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);</span>
+
+		/* closing=cancel */
+<span class="nc" id="L209">		addWindowListener(new WindowAdapter() {</span>
+			@Override
+			public void windowClosing(WindowEvent e) {
+<span class="nc" id="L212">				LD_CANCEL.actionPerformed(null);</span>
+<span class="nc" id="L213">			}</span>
+		});
+
+<span class="nc" id="L216">		initComponents();</span>
+<span class="nc" id="L217">	}</span>
+
+	/**
+	 * create components and lay them out
+	 */
+	private void initComponents() {
+<span class="nc" id="L223">		ldTable = new LDTable();</span>
+
+		//ldTitle=new JLabel(&quot;LD editor&quot;);
+		//ldTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		//ldTitle.setHorizontalTextPosition(SwingConstants.CENTER);
+		//ldTitle.setFont(new Font(&quot;Arial&quot;,Font.BOLD|Font.ITALIC,14));
+
+<span class="nc" id="L230">		ldExpression = new JTextField();</span>
+<span class="nc" id="L231">		ldExpression.addActionListener(new ActionListener() { // evaluate as the use presses enter</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L233">				EVALUATE.actionPerformed(e);</span>
+<span class="nc" id="L234">			}</span>
+		});
+
+		/*JPanel cp=new JPanel();
+		cp.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createRaisedBevelBorder(),
+		        BorderFactory.createEtchedBorder()));
+		getContentPane().add(cp);*/
+<span class="nc" id="L241">		Container cp = getContentPane();</span>
+
+<span class="nc" id="L243">		cp.setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L245">		cp.add(makeButtons(), BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L247">		Box vBox = Box.createVerticalBox();</span>
+<span class="nc" id="L248">		vBox.add(Box.createVerticalStrut(5));</span>
+<span class="nc" id="L249">		JScrollPane ldTablePane = new JScrollPane(ldTable);</span>
+<span class="nc" id="L250">		ldTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);</span>
+<span class="nc" id="L251">		ldTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);</span>
+<span class="nc" id="L252">		vBox.add(ldTablePane);</span>
+		//vBox.add(Box.createVerticalStrut(5));
+<span class="nc" id="L254">		vBox.add(makeTools());</span>
+		//vBox.add(Box.createVerticalStrut(5));
+
+<span class="nc" id="L257">		Box totalBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L258">		totalBox.add(Box.createHorizontalStrut(5));</span>
+<span class="nc" id="L259">		totalBox.add(vBox);</span>
+<span class="nc" id="L260">		totalBox.add(Box.createHorizontalStrut(5));</span>
+
+<span class="nc" id="L262">		cp.add(totalBox, BorderLayout.CENTER);</span>
+		//cp.add(ldTitle,BorderLayout.NORTH);
+<span class="nc" id="L264">	}</span>
+
+	/**
+	 * @return the button bar
+	 */
+	JPanel makeButtons() {
+<span class="nc" id="L270">		JPanel res = new JPanel();</span>
+<span class="nc" id="L271">		JButton commit = new JButton(LD_COMMIT);</span>
+<span class="nc" id="L272">		help.addHelp(commit, &quot;Closes the LD editor saving changes&quot;);</span>
+<span class="nc" id="L273">		res.add(commit);</span>
+<span class="nc" id="L274">		JButton cancel = new JButton(LD_CANCEL);</span>
+<span class="nc" id="L275">		help.addHelp(cancel, &quot;Closes the LD editor discarding all changes&quot;);</span>
+<span class="nc" id="L276">		res.add(cancel);</span>
+<span class="nc" id="L277">		JButton help_b = new JButton(LD_HELP);</span>
+<span class="nc" id="L278">		help.addHelp(help_b, &quot;Shows help for the LD editor&quot;);</span>
+<span class="nc" id="L279">		res.add(help_b);</span>
+<span class="nc" id="L280">		return res;</span>
+	}
+
+	/**
+	 * @return the editing tools bar
+	 */
+	JComponent makeTools() {
+<span class="nc" id="L287">		Box vbox = Box.createVerticalBox();</span>
+<span class="nc" id="L288">		Box box = Box.createHorizontalBox();</span>
+
+		/*JButton copyanchor=new JButton(ldTable.FILL_ACTION);
+		help.addHelp(copyanchor,&quot;Copies the value in the focused cell to all selected cells&quot;);
+		box.add(copyanchor);*/
+		/*JButton copydown=new JButton(COPY_DOWN);
+		help.addHelp(copydown,&quot;Copies the value in the focused cell down to all cells in the same column&quot;);
+		box.add(copydown);*/
+<span class="nc" id="L296">		help.addHelp(ldExpression, &quot;Select cells, enter an expression and press ENTER or click \&quot;Evaluate\&quot;.&quot;);</span>
+<span class="nc" id="L297">		ldExpression.setMaximumSize(new Dimension((int)(10000 * CommonConstants.widthScaling), (int)(22 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L298">		box.add(ldExpression);</span>
+<span class="nc" id="L299">		JButton evaluate = new JButton(EVALUATE);</span>
+<span class="nc" id="L300">		help.addHelp(evaluate, &quot;Click here to fill selected cells with evaluation results.&quot;);</span>
+<span class="nc" id="L301">		box.add(evaluate);</span>
+<span class="nc" id="L302">		box.setBorder(BorderFactory.createEtchedBorder());</span>
+
+<span class="nc" id="L304">		JPanel lPanel = new JPanel();</span>
+<span class="nc" id="L305">		lPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L306">		JLabel helpLabel = new JLabel(</span>
+				&quot;&lt;html&gt;Enter the expression to be evaluated, using &lt;b&gt;&lt;i&gt;n&lt;/i&gt;&lt;/b&gt; for the number of customers. &quot;
+				+ &quot;For syntax details and a list of supported functions click on \&quot;Help\&quot;&lt;/html&gt;&quot;);
+<span class="nc" id="L309">		helpLabel.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L310">		lPanel.add(helpLabel);</span>
+
+<span class="nc" id="L312">		vbox.add(lPanel);</span>
+<span class="nc" id="L313">		vbox.add(box);</span>
+
+<span class="nc" id="L315">		return vbox;</span>
+	}
+
+	/**
+	 * Sets all the data for the editing window. The matrix of service times is copied in order to have a &quot;cancel&quot; feature.
+	 */
+	public void setStatus(String title, String className, double[] serviceTimes) {
+<span class="nc" id="L322">		this.className = className;</span>
+<span class="nc" id="L323">		this.serviceTimes = ArrayUtils.copy(serviceTimes);</span>
+		//ldTitle.setText(&quot;Service times for &quot;+stationName);
+<span class="nc" id="L325">		setTitle(title);</span>
+<span class="nc" id="L326">		ldTable.updateStructure();</span>
+<span class="nc" id="L327">	}</span>
+
+	/**
+	 * @return the edited matrix of service times
+	 */
+	public double[] getServiceTimes() {
+<span class="nc" id="L333">		return serviceTimes;</span>
+	}
+
+	/**
+	 * if there is a cell being edited, accept the changes.
+	 */
+	private void commit() {
+<span class="nc bnc" id="L340" title="All 2 branches missed.">		if (ldTable.isEditing()) {</span>
+<span class="nc" id="L341">			ldTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc" id="L343">	}</span>
+
+	@Override
+	public void show() {
+<span class="nc" id="L347">		super.show();</span>
+<span class="nc" id="L348">		addWindowFocusListener(focusCaptor);</span>
+<span class="nc" id="L349">		owner.addComponentListener(moveCatcher);</span>
+		/* make sure we have a selected cell */
+<span class="nc" id="L351">		ldTable.setSelectedCell(0, 0);</span>
+<span class="nc" id="L352">		ldTable.requestFocus();</span>
+<span class="nc" id="L353">	}</span>
+
+	@Override
+	public void hide() {
+<span class="nc" id="L357">		owner.removeComponentListener(moveCatcher);</span>
+<span class="nc" id="L358">		removeWindowFocusListener(focusCaptor);</span>
+<span class="nc" id="L359">		super.hide();</span>
+<span class="nc" id="L360">	}</span>
+
+	public void setOffset(Point offset) {
+<span class="nc" id="L363">		this.offset = offset;</span>
+<span class="nc" id="L364">		setLocation(baseloc.x + offset.x, baseloc.y + offset.y);</span>
+<span class="nc" id="L365">	}</span>
+
+	public void setBase(Point baseloc) {
+<span class="nc" id="L368">		this.baseloc = baseloc;</span>
+<span class="nc" id="L369">		setLocation(baseloc.x + offset.x, baseloc.y + offset.y);</span>
+<span class="nc" id="L370">	}</span>
+
+	private void showHelp() {
+<span class="nc bnc" id="L373" title="All 2 branches missed.">		if (helpDialog == null) {</span>
+<span class="nc" id="L374">			helpDialog = new LDHelpDialog(this, eval);</span>
+		}
+<span class="nc" id="L376">		helpDialog.show();</span>
+<span class="nc" id="L377">	}</span>
+
+	//************************************************************************
+
+	private class LDTable extends ExactTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L385">		LDTable() {</span>
+<span class="nc" id="L386">			super(new LDTableModel());</span>
+<span class="nc" id="L387">			autoResizeMode = AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L388">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+
+<span class="nc" id="L390">			setDisplaysScrollLabels(true);</span>
+<span class="nc" id="L391">			setMoreColumnsTooltip(&quot;Scroll right to see more classes&quot;);</span>
+<span class="nc" id="L392">			setMoreRowsTooltip(&quot;Scroll down to see more stations&quot;);</span>
+<span class="nc" id="L393">			setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L394">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L395">			setBatchEditingEnabled(true);</span>
+
+<span class="nc" id="L397">			installKeyboardAction(COPYDOWN_ACTION);</span>
+<span class="nc" id="L398">			mouseHandler.getMenu().add(COPYDOWN_ACTION);</span>
+
+<span class="nc" id="L400">			help.addHelp(this,</span>
+					&quot;Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations&quot;);
+<span class="nc" id="L402">			help.addHelp(moreColumnsLabel, &quot;There are more classes: scroll right to see them&quot;);</span>
+<span class="nc" id="L403">			help.addHelp(moreRowsLabel, &quot;There are more rows: scroll down to see them&quot;);</span>
+<span class="nc" id="L404">			help.addHelp(selectAllButton, &quot;Click to select all cells&quot;);</span>
+<span class="nc" id="L405">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L406">			help.addHelp(tableHeader, &quot;Click, SHIFT-click or drag to select columns&quot;);</span>
+<span class="nc" id="L407">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L408">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select rows&quot;);</span>
+<span class="nc" id="L409">		}</span>
+
+		@Override
+		protected void updateActions() {
+<span class="nc" id="L413">			super.updateActions();</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">			COPYDOWN_ACTION.setEnabled(getSelectedColumnCount() &gt; 0);</span>
+<span class="nc" id="L415">		}</span>
+
+		/**
+		 * Copies the value of the anchor (focused) down to the end of its column
+		 */
+		protected void copyCellDown() {
+<span class="nc" id="L421">			stopEditing();</span>
+<span class="nc" id="L422">			int anchorRow = selectionModel.getAnchorSelectionIndex();</span>
+<span class="nc" id="L423">			ListSelectionModel csm = columnModel.getSelectionModel();</span>
+
+<span class="nc" id="L425">			LDTableModel dm = (LDTableModel) dataModel;</span>
+
+<span class="nc" id="L427">			dm.copyCellDown(anchorRow, 0);</span>
+
+<span class="nc" id="L429">			updateRows(anchorRow + 1, getRowCount());</span>
+<span class="nc" id="L430">		}</span>
+
+		/**
+		 * Fills in selected cells with values obtained evaluating &lt;code&gt;expr&lt;/code&gt;
+		 * @throws jmt.common.exception.ExpressionParseException if there were errors parsing expr
+		 */
+		protected void fillCells(String expr) throws ExpressionParseException {
+<span class="nc" id="L437">			stopEditing();</span>
+<span class="nc" id="L438">			int rowFrom = selectionModel.getMinSelectionIndex();</span>
+<span class="nc" id="L439">			int rowTo = selectionModel.getMaxSelectionIndex();</span>
+<span class="nc" id="L440">			ListSelectionModel csm = columnModel.getSelectionModel();</span>
+<span class="nc" id="L441">			int colFrom = csm.getMinSelectionIndex();</span>
+<span class="nc" id="L442">			int colTo = csm.getMaxSelectionIndex();</span>
+
+<span class="nc" id="L444">			((LDTableModel) dataModel).fillCells(expr, rowFrom, rowTo, colFrom, colTo);</span>
+<span class="nc" id="L445">		}</span>
+
+	}
+
+	/**
+	 * rows represent customer #, columns classes
+	 */
+	private class LDTableModel extends ExactTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L456">		LDTableModel() {</span>
+<span class="nc" id="L457">			prototype = new Double(1000);</span>
+<span class="nc" id="L458">			rowHeaderPrototype = &quot;99999&quot;;</span>
+<span class="nc" id="L459">		}</span>
+
+		public int getRowCount() {
+<span class="nc" id="L462">			return serviceTimes.length;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L466">			return 1;</span>
+		}
+
+		@Override
+		public String getColumnName(int index) {
+<span class="nc" id="L471">			return className;</span>
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc" id="L476">			return new Double(serviceTimes[rowIndex]);</span>
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc" id="L481">			return new Integer(rowIndex + 1);</span>
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+			try {
+<span class="nc" id="L487">				double newVal = Double.parseDouble((String) value);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">				if (newVal &gt;= 0) {</span>
+<span class="nc" id="L489">					serviceTimes[rowIndex] = newVal;</span>
+				}
+<span class="nc" id="L491">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L492">			}</span>
+<span class="nc" id="L493">		}</span>
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L497">			return true;</span>
+		}
+
+		@Override
+		public void clear(int row, int col) {
+<span class="nc" id="L502">			serviceTimes[row] = 0;</span>
+<span class="nc" id="L503">		}</span>
+
+		/**
+		 * Copy the contents of a cell down to the end of the column
+		 */
+		public void copyCellDown(int row, int col) {
+<span class="nc" id="L509">			double source = serviceTimes[row];</span>
+
+<span class="nc" id="L511">			int maxRow = serviceTimes.length;</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">			for (int r = row + 1; r &lt; maxRow; r++) {</span>
+<span class="nc" id="L513">				serviceTimes[r] = source;</span>
+			}
+<span class="nc" id="L515">		}</span>
+
+		/**
+		 * Fill in the cells within an area with the value of expr evaluated in their row index
+		 * @throws jmt.common.exception.ExpressionParseException if there were errors parsing expr
+		 */
+		public void fillCells(String expr, int rowFrom, int rowTo, int colFrom, int colTo) throws ExpressionParseException {
+<span class="nc" id="L522">			double[] x = new double[rowTo - rowFrom + 1];</span>
+
+			int i, r, c;
+
+<span class="nc bnc" id="L526" title="All 2 branches missed.">			for (r = rowTo + 1, i = x.length - 1; r &gt; rowFrom; r--, i--) {</span>
+<span class="nc" id="L527">				x[i] = r;</span>
+			}
+
+<span class="nc" id="L530">			double[] y = eval.evaluate(expr, x);</span>
+
+<span class="nc bnc" id="L532" title="All 2 branches missed.">			for (r = rowFrom, i = 0; r &lt;= rowTo; r++, i++) {</span>
+<span class="nc" id="L533">				serviceTimes[r] = y[i];</span>
+			}
+
+<span class="nc" id="L536">			fireTableRowsUpdated(rowFrom, rowTo);</span>
+<span class="nc" id="L537">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

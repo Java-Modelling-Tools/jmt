@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Matrix4.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.graphic</a> &gt; <span class="el_source">Matrix4.java</span></div><h1>Matrix4.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.graphic;
+
+import java.security.InvalidParameterException;
+
+/**
+ * Column-major 4x4 matrix, used for 3D computations (homogeneous coordinates).
+ * 
+ * @author Andrea Zoppi
+ * 
+ */
+public class Matrix4 {
+	// Column-major representation of the matrix in vector form.
+<span class="nc" id="L31">	protected float[]			m			= new float[ 16 ];</span>
+	
+	// Identity matrix.
+<span class="nc" id="L34">	public static final Matrix4	IDENTITY	= new Matrix4( 1.0f );</span>
+	
+	// Axes indices.
+	public static final int		X_INDEX		= 0;
+	public static final int		Y_INDEX		= 1;
+	public static final int		Z_INDEX		= 2;
+	
+	
+<span class="nc" id="L42">	public Matrix4() {</span>
+		// All zeroes by default
+<span class="nc" id="L44">	}</span>
+	
+
+	/**
+	 * Diagonal constructor.
+	 * 
+	 * @param scalar
+	 *            Scalar value to put on diagonal.
+	 */
+<span class="nc" id="L53">	public Matrix4( float scalar ) {</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		if ( scalar != 0.0f ) { // Avoid redundant assignments</span>
+<span class="nc bnc" id="L55" title="All 2 branches missed.">			for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L56">				set( i, i, scalar );</span>
+			}
+		}
+<span class="nc" id="L59">	}</span>
+	
+
+	/**
+	 * Copy constructor.
+	 * 
+	 * @param m
+	 *            Matrix to be copied.
+	 */
+<span class="nc" id="L68">	public Matrix4( Matrix4 m ) {</span>
+<span class="nc" id="L69">		set( m );</span>
+<span class="nc" id="L70">	}</span>
+	
+
+	/**
+	 * Array constructor.
+	 * 
+	 * @param a
+	 *            Array to be converted into a matrix.
+	 */
+<span class="nc" id="L79">	public Matrix4( float[] a ) {</span>
+<span class="nc" id="L80">		set( a );</span>
+<span class="nc" id="L81">	}</span>
+	
+
+	/**
+	 * Created a matrix given the position and the individual axes.
+	 * 
+	 * @param position
+	 *            Position vector.
+	 * @param left
+	 *            Left vector.
+	 * @param up
+	 *            Up vector.
+	 * @param forward
+	 *            Forward vector.
+	 */
+<span class="nc" id="L96">	public Matrix4( Vector4 position, Vector4 left, Vector4 up, Vector4 forward ) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		for ( int i = 0; i &lt; 3; i++ ) {</span>
+<span class="nc" id="L98">			set( i, 0, left.get( i ) );</span>
+<span class="nc" id="L99">			set( i, 1, up.get( i ) );</span>
+<span class="nc" id="L100">			set( i, 2, forward.get( i ) );</span>
+<span class="nc" id="L101">			set( i, 3, position.get( i ) );</span>
+		}
+<span class="nc" id="L103">		set( 3, 3, 1.0f );</span>
+<span class="nc" id="L104">	}</span>
+	
+
+	/**
+	 * Gets a matrix value.
+	 * 
+	 * @param r
+	 *            Row number.
+	 * @param c
+	 *            Column number.
+	 * @return Value at (row, column).
+	 */
+	public float get( int r, int c ) {
+<span class="nc" id="L117">		return m[(c &lt;&lt; 2) + r];</span>
+	}
+	
+
+	/**
+	 * Sets a matrix value.
+	 * 
+	 * @param r
+	 *            Row number.
+	 * @param c
+	 *            Column number.
+	 * @param value
+	 *            Value at (row, column).
+	 */
+	public void set( int r, int c, float value ) {
+<span class="nc" id="L132">		m[(c &lt;&lt; 2) + r] = value;</span>
+<span class="nc" id="L133">	}</span>
+	
+
+	/**
+	 * Sets all matrix values to the given value.
+	 * 
+	 * @param allValues
+	 *            Value to put in all cells.
+	 */
+	public void set( float allValues ) {
+<span class="nc bnc" id="L143" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L144">			m[i] = allValues;</span>
+		}
+<span class="nc" id="L146">	}</span>
+	
+
+	/**
+	 * Copies all values from an existing matrix.
+	 * 
+	 * @param m
+	 *            Matrix to be copied.
+	 */
+	public void set( Matrix4 m ) {
+<span class="nc bnc" id="L156" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L157">			this.m[i] = m.m[i];</span>
+		}
+<span class="nc" id="L159">	}</span>
+	
+
+	/**
+	 * Sets all values from a given matrix in column-major vector array form.
+	 * 
+	 * @param a
+	 *            Array to be converted into a matrix.
+	 */
+	public void set( float[] a ) {
+<span class="nc bnc" id="L169" title="All 2 branches missed.">		if ( a.length != 16 ) {</span>
+<span class="nc" id="L170">			throw new InvalidParameterException( &quot;Array length != 16&quot; );</span>
+		}
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L173">			m[i] = a[i];</span>
+		}
+<span class="nc" id="L175">	}</span>
+	
+
+	/**
+	 * Gets a single row vector.
+	 * 
+	 * @param r
+	 *            Row number.
+	 * @return The copied row vector.
+	 */
+	public Vector4 getRow( int r ) {
+<span class="nc" id="L186">		Vector4 res = new Vector4();</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">		for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L188">			res.v[i] = get( r, i );</span>
+		}
+<span class="nc" id="L190">		return res;</span>
+	}
+	
+
+	/**
+	 * Gets a single column vector.
+	 * 
+	 * @param c
+	 *            Column number.
+	 * @return The copied column vector.
+	 */
+	public Vector4 getColumn( int c ) {
+<span class="nc" id="L202">		Vector4 res = new Vector4();</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L204">			res.v[i] = get( i, c );</span>
+		}
+<span class="nc" id="L206">		return res;</span>
+	}
+	
+
+	/**
+	 * Sets a single row vector.
+	 * 
+	 * @param r
+	 *            Row number.
+	 * @param v
+	 *            Vector to be copied onto the row.
+	 */
+	public void setRow( int r, Vector4 v ) {
+<span class="nc bnc" id="L219" title="All 2 branches missed.">		for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L220">			set( r, i, v.v[i] );</span>
+		}
+<span class="nc" id="L222">	}</span>
+	
+
+	/**
+	 * Sets a single column vector.
+	 * 
+	 * @param r
+	 *            Column number.
+	 * @param v
+	 *            Vector to be copied onto the column.
+	 */
+	public void setColumn( int c, Vector4 v ) {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">		for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L235">			set( i, c, v.v[i] );</span>
+		}
+<span class="nc" id="L237">	}</span>
+	
+
+	/**
+	 * Sets the matrix to an identity matrix.
+	 */
+	public void setIdentity() {
+<span class="nc" id="L244">		set( IDENTITY );</span>
+<span class="nc" id="L245">	}</span>
+	
+
+	/**
+	 * Transposed version of the matrix.
+	 * 
+	 * @return A transposed copy of the matrix.
+	 */
+	public Matrix4 tr() {
+<span class="nc" id="L254">		Matrix4 t = new Matrix4();</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		for ( int r = 0; r &lt; 4; r++ ) {</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">			for ( int c = 0; c &lt; 4; c++ ) {</span>
+<span class="nc" id="L257">				t.set( r, c, this.get( c, r ) );</span>
+			}
+		}
+<span class="nc" id="L260">		return t;</span>
+	}
+	
+
+	/**
+	 * Self-transposes the matrix.
+	 */
+	public void trSelf() {
+<span class="nc bnc" id="L268" title="All 2 branches missed.">		for ( int r = 1; r &lt; 4; r++ ) {</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">			for ( int c = 0; c &lt; r; c++ ) {</span>
+<span class="nc" id="L270">				float t = get( c, r );</span>
+<span class="nc" id="L271">				set( c, r, get( r, c ) );</span>
+<span class="nc" id="L272">				set( r, c, t );</span>
+			}
+		}
+<span class="nc" id="L275">	}</span>
+	
+
+	/**
+	 * Computes the determinant of the matrix.
+	 * 
+	 * @return The matrix determinant.
+	 */
+	public float det() {
+		float p, m;
+		
+<span class="nc" id="L286">		p = get( 1, 1 ) * get( 2, 2 ) * get( 3, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L287">		p += get( 1, 1 ) * get( 3, 2 ) * get( 4, 3 ) * get( 2, 4 );</span>
+<span class="nc" id="L288">		p += get( 1, 1 ) * get( 4, 2 ) * get( 2, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L289">		p += get( 2, 1 ) * get( 1, 2 ) * get( 4, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L290">		p += get( 2, 1 ) * get( 3, 2 ) * get( 1, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L291">		p += get( 2, 1 ) * get( 4, 2 ) * get( 3, 3 ) * get( 1, 4 );</span>
+<span class="nc" id="L292">		p += get( 3, 1 ) * get( 1, 2 ) * get( 2, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L293">		p += get( 3, 1 ) * get( 2, 2 ) * get( 4, 3 ) * get( 1, 4 );</span>
+<span class="nc" id="L294">		p += get( 3, 1 ) * get( 4, 2 ) * get( 1, 3 ) * get( 2, 4 );</span>
+<span class="nc" id="L295">		p += get( 4, 1 ) * get( 1, 2 ) * get( 3, 3 ) * get( 2, 4 );</span>
+<span class="nc" id="L296">		p += get( 4, 1 ) * get( 2, 2 ) * get( 1, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L297">		p += get( 4, 1 ) * get( 3, 2 ) * get( 2, 3 ) * get( 1, 4 );</span>
+		
+<span class="nc" id="L299">		m = get( 1, 1 ) * get( 2, 2 ) * get( 4, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L300">		m += get( 1, 1 ) * get( 3, 2 ) * get( 2, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L301">		m += get( 1, 1 ) * get( 4, 2 ) * get( 3, 3 ) * get( 2, 4 );</span>
+<span class="nc" id="L302">		m += get( 2, 1 ) * get( 1, 2 ) * get( 3, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L303">		m += get( 2, 1 ) * get( 3, 2 ) * get( 4, 3 ) * get( 1, 4 );</span>
+<span class="nc" id="L304">		m += get( 2, 1 ) * get( 4, 2 ) * get( 1, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L305">		m += get( 3, 1 ) * get( 1, 2 ) * get( 4, 3 ) * get( 2, 4 );</span>
+<span class="nc" id="L306">		m += get( 3, 1 ) * get( 2, 2 ) * get( 1, 3 ) * get( 4, 4 );</span>
+<span class="nc" id="L307">		m += get( 3, 1 ) * get( 4, 2 ) * get( 2, 3 ) * get( 1, 4 );</span>
+<span class="nc" id="L308">		m += get( 4, 1 ) * get( 1, 2 ) * get( 2, 3 ) * get( 3, 4 );</span>
+<span class="nc" id="L309">		m += get( 4, 1 ) * get( 2, 2 ) * get( 3, 3 ) * get( 1, 4 );</span>
+<span class="nc" id="L310">		m += get( 4, 1 ) * get( 3, 2 ) * get( 1, 3 ) * get( 2, 4 );</span>
+		
+<span class="nc" id="L312">		return p - m;</span>
+	}
+	
+
+	/**
+	 * Computes an inverted copy of the matrix.
+	 * 
+	 * @return The inverted copy of the matrix.
+	 */
+	public Matrix4 inv() {
+<span class="nc" id="L322">		Matrix4 res = this.tr();</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">		for ( int i = 1; i &lt; 16; i += 2 ) {</span>
+<span class="nc" id="L324">			res.m[i] = -res.m[i]; // Algebraic complements</span>
+		}
+<span class="nc" id="L326">		res.divSelf( this.det() );</span>
+<span class="nc" id="L327">		return res;</span>
+	}
+	
+
+	/**
+	 * Self-inverts the matrix.
+	 */
+	public void invSelf() {
+<span class="nc" id="L335">		this.set( this.inv() );</span>
+<span class="nc" id="L336">	}</span>
+	
+
+	/**
+	 * Adds a matrix to this one.
+	 * 
+	 * @param m
+	 *            Matrix to be added.
+	 * @return The sum of the matrices.
+	 */
+	public Matrix4 add( Matrix4 m ) {
+<span class="nc" id="L347">		Matrix4 res = this.clone();</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L349">			res.m[i] += m.m[i];</span>
+		}
+<span class="nc" id="L351">		return res;</span>
+	}
+	
+
+	/**
+	 * Adds a matrix to itself.
+	 * 
+	 * @param m
+	 *            Matrix to be added.
+	 */
+	public void addSelf( Matrix4 m ) {
+<span class="nc bnc" id="L362" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L363">			this.m[i] += m.m[i];</span>
+		}
+<span class="nc" id="L365">	}</span>
+	
+
+	/**
+	 * Subtracts a mtrix to this one.
+	 * 
+	 * @param m
+	 *            Matrix to be subtracted
+	 * @return The difference between the matrices.
+	 */
+	public Matrix4 sub( Matrix4 m ) {
+<span class="nc" id="L376">		Matrix4 res = this.clone();</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L378">			res.m[i] -= m.m[i];</span>
+		}
+<span class="nc" id="L380">		return res;</span>
+	}
+	
+
+	/**
+	 * Subtracts a matrix to itself.
+	 * 
+	 * @param m
+	 *            Matrix to be subtracted.
+	 */
+	public void subSelf( Matrix4 m ) {
+<span class="nc bnc" id="L391" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L392">			this.m[i] -= m.m[i];</span>
+		}
+<span class="nc" id="L394">	}</span>
+	
+
+	/**
+	 * Multiplied copy of the matrix by a scalar value.
+	 * 
+	 * @param scalar
+	 *            Scalar value to be multiplied.
+	 * @return The multiplied matrix.
+	 */
+	public Matrix4 mult( float scalar ) {
+<span class="nc" id="L405">		Matrix4 res = this.clone();</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L407">			res.m[i] *= scalar;</span>
+		}
+<span class="nc" id="L409">		return res;</span>
+	}
+	
+
+	/**
+	 * Multiplies the matrix by another matrix.
+	 * 
+	 * @param m
+	 *            Matrix to be multiplied.
+	 * @return The multiplied matrix.
+	 */
+	public Matrix4 mult( Matrix4 m ) {
+<span class="nc" id="L421">		Matrix4 res = new Matrix4( 0.0f );</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">		for ( int r = 0; r &lt; 4; r++ ) {</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">			for ( int c = 0; c &lt; 4; c++ ) {</span>
+<span class="nc" id="L424">				float sum = 0.0f;</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">				for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L426">					sum += this.get( r, i ) * m.get( i, c );</span>
+				}
+<span class="nc" id="L428">				res.set( r, c, sum );</span>
+			}
+		}
+<span class="nc" id="L431">		return res;</span>
+	}
+	
+
+	/**
+	 * Multiplies the matrix by a vector.
+	 * 
+	 * @param v
+	 *            Vector to be multiplied.
+	 * @return The resultant vector (column).
+	 */
+	public Vector4 mult( Vector4 v ) {
+<span class="nc" id="L443">		Vector4 res = new Vector4( 0.0f );</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">		for ( int r = 0; r &lt; 4; r++ ) {</span>
+<span class="nc bnc" id="L445" title="All 2 branches missed.">			for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="nc" id="L446">				res.v[r] += this.get( r, i ) * v.v[i];</span>
+			}
+		}
+<span class="nc" id="L449">		return res;</span>
+	}
+	
+
+	/**
+	 * Multiplies itself by a scalar value.
+	 * 
+	 * @param scalar
+	 *            Scalar value to multiply by.
+	 */
+	public void multSelf( float scalar ) {
+<span class="nc bnc" id="L460" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L461">			this.m[i] *= scalar;</span>
+		}
+<span class="nc" id="L463">	}</span>
+	
+
+	/**
+	 * Multiplied itself by another matrix.
+	 * 
+	 * @param m
+	 *            Matrix to be multiplied by.
+	 */
+	public void multSelf( Matrix4 m ) {
+<span class="nc" id="L473">		this.set( this.mult( m ) );</span>
+<span class="nc" id="L474">	}</span>
+	
+
+	public Matrix4 div( float scalar ) {
+<span class="nc" id="L478">		Matrix4 res = this.clone();</span>
+<span class="nc" id="L479">		scalar = 1.0f / scalar;</span>
+<span class="nc bnc" id="L480" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L481">			res.m[i] *= scalar;</span>
+		}
+<span class="nc" id="L483">		return res;</span>
+	}
+	
+
+	public void divSelf( float scalar ) {
+<span class="nc" id="L488">		scalar = 1.0f / scalar;</span>
+<span class="nc bnc" id="L489" title="All 2 branches missed.">		for ( int i = 0; i &lt; 16; i++ ) {</span>
+<span class="nc" id="L490">			this.m[i] *= scalar;</span>
+		}
+<span class="nc" id="L492">	}</span>
+	
+
+	public Matrix4 trans( float dx, float dy, float dz ) {
+<span class="nc" id="L496">		Matrix4 res = this.clone();</span>
+<span class="nc" id="L497">		res.set( 0, 3, res.get( 0, 3 ) + dx );</span>
+<span class="nc" id="L498">		res.set( 1, 3, res.get( 1, 3 ) + dy );</span>
+<span class="nc" id="L499">		res.set( 2, 3, res.get( 2, 3 ) + dz );</span>
+<span class="nc" id="L500">		return res;</span>
+	}
+	
+
+	public Matrix4 trans( Vector4 dv ) {
+<span class="nc" id="L505">		Matrix4 res = this.clone();</span>
+<span class="nc" id="L506">		res.set( 0, 3, res.get( 0, 3 ) + dv.x() );</span>
+<span class="nc" id="L507">		res.set( 1, 3, res.get( 1, 3 ) + dv.y() );</span>
+<span class="nc" id="L508">		res.set( 2, 3, res.get( 2, 3 ) + dv.z() );</span>
+<span class="nc" id="L509">		return res;</span>
+	}
+	
+
+	public void transSelf( float dx, float dy, float dz ) {
+<span class="nc" id="L514">		this.set( 0, 3, this.get( 0, 3 ) + dx );</span>
+<span class="nc" id="L515">		this.set( 1, 3, this.get( 1, 3 ) + dy );</span>
+<span class="nc" id="L516">		this.set( 2, 3, this.get( 2, 3 ) + dz );</span>
+<span class="nc" id="L517">	}</span>
+	
+
+	public void transSelf( Vector4 dv ) {
+<span class="nc" id="L521">		transSelf( dv.x(), dv.y(), dv.z() );</span>
+<span class="nc" id="L522">	}</span>
+	
+
+	public float[] toArray() {
+<span class="nc" id="L526">		return m.clone();</span>
+	}
+	
+
+	@Override
+	public Matrix4 clone() {
+<span class="nc" id="L532">		return new Matrix4( this );</span>
+	}
+	
+
+	@Override
+	public String toString() {
+<span class="nc" id="L538">		StringBuilder sb = new StringBuilder( 512 );</span>
+<span class="nc" id="L539">		sb.append( &quot;[ &quot; );</span>
+		
+<span class="nc" id="L541">		sb.append( get( 0, 0 ) );</span>
+<span class="nc" id="L542">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L543">		sb.append( get( 0, 1 ) );</span>
+<span class="nc" id="L544">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L545">		sb.append( get( 0, 2 ) );</span>
+<span class="nc" id="L546">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L547">		sb.append( get( 0, 3 ) );</span>
+		
+<span class="nc" id="L549">		sb.append( &quot; ; &quot; );</span>
+		
+<span class="nc" id="L551">		sb.append( get( 1, 0 ) );</span>
+<span class="nc" id="L552">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L553">		sb.append( get( 1, 1 ) );</span>
+<span class="nc" id="L554">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L555">		sb.append( get( 1, 2 ) );</span>
+<span class="nc" id="L556">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L557">		sb.append( get( 1, 3 ) );</span>
+		
+<span class="nc" id="L559">		sb.append( &quot; ; &quot; );</span>
+		
+<span class="nc" id="L561">		sb.append( get( 2, 0 ) );</span>
+<span class="nc" id="L562">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L563">		sb.append( get( 2, 1 ) );</span>
+<span class="nc" id="L564">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L565">		sb.append( get( 2, 2 ) );</span>
+<span class="nc" id="L566">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L567">		sb.append( get( 2, 3 ) );</span>
+		
+<span class="nc" id="L569">		sb.append( &quot; ; &quot; );</span>
+		
+<span class="nc" id="L571">		sb.append( get( 3, 0 ) );</span>
+<span class="nc" id="L572">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L573">		sb.append( get( 3, 1 ) );</span>
+<span class="nc" id="L574">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L575">		sb.append( get( 3, 2 ) );</span>
+<span class="nc" id="L576">		sb.append( &quot;, &quot; );</span>
+<span class="nc" id="L577">		sb.append( get( 3, 3 ) );</span>
+		
+<span class="nc" id="L579">		sb.append( &quot; ]&quot; );</span>
+<span class="nc" id="L580">		return sb.toString();</span>
+	}
+	
+
+	public static Matrix4 createIdentity() {
+<span class="nc" id="L585">		return IDENTITY.clone();</span>
+	}
+	
+
+	public static Matrix4 createTranslation( float dx, float dy, float dz ) {
+<span class="nc" id="L590">		Matrix4 res = createIdentity();</span>
+<span class="nc" id="L591">		res.set( 0, 3, dx );</span>
+<span class="nc" id="L592">		res.set( 1, 3, dy );</span>
+<span class="nc" id="L593">		res.set( 2, 3, dz );</span>
+<span class="nc" id="L594">		return res;</span>
+	}
+	
+
+	public static Matrix4 createTranslationOnly( float dx, float dy, float dz ) {
+<span class="nc" id="L599">		Matrix4 res = new Matrix4( 0.0f );</span>
+<span class="nc" id="L600">		res.set( 0, 3, dx );</span>
+<span class="nc" id="L601">		res.set( 1, 3, dy );</span>
+<span class="nc" id="L602">		res.set( 2, 3, dz );</span>
+<span class="nc" id="L603">		return res;</span>
+	}
+	
+
+	public static Matrix4 createRotationXYZ( float rx, float ry, float rz ) {
+<span class="nc" id="L608">		Matrix4 res = null;</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">		if ( rx != 0.0f ) {</span>
+<span class="nc" id="L610">			res = createRotationX( rx );</span>
+		}
+<span class="nc bnc" id="L612" title="All 2 branches missed.">		if ( ry != 0.0f ) {</span>
+<span class="nc bnc" id="L613" title="All 2 branches missed.">			if ( res == null ) {</span>
+<span class="nc" id="L614">				res = createRotationY( ry );</span>
+			}
+			else {
+<span class="nc" id="L617">				res.multSelf( createRotationY( ry ) );</span>
+			}
+		}
+<span class="nc bnc" id="L620" title="All 2 branches missed.">		if ( rz != 0.0f ) {</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">			if ( res == null ) {</span>
+<span class="nc" id="L622">				res = createRotationZ( rz );</span>
+			}
+			else {
+<span class="nc" id="L625">				res.multSelf( createRotationZ( rz ) );</span>
+			}
+		}
+<span class="nc bnc" id="L628" title="All 2 branches missed.">		return (res != null) ? res : createIdentity();</span>
+	}
+	
+
+	public static Matrix4 createRotationZXY( float rx, float ry, float rz ) {
+<span class="nc" id="L633">		Matrix4 res = null;</span>
+<span class="nc bnc" id="L634" title="All 2 branches missed.">		if ( rz != 0.0f ) {</span>
+<span class="nc" id="L635">			res = createRotationZ( rz );</span>
+		}
+<span class="nc bnc" id="L637" title="All 2 branches missed.">		if ( rx != 0.0f ) {</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">			if ( res == null ) {</span>
+<span class="nc" id="L639">				res = createRotationX( rx );</span>
+			}
+			else {
+<span class="nc" id="L642">				res.multSelf( createRotationX( rx ) );</span>
+			}
+		}
+<span class="nc bnc" id="L645" title="All 2 branches missed.">		if ( ry != 0.0f ) {</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">			if ( res == null ) {</span>
+<span class="nc" id="L647">				res = createRotationY( ry );</span>
+			}
+			else {
+<span class="nc" id="L650">				res.multSelf( createRotationY( ry ) );</span>
+			}
+		}
+<span class="nc bnc" id="L653" title="All 2 branches missed.">		return (res != null) ? res : createIdentity();</span>
+	}
+	
+
+	public static Matrix4 createRotationX( float rad ) {
+<span class="nc" id="L658">		Matrix4 res = createIdentity();</span>
+<span class="nc bnc" id="L659" title="All 2 branches missed.">		if ( rad != 0.0f ) {</span>
+<span class="nc" id="L660">			float c = (float)Math.cos( rad );</span>
+<span class="nc" id="L661">			float s = (float)Math.sin( rad );</span>
+<span class="nc" id="L662">			res.set( 1, 1, c );</span>
+<span class="nc" id="L663">			res.set( 2, 2, c );</span>
+<span class="nc" id="L664">			res.set( 1, 2, -s );</span>
+<span class="nc" id="L665">			res.set( 2, 1, s );</span>
+		}
+<span class="nc" id="L667">		return res;</span>
+		
+	}
+	
+
+	public static Matrix4 createRotationY( float rad ) {
+<span class="nc" id="L673">		Matrix4 res = createIdentity();</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">		if ( rad != 0.0f ) {</span>
+<span class="nc" id="L675">			float c = (float)Math.cos( rad );</span>
+<span class="nc" id="L676">			float s = (float)Math.sin( rad );</span>
+<span class="nc" id="L677">			res.set( 0, 0, c );</span>
+<span class="nc" id="L678">			res.set( 2, 2, c );</span>
+<span class="nc" id="L679">			res.set( 0, 2, s );</span>
+<span class="nc" id="L680">			res.set( 2, 0, -s );</span>
+		}
+<span class="nc" id="L682">		return res;</span>
+	}
+	
+
+	public static Matrix4 createRotationZ( float rad ) {
+<span class="nc" id="L687">		Matrix4 res = createIdentity();</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">		if ( rad != 0.0f ) {</span>
+<span class="nc" id="L689">			float c = (float)Math.cos( rad );</span>
+<span class="nc" id="L690">			float s = (float)Math.sin( rad );</span>
+<span class="nc" id="L691">			res.set( 0, 0, c );</span>
+<span class="nc" id="L692">			res.set( 1, 1, c );</span>
+<span class="nc" id="L693">			res.set( 0, 1, -s );</span>
+<span class="nc" id="L694">			res.set( 1, 0, s );</span>
+		}
+<span class="nc" id="L696">		return res;</span>
+	}
+	
+
+	public static Matrix4 createDiagonal( float allValues ) {
+<span class="nc" id="L701">		return new Matrix4( allValues );</span>
+	}
+	
+
+	public static Matrix4 createDiagonal( float d00, float d11, float d22, float d33 ) {
+<span class="nc" id="L706">		Matrix4 res = new Matrix4();</span>
+<span class="nc" id="L707">		res.set( 0, 0, d00 );</span>
+<span class="nc" id="L708">		res.set( 1, 1, d11 );</span>
+<span class="nc" id="L709">		res.set( 2, 2, d22 );</span>
+<span class="nc" id="L710">		res.set( 3, 3, d33 );</span>
+<span class="nc" id="L711">		return res;</span>
+	}
+	
+
+	public static Matrix4 createScale( float xyzScale ) {
+<span class="nc" id="L716">		return createDiagonal( xyzScale, xyzScale, xyzScale, 1.0f );</span>
+	}
+	
+
+	public static Matrix4 createScale( float sx, float sy, float sz ) {
+<span class="nc" id="L721">		return createDiagonal( sx, sy, sz, 1.0f );</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

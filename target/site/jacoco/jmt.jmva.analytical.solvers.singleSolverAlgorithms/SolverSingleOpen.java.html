@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverSingleOpen.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.singleSolverAlgorithms</a> &gt; <span class="el_source">SolverSingleOpen.java</span></div><h1>SolverSingleOpen.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical.solvers.singleSolverAlgorithms;
+
+import jmt.jmva.analytical.solvers.Solver;
+
+/**
+ * Solves a single class open model. &lt;br&gt;
+ * To read about the formulas used to solve the system, see:&lt;br&gt;
+ * &lt;em&gt;
+ * E.D. Lazowska, J. Zahorjan, G.S. Graham, K. Sevcik&lt;br&gt;
+ * Quantitative System Performance,&lt;br&gt;
+ * Prentice Hall, 1984&lt;br&gt;
+ * &lt;/em&gt;
+ *
+ * NOT USED
+ * @author Federico Granata, Stefano Omini
+ *
+ */
+public class SolverSingleOpen extends Solver {
+
+	/**
+	 * arrival rate
+	 */
+	protected double lambda;
+
+	/**
+	 * Constructor
+	 * @param lambda the arrival rate
+	 * @param stations the number of stations
+	 *
+	 */
+<span class="nc" id="L49">	public SolverSingleOpen(double lambda, int stations) {</span>
+<span class="nc" id="L50">		this.lambda = lambda;</span>
+<span class="nc" id="L51">		this.stations = stations;</span>
+
+<span class="nc" id="L53">		name = new String[stations];</span>
+<span class="nc" id="L54">		type = new int[stations];</span>
+		//the matrix turns into an array, because for SolverSingleOpen LD centers are not allowed
+<span class="nc" id="L56">		servTime = new double[stations][1];</span>
+<span class="nc" id="L57">		visits = new double[stations];</span>
+
+<span class="nc" id="L59">		throughput = new double[stations];</span>
+<span class="nc" id="L60">		queueLen = new double[stations];</span>
+<span class="nc" id="L61">		utilization = new double[stations];</span>
+<span class="nc" id="L62">		residenceTime = new double[stations];</span>
+<span class="nc" id="L63">	}</span>
+
+	//TODO: we should return a boolean in the case where a solution is not possible (LD)
+
+	//NEW
+	//the old method &quot;solve&quot; has been renamed &quot;solveLI&quot;, since LD stations were not
+	//allowed
+	//a new method &quot;solve&quot; has been introduced to check that no LD stations are contained
+	//in the system.
+	//
+	//@author Stefano Omini
+
+	/**
+	 * Solves the system, after checking that the system contains no LD station
+	 * (only LI and DELAY stations are allowed).
+	 &lt;br&gt;* &quot;input(...)&quot; method must have been called before solving the model!!
+	 */
+	@Override
+	public void solve() {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+			//checks if LD stations are present in the system
+<span class="nc bnc" id="L84" title="All 2 branches missed.">			if (type[i] == Solver.LD) {</span>
+<span class="nc" id="L85">				return;</span>
+			}
+		}
+		//no LD stations present: solve the system
+<span class="nc" id="L89">		solveLI();</span>
+<span class="nc" id="L90">		return;</span>
+	}
+
+	/**
+	 * Solves the system with only LI and DELAY stations.
+	 */
+	public void solveLI() {
+		//initialize system aggregate measures
+<span class="nc" id="L98">		totRespTime = totUser = 0;</span>
+
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		for (int i = 0; i &lt; throughput.length; i++) {</span>
+			//station utilization
+<span class="nc" id="L102">			utilization[i] = lambda * visits[i] * servTime[i][0];</span>
+
+			//station residence time
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			if (type[i] == Solver.DELAY) {</span>
+<span class="nc" id="L106">				residenceTime[i] = visits[i] * servTime[i][0];</span>
+			} else {
+<span class="nc" id="L108">				residenceTime[i] = visits[i] * servTime[i][0] / (1 - utilization[i]);</span>
+			}
+
+			//station queue length
+<span class="nc" id="L112">			queueLen[i] = residenceTime[i] * lambda;</span>
+
+			//system response time
+<span class="nc" id="L115">			totRespTime += residenceTime[i];</span>
+
+			//average number in system
+<span class="nc" id="L118">			totUser += queueLen[i];</span>
+
+			//station throughput
+			//OLD
+			//throughput[i] = queueLen[i] / residenceTime[i];
+<span class="nc" id="L123">			throughput[i] = lambda * visits[i];</span>
+		}
+		//system throughput
+<span class="nc" id="L126">		totThroughput = lambda;</span>
+<span class="nc" id="L127">	}</span>
+
+	//end NEW
+
+	//NEW
+	//@author Stefano Omini
+	//TODO add check on saturation
+	/**
+	 * A system is said to have sufficient capacity to process a given load
+	 * &lt;tt&gt;lambda&lt;/tt&gt; if no service center is saturated as a result of such a load.
+	 * &lt;br&gt;
+	 * WARNING: This method should be called before solving the system.
+	 * @return true if sufficient capacity exists for the given workload, false otherwise
+	 */
+	@Override
+	public boolean hasSufficientProcessingCapacity() {
+		//load lambda must be &lt; 1/Dmax (that is Uj &lt; 1 for all stations)
+		//otherwise the system has no sufficient processing capacity
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		for (int j = 0; j &lt; stations; j++) {</span>
+			//utilization for station j
+			//Uj = lambda * Vj * Sj = lambda * Dj
+<span class="nc" id="L148">			double utiliz_j = lambda * visits[j] * servTime[j][0];</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">			if (utiliz_j &gt;= 1) {</span>
+<span class="nc" id="L150">				return false;</span>
+			}
+		}
+		//there are no stations with utilization &gt;= 1
+<span class="nc" id="L154">		return true;</span>
+	}
+	//end NEW
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

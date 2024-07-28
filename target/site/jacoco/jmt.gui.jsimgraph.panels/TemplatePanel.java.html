@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TemplatePanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.panels</a> &gt; <span class="el_source">TemplatePanel.java</span></div><h1>TemplatePanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.panels.CustomizableDialogFactory;
+import jmt.gui.common.xml.TemplateFileOperation;
+import jmt.gui.jsimgraph.controller.Mediator;
+import jmt.gui.jsimgraph.template.ITemplate;
+import jmt.gui.jsimgraph.template.TemplateConstants;
+import jmt.gui.jsimgraph.template.TemplateData;
+import org.apache.commons.io.FileUtils;
+
+/**
+ * @author S Jiang
+ * 
+ */
+public class TemplatePanel extends WizardPanel implements TemplateConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private Mediator mediator;
+	private CustomizableDialogFactory customizableDialogFactory;
+	private TemplateData[] templates;
+	private TemplateTable templateTable;
+	private JScrollPane tempPane;
+	private TemplatePanel parent;
+	private ITemplate myTemp;
+	private JButton remove;
+	private JButton update;
+
+<span class="nc" id="L86">	public TemplatePanel(Mediator mediator) {</span>
+<span class="nc" id="L87">		this.mediator = mediator;</span>
+<span class="nc" id="L88">		customizableDialogFactory = new CustomizableDialogFactory(mediator.getMainWindow());</span>
+<span class="nc" id="L89">		parent = this;</span>
+<span class="nc" id="L90">		initComponents();</span>
+<span class="nc" id="L91">	}</span>
+
+	public void updateTemplates() {
+<span class="nc" id="L94">		templates = TemplateFileOperation.readTemplates(TEMPLATE_FOLDER);</span>
+<span class="nc" id="L95">		templateTable.tableChanged(new TableModelEvent(templateTable.getModel()));</span>
+<span class="nc" id="L96">	}</span>
+
+	public void initComponents() {
+<span class="nc" id="L99">		templates = TemplateFileOperation.readTemplates(TEMPLATE_FOLDER);</span>
+<span class="nc" id="L100">		templateTable = new TemplateTable();</span>
+
+<span class="nc" id="L102">		this.setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L104">		JButton add = new JButton(&quot;Add/See all&quot;);</span>
+<span class="nc" id="L105">		remove = new JButton(&quot;Remove&quot;);</span>
+<span class="nc" id="L106">		remove.setEnabled(false);</span>
+<span class="nc" id="L107">		update = new JButton(&quot;Update&quot;);</span>
+<span class="nc" id="L108">		update.setEnabled(false);</span>
+<span class="nc" id="L109">		JButton create = new JButton(&quot;Instantiate&quot;);</span>
+<span class="nc" id="L110">		JButton close = new JButton(&quot;Close&quot;);</span>
+
+<span class="nc" id="L112">		add.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L113">		remove.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L114">		update.setPreferredSize(new Dimension((int)(160 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L115">		create.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L116">		close.setPreferredSize(new Dimension((int)(120 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+
+		// adding a new template from website
+<span class="nc" id="L119">		add.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L121">				customizableDialogFactory.getDialog(1000, 600, new TemplateAddingPanel(parent), &quot;Add/See Available Templates&quot;);</span>
+<span class="nc" id="L122">			}</span>
+		});
+
+		// remove an existing template
+<span class="nc" id="L126">		remove.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">				for (int i : templateTable.getSelectedRows()) {</span>
+<span class="nc" id="L130">					templates[i].getFile().delete();</span>
+				}
+<span class="nc" id="L132">				updateTemplates();</span>
+<span class="nc" id="L133">			}</span>
+		});
+
+<span class="nc" id="L136">		update.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L139">				List&lt;TemplateData&gt; updateList = new ArrayList&lt;TemplateData&gt;();</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">				for (int i : templateTable.getSelectedRows()) {</span>
+<span class="nc" id="L141">					updateList.add(templates[i]);</span>
+				}
+<span class="nc bnc" id="L143" title="All 2 branches missed.">				if (updateList.size() &gt; 0) {</span>
+<span class="nc" id="L144">					customizableDialogFactory.getDialog(520, 200, new TemplateUpdatePanel(TemplatePanel.this, updateList), &quot;Updating...&quot;);</span>
+<span class="nc" id="L145">					updateTemplates();</span>
+				}
+<span class="nc" id="L147">			}</span>
+		});
+
+		// invoke the selected template
+<span class="nc" id="L151">		create.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L154">				openTemplate();</span>
+<span class="nc" id="L155">			}</span>
+		});
+
+<span class="nc" id="L158">		close.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L161">				SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+<span class="nc" id="L162">			}</span>
+		});
+
+<span class="nc" id="L165">		templateTable.addMouseListener(new MouseAdapter() {</span>
+			public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">				if (e.getClickCount() == 2) {</span>
+<span class="nc" id="L168">					openTemplate();</span>
+				}
+<span class="nc" id="L170">			}</span>
+		});
+
+<span class="nc" id="L173">		ListSelectionModel selectionModel = templateTable.getSelectionModel();</span>
+<span class="nc" id="L174">		selectionModel.addListSelectionListener(new ListSelectionListener() {</span>
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">				if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L178">					return;</span>
+				}
+<span class="nc bnc" id="L180" title="All 2 branches missed.">				if (templateTable.getSelectedRowCount() &gt; 0) {</span>
+<span class="nc" id="L181">					remove.setEnabled(true);</span>
+<span class="nc" id="L182">					update.setEnabled(true);</span>
+				} else {
+<span class="nc" id="L184">					remove.setEnabled(false);</span>
+<span class="nc" id="L185">					update.setEnabled(false);</span>
+				}
+<span class="nc" id="L187">			}</span>
+		});
+
+<span class="nc" id="L190">		JPanel buttonPanel = new JPanel();</span>
+<span class="nc" id="L191">		buttonPanel.add(add);</span>
+<span class="nc" id="L192">		buttonPanel.add(remove);</span>
+<span class="nc" id="L193">		buttonPanel.add(update);</span>
+
+<span class="nc" id="L195">		JPanel bottomPanel = new JPanel();</span>
+<span class="nc" id="L196">		bottomPanel.add(create);</span>
+<span class="nc" id="L197">		bottomPanel.add(close);</span>
+
+<span class="nc" id="L199">		this.add(buttonPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L200">		tempPane = new JScrollPane();</span>
+<span class="nc" id="L201">		tempPane.getViewport().add(templateTable);</span>
+<span class="nc" id="L202">		this.add(tempPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L203">		this.add(bottomPanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L204">	}</span>
+
+	public void openTemplate() {
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		if (Defaults.getAsBoolean(&quot;showTemplateDialog&quot;)) {</span>
+<span class="nc" id="L208">			JOptionPane.showMessageDialog(parent, &quot;Each template has some default values for the parameters. &quot;</span>
+						+ &quot;Once instantiated you may change them according to your needs.&quot;);
+<span class="nc" id="L210">			Defaults.set(&quot;showTemplateDialog&quot;, &quot;false&quot;);</span>
+<span class="nc" id="L211">			Defaults.save();</span>
+		}
+
+<span class="nc" id="L214">		int selectedRow = templateTable.getSelectedRow();</span>
+<span class="nc bnc" id="L215" title="All 4 branches missed.">		if (selectedRow != -1 &amp;&amp; templateTable.getRowCount() != 0) {</span>
+			// close the template panel dialog
+<span class="nc" id="L217">			SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+			try {
+<span class="nc" id="L219">				File template = templates[selectedRow].getFile();</span>
+<span class="nc" id="L220">				File copy = File.createTempFile(template.getName(), &quot;&quot;);</span>
+<span class="nc" id="L221">				FileUtils.copyFile(templates[selectedRow].getFile(), copy);</span>
+<span class="nc" id="L222">				JarFile templateJarFile = new JarFile(copy);</span>
+
+				// get the path of template
+<span class="nc" id="L225">				Manifest m = templateJarFile.getManifest();</span>
+<span class="nc" id="L226">				String mainClass = m.getMainAttributes().getValue(&quot;Main-Class&quot;).toString();</span>
+
+<span class="nc" id="L228">				URL url = new URL(&quot;file:&quot; + copy.getAbsolutePath());</span>
+<span class="nc" id="L229">				URLClassLoader myLoader = new URLClassLoader(new URL[] { url }, Thread.currentThread().getContextClassLoader());</span>
+<span class="nc" id="L230">				Class&lt;?&gt; myClass = myLoader.loadClass(mainClass);</span>
+
+				// instantiate the template
+<span class="nc" id="L233">				myTemp = (ITemplate) myClass.getConstructor(mediator.getClass()).newInstance(mediator);</span>
+				// shows the input panel of the template
+<span class="nc" id="L235">				myTemp.showDialog(mediator.getMainWindow());</span>
+
+<span class="nc" id="L237">				templateJarFile.close();</span>
+<span class="nc" id="L238">				myLoader.close();</span>
+<span class="nc" id="L239">			} catch (Exception e) {</span>
+<span class="nc" id="L240">				e.printStackTrace();</span>
+<span class="nc" id="L241">			}</span>
+		}
+<span class="nc" id="L243">	}</span>
+
+	public TemplateData[] getTemplates() {
+<span class="nc" id="L246">		return this.templates;</span>
+	}
+
+	// table shows the local template list
+	protected class TemplateTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L254">		public TemplateTable() {</span>
+<span class="nc" id="L255">			setModel(new TemplateTableModel());</span>
+<span class="nc" id="L256">			sizeColumns();</span>
+<span class="nc" id="L257">			setRowHeight(CELL_HEIGHT);</span>
+<span class="nc" id="L258">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L259">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L262" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L263">				getColumnModel().getColumn(i).setPreferredWidth(((TemplateTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L265">		}</span>
+
+		@Override
+		public String getToolTipText(MouseEvent e) {
+<span class="nc" id="L269">			String tip = null;</span>
+<span class="nc" id="L270">			Point p = e.getPoint();</span>
+<span class="nc" id="L271">			int rowIndex = rowAtPoint(p);</span>
+			try {
+<span class="nc" id="L273">				tip = templates[rowIndex].getToolTip();</span>
+<span class="nc" id="L274">			} catch (Exception e1) {</span>
+<span class="nc" id="L275">				e1.printStackTrace();</span>
+<span class="nc" id="L276">			}</span>
+<span class="nc" id="L277">			return tip;</span>
+		}
+
+	}
+
+<span class="nc" id="L282">	protected class TemplateTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L286">		private String[] columnNames = { &quot;Template&quot;, &quot;Version&quot;, &quot;Description&quot;, &quot;Last Downloaded&quot; };</span>
+<span class="nc" id="L287">		public int[] columnSizes = new int[] { 140, 80, 320, 160 };</span>
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L291">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L296">			return columnNames.length;</span>
+		}
+
+		@Override
+		public int getRowCount() {
+<span class="nc" id="L301">			return templates.length;</span>
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L307">				return templates[rowIndex].getName();</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L309">				return templates[rowIndex].getVersion();</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">			} else if (columnIndex == 2) {</span>
+<span class="nc" id="L311">				return templates[rowIndex].getShortDescription();</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">			} else if (columnIndex == 3) {</span>
+<span class="nc" id="L313">				Path temPath = Paths.get(templates[rowIndex].getFile().getAbsolutePath());</span>
+				try {
+<span class="nc" id="L315">					BasicFileAttributes view = Files.getFileAttributeView(temPath, BasicFileAttributeView.class).readAttributes();</span>
+<span class="nc" id="L316">					FileTime modifiedTime = view.lastModifiedTime();</span>
+<span class="nc" id="L317">					DateFormat df = new SimpleDateFormat(&quot;HH:mm:ss dd/MM/yyyy&quot;);</span>
+<span class="nc" id="L318">					String cTime = df.format(modifiedTime.toMillis());</span>
+<span class="nc" id="L319">					return cTime;</span>
+<span class="nc" id="L320">				} catch (IOException e) {</span>
+<span class="nc" id="L321">					return &quot;--&quot;;</span>
+				}
+			} else {
+<span class="nc" id="L324">				return null;</span>
+			}
+		}
+
+	}
+
+	@Override
+	public String getName() {
+<span class="nc" id="L332">		return &quot;Template&quot;;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

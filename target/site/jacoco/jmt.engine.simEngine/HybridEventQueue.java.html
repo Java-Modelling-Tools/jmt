@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HybridEventQueue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.simEngine</a> &gt; <span class="el_source">HybridEventQueue.java</span></div><h1>HybridEventQueue.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.simEngine;
+
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.PriorityQueue;
+import java.util.Queue;
+
+import jmt.framework.data.CircularList;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; HybridEventQueue&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * An hybrid implementation for the EventQueue interface. Future events are inserted and retrieved in a sorted
+ * binary heap with log(n) performances, while events for the current time interval are inserted and retrieved
+ * using an unbounded circular list. 
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 12/mag/2009
+ * &lt;b&gt;Time:&lt;/b&gt; 18:40:26&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.1
+ */
+public class HybridEventQueue implements EventQueue {
+
+	private static final int DEFAULT_INITIAL_CAPACITY = 111;
+
+	/** Current events */
+	private CircularList&lt;SimEvent&gt; current;
+	/** Future events*/
+	private PriorityQueue&lt;SimEvent&gt; future;
+	/** Current time. All events in current event queue will have this time. */
+	private double currentTime;
+	/** A counter used to order future events basing on event time and insertion order */
+	private int order;
+
+<span class="nc" id="L53">	public HybridEventQueue() {</span>
+<span class="nc" id="L54">		clear();</span>
+<span class="nc" id="L55">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#add(jmt.engine.simEngine.SimEvent)
+	 */
+	public boolean add(SimEvent event) {
+<span class="nc" id="L61">		double eventTime = event.eventTime();</span>
+<span class="nc bnc" id="L62" title="All 2 branches missed.">		if (eventTime == currentTime) {</span>
+<span class="nc" id="L63">			current.add(event);</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		} else if (eventTime &gt; currentTime) {</span>
+<span class="nc" id="L65">			addToFuture(event);</span>
+		} else {
+			// Probably this condition will never happen but we are robust to it. We leave to the simulation
+			// engine the choice to deal with past events.
+<span class="nc" id="L69">			moveCurrentToFuture();</span>
+<span class="nc" id="L70">			current.add(event);</span>
+<span class="nc" id="L71">			currentTime = eventTime;</span>
+		}
+<span class="nc" id="L73">		return true;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#clear()
+	 */
+	public void clear() {
+<span class="nc" id="L80">		current = new CircularList&lt;SimEvent&gt;();</span>
+<span class="nc" id="L81">		future = new PriorityQueue&lt;SimEvent&gt;(DEFAULT_INITIAL_CAPACITY, new SimEventComparator());</span>
+<span class="nc" id="L82">		currentTime = 0.0;</span>
+<span class="nc" id="L83">		order = Integer.MIN_VALUE;</span>
+<span class="nc" id="L84">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#iterator()
+	 */
+	public Iterator&lt;SimEvent&gt; iterator() {
+<span class="nc" id="L90">		return new Iter();</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#peek()
+	 */
+	public SimEvent peek() {
+<span class="nc" id="L97">		handleCurrent();</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">		if (current.size() &gt; 0) {</span>
+<span class="nc" id="L99">			return current.getFirst();</span>
+		} else {
+<span class="nc" id="L101">			return null;</span>
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#pop()
+	 */
+	public SimEvent pop() {
+<span class="nc" id="L109">		handleCurrent();</span>
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (current.size() &gt; 0) {</span>
+<span class="nc" id="L111">			return current.removeFirst();</span>
+		} else {
+<span class="nc" id="L113">			return null;</span>
+		}
+	}
+
+	/**
+	 * This method will move events from future to current queue if it is empty.
+	 */
+	private void handleCurrent() {
+<span class="nc bnc" id="L121" title="All 4 branches missed.">		if (current.size() == 0 &amp;&amp; future.size() &gt; 0) {</span>
+<span class="nc" id="L122">			SimEvent first = future.remove();</span>
+<span class="nc" id="L123">			current.add(first);</span>
+<span class="nc" id="L124">			currentTime = first.eventTime();</span>
+<span class="nc bnc" id="L125" title="All 4 branches missed.">			while (future.size() &gt; 0 &amp;&amp; future.peek().eventTime() == currentTime) {</span>
+<span class="nc" id="L126">				current.add(future.remove());</span>
+			}
+		}
+<span class="nc" id="L129">	}</span>
+
+	/**
+	 * This method will move the entire current queue to future. This is needed when an event 
+	 * older than current one is queued. Probably will never happen because the simulator currently 
+	 * avoid this.
+	 */
+	private void moveCurrentToFuture() {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		while (current.size() &gt; 0) {</span>
+<span class="nc" id="L138">			addToFuture(current.removeFirst());</span>
+		}
+<span class="nc" id="L140">	}</span>
+
+	/**
+	 * This method will build a new future buffer with new order indices. As the total number of indices is
+	 * 2^32 this method probably will never be called.
+	 */
+	private void rebuildOrderIndices() {
+<span class="nc" id="L147">		Queue&lt;SimEvent&gt; tmp = future;</span>
+<span class="nc" id="L148">		future = new PriorityQueue&lt;SimEvent&gt;(DEFAULT_INITIAL_CAPACITY, new SimEventComparator());</span>
+<span class="nc" id="L149">		order = Integer.MIN_VALUE;</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		while (tmp.size() &gt; 0) {</span>
+<span class="nc" id="L151">			addToFuture(tmp.remove());</span>
+		}
+<span class="nc" id="L153">	}</span>
+
+	/**
+	 * Adds an event to future queue.
+	 * @param event
+	 */
+	private void addToFuture(SimEvent event) {
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		if (order == Integer.MAX_VALUE) {</span>
+			// Need to rebuild future events queue because order indices were finished. Probably this case will never happen
+			// but we are robust to it.
+<span class="nc" id="L163">			rebuildOrderIndices();</span>
+		}
+<span class="nc" id="L165">		event.internalOrdering = order++;</span>
+<span class="nc" id="L166">		future.add(event);</span>
+<span class="nc" id="L167">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#remove(jmt.engine.simEngine.SimEvent)
+	 */
+	public boolean remove(SimEvent event) {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		if (event.eventTime() == currentTime) {</span>
+<span class="nc" id="L174">			return current.remove(event);</span>
+		} else {
+<span class="nc" id="L176">			return future.remove(event);</span>
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.simEngine.EventQueue#size()
+	 */
+	public int size() {
+<span class="nc" id="L184">		return current.size() + future.size();</span>
+	}
+
+	/**
+	 * Internal Iterator implementation
+	 */
+<span class="nc" id="L190">	private class Iter implements Iterator&lt;SimEvent&gt; {</span>
+<span class="nc" id="L191">		private Iterator&lt;SimEvent&gt; currentIter = current.iterator();</span>
+<span class="nc" id="L192">		private Iterator&lt;SimEvent&gt; futureIter = future.iterator();</span>
+<span class="nc" id="L193">		private boolean isCurrent = true;</span>
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#hasNext()
+		 */
+		public boolean hasNext() {
+<span class="nc bnc" id="L199" title="All 4 branches missed.">			return currentIter.hasNext() || futureIter.hasNext();</span>
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#next()
+		 */
+		public SimEvent next() {
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (currentIter.hasNext()) {</span>
+<span class="nc" id="L207">				isCurrent = true;</span>
+<span class="nc" id="L208">				return currentIter.next();</span>
+			} else {
+<span class="nc" id="L210">				isCurrent = false;</span>
+<span class="nc" id="L211">				return futureIter.next();</span>
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see java.util.Iterator#remove()
+		 */
+		public void remove() {
+<span class="nc bnc" id="L219" title="All 2 branches missed.">			if (isCurrent) {</span>
+<span class="nc" id="L220">				currentIter.remove();</span>
+			} else {
+<span class="nc" id="L222">				futureIter.remove();</span>
+			}
+<span class="nc" id="L224">		}</span>
+
+	}
+
+	private static class SimEventComparator implements Comparator&lt;SimEvent&gt; {
+		/* (non-Javadoc)
+		 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+		 */
+		public int compare(SimEvent e1, SimEvent e2) {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			if (e1.eventTime() &gt; e2.eventTime()) {</span>
+<span class="nc" id="L234">				return 1;</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			} else if (e1.eventTime() &lt; e2.eventTime()) {</span>
+<span class="nc" id="L236">				return -1;</span>
+			} else {
+<span class="nc bnc" id="L238" title="All 2 branches missed.">				if (e1.internalOrdering &gt; e2.internalOrdering) {</span>
+<span class="nc" id="L239">					return 1;</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">				} else if (e1.internalOrdering &lt; e2.internalOrdering) {</span>
+<span class="nc" id="L241">					return -1;</span>
+				} else {
+<span class="nc" id="L243">					return 0;</span>
+				}
+			}
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

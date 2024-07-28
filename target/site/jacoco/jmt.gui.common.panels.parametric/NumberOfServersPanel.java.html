@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NumberOfServersPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">NumberOfServersPanel.java</span></div><h1>NumberOfServersPanel.java</h1><pre class="source lang-java linenums">package jmt.gui.common.panels.parametric;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Vector;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysis;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
+import jmt.gui.common.definitions.parametric.NumberOfServersParametricAnalysis;
+
+/**
+ * &lt;p&gt;Title: NumberOfServersPanel&lt;/p&gt;
+ * &lt;p&gt;Description: this is the panel for he parametric analysis where
+ * the number of servers inside a station is modified.&lt;/p&gt;
+ *
+ * @author Xinyu Gao
+ *         Date: 20-6-2023
+ */
+
+public class NumberOfServersPanel extends ParameterOptionPanel {
+    private static final long serialVersionUID = 1L;
+    private JLabel fromLabel;
+    private JSpinner from;
+    private JLabel toLabel;
+    private JSpinner to;
+    private JLabel stepsLabel;
+    private JSpinner steps;
+    private JLabel stationChooserLabel;
+    private JComboBox stationChooser;
+    private JLabel serverTypeChooserLabel;
+    private JComboBox serverTypeChooser;
+    private JScrollPane scroll;
+    private JTextArea description;
+    private JScrollPane descrPane;
+    private TitledBorder descriptionTitle;
+    private ParametricAnalysisChecker checker;
+    private String DESCRIPTION_SERVER_TYPES;
+
+    private NumberOfServersParametricAnalysis NSPA;
+
+    public NumberOfServersPanel(NumberOfServersParametricAnalysis nspa, ClassDefinition classDef, StationDefinition stationDef, SimulationDefinition simDef) {
+<span class="nc" id="L57">        super();</span>
+<span class="nc" id="L58">        NSPA = nspa;</span>
+<span class="nc" id="L59">        super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L60">        super.setDividerSize(3);</span>
+
+<span class="nc" id="L62">        DESCRIPTION = &quot;Repeat the simulation with different number of servers in a station.\n\n&quot;</span>
+                + &quot;The 'From' value represents the initial number of servers in a station.\n\n&quot;
+                + &quot;The 'To' value represents the final number of servers in a station.\n\n&quot;;
+
+<span class="nc" id="L66">        DESCRIPTION_SERVER_TYPES = &quot;Repeat the simulation with different number of servers for a server type in a station.\n\n&quot;</span>
+            + &quot;The 'From' value represents the initial number of servers for the server type in the station.\n\n&quot;
+            + &quot;The 'To' value represents the final number of servers for the server type in the station.\n\n&quot;;
+
+<span class="nc" id="L70">        cd = classDef;</span>
+<span class="nc" id="L71">        sd = stationDef;</span>
+<span class="nc" id="L72">        simd = simDef;</span>
+<span class="nc" id="L73">        checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+
+<span class="nc" id="L75">        initialize();</span>
+<span class="nc" id="L76">    }</span>
+
+    public void initialize() {
+<span class="nc" id="L79">        JPanel edit = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L80">        ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+<span class="nc" id="L81">        Vector&lt;Object&gt; availableS = checker.checkForNumberOfServersParametricAnalysisAvailableStations();</span>
+<span class="nc" id="L82">        String[] stationNames = new String[availableS.size()];</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">        for (int i = 0; i &lt; availableS.size(); i++) {</span>
+<span class="nc" id="L84">            stationNames[i] = sd.getStationName(availableS.get(i));</span>
+        }
+
+<span class="nc" id="L87">        stationChooser = new JComboBox(stationNames);</span>
+<span class="nc" id="L88">        stationChooser.setToolTipText(&quot;Choose the station whose number of servers will be changed&quot;);</span>
+
+<span class="nc" id="L90">        description = new JTextArea();</span>
+<span class="nc" id="L91">        description.setOpaque(false);</span>
+<span class="nc" id="L92">        description.setEditable(false);</span>
+<span class="nc" id="L93">        description.setLineWrap(true);</span>
+<span class="nc" id="L94">        description.setWrapStyleWord(true);</span>
+<span class="nc" id="L95">        descrPane = new JScrollPane(description);</span>
+<span class="nc" id="L96">        descriptionTitle = new TitledBorder(new EtchedBorder(), &quot;Description&quot;);</span>
+
+<span class="nc" id="L98">        descrPane.setBorder(descriptionTitle);</span>
+<span class="nc" id="L99">        descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+
+        //if the reference station of the NSPA is still available
+<span class="nc bnc" id="L102" title="All 2 branches missed.">        if (availableS.contains(NSPA.getReferenceStation())) {</span>
+<span class="nc" id="L103">            stationChooser.setSelectedItem(sd.getStationName(NSPA.getReferenceStation()));</span>
+        }
+        //else select another one
+        else {
+<span class="nc" id="L107">            NSPA.setReferenceStation(availableS.get(0));</span>
+<span class="nc" id="L108">            stationChooser.setSelectedIndex(0);</span>
+        }
+
+<span class="nc" id="L111">        fromLabel = new JLabel(&quot;From:&quot;);</span>
+<span class="nc" id="L112">        from = new JSpinner(new SpinnerNumberModel(NSPA.getInitialValue(), 1, Integer.MAX_VALUE, 1));</span>
+<span class="nc" id="L113">        from.setEnabled(true);</span>
+<span class="nc" id="L114">        from.setToolTipText(&quot;Sets the initial number of servers in the station&quot;);</span>
+<span class="nc" id="L115">        toLabel = new JLabel(&quot;To:&quot;);</span>
+<span class="nc" id="L116">        to = new JSpinner(new SpinnerNumberModel(NSPA.getFinalValue(), 1, Integer.MAX_VALUE, 1));</span>
+<span class="nc" id="L117">        to.setToolTipText(&quot;Sets the final number of servers in the station&quot;);</span>
+<span class="nc" id="L118">        stepsLabel = new JLabel(&quot;Steps: &quot;);</span>
+<span class="nc" id="L119">        steps = new JSpinner(new SpinnerNumberModel((int)(NSPA.getFinalValue() - NSPA.getInitialValue() + 1), 1, ParametricAnalysis.MAX_STEP_NUMBER, 1));</span>
+<span class="nc" id="L120">        NSPA.setNumberOfSteps((int)(NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+<span class="nc" id="L121">        steps.setToolTipText(&quot;Sets the number of steps to be performed&quot;);</span>
+
+<span class="nc bnc" id="L123" title="All 2 branches missed.">        if (NSPA.isSingleServerType()) {</span>
+<span class="nc" id="L124">            description.setText(DESCRIPTION);</span>
+        } else {
+<span class="nc" id="L126">            description.setText(DESCRIPTION_SERVER_TYPES);</span>
+        }
+
+<span class="nc" id="L129">        from.setBackground(Color.WHITE);</span>
+<span class="nc" id="L130">        stationChooserLabel = new JLabel(&quot;Station:&quot;);</span>
+<span class="nc" id="L131">        edit.add(fromLabel);</span>
+<span class="nc" id="L132">        edit.add(from);</span>
+<span class="nc" id="L133">        edit.add(toLabel);</span>
+<span class="nc" id="L134">        edit.add(to);</span>
+<span class="nc" id="L135">        edit.add(stepsLabel);</span>
+<span class="nc" id="L136">        edit.add(steps);</span>
+<span class="nc" id="L137">        edit.add(stationChooser);</span>
+<span class="nc" id="L138">        edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L139">        JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L140">        editLables.add(fromLabel);</span>
+<span class="nc" id="L141">        editLables.add(toLabel);</span>
+<span class="nc" id="L142">        editLables.add(stepsLabel);</span>
+<span class="nc" id="L143">        editLables.add(stationChooserLabel);</span>
+<span class="nc" id="L144">        editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+
+<span class="nc bnc" id="L146" title="All 2 branches missed.">        if (!NSPA.isSingleServerType()) {</span>
+<span class="nc" id="L147">            serverTypeChooser = new JComboBox(NSPA.getServerTypeNames());</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">            if (NSPA.serverTypeInStation()) {</span>
+<span class="nc" id="L149">                serverTypeChooser.setSelectedItem(sd.getServerType(NSPA.getServerTypeKey()).getName());</span>
+            } else {
+<span class="nc" id="L151">                NSPA.setServerType((String) serverTypeChooser.getSelectedItem());</span>
+            }
+<span class="nc" id="L153">            serverTypeChooserLabel = new JLabel(&quot;Server Type:&quot;);</span>
+<span class="nc" id="L154">            edit.add(serverTypeChooser);</span>
+<span class="nc" id="L155">            editLables.add(serverTypeChooserLabel);</span>
+        }
+
+<span class="nc" id="L158">        JPanel editPanel = new JPanel();</span>
+<span class="nc" id="L159">        editPanel.add(editLables);</span>
+<span class="nc" id="L160">        editPanel.add(edit);</span>
+<span class="nc" id="L161">        editPanel.setBorder(new EmptyBorder(10, 20, 0, 20));</span>
+<span class="nc" id="L162">        JPanel cont = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L163">        cont.add(editPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L164">        scroll = new JScrollPane(cont);</span>
+<span class="nc" id="L165">        title = new TitledBorder(&quot;Station number of servers variation&quot;);</span>
+<span class="nc" id="L166">        scroll.setBorder(title);</span>
+<span class="nc" id="L167">        scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L168">        setLeftComponent(scroll);</span>
+<span class="nc" id="L169">        setRightComponent(descrPane);</span>
+<span class="nc" id="L170">        this.setBorder(new EmptyBorder(5, 0, 5, 0));</span>
+<span class="nc" id="L171">        setListeners();</span>
+<span class="nc" id="L172">    }</span>
+
+    @Override
+    public void setEnabled(boolean enabled) {
+<span class="nc" id="L176">        fromLabel.setEnabled(enabled);</span>
+<span class="nc" id="L177">        from.setEnabled(enabled);</span>
+<span class="nc" id="L178">        toLabel.setEnabled(enabled);</span>
+<span class="nc" id="L179">        to.setEnabled(enabled);</span>
+<span class="nc" id="L180">        stepsLabel.setEnabled(enabled);</span>
+<span class="nc" id="L181">        steps.setEnabled(enabled);</span>
+<span class="nc" id="L182">        description.setEnabled(enabled);</span>
+<span class="nc" id="L183">        stationChooserLabel.setEnabled(enabled);</span>
+<span class="nc" id="L184">        stationChooser.setEnabled(enabled);</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">        if (!enabled) {</span>
+<span class="nc" id="L186">            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L187">            descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+        } else {
+<span class="nc" id="L189">            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L190">            descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+        }
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        if (!enabled) {</span>
+<span class="nc" id="L193">            title.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L194">            descriptionTitle.setTitleColor(Color.LIGHT_GRAY);</span>
+        } else {
+<span class="nc" id="L196">            title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L197">            descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+        }
+<span class="nc" id="L199">    }</span>
+
+    private void setListeners() {
+<span class="nc" id="L202">        from.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L204">                Object fValue = from.getValue();</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">                if (fValue instanceof Integer) {</span>
+<span class="nc" id="L206">                    NSPA.setInitialValue(((Integer) fValue).intValue());</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">                } else if (fValue instanceof Double) {</span>
+<span class="nc" id="L208">                    NSPA.setInitialValue(((Double) fValue).intValue());</span>
+                }
+<span class="nc" id="L210">                from.setValue(new Double(NSPA.getInitialValue()));</span>
+
+<span class="nc bnc" id="L212" title="All 2 branches missed.">                if (NSPA.getFinalValue() &gt; NSPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L214">                        NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L216">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                } else if (NSPA.getInitialValue() &gt; NSPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L220">                        NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L222">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L225">                    from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L226">                    to.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc" id="L227">                    Object sub = from.getValue();</span>
+<span class="nc" id="L228">                    from.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L230">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L232">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L234">                } else {</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">                    if (NSPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L236">                        NSPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L237">                        steps.setValue(new Integer(NSPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L240">                steps.setValue(NSPA.getNumberOfSteps());</span>
+<span class="nc" id="L241">            }</span>
+        });
+<span class="nc" id="L243">        to.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L245">                Object tValue = to.getValue();</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                if (tValue instanceof Integer) {</span>
+<span class="nc" id="L247">                    NSPA.setFinalValue(((Integer) tValue).intValue());</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">                } else if (tValue instanceof Double) {</span>
+<span class="nc" id="L249">                    NSPA.setFinalValue(((Double) tValue).intValue());</span>
+                }
+<span class="nc" id="L251">                to.setValue(new Double(NSPA.getFinalValue()));</span>
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                if (NSPA.getFinalValue() &gt; NSPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L255">                        NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L257">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                } else if (NSPA.getInitialValue() &gt; NSPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L261">                        NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L263">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L266">                    from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L267">                    to.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc" id="L268">                    Object sub = from.getValue();</span>
+<span class="nc" id="L269">                    from.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L271">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L273">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L275">                } else {</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                    if (NSPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L277">                        NSPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L278">                        steps.setValue(new Integer(NSPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L281">                steps.setValue(NSPA.getNumberOfSteps());</span>
+<span class="nc" id="L282">            }</span>
+        });
+<span class="nc" id="L284">        steps.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L286" title="All 2 branches missed.">                if (steps.getValue() instanceof Integer) {</span>
+<span class="nc" id="L287">                    Integer sValue = (Integer) steps.getValue();</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">                    if (NSPA.getFinalValue() &gt; NSPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">                        if (sValue &gt;= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L290">                            NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+                        } else {
+<span class="nc" id="L292">                            NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                    } else if (NSPA.getInitialValue() &gt; NSPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L295" title="All 2 branches missed.">                        if (sValue &gt;= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L296">                            NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));</span>
+                        } else {
+<span class="nc" id="L298">                            NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+                        // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L301">                        from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L302">                        to.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc" id="L303">                        Object sub = from.getValue();</span>
+<span class="nc" id="L304">                        from.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                        if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L306">                            to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                        } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L308">                            to.setValue((Double) sub);</span>
+                        }
+<span class="nc" id="L310">                    } else {</span>
+<span class="nc bnc" id="L311" title="All 2 branches missed.">                        if (NSPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L312">                            NSPA.setNumberOfSteps(1);</span>
+                        }
+                    }
+<span class="nc" id="L315">                    steps.setValue(NSPA.getNumberOfSteps());</span>
+                }
+<span class="nc" id="L317">            }</span>
+        });
+<span class="nc" id="L319">        stationChooser.addItemListener(new ItemListener() {</span>
+            public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L322">                    return;</span>
+                }
+<span class="nc" id="L324">                String stationName = (String) stationChooser.getSelectedItem();</span>
+<span class="nc" id="L325">                NSPA.setReferenceStation(getStationKey(stationName));</span>
+
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                if (serverTypeChooser != null) {</span>
+<span class="nc" id="L328">                    serverTypeChooser.setModel(new DefaultComboBoxModel(NSPA.getServerTypeNames()));</span>
+<span class="nc" id="L329">                    NSPA.setServerType((String) serverTypeChooser.getSelectedItem());</span>
+                }
+
+<span class="nc" id="L332">                NSPA.setDefaultInitialValue();</span>
+<span class="nc" id="L333">                NSPA.setDefaultFinalValue();</span>
+<span class="nc" id="L334">                from.setModel(new SpinnerNumberModel(NSPA.getInitialValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L335">                from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L336">                to.setModel(new SpinnerNumberModel(NSPA.getFinalValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L337">                to.setValue(new Double(NSPA.getFinalValue()));</span>
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">                if (NSPA.getFinalValue() &gt; NSPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L341">                        NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L343">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L345" title="All 2 branches missed.">                } else if (NSPA.getInitialValue() &gt; NSPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L347">                        NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L349">                        NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L352">                    from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L353">                    to.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc" id="L354">                    Object sub = from.getValue();</span>
+<span class="nc" id="L355">                    from.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L357">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L359">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L361">                } else {</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">                    if (NSPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L363">                        NSPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L364">                        steps.setValue(new Integer(NSPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L367">                steps.setValue(NSPA.getNumberOfSteps());</span>
+<span class="nc" id="L368">            }</span>
+        });
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        if (serverTypeChooser != null) {</span>
+<span class="nc" id="L371">            serverTypeChooser.addItemListener(new ItemListener() {</span>
+                @Override
+                public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L374" title="All 2 branches missed.">                    if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L375">                        return;</span>
+                    }
+<span class="nc" id="L377">                    NSPA.setServerType((String) serverTypeChooser.getSelectedItem());</span>
+
+<span class="nc" id="L379">                    NSPA.setDefaultInitialValue();</span>
+<span class="nc" id="L380">                    NSPA.setDefaultFinalValue();</span>
+<span class="nc" id="L381">                    from.setModel(new SpinnerNumberModel(NSPA.getInitialValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L382">                    from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L383">                    to.setModel(new SpinnerNumberModel(NSPA.getFinalValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L384">                    to.setValue(new Double(NSPA.getFinalValue()));</span>
+
+<span class="nc bnc" id="L386" title="All 2 branches missed.">                    if (NSPA.getFinalValue() &gt; NSPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">                        if ((Integer) steps.getValue() &gt;= (NSPA.getFinalValue() - NSPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L388">                            NSPA.setNumberOfSteps((int) (NSPA.getFinalValue() - NSPA.getInitialValue() + 1));</span>
+                        } else {
+<span class="nc" id="L390">                            NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                    } else if (NSPA.getInitialValue() &gt; NSPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                        if ((Integer) steps.getValue() &gt;= (NSPA.getInitialValue() - NSPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L394">                            NSPA.setNumberOfSteps((int) (NSPA.getInitialValue() - NSPA.getFinalValue() + 1));</span>
+                        } else {
+<span class="nc" id="L396">                            NSPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+                        // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L399">                        from.setValue(new Double(NSPA.getInitialValue()));</span>
+<span class="nc" id="L400">                        to.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc" id="L401">                        Object sub = from.getValue();</span>
+<span class="nc" id="L402">                        from.setValue(new Double(NSPA.getFinalValue()));</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">                        if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L404">                            to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">                        } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L406">                            to.setValue((Double) sub);</span>
+                        }
+<span class="nc" id="L408">                    } else {</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">                        if (NSPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L410">                            NSPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L411">                            steps.setValue(new Integer(NSPA.getNumberOfSteps()));</span>
+                        }
+                    }
+<span class="nc" id="L414">                    steps.setValue(NSPA.getNumberOfSteps());</span>
+<span class="nc" id="L415">                }</span>
+            });
+        }
+<span class="nc" id="L418">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

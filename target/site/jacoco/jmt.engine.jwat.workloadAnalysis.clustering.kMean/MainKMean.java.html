@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainKMean.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.workloadAnalysis.clustering.kMean</a> &gt; <span class="el_source">MainKMean.java</span></div><h1>MainKMean.java</h1><pre class="source lang-java linenums">package jmt.engine.jwat.workloadAnalysis.clustering.kMean;
+
+import java.lang.reflect.InvocationTargetException;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.TimeConsumingWorker;
+import jmt.engine.jwat.VariableNumber;
+import jmt.engine.jwat.input.EventFinishAbort;
+import jmt.engine.jwat.input.ProgressShow;
+import jmt.engine.jwat.workloadAnalysis.clustering.EventClusteringDone;
+
+//UPDATE 10/29/2006: + added passage of constructor parameter of the type of transformation to be applied to selected variables
+//+ add transform and anti to selected variables for clustering
+//UPDATE 10/31/2006: + added calculation of clustering statistics on untransformed variables
+
+public class MainKMean extends TimeConsumingWorker {
+
+	private short trasf;
+	private int[] varSel;
+	private int numClust;
+	private int iteration;
+	private MatrixObservations m;
+	private KMean clustering;
+<span class="nc" id="L24">	private String msg = null;</span>
+	private KMeanClusteringEngine Cluster;
+
+	public MainKMean(ProgressShow prg, MatrixObservations m, int[] varSel, int numClust, int iteration, short trasf) {
+<span class="nc" id="L28">		super(prg);</span>
+<span class="nc" id="L29">		this.m = m;</span>
+<span class="nc" id="L30">		this.iteration = iteration;</span>
+<span class="nc" id="L31">		this.numClust = numClust;</span>
+<span class="nc" id="L32">		this.varSel = varSel;</span>
+<span class="nc" id="L33">		clustering = new KMean(numClust, varSel);</span>
+<span class="nc" id="L34">		Cluster = new KMeanClusteringEngine(clustering, this);</span>
+<span class="nc" id="L35">		this.trasf = trasf;</span>
+<span class="nc" id="L36">	}</span>
+
+	@Override
+	public Object construct() {
+<span class="nc" id="L40">		boolean anti = false;</span>
+		try {
+<span class="nc" id="L42">			initShow((iteration * numClust) + 3);</span>
+<span class="nc" id="L43">			updateInfos(1, &quot;Initializing KMeans Clustering&quot;, true);</span>
+<span class="nc" id="L44">		} catch (InterruptedException e) {</span>
+<span class="nc" id="L45">			e.printStackTrace();</span>
+<span class="nc" id="L46">		} catch (InvocationTargetException e) {</span>
+<span class="nc" id="L47">			e.printStackTrace();</span>
+<span class="nc" id="L48">		}</span>
+//Applying the transformation to the variables involved in the clustering
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		if (trasf != VariableNumber.NONE) {</span>
+<span class="nc bnc" id="L51" title="All 2 branches missed.">			for (int element : varSel) {</span>
+<span class="nc" id="L52">				m.getVariables()[element].doClusteringTrasformation(trasf);</span>
+			}
+		}
+<span class="nc bnc" id="L55" title="All 2 branches missed.">		if (isCanceled()) {</span>
+<span class="nc" id="L56">			msg = &quot;CLUSTERING ABORTED BY USER&quot;;</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">			if (trasf != VariableNumber.NONE) {</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">				for (int element : varSel) {</span>
+<span class="nc" id="L59">					m.getVariables()[element].undoClueringTrasformation();</span>
+				}
+			}
+<span class="nc" id="L62">			return null;</span>
+		}
+		try {
+// Variables | total number of variables | number of variables involved | transformation | num Max Clusters | num Max Iterations | Index list of the variables involved
+<span class="nc" id="L66">			Cluster.PrepClustering(m, numClust, iteration, varSel);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			if (isCanceled()) {</span>
+<span class="nc" id="L68">				msg = &quot;CLUSTERING ABORTED BY USER&quot;;</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">				if (trasf != VariableNumber.NONE) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">					for (int element : varSel) {</span>
+<span class="nc" id="L71">						m.getVariables()[element].undoClueringTrasformation();</span>
+					}
+				}
+<span class="nc" id="L74">				return null;</span>
+			}
+<span class="nc bnc" id="L76" title="All 2 branches missed.">			if (!Cluster.DoClustering()) {</span>
+<span class="nc" id="L77">				msg = &quot;CLUSTERING ABORTED BY USER&quot;;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">				if (trasf != VariableNumber.NONE) {</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">					for (int element : varSel) {</span>
+<span class="nc" id="L80">						m.getVariables()[element].undoClueringTrasformation();</span>
+					}
+				}
+<span class="nc" id="L83">				return null;</span>
+			}
+//Anti-transformation of the variables involved
+
+<span class="nc bnc" id="L87" title="All 2 branches missed.">			if (trasf != VariableNumber.NONE) {</span>
+<span class="nc" id="L88">				anti = true;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">				for (int element : varSel) {</span>
+<span class="nc" id="L90">					m.getVariables()[element].undoClueringTrasformation();</span>
+				}
+			}
+<span class="nc" id="L93">			updateInfos((iteration * numClust) + 2, &quot;Saving Results&quot;, true);</span>
+//Clustering statistics calculation done
+<span class="nc bnc" id="L95" title="All 2 branches missed.">			for (int i = 0; i &lt; clustering.getNumCluster(); i++) {</span>
+<span class="nc" id="L96">				((ClusteringInfosKMean) clustering.getClusteringInfos(i)).DOStat(varSel, clustering.getAsseg()[i], m);</span>
+			}
+<span class="nc" id="L98">			updateInfos((iteration * numClust) + 3, &quot;END&quot;, true);</span>
+
+<span class="nc" id="L100">		} catch (OutOfMemoryError err) {</span>
+<span class="nc" id="L101">			updateInfos((iteration * numClust) + 3, &quot;errore&quot;, false);</span>
+<span class="nc" id="L102">			msg = &quot;Out of Memory. Try with more memory (1Gb JMT Version)&quot;;</span>
+<span class="nc bnc" id="L103" title="All 4 branches missed.">			if (trasf != VariableNumber.NONE &amp;&amp; !anti) {</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">				for (int element : varSel) {</span>
+<span class="nc" id="L105">					m.getVariables()[element].undoClueringTrasformation();</span>
+				}
+			}
+<span class="nc" id="L108">			return null;</span>
+<span class="nc" id="L109">		}</span>
+<span class="nc" id="L110">		return clustering;</span>
+	}
+
+	@Override
+	public void finished() {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">		if (this.get() != null) {</span>
+<span class="nc" id="L116">			fireEventStatus(new EventClusteringDone(clustering));</span>
+		} else {
+<span class="nc" id="L118">			fireEventStatus(new EventFinishAbort(msg));</span>
+		}
+<span class="nc" id="L120">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

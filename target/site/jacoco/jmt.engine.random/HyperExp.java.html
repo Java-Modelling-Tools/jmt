@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HyperExp.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">HyperExp.java</span></div><h1>HyperExp.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * 
+ * This is the Hyperexponential distribution (see the constructor
+ * description for details).
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Fabrizio Frontera - ffrontera@yahoo.it
+ * 
+ */
+public class HyperExp extends AbstractDistribution implements Distribution {
+
+	private Exponential expDistr;
+
+	/**
+	 * This is the constructor. It creates a new hyperexponential distribution which
+	 * is constituted by two parallel exponential phases.
+	 *
+	 */
+<span class="nc" id="L43">	public HyperExp() {</span>
+<span class="nc" id="L44">		expDistr = new Exponential();</span>
+<span class="nc" id="L45">	}</span>
+
+	@Override
+	public void setRandomEngine(RandomEngine engine) {
+<span class="nc" id="L49">		this.engine = engine;</span>
+<span class="nc" id="L50">		this.expDistr.setRandomEngine(engine);</span>
+<span class="nc" id="L51">	}</span>
+
+	/**
+	 * This method is used to obtain from the distribution its probability distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the pdf.
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the probability distribution function evaluated in x.
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L63">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution its cumulative distribution
+	 * function evaluated where required by the user.
+	 *
+	 * @param x double indicating where to evaluate the cdf.
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the cumulative distribution function evaluated in x.
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L76">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L89">			return ((HyperExpPar) p).getMean();</span>
+		} else {
+<span class="nc" id="L91">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Remember: parameter p must be a number between 0 and 1; parameter lambda1 and lambda2 must be gtz&quot;);
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic variance.
+	 *
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic variance of the distribution.
+	 */
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc" id="L106">			return ((HyperExpPar) p).getVar();</span>
+		} else {
+<span class="nc" id="L108">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Remember: parameter p must be a number between 0 and 1; parameter lambda1 and lambda2 must be gtz&quot;);
+		}
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the next number distributed
+	 * according to the distribution parameter.
+	 *
+	 * @param p parameter of the hyperexponential distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the next random number of this distribution.
+	 */
+	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (p.check()) {</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">			if (engine.nextDouble() &lt;= ((HyperExpPar) p).getP()) {</span>
+<span class="nc" id="L124">				return expDistr.nextRand(((HyperExpPar) p).getExpParam1());</span>
+			} else {
+<span class="nc" id="L126">				return expDistr.nextRand(((HyperExpPar) p).getExpParam2());</span>
+			}
+		} else {
+<span class="nc" id="L129">			throw new IncorrectDistributionParameterException(</span>
+					&quot;Remember: parameter p must be a number between 0 and 1; parameter lambda1 and lambda2 must be gtz&quot;);
+		}
+	}
+
+} // end HyperExp
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

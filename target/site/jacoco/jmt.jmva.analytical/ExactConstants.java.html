@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExactConstants.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical</a> &gt; <span class="el_source">ExactConstants.java</span></div><h1>ExactConstants.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * This class contains some constants for exact models.
+ * @author alyf (Andrea Conti), Bertoli Marco
+ * @version Date: 11-set-2003 Time: 16.40.25
+ * 
+ * @author Kourosh Sheykhvand
+ *  Added modifications regarding ReferenceStation and throughput
+ *  Nov 2013
+ */
+
+public interface ExactConstants {
+
+	public static final boolean DEBUG = true;
+
+	public static final int STATION_DELAY = 0;
+	public static final int STATION_LI = 1; // Load Independent
+	public static final int STATION_LD = 2; // Load Dependent
+	public static final int STATION_PRS = 3; // FCFS Preemptive Resume
+	public static final int STATION_HOL = 4; // FCFS Non-preemptive Head-of-Line
+	/** HTML gray text START*/
+	public static final String GRAY_S = &quot;&lt;html&gt;&lt;font color=\&quot;aaaaaa\&quot;&gt;&quot;;
+	/** HTML gray text END*/
+	public static final String GRAY_E = &quot;&lt;/font&gt;&lt;/html&gt;&quot;;
+
+<span class="nc" id="L49">	public static final String[] STATION_TYPENAMES = {</span>
+			&quot;Delay (Infinite Server)&quot;,
+			&quot;Load Independent&quot;,
+			&quot;Load Dependent&quot;,
+			&quot;Preemptive Resume&quot;,
+			&quot;Non-preemptive Head-of-Line&quot;
+	};
+
+	public static final int CLASS_CLOSED = 0;
+	public static final int CLASS_OPEN = 1;
+<span class="nc" id="L59">	public static final String[] CLASS_TYPENAMES = { &quot;closed&quot;, &quot;open&quot; };</span>
+
+	public static final int DEFAULT_CLASS_PRIORITY = 0;
+
+	public static final int MAX_CLASSES = 100;
+	public static final int MAX_STATIONS = 100;
+
+	// Performance indices
+<span class="nc" id="L67">	public static final String[] INDICES_TYPES = { &quot;Throughput&quot;, &quot;Number of Customers&quot;, &quot;Response Times&quot;, &quot;Residence Times&quot;, &quot;Utilization&quot;, &quot;System Power&quot; };</span>
+	// Aggregate performance indices
+<span class="nc" id="L69">	public static final String[] AGGREGATE_TYPES = { &quot;System Response Time&quot;, &quot;System Response Time (No Ref. Stat.)&quot;, &quot;System Throughput&quot;, &quot;System Number of Customers&quot; };</span>
+<span class="nc" id="L70">	public static final Set&lt;String&gt; AGGREGATE_TYPES_SET = new HashSet&lt;String&gt;(Arrays.asList(AGGREGATE_TYPES));</span>
+
+	public static final String DESCRIPTION_CLASSES = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Classes characteristics&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Number, customized name, type of classes and number of customers (closed class) or arrival rate (open class). Add classes one by one or define total number at once. Higher number means higher priority&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_STATIONS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Stations characteristics&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Number, customized name and type of stations. Add stations one by one or define the total number at once. Load Dependent stations necessarily require the use of MVA.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_SERVICETIMES = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Service Times&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Input service times of each station for each class.&lt;br&gt;&quot;
+			+ &quot;If the station is \&quot;Load Dependent\&quot; you can set the service times for each number of customers by double-click on \&quot;LD Settings...\&quot; button.&lt;br&gt;&quot;
+			+ &quot;Press \&quot;Service Demands\&quot; button to enter service demands instead of service times and visits.&lt;br&gt;&quot; 
+			+ &quot;MULTICLASS MODELS: when for a station the per-class service times are different, the results are correct ONLY IF its scheduling discipline is assumed Processor Sharing (PS) and not FCFS (See BCMP Theorem).&lt;br&gt;&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_VISITS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Visits&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Average number of visits to each station per class.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_REFERENCESTATION = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Reference Station&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;The station is used to compute the system throughput and the system response time for each &lt;b&gt;closed class&lt;/b&gt;.&lt;br&gt;&quot;
+			+ &quot;Performance metrics of &lt;b&gt;open classes&lt;/b&gt; are always computed with respect to the &lt;b&gt;arrival process&lt;/b&gt;. Visits at the Reference station can not be Zero.&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;WARNING:&lt;/b&gt; the reference station for all closed classes is forced to be the same station.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_SERVICEDEMANDS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Service Demands&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Input service demands of each station and class.&lt;br&gt;&quot;
+			+ &quot;If the station is \&quot;Load Dependent\&quot; you can set the service demands for each number of customers by double-click on \&quot;LD Settings...\&quot; button.&lt;br&gt;&quot;
+			+ &quot;Press \&quot;Service Times and Visits\&quot; button to enter service times and visits instead of service demands.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_COMMENT = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Comment&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Input an optional short comment.&lt;br&gt;&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_QUEUELENGTHS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Number of Customers&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Average number of customers for each class at each station.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_THROUGHPUTS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Throughput&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Throughput of each class for each station. System Throughput is the completion rate at the &lt;b&gt;Reference Station&lt;/b&gt;.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_SYSRESPONSETIMES = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;System Response Time&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;The global aggregate is the \&quot;System Response Time\&quot; and is obtained weighting the aggregated values by the relative per-class throughput.&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;A:&lt;/b&gt; This value of System Response Time &lt;b&gt;includes&lt;/b&gt; the Residence Time at the Reference Station.&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;B:&lt;/b&gt; This value of System Response Time &lt;b&gt;does NOT include&lt;/b&gt; the Residence Time at the Reference Station.&lt;br&gt;&quot;
+			+ &quot;Notice: For &lt;b&gt;open classes&lt;/b&gt; the Reference Station always coincides with the arrival process. Thus the &lt;b&gt;B&lt;/b&gt; values are not computed.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_RESPONSETIMES = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Response Times&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Average time spent by each customer class for a single visit to a station.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_RESIDENCETIMES = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Residence Times&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Average time spent by each customer class summed across all visits to a station.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_UTILIZATIONS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Utilization&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Utilization of a customer class at the selected station. The utilization of a delay station is the average number of customers in the station (it may be greater than 1).&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_NONE = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Select a control parameter if you want to solve several models with its values changing in the selected range. The performance indices will be shown in a graph.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_ARRIVAL_ALL = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models increasing proportionally the arrival rates of the open classes. Starting from the actual value, the arrival rates are increased (or decreased) by the percentage expressed in the 'to' value.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_ARRIVAL_ONE = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models with increasing (or decreasing) arrival rate of selected open class.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_CUSTOMERS_ALL = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models increasing proportionally the number of customers of the closed classes. Starting from the actual value, the population is increased (or decreased) by the percentage expressed in the 'to' value.&lt;br&gt;&quot;
+			+ &quot;Since only integer population values are allowed, the number of models executed can be very small.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_CUSTOMERS_ONE = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models with increasing (or decreasing) number of customers of selected closed class.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_DEMANDS_ALL = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models increasing proportionally service demands at selected station for all classes. Starting from the actual value, service demands are increased (or decreased) by the percentage expressed in the 'to' value.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_DEMANDS_ONE = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models with increasing (or decreasing) service demand at selected station for selected class.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_WHATIF_MIX = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;What-if analysis&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Solve models with different proportion of jobs between two closed classes, keeping constant the total number of jobs N (\u03b2i = Ni / N). It is required that Ni &gt; 0.&lt;br&gt;&quot;
+			+ &quot;Since only integer Ni values are allowed, the number of models executed can be very small.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_GRAPH = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;Graphical Results&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;Select performance indices to be plotted. Right-click and drag on the graph to zoom it, right-click to save it in EPS or PNG format.&lt;br&gt;&quot;
+			+ &quot;Notice: System Response Time of closed classes includes the Residence Time at the Reference Station.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+	public static final String DESCRIPTION_SYSTEMPOWERS = &quot;&lt;html&gt;&lt;body align=\&quot;left\&quot;&gt;&lt;font size=\&quot;4\&quot;&gt;&lt;b&gt;System Power&lt;/b&gt;&lt;/font&gt;&quot;
+			+ &quot;&lt;font size=\&quot;3\&quot;&gt;&lt;br&gt;&lt;b&gt;Aggregate System Power:&lt;/b&gt; Aggregate System Throughput (sum of the per-class throughputs) divided by the Aggregate System Response Time (sum of the Response Times per class weighted by the relative throughputs).&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;Per-class System Power:&lt;/b&gt; Throughput divided by the Response Time of each class.&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;A:&lt;/b&gt; This value of System Power is computed using the value of System Response Time that &lt;b&gt;includes&lt;/b&gt; the Residence Time at the Reference Station.&lt;br&gt;&quot;
+			+ &quot;&lt;b&gt;B:&lt;/b&gt; This value of System Power is computed using the value of System Response Time that &lt;b&gt;does NOT include&lt;/b&gt; the Residence Time at the Reference Station.&lt;br&gt;&quot;
+			+ &quot;Notice: For &lt;b&gt;open classes&lt;/b&gt; the Reference Station always coincides with the arrival process. Thus the &lt;b&gt;B&lt;/b&gt; values are not computed.&lt;/font&gt;&lt;/body&gt;&lt;/html&gt;&quot;;
+
+	/** What-if Analysis type constants */
+	public static final String WHAT_IF_ARRIVAL = &quot;Arrival Rates&quot;;
+	public static final String WHAT_IF_CUSTOMERS = &quot;Number of Customers&quot;;
+	public static final String WHAT_IF_MIX = &quot;Population Mix&quot;;
+	public static final String WHAT_IF_DEMANDS = &quot;Service Demands&quot;;
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Burst.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">Burst.java</span></div><h1>Burst.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * 
+ * This is the Burst distribution.
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2003
+ * &lt;br&gt;Politecnico di Milano - dipartimento di Elettronica e Informazione
+ * @author Federico Dal Castello
+ * 
+ */
+public class Burst extends NetNode implements Distribution {
+
+	/** static counter to ensure that two distribution will not have the same name */
+<span class="nc" id="L40">	private static int count = 0;</span>
+	/** if &lt;tt&gt;true&lt;/tt&gt; the next EVENT_DISTRIBUTION_CHANGE message will be discarded */
+<span class="nc" id="L42">	private boolean discardNextMessage = false;</span>
+
+	/** 
+	 * Probability of having events of type A. The probability of having events
+	 * of type B is (1 - probability).
+	 */
+	private Double probability;
+	/** length distribution A */
+	private Distribution lengthDistrA;
+	/** length distribution B */
+	private Distribution lengthDistrB;
+	/** parameter of length distribution A */
+	private Parameter lengthParamA;
+	/** parameter of length distribution B */
+	private Parameter lengthParamB;
+	/**
+	 * If &lt;tt&gt;true&lt;/tt&gt;, the behavior of the interval change is set to Round-Robin;
+	 * if &lt;tt&gt;false&lt;/tt&gt; the interval type is changed according to the probability parameter.
+	 */
+	private Boolean isRoundRobin;
+
+	/** absolute system time of the interval end */
+	private double intervalEnd;
+
+	/** the distribution selected and active at this time */
+	private Distribution currentLengthDistr;
+	/** the parameter of the distribution selected and active at this time */
+	private Parameter currentLengthPar;
+
+	/** Represents the random generator of uniformly distributed 32 bits numbers */
+	private RandomEngine engine;
+
+	/**
+	 * Creates a new Burst distribution with the specified probability of having
+	 * events of type A. &lt;tt&gt;distrContA&lt;/tt&gt; is the DistributionContainer containing
+	 * the length distribution A and the related parameters, while &lt;tt&gt;distrContB&lt;/tt&gt;
+	 * is the same of &lt;tt&gt;distrContA&lt;/tt&gt; but for distribution B.
+	 * 
+	 * @param probability the probability of having events of type A
+	 * @param distrContA the DistributionContainer containing the length
+	 * distribution A and the related parameter
+	 * @param distrContB the DistributionContainer containing the length
+	 * distribution A and the related parameter
+	 * @param isRoundRobin if &lt;tt&gt;true&lt;/tt&gt;, the behavior of the interval change is
+	 * set to Round-Robin. That is, there is a pure alternation of the interval types,
+	 * starting with interval A: A-B-A-B-A-B-A-B... In this case, the
+	 * probability parameter is ignored. If &lt;tt&gt;false&lt;/tt&gt;, the interval type is
+	 * changed according to the probability parameter
+	 * @throws IncorrectDistributionParameterException if the probability
+	 * is not a value comprised between 0 and 1
+	 */
+	public Burst(Double probability, DistributionContainer distrContA, DistributionContainer distrContB, Boolean isRoundRobin)
+			throws IncorrectDistributionParameterException {
+
+<span class="nc" id="L96">		super(&quot;@@JSIM:RESERVED@@ Burst Distribution &quot; + count++);</span>
+
+		//TODO also check if the length distributions parameter are correct? 
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		if (!check(probability)) {</span>
+<span class="nc" id="L100">			throw new IncorrectDistributionParameterException(&quot;The probability must be comprised between 0 and 1.&quot;);</span>
+		}
+
+<span class="nc" id="L103">		engine = RandomEngine.makeDefault();</span>
+<span class="nc" id="L104">		this.probability = probability;</span>
+<span class="nc" id="L105">		this.lengthDistrA = distrContA.getDistribution();</span>
+<span class="nc" id="L106">		this.lengthParamA = distrContA.getParameter();</span>
+<span class="nc" id="L107">		this.lengthDistrB = distrContB.getDistribution();</span>
+<span class="nc" id="L108">		this.lengthParamB = distrContB.getParameter();</span>
+<span class="nc" id="L109">		this.isRoundRobin = isRoundRobin;</span>
+
+		// sets the starting distribution and the starting interval end
+		// move these two lines to servicestrategy
+<span class="nc" id="L113">	}</span>
+
+	public void setRandomEngine(RandomEngine engine) {
+<span class="nc" id="L116">		this.engine = engine;</span>
+<span class="nc" id="L117">	}</span>
+
+	public void initialize() throws IncorrectDistributionParameterException {
+<span class="nc" id="L120">		intervalEnd = changeInterval();</span>
+<span class="nc" id="L121">		sendMe(intervalEnd, NetEvent.EVENT_DISTRIBUTION_CHANGE);</span>
+<span class="nc" id="L122">	}</span>
+
+	/**
+	 * Creates a new non-Round-Robin Burst distribution with the specified probability
+	 * of having events of type A. &lt;tt&gt;distrContA&lt;/tt&gt; is the DistributionContainer
+	 * containing the length distribution A and the related parameters, while
+	 * &lt;tt&gt;distrContB&lt;/tt&gt; is the same of &lt;tt&gt;distrContA&lt;/tt&gt; but for distribution B.
+	 * 
+	 * @param probability the probability of having events of type A
+	 * @param distrContA the DistributionContainer containing the length
+	 * distribution A and the related parameter
+	 * @param distrContB the DistributionContainer containing the length
+	 * distribution A and the related parameter
+	 * @throws IncorrectDistributionParameterException if the probability
+	 * is not a value comprised between 0 and 1
+	 */
+	public Burst(Double probability, DistributionContainer distrContA, DistributionContainer distrContB)
+			throws IncorrectDistributionParameterException {
+<span class="nc" id="L140">		this(probability, distrContA, distrContB, new Boolean(false));</span>
+<span class="nc" id="L141">	}</span>
+
+	/**
+	 * Verifies if the parameters are correct. For the burst distribution
+	 * the parameters are correct if the value of the probability is comprised
+	 * between 0 and 1.
+	 *
+	 * @return &lt;tt&gt;true&lt;/tt&gt; if the probability is correct; &lt;tt&gt;false&lt;/tt&gt; otherwise
+	 *
+	 */
+	public boolean check(Double probability) {
+<span class="nc" id="L152">		double prob = probability.doubleValue();</span>
+
+<span class="nc bnc" id="L154" title="All 4 branches missed.">		if (prob &lt; 0 || prob &gt; 1) {</span>
+<span class="nc" id="L155">			return false;</span>
+		} else {
+<span class="nc" id="L157">			return true;</span>
+		}
+	}
+
+	/** 
+	 * Changes the interval and returns the new interval length.
+	 * 
+	 * @return the new interval length of the selected length distribution
+	 * @throws IncorrectDistributionParameterException if the length
+	 * distributions parameter are not correct
+	 */
+	private double changeInterval() throws IncorrectDistributionParameterException {
+
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		if (isRoundRobin.booleanValue()) {</span>
+			// alternates the interval distributions, starting with distribution A
+<span class="nc bnc" id="L172" title="All 2 branches missed.">			if ((currentLengthDistr == null) || // the length distribution has not been initialized yet</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">					currentLengthDistr.equals(lengthDistrB)) {</span>
+				// sets it to length distribution A
+<span class="nc" id="L175">				currentLengthDistr = lengthDistrA;</span>
+<span class="nc" id="L176">				currentLengthPar = lengthParamA;</span>
+			} else {
+				// sets it to length distribution B
+<span class="nc" id="L179">				currentLengthDistr = lengthDistrB;</span>
+<span class="nc" id="L180">				currentLengthPar = lengthParamB;</span>
+			}
+		} else {
+			// changes the interval distributions according to the probability parameter
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			if (engine.raw() &lt; probability.doubleValue()) {</span>
+<span class="nc" id="L185">				currentLengthDistr = lengthDistrA;</span>
+<span class="nc" id="L186">				currentLengthPar = lengthParamA;</span>
+			} else {
+<span class="nc" id="L188">				currentLengthDistr = lengthDistrB;</span>
+<span class="nc" id="L189">				currentLengthPar = lengthParamB;</span>
+			}
+		}
+
+<span class="nc" id="L193">		return currentLengthDistr.nextRand(currentLengthPar);</span>
+	}
+
+	/**
+	 * @return always 0 because in this type of distribution it has no sense
+	 * to request the cdf of the distribution.
+	 * 
+	 */
+	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L202">		return 0.0;</span>
+	}
+
+	/**
+	 * @return always 0 because in this type of distribution it has no sense
+	 * to request the pdf of the distribution.
+	 * 
+	 */
+	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L211">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the value of its own
+	 * theoretic mean.
+	 *
+	 * @param p parameter of the constant distribution.
+	 * @throws IncorrectDistributionParameterException
+	 * @return double with the theoretic mean of the distribution.
+	 */
+	public double theorMean(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L223">		double probA = 0.0;</span>
+<span class="nc" id="L224">		double probB = 0.0;</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">		if (isRoundRobin.booleanValue()) {</span>
+<span class="nc" id="L226">			probA = 0.5;</span>
+<span class="nc" id="L227">			probB = 0.5;</span>
+		} else {
+<span class="nc" id="L229">			probA = probability.doubleValue();</span>
+<span class="nc" id="L230">			probB = 1.0 - probA;</span>
+		}
+<span class="nc" id="L232">		double lengthMeanA = lengthDistrA.theorMean(lengthParamA);</span>
+<span class="nc" id="L233">		double lengthMeanB = lengthDistrB.theorMean(lengthParamB);</span>
+<span class="nc" id="L234">		double valueMeanA = ((BurstPar) p).getValueDistributionA().theorMean(((BurstPar) p).getValueParameterA());</span>
+<span class="nc" id="L235">		double valueMeanB = ((BurstPar) p).getValueDistributionB().theorMean(((BurstPar) p).getValueParameterB());</span>
+<span class="nc" id="L236">		return (probA * lengthMeanA * valueMeanA + probB * lengthMeanB * valueMeanB) / (probA * lengthMeanA + probB * lengthMeanB);</span>
+	}
+
+	/**
+	 * @return always 0 because in this type of distribution it has no sense
+	 * to request the variance of the distribution.
+	 * 
+	 */
+	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
+<span class="nc" id="L245">		return 0.0;</span>
+	}
+
+	/**
+	 * This method is used to obtain from the distribution the next number distributed
+	 * according to the distribution parameter and the actual interval (A or B).
+	 *
+	 * @param p parameter of the burst distribution
+	 * @throws IncorrectDistributionParameterException if the value distributions
+	 * parameter are not correct
+	 * @return double with the next random number of this distribution, according
+	 * to the actual interval (A or B)
+	 */
+	public double nextRand(Parameter p) throws IncorrectDistributionParameterException {
+
+		// we suppose that the next message will not be discarded
+<span class="nc" id="L261">		discardNextMessage = false;</span>
+
+		// the sum of the &quot;jumped&quot; intervals remaining times; 0 if the first event is in the current interval
+<span class="nc" id="L264">		double offset = 0;</span>
+		// value returned by the current value distribution
+<span class="nc" id="L266">		double value = getCurrentValueDistrNextRand(p);</span>
+		// remaining time of the current interval
+<span class="nc" id="L268">		double remainingTime = intervalEnd - simSystem.getClock();</span>
+
+		/*
+		 * While the current value is larger than the remaining time of the current interval:
+		 * - the next arriving message must be discarded because it will be set a new interval
+		 * - the remaining time of the &quot;jumped&quot; interval has to be added to the offset
+		 * - change the interval and save the returned interval length as the new remaining time
+		 * - compute the new absolute interval end by adding the remaining time and the offset (remainingTime + offset)
+		 * - obtain a new value from the current value distribution (the value distribution of the NEW interval)
+		 */
+<span class="nc bnc" id="L278" title="All 2 branches missed.">		while (value &gt; remainingTime) {</span>
+			// The interval is surpassed: we have to discard the next
+			// EVENT_DISTRIBUTION_CHANGE message
+<span class="nc" id="L281">			discardNextMessage = true;</span>
+<span class="nc" id="L282">			offset += remainingTime;</span>
+<span class="nc" id="L283">			remainingTime = changeInterval();</span>
+<span class="nc" id="L284">			value = getCurrentValueDistrNextRand(p);</span>
+		}
+
+<span class="nc bnc" id="L287" title="All 2 branches missed.">		if (discardNextMessage == true) {</span>
+			// send the new EVENT_DISTRIBUTION_CHANGE message
+<span class="nc" id="L289">			intervalEnd = offset + remainingTime + simSystem.getClock();</span>
+<span class="nc" id="L290">			sendMe(offset + remainingTime, NetEvent.EVENT_DISTRIBUTION_CHANGE);</span>
+		}
+
+		// sums the random value returned by the value distribution to the offset
+<span class="nc" id="L294">		return offset + value;</span>
+	}
+
+	/** 
+	 * Returns the current value distribution new random number.
+	 * 
+	 * @param p parameter of the burst distribution
+	 * @return the current value distribution new random number
+	 * @throws IncorrectDistributionParameterException if the value distributions
+	 * parameter are not correct
+	 */
+	private double getCurrentValueDistrNextRand(Parameter p) throws IncorrectDistributionParameterException {
+
+<span class="nc" id="L307">		BurstPar par = (BurstPar) p;</span>
+		Distribution currentValueDistr;
+		Parameter currentValPar;
+
+<span class="nc bnc" id="L311" title="All 2 branches missed.">		if (currentLengthDistr.equals(lengthDistrA)) {</span>
+			// the current distribution is distribution A
+<span class="nc" id="L313">			currentValueDistr = par.getValueDistributionA();</span>
+<span class="nc" id="L314">			currentValPar = par.getValueParameterA();</span>
+		} else {
+			// the current distribution is distribution B
+<span class="nc" id="L317">			currentValueDistr = par.getValueDistributionB();</span>
+<span class="nc" id="L318">			currentValPar = par.getValueParameterB();</span>
+		}
+
+<span class="nc" id="L321">		return currentValueDistr.nextRand(currentValPar);</span>
+	}
+
+	/**
+	 * Send an event to this entity with no data, specifying the delivery delay
+	 * and the event type.
+	 * 
+	 * @param delay how long from the current simulation time the event should be sent
+	 * @param eventType an user-defined number representing the type of event
+	 */
+	protected void sendMe(double delay, int eventType) {
+<span class="nc" id="L332">		simSchedule(this.getId(), delay, eventType);</span>
+<span class="nc" id="L333">	}</span>
+
+	/**
+	 * Message dispatcher for Burst distribution. When an EVENT_DISTRIBUTION_CHANGE
+	 * message arrives, it chooses the new interval type based on the probability
+	 * and sends to itself a new EVENT_DISTRIBUTION_CHANGE message with a delay
+	 * generated by the chosen interval. Otherwise it discards the message, if
+	 * it is set to discard.
+	 */
+	@Override
+	protected void dispatch(NetMessage message) throws NetException {
+
+<span class="nc" id="L345">		int eventType = message.getEvent();</span>
+
+		/*
+		 * If we have to discard the next message: do nothing, that is return
+		 * without sending the new EVENT_DISTRIBUTION_CHANGE message.
+		 * 
+		 * The second condition is necessary to overcome the simulator behavior,
+		 * which processes method calls before messages: if there is a surpass
+		 * of an interval length at the simulation time 0, it is set to discard
+		 * the next message, but since messages are processed after method calls,
+		 * it will imply to discard the message arriving at the instant 0
+		 * (automatically triggered by an EVENT_START event), which has no sense.
+		 * We want to discard messages only if they are not arrived at instant 0.
+		 * 
+		 */
+<span class="nc bnc" id="L360" title="All 4 branches missed.">		if (discardNextMessage == true &amp;&amp; Double.compare(simSystem.getClock(), 0.0) != 0) {</span>
+<span class="nc" id="L361">			discardNextMessage = false;</span>
+<span class="nc" id="L362">			return;</span>
+		}
+
+		try {
+
+<span class="nc bnc" id="L367" title="All 2 branches missed.">			if (eventType == NetEvent.EVENT_DISTRIBUTION_CHANGE) {</span>
+				/* 
+				 * Change the interval and return the new interval length,
+				 * which will be added to the absolute system time of the 
+				 * interval end, and auto send an EVENT_DISTRIBUTION_CHANGE
+				 * message to indicate the next distribution change
+				 */
+<span class="nc" id="L374">				double delay = changeInterval();</span>
+<span class="nc" id="L375">				intervalEnd += delay;</span>
+<span class="nc" id="L376">				sendMe(delay, NetEvent.EVENT_DISTRIBUTION_CHANGE);</span>
+			}
+
+<span class="nc" id="L379">		} catch (IncorrectDistributionParameterException idpe) {</span>
+			// re-thrown as NetException to not modify the method declaration
+<span class="nc" id="L381">			throw new NetException(&quot;Incorrect distribution parameter: &quot; + idpe.getMessage());</span>
+<span class="nc" id="L382">		}</span>
+
+<span class="nc" id="L384">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

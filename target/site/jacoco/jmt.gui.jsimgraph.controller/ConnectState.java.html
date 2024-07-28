@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConnectState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller</a> &gt; <span class="el_source">ConnectState.java</span></div><h1>ConnectState.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.controller;
+
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+
+import jmt.gui.jsimgraph.JGraphMod.JmtCell;
+
+import org.jgraph.graph.PortView;
+import org.jgraph.graph.VertexView;
+
+/**
+
+ * @author Federico Granata
+ * Date: 14-lug-2003
+ * Time: 16.59.19
+
+ */
+public class ConnectState extends UIStateDefault {
+
+	protected JmtCell startPoint;
+
+	protected Point2D start;
+
+	protected Point2D current;
+
+	protected PortView port;
+
+	protected PortView firstPort;
+
+	protected PortView lastPort;
+
+	protected GraphMouseListener ml;
+
+<span class="nc" id="L56">	protected boolean pressed = false;</span>
+
+	public ConnectState(Mediator mediator, GraphMouseListener ml) {
+<span class="nc" id="L59">		super(mediator);</span>
+<span class="nc" id="L60">		this.ml = ml;</span>
+		//System.out.println(&quot;ConnectState -&gt; I am in  connect State&quot;);
+<span class="nc" id="L62">	}</span>
+
+	@Override
+	public void handlePress(MouseEvent e) {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if (!e.isConsumed()) {</span>
+<span class="nc" id="L67">			start = mediator.snap(e.getPoint());</span>
+<span class="nc" id="L68">			firstPort = port = getOutPortViewAt(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			if (firstPort != null) {</span>
+<span class="nc" id="L70">				start = mediator.toScreen(firstPort.getLocation(null));</span>
+			}
+<span class="nc" id="L72">			e.consume();</span>
+		}
+<span class="nc" id="L74">		pressed = true;</span>
+<span class="nc" id="L75">	}</span>
+
+	@Override
+	public void handleExit(MouseEvent e) {
+<span class="nc" id="L79">		mediator.setCursor(mediator.getOldCursor());</span>
+<span class="nc" id="L80">	}</span>
+
+	@Override
+	public void handleEnter(MouseEvent e) {
+<span class="nc" id="L84">		mediator.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));</span>
+<span class="nc" id="L85">	}</span>
+
+	@Override
+	public void handleDrag(MouseEvent e) {
+<span class="nc bnc" id="L89" title="All 2 branches missed.">		if (firstPort != null) {</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">			if (!e.isConsumed()) {</span>
+<span class="nc" id="L91">				Graphics2D g = mediator.getGraphGraphics();</span>
+<span class="nc" id="L92">				Color bg = mediator.getGraphBackground();</span>
+<span class="nc" id="L93">				Color fg = Color.BLACK;</span>
+<span class="nc" id="L94">				g.setColor(fg);</span>
+<span class="nc" id="L95">				g.setXORMode(bg);</span>
+<span class="nc" id="L96">				overlay(g);</span>
+
+<span class="nc" id="L98">				current = mediator.snap(e.getPoint());</span>
+<span class="nc" id="L99">				port = getInPortViewAt(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">				if (port != null) {</span>
+<span class="nc" id="L101">					current = mediator.toScreen(port.getLocation(null));</span>
+				}
+
+<span class="nc" id="L104">				g.setColor(bg);</span>
+<span class="nc" id="L105">				g.setXORMode(fg);</span>
+<span class="nc" id="L106">				overlay(g);</span>
+<span class="nc" id="L107">				e.consume();</span>
+			}
+		}
+<span class="nc" id="L110">	}</span>
+
+	// Heavily modified by Giuseppe De Cicco &amp; Fabio Granara
+	@Override
+	public void handleRelease(MouseEvent e) {
+<span class="nc bnc" id="L115" title="All 4 branches missed.">		if (e != null &amp;&amp; !e.isConsumed()) {</span>
+<span class="nc" id="L116">			PortView end = getInPortViewAt(e.getX(), e.getY());</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">			if (end != null) {</span>
+<span class="nc" id="L118">				mediator.connect(start, current, end, firstPort);</span>
+<span class="nc bnc" id="L119" title="All 4 branches missed.">				if ((firstPort != null) &amp;&amp; ((VertexView) (firstPort.getParentView()) != null)) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">					if ((JmtCell) ((VertexView) (firstPort.getParentView())).getCell() != null) {</span>
+<span class="nc" id="L121">						JmtCell cell = (JmtCell) ((VertexView) (firstPort.getParentView())).getCell();</span>
+<span class="nc" id="L122">						mediator.avoidOverlappingCell(new JmtCell[] { cell });</span>
+					}
+				}
+<span class="nc" id="L125">				mediator.getGraph().getGraphLayoutCache().reload();</span>
+			}
+<span class="nc" id="L127">			e.consume();</span>
+<span class="nc" id="L128">			mediator.graphRepaint();</span>
+		}
+<span class="nc" id="L130">		firstPort = null;</span>
+<span class="nc" id="L131">		port = null;</span>
+<span class="nc" id="L132">		start = null;</span>
+<span class="nc" id="L133">		current = null;</span>
+<span class="nc" id="L134">	}</span>
+
+	/**
+	 * Gets the first portView of the input port of the cell at position
+	 * @param x
+	 * @param y
+	 * @return portView of the input port
+	 */
+	protected PortView getInPortViewAt(int x, int y) {
+<span class="nc" id="L143">		return mediator.getInPortViewAt(x, y);</span>
+	}
+
+	/**
+	 * Gets the first portView of the output port of the cell at position
+	 * @param x
+	 * @param y
+	 * @return portView of the output port
+	 */
+	protected PortView getOutPortViewAt(int x, int y) {
+<span class="nc" id="L153">		return mediator.getOutPortViewAt(x, y);</span>
+	}
+
+	public void overlay(Graphics2D g) {
+<span class="nc bnc" id="L157" title="All 4 branches missed.">		if (start != null &amp;&amp; current != null) {</span>
+<span class="nc" id="L158">			g.draw(new Line2D.Double(start.getX(), start.getY(), current.getX(), current.getY()));</span>
+		}
+<span class="nc" id="L160">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

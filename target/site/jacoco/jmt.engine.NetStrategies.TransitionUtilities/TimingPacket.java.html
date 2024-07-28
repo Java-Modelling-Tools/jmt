@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimingPacket.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.TransitionUtilities</a> &gt; <span class="el_source">TimingPacket.java</span></div><h1>TimingPacket.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NetStrategies.TransitionUtilities;
+
+import jmt.engine.simEngine.RemoveToken;
+
+/**
+ * &lt;p&gt;Title: Timing Packet&lt;/p&gt;
+ * &lt;p&gt;Description: This class implements the timing packet.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 06-10-2016
+ * Time: 14.00.00
+ */
+public class TimingPacket {
+
+	private int modeIndex;
+	private double firingDelay;
+	private int firingPriority;
+	private double firingWeight;
+	private RemoveToken timingToken;
+
+<span class="nc" id="L39">	public TimingPacket(int modeIndex, double firingDelay, int firingPriority, double firingWeight) {</span>
+<span class="nc" id="L40">		this.modeIndex = modeIndex;</span>
+<span class="nc" id="L41">		this.firingDelay = firingDelay;</span>
+<span class="nc" id="L42">		this.firingPriority = firingPriority;</span>
+<span class="nc" id="L43">		this.firingWeight = firingWeight;</span>
+<span class="nc" id="L44">		this.timingToken = null;</span>
+<span class="nc" id="L45">	}</span>
+
+<span class="nc" id="L47">	public TimingPacket(double delay){</span>
+<span class="nc" id="L48">		this.modeIndex = 0;</span>
+<span class="nc" id="L49">		this.firingDelay = delay;</span>
+<span class="nc" id="L50">		this.firingPriority = 1;</span>
+<span class="nc" id="L51">		this.firingWeight = 1;</span>
+<span class="nc" id="L52">		this.timingToken = null;</span>
+<span class="nc" id="L53">	}</span>
+
+	public int getModeIndex() {
+<span class="nc" id="L56">		return modeIndex;</span>
+	}
+
+	public double getFiringDelay() {
+<span class="nc" id="L60">		return firingDelay;</span>
+	}
+
+	public int getFiringPriority() {
+<span class="nc" id="L64">		return firingPriority;</span>
+	}
+
+	public double getFiringWeight() {
+<span class="nc" id="L68">		return firingWeight;</span>
+	}
+
+	public RemoveToken getTimingToken() {
+<span class="nc" id="L72">		return timingToken;</span>
+	}
+
+	public void setTimingToken(RemoveToken timingToken) {
+<span class="nc" id="L76">		this.timingToken = timingToken;</span>
+<span class="nc" id="L77">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

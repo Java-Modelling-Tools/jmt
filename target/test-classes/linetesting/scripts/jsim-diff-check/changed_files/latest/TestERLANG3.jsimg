@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="TestERLANG3.jsimg" timestamp="Thu Nov 06 21:09:17 CET 2025" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="20000000" name="TestERLANG3.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Class1" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.33333333000000004</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Queue 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Queue 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Erlang" name="Erlang"/>
+                        <subParameter classPath="jmt.engine.random.ErlangPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="alpha">
+                                <value>1.25</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Long" name="r">
+                                <value>3</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue 1 - Server Type 1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1">
+            <section className="JobSink"/>
+        </node>
+        <measure alpha="0.001" name="Queue 1_Utilization" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Queue 1_Residence Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="1.0E-4" name="Queue 1_Response Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.001" name="Queue 1_Number of Customers" nodeType="station" precision="0.01" referenceNode="Queue 1" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+        <measure alpha="0.001" name="System Response Time" nodeType="" precision="0.01" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+        <connection source="Source 1" target="Queue 1"/>
+        <connection source="Queue 1" target="Sink 1"/>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="Class1"/>
+        <station name="Source 1">
+            <position angle="0.0" rotate="false" x="126.0" y="195.0"/>
+        </station>
+        <station name="Queue 1">
+            <position angle="0.0" rotate="false" x="293.0" y="195.0"/>
+        </station>
+        <station name="Sink 1">
+            <position angle="0.0" rotate="false" x="489.0" y="200.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="33270" logDecimalSeparator="," logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.999" analyzedSamples="35840" discardedSamples="420" finalValue="0.7975869811933481" name="Queue 1_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="6">
+            <sample lastIntervalAvgValue="0.8063477271362374" lowerBound="0.7583377570307652" meanValue="0.8158870296568769" simulationTime="45468.92090366194" upperBound="0.8734363022829885"/>
+            <sample lastIntervalAvgValue="0.7921093443637446" lowerBound="0.7783282041579396" meanValue="0.7975869811933481" simulationTime="90575.74428387228" upperBound="0.8168457582287567"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="512000" discardedSamples="1815" finalValue="8.701168073869228" name="Queue 1_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="3">
+            <sample lastIntervalAvgValue="8.089987414856068" meanValue="8.089987414856068" simulationTime="45468.92090366194"/>
+            <sample lastIntervalAvgValue="8.879557470374442" lowerBound="8.338548158539153" meanValue="8.777193792611262" simulationTime="764457.6297983131" upperBound="9.215839426683372"/>
+            <sample lastIntervalAvgValue="8.643749304421538" lowerBound="8.47015406163217" meanValue="8.701168073869228" simulationTime="1542845.0581934166" upperBound="8.932182086106287"/>
+        </measure>
+        <measure alpha="0.9999" analyzedSamples="1024000" discardedSamples="1815" finalValue="8.672424365045547" name="Queue 1_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="2">
+            <sample lastIntervalAvgValue="8.087863640513387" meanValue="8.087863640513387" simulationTime="45468.92090366194"/>
+            <sample lastIntervalAvgValue="8.879417982993019" lowerBound="8.081208179420786" meanValue="8.77705591324256" simulationTime="764457.6297983131" upperBound="9.472903647064333"/>
+            <sample lastIntervalAvgValue="8.647378273644035" lowerBound="8.352516737966315" meanValue="8.701134204993958" simulationTime="1568405.433329792" upperBound="9.0497516720216"/>
+            <sample lastIntervalAvgValue="8.648921196934703" lowerBound="8.352516737966315" meanValue="8.701134204993958" simulationTime="2401012.8302663327" upperBound="9.0497516720216"/>
+            <sample lastIntervalAvgValue="8.651533584818461" lowerBound="8.468339596829408" meanValue="8.672424365045547" simulationTime="3080291.3091549193" upperBound="8.876509133261687"/>
+        </measure>
+        <measure alpha="0.999" analyzedSamples="15073280" discardedSamples="3630" finalValue="2.9371142921510214" name="Queue 1_Number of Customers" nodeType="station" precision="0.01" referenceClass="" referenceStation="Queue 1" state="1" type="0">
+            <sample lastIntervalAvgValue="2.7100958906344803" lowerBound="1.7306282105892916" meanValue="2.727904827292937" simulationTime="45468.92090366194" upperBound="3.7251814439965822"/>
+            <sample lastIntervalAvgValue="2.9565032356225736" lowerBound="2.787747713689095" meanValue="2.94556039059106" simulationTime="764457.6297983131" upperBound="3.103373067493025"/>
+            <sample lastIntervalAvgValue="2.8802652586128126" lowerBound="2.8135148261794223" meanValue="2.9238056634347327" simulationTime="1568406.6541060873" upperBound="3.034096500690043"/>
+            <sample lastIntervalAvgValue="2.8840369307730844" lowerBound="2.8135148261794223" meanValue="2.9238056634347327" simulationTime="2401013.1931000534" upperBound="3.034096500690043"/>
+            <sample lastIntervalAvgValue="2.9200339140681533" lowerBound="2.8141173328391402" meanValue="2.883860681615906" simulationTime="3224529.7556058737" upperBound="2.9536040303926714"/>
+            <sample lastIntervalAvgValue="2.90860845710566" lowerBound="2.8141173328391402" meanValue="2.883860681615906" simulationTime="4016622.025249297" upperBound="2.9536040303926714"/>
+            <sample lastIntervalAvgValue="2.9064059784646155" lowerBound="2.8141173328391402" meanValue="2.883860681615906" simulationTime="4751126.163662015" upperBound="2.9536040303926714"/>
+            <sample lastIntervalAvgValue="2.913147590342162" lowerBound="2.8141173328391402" meanValue="2.883860681615906" simulationTime="5504243.656686795" upperBound="2.9536040303926714"/>
+            <sample lastIntervalAvgValue="2.9530522657602236" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="6253845.822840441" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.9551993910748906" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="7006580.545900181" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.9130003743434765" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="7744272.986274255" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.9600198159469175" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="8492803.149115622" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.956664794861613" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="9229463.169454368" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.9248932827867424" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="9977384.337087609" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.9427228838354242" lowerBound="2.8573116848802673" meanValue="2.906911258781097" simulationTime="1.0720398181741994E7" upperBound="2.9565108326819267"/>
+            <sample lastIntervalAvgValue="2.921384733767977" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.1458951594875406E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.94747670798996" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.221010227268441E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.8836894080402335" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.2954832627412612E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.966324601757468" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.3697550144481132E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9813576334409095" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.4445080594952237E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9364587212861744" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.5180460227043832E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.855208280849729" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.5918441444098314E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.985463505156619" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.6666973627657179E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.952556986354241" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.741947034970872E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9191092454629213" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.8165286301303312E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9246032803353916" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.8917384035967756E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.968565325367924" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="1.9655480170286413E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9361556589565256" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="2.0395415270071767E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.972632620074279" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="2.114361980293453E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.9227142589211836" lowerBound="2.8928834402749466" meanValue="2.9302777086436524" simulationTime="2.1889509161696825E7" upperBound="2.9676719770123583"/>
+            <sample lastIntervalAvgValue="2.978651679540939" lowerBound="2.912588667428225" meanValue="2.9371142921510214" simulationTime="2.2621342704547822E7" upperBound="2.9616399168738177"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="942080" discardedSamples="3630" finalValue="2.9238056634347327" name="System Number of Customers" nodeType="" precision="0.03" referenceClass="" referenceStation="" state="1" type="14">
+            <sample lastIntervalAvgValue="2.7100958906344803" lowerBound="2.064137150915565" meanValue="2.727904827292937" simulationTime="45468.92090366194" upperBound="3.391672503670309"/>
+            <sample lastIntervalAvgValue="2.9565032356225736" lowerBound="2.8253346212754016" meanValue="2.94556039059106" simulationTime="764457.6297983131" upperBound="3.065786159906718"/>
+            <sample lastIntervalAvgValue="2.9009026166266225" lowerBound="2.838629273134311" meanValue="2.9238056634347327" simulationTime="1418623.8611204007" upperBound="3.0089820537351546"/>
+        </measure>
+        <measure alpha="0.999" analyzedSamples="8192000" discardedSamples="1815" finalValue="8.81170372800418" name="System Response Time" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="15">
+            <sample lastIntervalAvgValue="8.087863640513387" meanValue="8.087863640513387" simulationTime="45468.92090366194"/>
+            <sample lastIntervalAvgValue="8.879417982993019" lowerBound="8.181651727758547" meanValue="8.77705591324256" simulationTime="764457.6297983131" upperBound="9.372460098726572"/>
+            <sample lastIntervalAvgValue="8.647378273644035" lowerBound="8.397898068734326" meanValue="8.701134204993958" simulationTime="1568405.433329792" upperBound="9.004370341253589"/>
+            <sample lastIntervalAvgValue="8.648921196934703" lowerBound="8.397898068734326" meanValue="8.701134204993958" simulationTime="2401012.8302663327" upperBound="9.004370341253589"/>
+            <sample lastIntervalAvgValue="8.763974158243222" lowerBound="8.493071539004093" meanValue="8.672424365045547" simulationTime="3224529.7556058737" upperBound="8.851777191087"/>
+            <sample lastIntervalAvgValue="8.727130206199469" lowerBound="8.493071539004093" meanValue="8.672424365045547" simulationTime="4016622.025249297" upperBound="8.851777191087"/>
+            <sample lastIntervalAvgValue="8.725542631137653" lowerBound="8.493071539004093" meanValue="8.672424365045547" simulationTime="4751126.163662015" upperBound="8.851777191087"/>
+            <sample lastIntervalAvgValue="8.76765804351793" lowerBound="8.493071539004093" meanValue="8.672424365045547" simulationTime="5504238.2094610995" upperBound="8.851777191087"/>
+            <sample lastIntervalAvgValue="8.872657142581657" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="6253842.729570094" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.872096287110319" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="7006580.545900181" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.743757012014923" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="7744272.986274255" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.89216644772799" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="8492803.149115622" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.864259151730234" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="9229457.484056585" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.782209201244925" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="9977384.337087609" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.814888439289168" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="1.0720398181741994E7" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.773508129407638" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="1.1458951177952407E7" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.864398939806787" lowerBound="8.616983508508314" meanValue="8.76062536339105" simulationTime="1.221010227268441E7" upperBound="8.904267218273786"/>
+            <sample lastIntervalAvgValue="8.657761886602778" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.295482799630564E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.886182498521842" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.3697550144481132E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.927896084085392" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.4445080594952237E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.790672413583744" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.518045439767331E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.580303428187532" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.5918439763358822E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.946385167215238" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.6666973627657179E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.863242923365467" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.741947034970872E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.773538614097452" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.816528372329635E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.790470169245681" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.8917384035967756E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.909628117156915" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="1.9655479971174374E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.806842701733853" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.0395415270071767E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.917013082573096" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.114361980293453E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.773547475370073" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.1889509161696825E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.890386627845572" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.2624542048226155E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.601952342685287" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.3383064114019413E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="9.052681322342622" lowerBound="8.699782677101298" meanValue="8.797941275475788" simulationTime="2.413508641230579E7" upperBound="8.896099873850277"/>
+            <sample lastIntervalAvgValue="8.670819703724016" lowerBound="8.743139976813746" meanValue="8.81170372800418" simulationTime="2.4585874709999565E7" upperBound="8.880267479194613"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="465" finalValue="0.3346809255582518" name="System Throughput" nodeType="" precision="0.03" referenceClass="" referenceStation="" state="1" type="16">
+            <sample lastIntervalAvgValue="0.33504203964455853" lowerBound="0.2972073590199989" meanValue="0.3343597856730828" simulationTime="45468.92090366194" upperBound="0.3821276834010647"/>
+            <sample lastIntervalAvgValue="0.33459958005214274" lowerBound="0.3282008901561813" meanValue="0.3346809255582518" simulationTime="184952.06069937526" upperBound="0.34142200004555145"/>
+        </measure>
+    </results>
+</archive>

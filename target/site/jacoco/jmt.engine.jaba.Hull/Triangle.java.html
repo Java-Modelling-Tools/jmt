@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Triangle.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba.Hull</a> &gt; <span class="el_source">Triangle.java</span></div><h1>Triangle.java</h1><pre class="source lang-java linenums">// Copyright (C) Chris Pudney, The University of Western Australia, 1998.
+// All rights reserved.
+//  
+// Permission to use, copy, modify and distribute this software and its
+// documentation only for the purposes of teaching and research is hereby
+// granted without fee, provided that the above copyright notice and this
+// permission notice appear in all copies of this software/documentation
+// and that you do not sell the software.  No commercial use or
+// distribution of the software is permitted without the consent of the
+// copyright owners.  Commercial licensing is available by contacting the
+// author(s).
+// 
+// THIS SOFTWARE/DOCUMENTATION IS PROVIDED WITH NO WARRANTY, EXPRESS OR
+// IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTY OF MERCHANTABILITY OR
+// FITNESS FOR A PARTICULAR PURPOSE.
+package jmt.engine.jaba.Hull;
+
+import java.util.Enumeration;
+import java.util.Vector;
+
+/**
+ * A class defining a triangle
+ */
+public class Triangle extends Polygon {
+	/**
+	 * Construct a triangle given three vertices.
+	 *
+	 * @param v1, v2, v3  the vertices
+	 */
+	public Triangle(Vertex v1, Vertex v2, Vertex v3) {
+<span class="nc" id="L31">		super();</span>
+<span class="nc" id="L32">		Vector&lt;Vertex&gt; v = getVertices();</span>
+<span class="nc" id="L33">		v.addElement(v1);</span>
+<span class="nc" id="L34">		v.addElement(v2);</span>
+<span class="nc" id="L35">		v.addElement(v3);</span>
+<span class="nc" id="L36">	}</span>
+
+	/**
+	 * Tests whether two triangles are the same.  Order of vertices is ignored.
+	 *
+	 * @param t1, t2  The triangles to compare
+	 */
+	public static boolean sameTriangle(Triangle t1, Triangle t2) {
+<span class="nc bnc" id="L44" title="All 2 branches missed.">		if (t1 == t2) {</span>
+<span class="nc" id="L45">			return true;</span>
+		}
+
+<span class="nc" id="L48">		Vector&lt;Vertex&gt; v1 = t1.getVertices();</span>
+<span class="nc" id="L49">		Vector&lt;Vertex&gt; v2 = t2.getVertices();</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">		if (v1 == v2) {</span>
+<span class="nc" id="L51">			return true;</span>
+		}
+
+<span class="nc" id="L54">		Vertex t1A = v1.firstElement();</span>
+<span class="nc" id="L55">		Vertex t1B = v1.elementAt(1);</span>
+<span class="nc" id="L56">		Vertex t1C = v1.lastElement();</span>
+<span class="nc" id="L57">		Vertex t2A = v2.firstElement();</span>
+<span class="nc" id="L58">		Vertex t2B = v2.elementAt(1);</span>
+<span class="nc" id="L59">		Vertex t2C = v2.lastElement();</span>
+<span class="nc bnc" id="L60" title="All 6 branches missed.">		return (Vertex.sameVertex(t1A, t2A) || Vertex.sameVertex(t1A, t2B) || Vertex.sameVertex(t1A, t2C))</span>
+<span class="nc bnc" id="L61" title="All 6 branches missed.">				&amp;&amp; (Vertex.sameVertex(t1B, t2A) || Vertex.sameVertex(t1B, t2B) || Vertex.sameVertex(t1B, t2C))</span>
+<span class="nc bnc" id="L62" title="All 6 branches missed.">				&amp;&amp; (Vertex.sameVertex(t1C, t2A) || Vertex.sameVertex(t1C, t2B) || Vertex.sameVertex(t1C, t2C));</span>
+	}
+
+	/**
+	 * Tests whether a triangle is present in a vector.
+	 *
+	 * @param vec  vector of triangles to match
+	 */
+	public boolean matches(Vector vec) {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		for (Enumeration e = vec.elements(); e.hasMoreElements();) {</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">			if (sameTriangle(this, (Triangle) e.nextElement())) {</span>
+<span class="nc" id="L73">				return true;</span>
+			}
+		}
+<span class="nc" id="L76">		return false;</span>
+	}
+
+	/**
+	 * Returns the index of a triangle in a vector.
+	 *
+	 * @param vec  vector of triangles to match
+	 * @return     index of the match or -1 if no match
+	 */
+	public int matchIndex(Vector vec) {
+<span class="nc" id="L86">		int i = 0;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		for (Enumeration e = vec.elements(); e.hasMoreElements();) {</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">			if (sameTriangle(this, (Triangle) e.nextElement())) {</span>
+<span class="nc" id="L89">				return i;</span>
+			}
+<span class="nc" id="L91">			i++;</span>
+		}
+<span class="nc" id="L93">		return -1;</span>
+	}
+
+	/**
+	 * Returns the third vertex of a triangle given the other two.
+	 *
+	 * @param v1, v2  the other two vertices
+	 * @return        the third vertex or null if v1 and v2 are not
+	 *                vertices
+	 */
+	public Vertex thirdVertex(Vertex v1, Vertex v2) {
+<span class="nc" id="L104">		Vector&lt;Vertex&gt; vertices = getVertices();</span>
+<span class="nc" id="L105">		Vertex vert1 = vertices.elementAt(0);</span>
+<span class="nc" id="L106">		Vertex vert2 = vertices.elementAt(1);</span>
+<span class="nc" id="L107">		Vertex vert3 = vertices.elementAt(2);</span>
+<span class="nc bnc" id="L108" title="All 8 branches missed.">		if (v1 == vert1 &amp;&amp; v2 == vert2 || v2 == vert1 &amp;&amp; v1 == vert2) {</span>
+<span class="nc" id="L109">			return vert3;</span>
+		}
+<span class="nc bnc" id="L111" title="All 8 branches missed.">		if (v1 == vert1 &amp;&amp; v2 == vert3 || v2 == vert1 &amp;&amp; v1 == vert3) {</span>
+<span class="nc" id="L112">			return vert2;</span>
+		}
+<span class="nc bnc" id="L114" title="All 8 branches missed.">		if (v1 == vert2 &amp;&amp; v2 == vert3 || v2 == vert2 &amp;&amp; v1 == vert3) {</span>
+<span class="nc" id="L115">			return vert1;</span>
+		}
+<span class="nc" id="L117">		return null;</span>
+	}
+
+	/**
+	 * Returns the triangle that shares a particular edge.
+	 *
+	 * @params tris   the list of triangles to search
+	 *         v1 v2  the vertices that define the edge
+	 * @return        the neighbouring triangle or null if not found
+	 */
+	public Triangle edgeNeighbour(Vector tris, Vertex v1, Vertex v2) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		for (Enumeration e = tris.elements(); e.hasMoreElements();) {</span>
+<span class="nc" id="L129">			Triangle t = (Triangle) e.nextElement();</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">			if (!sameTriangle(t, this)) {</span>
+<span class="nc" id="L131">				Vector&lt;Vertex&gt; verts = t.getVertices();</span>
+<span class="nc bnc" id="L132" title="All 4 branches missed.">				if (verts.contains(v1) &amp;&amp; verts.contains(v2)) {</span>
+<span class="nc" id="L133">					return t;</span>
+				}
+			}
+<span class="nc" id="L136">		}</span>
+<span class="nc" id="L137">		return null;</span>
+	}
+
+	/**
+	 * Returns the sign of the volume of the tetrahedron formed by a
+	 * triangle and a vertex.  VolumeSign is positive iff the vertex is
+	 * on the negative side of the triangle, where the positive side is
+	 * determined by the rh-rule.  So the volume is positive if the ccw
+	 * normal to points outside the tetrahedron.  The final
+	 * fewer-multiplications form is due to Bob Williamson. 
+	 *
+	 * @param v  vertex to test
+	 * @return   -1/0/1 if vertex is on the negative/coplanar/positive
+	 *           side of the triangle according to the rh-rule
+	 */
+	public int volumeSign(Vertex v) {
+<span class="nc" id="L153">		Vector&lt;Vertex&gt; vertices = getVertices();</span>
+<span class="nc" id="L154">		int[] v1 = vertices.firstElement().getCoords();</span>
+<span class="nc" id="L155">		int[] v2 = vertices.elementAt(1).getCoords();</span>
+<span class="nc" id="L156">		int[] v3 = vertices.lastElement().getCoords();</span>
+<span class="nc" id="L157">		int[] v4 = v.getCoords();</span>
+<span class="nc" id="L158">		long ax = v1[0] - v4[0];</span>
+<span class="nc" id="L159">		long ay = v1[1] - v4[1];</span>
+<span class="nc" id="L160">		long az = v1[2] - v4[2];</span>
+<span class="nc" id="L161">		long bx = v2[0] - v4[0];</span>
+<span class="nc" id="L162">		long by = v2[1] - v4[1];</span>
+<span class="nc" id="L163">		long bz = v2[2] - v4[2];</span>
+<span class="nc" id="L164">		long cx = v3[0] - v4[0];</span>
+<span class="nc" id="L165">		long cy = v3[1] - v4[1];</span>
+<span class="nc" id="L166">		long cz = v3[2] - v4[2];</span>
+
+<span class="nc" id="L168">		long vol = ax * (by * cz - bz * cy) + ay * (bz * cx - bx * cz) + az * (bx * cy - by * cx);</span>
+
+		/* The volume should be an integer. */
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		if (vol &gt; 0) {</span>
+<span class="nc" id="L172">			return 1;</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		} else if (vol &lt; 0) {</span>
+<span class="nc" id="L174">			return -1;</span>
+		} else {
+<span class="nc" id="L176">			return 0;</span>
+		}
+	}
+
+	/**
+	 * Returns six times the volume of the tetrahedron formed by a
+	 * triangle and vertex.  The volume is positive iff the vertex is on
+	 * the negative side of the triangle, where the positive side is
+	 * determined by the rh-rule. 
+	 *
+	 * @param v the vertex
+	 */
+	public int volume6(Vertex v) {
+<span class="nc" id="L189">		Vector&lt;Vertex&gt; vertices = getVertices();</span>
+<span class="nc" id="L190">		int[] v1 = vertices.firstElement().getCoords();</span>
+<span class="nc" id="L191">		int[] v2 = vertices.elementAt(1).getCoords();</span>
+<span class="nc" id="L192">		int[] v3 = vertices.lastElement().getCoords();</span>
+<span class="nc" id="L193">		int[] v4 = v.getCoords();</span>
+<span class="nc" id="L194">		int ax = v1[0];</span>
+<span class="nc" id="L195">		int ay = v1[1];</span>
+<span class="nc" id="L196">		int az = v1[2];</span>
+<span class="nc" id="L197">		int bx = v2[0];</span>
+<span class="nc" id="L198">		int by = v2[1];</span>
+<span class="nc" id="L199">		int bz = v2[2];</span>
+<span class="nc" id="L200">		int cx = v3[0];</span>
+<span class="nc" id="L201">		int cy = v3[1];</span>
+<span class="nc" id="L202">		int cz = v3[2];</span>
+<span class="nc" id="L203">		int dx = v4[0];</span>
+<span class="nc" id="L204">		int dy = v4[1];</span>
+<span class="nc" id="L205">		int dz = v4[2];</span>
+<span class="nc" id="L206">		int bxdx = bx - dx;</span>
+<span class="nc" id="L207">		int bydy = by - dy;</span>
+<span class="nc" id="L208">		int bzdz = bz - dz;</span>
+<span class="nc" id="L209">		int cxdx = cx - dx;</span>
+<span class="nc" id="L210">		int cydy = cy - dy;</span>
+<span class="nc" id="L211">		int czdz = cz - dz;</span>
+<span class="nc" id="L212">		return (az - dz) * (bxdx * cydy - bydy * cxdx) + (ay - dy) * (bzdz * cxdx - bxdx * czdz) + (ax - dx) * (bydy * czdz - bzdz * cydy);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

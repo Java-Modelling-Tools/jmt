@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StationsPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">StationsPanel.java</span></div><h1>StationsPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.gui.panels;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.table.ComboBoxCell;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.gui.table.ListOp;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.gui.JMVAWizard;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 23.48.19
+
+ */
+
+/**
+ * 2nd panel: stations number, names, types
+ */
+public final class StationsPanel extends WizardPanel implements ExactConstants, ForceUpdatablePanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Column numbers
+	private final static int COL_NAME = 0;
+	private final static int COL_TYPE = 1;
+	private final static int COL_DELETE_BUTTON = 2;
+
+	private JMVAWizard ew;
+	private HoverHelp help;
+	private static final String helpText = &quot;&lt;html&gt;In this panel you can define the number of stations in the system and their properties.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot; To edit values, double-click on the desired cell&quot;
+			+ &quot; and start typing.&lt;br&gt; To select stations click or drag on the row headers.&lt;br&gt; &lt;b&gt;For a list of the available operations right-click&quot;
+			+ &quot; on the table&lt;/b&gt;.&lt;br&gt;&quot; + &quot; Pressing DELETE removes all selected stations from the system.&lt;/html&gt;&quot;;
+
+	private int stations;
+	private int pop;
+
+	private String[] stationNames;
+	private int[] stationTypes;
+	private int nameCounter;
+
+	private List&lt;ListOp&gt; stationOps;
+	private boolean hasDeletes;
+<span class="nc" id="L89">	private boolean deleting = false;</span>
+
+<span class="nc" id="L91">	private JSpinner stationSpinner = new JSpinner(new SpinnerNumberModel(1, 1, MAX_STATIONS, 1));</span>
+
+	private StationTable stationTable;
+
+<span class="nc" id="L95">	private ChangeListener spinnerListener = new ChangeListener() {</span>
+		public void stateChanged(ChangeEvent ce) {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">			if (!deleting) {</span>
+<span class="nc" id="L98">				updateSizes();</span>
+			}
+<span class="nc" id="L100">		}</span>
+	};
+
+<span class="nc" id="L103">	private AbstractAction deleteStation = new AbstractAction(&quot;Delete selected stations&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L110">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L111">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes selected stations from the system&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L115">			deleteSelectedStations();</span>
+<span class="nc" id="L116">		}</span>
+	};
+
+<span class="nc" id="L119">	private AbstractAction deleteOneStation = new AbstractAction(&quot;&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L126">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes this station&quot;);</span>
+<span class="nc" id="L127">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L131">		}</span>
+	};
+
+<span class="nc" id="L134">	private AbstractAction addStation = new AbstractAction(&quot;New Station&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L141">			putValue(Action.SHORT_DESCRIPTION, &quot;Adds a new Station to Model&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L145">			addStation();</span>
+<span class="nc" id="L146">		}</span>
+	};
+
+<span class="nc" id="L149">	public StationsPanel(JMVAWizard ew) {</span>
+<span class="nc" id="L150">		this.ew = ew;</span>
+<span class="nc" id="L151">		help = ew.getHelp();</span>
+
+<span class="nc" id="L153">		stationOps = new ArrayList&lt;ListOp&gt;();</span>
+<span class="nc" id="L154">		sync();</span>
+<span class="nc" id="L155">		makeNames();</span>
+<span class="nc" id="L156">		initComponents();</span>
+<span class="nc" id="L157">	}</span>
+
+	private void sync() {
+<span class="nc" id="L160">		hasDeletes = false;</span>
+<span class="nc" id="L161">		stationOps.clear();</span>
+
+		/* sync status with data object */
+		/* arrays are copied to ensure data object consistency is preserved */
+<span class="nc" id="L165">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L166">		synchronized (data) {</span>
+<span class="nc" id="L167">			stations = data.getStations();</span>
+<span class="nc" id="L168">			nameCounter = stations;</span>
+<span class="nc" id="L169">			pop = data.getTotalPop();</span>
+<span class="nc" id="L170">			stationNames = ArrayUtils.copy(data.getStationNames());</span>
+<span class="nc" id="L171">			stationTypes = ArrayUtils.copy(data.getStationTypes());</span>
+<span class="nc" id="L172">		}</span>
+
+<span class="nc" id="L174">		stationSpinner.setValue(new Integer(stations));</span>
+<span class="nc" id="L175">	}</span>
+
+	/**
+	 * if true, load dependent stations are allowed
+	 * @return true if the model allows load dependent. False otherwise.
+	 */
+	private boolean isLdEnabled() {
+<span class="nc" id="L182">		ExactModel data = ew.getData();</span>
+		//return data.isClosed() &amp;&amp; data.isSingleClass() &amp;&amp; data.getAlgorithmType().supportLoadDependent() &amp;&amp; !data.isWhatifAlgorithms();
+<span class="nc bnc" id="L184" title="All 4 branches missed.">		return data.getAlgorithmType().supportsLoadDependent() &amp;&amp; !data.isWhatifAlgorithms();</span>
+	}
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L189">		sync();</span>
+<span class="nc" id="L190">		stationTable.update();</span>
+<span class="nc" id="L191">	}</span>
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L195">		commit();</span>
+		//release();
+<span class="nc" id="L197">	}</span>
+
+	/**
+	 * make up names for null entries
+	 */
+	private void makeNames() {
+<span class="nc bnc" id="L203" title="All 2 branches missed.">		for (int i = 0; i &lt; stationNames.length; i++) {</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">			if (stationNames[i] == null) {</span>
+<span class="nc" id="L205">				stationNames[i] = &quot;Station&quot; + (++nameCounter);</span>
+			}
+		}
+<span class="nc" id="L208">	}</span>
+
+	/**
+	 * resize internal data structures according to new values. intended to be called from a listener.
+	 */
+	private void updateSizes() {
+<span class="nc" id="L214">		setNumberOfStations(((Integer) stationSpinner.getValue()).intValue());</span>
+<span class="nc" id="L215">	}</span>
+
+	private void addStation() {
+<span class="nc" id="L218">		setNumberOfStations(stations + 1);</span>
+<span class="nc" id="L219">	}</span>
+
+	private void setNumberOfStations(int number) {
+<span class="nc" id="L222">		stationTable.stopEditing();</span>
+<span class="nc" id="L223">		stations = number;</span>
+
+<span class="nc" id="L225">		stationNames = ArrayUtils.resize(stationNames, stations, null);</span>
+<span class="nc" id="L226">		makeNames();</span>
+
+<span class="nc" id="L228">		stationTypes = ArrayUtils.resize(stationTypes, stations, STATION_LI);</span>
+
+<span class="nc" id="L230">		stationTable.updateStructure();</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">		if (!deleting) {</span>
+<span class="nc" id="L232">			stationOps.add(ListOp.createResizeOp(stations));</span>
+		}
+
+<span class="nc" id="L235">		stationSpinner.setValue(new Integer(stations));</span>
+<span class="nc" id="L236">		stationTable.updateDeleteCommand();</span>
+<span class="nc" id="L237">	}</span>
+
+	/**
+	 * Set up the panel contents and layout
+	 */
+	private void initComponents() {
+<span class="nc" id="L243">		stationSpinner.addChangeListener(spinnerListener);</span>
+
+<span class="nc" id="L245">		stationTable = new StationTable();</span>
+
+		/* and now some Box black magic */
+
+<span class="nc" id="L249">		Box stationSpinnerBox = Box.createHorizontalBox();</span>
+		//OLD
+		//DEK (Federico Granata) 26-09-2003
+		//JLabel spinnerLabel = new JLabel(&quot;&lt;html&gt;&lt;font size=\&quot;4\&quot;&gt;Set the number of stations (1-&quot; + MAX_STATIONS + &quot;):&lt;/font&gt;&lt;/html&gt;&quot;);
+		//NEW
+		//@author Stefano
+<span class="nc" id="L255">		JLabel spinnerLabel = new JLabel(DESCRIPTION_STATIONS);</span>
+
+		//spinnerLabel.setMaximumSize(new Dimension(300, 18));
+<span class="nc" id="L258">		stationSpinnerBox.add(spinnerLabel);</span>
+<span class="nc" id="L259">		stationSpinnerBox.add(Box.createHorizontalStrut(10));</span>
+<span class="nc" id="L260">		Box numberBox = Box.createVerticalBox();</span>
+
+<span class="nc" id="L262">		JPanel spinnerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L263">		JLabel numberLabel = new JLabel(&quot;Number:&quot;);</span>
+<span class="nc" id="L264">		stationSpinner.setMaximumSize(new Dimension(600, 18));</span>
+<span class="nc" id="L265">		spinnerPanel.add(numberLabel);</span>
+<span class="nc" id="L266">		spinnerPanel.add(stationSpinner);</span>
+<span class="nc" id="L267">		numberBox.add(spinnerPanel);</span>
+
+<span class="nc" id="L269">		numberBox.add(new JButton(addStation));</span>
+
+<span class="nc" id="L271">		numberBox.setMaximumSize(new Dimension(300, 150));</span>
+
+<span class="nc" id="L273">		stationSpinnerBox.add(numberBox);</span>
+		//END
+
+<span class="nc" id="L276">		Box stationBox = Box.createVerticalBox();</span>
+<span class="nc" id="L277">		stationBox.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L278">		stationBox.add(stationSpinnerBox);</span>
+<span class="nc" id="L279">		stationBox.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L280">		JScrollPane stationTablePane = new JScrollPane(stationTable);</span>
+<span class="nc" id="L281">		stationTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L282">		stationTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L283">		stationBox.add(stationTablePane);</span>
+<span class="nc" id="L284">		stationBox.add(Box.createRigidArea(new Dimension(10, 20)));</span>
+
+<span class="nc" id="L286">		Box totalBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L287">		totalBox.add(Box.createHorizontalStrut(20));</span>
+<span class="nc" id="L288">		totalBox.add(stationBox);</span>
+<span class="nc" id="L289">		totalBox.add(Box.createHorizontalStrut(20));</span>
+
+<span class="nc" id="L291">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L292">		add(totalBox, BorderLayout.CENTER);</span>
+<span class="nc" id="L293">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L297">		return &quot;Stations&quot;;</span>
+	}
+
+	private void commit() {
+<span class="nc bnc" id="L301" title="All 2 branches missed.">		if (stationSpinner.getEditor().getComponent(0).hasFocus()) {</span>
+			try {
+<span class="nc" id="L303">				stationSpinner.commitEdit();</span>
+<span class="nc" id="L304">				updateSizes();</span>
+<span class="nc" id="L305">			} catch (java.text.ParseException e) {</span>
+<span class="nc" id="L306">			}</span>
+		}
+
+<span class="nc" id="L309">		stationTable.stopEditing();</span>
+
+<span class="nc" id="L311">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L312">		synchronized (data) {</span>
+
+<span class="nc bnc" id="L314" title="All 2 branches missed.">			if (hasDeletes) {</span>
+<span class="nc" id="L315">				playbackStationOps(data); //play back ops on the data object</span>
+			} else {
+<span class="nc" id="L317">				data.resize(stations, data.getClasses());</span>
+			}
+<span class="nc" id="L319">			data.setStationNames(stationNames);</span>
+<span class="nc" id="L320">			data.setStationTypes(stationTypes);</span>
+
+			//NEW
+			//@author Stefano Omini
+<span class="nc" id="L324">			sync();</span>
+			//end NEW
+<span class="nc" id="L326">		}</span>
+<span class="nc" id="L327">	}</span>
+
+	@Override
+	public boolean canFinish() {
+<span class="nc bnc" id="L331" title="All 4 branches missed.">		return checkLD() &amp;&amp; !areThereDuplicates();</span>
+	}
+
+	private void deleteSelectedStations() {
+<span class="nc" id="L335">		int[] selectedRows = stationTable.getSelectedRows();</span>
+<span class="nc" id="L336">		int nrows = selectedRows.length;</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">		if (nrows == 0) {</span>
+<span class="nc" id="L338">			return;</span>
+		}
+<span class="nc" id="L340">		int left = stationTable.getRowCount() - nrows;</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		if (left &lt; 1) {</span>
+<span class="nc" id="L342">			stationTable.removeRowSelectionInterval(selectedRows[nrows - 1], selectedRows[nrows - 1]);</span>
+<span class="nc" id="L343">			deleteSelectedStations();</span>
+<span class="nc" id="L344">			return;</span>
+		}
+<span class="nc" id="L346">		deleteStations(selectedRows);</span>
+<span class="nc" id="L347">	}</span>
+
+	private void deleteStations(int[] idx) {
+<span class="nc" id="L350">		deleting = true;</span>
+<span class="nc" id="L351">		Arrays.sort(idx);</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">		for (int i = idx.length - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L353">			deleteStation(idx[i]);</span>
+		}
+<span class="nc" id="L355">		updateSizes();</span>
+<span class="nc" id="L356">		deleting = false;</span>
+<span class="nc" id="L357">	}</span>
+
+	private void deleteStation(int i) {
+<span class="nc" id="L360">		stations--;</span>
+<span class="nc" id="L361">		stationSpinner.setValue(new Integer(stations));</span>
+
+<span class="nc" id="L363">		stationNames = ArrayUtils.delete(stationNames, i);</span>
+<span class="nc" id="L364">		stationTypes = ArrayUtils.delete(stationTypes, i);</span>
+
+<span class="nc" id="L366">		stationOps.add(ListOp.createDeleteOp(i));</span>
+<span class="nc" id="L367">		hasDeletes = true;</span>
+<span class="nc" id="L368">	}</span>
+
+	private void playbackStationOps(ExactModel data) {
+<span class="nc bnc" id="L371" title="All 2 branches missed.">		for (int i = 0; i &lt; stationOps.size(); i++) {</span>
+<span class="nc" id="L372">			ListOp lo = stationOps.get(i);</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">			if (lo.isDeleteOp()) {</span>
+<span class="nc" id="L374">				data.deleteStation(lo.getData());</span>
+			}
+<span class="nc bnc" id="L376" title="All 2 branches missed.">			if (lo.isResizeOp()) {</span>
+<span class="nc" id="L377">				data.resize(lo.getData(), data.getClasses());</span>
+			}
+		}
+<span class="nc" id="L380">	}</span>
+
+	@Override
+	public boolean canGoBack() {
+<span class="nc" id="L384">		checkLD();</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">		if (areThereDuplicates()) {</span>
+<span class="nc" id="L386">			return false;</span>
+		}
+<span class="nc" id="L388">		return true;</span>
+	}
+
+	@Override
+	public boolean canGoForward() {
+<span class="nc" id="L393">		checkLD();</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">		if (areThereDuplicates()) {</span>
+<span class="nc" id="L395">			return false;</span>
+		}
+<span class="nc" id="L397">		return true;</span>
+	}
+
+	/**
+	 * @return true if the system contains Priority stations
+	 */
+	private boolean isPriority() {
+<span class="nc bnc" id="L404" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L405" title="All 4 branches missed.">			if (stationTypes[i] == STATION_PRS || stationTypes[i] == STATION_HOL) {</span>
+<span class="nc" id="L406">				return true;</span>
+			}
+		}
+<span class="nc" id="L409">		return false;</span>
+	}
+
+	/**
+	 * @return true if the system contains LD stations
+	 */
+	private boolean isLD() {
+<span class="nc bnc" id="L416" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L417" title="All 2 branches missed.">			if (stationTypes[i] == STATION_LD) {</span>
+<span class="nc" id="L418">				return true;</span>
+			}
+		}
+<span class="nc" id="L421">		return false;</span>
+	}
+
+	//checks population of classes for ld stations
+	private boolean checkLD() {
+<span class="nc" id="L426">		stationTable.stopEditing();</span>
+<span class="nc bnc" id="L427" title="All 4 branches missed.">		if (pop &lt; 1 &amp;&amp; isLD()) {</span>
+<span class="nc" id="L428">			JOptionPane</span>
+<span class="nc" id="L429">			.showMessageDialog(</span>
+					this,
+					&quot;&lt;html&gt;&lt;center&gt;A system with zero customers cannot have load dependent stations.&lt;br&gt;Increase the number of customers or remove all load dependent stations.&lt;/center&gt;&lt;/html&gt;&quot;,
+					&quot;Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L433">			return false;</span>
+		}
+<span class="nc" id="L435">		return true;</span>
+	}
+
+	//checks for presence of classes with same name
+	private boolean areThereDuplicates() {
+<span class="nc" id="L440">		boolean thereAreDupl = false;</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">		for (int i = 0; i &lt; stationNames.length; i++) {</span>
+<span class="nc bnc" id="L442" title="All 2 branches missed.">			for (int j = i + 1; j &lt; stationNames.length; j++) {</span>
+<span class="nc bnc" id="L443" title="All 4 branches missed.">				thereAreDupl = thereAreDupl || stationNames[i].equalsIgnoreCase(stationNames[j]);</span>
+			}
+		}
+<span class="nc bnc" id="L446" title="All 2 branches missed.">		if (thereAreDupl) {</span>
+<span class="nc" id="L447">			JOptionPane.showMessageDialog(this,</span>
+					&quot;&lt;html&gt;&lt;center&gt;Two or more stations in this system are identified by the same name.&lt;br&gt;Please modify names.&lt;/center&gt;&lt;/html&gt;&quot;,
+					&quot;Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L450">			return true;</span>
+		} else {
+<span class="nc" id="L452">			return false;</span>
+		}
+	}
+
+	@Override
+	public void help() {
+<span class="nc" id="L458">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L459">	}</span>
+
+	//NEW Federico Dall'Orso
+	//Methods added to implement forcing of data refresh
+	public void retrieveData() {
+<span class="nc" id="L464">		sync();</span>
+<span class="nc" id="L465">	}</span>
+
+	public void commitData() {
+<span class="nc" id="L468">		commit();</span>
+<span class="nc" id="L469">	}</span>
+
+	//END
+
+	/* ------------------------------------------------------------------
+	   The StationTable is a fairly complex object that would be probably better of as an outer class.
+	   However, it is very specialized and it needs access to the data structures of the StationsPanel,
+	   so having it as an inner class is *much* more practical
+	   ------------------------------------------------------------------
+	 */
+
+	/**
+	 * the nifty station table
+	 */
+	private class StationTable extends ExactTable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private TableCellEditor LD_disabled_StationTypeEditor;
+		private TableCellEditor LD_enabled_StationTypeEditor;
+		//BEGIN Federico Dall'Orso 8/3/2005
+		//NEW
+		private ComboBoxCell LD_disabled_StationTypeCell;
+		private ComboBoxCell LD_enabled_StationTypeCell;
+		//14/3/2005
+		private JButton deleteButton;
+		private ButtonCellEditor deleteButtonCellRenderer;
+
+		//END Federico Dall'Orso
+
+<span class="nc" id="L501">		StationTable() {</span>
+<span class="nc" id="L502">			super(new StationTableModel());</span>
+<span class="nc" id="L503">			setName(&quot;StationTable&quot;);</span>
+			//BEGIN Federico Dall'Orso 8/3/2005
+			//station type cell renderers
+			//NEW
+<span class="nc" id="L507">			String[] ldDisabledStationTypeNames = grayOutStationType(STATION_TYPENAMES, STATION_LD);</span>
+<span class="nc" id="L508">			LD_disabled_StationTypeCell = new ComboBoxCell(ldDisabledStationTypeNames);</span>
+<span class="nc" id="L509">			LD_enabled_StationTypeCell = new ComboBoxCell(STATION_TYPENAMES);</span>
+			//14/3/2005
+<span class="nc" id="L511">			deleteButton = new JButton(deleteOneStation);</span>
+<span class="nc" id="L512">			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);</span>
+<span class="nc" id="L513">			enableDeletes();</span>
+<span class="nc" id="L514">			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L515">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+			//END Federico Dall'Orso
+
+			/* a station type cell editor for open/mixed systems */
+<span class="nc" id="L519">			JComboBox&lt;String&gt; stationTypeBox = new JComboBox&lt;String&gt;(ldDisabledStationTypeNames);</span>
+<span class="nc" id="L520">			stationTypeBox.setEditable(false);</span>
+<span class="nc" id="L521">			LD_disabled_StationTypeEditor = new DefaultCellEditor(stationTypeBox);</span>
+
+			/* a station type cell editor for closed systems */
+<span class="nc" id="L524">			JComboBox&lt;String&gt; LD_enabled_StationTypeBox = new JComboBox&lt;String&gt;(STATION_TYPENAMES);</span>
+<span class="nc" id="L525">			LD_enabled_StationTypeBox.setEditable(false);</span>
+<span class="nc" id="L526">			LD_enabled_StationTypeEditor = new DefaultCellEditor(LD_enabled_StationTypeBox);</span>
+
+<span class="nc" id="L528">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L529">			setColumnSelectionAllowed(false);</span>
+
+<span class="nc" id="L531">			setDisplaysScrollLabels(true);</span>
+
+<span class="nc" id="L533">			installKeyboardAction(getInputMap(), getActionMap(), deleteStation);</span>
+<span class="nc" id="L534">			mouseHandler = new ExactTable.MouseHandler(makeMouseMenu());</span>
+<span class="nc" id="L535">			mouseHandler.install();</span>
+
+<span class="nc" id="L537">			help.addHelp(this,</span>
+					&quot;Click or drag to select stations; to edit data double-click and start typing. Right-click for a list of available operations&quot;);
+<span class="nc" id="L539">			help.addHelp(moreRowsLabel, &quot;There are more stations: scroll down to see them&quot;);</span>
+<span class="nc" id="L540">			help.addHelp(selectAllButton, &quot;Click to select all stations&quot;);</span>
+<span class="nc" id="L541">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L542">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L543">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select stations&quot;);</span>
+<span class="nc" id="L544">		}</span>
+
+		/**
+		 * Adds GRAY_S, GRAY_E around a specified station type name
+		 * @param stationTypes array of types of stations
+		 * @param station index of station to be grayed out
+		 * @return copy of stationTypes with new grayed out value
+		 */
+		private String[] grayOutStationType(String[] stationTypes, int station) {
+<span class="nc" id="L553">			String[] newTypes = ArrayUtils.copy(stationTypes);</span>
+<span class="nc" id="L554">			newTypes[station] = GRAY_S + newTypes[station] + GRAY_E;</span>
+<span class="nc" id="L555">			return newTypes;</span>
+		}
+
+		//BEGIN Federico Dall'Orso 14/3/2005
+		/*enables deleting operations with last column's button*/
+		private void enableDeletes() {
+<span class="nc bnc" id="L561" title="All 2 branches missed.">			deleteOneStation.setEnabled(stations &gt; 1);</span>
+			/*It seems the only way to implement row deletion...*/
+<span class="nc" id="L563">			this.addMouseListener(new MouseAdapter() {</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L566" title="All 4 branches missed.">					if ((columnAtPoint(e.getPoint()) == getColumnCount() - 1) &amp;&amp; getRowCount() &gt; 1) {</span>
+<span class="nc" id="L567">						setRowSelectionInterval(rowAtPoint(e.getPoint()), rowAtPoint(e.getPoint()));</span>
+<span class="nc" id="L568">						deleteSelectedStations();</span>
+					}
+<span class="nc" id="L570">				}</span>
+			});
+<span class="nc" id="L572">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L573">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+<span class="nc" id="L574">		}</span>
+
+		//END Federico Dall'Orso 14/3/2005
+
+		@Override
+		protected void installKeyboard() {
+<span class="nc" id="L580">		}</span>
+
+		@Override
+		protected void installMouse() {
+<span class="nc" id="L584">		}</span>
+
+		@Override
+		protected JPopupMenu makeMouseMenu() {
+<span class="nc" id="L588">			JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L589">			menu.add(deleteStation);</span>
+<span class="nc" id="L590">			return menu;</span>
+		}
+
+		/**
+		 * Overridden to ensure proper handling of station type column
+		 */
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L598" title="All 2 branches missed.">			if (column == COL_TYPE) {</span>
+				/* select the right editor */
+<span class="nc bnc" id="L600" title="All 2 branches missed.">				if (isLdEnabled()) {</span>
+<span class="nc" id="L601">					return LD_enabled_StationTypeEditor;</span>
+				} else {
+<span class="nc" id="L603">					return LD_disabled_StationTypeEditor;</span>
+				}
+			} else {
+<span class="nc" id="L606">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		//BEGIN Federico Dall'Orso 8/3/2005
+		//NEW
+		/**Returns combobox-styled cellrenderer if a multiple choice cell is to be rendered.
+		 * @return cell renderer*/
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			//if this is type column, I must render it as a combo box instead of a jtextfield
+<span class="nc bnc" id="L617" title="All 2 branches missed.">			if (column == COL_TYPE) {</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">				if (isLdEnabled()) {</span>
+<span class="nc" id="L619">					return LD_enabled_StationTypeCell;</span>
+				} else {
+<span class="nc" id="L621">					return LD_disabled_StationTypeCell;</span>
+				}
+<span class="nc bnc" id="L623" title="All 2 branches missed.">			} else if (column == getColumnCount() - 1) {</span>
+<span class="nc" id="L624">				return deleteButtonCellRenderer;</span>
+			} else {
+<span class="nc" id="L626">				return new DefaultTableCellRenderer();</span>
+			}
+		}
+
+		//END Federico Dall'Orso 8/3/2005
+
+		//BEGIN Federico Dall'Orso 14/3/2005
+		//NEW
+		//Updates appearence of last column's buttons
+		void updateDeleteCommand() {
+<span class="nc bnc" id="L636" title="All 2 branches missed.">			deleteOneStation.setEnabled(stations &gt; 1);</span>
+<span class="nc" id="L637">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L638">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+<span class="nc" id="L639">		}</span>
+
+		//END Federico Dall'Orso 14/3/2005
+
+		@Override
+		protected void updateActions() {
+<span class="nc bnc" id="L645" title="All 4 branches missed.">			deleteStation.setEnabled(stations &gt; 1 &amp;&amp; getSelectedRowCount() &gt; 0);</span>
+<span class="nc bnc" id="L646" title="All 2 branches missed.">			deleteOneStation.setEnabled(stations &gt; 1);</span>
+<span class="nc" id="L647">		}</span>
+
+	}
+
+	/**
+	 * the model backing the station table
+	 */
+<span class="nc" id="L654">	private class StationTableModel extends ExactTableModel {</span>
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L660">		private Object[] prototypes = { &quot;10000&quot;, new String(new char[15]), new String(new char[15]), &quot;&quot; };</span>
+
+		@Override
+		public Object getPrototype(int columnIndex) {
+<span class="nc" id="L664">			return prototypes[columnIndex + 1];</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L668">			return stations;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L672">			return 3;</span>
+		}
+
+		@Override
+		public String getColumnName(int index) {
+<span class="nc bnc" id="L677" title="All 3 branches missed.">			switch (index) {</span>
+			case COL_NAME:
+<span class="nc" id="L679">				return &quot;Name&quot;;</span>
+			case COL_TYPE:
+<span class="nc" id="L681">				return &quot;Type&quot;;</span>
+			default:
+<span class="nc" id="L683">				return null;</span>
+			}
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc" id="L689">			return new Integer(rowIndex + 1);</span>
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L694" title="All 3 branches missed.">			switch (columnIndex) {</span>
+			case COL_NAME:
+<span class="nc" id="L696">				return stationNames[rowIndex];</span>
+			case COL_TYPE:
+<span class="nc" id="L698">				return STATION_TYPENAMES[stationTypes[rowIndex]];</span>
+			default:
+<span class="nc" id="L700">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L706" title="All 3 branches missed.">			switch (columnIndex) {</span>
+			case COL_NAME:
+<span class="nc" id="L708">				stationNames[rowIndex] = (String) value;</span>
+<span class="nc" id="L709">				break;</span>
+			case COL_TYPE:
+<span class="nc bnc" id="L711" title="All 2 branches missed.">				for (int i = 0; i &lt; STATION_TYPENAMES.length; i++) {</span>
+<span class="nc bnc" id="L712" title="All 2 branches missed.">					if (value == STATION_TYPENAMES[i]) { //literal strings are canonical objects, hence == is ok</span>
+<span class="nc" id="L713">						stationTypes[rowIndex] = i;</span>
+<span class="nc" id="L714">						break;</span>
+					}
+				}
+<span class="nc" id="L717">				ew.updateAlgoPanel(null, null, null, isLD(), isPriority());</span>
+				//if (isLd) {
+				//ew.getData().setAlgorithmType(SolverAlgorithm.EXACT);
+				//}
+<span class="nc" id="L721">				break;</span>
+			default:
+			}
+<span class="nc" id="L724">		}</span>
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L728" title="All 2 branches missed.">			switch (columnIndex) {</span>
+			case COL_NAME:
+			case COL_TYPE:
+<span class="nc" id="L731">				return true;</span>
+			default:
+<span class="nc" id="L733">				return false;</span>
+			}
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

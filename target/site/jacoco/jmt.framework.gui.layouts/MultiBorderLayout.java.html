@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultiBorderLayout.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.layouts</a> &gt; <span class="el_source">MultiBorderLayout.java</span></div><h1>MultiBorderLayout.java</h1><pre class="source lang-java linenums">package jmt.framework.gui.layouts;
+
+import jmt.gui.common.CommonConstants;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * A custom BorderLayout manager that supports multiple items on the same position
+ * User: Marco Bertoli
+ * Date: 1-giu-2005
+ * Time: 11.32.36
+ */
+public class MultiBorderLayout extends BorderLayout {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+<span class="nc" id="L25">	List&lt;Component&gt; north = new ArrayList&lt;Component&gt;();</span>
+<span class="nc" id="L26">	List&lt;Component&gt; south = new ArrayList&lt;Component&gt;();</span>
+<span class="nc" id="L27">	List&lt;Component&gt; west = new ArrayList&lt;Component&gt;();</span>
+<span class="nc" id="L28">	List&lt;Component&gt; east = new ArrayList&lt;Component&gt;();</span>
+<span class="nc" id="L29">	List&lt;Component&gt; center = new ArrayList&lt;Component&gt;();</span>
+
+	public MultiBorderLayout() {
+<span class="nc" id="L32">		super();</span>
+<span class="nc" id="L33">	}</span>
+
+	public MultiBorderLayout(int hgap, int vgap) {
+<span class="nc" id="L36">		super(hgap, vgap);</span>
+<span class="nc" id="L37">	}</span>
+
+	@Override
+	public void addLayoutComponent(String name, Component comp) {
+<span class="nc" id="L41">		synchronized (comp.getTreeLock()) {</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">			if (name == null) {</span>
+<span class="nc" id="L43">				name = &quot;Center&quot;;</span>
+			}
+
+			/* Assign the component to one of the known regions of the layout.
+			*/
+<span class="nc bnc" id="L48" title="All 2 branches missed.">			if (&quot;Center&quot;.equals(name)) {</span>
+<span class="nc" id="L49">				center.add(comp);</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">			} else if (&quot;North&quot;.equals(name)) {</span>
+<span class="nc" id="L51">				north.add(comp);</span>
+<span class="nc bnc" id="L52" title="All 2 branches missed.">			} else if (&quot;South&quot;.equals(name)) {</span>
+<span class="nc" id="L53">				south.add(comp);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">			} else if (&quot;East&quot;.equals(name)) {</span>
+<span class="nc" id="L55">				east.add(comp);</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">			} else if (&quot;West&quot;.equals(name)) {</span>
+<span class="nc" id="L57">				west.add(comp);</span>
+			} else {
+<span class="nc" id="L59">				throw new IllegalArgumentException(&quot;cannot add to layout: unknown constraint: &quot; + name);</span>
+			}
+<span class="nc" id="L61">		}</span>
+<span class="nc" id="L62">	}</span>
+
+	@Override
+	public void removeLayoutComponent(Component comp) {
+<span class="nc" id="L66">		synchronized (comp.getTreeLock()) {</span>
+<span class="nc" id="L67">			south.remove(comp);</span>
+<span class="nc" id="L68">			north.remove(comp);</span>
+<span class="nc" id="L69">			center.remove(comp);</span>
+<span class="nc" id="L70">			west.remove(comp);</span>
+<span class="nc" id="L71">			east.remove(comp);</span>
+<span class="nc" id="L72">		}</span>
+<span class="nc" id="L73">	}</span>
+
+	@Override
+	public Dimension minimumLayoutSize(Container target) {
+<span class="nc" id="L77">		synchronized (target.getTreeLock()) {</span>
+<span class="nc" id="L78">			Dimension dim = new Dimension(0, 0);</span>
+
+<span class="nc" id="L80">			Component c = null;</span>
+
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			if (east.size() &gt; 0) {</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">				for (int i = 0; i &lt; east.size(); i++) {</span>
+<span class="nc" id="L84">					c = east.get(i);</span>
+<span class="nc" id="L85">					Dimension d = c.getMinimumSize();</span>
+<span class="nc" id="L86">					dim.width += d.width + this.getHgap();</span>
+<span class="nc" id="L87">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L90" title="All 2 branches missed.">			if (west.size() &gt; 0) {</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">				for (int i = 0; i &lt; west.size(); i++) {</span>
+<span class="nc" id="L92">					c = west.get(i);</span>
+<span class="nc" id="L93">					Dimension d = c.getMinimumSize();</span>
+<span class="nc" id="L94">					dim.width += d.width + this.getHgap();</span>
+<span class="nc" id="L95">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			if (center.size() &gt; 0) {</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">				for (int i = 0; i &lt; center.size(); i++) {</span>
+<span class="nc" id="L100">					c = center.get(i);</span>
+<span class="nc" id="L101">					Dimension d = c.getMinimumSize();</span>
+<span class="nc" id="L102">					dim.width += d.width;</span>
+<span class="nc" id="L103">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			if (north.size() &gt; 0) {</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">				for (int i = 0; i &lt; north.size(); i++) {</span>
+<span class="nc" id="L108">					c = north.get(i);</span>
+<span class="nc" id="L109">					Dimension d = c.getMinimumSize();</span>
+<span class="nc" id="L110">					dim.width = Math.max(d.width, dim.width);</span>
+<span class="nc" id="L111">					dim.height += d.height + this.getVgap();</span>
+				}
+			}
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			if (south.size() &gt; 0) {</span>
+<span class="nc bnc" id="L115" title="All 2 branches missed.">				for (int i = 0; i &lt; south.size(); i++) {</span>
+<span class="nc" id="L116">					c = south.get(i);</span>
+<span class="nc" id="L117">					Dimension d = c.getMinimumSize();</span>
+<span class="nc" id="L118">					dim.width = Math.max(d.width, dim.width);</span>
+<span class="nc" id="L119">					dim.height += d.height + this.getVgap();</span>
+				}
+			}
+
+<span class="nc" id="L123">			Insets insets = target.getInsets();</span>
+<span class="nc" id="L124">			dim.width += insets.left + insets.right;</span>
+<span class="nc" id="L125">			dim.height += insets.top + insets.bottom;</span>
+
+<span class="nc" id="L127">			return dim;</span>
+		}
+	}
+
+	public Dimension prefferedLayoutSize(Container target) {
+<span class="nc" id="L132">		synchronized (target.getTreeLock()) {</span>
+<span class="nc" id="L133">			Dimension dim = new Dimension(0, 0);</span>
+
+<span class="nc" id="L135">			Component c = null;</span>
+
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			if (east.size() &gt; 0) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">				for (int i = 0; i &lt; east.size(); i++) {</span>
+<span class="nc" id="L139">					c = east.get(i);</span>
+<span class="nc" id="L140">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L141">					dim.width += d.width + this.getHgap();</span>
+<span class="nc" id="L142">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (west.size() &gt; 0) {</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">				for (int i = 0; i &lt; west.size(); i++) {</span>
+<span class="nc" id="L147">					c = west.get(i);</span>
+<span class="nc" id="L148">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L149">					dim.width += d.width + this.getHgap();</span>
+<span class="nc" id="L150">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			if (center.size() &gt; 0) {</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">				for (int i = 0; i &lt; center.size(); i++) {</span>
+<span class="nc" id="L155">					c = center.get(i);</span>
+<span class="nc" id="L156">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L157">					dim.width += d.width;</span>
+<span class="nc" id="L158">					dim.height = Math.max(d.height, dim.height);</span>
+				}
+			}
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			if (north.size() &gt; 0) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">				for (int i = 0; i &lt; north.size(); i++) {</span>
+<span class="nc" id="L163">					c = north.get(i);</span>
+<span class="nc" id="L164">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L165">					dim.width = Math.max(d.width, dim.width);</span>
+<span class="nc" id="L166">					dim.height += d.height + this.getVgap();</span>
+				}
+			}
+<span class="nc bnc" id="L169" title="All 2 branches missed.">			if (south.size() &gt; 0) {</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">				for (int i = 0; i &lt; south.size(); i++) {</span>
+<span class="nc" id="L171">					c = south.get(i);</span>
+<span class="nc" id="L172">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L173">					dim.width = Math.max(d.width, dim.width);</span>
+<span class="nc" id="L174">					dim.height += d.height + this.getVgap();</span>
+				}
+			}
+
+<span class="nc" id="L178">			Insets insets = target.getInsets();</span>
+<span class="nc" id="L179">			dim.width += insets.left + insets.right;</span>
+<span class="nc" id="L180">			dim.height += insets.top + insets.bottom;</span>
+
+<span class="nc" id="L182">			return dim;</span>
+		}
+	}
+
+	@Override
+	public void layoutContainer(Container target) {
+<span class="nc" id="L188">		synchronized (target.getTreeLock()) {</span>
+<span class="nc" id="L189">			Insets insets = target.getInsets();</span>
+<span class="nc" id="L190">			int top = insets.top;</span>
+<span class="nc" id="L191">			int bottom = target.getHeight() - insets.bottom;</span>
+<span class="nc" id="L192">			int left = insets.left;</span>
+<span class="nc" id="L193">			int right = target.getWidth() - insets.right;</span>
+
+<span class="nc" id="L195">			Component c = null;</span>
+
+<span class="nc bnc" id="L197" title="All 2 branches missed.">			if (north.size() &gt; 0) {</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">				for (int i = 0; i &lt; north.size(); i++) {</span>
+<span class="nc" id="L199">					c = north.get(i);</span>
+<span class="nc" id="L200">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L201">					c.setSize(right - left, d.height);</span>
+<span class="nc" id="L202">					c.setBounds(left, top, right - left, c.getHeight());</span>
+<span class="nc" id="L203">					top += d.height;</span>
+				}
+			}
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (south.size() &gt; 0) {</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				for (int i = 0; i &lt; south.size(); i++) {</span>
+<span class="nc" id="L208">					c = south.get(i);</span>
+<span class="nc" id="L209">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L210">					c.setSize(right - left, d.height);</span>
+<span class="nc" id="L211">					c.setBounds(left, bottom - d.height, right - left, c.getHeight());</span>
+<span class="nc" id="L212">					bottom -= d.height;</span>
+				}
+			}
+<span class="nc bnc" id="L215" title="All 2 branches missed.">			if (east.size() &gt; 0) {</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">				for (int i = 0; i &lt; east.size(); i++) {</span>
+<span class="nc" id="L217">					c = east.get(i);</span>
+<span class="nc" id="L218">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L219">					c.setSize(d.width, bottom - top);</span>
+<span class="nc" id="L220">					c.setBounds(right - d.width, top, c.getWidth(), bottom - top);</span>
+<span class="nc" id="L221">					right -= d.width;</span>
+				}
+			}
+<span class="nc bnc" id="L224" title="All 2 branches missed.">			if (west.size() &gt; 0) {</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">				for (int i = 0; i &lt; west.size(); i++) {</span>
+<span class="nc" id="L226">					c = west.get(i);</span>
+<span class="nc" id="L227">					Dimension d = c.getPreferredSize();</span>
+<span class="nc" id="L228">					c.setSize(d.width, bottom - top);</span>
+<span class="nc" id="L229">					c.setBounds(left, top, c.getWidth(), bottom - top);</span>
+<span class="nc" id="L230">					left += d.width;</span>
+				}
+			}
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			if (center.size() &gt; 0) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">				for (int i = 0; i &lt; center.size(); i++) {</span>
+<span class="nc" id="L235">					c = center.get(i);</span>
+<span class="nc" id="L236">					c.setBounds(left, top, right - left, bottom - top);</span>
+				}
+			}
+<span class="nc" id="L239">		}</span>
+<span class="nc" id="L240">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

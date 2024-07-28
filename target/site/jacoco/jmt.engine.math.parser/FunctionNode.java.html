@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FunctionNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math.parser</a> &gt; <span class="el_source">FunctionNode.java</span></div><h1>FunctionNode.java</h1><pre class="source lang-java linenums">/**
+  * Copyright 2006 Bertoli Marco
+
+  *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+
+  *  http://www.apache.org/licenses/LICENSE-2.0
+
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+package jmt.engine.math.parser;
+
+import jmt.engine.math.Sfun;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; FunctionNode&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * This node is used to evaluate every kind of function with a single parameter, like abs(...) or sin(...)
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 08/dic/06
+ * &lt;b&gt;Time:&lt;/b&gt; 16:31:14&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class FunctionNode implements ExpressionNode {
+	/** List of supported functions */
+<span class="nc" id="L33">	public static final String[] FUNCTIONS = new String[] { &quot;-&quot;, &quot;sin&quot;, &quot;cos&quot;, &quot;tan&quot;, &quot;asin&quot;, &quot;acos&quot;, &quot;atan&quot;, &quot;sinh&quot;, &quot;cosh&quot;, &quot;tanh&quot;, &quot;asinh&quot;,</span>
+			&quot;acosh&quot;, &quot;atanh&quot;, &quot;ln&quot;, &quot;log&quot;, &quot;abs&quot;, &quot;rand&quot;, &quot;sqrt&quot;, &quot;erf&quot;, &quot;erfc&quot;, &quot;gamma&quot;, &quot;exp&quot;, &quot;cot&quot;, &quot;log2&quot; };
+	/** Child node */
+	protected ExpressionNode child;
+	/** Function of this node */
+	protected int function;
+	/** An array with children */
+	protected ExpressionNode[] children;
+	
+	private Parser parser;
+	
+
+	/**
+	 * Creates a function node.
+	 * @param child child node of this node
+	 * @param function function to be evaluated. This is the index in &lt;code&gt;FUNCTIONS&lt;/code&gt; array
+	 * @see FunctionNode#FUNCTIONS
+	 */
+<span class="nc" id="L51">	public FunctionNode(ExpressionNode child, int function) {</span>
+<span class="nc" id="L52">		this.child = child;</span>
+<span class="nc" id="L53">		this.function = function;</span>
+<span class="nc" id="L54">		children = new ExpressionNode[] { child };</span>
+<span class="nc" id="L55">	}</span>
+
+	/**
+	 * Creates a function node.
+	 * @param child child node of this node
+	 * @param function name of function to be evaluated.
+	 * @throws IllegalArgumentException if function is unsupported
+	 */
+<span class="nc" id="L63">	public FunctionNode(ExpressionNode child, String function) throws IllegalArgumentException {</span>
+<span class="nc" id="L64">		this.child = child;</span>
+<span class="nc" id="L65">		this.function = -1;</span>
+<span class="nc" id="L66">		children = new ExpressionNode[] { child };</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">		for (int i = 0; i &lt; FUNCTIONS.length; i++) {</span>
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			if (FUNCTIONS[i].equals(function)) {</span>
+<span class="nc" id="L69">				this.function = i;</span>
+<span class="nc" id="L70">				break;</span>
+			}
+		}
+<span class="nc bnc" id="L73" title="All 2 branches missed.">		if (this.function &lt; 0) {</span>
+<span class="nc" id="L74">			throw new IllegalArgumentException(&quot;Unrecognized function&quot;);</span>
+		}
+<span class="nc" id="L76">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#count()
+	 */
+	public int count() {
+<span class="nc" id="L82">		return 1 + child.count();</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getDepth()
+	 */
+	public int getDepth() {
+<span class="nc" id="L89">		return 1 + child.getDepth();</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getSubtype()
+	 */
+	public String getSubtype() {
+<span class="nc" id="L96">		return FUNCTIONS[function];</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getType()
+	 */
+	public int getType() {
+<span class="nc" id="L103">		return ExpressionNode.FUNCTION_NODE;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#getValue()
+	 */
+	public double getValue() {
+<span class="nc bnc" id="L110" title="All 25 branches missed.">		switch (function) {</span>
+			case 0:
+<span class="nc" id="L112">				return -child.getValue();</span>
+			case 1:
+<span class="nc" id="L114">				return Math.sin(child.getValue());</span>
+			case 2:
+<span class="nc" id="L116">				return Math.cos(child.getValue());</span>
+			case 3:
+<span class="nc" id="L118">				return Math.tan(child.getValue());</span>
+			case 4:
+<span class="nc" id="L120">				return Math.asin(child.getValue());</span>
+			case 5:
+<span class="nc" id="L122">				return Math.acos(child.getValue());</span>
+			case 6:
+<span class="nc" id="L124">				return Math.atan(child.getValue());</span>
+			case 7:
+<span class="nc" id="L126">				return Sfun.sinh(child.getValue());</span>
+			case 8:
+<span class="nc" id="L128">				return Sfun.cosh(child.getValue());</span>
+			case 9:
+<span class="nc" id="L130">				return Sfun.tanh(child.getValue());</span>
+			case 10:
+<span class="nc" id="L132">				return Sfun.asinh(child.getValue());</span>
+			case 11:
+<span class="nc" id="L134">				return Sfun.acosh(child.getValue());</span>
+			case 12:
+<span class="nc" id="L136">				return Sfun.atanh(child.getValue());</span>
+			case 13:
+<span class="nc" id="L138">				return Math.log(child.getValue());</span>
+			case 14:
+<span class="nc" id="L140">				return Math.log(child.getValue()) * 0.43429448190325182765;</span>
+			case 15:
+<span class="nc" id="L142">				return Math.abs(child.getValue());</span>
+			case 16:
+<span class="nc" id="L144">				return parser.getEngine().raw() * child.getValue();</span>
+			case 17:
+<span class="nc" id="L146">				return Math.sqrt(child.getValue());</span>
+			case 18:
+<span class="nc" id="L148">				return Sfun.erf(child.getValue());</span>
+			case 19:
+<span class="nc" id="L150">				return Sfun.erfc(child.getValue());</span>
+			case 20:
+<span class="nc" id="L152">				return Sfun.gamma(child.getValue());</span>
+			case 21:
+<span class="nc" id="L154">				return Math.exp(child.getValue());</span>
+			case 22:
+<span class="nc" id="L156">				return Sfun.cot(child.getValue());</span>
+			case 23:
+<span class="nc" id="L158">				return Math.log(child.getValue()) * 1.442695040888963407360;</span>
+		}
+		// This is never reached
+<span class="nc" id="L161">		return 0;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see jmt.engine.math.parser.ExpressionNode#setVariable(java.lang.String, double)
+	 */
+	public void setVariable(String name, double value) {
+<span class="nc" id="L168">		child.setVariable(name, value);</span>
+<span class="nc" id="L169">	}</span>
+
+	/* (non-Javadoc)
+	 * @see org.mbertoli.jfep.ExpressionNode#getChildrenNodes()
+	 */
+	public ExpressionNode[] getChildrenNodes() {
+<span class="nc" id="L175">		return children;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+<span class="nc" id="L183">		ExpressionNode n_child = (ExpressionNode) child.clone();</span>
+<span class="nc" id="L184">		FunctionNode fn = new FunctionNode(n_child, function);</span>
+<span class="nc" id="L185">		fn.setParser(parser);</span>
+<span class="nc" id="L186">		return fn;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		// Special case for negation function
+<span class="nc bnc" id="L195" title="All 2 branches missed.">		if (function != 0) {</span>
+<span class="nc" id="L196">			return this.getSubtype() + &quot;(&quot; + child.toString() + &quot;)&quot;;</span>
+		} else {
+<span class="nc bnc" id="L198" title="All 4 branches missed.">			if (child.getType() == CONSTANT_NODE || child.getType() == VARIABLE_NODE</span>
+<span class="nc bnc" id="L199" title="All 4 branches missed.">					|| (child.getType() == FUNCTION_NODE &amp;&amp; !child.getSubtype().equals(FUNCTIONS[0]))) {</span>
+<span class="nc" id="L200">				return FUNCTIONS[0] + child.toString();</span>
+			} else {
+<span class="nc" id="L202">				return FUNCTIONS[0] + &quot;(&quot; + child.toString() + &quot;)&quot;;</span>
+			}
+		}
+	}
+
+	public void setParser(Parser parser) {
+<span class="nc" id="L208">		this.parser = parser;</span>
+<span class="nc" id="L209">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

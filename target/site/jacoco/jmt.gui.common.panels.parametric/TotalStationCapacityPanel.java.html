@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TotalStationCapacityPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">TotalStationCapacityPanel.java</span></div><h1>TotalStationCapacityPanel.java</h1><pre class="source lang-java linenums">package jmt.gui.common.panels.parametric;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Vector;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysis;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
+import jmt.gui.common.definitions.parametric.TotalStationCapacityParametricAnalysis;
+
+/**
+ * &lt;p&gt;Title: TotalStationCapacityPanel&lt;/p&gt;
+ * &lt;p&gt;Description: this is the panel for he parametric analysis where
+ * the total capacity inside a station is modified.&lt;/p&gt;
+ *
+ * @author Xinyu Gao
+ *         Date: 1-7-2023
+ */
+
+public class TotalStationCapacityPanel extends ParameterOptionPanel {
+    private static final long serialVersionUID = 1L;
+    private JLabel fromLabel;
+    private JSpinner from;
+    private JLabel toLabel;
+    private JSpinner to;
+    private JLabel stepsLabel;
+    private JSpinner steps;
+    private JLabel stationChooserLabel;
+    private JComboBox stationChooser;
+    private JScrollPane scroll;
+    private JTextArea description;
+    private JScrollPane descrPane;
+    private TitledBorder descriptionTitle;
+    private ParametricAnalysisChecker checker;
+
+    private TotalStationCapacityParametricAnalysis TSCPA;
+
+    public TotalStationCapacityPanel(TotalStationCapacityParametricAnalysis tscpa, ClassDefinition classDef, StationDefinition stationDef, SimulationDefinition simDef) {
+<span class="nc" id="L65">        super();</span>
+<span class="nc" id="L66">        TSCPA = tscpa;</span>
+<span class="nc" id="L67">        super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L68">        super.setDividerSize(3);</span>
+
+<span class="nc" id="L70">        DESCRIPTION = &quot;Repeat the simulation with different total capacity of a station.\n\n&quot;</span>
+                + &quot;The 'To' value represents the final total station capacity.\n\n&quot;
+                + &quot;The 'From' value represents the initial total station capacity.\n\n&quot;;
+
+<span class="nc" id="L74">        cd = classDef;</span>
+<span class="nc" id="L75">        sd = stationDef;</span>
+<span class="nc" id="L76">        simd = simDef;</span>
+<span class="nc" id="L77">        checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+
+<span class="nc" id="L79">        initialize();</span>
+<span class="nc" id="L80">    }</span>
+
+    public void initialize() {
+<span class="nc" id="L83">        JPanel edit = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L84">        ParametricAnalysisChecker checker = new ParametricAnalysisChecker(cd, sd, simd);</span>
+<span class="nc" id="L85">        Vector&lt;Object&gt; availableS = checker.checkForTotalStationCapacityParametricAnalysisAvailableStations();</span>
+<span class="nc" id="L86">        String[] stationNames = new String[availableS.size()];</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        for (int i = 0; i &lt; availableS.size(); i++) {</span>
+<span class="nc" id="L88">            stationNames[i] = sd.getStationName(availableS.get(i));</span>
+        }
+
+<span class="nc" id="L91">        stationChooser = new JComboBox(stationNames);</span>
+<span class="nc" id="L92">        stationChooser.setToolTipText(&quot;Choose the station whose total capacity will be changed&quot;);</span>
+
+<span class="nc" id="L94">        description = new JTextArea();</span>
+<span class="nc" id="L95">        description.setOpaque(false);</span>
+<span class="nc" id="L96">        description.setEditable(false);</span>
+<span class="nc" id="L97">        description.setLineWrap(true);</span>
+<span class="nc" id="L98">        description.setWrapStyleWord(true);</span>
+<span class="nc" id="L99">        descrPane = new JScrollPane(description);</span>
+<span class="nc" id="L100">        descriptionTitle = new TitledBorder(new EtchedBorder(), &quot;Description&quot;);</span>
+
+<span class="nc" id="L102">        descrPane.setBorder(descriptionTitle);</span>
+<span class="nc" id="L103">        descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+
+        //if the reference station of the NSPA is still available
+<span class="nc bnc" id="L106" title="All 2 branches missed.">        if (availableS.contains(TSCPA.getReferenceStation())) {</span>
+<span class="nc" id="L107">            stationChooser.setSelectedItem(sd.getStationName(TSCPA.getReferenceStation()));</span>
+        }
+        //else select another one
+        else {
+<span class="nc" id="L111">            TSCPA.setReferenceStation(availableS.get(0));</span>
+<span class="nc" id="L112">            stationChooser.setSelectedIndex(0);</span>
+        }
+
+<span class="nc" id="L115">        fromLabel = new JLabel(&quot;From:&quot;);</span>
+<span class="nc" id="L116">        from = new JSpinner(new SpinnerNumberModel(TSCPA.getInitialValue(), 1, Integer.MAX_VALUE, 1));</span>
+<span class="nc" id="L117">        from.setEnabled(true);</span>
+<span class="nc" id="L118">        from.setToolTipText(&quot;Sets the initial total capacity in the station&quot;);</span>
+<span class="nc" id="L119">        toLabel = new JLabel(&quot;To:&quot;);</span>
+<span class="nc" id="L120">        to = new JSpinner(new SpinnerNumberModel(TSCPA.getFinalValue(), 1, Integer.MAX_VALUE, 1));</span>
+<span class="nc" id="L121">        to.setToolTipText(&quot;Sets the final total capacity in the station&quot;);</span>
+<span class="nc" id="L122">        stepsLabel = new JLabel(&quot;Steps: &quot;);</span>
+<span class="nc" id="L123">        steps = new JSpinner(new SpinnerNumberModel((int)(TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1), 1, ParametricAnalysis.MAX_STEP_NUMBER, 1));</span>
+<span class="nc" id="L124">        TSCPA.setNumberOfSteps((int)(TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1));</span>
+<span class="nc" id="L125">        steps.setToolTipText(&quot;Sets the number of steps to be performed&quot;);</span>
+
+<span class="nc" id="L127">        description.setText(DESCRIPTION);</span>
+
+<span class="nc" id="L129">        from.setBackground(Color.WHITE);</span>
+<span class="nc" id="L130">        stationChooserLabel = new JLabel(&quot;Station:&quot;);</span>
+<span class="nc" id="L131">        edit.add(fromLabel);</span>
+<span class="nc" id="L132">        edit.add(from);</span>
+<span class="nc" id="L133">        edit.add(toLabel);</span>
+<span class="nc" id="L134">        edit.add(to);</span>
+<span class="nc" id="L135">        edit.add(stepsLabel);</span>
+<span class="nc" id="L136">        edit.add(steps);</span>
+<span class="nc" id="L137">        edit.add(stationChooser);</span>
+<span class="nc" id="L138">        edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L139">        JPanel editLables = new JPanel(new GridLayout(5, 1, 0, 5));</span>
+<span class="nc" id="L140">        editLables.add(fromLabel);</span>
+<span class="nc" id="L141">        editLables.add(toLabel);</span>
+<span class="nc" id="L142">        editLables.add(stepsLabel);</span>
+<span class="nc" id="L143">        editLables.add(stationChooserLabel);</span>
+<span class="nc" id="L144">        editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(128 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L145">        JPanel editPanel = new JPanel();</span>
+<span class="nc" id="L146">        editPanel.add(editLables);</span>
+<span class="nc" id="L147">        editPanel.add(edit);</span>
+<span class="nc" id="L148">        editPanel.setBorder(new EmptyBorder(10, 20, 0, 20));</span>
+<span class="nc" id="L149">        JPanel cont = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L150">        cont.add(editPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L151">        scroll = new JScrollPane(cont);</span>
+<span class="nc" id="L152">        title = new TitledBorder(&quot;Station total capacity variation&quot;);</span>
+<span class="nc" id="L153">        scroll.setBorder(title);</span>
+<span class="nc" id="L154">        scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L155">        setLeftComponent(scroll);</span>
+<span class="nc" id="L156">        setRightComponent(descrPane);</span>
+<span class="nc" id="L157">        this.setBorder(new EmptyBorder(5, 0, 5, 0));</span>
+<span class="nc" id="L158">        setListeners();</span>
+<span class="nc" id="L159">    }</span>
+
+    @Override
+    public void setEnabled(boolean enabled) {
+<span class="nc" id="L163">        fromLabel.setEnabled(enabled);</span>
+<span class="nc" id="L164">        from.setEnabled(enabled);</span>
+<span class="nc" id="L165">        toLabel.setEnabled(enabled);</span>
+<span class="nc" id="L166">        to.setEnabled(enabled);</span>
+<span class="nc" id="L167">        stepsLabel.setEnabled(enabled);</span>
+<span class="nc" id="L168">        steps.setEnabled(enabled);</span>
+<span class="nc" id="L169">        description.setEnabled(enabled);</span>
+<span class="nc" id="L170">        stationChooserLabel.setEnabled(enabled);</span>
+<span class="nc" id="L171">        stationChooser.setEnabled(enabled);</span>
+<span class="nc bnc" id="L172" title="All 2 branches missed.">        if (!enabled) {</span>
+<span class="nc" id="L173">            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L174">            descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+        } else {
+<span class="nc" id="L176">            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L177">            descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+        }
+<span class="nc bnc" id="L179" title="All 2 branches missed.">        if (!enabled) {</span>
+<span class="nc" id="L180">            title.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L181">            descriptionTitle.setTitleColor(Color.LIGHT_GRAY);</span>
+        } else {
+<span class="nc" id="L183">            title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L184">            descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+        }
+<span class="nc" id="L186">    }</span>
+
+    private void setListeners() {
+<span class="nc" id="L189">        from.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L191">                Object fValue = from.getValue();</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                if (fValue instanceof Integer) {</span>
+<span class="nc" id="L193">                    TSCPA.setInitialValue(((Integer) fValue).intValue());</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">                } else if (fValue instanceof Double) {</span>
+<span class="nc" id="L195">                    TSCPA.setInitialValue(((Double) fValue).intValue());</span>
+                }
+<span class="nc" id="L197">                from.setValue(new Double(TSCPA.getInitialValue()));</span>
+
+<span class="nc bnc" id="L199" title="All 2 branches missed.">                if (TSCPA.getFinalValue() &gt; TSCPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L201">                        TSCPA.setNumberOfSteps((int) (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L203">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L205" title="All 2 branches missed.">                } else if (TSCPA.getInitialValue() &gt; TSCPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L207">                        TSCPA.setNumberOfSteps((int) (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L209">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L212">                    from.setValue(new Double(TSCPA.getInitialValue()));</span>
+<span class="nc" id="L213">                    to.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc" id="L214">                    Object sub = from.getValue();</span>
+<span class="nc" id="L215">                    from.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L217">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L219">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L221">                } else {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">                    if (TSCPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L223">                        TSCPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L224">                        steps.setValue(new Integer(TSCPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L227">                steps.setValue(TSCPA.getNumberOfSteps());</span>
+<span class="nc" id="L228">            }</span>
+        });
+<span class="nc" id="L230">        to.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L232">                Object tValue = to.getValue();</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">                if (tValue instanceof Integer) {</span>
+<span class="nc" id="L234">                    TSCPA.setFinalValue(((Integer) tValue).intValue());</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">                } else if (tValue instanceof Double) {</span>
+<span class="nc" id="L236">                    TSCPA.setFinalValue(((Double) tValue).intValue());</span>
+                }
+<span class="nc" id="L238">                to.setValue(new Double(TSCPA.getFinalValue()));</span>
+
+<span class="nc bnc" id="L240" title="All 2 branches missed.">                if (TSCPA.getFinalValue() &gt; TSCPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L242">                        TSCPA.setNumberOfSteps((int) (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L244">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                } else if (TSCPA.getInitialValue() &gt; TSCPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L248">                        TSCPA.setNumberOfSteps((int) (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L250">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L253">                    from.setValue(new Double(TSCPA.getInitialValue()));</span>
+<span class="nc" id="L254">                    to.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc" id="L255">                    Object sub = from.getValue();</span>
+<span class="nc" id="L256">                    from.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc bnc" id="L257" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L258">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L260">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L262">                } else {</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">                    if (TSCPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L264">                        TSCPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L265">                        steps.setValue(new Integer(TSCPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L268">                steps.setValue(TSCPA.getNumberOfSteps());</span>
+<span class="nc" id="L269">            }</span>
+        });
+<span class="nc" id="L271">        steps.addChangeListener(new ChangeListener() {</span>
+            public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L273" title="All 2 branches missed.">                if (steps.getValue() instanceof Integer) {</span>
+<span class="nc" id="L274">                    Integer sValue = (Integer) steps.getValue();</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">                    if (TSCPA.getFinalValue() &gt; TSCPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">                        if (sValue &gt;= (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L277">                            TSCPA.setNumberOfSteps((int) (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1));</span>
+                        } else {
+<span class="nc" id="L279">                            TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+<span class="nc bnc" id="L281" title="All 2 branches missed.">                    } else if (TSCPA.getInitialValue() &gt; TSCPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                        if (sValue &gt;= (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L283">                            TSCPA.setNumberOfSteps((int) (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1));</span>
+                        } else {
+<span class="nc" id="L285">                            TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                        }
+                        // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L288">                        from.setValue(new Double(TSCPA.getInitialValue()));</span>
+<span class="nc" id="L289">                        to.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc" id="L290">                        Object sub = from.getValue();</span>
+<span class="nc" id="L291">                        from.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                        if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L293">                            to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">                        } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L295">                            to.setValue((Double) sub);</span>
+                        }
+<span class="nc" id="L297">                    } else {</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                        if (TSCPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L299">                            TSCPA.setNumberOfSteps(1);</span>
+                        }
+                    }
+<span class="nc" id="L302">                    steps.setValue(TSCPA.getNumberOfSteps());</span>
+                }
+<span class="nc" id="L304">            }</span>
+        });
+<span class="nc" id="L306">        stationChooser.addItemListener(new ItemListener() {</span>
+            public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L309">                    return;</span>
+                }
+<span class="nc" id="L311">                String stationName = (String) stationChooser.getSelectedItem();</span>
+<span class="nc" id="L312">                TSCPA.setReferenceStation(getStationKey(stationName));</span>
+
+<span class="nc" id="L314">                TSCPA.setDefaultInitialValue();</span>
+<span class="nc" id="L315">                TSCPA.setDefaultFinalValue();</span>
+<span class="nc" id="L316">                from.setModel(new SpinnerNumberModel(TSCPA.getInitialValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L317">                from.setValue(new Double(TSCPA.getInitialValue()));</span>
+<span class="nc" id="L318">                to.setModel(new SpinnerNumberModel(TSCPA.getFinalValue(), 1, Double.MAX_VALUE, 1));</span>
+<span class="nc" id="L319">                to.setValue(new Double(TSCPA.getFinalValue()));</span>
+
+<span class="nc bnc" id="L321" title="All 2 branches missed.">                if (TSCPA.getFinalValue() &gt; TSCPA.getInitialValue()) {</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1)) {</span>
+<span class="nc" id="L323">                        TSCPA.setNumberOfSteps((int) (TSCPA.getFinalValue() - TSCPA.getInitialValue() + 1));</span>
+                    } else {
+<span class="nc" id="L325">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+<span class="nc bnc" id="L327" title="All 2 branches missed.">                } else if (TSCPA.getInitialValue() &gt; TSCPA.getFinalValue()) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">                    if ((Integer) steps.getValue() &gt;= (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1)) {</span>
+<span class="nc" id="L329">                        TSCPA.setNumberOfSteps((int) (TSCPA.getInitialValue() - TSCPA.getFinalValue() + 1));</span>
+                    } else {
+<span class="nc" id="L331">                        TSCPA.setNumberOfSteps((Integer) steps.getValue());</span>
+                    }
+                    // convert &quot;From&quot; and &quot;To&quot;
+<span class="nc" id="L334">                    from.setValue(new Double(TSCPA.getInitialValue()));</span>
+<span class="nc" id="L335">                    to.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc" id="L336">                    Object sub = from.getValue();</span>
+<span class="nc" id="L337">                    from.setValue(new Double(TSCPA.getFinalValue()));</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">                    if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L339">                        to.setValue((Integer) sub);</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">                    } else if (to.getValue() instanceof Double) {</span>
+<span class="nc" id="L341">                        to.setValue((Double) sub);</span>
+                    }
+<span class="nc" id="L343">                } else {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                    if (TSCPA.getNumberOfSteps() &gt;= 2) {</span>
+<span class="nc" id="L345">                        TSCPA.setNumberOfSteps(1);</span>
+<span class="nc" id="L346">                        steps.setValue(new Integer(TSCPA.getNumberOfSteps()));</span>
+                    }
+                }
+<span class="nc" id="L349">                steps.setValue(TSCPA.getNumberOfSteps());</span>
+<span class="nc" id="L350">            }</span>
+        });
+<span class="nc" id="L352">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

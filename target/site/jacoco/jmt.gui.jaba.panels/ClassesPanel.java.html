@@ -1,0 +1,841 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.panels</a> &gt; <span class="el_source">ClassesPanel.java</span></div><h1>ClassesPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jaba.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.table.ComboBoxCell;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.gui.table.ListOp;
+import jmt.gui.jaba.JabaConstants;
+import jmt.gui.jaba.JabaModel;
+import jmt.gui.jaba.JabaWizard;
+import jmt.jmva.gui.panels.ForceUpdatablePanel;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 23.48.19
+
+ * Adapted to JABA by Zanzottera
+
+ * Heavily bugfixed by Bertoli Marco (31-jan-2006)
+
+ */
+
+/**
+ * 1st panel: classes number, names, types and data
+ */
+public class ClassesPanel extends WizardPanel implements JabaConstants, ForceUpdatablePanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// Added by Bertoli Marco
+	private static final int MINCLASSES = 2;
+	private static final int MAXCLASSES = 3;
+	// end
+
+	private HoverHelp help;
+	private static final String helpText = &quot;&lt;html&gt;In this panel you can define the number of stations in the system and their properties.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot; To edit values, double-click on the desired cell&quot;
+			+ &quot; and start typing.&lt;br&gt; To select classes click or drag on the row headers.&lt;br&gt; &lt;b&gt;For a list of the available operations right-click&quot;
+			+ &quot; on the table&lt;/b&gt;.&lt;br&gt;&quot; + &quot; Pressing DELETE removes all selected classes from the system.&lt;/html&gt;&quot;;
+
+	private JabaWizard ew;
+	private boolean isLd;
+	private int classes;
+	private String[] classNames;
+	private int[] classTypes;
+	private double[] classData;
+	private int nameCounter;
+
+	private List&lt;ListOp&gt; classOps;
+	private boolean hasDeletes;
+<span class="nc" id="L110">	private boolean deleting = false;</span>
+
+<span class="nc" id="L112">	private JSpinner classSpinner = new JSpinner(new SpinnerNumberModel(2, 2, MAX_CLASSES, 1));</span>
+
+	private ClassTable classTable;
+
+<span class="nc" id="L116">	private ChangeListener spinnerListener = new ChangeListener() {</span>
+		public void stateChanged(ChangeEvent ce) {
+<span class="nc bnc" id="L118" title="All 2 branches missed.">			if (!deleting) {</span>
+<span class="nc" id="L119">				updateSizes();</span>
+			}
+<span class="nc" id="L121">		}</span>
+	};
+
+<span class="nc" id="L124">	private AbstractAction deleteClass = new AbstractAction(&quot;Delete selected classes&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L131">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L132">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes selected classes from the system&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L136">			deleteSelectedClasses();</span>
+<span class="nc" id="L137">		}</span>
+	};
+
+<span class="nc" id="L140">	private AbstractAction deleteOneClass = new AbstractAction(&quot;&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L147">			putValue(Action.SHORT_DESCRIPTION, &quot;Delete This Class&quot;);</span>
+<span class="nc" id="L148">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L152">		}</span>
+	};
+
+<span class="nc" id="L155">	private AbstractAction addClass = new AbstractAction(&quot;New Class&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L162">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.ALT_MASK));</span>
+<span class="nc" id="L163">			putValue(Action.SHORT_DESCRIPTION, &quot;Adds a new Class to Model&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L167">			addClass();</span>
+<span class="nc" id="L168">		}</span>
+	};
+
+<span class="nc" id="L171">	public ClassesPanel(JabaWizard ew) {</span>
+<span class="nc" id="L172">		this.ew = ew;</span>
+<span class="nc" id="L173">		help = ew.getHelp();</span>
+<span class="nc" id="L174">		classOps = new ArrayList&lt;ListOp&gt;();</span>
+
+<span class="nc" id="L176">		sync();</span>
+
+<span class="nc" id="L178">		initComponents();</span>
+<span class="nc" id="L179">		makeNames();</span>
+<span class="nc" id="L180">	}</span>
+
+	private void sync() {
+<span class="nc" id="L183">		hasDeletes = false;</span>
+<span class="nc" id="L184">		classOps.clear();</span>
+
+		/* sync status with data object */
+		/* arrays are copied to ensure data object consistency is preserved */
+<span class="nc" id="L188">		JabaModel data = ew.getData();</span>
+<span class="nc" id="L189">		synchronized (data) {</span>
+<span class="nc" id="L190">			classes = data.getClasses();</span>
+<span class="nc" id="L191">			nameCounter = classes;</span>
+<span class="nc" id="L192">			isLd = data.isLd();</span>
+<span class="nc" id="L193">			classNames = ArrayUtils.copy(data.getClassNames());</span>
+<span class="nc" id="L194">			classTypes = ArrayUtils.copy(data.getClassTypes());</span>
+<span class="nc" id="L195">			classData = ArrayUtils.copy(data.getClassData());</span>
+
+			//NEW
+			//@author Stefano Omini
+<span class="nc bnc" id="L199" title="All 2 branches missed.">			if (isLd) {</span>
+				//if load dependent is no more supported after class changes
+				//remove all load dependent stations
+<span class="nc bnc" id="L202" title="All 4 branches missed.">				if (!(data.isClosed() &amp;&amp; data.isSingleClass())) {</span>
+<span class="nc" id="L203">					JOptionPane</span>
+<span class="nc" id="L204">							.showMessageDialog(</span>
+									this,
+									&quot;&lt;html&gt;&lt;center&gt;JMVA allows Load Dependent stations only for single class closed model. &lt;br&gt; Load Dependent stations will be replaced with Load Independent stations.&lt;/center&gt;&lt;/html&gt;&quot;,
+									&quot;Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L208">					data.removeLD();</span>
+<span class="nc" id="L209">					isLd = false;</span>
+				}
+			}
+			//end NEW
+<span class="nc" id="L213">		}</span>
+<span class="nc" id="L214">		classSpinner.setValue(new Integer(classes));</span>
+<span class="nc" id="L215">	}</span>
+
+	/**
+	 * make up names for null entries
+	 */
+	private void makeNames() {
+<span class="nc bnc" id="L221" title="All 2 branches missed.">		for (int i = 0; i &lt; classNames.length; i++) {</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			if (classNames[i] == null) {</span>
+<span class="nc" id="L223">				classNames[i] = &quot;Class&quot; + (++nameCounter);</span>
+			}
+		}
+<span class="nc" id="L226">	}</span>
+
+	/**
+	 * resize internal data structures according to new values. intended to be called from a listener.
+	 */
+	private void updateSizes()
+	//todo add control on number of classes 
+	{
+<span class="nc bnc" id="L234" title="All 2 branches missed.">		if (((Integer) classSpinner.getValue()).intValue() &lt;= MAXCLASSES) {</span>
+<span class="nc" id="L235">			setNumberOfClasses(((Integer) classSpinner.getValue()).intValue());</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">		} else if (((Integer) classSpinner.getValue()).intValue() &lt; MINCLASSES) {</span>
+<span class="nc" id="L237">			JOptionPane.showMessageDialog(this, &quot;Sorry, jABA needs at least &quot; + MINCLASSES + &quot; classes.&quot;, &quot;jABA classes warning&quot;,</span>
+					JOptionPane.ERROR_MESSAGE);
+		} else {
+<span class="nc" id="L240">			JOptionPane.showMessageDialog(this, &quot;Sorry, jABA admits only up to &quot; + MAXCLASSES + &quot; classes.&quot;, &quot;jABA classes warning&quot;,</span>
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+<span class="nc" id="L244">	}</span>
+
+	private void addClass() {
+<span class="nc" id="L247">		setNumberOfClasses(classes + 1);</span>
+<span class="nc" id="L248">	}</span>
+
+	private void setNumberOfClasses(int number) {
+<span class="nc" id="L251">		classTable.stopEditing();</span>
+
+<span class="nc bnc" id="L253" title="All 2 branches missed.">		if (number &lt;= MAXCLASSES) {</span>
+<span class="nc" id="L254">			classes = number;</span>
+		} else {
+<span class="nc" id="L256">			JOptionPane.showMessageDialog(this, &quot;Sorry, jABA admits only up to &quot; + MAXCLASSES + &quot; classes&quot;, &quot;jABA classes warning&quot;,</span>
+					JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L258">			return;</span>
+		}
+
+<span class="nc" id="L261">		classNames = ArrayUtils.resize(classNames, classes, null);</span>
+<span class="nc" id="L262">		makeNames();</span>
+
+<span class="nc" id="L264">		classTypes = ArrayUtils.resize(classTypes, classes, CLASS_CLOSED);</span>
+<span class="nc" id="L265">		classData = ArrayUtils.resize(classData, classes, 0.0);</span>
+
+<span class="nc" id="L267">		classTable.updateStructure();</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">		if (!deleting) {</span>
+<span class="nc" id="L269">			classOps.add(ListOp.createResizeOp(classes));</span>
+		}
+
+<span class="nc" id="L272">		classSpinner.setValue(new Integer(classes));</span>
+<span class="nc" id="L273">		classTable.updateDeleteCommand();</span>
+<span class="nc" id="L274">	}</span>
+
+	/**
+	 * Set up the panel contents and layout
+	 */
+	private void initComponents() {
+<span class="nc" id="L280">		classSpinner.addChangeListener(spinnerListener);</span>
+<span class="nc" id="L281">		help.addHelp(classSpinner, &quot;Enter the number of classes for this system&quot;);</span>
+
+<span class="nc" id="L283">		classTable = new ClassTable();</span>
+
+		/* and now some Box black magic */
+		//DEK (Federico Granata) 26-09-2003
+<span class="nc" id="L287">		Box classSpinnerBox = Box.createHorizontalBox();</span>
+		//OLD
+		//JLabel spinnerLabel = new JLabel(&quot;&lt;html&gt;&lt;font size=\&quot;4\&quot;&gt;Set the Number of classes (1-&quot; + MAX_CLASSES + &quot;):&lt;/font&gt;&lt;/html&gt;&quot;);
+		//NEW
+		//@author Stefano
+<span class="nc" id="L292">		JLabel spinnerLabel = new JLabel(DESCRIPTION_CLASSES);</span>
+
+<span class="nc" id="L294">		classSpinnerBox.add(spinnerLabel);</span>
+		//END
+		//BEGIN Federico Dall'Orso 9/3/2005
+		//OLD
+		/*
+		classSpinnerBox.add(Box.createGlue());
+		*/
+		//NEW
+<span class="nc" id="L302">		classSpinnerBox.add(Box.createHorizontalStrut(10));</span>
+<span class="nc" id="L303">		Box numberBox = Box.createVerticalBox();</span>
+
+<span class="nc" id="L305">		JPanel spinnerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L306">		JLabel numberLabel = new JLabel(&quot;Number (Max=3):&quot;);</span>
+<span class="nc" id="L307">		classSpinner.setMaximumSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(18 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L308">		spinnerPanel.add(numberLabel);</span>
+<span class="nc" id="L309">		spinnerPanel.add(classSpinner);</span>
+<span class="nc" id="L310">		numberBox.add(spinnerPanel);</span>
+
+<span class="nc" id="L312">		numberBox.add(new JButton(addClass));</span>
+
+<span class="nc" id="L314">		numberBox.setMaximumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(150 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L316">		classSpinnerBox.add(numberBox);</span>
+		//END  Federico Dall'Orso 9/3/2005
+
+<span class="nc" id="L319">		Box classBox = Box.createVerticalBox();</span>
+<span class="nc" id="L320">		classBox.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L321">		classBox.add(classSpinnerBox);</span>
+<span class="nc" id="L322">		classBox.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L323">		JScrollPane classTablePane = new JScrollPane(classTable);</span>
+<span class="nc" id="L324">		classTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L325">		classTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L326">		classBox.add(classTablePane);</span>
+<span class="nc" id="L327">		classBox.add(Box.createVerticalStrut(30));</span>
+
+<span class="nc" id="L329">		Box totalBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L330">		totalBox.add(Box.createHorizontalStrut(20));</span>
+<span class="nc" id="L331">		totalBox.add(classBox);</span>
+<span class="nc" id="L332">		totalBox.add(Box.createHorizontalStrut(20));</span>
+
+<span class="nc" id="L334">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L335">		add(totalBox, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L337">	}</span>
+
+	/**
+	 * @return the total number of customers in the system
+	 */
+	private int sumPop() {
+<span class="nc" id="L343">		int pop = 0;</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">			if (classTypes[i] == CLASS_CLOSED) {</span>
+<span class="nc" id="L346">				pop += classData[i];</span>
+			}
+		}
+<span class="nc" id="L349">		return pop;</span>
+	}
+
+	@Override
+	public String getName() {
+<span class="nc" id="L354">		return &quot;Classes&quot;;</span>
+	}
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L359">		commit();</span>
+		//release();
+<span class="nc" id="L361">	}</span>
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L365">		sync();</span>
+<span class="nc" id="L366">		classTable.update();</span>
+<span class="nc" id="L367">	}</span>
+
+	@Override
+	public boolean canFinish() {
+<span class="nc bnc" id="L371" title="All 4 branches missed.">		return checkPop() &amp;&amp; !areThereDuplicates();</span>
+	}
+
+	@Override
+	public boolean canGoBack() {
+<span class="nc" id="L376">		checkPop();</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">		if (areThereDuplicates()) {</span>
+<span class="nc" id="L378">			return false;</span>
+		}
+<span class="nc" id="L380">		return true; //so that the user can correct errors</span>
+	}
+
+	@Override
+	public boolean canGoForward() {
+<span class="nc" id="L385">		checkPop();</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">		if (areThereDuplicates()) {</span>
+<span class="nc" id="L387">			return false;</span>
+		}
+<span class="nc" id="L389">		return true; // so that the user can correct errors</span>
+	}
+
+	//checks whether population is greater than 0
+	private boolean checkPop() {
+<span class="nc" id="L394">		classTable.stopEditing();</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">		if (isLd &amp;&amp; sumPop() &lt; 1) {</span>
+<span class="nc" id="L396">			JOptionPane</span>
+<span class="nc" id="L397">					.showMessageDialog(</span>
+							this,
+							&quot;&lt;html&gt;&lt;center&gt;A system with load dependent stations cannot have zero customers.&lt;br&gt;Increase the number of customers or remove all load dependent stations.&lt;/center&gt;&lt;/html&gt;&quot;,
+							&quot;Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L401">			return false;</span>
+		}
+<span class="nc" id="L403">		return true;</span>
+	}
+
+	//checks for presence of classes with same name
+	private boolean areThereDuplicates() {
+<span class="nc" id="L408">		boolean thereAreDupl = false;</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">		for (int i = 0; i &lt; classNames.length; i++) {</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">			for (int j = i + 1; j &lt; classNames.length; j++) {</span>
+<span class="nc bnc" id="L411" title="All 4 branches missed.">				thereAreDupl = thereAreDupl || classNames[i].equalsIgnoreCase(classNames[j]);</span>
+			}
+		}
+<span class="nc bnc" id="L414" title="All 2 branches missed.">		if (thereAreDupl) {</span>
+<span class="nc" id="L415">			JOptionPane.showMessageDialog(this,</span>
+					&quot;&lt;html&gt;&lt;center&gt;Two or more classes in this system are identified by the same name.&lt;br&gt;Please modify names.&lt;/center&gt;&lt;/html&gt;&quot;,
+					&quot;Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L418">			return true;</span>
+		} else {
+<span class="nc" id="L420">			return false;</span>
+		}
+	}
+
+	private void commit() {
+		/* stop any editing in progress */
+<span class="nc bnc" id="L426" title="All 2 branches missed.">		if (classSpinner.getEditor().getComponent(0).hasFocus()) {</span>
+			//disgusting. there must be a better way...
+			try {
+<span class="nc" id="L429">				classSpinner.commitEdit();</span>
+<span class="nc" id="L430">				updateSizes();</span>
+<span class="nc" id="L431">			} catch (java.text.ParseException e) {</span>
+<span class="nc" id="L432">			}</span>
+		}
+
+<span class="nc" id="L435">		classTable.stopEditing();</span>
+
+<span class="nc" id="L437">		JabaModel data = ew.getData();</span>
+
+<span class="nc" id="L439">		synchronized (data) {</span>
+
+<span class="nc bnc" id="L441" title="All 2 branches missed.">			if (hasDeletes) {</span>
+				//if at some point rows have been deleted
+				//play back all ops in the same order on the data object
+<span class="nc" id="L444">				playbackClassOps(data);</span>
+			} else {
+<span class="nc" id="L446">				data.resize(data.getStations(), classes); //otherwise a simple resize is ok</span>
+			}
+
+<span class="nc" id="L449">			data.setClassNames(classNames);</span>
+<span class="nc" id="L450">			data.setClassTypes(classTypes);</span>
+<span class="nc" id="L451">			data.setClassData(classData);</span>
+
+			//NEW
+			//@author Stefano Omini
+<span class="nc" id="L455">			sync();</span>
+			//end NEW
+<span class="nc" id="L457">		}</span>
+<span class="nc" id="L458">	}</span>
+
+	private void deleteSelectedClasses() {
+<span class="nc" id="L461">		int[] selectedRows = classTable.getSelectedRows();</span>
+<span class="nc" id="L462">		int nrows = selectedRows.length;</span>
+<span class="nc" id="L463">		int left = classTable.getRowCount() - nrows;</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">		if (left &lt; 1) {</span>
+<span class="nc" id="L465">			classTable.removeRowSelectionInterval(selectedRows[nrows - 1], selectedRows[nrows - 1]);</span>
+<span class="nc" id="L466">			deleteSelectedClasses();</span>
+<span class="nc" id="L467">			return;</span>
+		}
+<span class="nc" id="L469">		deleteClasses(selectedRows);</span>
+<span class="nc" id="L470">	}</span>
+
+	private void deleteClasses(int[] idx) {
+<span class="nc" id="L473">		deleting = true;</span>
+<span class="nc" id="L474">		Arrays.sort(idx);</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">		for (int i = idx.length - 1; i &gt;= 0; i--) {</span>
+<span class="nc" id="L476">			deleteClass(idx[i]);</span>
+		}
+<span class="nc" id="L478">		updateSizes();</span>
+<span class="nc" id="L479">		deleting = false;</span>
+<span class="nc" id="L480">	}</span>
+
+	private void deleteClass(int i) {
+
+<span class="nc" id="L484">		classes--;</span>
+<span class="nc" id="L485">		classSpinner.setValue(new Integer(classes));</span>
+
+<span class="nc" id="L487">		classNames = ArrayUtils.delete(classNames, i);</span>
+<span class="nc" id="L488">		classTypes = ArrayUtils.delete(classTypes, i);</span>
+<span class="nc" id="L489">		classData = ArrayUtils.delete(classData, i);</span>
+
+<span class="nc" id="L491">		classOps.add(ListOp.createDeleteOp(i));</span>
+<span class="nc" id="L492">		hasDeletes = true;</span>
+
+<span class="nc" id="L494">	}</span>
+
+	private void playbackClassOps(JabaModel data) {
+<span class="nc bnc" id="L497" title="All 2 branches missed.">		for (int i = 0; i &lt; classOps.size(); i++) {</span>
+<span class="nc" id="L498">			ListOp lo = classOps.get(i);</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">			if (lo.isDeleteOp()) {</span>
+<span class="nc" id="L500">				data.deleteClass(lo.getData());</span>
+			}
+<span class="nc bnc" id="L502" title="All 2 branches missed.">			if (lo.isResizeOp()) {</span>
+<span class="nc" id="L503">				data.resize(data.getStations(), lo.getData());</span>
+			}
+
+		}
+<span class="nc" id="L507">	}</span>
+
+	@Override
+	public void help() {
+<span class="nc" id="L511">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+
+<span class="nc" id="L513">	}</span>
+
+	//NEW Federico Dall'Orso
+	//Methods added to implement forcing of data refresh
+	public void retrieveData() {
+<span class="nc" id="L518">		sync();</span>
+<span class="nc" id="L519">	}</span>
+
+	public void commitData() {
+<span class="nc" id="L522">		commit();</span>
+<span class="nc" id="L523">	}</span>
+
+	//END
+
+	/* ------------------------------------------------------------------
+	   The ClassTable is a fairly complex object that would be probably better of as an outer class.
+	   However, it is very specialized and it needs access to the data structures of the ClassesPanel,
+	   so having it as an inner class is *much* more practical
+	   ------------------------------------------------------------------
+	   */
+
+	/**
+	 * Her Majesty, the class table herself
+	 */
+	private class ClassTable extends ExactTable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		TableCellRenderer disabledCellRenderer;
+		TableCellEditor classTypeCellEditor;
+		//BEGIN Federico Dall'Orso 8/3/2005
+		ComboBoxCell classTypeComboBoxCell;
+		ButtonCellEditor deleteButtonCellRenderer;
+		JButton deleteButton;
+
+		//END Federico Dall'Orso 8/3/2005
+
+<span class="nc" id="L552">		ClassTable() {</span>
+<span class="nc" id="L553">			super(new ClassTableModel());</span>
+
+<span class="nc" id="L555">			disabledCellRenderer = new DisabledCellRenderer();</span>
+
+			//BEGIN Federico Dall'Orso 8/3/2005
+			//NEW
+<span class="nc" id="L559">			classTypeComboBoxCell = new ComboBoxCell(CLASS_TYPENAMES);</span>
+			//todo replace after adding open classes
+<span class="nc" id="L561">			classTypeComboBoxCell.getComboBox().setEnabled(false);</span>
+
+<span class="nc" id="L563">			deleteButton = new JButton(deleteOneClass);</span>
+<span class="nc" id="L564">			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);</span>
+<span class="nc" id="L565">			enableDeletes();</span>
+<span class="nc" id="L566">			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L567">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+			//END Federico Dall'Orso 8/3/2005
+
+<span class="nc" id="L570">			JComboBox&lt;String&gt; classTypeBox = new JComboBox&lt;String&gt;(CLASS_TYPENAMES);</span>
+			//todo replace after adding open classes
+<span class="nc" id="L572">			classTypeBox.setEnabled(false);</span>
+
+<span class="nc" id="L574">			classTypeCellEditor = new DefaultCellEditor(classTypeBox);</span>
+<span class="nc" id="L575">			classTypeBox.setEditable(false);</span>
+
+<span class="nc" id="L577">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L578">			setColumnSelectionAllowed(false);</span>
+
+			// not beautiful, but effective. See ClassTableModel.getColumnClass()
+<span class="nc" id="L581">			setDefaultRenderer(DisabledCellRenderer.class, disabledCellRenderer);</span>
+<span class="nc" id="L582">			setDefaultEditor(String.class, classTypeCellEditor);</span>
+
+<span class="nc" id="L584">			setDisplaysScrollLabels(true);</span>
+
+<span class="nc" id="L586">			installKeyboardAction(getInputMap(), getActionMap(), deleteClass);</span>
+<span class="nc" id="L587">			mouseHandler = new ExactTable.MouseHandler(makeMouseMenu());</span>
+<span class="nc" id="L588">			mouseHandler.install();</span>
+
+<span class="nc" id="L590">			help.addHelp(this,</span>
+					&quot;Click or drag to select classes; to edit data double-click and start typing. Right-click for a list of available operations&quot;);
+<span class="nc" id="L592">			help.addHelp(moreRowsLabel, &quot;There are more classes: scroll down to see them&quot;);</span>
+<span class="nc" id="L593">			help.addHelp(selectAllButton, &quot;Click to select all classes&quot;);</span>
+<span class="nc" id="L594">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L595">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L596">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select classes&quot;);</span>
+<span class="nc" id="L597">		}</span>
+
+		//BEGIN Federico Dall'Orso 14/3/2005
+		/*enables deleting operations with last column's button*/
+		private void enableDeletes() {
+			//deleteOneClass.setEnabled(classes&gt;1);
+			//todo zanzottera added control initially it is not possible to cancel the 2 classes
+<span class="nc bnc" id="L604" title="All 2 branches missed.">						deleteOneClass.setEnabled(classes &gt; MINCLASSES);</span>
+			/*It seems the only way to implement row deletion...*/
+<span class="nc" id="L606">			this.addMouseListener(new MouseAdapter() {</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L609" title="All 6 branches missed.">					if (classes &gt; MINCLASSES &amp;&amp; (columnAtPoint(e.getPoint()) == getColumnCount() - 1) &amp;&amp; getRowCount() &gt; 1) {</span>
+<span class="nc" id="L610">						setRowSelectionInterval(rowAtPoint(e.getPoint()), rowAtPoint(e.getPoint()));</span>
+<span class="nc" id="L611">						deleteSelectedClasses();</span>
+					}
+<span class="nc" id="L613">				}</span>
+			});
+<span class="nc" id="L615">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L616">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+<span class="nc" id="L617">		}</span>
+
+		//END Federico Dall'Orso 14/3/2005
+
+		//new Federico Dall'Orso 8/3/2005
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+			//if this is type column, i must render it as a combo box instead of a jtextfield
+<span class="nc bnc" id="L626" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L627">				return classTypeComboBoxCell;</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">			} else if (column == 4) {</span>
+<span class="nc" id="L629">				return deleteButtonCellRenderer;</span>
+			} else {
+<span class="nc" id="L631">				return disabledCellRenderer;</span>
+			}
+		}
+
+		//end Federico Dall'Orso 8/3/2005
+
+		@Override
+		protected void installKeyboard() {
+<span class="nc" id="L639">		}</span>
+
+		@Override
+		protected void installMouse() {
+<span class="nc" id="L643">		}</span>
+
+		@Override
+		protected JPopupMenu makeMouseMenu() {
+<span class="nc" id="L647">			JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L648">			menu.add(deleteClass);</span>
+<span class="nc" id="L649">			return menu;</span>
+		}
+
+		/**
+		 * Make sure the table reflects changes on editing end
+		 * Overridden to truncate decimals in data if current class is closed
+		 */
+		@Override
+		public void editingStopped(ChangeEvent ce) {
+<span class="nc bnc" id="L658" title="All 2 branches missed.">			if (classTypes[editingRow] == CLASS_CLOSED) {</span>
+<span class="nc" id="L659">				classData[editingRow] = (int) classData[editingRow];</span>
+			}
+<span class="nc" id="L661">			updateRow(editingRow);</span>
+<span class="nc" id="L662">			super.editingStopped(ce);</span>
+<span class="nc" id="L663">		}</span>
+
+		//BEGIN Federico Dall'Orso 14/3/2005
+		//NEW
+		//Updates appearence of last column's buttons
+		void updateDeleteCommand() {
+			//todo inserito controllo non si possono cancellare classi se ce ne sono solo 2
+<span class="nc bnc" id="L670" title="All 2 branches missed.">			deleteOneClass.setEnabled(classes &gt; MINCLASSES);</span>
+<span class="nc" id="L671">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L672">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+
+<span class="nc" id="L674">		}</span>
+
+		//END Federico Dall'Orso 14/3/2005
+
+		@Override
+		protected void updateActions() {
+<span class="nc bnc" id="L680" title="All 4 branches missed.">			boolean isEnabled = classes &gt; MINCLASSES &amp;&amp; getSelectedRowCount() &gt; 0;</span>
+<span class="nc" id="L681">			deleteClass.setEnabled(isEnabled);</span>
+<span class="nc bnc" id="L682" title="All 2 branches missed.">			deleteOneClass.setEnabled(classes &gt; MINCLASSES);</span>
+<span class="nc" id="L683">		}</span>
+	}
+
+	/**
+	 * the model backing the class table
+	 */
+<span class="nc" id="L689">	private class ClassTableModel extends ExactTableModel {</span>
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L695">		private Object[] prototypes = { &quot;10000&quot;, new String(new char[12]), &quot;closed+cbox&quot;, new Integer(1000), new String(new char[12]), &quot;&quot; };</span>
+<span class="nc" id="L696">		private int suffixClassCollision = 1;</span>
+
+		@Override
+		public Object getPrototype(int columnIndex) {
+<span class="nc" id="L700">			return prototypes[columnIndex + 1];</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L704">			return classes;</span>
+		}
+
+		@Override
+		@SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+		public Class getColumnClass(int col) {
+<span class="nc bnc" id="L710" title="All 3 branches missed.">			switch (col) {</span>
+				case 1:
+<span class="nc" id="L712">					return String.class;</span>
+				case 2:
+				case 3:
+<span class="nc" id="L715">					return DisabledCellRenderer.class;</span>
+				default:
+<span class="nc" id="L717">					return Object.class;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L722">			return 5;</span>
+		}
+
+		@Override
+		public String getColumnName(int index) {
+<span class="nc bnc" id="L727" title="All 5 branches missed.">			switch (index) {</span>
+				case 0:
+<span class="nc" id="L729">					return &quot;Name&quot;;</span>
+				case 1:
+<span class="nc" id="L731">					return &quot;Type (Closed Only)&quot;;</span>
+				case 2:
+<span class="nc" id="L733">					return &quot;No. of Customers (+inf.)&quot;;</span>
+				case 3:
+					//return &quot;Arrival Rate (\u03BB)&quot;;
+<span class="nc" id="L736">					return &quot;Arrival Rate (Further versions)&quot;;</span>
+				default:
+<span class="nc" id="L738">					return null;</span>
+			}
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L744" title="All 3 branches missed.">			switch (columnIndex) {</span>
+				case 0://name
+<span class="nc" id="L746">					return classNames[rowIndex];</span>
+				case 1://type
+<span class="nc" id="L748">					return CLASS_TYPENAMES[classTypes[rowIndex]];</span>
+				case 2://customers
+					/*
+					if (classTypes[rowIndex] == CLASS_CLOSED) {
+						return new Integer((int) classData[rowIndex]);
+					} else {
+						return null;
+					}
+					*/
+				case 3://arrival rate
+					/*
+					if (classTypes[rowIndex] == CLASS_OPEN) {
+						return new Double(classData[rowIndex]);
+					} else {
+						return null;
+					}
+					*/
+				default:
+<span class="nc" id="L766">					return null;</span>
+			}
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc" id="L772">			return new Integer(rowIndex + 1);</span>
+		}
+		
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L777" title="All 5 branches missed.">			switch (columnIndex) {</span>
+				case 0: //name
+<span class="nc" id="L779">					String tmpName = (String) value;</span>
+					//Check for class name collision
+<span class="nc bnc" id="L781" title="All 2 branches missed.">					for (int i = 0; i &lt; classNames.length; i++ ) {</span>
+<span class="nc bnc" id="L782" title="All 4 branches missed.">						if (classNames[i].equals(tmpName) &amp;&amp; i != rowIndex) {</span>
+<span class="nc" id="L783">							tmpName = tmpName + &quot;_&quot; + suffixClassCollision++;</span>
+<span class="nc" id="L784">							break;</span>
+						}
+					}
+<span class="nc" id="L787">					classNames[rowIndex] = tmpName;</span>
+<span class="nc" id="L788">					break;</span>
+				case 1: //type
+<span class="nc bnc" id="L790" title="All 2 branches missed.">					for (int i = 0; i &lt; CLASS_TYPENAMES.length; i++) {</span>
+<span class="nc bnc" id="L791" title="All 2 branches missed.">						if (value == CLASS_TYPENAMES[i]) { //literal strings are canonicalized, hence == is ok</span>
+<span class="nc" id="L792">							classTypes[rowIndex] = i;</span>
+<span class="nc" id="L793">							break;</span>
+						}
+					}
+<span class="nc" id="L796">					break;</span>
+				case 2: {//customers
+					try {
+<span class="nc" id="L799">						int newval = (int) Double.parseDouble((String) value);</span>
+<span class="nc bnc" id="L800" title="All 2 branches missed.">						if (newval &gt;= 0) {</span>
+<span class="nc" id="L801">							classData[rowIndex] = newval;</span>
+						}
+<span class="nc" id="L803">					} catch (NumberFormatException e) {</span>
+<span class="nc" id="L804">					}</span>
+<span class="nc" id="L805">					break;</span>
+				}
+				case 3: { //arrival rate
+					try {
+<span class="nc" id="L809">						double newval = Double.parseDouble((String) value);</span>
+<span class="nc bnc" id="L810" title="All 2 branches missed.">						if (newval &gt;= 0.0) {</span>
+<span class="nc" id="L811">							classData[rowIndex] = newval;</span>
+						}
+<span class="nc" id="L813">					} catch (NumberFormatException e) {</span>
+<span class="nc" id="L814">					}</span>
+<span class="nc" id="L815">					break;</span>
+				}
+				default:
+			}
+<span class="nc" id="L819">		}</span>
+
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L824" title="All 4 branches missed.">			switch (columnIndex) {</span>
+				case 0:
+<span class="nc" id="L826">					return true;</span>
+				case 1:
+<span class="nc" id="L828">					return false;</span>
+				case 2:
+					//todo restore when open classes will be accepted
+					//return (classTypes[rowIndex] == CLASS_CLOSED);
+				case 3:
+<span class="nc bnc" id="L833" title="All 2 branches missed.">					return (classTypes[rowIndex] == CLASS_OPEN);</span>
+				default:
+<span class="nc" id="L835">					return false;</span>
+			}
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

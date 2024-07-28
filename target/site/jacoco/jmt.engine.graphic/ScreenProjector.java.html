@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScreenProjector.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.graphic</a> &gt; <span class="el_source">ScreenProjector.java</span></div><h1>ScreenProjector.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.graphic;
+
+import java.awt.Dimension;
+import java.security.InvalidParameterException;
+import java.util.LinkedList;
+
+/**
+ * This class transforms 3D coordinates into 2D screen coordinates.
+ * 
+ * @author Andrea Zoppi.
+ * 
+ */
+public class ScreenProjector {
+	
+	protected float					screenW;
+	protected float					screenH;
+	protected float					halfW;
+	protected float					halfH;
+	protected float					aspect;
+	
+	protected float					fov;
+	protected float					near;
+	protected float					far;
+	
+	protected float					focalLength;
+<span class="nc" id="L44">	protected Matrix4				modelView	= Matrix4.createIdentity();</span>
+<span class="nc" id="L45">	protected Matrix4				projection	= Matrix4.createIdentity();</span>
+	
+<span class="nc" id="L47">	protected LinkedList&lt;Matrix4&gt;	stack		= new LinkedList&lt;Matrix4&gt;();</span>
+	
+	
+<span class="nc" id="L50">	public ScreenProjector() {</span>
+<span class="nc" id="L51">		setScreenSize( new Dimension( 680, 480 ) );</span>
+<span class="nc" id="L52">		setNearClipping( 0.1f );</span>
+<span class="nc" id="L53">		setFarClipping( 200.0f );</span>
+<span class="nc" id="L54">		setFov( 90.0f );</span>
+<span class="nc" id="L55">		updateProjection();</span>
+<span class="nc" id="L56">	}</span>
+	
+
+	public Dimension getScreenSize() {
+<span class="nc" id="L60">		return new Dimension( (int)Math.round( screenW ), (int)Math.round( screenH ) );</span>
+	}
+	
+
+	public void setScreenSize( Dimension screenSize ) {
+<span class="nc bnc" id="L65" title="All 2 branches missed.">		if ( screenSize.width &lt; 1 ) {</span>
+<span class="nc" id="L66">			throw new InvalidParameterException( &quot;screenSize.width &lt; 1&quot; );</span>
+		}
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		if ( screenSize.height &lt; 1 ) {</span>
+<span class="nc" id="L69">			throw new InvalidParameterException( &quot;screenSize.height &lt; 1&quot; );</span>
+		}
+<span class="nc" id="L71">		screenW = screenSize.width;</span>
+<span class="nc" id="L72">		screenH = screenSize.height;</span>
+<span class="nc" id="L73">		halfW = screenW / 2;</span>
+<span class="nc" id="L74">		halfH = screenH / 2;</span>
+<span class="nc" id="L75">		aspect = screenH / screenW; // FIXME</span>
+<span class="nc" id="L76">	}</span>
+	
+
+	public float getFov() {
+<span class="nc" id="L80">		return (float)(fov * (180 / Math.PI));</span>
+	}
+	
+
+	/**
+	 * Sets the &lt;i&gt;Field of View&lt;/i&gt;.
+	 * 
+	 * @param fov
+	 *            FOV in degrees.
+	 */
+	public void setFov( float fov ) {
+<span class="nc" id="L91">		this.fov = (float)(Math.min( Math.max( 0.1f, fov ), 175.0f ) * (Math.PI / 180));</span>
+<span class="nc" id="L92">		focalLength = (float)(1.0 / Math.tan( this.fov / 2.0 ));</span>
+<span class="nc" id="L93">	}</span>
+	
+
+	public float getNearClipping() {
+<span class="nc" id="L97">		return near;</span>
+	}
+	
+
+	public void setNearClipping( float near ) {
+<span class="nc" id="L102">		this.near = Math.max( 0.01f, Math.min( far, 9999.0f ) );</span>
+<span class="nc" id="L103">	}</span>
+	
+
+	public float getFarClipping() {
+<span class="nc" id="L107">		return far;</span>
+	}
+	
+
+	public void setFarClipping( float far ) {
+<span class="nc" id="L112">		this.far = Math.max( 0.02f, Math.min( far, 10000.0f ) );</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if ( this.far == this.near ) {</span>
+<span class="nc" id="L114">			this.far += 0.01f; // Try to avoid degeneration</span>
+		}
+<span class="nc" id="L116">	}</span>
+	
+
+	public void lookAt( Vector4 eyePos, Vector4 targetPos, boolean translate ) {
+<span class="nc" id="L120">		Vector4 forward = targetPos.sub( eyePos );</span>
+<span class="nc" id="L121">		forward.normalize();</span>
+		
+		Vector4 up;
+<span class="nc bnc" id="L124" title="All 4 branches missed.">		if ( Math.abs( forward.x() ) &lt; 0.01f &amp;&amp; Math.abs( forward.z() ) &lt; 0.01f ) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">			up = (forward.y() &gt; 0.0f) ? Vector4.Z_AXIS_REV : Vector4.Z_AXIS;</span>
+		}
+		else {
+<span class="nc" id="L128">			up = Vector4.Y_AXIS_REV;</span>
+		}
+		
+<span class="nc" id="L131">		Vector4 left = up.cross( forward );</span>
+<span class="nc" id="L132">		left.normalize();</span>
+		
+<span class="nc" id="L134">		up = forward.cross( left );</span>
+<span class="nc" id="L135">		up.normalize();</span>
+		
+<span class="nc bnc" id="L137" title="All 2 branches missed.">		modelView.set( new Matrix4( translate ? eyePos : Vector4.ORIGIN, left, up, forward ) );</span>
+<span class="nc" id="L138">	}</span>
+	
+
+	public void lookAt( Vector4 eyePos, Vector4 targetPos, Vector4 up, boolean translate ) {
+<span class="nc" id="L142">		Vector4 forward = targetPos.sub( eyePos );</span>
+<span class="nc" id="L143">		forward.normalize();</span>
+		
+<span class="nc" id="L145">		Vector4 left = up.cross( forward );</span>
+<span class="nc" id="L146">		left.normalize();</span>
+		
+<span class="nc" id="L148">		up = forward.cross( left );</span>
+<span class="nc" id="L149">		up.normalize();</span>
+		
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		modelView.set( new Matrix4( translate ? eyePos : Vector4.ORIGIN, left, up, forward ) );</span>
+<span class="nc" id="L152">	}</span>
+	
+
+	public void trans( float dx, float dy, float dz ) {
+<span class="nc" id="L156">		modelView.transSelf( dx, dy, dz );</span>
+<span class="nc" id="L157">	}</span>
+	
+
+	public void trans( Vector4 delta ) {
+<span class="nc" id="L161">		modelView.transSelf( delta );</span>
+<span class="nc" id="L162">	}</span>
+	
+
+	public void rotX( float w ) {
+<span class="nc" id="L166">		modelView.multSelf( Matrix4.createRotationX( w ) );</span>
+<span class="nc" id="L167">	}</span>
+	
+
+	public void rotY( float w ) {
+<span class="nc" id="L171">		modelView.multSelf( Matrix4.createRotationY( w ) );</span>
+<span class="nc" id="L172">	}</span>
+	
+
+	public void rotZ( float w ) {
+<span class="nc" id="L176">		modelView.multSelf( Matrix4.createRotationZ( w ) );</span>
+<span class="nc" id="L177">	}</span>
+	
+
+	public Matrix4 getModelView() {
+<span class="nc" id="L181">		return modelView;</span>
+	}
+	
+
+	public Matrix4 getProjection() {
+<span class="nc" id="L186">		return projection;</span>
+	}
+	
+
+	public void push( Matrix4 matrix ) {
+<span class="nc" id="L191">		stack.push( matrix.clone() );</span>
+<span class="nc" id="L192">	}</span>
+	
+
+	public Matrix4 pop() {
+<span class="nc" id="L196">		return stack.pop();</span>
+	}
+	
+
+	public int stackSize() {
+<span class="nc" id="L201">		return stack.size();</span>
+	}
+	
+
+	/**
+	 * Updates the projection matrix after modifying the screen size, fov or
+	 * clipping.
+	 */
+	public void updateProjection() {
+<span class="nc" id="L210">		projection.set( 0.0f );</span>
+<span class="nc" id="L211">		projection.set( 0, 0, focalLength * aspect );</span>
+<span class="nc" id="L212">		projection.set( 1, 1, focalLength );</span>
+<span class="nc" id="L213">		projection.set( 2, 2, (far + near) / (far - near) );</span>
+<span class="nc" id="L214">		projection.set( 3, 2, (2 * near * far) / (near - far) );</span>
+<span class="nc" id="L215">		projection.set( 2, 3, 1.0f );</span>
+<span class="nc" id="L216">	}</span>
+	
+
+	/**
+	 * Projects a 3D point onto the screen surface, as a 2D point.
+	 * 
+	 * @param point
+	 *            3D point to project.
+	 * @return The projected 2D point.
+	 */
+	public Vector4 project( Vector4 point ) {
+<span class="nc" id="L227">		Matrix4 T = projection.mult( modelView );</span>
+<span class="nc" id="L228">		Vector4 p = T.mult( point );</span>
+<span class="nc" id="L229">		p.x( (p.x() * screenW) / (2.0f * p.w()) + halfW );</span>
+<span class="nc" id="L230">		p.y( (p.y() * screenH) / (2.0f * p.w()) + halfH );</span>
+<span class="nc" id="L231">		p.z( p.z() / p.w() );</span>
+<span class="nc" id="L232">		return p;</span>
+	}
+	
+
+	/**
+	 * Checks whether a projected 2D point is clipped by the frustum.
+	 * 
+	 * @param point
+	 *            Point to check.
+	 * @return The clipped condition.
+	 */
+	public boolean isClipped( Vector4 projectedPoint ) {
+<span class="nc" id="L244">		int x = (int) projectedPoint.x();</span>
+<span class="nc" id="L245">		int y = (int) projectedPoint.y();</span>
+<span class="nc bnc" id="L246" title="All 8 branches missed.">		return x &lt; screenW &amp;&amp; x &lt; screenH &amp;&amp; (x + 1) &gt;= 0 &amp;&amp; (y + 1) &gt;= 0; // TODO: Z-tests</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

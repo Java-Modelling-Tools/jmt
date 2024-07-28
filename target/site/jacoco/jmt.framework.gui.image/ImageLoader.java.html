@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ImageLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.image</a> &gt; <span class="el_source">ImageLoader.java</span></div><h1>ImageLoader.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.gui.image;
+
+import jmt.gui.common.CommonConstants;
+
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.net.URL;
+import java.util.HashMap;
+
+import javax.swing.ImageIcon;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; ImageLoader&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A class used to load images. Each subclass must implement the &lt;code&gt;getImageURL&lt;/code&gt;
+ * method to retrieve URL of resource to be loaded. This class holds a cache of loaded images.
+ * Cache size can be adjusted using the &lt;code&gt;maxCache&lt;/code&gt; field.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 23/gen/07
+ * &lt;b&gt;Time:&lt;/b&gt; 15:09:14&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+<span class="fc" id="L46">public abstract class ImageLoader {</span>
+
+	/**
+	 * Modifier to be used for mirror images (rotated on y axis)
+	 */
+	public static final String MODIFIER_MIRROR = &quot;MIRROR&quot;;
+	/**
+	 * Modifier to be used for rotating images (rotated on y axis)
+	 */
+	public static final String MODIFIER_ROTATE = &quot;ROTATE&quot;;
+	/**
+	 * Modifier to be used for mirror images  and rotating images (rotated on y axis)
+	 */
+	public static final String MODIFIER_MIRROR_AND_ROTATE = &quot;MIRROR_ROTATE&quot;;
+	/**
+	 * Modifier to be used for pressed button images
+	 */
+	public static final String MODIFIER_PRESSED = &quot;P&quot;;
+	/**
+	 * Modifier to be used for rollover button images
+	 */
+	public static final String MODIFIER_ROLLOVER = &quot;RO&quot;;
+	/**
+	 * Modifier to be used for selected (toggled) button images
+	 */
+	public static final String MODIFIER_SELECTED = &quot;S&quot;;
+	/**
+	 * Template used to derive modified toolbar images
+	 */
+	private static final String TEMPLATE_IMAGE_NAME = &quot;templateToolbarImage&quot;;
+
+	/**
+	 * Allowed images extensions
+	 */
+<span class="fc" id="L80">	private static final String[] EXTENSIONS = new String[]{&quot;.gif&quot;, &quot;.png&quot;, &quot;.jpg&quot;};</span>
+	/**
+	 * Maximum number of cached elements
+	 */
+<span class="fc" id="L84">	protected int maxCache = 256;</span>
+	/**
+	 * Internal caching data structure
+	 */
+<span class="fc" id="L88">	protected HashMap&lt;String, ImageIcon&gt; iconCache = new HashMap&lt;String, ImageIcon&gt;();</span>
+
+	/**
+	 * Returns the url of a given resource
+	 *
+	 * @param resourceName name of the resource to be retrieved
+	 * @return url of the resource or null if it was not found
+	 */
+	protected abstract URL getImageURL(String resourceName);
+
+	/**
+	 * Loads an icon with specified name, and caches it.
+	 *
+	 * @param iconName name of the icon to be loaded
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName) {
+<span class="fc" id="L105">		return this.loadIcon(iconName, (String) null);</span>
+	}
+
+	/**
+	 * Loads an icon with specified name and modifier, and caches it.
+	 *
+	 * @param iconName name of the icon to be loaded
+	 * @param modifier modifier to be applied
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName, String modifier) {
+<span class="fc" id="L116">		return this.loadIcon(iconName, modifier, 0.0);</span>
+	}
+
+	/**
+	 * Loads an icon with specified name and size, caches it and then resizes it.
+	 *
+	 * @param iconName name of the icon to be loaded
+	 * @param size     target dimension of image
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName, Dimension size) {
+<span class="nc" id="L127">		return this.loadIcon(iconName, (String) null, size);</span>
+	}
+
+	/**
+	 * Loads an icon with specified name, modifier and size, caches it and then resizes it.
+	 *
+	 * @param iconName name of the icon to be loaded
+	 * @param modifier modifier to be applied
+	 * @param size     target dimension of image
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName, String modifier, Dimension size) {
+<span class="nc" id="L139">		ImageIcon icon = loadIcon(iconName, modifier);</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if (icon != null) {</span>
+<span class="nc" id="L141">			Image image = icon.getImage();</span>
+<span class="nc" id="L142">			image = image.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);</span>
+<span class="nc" id="L143">			return new ImageIcon(image);</span>
+		} else {
+<span class="nc" id="L145">			return icon;</span>
+		}
+	}
+
+	/**
+	 * Loads an icon with specified name, modifier and size, caches it and then resizes it.
+	 *
+	 * @param iconName name of the icon to be loaded
+	 * @param modifier modifier to be applied
+	 * @param angle    rotation angle of the image in degrees
+	 * @return icon if found, null otherwise
+	 */
+	public ImageIcon loadIcon(String iconName, String modifier, Double angle) {
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">		if (iconName == null) {</span>
+<span class="nc" id="L159">			return null;</span>
+		}
+<span class="fc" id="L161">		String derivedName = iconName;</span>
+		// Applies modifier to icon name if needed
+<span class="pc bpc" id="L163" title="1 of 2 branches missed.">		if (modifier != null) {</span>
+<span class="nc" id="L164">			derivedName = deriveIconName(iconName, modifier);</span>
+		}
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">		if (angle != 0.0) {</span>
+<span class="nc" id="L167">			derivedName = derivedName + &quot;_&quot; + ((int) Math.floor(angle));</span>
+		}
+
+<span class="fc bfc" id="L170" title="All 2 branches covered.">		if (iconCache.containsKey(derivedName)) {</span>
+<span class="fc" id="L171">			return iconCache.get(derivedName);</span>
+		}
+
+<span class="fc" id="L174">		URL url = null;</span>
+		// If image is not found, tries to add extensions
+<span class="fc bfc" id="L176" title="All 4 branches covered.">		for (int i = 0; i &lt; EXTENSIONS.length &amp;&amp; url == null; i++) {</span>
+<span class="fc" id="L177">			url = getImageURL(derivedName + EXTENSIONS[i]);</span>
+		}
+
+<span class="fc" id="L180">		ImageIcon icon = null;</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">		if (url != null) {</span>
+<span class="fc" id="L182">			icon = new ImageIcon(url);</span>
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">		} else if (modifier != null) {</span>
+			// Loads base icon without modifiers
+<span class="nc" id="L185">			ImageIcon base = loadIcon(iconName);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">			if (base != null) {</span>
+				// Applies known modifiers
+<span class="nc" id="L188">				icon = applyModifier(base, modifier,angle);</span>
+			}
+		}
+<span class="fc bfc" id="L191" title="All 2 branches covered.">		if (icon != null) {</span>
+<span class="fc" id="L192">			Image image = icon.getImage();</span>
+			//System.out.println(iconName);
+			//switch (iconName) {
+			//	case &quot;Source&quot;:
+			//	case &quot;Sink&quot;:
+			//	case &quot;Router&quot;:
+			//	case &quot;Delay&quot;:
+			//	case &quot;Server&quot;:
+			//	case &quot;Fork&quot;:
+			//	case &quot;Join&quot;:
+			//	case &quot;Scaler&quot;:
+			//	case &quot;Semaphore&quot;:
+			//	case &quot;Logger&quot;:
+			//	case &quot;ClassSwitch&quot;:
+				//case &quot;Place&quot;:
+				//case &quot;Transition&quot;:
+				//	image = image.getScaledInstance((int) (CommonConstants.widthScaling * image.getWidth(null)), (int) (CommonConstants.heightScaling * image.getHeight(null)), Image.SCALE_SMOOTH);
+			//		break;
+			//}
+<span class="fc" id="L211">			icon = new ImageIcon(image);</span>
+		}
+
+		// Clears cache when it is bigger than maxCache. This is not needed but avoids memory leakages...
+<span class="pc bpc" id="L215" title="1 of 2 branches missed.">		if (iconCache.size() &gt; maxCache) {</span>
+<span class="nc" id="L216">			iconCache.clear();</span>
+		}
+
+<span class="fc" id="L219">		iconCache.put(derivedName, icon);</span>
+<span class="fc" id="L220">		return icon;</span>
+	}
+
+	/**
+	 * Derives an icon name to apply suffixes before extension
+	 *
+	 * @param iconName name of the icon to be derived
+	 * @param modifier suffix to be appended
+	 * @return derived name
+	 */
+	public static String deriveIconName(String iconName, String modifier) {
+<span class="nc" id="L231">		int dot = iconName.lastIndexOf('.');</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">		if (dot &lt; 0) {</span>
+<span class="nc" id="L233">			return iconName + modifier;</span>
+		} else {
+<span class="nc" id="L235">			return iconName.substring(0, dot) + modifier + iconName.substring(dot);</span>
+		}
+	}
+
+	// --- Methods to apply modifiers to loaded icons ---------------------------------------------------
+
+	/**
+	 * Apply known modifiers to given image
+	 *
+	 * @param base     base image to be modified
+	 * @param modifier modifier to be applied
+	 * @return modified image
+	 */
+	protected ImageIcon applyModifier(ImageIcon base, String modifier) {
+<span class="nc" id="L249">		return this.applyModifier(base, modifier, 0.0);</span>
+	}
+
+	/**
+	 * Apply known modifiers to given image
+	 *
+	 * @param base     base image to be modified
+	 * @param modifier modifier to be applied
+	 * @param angle rotation angle in degrees
+	 * @return modified image
+	 */
+	protected ImageIcon applyModifier(ImageIcon base, String modifier, Double angle) {
+<span class="nc bnc" id="L261" title="All 2 branches missed.">		if (modifier.equals(MODIFIER_MIRROR)) {</span>
+<span class="nc" id="L262">			return mirrorImage(base);</span>
+<span class="nc bnc" id="L263" title="All 2 branches missed.">		} else if (modifier.equals(MODIFIER_ROTATE)) {</span>
+<span class="nc" id="L264">			return rotate(base, angle);</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		} else if (modifier.equals(MODIFIER_MIRROR_AND_ROTATE)) {</span>
+<span class="nc" id="L266">			ImageIcon iconMirrored = mirrorImage(base);</span>
+<span class="nc" id="L267">			return rotate(iconMirrored, angle);</span>
+<span class="nc bnc" id="L268" title="All 4 branches missed.">		} else if (modifier.equals(MODIFIER_ROLLOVER) || modifier.equals(MODIFIER_SELECTED)) {</span>
+<span class="nc" id="L269">			ImageIcon background = loadIcon(deriveIconName(TEMPLATE_IMAGE_NAME, modifier));</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">			if (background != null) {</span>
+<span class="nc" id="L271">				return mergeIcons(background, base, new Point(0, 0), new Point(background.getIconWidth(), background.getIconHeight()),</span>
+						new Point(0, 0));
+			}
+<span class="nc bnc" id="L274" title="All 2 branches missed.">		} else if (modifier.equals(MODIFIER_PRESSED)) {</span>
+<span class="nc" id="L275">			ImageIcon background = loadIcon(deriveIconName(TEMPLATE_IMAGE_NAME, modifier));</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">			if (background != null) {</span>
+<span class="nc" id="L277">				return mergeIcons(background, base, new Point(0, 0), new Point(background.getIconWidth(), background.getIconHeight()),</span>
+						new Point(4, 4));
+			}
+		}
+		// Modifier unsupported or template images not found.
+<span class="nc" id="L282">		return base;</span>
+	}
+
+	/**
+	 * Merge two icons together. Output icon dimension is the same as background one.
+	 *
+	 * @param background background icon
+	 * @param overlay    overlay icon, needs to be transparent (will be moved and cropped)
+	 * @param cropMin    minimum crop point for overlay icon (0,0 for no crop)
+	 * @param cropMax    maximum crop point for overlay icon (width and height for no crop)
+	 * @param move       upper left corner where cropped overlay image should be positioned on background image
+	 * @return merged icon
+	 */
+	protected ImageIcon mergeIcons(ImageIcon background, ImageIcon overlay, Point cropMin, Point cropMax, Point move) {
+<span class="nc" id="L296">		BufferedImage out = new BufferedImage(background.getIconWidth(), background.getIconHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc" id="L297">		Graphics2D g = out.createGraphics();</span>
+<span class="nc" id="L298">		g.drawImage(background.getImage(), 0, 0, null);</span>
+<span class="nc" id="L299">		g.drawImage(overlay.getImage(), move.x, move.y, move.x + cropMax.x - cropMin.x, move.y + cropMax.y - cropMin.y, cropMin.x, cropMin.y,</span>
+				cropMax.x, cropMax.y, null);
+<span class="nc" id="L301">		return new ImageIcon(out);</span>
+	}
+
+	/**
+	 * Rotates image on y axis
+	 *
+	 * @param base image to be modified
+	 * @return mirrored image
+	 */
+	protected ImageIcon mirrorImage(ImageIcon base) {
+<span class="nc" id="L311">		BufferedImage out = new BufferedImage(base.getIconWidth(), base.getIconHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc" id="L312">		Graphics2D g = out.createGraphics();</span>
+<span class="nc" id="L313">		g.drawImage(base.getImage(), base.getIconWidth(), 0, 0, base.getIconHeight(), 0, 0, base.getIconWidth(), base.getIconHeight(), null);</span>
+<span class="nc" id="L314">		return new ImageIcon(out);</span>
+	}
+
+	/**
+	 * Rotates image on y axis
+	 *
+	 * @param base  image to be modified
+	 * @param angle rotation angle in degrees
+	 * @return rotated image
+	 *
+	 * @author Emma Bortone
+	 * Date: April 2020
+	 */
+	protected ImageIcon rotate(ImageIcon base, Double angle) {
+<span class="nc" id="L328">		double radianAngle = Math.toRadians(angle);</span>
+
+		//width and height of the original image
+<span class="nc" id="L331">		int widthBase = base.getIconWidth();</span>
+<span class="nc" id="L332">		int heightBase = base.getIconHeight();</span>
+
+		//width and height of the new image
+<span class="nc" id="L335">		int widthNew = (int) Math.ceil(widthBase * Math.abs(Math.cos(radianAngle)) + heightBase * Math.abs(Math.sin(radianAngle)));</span>
+<span class="nc" id="L336">		int heightNew = (int) Math.ceil(widthBase * Math.abs(Math.sin(radianAngle)) + heightBase * Math.abs(Math.cos(radianAngle)));</span>
+
+<span class="nc" id="L338">		BufferedImage out = new BufferedImage(widthNew, heightNew, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="nc" id="L339">		Graphics2D g = out.createGraphics();</span>
+
+<span class="nc" id="L341">		AffineTransform identity = new AffineTransform();</span>
+<span class="nc" id="L342">		AffineTransform trans = new AffineTransform();</span>
+
+<span class="nc" id="L344">		trans.setTransform(identity);</span>
+
+		// translation of the image to the center of the new rectangle
+<span class="nc" id="L347">		trans.translate((widthNew - widthBase) / 2.0 , (heightNew - heightBase) / 2.0);</span>
+		// rotation of the image
+<span class="nc" id="L349">		trans.rotate(radianAngle, widthBase / 2.0, heightBase / 2.0);</span>
+<span class="nc" id="L350">		g.drawImage(base.getImage(), trans, null);</span>
+
+<span class="nc" id="L352">		return new ImageIcon(out);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,1436 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.simEngine</a> &gt; <span class="el_source">SimLoader.java</span></div><h1>SimLoader.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.simEngine;
+
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.common.exception.LoadException;
+import jmt.common.xml.XSDSchemaLoader;
+import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchRoutingStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy;
+import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;
+import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
+import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
+import jmt.engine.NodeSections.*;
+import jmt.engine.NodeSections.Queue;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.dataAnalysis.InverseMeasure;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.SimParameters;
+import jmt.engine.random.AbstractDistribution;
+import jmt.engine.random.Burst;
+import jmt.engine.random.Distribution;
+
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+
+/**
+ * This class contains the methods to load the DOM description of a
+ * queueing network model from a XML file and then to create a Simulation object
+ * from that description.
+ *
+ * For each node, all parameters and sub-parameters are loaded using the suitable constructors.
+ *
+ * @author Federico Granata, Stefano Omini, Bertoli Marco
+ * @version 26-ago-2003 14.23.27
+ *       
+ * Modified by Ashanka (May 2010): 
+ * Patch: Multi-Sink Perf. Index 
+ * Description: Added new Performance index for capturing 
+ * 				1. global response time (ResponseTime per Sink)
+ *              2. global throughput (Throughput per Sink)
+ *              each sink per class.
+ */
+public class SimLoader {
+
+	//used for debug purposes
+	private static final boolean DEBUG = false;
+
+	//represents the entire XML document. it is the root
+	//of the document tree, and provides the primary access to the document's data
+	Document document;
+
+	//customer class array
+	private JobClass[] jobClasses;
+	// simulation object created by this loader
+	private Simulation sim;
+
+	//path of the xml file containing the sim model
+	private String simModelPath;
+
+	/**
+	 * Creates a Simulation object, loading all the model definition from the
+	 * passed xml file
+	 *
+	 * @param xmlPath the &lt;em&gt;absolute&lt;/em&gt; path of the xml model definition
+	 */
+<span class="nc" id="L105">	public SimLoader(String xmlPath) throws IOException, LoadException {</span>
+<span class="nc" id="L106">		simModelPath = xmlPath;</span>
+<span class="nc" id="L107">		InputStream is = new BufferedInputStream(new FileInputStream(xmlPath));</span>
+		//loads the model and creates a Simulation object
+<span class="nc" id="L109">		load(is);</span>
+<span class="nc" id="L110">	}</span>
+
+	private void load(InputStream is) throws LoadException {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (is == null) {</span>
+<span class="nc" id="L114">			throw new LoadException(&quot;File not Found&quot;);</span>
+		}
+<span class="nc" id="L116">		InputSource inputSource = new InputSource(is);</span>
+		//create a parser
+<span class="nc" id="L118">		DOMParser parser = new DOMParser();</span>
+
+<span class="nc" id="L120">		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();</span>
+<span class="nc" id="L121">		factory.setValidating(true);</span>
+<span class="nc" id="L122">		factory.setNamespaceAware(true);</span>
+
+		try {
+			// turn on schema validation ( note need to set both sax and dom validation )
+<span class="nc" id="L126">			parser.setFeature(&quot;http://xml.org/sax/features/validation&quot;, true);</span>
+<span class="nc" id="L127">			parser.setFeature(&quot;http://apache.org/xml/features/validation/schema&quot;, true);</span>
+<span class="nc" id="L128">			parser.setFeature(&quot;http://apache.org/xml/features/validation/schema-full-checking&quot;, true);</span>
+
+			//NEW
+			//TODO: set the schema to do parsing
+<span class="nc" id="L132">			String externalSchemaLocation = XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION);</span>
+<span class="nc" id="L133">			parser.setProperty(&quot;http://apache.org/xml/properties/schema/external-noNamespaceSchemaLocation&quot;, externalSchemaLocation);</span>
+			//end NEW
+
+			try {
+				//document parsing
+<span class="nc" id="L138">				parser.parse(inputSource);</span>
+<span class="nc" id="L139">			} catch (FileNotFoundException e) {</span>
+<span class="nc" id="L140">				throw new LoadException(&quot;Problems while parsing&quot;, e);</span>
+<span class="nc" id="L141">			}</span>
+
+			//get the w3c document
+<span class="nc" id="L144">			document = parser.getDocument();</span>
+			if (DEBUG) {
+				System.out.println(&quot; created document&quot;);
+			}
+			//gets root - node name = 'sim'
+<span class="nc" id="L149">			Element root = document.getDocumentElement();</span>
+			if (DEBUG) {
+				System.out.println(&quot;root = &quot; + root.getAttribute(&quot;name&quot;));
+			}
+
+			//recovers the name of the simulation &amp; creates a getLog with the same
+			//name
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			if (root.getNodeName() == null) {</span>
+<span class="nc" id="L157">				throw new LoadException(&quot;Problems loading&quot;);</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">			} else if (!root.getNodeName().equalsIgnoreCase(&quot;sim&quot;)) {</span>
+<span class="nc" id="L159">				throw new LoadException(&quot;Problems loading&quot;);</span>
+			}
+
+			//OLD
+			//sim = new Simulation(root.getAttribute(&quot;name&quot;), root.getAttribute(&quot;debug&quot;).equals(&quot;true&quot;));
+
+			//NEW
+			//@author Stefano Omini
+			//default values
+<span class="nc" id="L168">			long seed = -1;</span>
+<span class="nc" id="L169">			String simName = &quot;&quot;;</span>
+
+<span class="nc bnc" id="L171" title="All 2 branches missed.">			if (root.hasAttribute(&quot;name&quot;)) {</span>
+<span class="nc" id="L172">				simName = root.getAttribute(&quot;name&quot;);</span>
+			}
+
+			//variable debug is no longer USED
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">			if (root.getAttribute(&quot;seed&quot;) != &quot;&quot;) {</span>
+<span class="nc" id="L178">				seed = Long.parseLong(root.getAttribute(&quot;seed&quot;));</span>
+			}
+
+<span class="nc bnc" id="L181" title="All 2 branches missed.">			if (simName.equalsIgnoreCase(&quot;&quot;)) {</span>
+				//NEW
+				//@author Stefano Omini
+				//no name specified: uses current time as name
+<span class="nc" id="L185">				String datePattern = &quot;yyyyMMdd_HHmmss&quot;;</span>
+<span class="nc" id="L186">				SimpleDateFormat formatter = new SimpleDateFormat(datePattern);</span>
+
+<span class="nc" id="L188">				Date today = new Date();</span>
+<span class="nc" id="L189">				String todayString = formatter.format(today);</span>
+
+<span class="nc" id="L191">				simName = &quot;JSIM_&quot; + todayString;</span>
+
+				//OLD
+				//sim = new Simulation(seed, null, debug);
+<span class="nc" id="L195">				sim = new Simulation(seed, simName);</span>
+				//end NEW
+<span class="nc" id="L197">			} else {</span>
+				//OLD
+				//sim = new Simulation(seed, simName, debug);
+<span class="nc" id="L200">				sim = new Simulation(seed, simName);</span>
+			}
+
+<span class="nc" id="L203">			sim.setXmlSimModelDefPath(simModelPath);</span>
+			//end NEW
+
+			//-------------- SIM PARAMETERS -------------------//
+
+			//TODO: code to set sim parameters
+
+			// Create a class SimParameter, whose parameters will be shared by all
+			// dynamic data analyzer in order to compute confidence intervals.
+			// For example, number of batches, batch size, ecc..
+
+			//this constructor will use default values
+<span class="nc" id="L215">			SimParameters simParam = new SimParameters();</span>
+
+		//TODO: here I should put blocks like if (has attribute(&quot;batch&quot;)) then set(..) etc
+//once added in the xml schema, they must be read and
+//inserted with the respective set methods
+
+// {......}
+
+//TODO: finished the part with parsing and set of attributes, put this method
+//(which for the moment is limited to setting the default values)
+
+			//sets the reference in sim object
+<span class="nc" id="L227">			sim.setSimParameters(simParam);</span>
+
+			//gets the default value of maxSamples
+			//(max number of samples for each measure)
+<span class="nc" id="L231">			int maxSamples = simParam.getMaxSamples();</span>
+			//gets the default value of minSamples
+			//(min number of samples for each measure)
+<span class="nc" id="L234">			int minSamples = simParam.getMinSamples();</span>
+			//gets the default value of maxSimulatedTime
+<span class="nc" id="L236">			double maxSimulatedTime = simParam.getMaxSimulatedTime();</span>
+			//gets the default value of maxProcessedEvents
+<span class="nc" id="L238">			int maxProcessedEvents = simParam.getMaxProcessedEvents();</span>
+			//gets the default value of disableStatisticStop
+<span class="nc" id="L240">			boolean disableStatisticStop = simParam.isDisableStatisticStop();</span>
+
+			// Gets the timestamp value
+<span class="nc" id="L243">			simParam.setTimestampValue(Long.toString(System.currentTimeMillis()));</span>
+
+			//-------------- end SIM PARAMETERS -------------------//
+
+			// Read maxSamples if specified
+<span class="nc bnc" id="L248" title="All 2 branches missed.">			if (root.getAttribute(&quot;maxSamples&quot;) != &quot;&quot;) {</span>
+<span class="nc" id="L249">				maxSamples = Integer.parseInt(root.getAttribute(&quot;maxSamples&quot;));</span>
+<span class="nc" id="L250">				simParam.setMaxSamples(maxSamples);</span>
+			}
+
+			// Read minSamples if specified
+<span class="nc bnc" id="L254" title="All 2 branches missed.">			if (root.getAttribute(&quot;minSamples&quot;) != &quot;&quot;) {</span>
+<span class="nc" id="L255">				minSamples = Integer.parseInt(root.getAttribute(&quot;minSamples&quot;));</span>
+<span class="nc" id="L256">				simParam.setMinSamples(minSamples);</span>
+			}
+
+			// Read maxSimulatedTime if specified
+<span class="nc bnc" id="L260" title="All 2 branches missed.">			if (root.getAttribute(&quot;maxSimulated&quot;) != &quot;&quot;) {</span>
+<span class="nc" id="L261">				maxSimulatedTime = Double.parseDouble(root.getAttribute(&quot;maxSimulated&quot;));</span>
+<span class="nc" id="L262">				simParam.setMaxSimulatedTime(maxSimulatedTime);</span>
+			}
+
+			// Read maxProcessedEvents if specified
+<span class="nc bnc" id="L266" title="All 2 branches missed.">			if (root.getAttribute(&quot;maxEvents&quot;) != &quot;&quot;) {</span>
+<span class="nc" id="L267">				maxProcessedEvents = Integer.parseInt(root.getAttribute(&quot;maxEvents&quot;));</span>
+<span class="nc" id="L268">				simParam.setMaxProcessedEvents(maxProcessedEvents);</span>
+			}
+
+			// Disables confidence interval as stopping criteria
+<span class="nc bnc" id="L272" title="All 2 branches missed.">			if (root.hasAttribute(&quot;disableStatisticStop&quot;)) {</span>
+<span class="nc" id="L273">				disableStatisticStop = Boolean.parseBoolean(root.getAttribute(&quot;disableStatisticStop&quot;));</span>
+<span class="nc" id="L274">				simParam.setDisableStatisticStop(disableStatisticStop);</span>
+			}
+
+			// MF08 0.7.4  Michael Fercu (Bertoli Marco) -- re-defines global logger attributes
+			// for the purpose of passing them to the Logger constructor
+<span class="nc bnc" id="L279" title="All 2 branches missed.">			if (root.hasAttribute(&quot;logPath&quot;)) {</span>
+<span class="nc" id="L280">				String temp_lp = root.getAttribute(&quot;logPath&quot;);</span>
+<span class="nc" id="L281">				simParam.setLogPath(temp_lp);</span>
+			}
+<span class="nc bnc" id="L283" title="All 2 branches missed.">			if (root.hasAttribute(&quot;logDelimiter&quot;)) {</span>
+<span class="nc" id="L284">				String temp_ld = root.getAttribute(&quot;logDelimiter&quot;);</span>
+<span class="nc" id="L285">				simParam.setLogDelimiter(temp_ld);</span>
+			}
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			if (root.hasAttribute(&quot;logDecimalSeparator&quot;)) {</span>
+<span class="nc" id="L288">				String temp_ld = root.getAttribute(&quot;logDecimalSeparator&quot;);</span>
+<span class="nc" id="L289">				simParam.setLogDecimalSeparator(temp_ld);</span>
+			}
+<span class="nc bnc" id="L291" title="All 2 branches missed.">			if (root.hasAttribute(&quot;logReplaceMode&quot;)) {</span>
+<span class="nc" id="L292">				String temp_lr = root.getAttribute(&quot;logReplaceMode&quot;);</span>
+<span class="nc" id="L293">				simParam.setLogReplaceMode(temp_lr);</span>
+			}
+			//END MF08
+
+			//FIXME read measure logging attributes here...
+
+			//Returns a NodeList of all the Elements with a given tag name in the order in which they
+			//are encountered in a preordering traversal of the Document tree.
+<span class="nc" id="L301">			NodeList nodeList = root.getElementsByTagName(&quot;node&quot;);</span>
+<span class="nc" id="L302">			NodeList classList = root.getElementsByTagName(&quot;userClass&quot;);</span>
+<span class="nc" id="L303">			NodeList measureList = root.getElementsByTagName(&quot;measure&quot;);</span>
+<span class="nc" id="L304">			NodeList connectionList = root.getElementsByTagName(&quot;connection&quot;);</span>
+
+			//class array creation
+<span class="nc" id="L307">			jobClasses = new JobClass[classList.getLength()];</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">			for (int i = 0; i &lt; classList.getLength(); i++) {</span>
+				//OLD
+				//jobClasses[i] = new JobClass(((Element) classList.item(i)).getAttribute(&quot;name&quot;));
+
+				//NEW
+				//@author Stefano Omini
+<span class="nc" id="L314">				Element currentJobClass = (Element) classList.item(i);</span>
+
+				//parse class attributes: name, type and priority
+<span class="nc" id="L317">				String currentClassName = currentJobClass.getAttribute(&quot;name&quot;);</span>
+<span class="nc" id="L318">				String currentClassType = currentJobClass.getAttribute(&quot;type&quot;);</span>
+<span class="nc" id="L319">				String currentClassPriority = currentJobClass.getAttribute(&quot;priority&quot;);</span>
+<span class="nc" id="L320">				String referenceNode = currentJobClass.getAttribute(&quot;referenceSource&quot;);</span>
+<span class="nc" id="L321">				String currentClassSoftDeadline = currentJobClass.getAttribute(&quot;softDeadline&quot;);</span>
+<span class="nc" id="L322">				String cacheMissClass = currentJobClass.getAttribute(&quot;cacheMissClass&quot;);</span>
+<span class="nc" id="L323">				String cacheHitClass = currentJobClass.getAttribute(&quot;cacheHitClass&quot;);</span>
+
+				int type, priority;
+				double softDeadline;
+
+<span class="nc bnc" id="L328" title="All 2 branches missed.">				if (currentClassType.equalsIgnoreCase(&quot;closed&quot;)) {</span>
+<span class="nc" id="L329">					type = JobClass.CLOSED_CLASS;</span>
+				} else {
+<span class="nc" id="L331">					type = JobClass.OPEN_CLASS;</span>
+				}
+
+<span class="nc" id="L334">				priority = Integer.parseInt(currentClassPriority);</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">				if (priority &lt; 0) {</span>
+					//negative priorities not allowed
+<span class="nc" id="L337">					priority = 0;</span>
+				}
+
+<span class="nc bnc" id="L340" title="All 2 branches missed.">				softDeadline = currentClassSoftDeadline.isEmpty() ? 0 : Double.parseDouble(currentClassSoftDeadline);</span>
+
+				//add job class
+<span class="nc" id="L343">				jobClasses[i] = new JobClass(currentClassName, priority, type, referenceNode);</span>
+				//end NEW
+
+<span class="nc" id="L346">				jobClasses[i].setSoftDeadline(softDeadline);</span>
+
+				if (DEBUG) {
+					System.out.println(&quot;Class &quot; + jobClasses[i].getName() + &quot; created&quot;);
+				}
+			}
+			//inserts all JobClasses in the Simulation object
+<span class="nc" id="L353">			sim.addClasses(jobClasses);</span>
+			if (DEBUG) {
+				System.out.println(&quot;classes added\n&quot;);
+			}
+
+			//creates the nodes from xml &amp; adds them to the simulation object
+<span class="nc bnc" id="L359" title="All 2 branches missed.">			for (int i = 0; i &lt; nodeList.getLength(); i++) {</span>
+<span class="nc" id="L360">				Element node = (Element) nodeList.item(i);</span>
+				if (DEBUG) {
+					System.out.println(&quot;start creation of node = &quot; + node.getAttribute(&quot;name&quot;));
+				}
+				// Process soft deadlines.
+<span class="nc" id="L365">				double[] softDeadlinesArr = null;</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">				if (node.getElementsByTagName(&quot;classSoftDeadlines&quot;).getLength() != 0) {</span>
+<span class="nc" id="L367">					List&lt;Double&gt; softDeadlines = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L368">					NodeList classSoftDeadlinesChildren = node.getElementsByTagName(&quot;classSoftDeadlines&quot;).item(0).getChildNodes();</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">					for (int j = 0; j &lt; classSoftDeadlinesChildren.getLength(); j++) {</span>
+<span class="nc" id="L370">						Node item = classSoftDeadlinesChildren.item(j);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">						if (item.getNodeType() == Node.ELEMENT_NODE) {</span>
+							// This is a soft deadline element.
+<span class="nc" id="L373">							softDeadlines.add(Double.parseDouble(item.getTextContent()));</span>
+						}
+					}
+<span class="nc bnc" id="L376" title="All 2 branches missed.">					if (softDeadlines.size() &gt; 0) {</span>
+<span class="nc" id="L377">						softDeadlinesArr = new double[softDeadlines.size()];</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">						for (int j = 0; j &lt; softDeadlines.size(); j++) {</span>
+<span class="nc" id="L379">							softDeadlinesArr[j] = softDeadlines.get(j);</span>
+						}
+					}
+				}
+<span class="nc" id="L383">				double quantaSize = 0.0;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">				if (node.getElementsByTagName(&quot;quantaSize&quot;).getLength() != 0) {</span>
+<span class="nc" id="L385">					quantaSize = Double.parseDouble(node.getElementsByTagName(&quot;quantaSize&quot;).item(0).getTextContent());</span>
+				}
+<span class="nc" id="L387">				double switchTime = 0.0;</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">				if (node.getElementsByTagName(&quot;quantumSwitchoverTime&quot;).getLength() != 0) {</span>
+<span class="nc" id="L389">					switchTime = Double.parseDouble(node.getElementsByTagName(&quot;quantumSwitchoverTime&quot;).item(0).getTextContent());</span>
+				}
+
+				//gets list of sections
+<span class="nc" id="L393">				NodeList sectionList = node.getElementsByTagName(&quot;section&quot;);</span>
+<span class="nc" id="L394">				NodeSection[] sections = new NodeSection[4];</span>
+				//creates all sections (max is 3)
+<span class="nc bnc" id="L396" title="All 2 branches missed.">				for (int j = 0; j &lt; sectionList.getLength(); j++) {</span>
+					if (DEBUG) {
+						System.out.println(&quot;    start creation of section = &quot; + ((Element) sectionList.item(j)).getAttribute(&quot;className&quot;));
+					}
+<span class="nc" id="L400">					NodeSection ns = createSection((Element) sectionList.item(j));</span>
+					if (DEBUG) {
+						System.out.println(&quot;    finished creation of &quot; + ((Element) sectionList.item(j)).getAttribute(&quot;className&quot;) + &quot;\n&quot;);
+					}
+<span class="nc bnc" id="L404" title="All 2 branches missed.">					if (ns instanceof InputSection) {</span>
+<span class="nc bnc" id="L405" title="All 2 branches missed.">						if (ns instanceof Queue) {</span>
+<span class="nc" id="L406">							((Queue) ns).setSoftDeadlines(softDeadlinesArr);</span>
+
+						}
+<span class="nc" id="L409">						sections[0] = ns;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">					} else if (ns instanceof ServiceSection) {</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">						if(ns instanceof PSServer){</span>
+<span class="nc" id="L412">							((PSServer) ns).setQuantumSize(quantaSize);</span>
+<span class="nc" id="L413">							((PSServer) ns).setSwitchTime(switchTime);</span>
+						}
+<span class="nc" id="L415">						sections[1] = ns;</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">					} else if (ns instanceof OutputSection) {</span>
+<span class="nc" id="L417">						sections[2] = ns;</span>
+					} else {
+<span class="nc" id="L419">						throw new LoadException(&quot;trying to cast the wrong Class type&quot;);</span>
+					}
+				}
+
+				//adds node.
+<span class="nc" id="L424">				sim.addNode(node.getAttribute(&quot;name&quot;), (InputSection) sections[0], (ServiceSection) sections[1], (OutputSection) sections[2]);</span>
+				if (DEBUG) {
+					System.out.println(&quot;node added\n&quot;);
+				}
+			}
+			if (DEBUG) {
+				System.out.println(&quot;&quot;);
+			}
+
+			//adds all connections
+<span class="nc bnc" id="L434" title="All 2 branches missed.">			for (int i = 0; i &lt; connectionList.getLength(); i++) {</span>
+<span class="nc" id="L435">				Element e = (Element) connectionList.item(i);</span>
+<span class="nc" id="L436">				sim.addConnection(e.getAttribute(&quot;source&quot;), e.getAttribute(&quot;target&quot;));</span>
+				if (DEBUG) {
+					System.out.println(&quot;added connection = &quot; + e.getAttribute(&quot;source&quot;) + &quot; to &quot; + e.getAttribute(&quot;target&quot;));
+				}
+			}
+			if (DEBUG) {
+				System.out.println(&quot;&quot;);
+			}
+
+			//adds all measures
+<span class="nc bnc" id="L446" title="All 2 branches missed.">			for (int i = 0; i &lt; measureList.getLength(); i++) {</span>
+<span class="nc" id="L447">				Element e = (Element) measureList.item(i);</span>
+
+<span class="nc" id="L449">				int measureType = EngineUtils.decodeMeasureType(e.getAttribute(&quot;type&quot;));</span>
+				//throughput measure requires an InverseMeasure object!!
+<span class="nc bnc" id="L451" title="All 2 branches missed.">				if (EngineUtils.isInverseMeasure(measureType)) {</span>
+					//throughput measure
+<span class="nc" id="L453">					InverseMeasure invMeasure = new InverseMeasure(e.getAttribute(&quot;name&quot;), Double.parseDouble(e.getAttribute(&quot;alpha&quot;)),</span>
+<span class="nc" id="L454">							Double.parseDouble(e.getAttribute(&quot;precision&quot;)), maxSamples, e.getAttribute(&quot;verbose&quot;).equalsIgnoreCase(&quot;true&quot;));</span>
+
+<span class="nc" id="L456">					sim.addMeasure(measureType, e.getAttribute(&quot;referenceNode&quot;), invMeasure, e.getAttribute(&quot;referenceUserClass&quot;),</span>
+<span class="nc" id="L457">							e.getAttribute(&quot;nodeType&quot;));</span>
+<span class="nc" id="L458">				} else {</span>
+					//other measures
+<span class="nc" id="L460">					Measure measure = new Measure(e.getAttribute(&quot;name&quot;), Double.parseDouble(e.getAttribute(&quot;alpha&quot;)),</span>
+<span class="nc" id="L461">							Double.parseDouble(e.getAttribute(&quot;precision&quot;)), maxSamples, e.getAttribute(&quot;verbose&quot;).equalsIgnoreCase(&quot;true&quot;), null);</span>
+
+<span class="nc" id="L463">					sim.addMeasure(measureType, e.getAttribute(&quot;referenceNode&quot;), measure, e.getAttribute(&quot;referenceUserClass&quot;),</span>
+<span class="nc" id="L464">							e.getAttribute(&quot;nodeType&quot;));</span>
+				}
+
+				if (DEBUG) {
+					System.out.println(&quot;added measure = &quot; + e.getAttribute(&quot;name&quot;));
+				}
+			}
+			if (DEBUG) {
+				System.out.println(&quot;&quot;);
+			}
+
+			//NEW
+			//@author Stefano Omini
+<span class="nc" id="L477">			NodeList regionList = root.getElementsByTagName(&quot;blockingRegion&quot;);</span>
+
+			// Use external method
+<span class="nc" id="L480">			loadBlockingRegions(root, regionList);</span>
+			if (DEBUG) {
+				System.out.println(&quot;&quot;);
+			}
+			//end NEW
+
+			//Preloading
+
+<span class="nc" id="L488">			NodeList preloadList = root.getElementsByTagName(&quot;preload&quot;);</span>
+<span class="nc" id="L489">			Element preload = (Element) preloadList.item(0);</span>
+
+			//station names
+			String[] stationNames;
+			//initial populations [station, class]
+			int[][] initialP;
+
+<span class="nc bnc" id="L496" title="All 2 branches missed.">			if (preload != null) {</span>
+				//preload has been defined by user
+				NodeList stations;
+				NodeList initialPops;
+				Element station;
+
+				//gets all station elements
+<span class="nc" id="L503">				stations = preload.getElementsByTagName(&quot;stationPopulations&quot;);</span>
+				//number of stations to be preloaded
+<span class="nc" id="L505">				int stationsNumber = stations.getLength();</span>
+<span class="nc" id="L506">				int classNumber = jobClasses.length;</span>
+
+				//create the array of station names to be preloaded
+				// (not ALL the stations!!)
+<span class="nc" id="L510">				stationNames = new String[stationsNumber];</span>
+				//create the population matrix
+<span class="nc" id="L512">				initialP = new int[stationsNumber][classNumber];</span>
+
+				//initializes matrix
+<span class="nc bnc" id="L515" title="All 2 branches missed.">				for (int s = 0; s &lt; stationsNumber; s++) {</span>
+<span class="nc bnc" id="L516" title="All 2 branches missed.">					for (int c = 0; c &lt; classNumber; c++) {</span>
+<span class="nc" id="L517">						initialP[s][c] = 0;</span>
+					}
+				}
+
+				//loop over stations
+<span class="nc bnc" id="L522" title="All 2 branches missed.">				for (int s = 0; s &lt; stationsNumber; s++) {</span>
+					//current station
+<span class="nc" id="L524">					station = (Element) stations.item(s);</span>
+
+					//set station name
+<span class="nc" id="L527">					stationNames[s] = station.getAttribute(&quot;stationName&quot;);</span>
+
+					//retrieves the class initial populations
+<span class="nc" id="L530">					initialPops = station.getElementsByTagName(&quot;classPopulation&quot;);</span>
+<span class="nc" id="L531">					int entries = initialPops.getLength();</span>
+
+<span class="nc bnc" id="L533" title="All 2 branches missed.">					for (int c = 0; c &lt; entries; c++) {</span>
+<span class="nc" id="L534">						String pop = ((Element) initialPops.item(c)).getAttribute(&quot;population&quot;);</span>
+<span class="nc" id="L535">						String className = ((Element) initialPops.item(c)).getAttribute(&quot;refClass&quot;);</span>
+
+<span class="nc" id="L537">						int classPosition = findClassPosition(className);</span>
+						//sets the value in the correct position (using the class ID)
+<span class="nc" id="L539">						initialP[s][classPosition] = Integer.parseInt(pop);</span>
+					}
+				}
+
+				//copies the preload info into simulation object
+<span class="nc" id="L544">				sim.setPreloadEnabled(true);</span>
+<span class="nc" id="L545">				sim.setPreload_stationNames(stationNames);</span>
+<span class="nc" id="L546">				sim.setPreload_initialPopulations(initialP);</span>
+			}
+			//end NEW
+<span class="nc" id="L549">		} catch (SAXNotRecognizedException e) {</span>
+<span class="nc" id="L550">			e.printStackTrace();</span>
+<span class="nc" id="L551">		} catch (SAXNotSupportedException e) {</span>
+<span class="nc" id="L552">			e.printStackTrace();</span>
+<span class="nc" id="L553">		} catch (SAXException sxe) {</span>
+			// Error generated during parsing)
+<span class="nc" id="L555">			Exception x = sxe;</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">			if (sxe.getException() != null) {</span>
+<span class="nc" id="L557">				x = sxe.getException();</span>
+			}
+<span class="nc" id="L559">			x.printStackTrace();</span>
+<span class="nc" id="L560">		} catch (IOException e) {</span>
+<span class="nc" id="L561">			e.printStackTrace();</span>
+<span class="nc" id="L562">		}</span>
+<span class="nc" id="L563">	}</span>
+
+	/**
+	 * Returns the Simulation object which has been created by this SimLoader while loading the
+	 * queueing network model.
+	 * @return The simulation created
+	 */
+	public Simulation getSim() {
+<span class="nc" id="L571">		return sim;</span>
+	}
+
+	/**
+	 * Creates a nodeName section from a dom description. Each parameter (or array of parameters)
+	 * is created using the suitable constructor.
+	 *
+	 * @param section  dom description of the nodeName section.
+	 * @return NodeSection created.
+	 */
+	// section Element represents the content enclosed by the &lt;Section&gt; tag
+	// traverse each parameter node in section，creating the object as the input of the section constructor
+	private NodeSection createSection(Element section) throws LoadException {
+		//gets all the parameters
+<span class="nc" id="L585">		NodeList parameterList = section.getElementsByTagName(&quot;parameter&quot;);</span>
+		try {
+			//gets appropriate Class Object
+<span class="nc" id="L588">			Class&lt;?&gt; c = Class.forName(&quot;jmt.engine.NodeSections.&quot; + section.getAttribute(&quot;className&quot;));</span>
+			if (DEBUG) {
+				System.out.println(&quot;    class found&quot;);
+			}
+			//creates with Default Constructor
+<span class="nc bnc" id="L593" title="All 2 branches missed.">			if (parameterList.getLength() == 0) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;    using default constructor&quot;);
+				}
+<span class="nc" id="L597">				NodeSection ns = (NodeSection) c.newInstance();</span>
+<span class="nc" id="L598">				return ns;</span>
+			} else {
+				//creates the array with all parameters &amp; the array with all their classes
+<span class="nc" id="L601">				Object[] initargs = new Object[parameterList.getLength()];</span>
+<span class="nc" id="L602">				Class&lt;?&gt;[] parameterTypes = new Class[parameterList.getLength()];</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">				for (int i = 0; i &lt; parameterList.getLength(); i++) {</span>
+					//creates the parameter
+					//if (DEBUG) {
+					//	System.out.println(&quot;parameterList.item(i): &quot; + parameterList.item(i).toString());
+					//}
+<span class="nc" id="L608">					initargs[i] = createParameter((Element) parameterList.item(i));</span>
+<span class="nc bnc" id="L609" title="All 2 branches missed.">					if (initargs[i] != null) {</span>
+						//gets the class of the parameter
+<span class="nc" id="L611">						parameterTypes[i] = initargs[i].getClass();</span>
+						if (DEBUG) {
+							//System.out.println(&quot;parameterTypes[i]: &quot; + parameterTypes[i].toString());
+							System.out.println(&quot;        parameter of class = &quot; + parameterTypes[i].getName());
+						}
+					} else {
+<span class="nc bnc" id="L617" title="All 2 branches missed.">						if (((Element) parameterList.item(i)).getAttribute(&quot;array&quot;).equals(&quot;true&quot;)) {</span>
+							// array parameter
+<span class="nc" id="L619">							parameterTypes[i] = Array.newInstance(Class.forName(((Element) parameterList.item(i)).getAttribute(&quot;classPath&quot;)), 0)</span>
+<span class="nc" id="L620">									.getClass();</span>
+<span class="nc bnc" id="L621" title="All 2 branches missed.">						} else if (((Element) parameterList.item(i)).getAttribute(&quot;map&quot;).equals(&quot;true&quot;)) {</span>
+							// map parameter
+<span class="nc" id="L623">							parameterTypes[i] = Map.class;</span>
+						} else {
+							//the parameter is not an array
+<span class="nc" id="L626">							parameterTypes[i] = Class.forName(((Element) parameterList.item(i)).getAttribute(&quot;classPath&quot;));</span>
+						}
+						if (DEBUG) {
+							System.out.println(&quot;        parameter of class = &quot; + parameterTypes[i].getName());
+						}
+					}
+				}
+
+<span class="nc" id="L634">				Constructor&lt;?&gt; constr = getConstructor(c, parameterTypes);</span>
+				if (DEBUG) {
+					System.out.println(&quot;    constructor found&quot;);
+				}
+				//creates the Section with the constructor
+<span class="nc" id="L639">				NodeSection ns = (NodeSection) constr.newInstance(initargs);</span>
+<span class="nc" id="L640">				return ns;</span>
+			}
+<span class="nc" id="L642">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L643">			throw new LoadException(&quot;Class of Section Not found&quot;, e);</span>
+<span class="nc" id="L644">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L645">			throw new LoadException(&quot;Class of Section cannot be istantiated&quot;, e);</span>
+<span class="nc" id="L646">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L647">			throw new LoadException(&quot;Class of Section illegal access&quot;, e);</span>
+<span class="nc" id="L648">		} catch (NoSuchMethodException e) {			</span>
+<span class="nc" id="L649">			throw new LoadException(&quot;Constructor of Section not found&quot;, e);</span>
+<span class="nc" id="L650">		} catch (InvocationTargetException e) {</span>
+<span class="nc" id="L651">			throw new LoadException(&quot;problems with Section constructor&quot;, e);</span>
+		}
+	}
+
+	/**
+	 * Creates a parameter object given the corresponding description of the tag.
+	 * @param param
+	 * @throws jmt.common.exception.LoadException
+	 */
+	private Object createParameter(Element param) throws LoadException {
+<span class="nc bnc" id="L661" title="All 2 branches missed.">		if (!param.getTagName().equals(&quot;parameter&quot;)) {</span>
+<span class="nc" id="L662">			throw new LoadException(&quot;trying to use createParameter on a : &quot; + param.getTagName());</span>
+		}
+<span class="nc" id="L664">		String classPathForError = null;</span>
+		try {
+			if (DEBUG) {
+				System.out.println(&quot;        start creation of parameter = &quot; + param.getAttribute(&quot;name&quot;));
+			}
+			//gets Class Object for the parameter
+<span class="nc" id="L670">			String classPath = param.getAttribute(&quot;classPath&quot;);</span>
+<span class="nc" id="L671">			classPathForError = classPath;</span>
+<span class="nc" id="L672">			NodeList valueList = XMLParser.getElementsByTagName(param, &quot;value&quot;);</span>
+			//if value == null the object is a null pointer
+<span class="nc bnc" id="L674" title="All 4 branches missed.">			if (valueList.getLength() &gt; 0 &amp;&amp; valueList.item(0).getChildNodes().item(0).getNodeValue().equals(&quot;null&quot;)) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;        parameter null&quot;);
+				}
+<span class="nc" id="L678">				return null;</span>
+			}
+<span class="nc" id="L680">			Class&lt;?&gt; c = Class.forName(classPath);</span>
+			if (DEBUG) {
+				System.out.println(&quot;        parameter class found = &quot; + classPath);
+			}
+
+			//parameter is a map:
+<span class="nc bnc" id="L686" title="All 2 branches missed.">			if (param.getAttribute(&quot;map&quot;).equals(&quot;true&quot;)) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;        parameter is a map&quot;);
+				}
+				//check if there are child nodes in the map
+<span class="nc bnc" id="L691" title="All 2 branches missed.">				if (!param.hasChildNodes()) {</span>
+					if (DEBUG) {
+						System.out.println(&quot;        creates empty map&quot;);
+					}
+<span class="nc" id="L695">					return new HashMap&lt;String, Object&gt;();//return an empty map</span>
+				}
+				//creates a map
+<span class="nc" id="L698">				Map&lt;String, Object&gt; map = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L699">				NodeList childList = XMLParser.getElementsByTagName(param, &quot;subParameter&quot;);</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">				for (int i = 0; i &lt; childList.getLength(); i++) {</span>
+<span class="nc" id="L701">					Element e = (Element) childList.item(i);</span>
+					if (DEBUG) {
+						System.out.println(&quot;            creates subparameter = &quot; + e.getAttribute(&quot;name&quot;));
+					}
+<span class="nc" id="L705">					map.put(e.getAttribute(&quot;name&quot;), createSubParameter(e));</span>
+				}
+				if (DEBUG) {
+					System.out.println(&quot;        created parameter&quot;);
+				}
+<span class="nc" id="L710">				return map;</span>
+			}
+
+			// parameter is an array;
+<span class="nc bnc" id="L714" title="All 2 branches missed.">			if (param.getAttribute(&quot;array&quot;).equals(&quot;true&quot;)) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;        parameter is an array&quot;);
+				}
+				//check if there are child nodes in the array
+<span class="nc bnc" id="L719" title="All 2 branches missed.">				if (!param.hasChildNodes()) {</span>
+					if (DEBUG) {
+						System.out.println(&quot;        creates 0 size array&quot;);
+					}
+<span class="nc" id="L723">					return Array.newInstance(c, 0);//return a 0 element array</span>
+				}
+				//there are 2 situations: the parameter is an array or a group of subparameters defined per class
+
+				//first situation: just an array without classes
+				Object[] arrayElements;
+<span class="nc bnc" id="L729" title="All 2 branches missed.">				if (XMLParser.getElementsByTagName(param, &quot;refClass&quot;).getLength() == 0) {</span>
+					//gets list of first level subParameters
+<span class="nc" id="L731">					NodeList childList = XMLParser.getElementsByTagName(param, &quot;subParameter&quot;);</span>
+					//creates an array of the appropriate length
+<span class="nc" id="L733">					arrayElements = new Object[childList.getLength()];</span>
+					if (DEBUG) {
+						System.out.println(&quot;        instance a simple array of size &quot; + arrayElements.length);
+					}
+					//creates all the elements of the array
+<span class="nc bnc" id="L738" title="All 2 branches missed.">					for (int i = 0; i &lt; arrayElements.length; i++) {</span>
+						if (DEBUG) {
+							System.out.println(&quot;creating subparemter = &quot; + ((Element) childList.item(i)).getAttribute(&quot;name&quot;));
+						}
+<span class="nc" id="L742">						arrayElements[i] = createSubParameter((Element) childList.item(i));</span>
+					}
+					//creates a fake array object
+<span class="nc" id="L745">					Object parameter = Array.newInstance(c, childList.getLength());</span>
+					//copy inside all the elements
+<span class="nc" id="L747">					System.arraycopy(arrayElements, 0, parameter, 0, arrayElements.length);</span>
+					if (DEBUG) {
+						System.out.println(&quot;        created parameter&quot;);
+					}
+<span class="nc" id="L751">					return parameter;</span>
+				} else {
+					//it is a group parameter! more complicated(the other was easy... :P )
+					if (DEBUG) {
+						System.out.println(&quot;        it is group class parameter&quot;);
+					}
+					//creates an array of Object that has enough element to store
+					//subParametes for each class.
+<span class="nc" id="L759">					arrayElements = new Object[jobClasses.length];</span>
+<span class="nc" id="L760">					NodeList chiList = param.getChildNodes();</span>
+<span class="nc" id="L761">					ArrayList&lt;String&gt; classVect = new ArrayList&lt;String&gt;();</span>
+					//iterates over the childList, it is like this, it has a list (optional)of classRef
+					//followed by a subParameter
+<span class="nc bnc" id="L764" title="All 2 branches missed.">					for (int i = 0; i &lt; chiList.getLength(); i++) {</span>
+<span class="nc" id="L765">						Node n = chiList.item(i);</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">						if (n.getNodeType() == 1) {</span>
+							//if gets a class it add to list of classes
+<span class="nc bnc" id="L768" title="All 2 branches missed.">							if (n.getNodeName().equals(&quot;refClass&quot;)) {</span>
+<span class="nc" id="L769">								classVect.add(n.getFirstChild().getNodeValue());</span>
+								if (DEBUG) {
+									System.out.println(&quot;        found class &quot; + n.getFirstChild().getNodeValue());
+								}
+							} else {
+								//gets the position of classes
+<span class="nc" id="L775">								int[] positions = new int[classVect.size()];</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">								for (int j = 0; j &lt; positions.length; j++) {</span>
+<span class="nc" id="L777">									positions[j] = findClassPosition(classVect.get(j));</span>
+								}
+								//gets the subparameter
+<span class="nc bnc" id="L780" title="All 2 branches missed.">								for (int j = 0; j &lt; positions.length; j++) {</span>
+									if (DEBUG) {
+										System.out.println(&quot;        creating subParameter &quot; + ((Element) n).getAttribute(&quot;name&quot;) + &quot; for class &quot;
+												+ classVect.get(j));
+									}
+<span class="nc" id="L785">									arrayElements[positions[j]] = createSubParameter((Element) n);</span>
+								}
+								//clears the classes vector
+<span class="nc" id="L788">								classVect.clear();</span>
+							}
+						}
+					}
+					//creates a fake array object
+<span class="nc" id="L793">					Object parameter = Array.newInstance(c, jobClasses.length);</span>
+					//copy inside all the elements
+<span class="nc" id="L795">					System.arraycopy(arrayElements, 0, parameter, 0, arrayElements.length);</span>
+					if (DEBUG) {
+						System.out.println(&quot;        created parameter&quot;);
+					}
+<span class="nc" id="L799">					return parameter;</span>
+				}
+			}
+			//check for default constructor
+<span class="nc bnc" id="L803" title="All 2 branches missed.">			if (!param.hasChildNodes()) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;       created with default constructor&quot;);
+				}
+<span class="nc" id="L807">				return c.newInstance();</span>
+			}
+
+			//check if it is a leaf node (it has a value &amp; not subparameters)
+<span class="nc bnc" id="L811" title="All 2 branches missed.">			if (valueList.getLength() &gt; 0) {</span>
+<span class="nc" id="L812">				String value = valueList.item(0).getFirstChild().getNodeValue();</span>
+				if (DEBUG) {
+					System.out.println(&quot;        parameter is a leaf node, value = &quot; + value);
+				}
+				//needs to get the String constructor
+<span class="nc" id="L817">				Object[] initargs = { value };</span>
+<span class="nc" id="L818">				Class&lt;?&gt;[] parameterTypes = { initargs[0].getClass() };</span>
+<span class="nc" id="L819">				Constructor&lt;?&gt; constr = getConstructor(c, parameterTypes);</span>
+				if (DEBUG) {
+					System.out.println(&quot;        created parameter&quot;);
+				}
+<span class="nc" id="L823">				return constr.newInstance(initargs);</span>
+			} else {
+				//leaf node but has subparameters
+<span class="nc" id="L826">				NodeList childList = XMLParser.getElementsByTagName(param, &quot;subParameter&quot;);</span>
+<span class="nc" id="L827">				Object[] initargs = new Object[childList.getLength()];</span>
+				if (DEBUG) {
+					System.out.println(&quot;        parameter is a leaf node with subparameter &quot;);
+				}
+<span class="nc" id="L831">				Class&lt;?&gt;[] paramClasses = new Class[childList.getLength()];</span>
+				//creates iteratively all the subparameters
+<span class="nc bnc" id="L833" title="All 2 branches missed.">				for (int i = 0; i &lt; childList.getLength(); i++) {</span>
+<span class="nc" id="L834">					Element e = (Element) childList.item(i);</span>
+					if (DEBUG) {
+						System.out.println(&quot;            creates subparameter = &quot; + e.getAttribute(&quot;name&quot;));
+					}
+<span class="nc" id="L838">					initargs[i] = createSubParameter(e);</span>
+<span class="nc" id="L839">					paramClasses[i] = initargs[i].getClass();</span>
+				}
+<span class="nc" id="L841">				Constructor&lt;?&gt; constr = getConstructor(c, paramClasses);</span>
+<span class="nc" id="L842">				return constr.newInstance(initargs);</span>
+			}
+<span class="nc" id="L844">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L845">			throw new LoadException(appendDebugInstantiationInfo(&quot;Class of Parameter not found&quot;, classPathForError), e);</span>
+<span class="nc" id="L846">		} catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L847">			throw new LoadException(appendDebugInstantiationInfo(&quot;there is not a String Constructor&quot;, classPathForError), e);</span>
+<span class="nc" id="L848">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L849">			throw new LoadException(appendDebugInstantiationInfo(&quot;Class of parameter cannot be instantiated&quot;, classPathForError), e);</span>
+<span class="nc" id="L850">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L851">			throw new LoadException(appendDebugInstantiationInfo(&quot;Class of parameter cannot be instantiated&quot;, classPathForError), e);</span>
+<span class="nc" id="L852">		} catch (InvocationTargetException e) {</span>
+<span class="nc" id="L853">			throw new LoadException(appendDebugInstantiationInfo(&quot;Class of parameter cannot be instantiated&quot;, classPathForError), e);</span>
+		}
+	}
+
+	/**
+	 * @author Daniele Borgna
+	 * Date: 10-apr-2026
+	 * */
+	private String appendDebugInstantiationInfo(String baseMessage, String classPath) {
+		if (DEBUG &amp;&amp; classPath != null &amp;&amp; !classPath.isEmpty()) {
+			return baseMessage + &quot; [classPath=&quot; + classPath + &quot;]&quot;;
+		}
+<span class="nc" id="L865">		return baseMessage;</span>
+	}
+
+	/**
+	 * Creates a subParameter given an appropriate Element of a DOM
+	 * @param subp
+	 * @return
+	 * @throws jmt.common.exception.LoadException
+	 */
+	private Object createSubParameter(Element subp) throws LoadException {
+		//gets Class object
+<span class="nc" id="L876">		String classPathForError = null;</span>
+		try {
+<span class="nc" id="L878">			classPathForError = subp.getAttribute(&quot;classPath&quot;);</span>
+<span class="nc" id="L879">			NodeList valueList = XMLParser.getElementsByTagName(subp, &quot;value&quot;);</span>
+			//if value == null the object is a null pointer
+<span class="nc bnc" id="L881" title="All 4 branches missed.">			if (valueList.getLength() &gt; 0 &amp;&amp; valueList.item(0).getChildNodes().item(0).getNodeValue().equals(&quot;null&quot;)) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;         subParameter null&quot;);
+				}
+<span class="nc" id="L885">				return null;</span>
+			}
+<span class="nc" id="L887">			Class&lt;?&gt; c = Class.forName(subp.getAttribute(&quot;classPath&quot;));</span>
+			if (DEBUG) {
+				System.out.println(&quot;            subparameter class found = &quot; + c.getName());
+			}
+			//check if the subparameter is an array
+<span class="nc bnc" id="L892" title="All 2 branches missed.">			if (subp.getAttribute(&quot;array&quot;).equals(&quot;true&quot;)) {</span>
+				//array subparameter
+				if (DEBUG) {
+					System.out.println(&quot;            subparameter is an array&quot;);
+				}
+				//check if there are child nodes in the array
+<span class="nc bnc" id="L898" title="All 2 branches missed.">				if (!subp.hasChildNodes()) {</span>
+					if (DEBUG) {
+						System.out.println(&quot;            creates 0 size array&quot;);
+					}
+<span class="nc" id="L902">					return Array.newInstance(c, 0);//return a 0 element array</span>
+				}
+				Object[] arrayElements;
+				//gets list of first level subParameters
+<span class="nc" id="L906">				NodeList childList = XMLParser.getElementsByTagName(subp, &quot;subParameter&quot;);</span>
+				//creates an array of the appropriate length
+<span class="nc" id="L908">				arrayElements = new Object[childList.getLength()];</span>
+				if (DEBUG) {
+					System.out.println(&quot;            instance a simple array of size &quot; + arrayElements.length);
+				}
+				//creates all the elements of the array
+<span class="nc bnc" id="L913" title="All 2 branches missed.">				for (int i = 0; i &lt; arrayElements.length; i++) {</span>
+					if (DEBUG) {
+						System.out.println(&quot;            creating subparameter = &quot; + ((Element) childList.item(i)).getAttribute(&quot;name&quot;));
+					}
+<span class="nc" id="L917">					arrayElements[i] = createSubParameter((Element) childList.item(i));</span>
+				}
+				//creates a fake array object
+<span class="nc" id="L920">				Object parameter = Array.newInstance(c, childList.getLength());</span>
+				//copy inside all the elements
+<span class="nc" id="L922">				System.arraycopy(arrayElements, 0, parameter, 0, arrayElements.length);</span>
+				if (DEBUG) {
+					System.out.println(&quot;            created parameter&quot;);
+				}
+<span class="nc" id="L926">				return parameter;</span>
+			}
+			//check for default constructor
+<span class="nc bnc" id="L929" title="All 2 branches missed.">			if (!subp.hasChildNodes()) {</span>
+				if (DEBUG) {
+					System.out.println(&quot;            created with default constructor&quot;);
+				}
+<span class="nc" id="L933">				Object o = c.newInstance();</span>
+<span class="nc bnc" id="L934" title="All 2 branches missed.">				if (o instanceof AbstractDistribution) {</span>
+<span class="nc" id="L935">					((AbstractDistribution) o).setRandomEngine(sim.getEngine());</span>
+				}
+<span class="nc" id="L937">				return o;</span>
+			}
+
+			//check if it is a leaf node (it has a value &amp; not subparameters)
+<span class="nc bnc" id="L941" title="All 2 branches missed.">			if (valueList.getLength() &gt; 0) {</span>
+<span class="nc" id="L942">				String value = valueList.item(0).getFirstChild().getNodeValue();</span>
+				if (DEBUG) {
+					System.out.println(&quot;            subParameter is leaf node, value = &quot; + value);
+				}
+				//needs to get the String constructor
+<span class="nc" id="L947">				Object[] initargs = { value };</span>
+<span class="nc" id="L948">				Class&lt;?&gt;[] parameterTypes = { initargs[0].getClass() };</span>
+<span class="nc" id="L949">				Constructor&lt;?&gt; constr = getConstructor(c, parameterTypes);</span>
+				if (DEBUG) {
+					System.out.println(&quot;            created subParameter&quot;);
+				}
+<span class="nc" id="L953">				Object o = constr.newInstance(initargs);</span>
+
+<span class="nc" id="L955">				return o;</span>
+			} else {
+				//leaf node but has subparameters
+<span class="nc" id="L958">				NodeList childList = XMLParser.getElementsByTagName(subp, &quot;subParameter&quot;);</span>
+<span class="nc" id="L959">				Object[] initargs = new Object[childList.getLength()];</span>
+				if (DEBUG) {
+					System.out.println(&quot;            subParameter is a leaf node with subparameter &quot;);
+				}
+<span class="nc" id="L963">				Class&lt;?&gt;[] paramClasses = new Class[childList.getLength()];</span>
+				//creates iteratively all the subparameters
+<span class="nc bnc" id="L965" title="All 2 branches missed.">				for (int i = 0; i &lt; childList.getLength(); i++) {</span>
+<span class="nc" id="L966">					Element e = (Element) childList.item(i);</span>
+					if (DEBUG) {
+						System.out.println(&quot;            creates subparameter = &quot; + e.getAttribute(&quot;name&quot;));
+					}
+<span class="nc" id="L970">					initargs[i] = createSubParameter(e);</span>
+<span class="nc" id="L971">					paramClasses[i] = initargs[i].getClass();</span>
+				}
+				//gets the right constructor
+<span class="nc" id="L974">				Constructor&lt;?&gt; constr = getConstructor(c, paramClasses);</span>
+<span class="nc" id="L975">				Object o = constr.newInstance(initargs);</span>
+<span class="nc bnc" id="L976" title="All 4 branches missed.">				if (o instanceof NetNode &amp;&amp; o instanceof Distribution) { //change to burst then add a method to burst to do those two lines</span>
+					//add to simsystem
+					//call the initialize method
+<span class="nc" id="L979">					NetNode n = (NetNode) o;</span>
+<span class="nc" id="L980">					SimSystem simSystem = sim.getSimSystem();</span>
+<span class="nc" id="L981">					simSystem.add(n);</span>
+<span class="nc" id="L982">					n.setSimSystem(simSystem);</span>
+
+<span class="nc" id="L984">					Burst b = (Burst) o; //any distribution will do?</span>
+<span class="nc" id="L985">					b.setRandomEngine(sim.getNetSystem().getEngine());</span>
+<span class="nc" id="L986">					b.initialize();</span>
+
+<span class="nc" id="L988">					sim.addDistrNetNode((NetNode) o);</span>
+				}
+<span class="nc bnc" id="L990" title="All 2 branches missed.">				if (o instanceof ForkStrategy) {</span>
+<span class="nc" id="L991">					((ForkStrategy) o).setRandomEngine(sim.getEngine());</span>
+				}
+<span class="nc bnc" id="L993" title="All 2 branches missed.">				if (o instanceof EmpiricalStrategy) {</span>
+<span class="nc" id="L994">					((EmpiricalStrategy) o).setRandomEngine(sim.getEngine());	</span>
+				}
+<span class="nc bnc" id="L996" title="All 2 branches missed.">				if (o instanceof LoadDependentRoutingParameter) {</span>
+<span class="nc" id="L997">					((LoadDependentRoutingParameter) o).setRandomEngine(sim.getEngine());</span>
+				}
+<span class="nc bnc" id="L999" title="All 2 branches missed.">				if (o instanceof LDParameter) {</span>
+<span class="nc" id="L1000">					((LDParameter) o).setRandomEngine(sim.getEngine());</span>
+				}
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">				if(o instanceof ClassSwitchRoutingStrategy) {</span>
+<span class="nc" id="L1003">					((ClassSwitchRoutingStrategy) o).setRandomEngine(sim.getEngine());</span>
+				}
+
+<span class="nc" id="L1006">				return o;</span>
+			}
+<span class="nc" id="L1008">		} catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L1009">			throw new LoadException(appendDebugInstantiationInfo(&quot;class of subparameter not found&quot;, classPathForError), e);</span>
+<span class="nc" id="L1010">		} catch (InstantiationException e) {</span>
+<span class="nc" id="L1011">			throw new LoadException(appendDebugInstantiationInfo(&quot;class of subparameter not found&quot;, classPathForError), e);</span>
+<span class="nc" id="L1012">		} catch (IllegalAccessException e) {</span>
+<span class="nc" id="L1013">			throw new LoadException(appendDebugInstantiationInfo(&quot;class of subparameter not found&quot;, classPathForError), e);</span>
+<span class="nc" id="L1014">		} catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L1015">			throw new LoadException(appendDebugInstantiationInfo(&quot;class of subparameter not found&quot;, classPathForError), e);</span>
+<span class="nc" id="L1016">		} catch (InvocationTargetException e) {</span>
+<span class="nc" id="L1017">			e.printStackTrace();</span>
+<span class="nc" id="L1018">		} catch (IncorrectDistributionParameterException e) {</span>
+			// TODO Auto-generated catch block
+<span class="nc" id="L1020">			e.printStackTrace();</span>
+<span class="nc" id="L1021">		}</span>
+		if (DEBUG) {
+			System.out.println(&quot;            creation fake of subparameter&quot;);
+		}
+<span class="nc" id="L1025">		return null;</span>
+	}
+
+	/**
+	 * Gets an appropriate constructor for c given the paramClasses
+	 * @param c
+	 * @param paramClasses
+	 * @return found constructor
+	 */
+	public Constructor&lt;?&gt; getConstructor(Class&lt;?&gt; c, Class&lt;?&gt;[] paramClasses) throws NoSuchMethodException {
+		try {
+<span class="nc" id="L1036">			return c.getConstructor(paramClasses);</span>
+<span class="nc" id="L1037">		} catch (NoSuchMethodException e) {</span>
+			//the right constructor is not contained.. let search for another
+			//one that fits
+<span class="nc" id="L1040">		} catch (SecurityException e) {</span>
+<span class="nc" id="L1041">			e.printStackTrace();</span>
+<span class="nc" id="L1042">		}</span>
+		//gets all constructors
+<span class="nc" id="L1044">		Constructor&lt;?&gt;[] constrs = c.getConstructors();</span>
+<span class="nc bnc" id="L1045" title="All 2 branches missed.">		for (Constructor&lt;?&gt; constr : constrs) {</span>
+<span class="nc" id="L1046">			Class&lt;?&gt;[] params = constr.getParameterTypes();</span>
+<span class="nc bnc" id="L1047" title="All 2 branches missed.">			if (params.length == paramClasses.length) {</span>
+				//right number of parameters
+<span class="nc" id="L1049">				boolean ok = true;</span>
+<span class="nc bnc" id="L1050" title="All 4 branches missed.">				for (int j = 0; j &lt; params.length &amp;&amp; ok; j++) {</span>
+<span class="nc" id="L1051">					Class&lt;?&gt; param = params[j];</span>
+<span class="nc bnc" id="L1052" title="All 2 branches missed.">					if (!param.isAssignableFrom(paramClasses[j])) {</span>
+<span class="nc" id="L1053">						ok = false;</span>
+					}
+				}
+<span class="nc bnc" id="L1056" title="All 2 branches missed.">				if (ok) {</span>
+<span class="nc" id="L1057">					return constr;</span>
+				}
+			}
+		}
+<span class="nc" id="L1061">		String errorMessage = c.getName() + &quot;.&quot; + &quot;&lt;init&gt;(&quot;;</span>
+<span class="nc bnc" id="L1062" title="All 2 branches missed.">		for (Class&lt;?&gt; paramClass : paramClasses) {</span>
+<span class="nc" id="L1063">			errorMessage += paramClass.getName() + &quot;, &quot;;</span>
+		}
+<span class="nc" id="L1065">		errorMessage += &quot;)&quot;;</span>
+<span class="nc" id="L1066">		throw new NoSuchMethodException(errorMessage);</span>
+	}
+
+	/**
+	 * Finds the position of the specified class
+	 * @param className the name of the class
+	 * @return the position if such class exists, -1 otherwise
+	 */
+	private int findClassPosition(String className) {
+<span class="nc bnc" id="L1075" title="All 2 branches missed.">		if (jobClasses == null) {</span>
+			//classes not loaded yet
+<span class="nc" id="L1077">			return -1;</span>
+		}
+
+		//else search in the array
+		JobClass jobClass;
+<span class="nc bnc" id="L1082" title="All 2 branches missed.">		for (int c = 0; c &lt; jobClasses.length; c++) {</span>
+<span class="nc" id="L1083">			jobClass = jobClasses[c];</span>
+<span class="nc bnc" id="L1084" title="All 2 branches missed.">			if (jobClass.getName().equals(className)) {</span>
+				//it is the class we are searching for
+<span class="nc" id="L1086">				return c;</span>
+			}
+		}
+		//no class with the specified name
+<span class="nc" id="L1090">		return -1;</span>
+	}
+
+	/**
+	 * Loads blocking region from input XML file
+	 * @param root root element of XML file
+	 * @param regionList a NodeList data structure with all blocking regions
+	 * @throws LoadException if some problems occurs during loading
+	 */
+	private void loadBlockingRegions(Element root, NodeList regionList) throws LoadException {
+<span class="nc" id="L1100">		int classNumber = root.getElementsByTagName(&quot;userClass&quot;).getLength();</span>
+
+		//adds all regions
+<span class="nc bnc" id="L1103" title="All 2 branches missed.">		for (int i = 0; i &lt; regionList.getLength(); i++) {</span>
+
+			//get i-th region
+<span class="nc" id="L1106">			Element region = (Element) regionList.item(i);</span>
+
+			//name
+<span class="nc" id="L1109">			String regionName = region.getAttribute(&quot;name&quot;);</span>
+
+			if (DEBUG) {
+				System.out.println(&quot;start adding region = &quot; + regionName);
+			}
+
+			//NOT USED
+			//String regionType = region.getAttribute(&quot;type&quot;);
+
+			//--------------REGION NODES----------------//
+			//gets the names of the stations contained in the region
+<span class="nc" id="L1120">			NodeList regionNodesList = region.getElementsByTagName(&quot;regionNode&quot;);</span>
+
+<span class="nc" id="L1122">			String[] stationNames = new String[regionNodesList.getLength()];</span>
+
+<span class="nc bnc" id="L1124" title="All 2 branches missed.">			for (int j = 0; j &lt; regionNodesList.getLength(); j++) {</span>
+<span class="nc" id="L1125">				Element rn = (Element) regionNodesList.item(j);</span>
+<span class="nc" id="L1126">				stationNames[j] = rn.getAttribute(&quot;nodeName&quot;);</span>
+				if (DEBUG) {
+					System.out.println(&quot;   region contains node = &quot; + stationNames[j]);
+				}
+			}
+
+			//---------GLOBAL CONSTRAINT-----------//
+<span class="nc" id="L1133">			double maxCapacity = -1;</span>
+
+<span class="nc" id="L1135">			NodeList globalConstraints = region.getElementsByTagName(&quot;globalConstraint&quot;);</span>
+
+<span class="nc bnc" id="L1137" title="All 2 branches missed.">			if (globalConstraints.item(0) != null) {</span>
+<span class="nc" id="L1138">				Element globalConstraint = (Element) globalConstraints.item(0);</span>
+<span class="nc" id="L1139">				maxCapacity = Double.parseDouble(globalConstraint.getAttribute(&quot;maxJobs&quot;));</span>
+				if (DEBUG) {
+					System.out.println(&quot;   global constraint = &quot; + Double.toString(maxCapacity));
+				}
+<span class="nc" id="L1143">			} else {</span>
+<span class="nc" id="L1144">				throw new LoadException(&quot;Element \&quot;globalConstraint\&quot; missing...&quot;);</span>
+			}
+
+			//--------------GLOBAL MEMORY CONSTRAINT-------------//
+<span class="nc" id="L1148">			double maxMemory = -1;</span>
+
+<span class="nc" id="L1150">			NodeList globalMemoryConstraints = region.getElementsByTagName(&quot;globalMemoryConstraint&quot;);</span>
+
+<span class="nc bnc" id="L1152" title="All 2 branches missed.">			if (globalMemoryConstraints.item(0) != null) {</span>
+<span class="nc" id="L1153">				Element globalMemoryConstraint = (Element) globalMemoryConstraints.item(0);</span>
+<span class="nc" id="L1154">				maxMemory = Double.parseDouble(globalMemoryConstraint.getAttribute(&quot;maxMemory&quot;));</span>
+				if (DEBUG) {
+					System.out.println(&quot;   global memory constraint = &quot; + Double.toString(maxMemory));
+				}
+<span class="nc" id="L1158">			} else {</span>
+<span class="nc" id="L1159">				throw new LoadException(&quot;Element \&quot;globalMemoryConstraint\&quot; missing...&quot;);</span>
+			}
+
+			//--------------DROP RULES---------------//
+<span class="nc" id="L1163">			NodeList dropRules = region.getElementsByTagName(&quot;dropRules&quot;);</span>
+
+			//drop rules (one for each class)
+<span class="nc" id="L1166">			boolean[] dropThisClass = new boolean[classNumber];</span>
+			//init
+<span class="nc bnc" id="L1168" title="All 2 branches missed.">			if (dropRules.getLength() == 0) {</span>
+				//no drop rules specified: use default drop values (drop open and keep closed)
+				if (DEBUG) {
+					System.out.println(&quot;Loading default drop rules...&quot;);
+				}
+
+<span class="nc bnc" id="L1174" title="All 2 branches missed.">				for (int c = 0; c &lt; classNumber; c++) {</span>
+<span class="nc" id="L1175">					int classType = jobClasses[c].getType();</span>
+<span class="nc bnc" id="L1176" title="All 2 branches missed.">					if (classType == JobClass.OPEN_CLASS) {</span>
+						//drop open class jobs
+<span class="nc" id="L1178">						dropThisClass[c] = true;</span>
+					} else {
+						//block closed class jobs
+<span class="nc" id="L1181">						dropThisClass[c] = false;</span>
+					}
+				}
+			} else {
+				//drop rules specified by user
+				if (DEBUG) {
+					System.out.println(&quot;Loading specified drop rules...&quot;);
+				}
+
+<span class="nc" id="L1190">				Element dropRule = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1194" title="All 2 branches missed.">				for (int dr = 0; dr &lt; dropRules.getLength(); dr++) {</span>
+<span class="nc" id="L1195">					dropRule = (Element) dropRules.item(dr);</span>
+<span class="nc" id="L1196">					className = dropRule.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1198">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1199">					dropThisClass[classPosition] = dropRule.getAttribute(&quot;dropThisClass&quot;).equalsIgnoreCase(&quot;true&quot;);</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   drop for class &quot; + className + &quot; = &quot; + dropThisClass[classPosition]);
+					}
+				}
+			}
+
+			//-----------------CLASS CONSTRAINTS-----------------//
+<span class="nc" id="L1208">			NodeList classConstraints = region.getElementsByTagName(&quot;classConstraint&quot;);</span>
+
+			//max capacity for each class (-1 means no constraint)
+<span class="nc" id="L1211">			double[] maxCapacityPerClass = new double[classNumber];</span>
+			//init
+<span class="nc" id="L1213">			Arrays.fill(maxCapacityPerClass, -1.0);</span>
+
+<span class="nc bnc" id="L1215" title="All 2 branches missed.">			if (classConstraints.getLength() &gt; 0) {</span>
+<span class="nc" id="L1216">				Element clsConst = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1220" title="All 2 branches missed.">				for (int cc = 0; cc &lt; classConstraints.getLength(); cc++) {</span>
+<span class="nc" id="L1221">					clsConst = (Element) classConstraints.item(cc);</span>
+<span class="nc" id="L1222">					className = clsConst.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1224">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1225">					maxCapacityPerClass[classPosition] = Double.parseDouble(clsConst.getAttribute(&quot;maxJobsPerClass&quot;));</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   constraint for class &quot; + className + &quot; = &quot; + Double.toString(maxCapacityPerClass[classPosition]));
+					}
+				}
+			}
+
+			//-----------------CLASS MEMORY CONSTRAINTS-----------------//
+<span class="nc" id="L1234">			NodeList classMemoryConstraints = region.getElementsByTagName(&quot;classMemoryConstraint&quot;);</span>
+
+			//max memory for each class (-1 means no constraint)
+<span class="nc" id="L1237">			double[] maxMemoryPerClass = new double[classNumber];</span>
+			//init
+<span class="nc" id="L1239">			Arrays.fill(maxMemoryPerClass, -1.0);</span>
+
+<span class="nc bnc" id="L1241" title="All 2 branches missed.">			if (classMemoryConstraints.getLength() &gt; 0) {</span>
+<span class="nc" id="L1242">				Element clsMemConst = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1246" title="All 2 branches missed.">				for (int cmc = 0; cmc &lt; classMemoryConstraints.getLength(); cmc++) {</span>
+<span class="nc" id="L1247">					clsMemConst = (Element) classMemoryConstraints.item(cmc);</span>
+<span class="nc" id="L1248">					className = clsMemConst.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1250">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1251">					maxMemoryPerClass[classPosition] = Double.parseDouble(clsMemConst.getAttribute(&quot;maxMemoryPerClass&quot;));</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   memory constraint for class &quot; + className + &quot; = &quot; + Double.toString(maxMemoryPerClass[classPosition]));
+					}
+				}
+			}
+
+			//----------------CLASS WEIGHTS----------------//
+<span class="nc" id="L1260">			NodeList classWeights = region.getElementsByTagName(&quot;classWeight&quot;);</span>
+
+<span class="nc" id="L1262">			double[] regionClassWeights = new double[classNumber];</span>
+			//init
+<span class="nc" id="L1264">			Arrays.fill(regionClassWeights, 1.0);</span>
+
+<span class="nc bnc" id="L1266" title="All 2 branches missed.">			if (classWeights.getLength() &gt; 0) {</span>
+<span class="nc" id="L1267">				Element clsWeight = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1271" title="All 2 branches missed.">				for (int cw = 0; cw &lt; classWeights.getLength(); cw++) {</span>
+<span class="nc" id="L1272">					clsWeight = (Element) classWeights.item(cw);</span>
+<span class="nc" id="L1273">					className = clsWeight.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1275">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1276">					regionClassWeights[classPosition] = Double.parseDouble(clsWeight.getAttribute(&quot;weight&quot;));</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   weight for class &quot; + className + &quot; = &quot; + Double.toString(regionClassWeights[classPosition]));
+					}
+				}
+			}
+
+			//----------------CLASS SIZES----------------//
+<span class="nc" id="L1285">			NodeList classSizes = region.getElementsByTagName(&quot;classSize&quot;);</span>
+
+<span class="nc" id="L1287">			double[] regionClassSizes = new double[classNumber];</span>
+			//init
+<span class="nc" id="L1289">			Arrays.fill(regionClassSizes, 1.0);</span>
+
+<span class="nc bnc" id="L1291" title="All 2 branches missed.">			if (classSizes.getLength() &gt; 0) {</span>
+<span class="nc" id="L1292">				Element clsSize = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1296" title="All 2 branches missed.">				for (int cs = 0; cs &lt; classSizes.getLength(); cs++) {</span>
+<span class="nc" id="L1297">					clsSize = (Element) classSizes.item(cs);</span>
+<span class="nc" id="L1298">					className = clsSize.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1300">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1301">					regionClassSizes[classPosition] = Double.parseDouble(clsSize.getAttribute(&quot;size&quot;));</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   size for class &quot; + className + &quot; = &quot; + Double.toString(regionClassSizes[classPosition]));
+					}
+				}
+			}
+
+			//----------------CLASS DUE DATES----------------//
+<span class="nc" id="L1310">			NodeList classSoftDeadlines = region.getElementsByTagName(&quot;classSoftDeadline&quot;);</span>
+
+<span class="nc" id="L1312">			double[] regionClassSoftDeadlines = new double[classNumber];</span>
+			//init
+<span class="nc" id="L1314">			Arrays.fill(regionClassSoftDeadlines, 1.0);</span>
+
+<span class="nc bnc" id="L1316" title="All 2 branches missed.">			if (classSoftDeadlines.getLength() &gt; 0) {</span>
+<span class="nc" id="L1317">				Element clsSoftDeadline = null;</span>
+				String className;
+				int classPosition;
+
+<span class="nc bnc" id="L1321" title="All 2 branches missed.">				for (int cdd = 0; cdd &lt; classSoftDeadlines.getLength(); cdd++) {</span>
+<span class="nc" id="L1322">					clsSoftDeadline = (Element) classSoftDeadlines.item(cdd);</span>
+<span class="nc" id="L1323">					className = clsSoftDeadline.getAttribute(&quot;jobClass&quot;);</span>
+					//entries may be in a wrong order: find the right position
+<span class="nc" id="L1325">					classPosition = findClassPosition(className);</span>
+<span class="nc" id="L1326">					regionClassSoftDeadlines[classPosition] = Double.parseDouble(clsSoftDeadline.getAttribute(&quot;softDeadline&quot;));</span>
+
+					if (DEBUG) {
+						System.out.println(&quot;   soft deadline for class &quot; + className + &quot; = &quot; + Double.toString(regionClassSoftDeadlines[classPosition]));
+					}
+				}
+			}
+
+			//----------------GROUP CONSTRAINTS----------------//
+<span class="nc" id="L1335">			NodeList groupConstraints = region.getElementsByTagName(&quot;groupConstraint&quot;);</span>
+<span class="nc" id="L1336">			int groupNumber = groupConstraints.getLength();</span>
+<span class="nc" id="L1337">			String[] groupNames = new String[groupNumber];</span>
+<span class="nc" id="L1338">			double[] maxCapacityPerGroup = new double[groupNumber];</span>
+<span class="nc bnc" id="L1339" title="All 2 branches missed.">			for (int j = 0; j &lt; groupNumber; j++) {</span>
+<span class="nc" id="L1340">				Element groupConstraint = (Element) groupConstraints.item(j);</span>
+<span class="nc" id="L1341">				groupNames[j] = groupConstraint.getAttribute(&quot;jobGroup&quot;);</span>
+<span class="nc" id="L1342">				maxCapacityPerGroup[j] = Double.parseDouble(groupConstraint.getAttribute(&quot;maxJobsPerGroup&quot;));</span>
+			}
+
+			//----------------GROUP MEMORY CONSTRAINTS----------------//
+<span class="nc" id="L1346">			NodeList groupMemoryConstraints = region.getElementsByTagName(&quot;groupMemoryConstraint&quot;);</span>
+<span class="nc" id="L1347">			double[] maxMemoryPerGroup = new double[groupNumber];</span>
+<span class="nc bnc" id="L1348" title="All 2 branches missed.">			for (int j = 0; j &lt; groupNumber; j++) {</span>
+<span class="nc" id="L1349">				Element groupMemoryConstraint = (Element) groupMemoryConstraints.item(j);</span>
+<span class="nc" id="L1350">				maxMemoryPerGroup[j] = Double.parseDouble(groupMemoryConstraint.getAttribute(&quot;maxMemoryPerGroup&quot;));</span>
+			}
+
+			//----------------GROUP CLASSLISTS----------------//
+<span class="nc" id="L1354">			NodeList groupClassLists  = region.getElementsByTagName(&quot;groupClassList&quot;);</span>
+<span class="nc" id="L1355">			List&lt;List&lt;Integer&gt;&gt; groupClassIndexLists = new ArrayList&lt;List&lt;Integer&gt;&gt;();</span>
+<span class="nc bnc" id="L1356" title="All 2 branches missed.">			for (int j = 0; j &lt; groupNumber; j++) {</span>
+<span class="nc" id="L1357">				Element groupClassList = (Element) groupClassLists.item(j);</span>
+<span class="nc" id="L1358">				NodeList groupClasses = groupClassList.getElementsByTagName(&quot;groupClass&quot;);</span>
+<span class="nc" id="L1359">				groupClassIndexLists.add(new ArrayList&lt;Integer&gt;());</span>
+<span class="nc bnc" id="L1360" title="All 2 branches missed.">				for (int k = 0; k &lt; groupClasses.getLength(); k++) {</span>
+<span class="nc" id="L1361">					Element groupClass = (Element) groupClasses.item(k);</span>
+<span class="nc" id="L1362">					int classIndex = findClassPosition(groupClass.getAttribute(&quot;jobClass&quot;));</span>
+<span class="nc" id="L1363">					groupClassIndexLists.get(j).add(classIndex);</span>
+				}
+			}
+
+			//------------------ADD BLOCKING REGION TO SIM------------------//
+<span class="nc" id="L1368">			sim.addRegion(regionName, maxCapacity, maxMemory, maxCapacityPerClass, maxMemoryPerClass, dropThisClass, regionClassWeights, regionClassSizes,</span>
+					regionClassSoftDeadlines, groupNames, maxCapacityPerGroup, maxMemoryPerGroup, groupClassIndexLists, stationNames);
+			if (DEBUG) {
+				System.out.println(&quot;added region &quot; + regionName);
+			}
+		}
+<span class="nc" id="L1374">	}</span>
+
+	// Cut and paste of old GUI code used by SimLoader (to clear up things) - Bertoli Marco
+<span class="nc" id="L1377">	public static class XMLParser {</span>
+
+		/**
+		 * Returns a NodeList of all descendant Elements with a given tag name, in
+		 * the order in which they are encountered in a preordering traversal of
+		 * this Element (only at first level).
+		 * @param e  The element that is being analyzed.
+		 * @param name  The name of the tag to match on.
+		 * @return A list of matching Element nodes.
+		 */
+		public static NodeList getElementsByTagName(Element e, String name) {
+<span class="nc" id="L1388">			JmtNodeList reqChild = new JmtNodeList();</span>
+<span class="nc" id="L1389">			NodeList childList = e.getChildNodes();</span>
+<span class="nc bnc" id="L1390" title="All 4 branches missed.">			if (childList != null &amp;&amp; childList.getLength() != 0) {</span>
+<span class="nc bnc" id="L1391" title="All 2 branches missed.">				for (int i = 0; i &lt; childList.getLength(); i++) {</span>
+<span class="nc" id="L1392">					Node n = childList.item(i);</span>
+<span class="nc bnc" id="L1393" title="All 6 branches missed.">					if (n.getNodeType() == 1 &amp;&amp; n.getNodeName() != null &amp;&amp; n.getNodeName().equals(name)) {</span>
+<span class="nc" id="L1394">						reqChild.add(n);</span>
+					}
+
+				}
+			}
+<span class="nc" id="L1399">			return reqChild;</span>
+		}
+
+		/** Implements a NodeList that lets also add Nodes, feel free to
+		 * add methods if u need.
+
+		 * @author Federico Granata
+		 * Date: 16-ott-2003
+		 * Time: 17.17.43
+
+		 */
+		public static class JmtNodeList implements NodeList {
+
+			ArrayList&lt;Node&gt; data;
+
+<span class="nc" id="L1414">			public JmtNodeList() {</span>
+<span class="nc" id="L1415">				data = new ArrayList&lt;Node&gt;();</span>
+<span class="nc" id="L1416">			}</span>
+
+			public void add(Node child) {
+<span class="nc" id="L1419">				data.add(child);</span>
+<span class="nc" id="L1420">			}</span>
+
+			public Node item(int index) {
+<span class="nc" id="L1423">				return data.get(index);</span>
+			}
+
+			public int getLength() {
+<span class="nc" id="L1427">				return data.size();</span>
+			}
+
+		}
+
+	}
+	//END - Bertoli Marco
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

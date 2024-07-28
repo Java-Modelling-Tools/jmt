@@ -88,7 +88,10 @@
             <destDir>javadoc</destDir>
           </configuration>
           </plugin>
+<<<<<<< HEAD
           <!-- we want JDK 1.7 source and binary compatibility -->
+=======
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-compiler-plugin</artifactId>

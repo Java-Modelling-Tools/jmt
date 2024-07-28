@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JobAnimation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.animation</a> &gt; <span class="el_source">JobAnimation.java</span></div><h1>JobAnimation.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.animation;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.image.ImageObserver;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 17-gen-2005
+ * Time: 13.53.44
+ * Represents a job to be routed through the queue net. Paths to be followed must be specified.
+ * If more than one path is defined, this class randomly decides which path to follow next when
+ * the current one is completed.
+ */
+public class JobAnimation implements Animation {
+
+	//bounding box, used to repaint the job
+	private Rectangle bounds;
+	private Image icon;
+
+	/**current symbolic position. Represents a coordinate calculated along the line of an edge.*/
+	protected double position;
+
+	/**timer that keeps trace of the millisecs passed by the time this job entered the
+	element (e.g. edge or station) it is going through*/
+	protected long timeOfEntrance;
+
+	//speed this job must move at through the queue net.
+	private double speed;
+
+	//paths followed by this job
+	JobPath[] jobPaths;
+	//current path this job is running through
+<span class="nc" id="L54">	int currentPath = 0;</span>
+
+	//tells whether this job must be repainted. For example, if this job enters a station,
+	//it must be hidden.
+<span class="nc" id="L58">	private boolean repaint = true;</span>
+
+	//icon toolkit to be used for renderization of the images.
+	private IconsToolkit toolkit;
+
+	/**Creates a new instance of JobAnimation initialized with specified default paths
+	 * to be followed by the job and specified speed.
+	 * @param speed: speed this job must keep following its paths. It is measured in
+	 * pixels per second
+	 * @param jps: paths this Job can go through
+	 * @param bounds: default size for this job*/
+	public JobAnimation(double speed, JobPath[] jps, Rectangle bounds) {
+<span class="nc" id="L70">		this(speed, jps, bounds, new DefaultIconsToolkit());</span>
+<span class="nc" id="L71">	}</span>
+
+	/**Creates a new instance of JobAnimation initialized with specified values of another job.
+	 * @param job: job wanted to be copied.*/
+	public JobAnimation(JobAnimation job) {
+<span class="nc" id="L76">		this(job.speed, job.jobPaths, job.bounds, new DefaultIconsToolkit());</span>
+<span class="nc" id="L77">	}</span>
+
+	/**Creates a new instance of JobAnimation initialized with specified default paths
+	 * to be followed by the job and specified speed.
+	 * @param speed: speed this job must keep following its paths. It is measured in
+	 * pixels per second
+	 * @param jps: paths this Job can go through
+	 * @param bounds: default size for this job
+	 * @param toolkit: Image toolkit for customized renderization of job image*/
+<span class="nc" id="L86">	public JobAnimation(double speed, JobPath[] jps, Rectangle bounds, IconsToolkit toolkit) {</span>
+<span class="nc" id="L87">		timeOfEntrance = System.currentTimeMillis();</span>
+<span class="nc" id="L88">		this.speed = speed;</span>
+<span class="nc" id="L89">		jobPaths = jps;</span>
+<span class="nc" id="L90">		this.bounds = bounds;</span>
+<span class="nc" id="L91">		this.toolkit = toolkit;</span>
+<span class="nc" id="L92">		icon = toolkit.getJobIcon(bounds);</span>
+<span class="nc" id="L93">		currentPath = (int) (Math.random() * (jobPaths.length));</span>
+<span class="nc" id="L94">	}</span>
+
+//	/**Adds a path to be followed by this job
+//	 * @param jp: new path to be added.*/
+//	public void addPath(JobPath jp) {
+//		JobPath[] newJps = new JobPath[jobPaths.length + 1];
+//		for (int i = 0; i &lt; jobPaths.length; i++) {
+//			newJps[i] = jobPaths[i];
+//		}
+//		newJps[jobPaths.length] = jp;
+//	}
+
+	public void refresh() {
+<span class="nc" id="L107">	}</span>
+
+	public void init() {
+<span class="nc" id="L110">	}</span>
+
+	public void paint(Graphics g, ImageObserver io) {
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		if (repaint) {</span>
+<span class="nc" id="L114">			g.drawImage(icon, bounds.x, bounds.y, io);</span>
+		}
+<span class="nc" id="L116">	}</span>
+
+	public Image getBGImage() {
+<span class="nc" id="L119">		return icon;</span>
+	}
+
+	public void setBGImage(Image img) {
+<span class="nc" id="L123">		icon = img;</span>
+<span class="nc" id="L124">	}</span>
+
+	public void setBounds(Rectangle r) {
+<span class="nc bnc" id="L127" title="All 4 branches missed.">		if (bounds.width != r.width || bounds.height != r.height) {</span>
+<span class="nc" id="L128">			toolkit.getJobIcon(r);</span>
+		}
+<span class="nc" id="L130">		bounds = r;</span>
+<span class="nc" id="L131">	}</span>
+
+	public Rectangle getBounds() {
+<span class="nc" id="L134">		return bounds;</span>
+	}
+
+	/**Tells this class to show or hide itself.
+	 * @param repaint: true if this class must show itself, false otherwise.
+	 * */
+	public void setRepaint(boolean repaint) {
+<span class="nc" id="L141">		this.repaint = repaint;</span>
+<span class="nc" id="L142">	}</span>
+
+	/**Tells whether this job was set to be hidden or to be shown.
+	 * @return true if this job must be shown, false otherwise*/
+	public boolean getRepaint() {
+<span class="nc" id="L147">		return repaint;</span>
+	}
+
+	public double getSpeed() {
+<span class="nc" id="L151">		return speed;</span>
+	}
+
+	public double getPosition() {
+<span class="nc" id="L155">		return position;</span>
+	}
+
+	public void setPosition(double newPosition) {
+<span class="nc" id="L159">		position = newPosition;</span>
+<span class="nc" id="L160">	}</span>
+
+	/**Returns next queue net element this job must be routed to.*/
+	public JobContainer getNextElement() {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">		if (jobPaths[currentPath].isLast()) {</span>
+<span class="nc" id="L165">			currentPath = (int) (Math.random() * (jobPaths.length));</span>
+		}
+<span class="nc" id="L167">		return jobPaths[currentPath].getNext();</span>
+	}
+
+	/**Resets the time of entrance of this job in the element that currently contains it.
+	 * every class that accepts jobs must call this method whenever a a new job is added,
+	 * in order to calculate the correct position once the job speed is known.
+	 * */
+	public void resetTimeOfEntrance() {
+<span class="nc" id="L175">		timeOfEntrance = System.currentTimeMillis();</span>
+<span class="nc" id="L176">	}</span>
+
+	/** returns system timestamp (in millisecs) for the time of entrance in an element of the
+	 * queuenet.
+	 * @return :number of system millisecs time.*/
+	public long getTimeOfEntrance() {
+<span class="nc" id="L182">		return timeOfEntrance;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

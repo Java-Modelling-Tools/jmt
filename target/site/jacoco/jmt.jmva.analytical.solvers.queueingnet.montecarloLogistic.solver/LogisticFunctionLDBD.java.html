@@ -1,0 +1,890 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogisticFunctionLDBD.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver</a> &gt; <span class="el_source">LogisticFunctionLDBD.java</span></div><h1>LogisticFunctionLDBD.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.checkMatrixNonnegative;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ListIterator;
+
+import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
+import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.apache.commons.math3.optimization.GoalType;
+import org.apache.commons.math3.optimization.PointValuePair;
+import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
+import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
+
+import cern.colt.matrix.DoubleFactory1D;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
+
+/**
+ * Implementation of the Multiserver Logistic Function, as given in Ong 2018:
+ * Java Algorithms for Computer Performance Analysis. Uses Method 2, with the
+ * Sum and Difference operators inside
+ */
+public class LogisticFunctionLDBD extends LogisticFunctionBase {
+
+	// Model parameters
+	protected int N;
+	protected int R;
+	protected int K;
+	protected double epsilon;
+	protected DoubleMatrix2D demands;
+	protected DoubleMatrix2D sigma;
+	protected DoubleMatrix1D servers;
+	protected DoubleMatrix1D pop;
+	// Misc
+	protected Algebra A;
+	DoubleFactory2D DF2;
+	DoubleFactory1D DF1;
+	protected MathContext MC;
+	// Cached list of states in the summation and difference operators
+	protected ArrayList&lt;state&gt; States;
+
+	/**
+	 * Implements the safeEvaluate abstract method. Computes the logistic additive function
+	 * at the point given by point, for multiserver networks e^(k(x))
+	 * @param point Array representing point to be evaluated
+	 * @return BigDecimal equal to the function value at that point
+	 */
+	@Override
+	protected BigDecimal safeEvaluate(double[] point) throws InternalErrorException {
+<span class="nc" id="L68">		DoubleMatrix1D x = new DenseDoubleMatrix1D(point);</span>
+<span class="nc" id="L69">		BigDecimal[] U = logistic_transform(x);</span>
+
+<span class="nc" id="L71">		BigDecimal I = BigDecimal.ZERO;</span>
+
+<span class="nc" id="L73">		ListIterator&lt;state&gt; S_it = States.listIterator();</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		while (S_it.hasNext()) { // iterate over the summation terms, V</span>
+<span class="nc" id="L76">			state V = S_it.next();</span>
+<span class="nc" id="L77">			BigDecimal alpha = V.coeff;</span>
+
+<span class="nc" id="L79">			BigDecimal J = BigDecimal.ZERO;</span>
+
+<span class="nc" id="L81">			ArrayList&lt;state&gt; Ts = V.nested_states;</span>
+<span class="nc" id="L82">			ListIterator&lt;state&gt; Ts_it = Ts.listIterator();</span>
+
+<span class="nc bnc" id="L84" title="All 2 branches missed.">			while (Ts_it.hasNext()) { // iterate over the difference terms, T</span>
+<span class="nc" id="L85">				state T = Ts_it.next();</span>
+<span class="nc" id="L86">				BigDecimal C = T.coeff;</span>
+
+<span class="nc" id="L88">				double t0 = T.s.get(0);</span>
+<span class="nc" id="L89">				DoubleMatrix1D t = T.s.viewPart(1,K).copy();</span>
+
+<span class="nc" id="L91">				BigDecimal H = calc_logisticF_inside(U, t0, t); // Compute h(u, t0, t)</span>
+<span class="nc" id="L92">				H = H.multiply(C, MC); // Multiply binomial coefficients in difference operators</span>
+<span class="nc" id="L93">				J = J.add(H, MC);</span>
+<span class="nc" id="L94">			}</span>
+
+<span class="nc" id="L96">			J = J.multiply(alpha, MC); // alpha coefficient in the summation</span>
+<span class="nc" id="L97">			I = I.add(J, MC);</span>
+<span class="nc" id="L98">		}</span>
+
+<span class="nc" id="L100">		return I;</span>
+	}
+
+	@Override
+	protected void checkInDomain(double[] point) throws InternalErrorException {
+<span class="nc" id="L105">		return;</span>
+	}
+
+	@Override
+	public Function copy() throws InternalErrorException {
+<span class="nc" id="L110">		return new LogisticFunctionLDBD(this);</span>
+	}
+
+	/*================ Public utility functions =================*/
+
+	/**
+	 * Stationary point calculation for multi-server networks - requires
+	 * CG descent. Requires the implementation of a gradient MultivariateVectorFunction
+	 * and a partial gradient MultivariateFunction to be given into the optimizer class.
+	 * These will then be used in the nonlinear CG algorithm to calculate the direction
+	 * of descent
+	 * @throws InternalErrorException
+	 */
+	public void calculate_stationary_point() throws InternalErrorException {
+		/**
+		 * Implementation of gradient vector function, contains a replica of this Logistic Function object
+		 */
+		class LFMS1D_grad implements MultivariateVectorFunction {
+
+			private LogisticFunctionLDBD LFMS;
+
+<span class="nc" id="L131">			public LFMS1D_grad(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon) throws InternalErrorException {</span>
+<span class="nc" id="L132">				LFMS = new LogisticFunctionLDBD(ndim, population, demands, servers, epsilon);</span>
+<span class="nc" id="L133">			}</span>
+
+			/**
+			 * Calculated the gradient of the associated differentiable function as a given point doubles
+			 * @param doubles
+			 * @return
+			 */
+			@Override
+			public double[] value(double[] doubles) {
+<span class="nc" id="L142">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">				for (int i=0; i&lt;doubles.length; i++)</span>
+<span class="nc" id="L144">					x[i] = doubles[i];</span>
+
+				try {
+<span class="nc" id="L147">					double[] J = LFMS.evaluateJac(x);</span>
+<span class="nc bnc" id="L148" title="All 2 branches missed.">					for (int i=0; i&lt;J.length; i++)</span>
+<span class="nc" id="L149">						J[i] *= -1;</span>
+<span class="nc" id="L150">					return J;</span>
+<span class="nc" id="L151">				} catch (ArithmeticException | NumberFormatException e) {</span>
+<span class="nc" id="L152">					System.err.println(&quot;Warning: Bad value (possibly negative) encountered when evaluating multiserver &quot; +</span>
+							&quot;logistic function! Try setting a higher precsion! Continuing ... &quot;);
+<span class="nc" id="L154">					double[] J = new double[x.length];</span>
+<span class="nc" id="L155">					Arrays.fill(J, 0.);</span>
+<span class="nc" id="L156">					return J;</span>
+<span class="nc" id="L157">				} catch (Exception e) {</span>
+<span class="nc" id="L158">					System.err.println(&quot;Warning: Unknown error encountered when evaluating multiserver logistic function! Continuing ... &quot;);</span>
+<span class="nc" id="L159">					double[] J = new double[x.length];</span>
+<span class="nc" id="L160">					Arrays.fill(J, 0.);</span>
+<span class="nc" id="L161">					return J;</span>
+				}
+			}
+		}
+
+		/**
+		 * Implementation of partial gradient vector function, contains a replica of this Logistic Function object
+		 */
+		class LFMS1D_partgrad implements MultivariateFunction {
+			private LogisticFunctionLDBD LFMS;
+			private int k;
+<span class="nc" id="L172">			public LFMS1D_partgrad(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon, int k) throws InternalErrorException {</span>
+<span class="nc" id="L173">				LFMS = new LogisticFunctionLDBD(ndim, population, demands, servers, epsilon);</span>
+<span class="nc" id="L174">				this.k = k;</span>
+<span class="nc" id="L175">			}</span>
+
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L179">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">				for (int i=0; i&lt;doubles.length; i++)</span>
+<span class="nc" id="L181">					x[i] = doubles[i];</span>
+
+				try {
+<span class="nc" id="L184">					double[] J = LFMS.evaluateJac(x);</span>
+<span class="nc" id="L185">					return -J[k];</span>
+<span class="nc" id="L186">				} catch (ArithmeticException | NumberFormatException e) {</span>
+<span class="nc" id="L187">					System.err.println(&quot;Warning: Bad value (possibly negative) encountered when evaluating multiserver &quot; +</span>
+							&quot;logistic function! Try setting a higher precsion! Continuing ... &quot;);
+<span class="nc" id="L189">					return 0.;</span>
+<span class="nc" id="L190">				} catch (Exception e) {</span>
+<span class="nc" id="L191">					System.err.println(&quot;Warning: Unknown error encountered when evaluating multiserver logistic function! Continuing ... &quot;);</span>
+<span class="nc" id="L192">					return 0.;</span>
+				}
+			}
+		}
+
+		/**
+		 * Implementation of a DifferentiableMultivariateFunction as required by the CG optimizer,
+		 * contains a replica of this Logistic Function object
+		 */
+		class LFMS1D_diff implements DifferentiableMultivariateFunction {
+
+			private LogisticFunctionLDBD LFMS;
+			private int ndim;
+			private DoubleMatrix1D pop;
+			private DoubleMatrix2D demands;
+			private DoubleMatrix1D servers;
+			private double epsilon;
+
+<span class="nc" id="L210">			public LFMS1D_diff(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon) throws InternalErrorException {</span>
+<span class="nc" id="L211">				this.ndim = ndim;</span>
+<span class="nc" id="L212">				this.pop = population;</span>
+<span class="nc" id="L213">				this.demands = demands;</span>
+<span class="nc" id="L214">				this.servers = servers;</span>
+<span class="nc" id="L215">				this.epsilon = epsilon;</span>
+<span class="nc" id="L216">				LFMS = new LogisticFunctionLDBD(ndim, population, demands, servers, epsilon);</span>
+<span class="nc" id="L217">			}</span>
+
+			/**
+			 * Calculates the value at a given point
+			 * @param doubles
+			 * @return
+			 */
+			@Override
+			public double value(double[] doubles) {
+<span class="nc" id="L226">				double[] x = new double[doubles.length];</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">				for (int i=0; i&lt;doubles.length; i++)</span>
+<span class="nc" id="L228">					x[i] = doubles[i];</span>
+
+				try {
+<span class="nc" id="L231">					BigDecimal F = LFMS.evaluate(x);</span>
+<span class="nc" id="L232">					F = log(F, MathContext.DECIMAL128);</span>
+<span class="nc" id="L233">					return -F.doubleValue();</span>
+<span class="nc" id="L234">				} catch (ArithmeticException | NumberFormatException e) {</span>
+<span class="nc" id="L235">					System.err.println(&quot;Warning: Bad value (possibly negative) encountered when evaluating multiserver &quot; +</span>
+							&quot;logistic function! Try setting a higher precsion! Continuing ... &quot;);
+<span class="nc" id="L237">					return 0.;</span>
+<span class="nc" id="L238">				} catch (Exception e) {</span>
+<span class="nc" id="L239">					System.err.println(&quot;Warning: Unknown error encountered when evaluating multiserver logistic function! Continuing ... &quot;);</span>
+<span class="nc" id="L240">					return 0.;</span>
+				}
+			}
+
+			/**
+			 * Returns the gradient MVF instance
+			 * @return
+			 */
+			@Override
+			public MultivariateVectorFunction gradient() {
+				try {
+<span class="nc" id="L251">					return new LFMS1D_grad(ndim, pop, demands, servers, epsilon);</span>
+<span class="nc" id="L252">				} catch (Exception e) {</span>
+<span class="nc" id="L253">					return null;</span>
+				}
+			}
+
+			/**
+			 * Returns the partial gradient function instance
+			 * @param i
+			 * @return
+			 */
+			@Override
+			public MultivariateFunction partialDerivative(int i) {
+				try {
+<span class="nc" id="L265">					return new LFMS1D_partgrad(ndim, pop, demands, servers, epsilon, i);</span>
+<span class="nc" id="L266">				} catch (Exception e) {</span>
+<span class="nc" id="L267">					return null;</span>
+				}
+			}
+		}
+
+		// Single station case - trivial
+<span class="nc bnc" id="L273" title="All 2 branches missed.">		if (K==1) {</span>
+<span class="nc" id="L274">			u_stat = new DenseDoubleMatrix1D(new double[]{1.});</span>
+<span class="nc" id="L275">			x_stat = new DenseDoubleMatrix1D(new double[]{});</span>
+<span class="nc" id="L276">			return;</span>
+		}
+
+		// Initialize optimizer
+<span class="nc" id="L280">		NonLinearConjugateGradientOptimizer optimizer =</span>
+				new NonLinearConjugateGradientOptimizer(ConjugateGradientFormula.POLAK_RIBIERE);
+
+<span class="nc" id="L283">		double[] start = new double[K-1];</span>
+<span class="nc" id="L284">		Arrays.fill(start,0);</span>
+
+		// Attempt optimization
+		DenseDoubleMatrix1D x_opt;
+		try {
+<span class="nc" id="L289">			PointValuePair optimum = optimizer.optimize(1000, new LFMS1D_diff(K - 1, pop, demands, servers, epsilon), GoalType.MINIMIZE, start);</span>
+<span class="nc" id="L290">			x_opt = new DenseDoubleMatrix1D(optimum.getPoint());</span>
+<span class="nc" id="L291">		} catch (TooManyEvaluationsException e) { //failed</span>
+<span class="nc" id="L292">			throw new InternalErrorException(&quot; Gradient Descent Optimizer Failed for Multiserver Logistic Sampling Algorithm! Try using more preceision!&quot;);</span>
+<span class="nc" id="L293">		}</span>
+
+<span class="nc" id="L295">		x_stat = x_opt.copy();</span>
+<span class="nc" id="L296">		u_stat = new DenseDoubleMatrix1D(K);</span>
+<span class="nc" id="L297">		u_stat.viewPart(0,K-1).assign(x_opt);</span>
+<span class="nc" id="L298">		u_stat.set(K-1, 0);</span>
+<span class="nc" id="L299">		u_stat.assign(Functions.exp);</span>
+<span class="nc" id="L300">		double Z = u_stat.zSum();</span>
+<span class="nc" id="L301">		u_stat.assign(Functions.div(Z));</span>
+<span class="nc" id="L302">	}</span>
+
+	/**
+	 * Stationary point Hessian calculations for multi-server networks
+	 * @throws InternalErrorException
+	 */
+	public void calculate_hessian()throws InternalErrorException {
+<span class="nc" id="L309">		DoubleMatrix1D x_opt = this.u_stat.viewPart(0,this.K-1).copy();</span>
+<span class="nc" id="L310">		x_opt.assign(Functions.div(this.u_stat.get(this.K-1)));</span>
+<span class="nc" id="L311">		x_opt.assign(Functions.log);</span>
+
+<span class="nc" id="L313">		hess_stat = new DenseDoubleMatrix2D(evaluateHessStat(x_opt.toArray()));</span>
+<span class="nc" id="L314">		hess_stat.assign(Functions.mult(-1));</span>
+<span class="nc" id="L315">	}</span>
+
+	/**
+	 * Evaluate the Hessian of k(x) at the stationary point, stat_point.
+	 * Will be correct iff stat-point is the correct stationary point
+	 * @param stat_point stationry point to provide
+	 * @return double[][] containing the Hessian of log(k(x))
+	 * @throws InternalErrorException
+	 */
+	public double[][] evaluateHessStat(double[] stat_point) throws InternalErrorException {
+<span class="nc" id="L325">		BigDecimal[] Ustat = logistic_transform(new DenseDoubleMatrix1D(stat_point));</span>
+
+<span class="nc" id="L327">		BigDecimal[][] Hess = new BigDecimal[K-1][K-1];</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++)</span>
+<span class="nc" id="L329">			Arrays.fill(Hess[i], BigDecimal.ZERO);</span>
+
+<span class="nc" id="L331">		ListIterator&lt;state&gt; S_it = States.listIterator();</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		while (S_it.hasNext()) { // iterate over the summation terms, V</span>
+<span class="nc" id="L333">			state V = S_it.next();</span>
+<span class="nc" id="L334">			BigDecimal alpha = V.coeff;</span>
+
+<span class="nc" id="L336">			ArrayList&lt;state&gt; Ts = V.nested_states;</span>
+<span class="nc" id="L337">			ListIterator&lt;state&gt; Ts_it = Ts.listIterator();</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">			while (Ts_it.hasNext()) { // iterate over the difference terms, T</span>
+<span class="nc" id="L339">				state T = Ts_it.next();</span>
+<span class="nc" id="L340">				BigDecimal C = T.coeff;</span>
+
+<span class="nc" id="L342">				double t0 = T.s.get(0);</span>
+<span class="nc" id="L343">				DoubleMatrix1D t = T.s.viewPart(1, K).copy();</span>
+
+<span class="nc" id="L345">				BigDecimal Fi = calc_logisticF_inside(Ustat, t0, t); // Compute h(u, t0, t)</span>
+<span class="nc" id="L346">				BigDecimal[] Ji = calc_jac_log_inside(Ustat, t0, t); // Compute d/dx (h(u, t0, t))</span>
+<span class="nc" id="L347">				BigDecimal[][] Hi = calc_stat_hess_log_inside(Ustat, t0, t); // Compute d^2/dx^2 (h(u, t0, t))</span>
+
+<span class="nc bnc" id="L349" title="All 2 branches missed.">				for (int i=0; i&lt;K-1; i++) {</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">					for (int j=0; j&lt;K-1; j++) {</span>
+<span class="nc" id="L351">						BigDecimal G = Ji[i];</span>
+<span class="nc" id="L352">						G = G.multiply(Ji[j], MC);</span>
+<span class="nc" id="L353">						Hi[i][j] = Hi[i][j].add(G, MC);</span>
+
+<span class="nc" id="L355">						Hi[i][j] = Hi[i][j].multiply(Fi, MC);</span>
+<span class="nc" id="L356">						Hi[i][j] = Hi[i][j].multiply(alpha, MC);</span>
+<span class="nc" id="L357">						Hi[i][j] = Hi[i][j].multiply(C, MC);</span>
+<span class="nc" id="L358">						Hess[i][j] = Hess[i][j].add(Hi[i][j], MC);</span>
+					} // endfor i
+				} // endfor j
+<span class="nc" id="L361">			}</span>
+<span class="nc" id="L362">		}</span>
+
+<span class="nc" id="L364">		BigDecimal F = evaluate(stat_point); // compute e^k(x)</span>
+<span class="nc" id="L365">		double[][] hess_double = new double[K-1][K-1];</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++) {</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">			for (int j=0; j&lt;K-1; j++) {</span>
+<span class="nc" id="L368">				Hess[i][j] = Hess[i][j].divide(F, MC);</span>
+<span class="nc" id="L369">				hess_double[i][j] = Hess[i][j].doubleValue();</span>
+			}
+		}
+
+<span class="nc" id="L373">		return hess_double;</span>
+	}
+
+	/**
+	 * Evaluate the Jacobian of k(x) at the given point, point
+	 * Does not have to be the stat point. For use in gradient descent for
+	 * finding the stationary point
+	 * @param point Given point to evaluate Jacobian
+	 * @return double[] representing Jacobian
+	 * @throws InternalErrorException
+	 */
+	public double[] evaluateJac(double[] point) throws InternalErrorException {
+<span class="nc" id="L385">		DoubleMatrix1D x = new DenseDoubleMatrix1D(point);</span>
+<span class="nc" id="L386">		BigDecimal[] U = logistic_transform(x);</span>
+
+<span class="nc" id="L388">		BigDecimal[] Jac = new BigDecimal[K-1];</span>
+<span class="nc" id="L389">		Arrays.fill(Jac, BigDecimal.ZERO);</span>
+
+<span class="nc" id="L391">		ListIterator&lt;state&gt; S_it = States.listIterator();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">		while (S_it.hasNext()) { // iterate over the summation terms, V</span>
+<span class="nc" id="L393">			state V = S_it.next();</span>
+<span class="nc" id="L394">			BigDecimal alpha = V.coeff;</span>
+
+<span class="nc" id="L396">			ArrayList&lt;state&gt; Ts = V.nested_states;</span>
+<span class="nc" id="L397">			ListIterator&lt;state&gt; Ts_it = Ts.listIterator();</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">			while (Ts_it.hasNext()) { // iterate over the difference terms, T</span>
+<span class="nc" id="L399">				state T = Ts_it.next();</span>
+<span class="nc" id="L400">				BigDecimal C = T.coeff;</span>
+
+<span class="nc" id="L402">				double t0 = T.s.get(0);</span>
+<span class="nc" id="L403">				DoubleMatrix1D t = T.s.viewPart(1,K).copy();</span>
+
+<span class="nc" id="L405">				BigDecimal[] Hi = calc_jac_log_inside(U, t0, t); // calculate d/dx (h(u, to, t))</span>
+<span class="nc" id="L406">				BigDecimal Fi = calc_logisticF_inside(U, t0, t); // calculate e^(-h(u, t0, t))</span>
+<span class="nc bnc" id="L407" title="All 2 branches missed.">				for (int i=0; i&lt;Hi.length; i++) { // multiply by binomial and alpha coefficients</span>
+<span class="nc" id="L408">					Hi[i] = Hi[i].multiply(Fi, MC);</span>
+<span class="nc" id="L409">					Hi[i] = Hi[i].multiply(alpha, MC);</span>
+<span class="nc" id="L410">					Hi[i] = Hi[i].multiply(C, MC);</span>
+<span class="nc" id="L411">					Jac[i] = Jac[i].add(Hi[i], MC);</span>
+				}
+<span class="nc" id="L413">			}</span>
+<span class="nc" id="L414">		}</span>
+
+<span class="nc" id="L416">		BigDecimal F = evaluate(point); // calculate e^(k(x))</span>
+<span class="nc" id="L417">		double[] jac_double = new double[Jac.length];</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">		for (int i=0; i&lt;Jac.length; i++) {</span>
+<span class="nc" id="L419">			Jac[i] = Jac[i].divide(F, MC);</span>
+<span class="nc" id="L420">			jac_double[i] = Jac[i].doubleValue();</span>
+		}
+
+<span class="nc" id="L423">		return jac_double;</span>
+	}
+
+	/*================ Constructors =================*/
+	public LogisticFunctionLDBD(int ndim, int[] population, double[][] demands, double[] servers, double epsilon) throws InternalErrorException {
+<span class="nc" id="L428">		this(ndim, population, demands, servers, epsilon, MathContext.DECIMAL128);</span>
+<span class="nc" id="L429">	}</span>
+
+	public LogisticFunctionLDBD(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon) throws InternalErrorException {
+<span class="nc" id="L432">		this(ndim, population, demands, servers, epsilon, MathContext.DECIMAL128);</span>
+<span class="nc" id="L433">	}</span>
+
+	public LogisticFunctionLDBD(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon, MathContext MC) throws InternalErrorException {
+<span class="nc" id="L436">		super(ndim);</span>
+<span class="nc" id="L437">		this.initialize(ndim, population, demands, servers, epsilon, MC);</span>
+<span class="nc" id="L438">	}</span>
+
+	public LogisticFunctionLDBD(int ndim, int[] population, double[][] demands, double[] servers, double epsilon, MathContext MC) throws InternalErrorException {
+<span class="nc" id="L441">		super(ndim);</span>
+
+		/*convert array into matrix objects*/
+		DoubleMatrix1D pop_temp;
+		DoubleMatrix2D demands_temp;
+		DoubleMatrix1D servers_temp;
+
+		try {
+<span class="nc" id="L449">			pop_temp = new DenseDoubleMatrix1D(population.length);</span>
+<span class="nc bnc" id="L450" title="All 2 branches missed.">			for (int i=0; i&lt;population.length; i++)</span>
+<span class="nc" id="L451">				pop_temp.set(i, (double)population[i]);</span>
+<span class="nc" id="L452">			demands_temp = new DenseDoubleMatrix2D(demands);</span>
+<span class="nc" id="L453">			servers_temp = new DenseDoubleMatrix1D(servers);</span>
+<span class="nc" id="L454">		} catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L455">			throw new InternalErrorException(&quot;Demands needs to be a rectangular 2D array!&quot;);</span>
+<span class="nc" id="L456">		}</span>
+
+<span class="nc" id="L458">		this.initialize(ndim, pop_temp, demands_temp, servers_temp, epsilon, MC);</span>
+<span class="nc" id="L459">	}</span>
+
+	/*Copy constructor*/
+	public LogisticFunctionLDBD(LogisticFunctionLDBD LF) throws InternalErrorException {
+		// easier to re-calculate the states, than risk wrongly copying it
+<span class="nc" id="L464">		this(LF.ndim, LF.pop, LF.demands, LF.servers, LF.epsilon, LF.MC);</span>
+<span class="nc" id="L465">	}</span>
+
+	private void initialize(int ndim, DoubleMatrix1D population, DoubleMatrix2D demands, DoubleMatrix1D servers, double epsilon, MathContext MC) throws InternalErrorException {
+<span class="nc" id="L468">		this.A = new Algebra();</span>
+<span class="nc" id="L469">		DF2 = DoubleFactory2D.dense;</span>
+<span class="nc" id="L470">		DF1 = DoubleFactory1D.dense;</span>
+<span class="nc" id="L471">		this.MC = MC;</span>
+
+<span class="nc" id="L473">		this.pop = population.copy();</span>
+<span class="nc" id="L474">		this.demands = demands.copy();</span>
+<span class="nc" id="L475">		this.servers = servers.copy();</span>
+<span class="nc" id="L476">		this.epsilon = epsilon;</span>
+
+<span class="nc bnc" id="L478" title="All 4 branches missed.">		if ((ndim != this.demands.rows()-1) || (ndim != this.servers.size()-1))</span>
+<span class="nc" id="L479">			throw new InternalErrorException(&quot;Number of integrated dimensions must be one less than number of queues!&quot;);</span>
+
+<span class="nc" id="L481">		check_inputs(this.pop, this.demands, this.epsilon);</span>
+
+<span class="nc" id="L483">		this.N = (int)this.pop.zSum();</span>
+<span class="nc" id="L484">		this.K = this.demands.rows();</span>
+<span class="nc" id="L485">		this.R = this.demands.columns();</span>
+
+<span class="nc" id="L487">		this.sigma = new DenseDoubleMatrix2D(K,R);</span>
+<span class="nc bnc" id="L488" title="All 2 branches missed.">		for (int k=0; k&lt;K; k++) {</span>
+<span class="nc" id="L489">			sigma.viewRow(k).assign(demands.viewRow(k));</span>
+<span class="nc" id="L490">			sigma.viewRow(k).assign(Functions.div(servers.get(k)));</span>
+		}
+
+<span class="nc" id="L493">		checkMatrixNonnegative(servers);</span>
+
+		/* initialize and cache the states for the summation and differences
+		 * and cache the coefficients too */
+<span class="nc" id="L497">		States = new ArrayList&lt;&gt;();</span>
+
+		// set up the final and initial states for the sum
+<span class="nc" id="L500">		int[] v = new int[K]; Arrays.fill(v, 0);</span>
+
+<span class="nc" id="L502">		int P = (int)pop.zSum();</span>
+
+<span class="nc" id="L504">		int[] s_1 = new int[K];</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">		for (int i=0; i&lt;K; i++)</span>
+<span class="nc" id="L506">			s_1[i] = (int)servers.get(i)-1;</span>
+
+<span class="nc bnc" id="L508" title="All 2 branches missed.">		while (v.length&gt;0) {</span>
+<span class="nc" id="L509">			int V = 0;</span>
+<span class="nc bnc" id="L510" title="All 2 branches missed.">			for (int i : v)</span>
+<span class="nc" id="L511">				V += i;</span>
+
+<span class="nc bnc" id="L513" title="All 2 branches missed.">			if (P-V &lt; 0) {</span>
+<span class="nc" id="L514">				v = next_state(v, s_1);</span>
+<span class="nc" id="L515">				continue;</span>
+			}
+
+<span class="nc" id="L518">			double beta = 0;</span>
+<span class="nc bnc" id="L519" title="All 2 branches missed.">			for (int i=0; i&lt;K; i++) {</span>
+<span class="nc" id="L520">				beta += v[i] * Math.log(servers.get(i));</span>
+<span class="nc" id="L521">				beta -= lnGamma(v[i]+1);</span>
+<span class="nc" id="L522">				beta += Math.log(1-(double)v[i]/servers.get(i));</span>
+			}
+
+<span class="nc" id="L525">			beta += lnGamma(P+K-V) - lnGamma(P-V+1);</span>
+<span class="nc" id="L526">			BigDecimal alpha = exp( beta, MC);</span>
+
+<span class="nc" id="L528">			States.add(new state(new DenseDoubleMatrix1D(ints2doubles(v)) ,alpha, true));</span>
+
+			// set up the final and initial states for the differences
+<span class="nc" id="L531">			int[] Tfinal = new int[K+1];</span>
+<span class="nc" id="L532">			Tfinal[0] = P-V;</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">			for (int i=0; i&lt;K; i++) {</span>
+<span class="nc" id="L534">				Tfinal[i+1] = v[i];</span>
+			}
+<span class="nc" id="L536">			int[] T = new int[K+1];</span>
+<span class="nc" id="L537">			Arrays.fill(T,0);</span>
+
+<span class="nc bnc" id="L539" title="All 2 branches missed.">			while (T.length&gt;0) {</span>
+<span class="nc" id="L540">				double C = Math.pow(-1, sum_int(Tfinal) - sum_int(T));</span>
+<span class="nc bnc" id="L541" title="All 2 branches missed.">				for (int i=0; i&lt;K+1; i++)</span>
+<span class="nc" id="L542">					C *= binomial(Tfinal[i], T[i]);</span>
+
+<span class="nc bnc" id="L544" title="All 2 branches missed.">				if (sum_int(T)==0) {</span>
+<span class="nc" id="L545">					T = next_state(T, Tfinal);</span>
+<span class="nc" id="L546">					continue;</span>
+				}
+
+<span class="nc" id="L549">				States.get(States.size()-1).add_nested_state(</span>
+<span class="nc" id="L550">						new state(new DenseDoubleMatrix1D(ints2doubles(T)), new BigDecimal(C), false));</span>
+<span class="nc" id="L551">				T = next_state(T, Tfinal);</span>
+<span class="nc" id="L552">			}</span>
+
+<span class="nc" id="L554">			v = next_state(v, s_1);</span>
+<span class="nc" id="L555">		}</span>
+<span class="nc" id="L556">	}</span>
+
+	/*================ Non-static helper classes/ methods =================*/
+
+	/**
+	 * Private class to store the summation/difference terms, can have nested states,
+	 * for multiple levels of nesting. Each state has it value stored as a DoubleMatrix,
+	 * amd a coefficient to multiply its terms by. It can have an ArrayList of nested
+	 * states, which can be traversed over too
+	 */
+	private class state {
+
+		private DoubleMatrix1D s; // the state
+		private BigDecimal coeff; // the coefficient
+		private ArrayList&lt;state&gt; nested_states; // nested states associated with this state
+
+<span class="nc" id="L572">		state(DoubleMatrix1D s, BigDecimal coeff, boolean nest) {</span>
+<span class="nc" id="L573">			this.s = s;</span>
+<span class="nc" id="L574">			this.coeff = coeff;</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">			if (nest)</span>
+<span class="nc" id="L576">				nested_states = new ArrayList&lt;state&gt;();</span>
+<span class="nc" id="L577">		}</span>
+
+		void add_nested_state(state s) {
+<span class="nc" id="L580">			nested_states.add(s);</span>
+<span class="nc" id="L581">		}</span>
+
+	}
+
+	/**
+	 * Calculates the function d/dx(-h(u, t0, t)) as specified in Ong, 2018
+	 * @param U simplex point to evaluate
+	 * @param t0 t0 term
+	 * @param t t term
+	 * @return d/dx(-h(u, t0, t)) in BigDecimal
+	 */
+	private BigDecimal[] calc_jac_log_inside(BigDecimal[] U, double t0, DoubleMatrix1D t) {
+<span class="nc" id="L593">		BigDecimal T0 = new BigDecimal(t0);</span>
+
+<span class="nc" id="L595">		BigDecimal[] Zeta = new BigDecimal[R];</span>
+<span class="nc bnc" id="L596" title="All 2 branches missed.">		for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L597">			BigDecimal Zetar = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L598" title="All 2 branches missed.">			for (int k=0; k&lt;K; k++) {</span>
+<span class="nc" id="L599">				BigDecimal H = U[k];</span>
+<span class="nc" id="L600">				H = H.multiply(T0, MC);</span>
+<span class="nc" id="L601">				H = H.add(new BigDecimal(t.get(k)), MC);</span>
+<span class="nc" id="L602">				H = H.multiply(new BigDecimal(sigma.get(k,r)), MC);</span>
+<span class="nc" id="L603">				Zetar = Zetar.add(H, MC);</span>
+			}
+<span class="nc" id="L605">			BigDecimal Nr = new BigDecimal(pop.get(r));</span>
+<span class="nc" id="L606">			Zetar = BigDecimal.ONE.divide(Zetar, MC);</span>
+<span class="nc" id="L607">			Zetar = Zetar.multiply(Nr, MC);</span>
+<span class="nc" id="L608">			Zeta[r] = Zetar;</span>
+		}
+
+<span class="nc" id="L611">		BigDecimal[] Jac = new BigDecimal[K-1];</span>
+<span class="nc bnc" id="L612" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++) {</span>
+<span class="nc" id="L613">			BigDecimal Ui = U[i];</span>
+<span class="nc" id="L614">			BigDecimal L = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L615" title="All 2 branches missed.">			for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L616">				BigDecimal Zetar = Zeta[r];</span>
+<span class="nc" id="L617">				BigDecimal H = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">				for (int k=0; k&lt;K; k++) {</span>
+<span class="nc" id="L619">					BigDecimal G = new BigDecimal(sigma.get(k,r), MC);</span>
+<span class="nc" id="L620">					G = G.multiply(U[k], MC);</span>
+<span class="nc" id="L621">					H = H.subtract(G, MC);</span>
+				}
+<span class="nc" id="L623">				H = H.add(new BigDecimal(sigma.get(i,r)), MC);</span>
+<span class="nc" id="L624">				H = H.multiply(Zetar, MC);</span>
+<span class="nc" id="L625">				L = L.add(H, MC);</span>
+			}
+<span class="nc" id="L627">			L = L.multiply(T0, MC);</span>
+<span class="nc" id="L628">			L = L.subtract(new BigDecimal(K), MC);</span>
+<span class="nc" id="L629">			L = L.multiply(Ui, MC);</span>
+<span class="nc" id="L630">			L = L.add(BigDecimal.ONE);</span>
+<span class="nc" id="L631">			Jac[i] = L;</span>
+		}
+
+<span class="nc" id="L634">		return Jac;</span>
+	}
+
+	/**
+	 * Calculates the function d^2/dx^2 (-h(u, t0, t)) as specified in Ong, 2018
+	 * @param Ustat Stationary point in simplex terms
+	 * @param t0
+	 * @param t
+	 * @return Hessian at given point (not stationary w.r.t h(u, t0, t)
+	 */
+	private BigDecimal[][] calc_stat_hess_log_inside(BigDecimal[] Ustat, double t0, DoubleMatrix1D t) {
+<span class="nc" id="L645">		BigDecimal T0 = new BigDecimal(t0);</span>
+
+<span class="nc" id="L647">		BigDecimal[] Zeta = new BigDecimal[R];</span>
+<span class="nc" id="L648">		BigDecimal[] Zeta2 = new BigDecimal[R];</span>
+<span class="nc bnc" id="L649" title="All 2 branches missed.">		for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L650">			BigDecimal Zetar = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L651" title="All 2 branches missed.">			for (int k=0; k&lt;K; k++) {</span>
+<span class="nc" id="L652">				BigDecimal H = Ustat[k];</span>
+<span class="nc" id="L653">				H = H.multiply(T0, MC);</span>
+<span class="nc" id="L654">				H = H.add(new BigDecimal(t.get(k)), MC);</span>
+<span class="nc" id="L655">				H = H.multiply(new BigDecimal(sigma.get(k,r)), MC);</span>
+<span class="nc" id="L656">				Zetar = Zetar.add(H, MC);</span>
+			}
+<span class="nc" id="L658">			BigDecimal Nr = new BigDecimal(pop.get(r));</span>
+<span class="nc" id="L659">			Zetar = BigDecimal.ONE.divide(Zetar, MC);</span>
+<span class="nc" id="L660">			Zetar = Zetar.multiply(Nr, MC);</span>
+<span class="nc" id="L661">			Zeta[r] = Zetar;</span>
+<span class="nc" id="L662">			Zeta2[r] = Zetar.pow(2, MC);</span>
+		}
+
+<span class="nc" id="L665">		BigDecimal[][] Hessu = new BigDecimal[K][K]; // d^2/du^2 (h(u, t0, t))</span>
+<span class="nc bnc" id="L666" title="All 2 branches missed.">		for (int i=0; i&lt;K; i++) {</span>
+<span class="nc bnc" id="L667" title="All 2 branches missed.">			for (int j=0; j&lt;K; j++) {</span>
+<span class="nc" id="L668">				BigDecimal G = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L669" title="All 2 branches missed.">				for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L670">					BigDecimal H = new BigDecimal(sigma.get(i,r));</span>
+<span class="nc" id="L671">					H = H.multiply(new BigDecimal(sigma.get(j,r)), MC);</span>
+<span class="nc" id="L672">					H = H.multiply(Zeta2[r], MC);</span>
+<span class="nc" id="L673">					H = H.divide(new BigDecimal(pop.get(r)), MC);</span>
+<span class="nc" id="L674">					G = G.subtract(H, MC);</span>
+				}
+<span class="nc" id="L676">				G = G.multiply(T0.pow(2,MC),MC);</span>
+
+<span class="nc bnc" id="L678" title="All 2 branches missed.">				if (i==j) {</span>
+<span class="nc" id="L679">					BigDecimal U = Ustat[i];</span>
+<span class="nc" id="L680">					U = U.multiply(Ustat[i], MC);</span>
+<span class="nc" id="L681">					U = U.pow(-1, MC);</span>
+<span class="nc" id="L682">					G = G.subtract(U, MC);</span>
+				}
+<span class="nc" id="L684">				Hessu[i][j] = G;</span>
+			}
+		}
+
+		//contribution from 1st derivative (not necessarily zero)
+<span class="nc" id="L689">		BigDecimal[] Jacu = new BigDecimal[K]; // d/du (h(u, t0, t))</span>
+<span class="nc bnc" id="L690" title="All 2 branches missed.">		for (int i=0; i&lt;K; i++) {</span>
+<span class="nc" id="L691">			BigDecimal G = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L692" title="All 2 branches missed.">			for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L693">				BigDecimal H = Zeta[r];</span>
+<span class="nc" id="L694">				H = H.multiply(new BigDecimal(sigma.get(i,r)), MC);</span>
+<span class="nc" id="L695">				G = G.add(H, MC);</span>
+			}
+<span class="nc" id="L697">			G = G.multiply(T0, MC);</span>
+<span class="nc" id="L698">			BigDecimal U = Ustat[i];</span>
+<span class="nc" id="L699">			U = U.pow(-1, MC);</span>
+<span class="nc" id="L700">			G = G.add(U, MC);</span>
+<span class="nc" id="L701">			Jacu[i] = G;</span>
+		}
+
+<span class="nc" id="L704">		BigDecimal[][] Jux = jac_ux(Ustat); // du/dx</span>
+<span class="nc" id="L705">		BigDecimal[][][] Juxx = jac_uxx(Ustat); // d^u/dx^2</span>
+<span class="nc" id="L706">		BigDecimal[][] Hessx = new BigDecimal[K-1][K-1];</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">		for (int i=0; i&lt;K-1; i++) {</span>
+<span class="nc bnc" id="L708" title="All 2 branches missed.">			for (int j=0; j&lt;K-1; j++) {</span>
+<span class="nc" id="L709">				BigDecimal G = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">				for (int p=0; p&lt;K; p++) {</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">					for (int q=0; q&lt;K; q++) {</span>
+<span class="nc" id="L712">						BigDecimal H = Hessu[p][q];</span>
+<span class="nc" id="L713">						H = H.multiply(Jux[p][j], MC);</span>
+<span class="nc" id="L714">						H = H.multiply(Jux[q][i], MC);</span>
+<span class="nc" id="L715">						G = G.add(H, MC);</span>
+					}
+				}
+<span class="nc" id="L718">				Hessx[i][j] = G;</span>
+
+<span class="nc" id="L720">				G = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">				for (int p=0; p&lt;K; p++) {</span>
+<span class="nc" id="L722">					BigDecimal H =  Jacu[p];</span>
+<span class="nc" id="L723">					H = H.multiply(Juxx[p][i][j], MC);</span>
+<span class="nc" id="L724">					G = G.add(H, MC);</span>
+				}
+<span class="nc" id="L726">				Hessx[i][j] = Hessx[i][j].add(G);</span>
+			}
+		}
+
+<span class="nc" id="L730">		return Hessx;</span>
+	}
+
+	/**
+	 * Calculates the function e^(-h(u, t0, t)) as specified in Ong, 2018
+	 * @param U Point in simplex terms
+	 * @param t0
+	 * @param t
+	 * @return e^(-h(u, t0, t)) at given point
+	 */
+	private BigDecimal calc_logisticF_inside(BigDecimal[] U, double t0, DoubleMatrix1D t) {
+<span class="nc" id="L741">		BigDecimal H = BigDecimal.ONE;</span>
+<span class="nc bnc" id="L742" title="All 2 branches missed.">		for (int r=0; r&lt;R; r++) {</span>
+<span class="nc" id="L743">			BigDecimal G = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L744" title="All 2 branches missed.">			for (int k = 0; k&lt;(K); k++) {</span>
+<span class="nc" id="L745">				BigDecimal L = new BigDecimal(t0);</span>
+<span class="nc" id="L746">				L = L.multiply(U[k], MC);</span>
+<span class="nc" id="L747">				L = L.add(new BigDecimal(t.get(k)), MC);</span>
+<span class="nc" id="L748">				L = L.multiply(new BigDecimal(sigma.get(k,r)),MC);</span>
+<span class="nc" id="L749">				G = G.add(L,MC);</span>
+			}
+<span class="nc" id="L751">			G = G.pow((int) pop.get(r),MC);</span>
+<span class="nc" id="L752">			H = H.multiply(G,MC);</span>
+		}
+<span class="nc bnc" id="L754" title="All 2 branches missed.">		for (int k = 0; k&lt;(K); k++) {</span>
+<span class="nc" id="L755">			H = H.multiply(U[k],MC);</span>
+		}
+<span class="nc" id="L757">		return H;</span>
+	}
+
+	/**
+	 * Jacobian between simplex and x : du_i/dx_j, given u
+	 * @param U point to evaluate on
+	 * @return Jacobian
+	 */
+	private BigDecimal[][] jac_ux(BigDecimal[] U) {
+<span class="nc" id="L766">		BigDecimal[][] Jac = new BigDecimal[K][K-1];</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">		for (int i=0; i&lt;K; i++) {</span>
+<span class="nc bnc" id="L768" title="All 2 branches missed.">			for (int j=0; j&lt;K-1; j++) {</span>
+<span class="nc" id="L769">				Jac[i][j] = U[i];</span>
+<span class="nc" id="L770">				Jac[i][j] = Jac[i][j].negate();</span>
+<span class="nc" id="L771">				Jac[i][j] = Jac[i][j].multiply(U[j], MC);</span>
+<span class="nc bnc" id="L772" title="All 2 branches missed.">				if (i==j)</span>
+<span class="nc" id="L773">					Jac[i][j] = Jac[i][j].add(U[i], MC);</span>
+			}
+		}
+<span class="nc" id="L776">		return Jac;</span>
+	}
+
+	/**
+	 * Hessian between simplex and x : d^2(u_i)/(d_xj d_xk)
+	 * @param U point to evaluate on, in simplex terms
+	 * @return Hessian
+	 */
+	private BigDecimal[][][] jac_uxx(BigDecimal[] U) {
+<span class="nc" id="L785">		BigDecimal[][][] J = new BigDecimal[K][K-1][K-1];</span>
+<span class="nc bnc" id="L786" title="All 2 branches missed.">		for (int p=0; p&lt;K; p++)</span>
+<span class="nc bnc" id="L787" title="All 2 branches missed.">			for (int i=0; i&lt;K-1; i++)</span>
+<span class="nc bnc" id="L788" title="All 2 branches missed.">				for (int j=0; j&lt;K-1; j++) {</span>
+<span class="nc" id="L789">					BigDecimal H = new BigDecimal(Utils.delta(p,j)*Utils.delta(p,i));</span>
+<span class="nc" id="L790">					H = H.multiply(U[p], MC);</span>
+<span class="nc" id="L791">					J[p][i][j] = H;</span>
+
+<span class="nc" id="L793">					H = new BigDecimal(Utils.delta(p,j));</span>
+<span class="nc" id="L794">					H = H.multiply(U[p], MC);</span>
+<span class="nc" id="L795">					H = H.multiply(U[i], MC);</span>
+<span class="nc" id="L796">					J[p][i][j] = J[p][i][j].subtract(H, MC);</span>
+
+<span class="nc" id="L798">					H = new BigDecimal(Utils.delta(i,j));</span>
+<span class="nc" id="L799">					H = H.multiply(U[p], MC);</span>
+<span class="nc" id="L800">					H = H.multiply(U[j], MC);</span>
+<span class="nc" id="L801">					J[p][i][j] = J[p][i][j].subtract(H, MC);</span>
+
+<span class="nc" id="L803">					H = new BigDecimal(Utils.delta(p,i));</span>
+<span class="nc" id="L804">					H = H.multiply(U[p], MC);</span>
+<span class="nc" id="L805">					H = H.multiply(U[j], MC);</span>
+<span class="nc" id="L806">					J[p][i][j] = J[p][i][j].subtract(H, MC);</span>
+
+<span class="nc" id="L808">					H = U[p];</span>
+<span class="nc" id="L809">					H = H.multiply(U[i], MC);</span>
+<span class="nc" id="L810">					H = H.multiply(U[j], MC);</span>
+<span class="nc" id="L811">					H = H.multiply(new BigDecimal(2), MC);</span>
+<span class="nc" id="L812">					J[p][i][j] = J[p][i][j].add(H, MC);</span>
+				}
+<span class="nc" id="L814">		return J;</span>
+	}
+
+	/**
+	 * Transforms from x into u
+	 * @param x point in R^{K-1}
+	 * @return u, simplex point
+	 * @throws InternalErrorException
+	 */
+	private BigDecimal[] logistic_transform(DoubleMatrix1D x) throws InternalErrorException {
+<span class="nc" id="L824">		BigDecimal[] U = new BigDecimal[K];</span>
+<span class="nc" id="L825">		BigDecimal Z = BigDecimal.ZERO;</span>
+<span class="nc bnc" id="L826" title="All 2 branches missed.">		for (int i=0; i&lt;(K-1); i++) {</span>
+<span class="nc" id="L827">			U[i] = exp(x.get(i), MC);</span>
+<span class="nc" id="L828">			Z = Z.add(U[i], MC);</span>
+		}
+<span class="nc" id="L830">		Z = Z.add(BigDecimal.ONE, MC);</span>
+<span class="nc bnc" id="L831" title="All 2 branches missed.">		for (int i=0; i&lt;(K-1); i++) {</span>
+<span class="nc" id="L832">			BigDecimal ui = U[i];</span>
+<span class="nc" id="L833">			ui = ui.divide(Z, MC);</span>
+<span class="nc" id="L834">			U[i] = ui;</span>
+		}
+<span class="nc" id="L836">		U[K-1] = BigDecimal.ONE.divide(Z, MC);</span>
+<span class="nc" id="L837">		return U;</span>
+	}
+
+
+	/*================ Static helper functions =============== */
+	private static int sum_int(int[] int_array) {
+<span class="nc" id="L843">		int sum = 0;</span>
+<span class="nc bnc" id="L844" title="All 2 branches missed.">		for (int i : int_array)</span>
+<span class="nc" id="L845">			sum += i;</span>
+<span class="nc" id="L846">		return sum;</span>
+	}
+
+	/**
+	 * Binomial term n choose k
+	 * @param n
+	 * @param k
+	 * @return
+	 */
+	private static long binomial(int n, int k) {
+<span class="nc bnc" id="L856" title="All 2 branches missed.">		if (k&gt;n-k)</span>
+<span class="nc" id="L857">			k=n-k;</span>
+
+<span class="nc" id="L859">		long b=1;</span>
+<span class="nc bnc" id="L860" title="All 2 branches missed.">		for (int i=1, m=n; i&lt;=k; i++, m--)</span>
+<span class="nc" id="L861">			b=b*m/i;</span>
+<span class="nc" id="L862">		return b;</span>
+	}
+
+	private static int[] next_state(int[] prev_state, int[] final_state) {
+<span class="nc" id="L866">		int[] next = prev_state.clone();</span>
+<span class="nc" id="L867">		int D = final_state.length;</span>
+<span class="nc" id="L868">		int d = D-1;</span>
+<span class="nc bnc" id="L869" title="All 4 branches missed.">		while ((d&gt;-1) &amp;&amp; next[d]==final_state[d]) {</span>
+<span class="nc" id="L870">			next[d] = 0;</span>
+<span class="nc" id="L871">			d -= 1;</span>
+		}
+
+<span class="nc bnc" id="L874" title="All 2 branches missed.">		if (d==-1) {</span>
+<span class="nc" id="L875">			return new int[0];</span>
+		}
+
+<span class="nc" id="L878">		next[d] += 1;</span>
+<span class="nc" id="L879">		return next;</span>
+	}
+
+	private static double[] ints2doubles(int[] ints) {
+<span class="nc" id="L883">		double[] doubles = new double[ints.length];</span>
+<span class="nc bnc" id="L884" title="All 2 branches missed.">		for (int i=0; i&lt;ints.length; i++)</span>
+<span class="nc" id="L885">			doubles[i] = ints[i];</span>
+<span class="nc" id="L886">		return doubles;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PSServerPriority.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">PSServerPriority.java</span></div><h1>PSServerPriority.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.*;
+import java.util.function.Supplier;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.PSStrategy;
+import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.QueueNet.PSJobInfo;
+import jmt.engine.QueueNet.PSJobInfoList;
+import jmt.engine.simEngine.RemoveToken;
+
+import static jmt.gui.common.CommonConstants.*;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; PSServer&lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt;
+ * This class implements a multi-class processor sharing server.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 04/ott/2009
+ * &lt;b&gt;Time:&lt;/b&gt; 13.45.37&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class PSServerPriority extends Server {
+
+    private int numberOfServers;
+    private int maxRunningJobs;
+    private ServiceStrategy[] serviceStrategies;
+    private PSStrategy[] psStrategies;
+    private double[] serviceWeights;
+
+    private int totalNumberOfServers;
+    private int[] compatibleServersForClass;
+
+    /** Tells which inner event we are processing */
+<span class="nc" id="L65">    private enum PSEvent {</span>
+<span class="nc" id="L66">        JOB_IN, JOB_OUT</span>
+    }
+
+    private int busyCounter;
+
+    private JobClassList jobClasses;
+    private PSJobInfoList psJobsList;
+    private double[] serviceFractions;
+    private double[][] serviceFractionsPerServerType;
+    private int[][] assignedJobs;
+<span class="nc" id="L76">    private final HashMap&lt;Integer, Integer&gt; jobAssignments = new HashMap&lt;&gt;();</span>
+    private List&lt;ServerType&gt; orderedServerTypes;
+    private String schedulingPolicy;
+
+    private RemoveToken messageToken;
+    private PSJobInfo messageJobInfo;
+    private double messageSendTime;
+
+    public PSServerPriority(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
+<span class="nc" id="L85">        this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);</span>
+<span class="nc" id="L86">    }</span>
+
+    public PSServerPriority(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
+                    PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
+<span class="nc" id="L90">        this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights, null, null, null, null, null);</span>
+<span class="nc" id="L91">    }</span>
+
+    /**
+     * Creates a new instance of PSServer.
+     * @param numberOfServers Number of servers which can be shared among jobs.
+     * @param maxRunningJobs Number of jobs which can be served simultaneously.
+     * @param numberOfVisits Number of job visits per class (not used).
+     * @param serviceStrategies Array of service strategies, one per class.
+     * @param psStrategies Array of PS strategies, one per class.
+     * @param serviceWeights Array of service weights, one per class.
+     */
+    public PSServerPriority(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
+                    ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
+                    Integer[] serverNumRequired,
+                    String[] serverNames,
+                    Integer[] serversPerServerType,
+                    Object[] serverCompatibilities,
+                    String schedulingPolicy) throws NetException {
+<span class="nc" id="L109">        this(numberOfServers, maxRunningJobs, numberOfVisits, serviceStrategies, psStrategies, serviceWeights,</span>
+                ((Supplier&lt;Map&lt;String, Object&gt;&gt;) () -&gt; {
+<span class="nc" id="L111">                    Map&lt;String, Object&gt; advancedFeatures = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L112">                    advancedFeatures.put(SERVER_FEATURE_CLASS_PARALLELISM, serverNumRequired);</span>
+<span class="nc" id="L113">                    advancedFeatures.put(SERVER_FEATURE_SERVER_NAMES, serverNames);</span>
+<span class="nc" id="L114">                    advancedFeatures.put(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, serversPerServerType);</span>
+<span class="nc" id="L115">                    advancedFeatures.put(SERVER_FEATURE_SERVER_COMPATIBILITIES, serverCompatibilities);</span>
+<span class="nc" id="L116">                    advancedFeatures.put(SERVER_FEATURE_SCHEDULING_POLICY, schedulingPolicy);</span>
+<span class="nc" id="L117">                    return advancedFeatures;</span>
+<span class="nc" id="L118">                }).get());</span>
+<span class="nc" id="L119">    }</span>
+
+    public PSServerPriority(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
+                            ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
+                            Map&lt;String, Object&gt; advancedFeatures) throws NetException {
+<span class="nc" id="L124">        super(numberOfServers,numberOfVisits,serviceStrategies,advancedFeatures);</span>
+<span class="nc" id="L125">        this.numberOfServers = numberOfServers.intValue();</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">        if (maxRunningJobs == null) {</span>
+<span class="nc" id="L127">            this.maxRunningJobs = -1;</span>
+        } else {
+<span class="nc" id="L129">            this.maxRunningJobs = maxRunningJobs.intValue();</span>
+        }
+<span class="nc" id="L131">        this.serviceStrategies = serviceStrategies;</span>
+<span class="nc bnc" id="L132" title="All 2 branches missed.">        if (psStrategies == null) {</span>
+<span class="nc" id="L133">            this.psStrategies = new PSStrategy[serviceStrategies.length];</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            for (int i = 0; i &lt; serviceStrategies.length; i++) {</span>
+<span class="nc" id="L135">                this.psStrategies[i] = new EPSStrategy();</span>
+            }
+        } else {
+<span class="nc" id="L138">            this.psStrategies = psStrategies;</span>
+        }
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if (serviceWeights == null) {</span>
+<span class="nc" id="L141">            this.serviceWeights = new double[serviceStrategies.length];</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">            for (int i = 0; i &lt; serviceStrategies.length; i++) {</span>
+<span class="nc" id="L143">                this.serviceWeights[i] = 1.0;</span>
+            }
+        } else {
+<span class="nc" id="L146">            this.serviceWeights = new double[serviceWeights.length];</span>
+<span class="nc bnc" id="L147" title="All 2 branches missed.">            for (int i = 0; i &lt; serviceWeights.length; i++) {</span>
+<span class="nc" id="L148">                this.serviceWeights[i] = serviceWeights[i].doubleValue();</span>
+            }
+        }
+<span class="nc" id="L151">        busyCounter = 0;</span>
+<span class="nc" id="L152">        String schedulingPolicy = (String) advancedFeatures.get(SERVER_FEATURE_SCHEDULING_POLICY);</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">        if (schedulingPolicy == null) {</span>
+<span class="nc" id="L154">            schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;</span>
+        }
+<span class="nc" id="L156">        this.schedulingPolicy = schedulingPolicy;</span>
+<span class="nc" id="L157">    }</span>
+
+    @Override
+    void initializeServerTypes(Integer[] serverNumRequired, String[] serverNames, Integer[] serversPerServerType, Object[] serverCompatibilities) throws NetException {
+<span class="nc" id="L161">        super.initializeServerTypes(serverNumRequired, serverNames, serversPerServerType, serverCompatibilities);</span>
+<span class="nc" id="L162">        totalNumberOfServers = 0;</span>
+<span class="nc" id="L163">        compatibleServersForClass = new int[serverNumRequired.length];</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        for (ServerType serverType: getServerTypes()) {</span>
+<span class="nc" id="L165">            totalNumberOfServers += serverType.getNumOfServers();</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">            for (int i = 0; i &lt; serverNumRequired.length; i++) {</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">                if (serverType.getCompatibilities()[i]) {</span>
+<span class="nc" id="L168">                    compatibleServersForClass[i] += serverType.getNumOfServers();</span>
+                }
+            }
+<span class="nc" id="L171">        }</span>
+<span class="nc" id="L172">        assignedJobs = new int[serverNames.length][serverNumRequired.length];</span>
+<span class="nc" id="L173">        orderedServerTypes = new ArrayList&lt;&gt;(getServerTypes());</span>
+<span class="nc" id="L174">    }</span>
+
+    @Override
+    public double getDoubleSectionProperty(int id) throws NetException {
+<span class="nc" id="L178">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L179" title="All 3 branches missed.">        switch (id) {</span>
+            case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L181">                double sum = 0.0;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L183">                    JobClass jobClass = jobClasses.get(i);</span>
+<span class="nc" id="L184">                    sum += psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];</span>
+                }
+<span class="nc" id="L186">                return sum;</span>
+            case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L189">                        : psJobsList.getTotalSojournTime() / netSystem.getTime() / numberOfServers;</span>
+            default:
+<span class="nc" id="L191">                return super.getDoubleSectionProperty(id);</span>
+        }
+    }
+
+    @Override
+    public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L197">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L198" title="All 3 branches missed.">        switch (id) {</span>
+            case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L200">                return psJobsList.size(jobClass) * serviceFractions[jobClass.getId()];</span>
+            case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L202" title="All 2 branches missed.">                return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L203">                        : psJobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime() / numberOfServers;</span>
+            default:
+<span class="nc" id="L205">                return super.getDoubleSectionProperty(id, jobClass);</span>
+        }
+    }
+
+    @Override
+    protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L211">        super.nodeLinked(node);</span>
+<span class="nc" id="L212">        int stationCapacity = ((Queue) getOwnerNode().getSection(NodeSection.INPUT)).getStationCapacity();</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">        if (maxRunningJobs &lt;= 0) {</span>
+<span class="nc" id="L214">            maxRunningJobs = stationCapacity;</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        } else if (stationCapacity &lt;= 0) {</span>
+            // Do nothing
+        } else {
+<span class="nc" id="L218">            maxRunningJobs = Math.min(maxRunningJobs, stationCapacity);</span>
+        }
+<span class="nc" id="L220">        jobClasses = getJobClasses();</span>
+<span class="nc" id="L221">        jobsList = psJobsList = new PSJobInfoList(jobClasses,getClassCompatibilities(),getOwnerNode().getName(), getServerTypes());</span>
+<span class="nc" id="L222">        psJobsList.setNetSystem(node.getNetSystem());</span>
+<span class="nc" id="L223">        psJobsList.setNumberOfServers(numberOfServers);</span>
+<span class="nc" id="L224">        serviceFractions = new double[jobClasses.size()];</span>
+<span class="nc" id="L225">        Arrays.fill(serviceFractions, 0.0);</span>
+<span class="nc" id="L226">        serviceFractionsPerServerType = new double[getServerTypes().size()][jobClasses.size()];</span>
+<span class="nc" id="L227">    }</span>
+
+    @Override
+    protected int process(NetMessage message) throws NetException {
+<span class="nc" id="L231">        Job job = message.getJob();</span>
+
+<span class="nc bnc" id="L233" title="All 5 branches missed.">        switch (message.getEvent()) {</span>
+
+            case NetEvent.EVENT_START:
+<span class="nc" id="L236">                break;</span>
+
+            case NetEvent.EVENT_JOB:
+<span class="nc bnc" id="L239" title="All 2 branches missed.">                if (isMine(message)) {</span>
+<span class="nc" id="L240">                    performServiceTimes(messageSendTime);</span>
+<span class="nc" id="L241">                    handleJobInfoList(messageJobInfo, PSEvent.JOB_OUT);</span>
+<span class="nc" id="L242">                    messageToken = null;</span>
+<span class="nc" id="L243">                    unassignJob(job);</span>
+<span class="nc" id="L244">                    sendForward(job, 0.0);</span>
+                } else {
+<span class="nc bnc" id="L246" title="All 4 branches missed.">                    if (maxRunningJobs &gt; 0 &amp;&amp; busyCounter &gt;= maxRunningJobs) {</span>
+<span class="nc" id="L247">                        return MSG_NOT_PROCESSED;</span>
+                    }
+<span class="nc bnc" id="L249" title="All 2 branches missed.">                    if (messageToken != null) {</span>
+<span class="nc" id="L250">                        removeMessage(messageToken);</span>
+<span class="nc" id="L251">                        performServiceTimes(messageSendTime);</span>
+<span class="nc" id="L252">                        messageToken = null;</span>
+                    }
+                    // To support LD strategy, update jobInfoList before obtaining serviceTime
+<span class="nc" id="L255">                    PSJobInfo jobInfo = new PSJobInfo(job);</span>
+<span class="nc" id="L256">                    handleJobInfoList(jobInfo, PSEvent.JOB_IN);</span>
+<span class="nc" id="L257">                    assignJob(job);</span>
+<span class="nc" id="L258">                    double serviceTime = getServiceStrategiesPerServerType()[jobAssignments.get(job.getId())][job.getJobClass().getId()].wait(this, job.getJobClass());</span>
+<span class="nc" id="L259">                    jobInfo.setServiceTime(serviceTime);</span>
+<span class="nc" id="L260">                    jobInfo.setResidualServiceTime(serviceTime);</span>
+<span class="nc" id="L261">                    busyCounter++;</span>
+<span class="nc bnc" id="L262" title="All 4 branches missed.">                    if (maxRunningJobs &lt;= 0 || busyCounter &lt; maxRunningJobs) {</span>
+<span class="nc" id="L263">                        sendBackward(NetEvent.EVENT_ACK, job, 0.0);</span>
+                    }
+                }
+<span class="nc" id="L266">                updateServiceFractions();</span>
+<span class="nc" id="L267">                serviceJobs();</span>
+<span class="nc" id="L268">                break;</span>
+
+            case NetEvent.EVENT_ACK:
+<span class="nc bnc" id="L271" title="All 2 branches missed.">                if (busyCounter &lt;= 0) {</span>
+<span class="nc" id="L272">                    return MSG_NOT_PROCESSED;</span>
+                }
+<span class="nc bnc" id="L274" title="All 4 branches missed.">                if (maxRunningJobs &gt; 0 &amp;&amp; busyCounter &gt;= maxRunningJobs) {</span>
+<span class="nc" id="L275">                    sendBackward(NetEvent.EVENT_ACK, job, 0.0);</span>
+                }
+<span class="nc" id="L277">                busyCounter--;</span>
+<span class="nc" id="L278">                break;</span>
+
+            case NetEvent.EVENT_STOP:
+<span class="nc" id="L281">                break;</span>
+
+            default:
+<span class="nc" id="L284">                return MSG_NOT_PROCESSED;</span>
+        }
+
+<span class="nc" id="L287">        return MSG_PROCESSED;</span>
+    }
+
+    private void assignJob(Job job) throws NetException {
+<span class="nc" id="L291">        double minJobs = Double.MAX_VALUE;</span>
+<span class="nc" id="L292">        int minServer = 0;</span>
+<span class="nc" id="L293">        int classId = job.getJobClass().getId();</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        for (ServerType serverType : orderedServerTypes) {</span>
+<span class="nc" id="L295">            int serverId = serverType.getId();</span>
+<span class="nc bnc" id="L296" title="All 2 branches missed.">            if (serverType.getCompatibilities()[classId]) {</span>
+<span class="nc" id="L297">                double jobsInServer = 0;</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L299">                    jobsInServer += assignedJobs[serverId][i];</span>
+                }
+<span class="nc" id="L301">                jobsInServer /= serverType.getNumOfServers();</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">                if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FSF)) {</span>
+<span class="nc" id="L303">                    jobsInServer = (jobsInServer + 1) * getServiceStrategiesPerServerType()[serverId][classId].expect(this, job.getJobClass());</span>
+                }
+<span class="nc bnc" id="L305" title="All 2 branches missed.">                if (jobsInServer &lt; minJobs) {</span>
+<span class="nc" id="L306">                    minJobs = jobsInServer;</span>
+<span class="nc" id="L307">                    minServer = serverId;</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">                    if (jobsInServer == 0) {</span>
+<span class="nc" id="L309">                        break;</span>
+                    }
+                }
+            }
+<span class="nc" id="L313">        }</span>
+<span class="nc" id="L314">        assignedJobs[minServer][classId]++;</span>
+<span class="nc" id="L315">        jobAssignments.put(job.getId(), minServer);</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">        if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_RAIS)) {</span>
+<span class="nc" id="L317">            Collections.shuffle(orderedServerTypes);</span>
+<span class="nc bnc" id="L318" title="All 4 branches missed.">        } else if (schedulingPolicy.equals(STATION_SCHEDULING_POLICY_ALIS) || schedulingPolicy.equals(STATION_SCHEDULING_POLICY_FAIRNESS)) {</span>
+<span class="nc" id="L319">            orderedServerTypes.remove(getServerTypes().get(minServer));</span>
+<span class="nc" id="L320">            orderedServerTypes.add(getServerTypes().get(minServer));</span>
+        }
+<span class="nc" id="L322">    }</span>
+
+    private void unassignJob(Job job) {
+<span class="nc" id="L325">        int assignedServer = jobAssignments.get(job.getId());</span>
+<span class="nc" id="L326">        jobAssignments.remove(job.getId());</span>
+<span class="nc" id="L327">        assignedJobs[assignedServer][job.getJobClass().getId()]--;</span>
+<span class="nc" id="L328">    }</span>
+
+    private void performServiceTimes(double startTime) {
+<span class="nc" id="L331">        Iterator&lt;JobInfo&gt; it = psJobsList.getInternalJobInfoList().iterator();</span>
+<span class="nc" id="L332">        NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">        while (it.hasNext()) {</span>
+<span class="nc" id="L334">            PSJobInfo jobInfo = (PSJobInfo) it.next();</span>
+<span class="nc" id="L335">            int jobClassID = jobInfo.getJob().getJobClass().getId();</span>
+            // Perform service for the job
+<span class="nc" id="L337">            double elapsedTime = netSystem.getTime() - startTime;</span>
+<span class="nc" id="L338">            double serviceTime = elapsedTime * compatibleServersForClass[jobClassID] * serviceFractions[jobClassID];</span>
+<span class="nc" id="L339">            jobInfo.performServiceTime(serviceTime);</span>
+<span class="nc" id="L340">        }</span>
+<span class="nc" id="L341">    }</span>
+
+    private void handleJobInfoList(PSJobInfo jobInfo, PSEvent event) {
+<span class="nc" id="L344">        JobClass jobClass = jobInfo.getJob().getJobClass();</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (event == PSEvent.JOB_IN) {</span>
+<span class="nc" id="L346">            psJobsList.psUpdateUtilization(jobClass, serviceFractions);</span>
+<span class="nc" id="L347">            psJobsList.psUpdateUtilizationPerServerType(serviceFractionsPerServerType, assignedJobs);</span>
+<span class="nc" id="L348">            psJobsList.add(jobInfo);</span>
+        } else {
+<span class="nc" id="L350">            NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L351">            double elapsedTime = netSystem.getTime() - jobInfo.getEnteringTime();</span>
+<span class="nc" id="L352">            double sojournTime = jobInfo.getServiceTime() - jobInfo.getResidualServiceTime();</span>
+<span class="nc" id="L353">            double queueTime = elapsedTime - sojournTime;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">            if (queueTime &lt; 0.0) {</span>
+<span class="nc" id="L355">                queueTime = 0.0;</span>
+            }
+<span class="nc" id="L357">            psJobsList.psUpdateSojournTime(jobClass, sojournTime);</span>
+<span class="nc" id="L358">            psJobsList.psUpdateQueueTime(jobClass, queueTime);</span>
+<span class="nc" id="L359">            psJobsList.psUpdateUtilization(jobClass, serviceFractions);</span>
+<span class="nc" id="L360">            psJobsList.psUpdateUtilizationPerServerType(serviceFractionsPerServerType, assignedJobs);</span>
+<span class="nc" id="L361">            psJobsList.remove(jobInfo);</span>
+        }
+<span class="nc" id="L363">    }</span>
+
+    private void updateServiceFractions() {
+<span class="nc bnc" id="L366" title="All 2 branches missed.">        for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L367">            serviceFractions[i] = 0;</span>
+        }
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        for (ServerType serverType : getServerTypes()) {</span>
+<span class="nc" id="L370">            Boolean[] compatibilities = serverType.getCompatibilities();</span>
+<span class="nc" id="L371">            double numOfServers = serverType.getNumOfServers();</span>
+<span class="nc" id="L372">            int serverTypeId = serverType.getId();</span>
+<span class="nc" id="L373">            int totalJobsInServer = 0;</span>
+<span class="nc" id="L374">            double[] splits = new double[jobClasses.size()];</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">            for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L376">                serviceFractionsPerServerType[serverTypeId][i] = 0;</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">                if (assignedJobs[serverTypeId][i] &gt; 0) {</span>
+<span class="nc" id="L378">                    totalJobsInServer += assignedJobs[serverTypeId][i];</span>
+<span class="nc" id="L379">                    splits[i] = (double) assignedJobs[serverTypeId][i] / psJobsList.size(jobClasses.get(i));</span>
+                }
+            }
+<span class="nc bnc" id="L382" title="All 2 branches missed.">            if (totalJobsInServer &lt;= numOfServers) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">                for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">                    if (assignedJobs[serverTypeId][i] &gt; 0) {</span>
+<span class="nc" id="L385">                        serviceFractionsPerServerType[serverTypeId][i] = 1.0 / numOfServers;</span>
+                    }
+                }
+            } else {
+<span class="nc" id="L389">                boolean[] serviceSaturated = new boolean[jobClasses.size()];</span>
+<span class="nc" id="L390">                Arrays.fill(serviceSaturated, false);</span>
+<span class="nc" id="L391">                double residualCapacity = numOfServers;</span>
+<span class="nc" id="L392">                boolean allocationComplete = false;</span>
+<span class="nc bnc" id="L393" title="All 2 branches missed.">                while (!allocationComplete) {</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                    for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">                        if (!serviceSaturated[i] &amp;&amp; splits[i] &gt; 0) {</span>
+<span class="nc" id="L396">                            JobClass jobClass = jobClasses.get(i);</span>
+<span class="nc" id="L397">                            serviceFractionsPerServerType[serverTypeId][i] = psStrategies[i].slice(psJobsList, jobClasses, serviceWeights, serviceSaturated, jobClass, compatibilities, splits)</span>
+                                    * (residualCapacity / numOfServers);
+                        }
+                    }
+<span class="nc" id="L401">                    allocationComplete = true;</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">                    for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc bnc" id="L403" title="All 2 branches missed.">                        if (serviceFractionsPerServerType[serverTypeId][i] &gt; 1.0 / numOfServers) {</span>
+<span class="nc" id="L404">                            JobClass jobClass = jobClasses.get(i);</span>
+<span class="nc" id="L405">                            serviceFractionsPerServerType[serverTypeId][i] = 1.0 / numOfServers;</span>
+<span class="nc" id="L406">                            residualCapacity -= psJobsList.size(jobClass);</span>
+<span class="nc" id="L407">                            serviceSaturated[i] = true;</span>
+<span class="nc" id="L408">                            allocationComplete = false;</span>
+                        }
+                    }
+                }
+            }
+<span class="nc bnc" id="L413" title="All 2 branches missed.">            for (int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L414">                serviceFractions[i] += serviceFractionsPerServerType[serverTypeId][i] * splits[i] * numOfServers / compatibleServersForClass[i];</span>
+            }
+<span class="nc" id="L416">        }</span>
+<span class="nc" id="L417">    }</span>
+
+    private void serviceJobs() {
+<span class="nc bnc" id="L420" title="All 2 branches missed.">        if (psJobsList.size() &gt; 0) {</span>
+<span class="nc" id="L421">            double minWaitTime = Double.MAX_VALUE;</span>
+<span class="nc" id="L422">            Iterator&lt;JobInfo&gt; it = psJobsList.getInternalJobInfoList().iterator();</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">            while (it.hasNext()) {</span>
+<span class="nc" id="L424">                PSJobInfo jobInfo = (PSJobInfo) it.next();</span>
+<span class="nc" id="L425">                int jobClassID = jobInfo.getJob().getJobClass().getId();</span>
+<span class="nc" id="L426">                double waitTime = jobInfo.getResidualServiceTime() / (compatibleServersForClass[jobClassID] * serviceFractions[jobClassID]);</span>
+<span class="nc bnc" id="L427" title="All 2 branches missed.">                if (waitTime &lt; minWaitTime) {</span>
+<span class="nc" id="L428">                    messageJobInfo = jobInfo;</span>
+<span class="nc" id="L429">                    minWaitTime = waitTime;</span>
+                }
+<span class="nc" id="L431">            }</span>
+<span class="nc" id="L432">            messageToken = sendMe(messageJobInfo.getJob(), minWaitTime);</span>
+<span class="nc" id="L433">            messageSendTime = getOwnerNode().getNetSystem().getTime();</span>
+        }
+<span class="nc" id="L435">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

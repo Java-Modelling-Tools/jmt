@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MoMSolverDispatcher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.control</a> &gt; <span class="el_source">MoMSolverDispatcher.java</span></div><h1>MoMSolverDispatcher.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.control;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.MoMSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class implements the API to allow use by other applications. One can
+ * define the queueing network model details, call the solvers transparently and,
+ * afterwards, read the results.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class MoMSolverDispatcher {
+
+    /**
+     * number of classes or jobs in the system
+     */
+<span class="nc" id="L43">    protected int classes = 0;</span>
+    /**
+     * Array containing population for each class
+     */
+    protected int[] population;
+    /**
+     * Contains the queueing network model
+     */
+    protected QNModel qnm;
+    /**
+     * Number of threads that the MoMSolver should use
+     */
+    protected int nThreads;
+    /**--------------CONSTANTS DEFINITION------------------------*/
+    /** constant for Load Dependent service center  */
+    public static final int LD = 0;
+    /** constant for Load Independent service center  */
+    public static final int LI = 1;
+    /** constant for delay center*/
+    public static final int DELAY = 2;
+    /**---------------MODEL DEFINITION------------------------*/
+    /**number of resources*/
+<span class="nc" id="L65">    protected int stations = 0;</span>
+    /**---------------MODEL SOLUTION------------------------*/
+    /** array containing the throughput of each service center  */
+    protected double[] throughput;
+    /** array containing the queue length of each service center  */
+    protected double[][] queueLen;
+
+    /** Creates new MoMSolverDispatcher
+     *  @param  stations    number of service centers
+     *  @param  classes     number of classes
+     *  @param  population  array of class populations
+     */
+<span class="nc" id="L77">    public MoMSolverDispatcher(int classes, int stations, int[] population) {</span>
+<span class="nc" id="L78">        this.classes = classes;</span>
+<span class="nc" id="L79">        this.stations = stations;</span>
+<span class="nc" id="L80">        this.population = population;</span>
+<span class="nc" id="L81">    }</span>
+
+    /** Initializes the solver with the system parameters.
+     * It must be called before trying to solve the model.
+     *  @param  t   array of the types (LD or LI) of service centers
+     *  @param  s   matrix of service times of the service centers
+     *  @param  v   array of visits to the service centers
+     *  @param  nThreads The number of threads the solver should use. If nThreads &gt; 2 then the parallel algorithm is used.
+     *  @return True if the operation is completed with success
+     */
+    public boolean input(int[] t, double[][] s, double[][] v, int nThreads) {
+<span class="nc bnc" id="L92" title="All 6 branches missed.">        if ((t.length &gt; stations) || (s.length &gt; stations) || (v.length &gt; stations)) {</span>
+            // wrong input.
+<span class="nc" id="L94">            return false;</span>
+        }
+        try {
+<span class="nc" id="L97">            int M = 0, R = this.classes;</span>
+<span class="nc" id="L98">            double[] Z = new double[classes];</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">            for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L100">                Z[r] = 0;</span>
+            }
+
+            // Discover delay times (think times)
+<span class="nc bnc" id="L104" title="All 2 branches missed.">            for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">                if (t[i] == LI) {</span>
+<span class="nc" id="L106">                    M++;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                } else if (t[i] == LD) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">                    for (int r = 0; r &lt; classes; r++) {</span>
+<span class="nc" id="L109">                        Z[r] += (int) (s[i][r] * v[i][r]);</span>
+                    }
+                } else {
+<span class="nc" id="L112">                    return false;</span>
+                }
+            }
+            // Now Z contains the delay times
+
+            // Discover service demands
+<span class="nc" id="L118">            double[][] D = new double[M][R];</span>
+<span class="nc" id="L119">            int mIndex = 0; // current queue</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">            for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">                if (t[i] == LI) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">                    for (int r = 0; r &lt; classes; r++) {</span>
+<span class="nc" id="L123">                        D[mIndex][r] = (int) (s[i][r] * v[i][r]);</span>
+                    }
+<span class="nc" id="L125">                    mIndex++;</span>
+                }
+            }
+            // Now D contains service demands
+
+            // Create queue multiplicities array
+            // All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
+            // If this array is instantiated properly, the rest of the MoMSolver can support them
+<span class="nc" id="L133">            Integer[] multiplicities = new Integer[M];</span>
+<span class="nc bnc" id="L134" title="All 2 branches missed.">            for (int m = 0; m &lt; M; m++) {</span>
+<span class="nc" id="L135">                multiplicities[m] = 1;</span>
+            }
+
+            // Transform population from int[] to Integer[]
+<span class="nc" id="L139">            Integer[] N = new Integer[R];</span>
+<span class="nc bnc" id="L140" title="All 2 branches missed.">            for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L141">                N[r] = population[r];</span>
+            }
+
+            // Instantiate queueing network model
+<span class="nc" id="L145">            qnm = new QNModel(R, M, t, N, Z, multiplicities, D);</span>
+<span class="nc" id="L146">        } catch (Exception ex) {</span>
+<span class="nc" id="L147">            ex.printStackTrace();</span>
+            // Return false if initialisation fails for any reason.
+<span class="nc" id="L149">            return false;</span>
+<span class="nc" id="L150">        }</span>
+<span class="nc" id="L151">        return true;</span>
+    }
+
+    /**
+     * Solves the system through the MoM algorithm.
+     * input(...) must have been called first.
+     *
+     * @throws InternalErrorException
+     * @throws BTFMatrixErrorException 
+     * @throws InconsistentLinearSystemException 
+     * @throws OperationNotSupportedException 
+     */
+    public void solve() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
+<span class="nc" id="L164">        QNSolver c = new MoMSolver(qnm, nThreads);</span>
+<span class="nc" id="L165">        c.printWelcome();</span>
+<span class="nc" id="L166">        System.out.println(&quot;Will solve the following model: &quot;);</span>
+<span class="nc" id="L167">        qnm.printModel();</span>
+<span class="nc" id="L168">        c.computeNormalisingConstant();</span>
+<span class="nc" id="L169">        System.out.println(&quot;G = &quot; + qnm.getPrettyNormalisingConstant());</span>
+<span class="nc" id="L170">        c.printTimeStatistics();</span>
+<span class="nc" id="L171">        c.printMemUsage();</span>
+<span class="nc" id="L172">        c.computePerformanceMeasures();</span>
+<span class="nc" id="L173">        System.out.println(&quot;\nX = &quot;);</span>
+<span class="nc" id="L174">        MiscMathsFunctions.printPrettyMatrix(qnm.getMeanThroughputs());</span>
+<span class="nc" id="L175">        System.out.println(&quot;\nQ = &quot;);</span>
+<span class="nc" id="L176">        MiscMathsFunctions.printPrettyMatrix(qnm.getMeanQueueLengths());</span>
+<span class="nc" id="L177">        System.out.println();</span>
+<span class="nc" id="L178">        c.printTimeStatistics();</span>
+
+<span class="nc" id="L180">        throughput = getMeanThroughputs();</span>
+<span class="nc" id="L181">        queueLen = getMeanQueueLengths();</span>
+<span class="nc" id="L182">    }</span>
+
+    /**
+     * Returns the value of the normalising constant as a string. May contain fractional part.
+     * @return The string representing the normalising constant
+     */
+    public String getPrettyNormalisingConstant() {
+<span class="nc" id="L189">        return qnm.getPrettyNormalisingConstant();</span>
+    }
+
+    /**
+     * Returns the value of the normalising constant as a BigRational.
+     * @return The BigRational representing the normalising constant
+     */
+    public BigRational getNormalisingConstant() {
+<span class="nc" id="L197">        return qnm.getNormalisingConstant();</span>
+    }
+
+    /**
+     * Returns the mean queue lengths as an MxR array of doubles.
+     * @return The double[M][R] array.
+     */
+    public double[][] getMeanQueueLengths() {
+<span class="nc" id="L205">        return qnm.getMeanQueueLengthsAsDoubles();</span>
+    }
+
+    /**
+     * Returns the mean throughputs as an array of R doubles.
+     * @return The double[R] array.
+     */
+    public double[] getMeanThroughputs() {
+<span class="nc" id="L213">        return qnm.getMeanThroughputsAsDoubles();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

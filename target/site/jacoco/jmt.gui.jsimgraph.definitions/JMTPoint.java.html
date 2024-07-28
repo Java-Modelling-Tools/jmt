@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JMTPoint.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.definitions</a> &gt; <span class="el_source">JMTPoint.java</span></div><h1>JMTPoint.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jsimgraph.definitions;
+
+import java.awt.geom.Point2D;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; JMTPoint&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A Point2D implementation class used to store position of a station 
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 21/feb/07
+ * &lt;b&gt;Time:&lt;/b&gt; 18:37:35&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class JMTPoint extends Point2D {
+
+	private double x;
+	private double y;
+	private boolean rotate;
+	private double angle;
+
+	/**
+	 * Builds a new JMTPoint at position (0,0) and no rotation.
+	 */
+<span class="nc" id="L42">	public JMTPoint() {</span>
+<span class="nc" id="L43">		x = 0;</span>
+<span class="nc" id="L44">		y = 0;</span>
+<span class="nc" id="L45">		rotate = false;</span>
+<span class="nc" id="L46">		angle = 0;</span>
+<span class="nc" id="L47">	}</span>
+
+	/**
+	 * Builds a new JMTPoint
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param rotate true if station is rotated
+	 */
+<span class="nc" id="L55">	public JMTPoint(double x, double y, boolean rotate) {</span>
+<span class="nc" id="L56">		this.x = x;</span>
+<span class="nc" id="L57">		this.y = y;</span>
+<span class="nc" id="L58">		this.rotate = rotate;</span>
+<span class="nc" id="L59">		this.angle = 0;</span>
+<span class="nc" id="L60">	}</span>
+
+	/**
+	 * Builds a new JMTPoint from a given point
+	 * @param x x coordinate
+	 * @param y y coordinate
+	 * @param rotate true if station is rotated
+	 * @param angle value of the rotation angle
+	 */
+<span class="fc" id="L69">	public JMTPoint(double x, double y, boolean rotate, double angle) {</span>
+<span class="fc" id="L70">		this.x = x;</span>
+<span class="fc" id="L71">		this.y = y;</span>
+<span class="fc" id="L72">		this.rotate = rotate;</span>
+<span class="fc" id="L73">		this.angle = angle;</span>
+<span class="fc" id="L74">	}</span>
+
+	/**
+	 * Builds a new JMTPoint from a given point
+	 * @param point point for coordinates
+	 * @param rotate true if station is rotated
+	 */
+<span class="nc" id="L81">	public JMTPoint(Point2D point, boolean rotate) {</span>
+<span class="nc" id="L82">		this.x = point.getX();</span>
+<span class="nc" id="L83">		this.y = point.getY();</span>
+<span class="nc" id="L84">		this.rotate = rotate;</span>
+<span class="nc" id="L85">		this.angle = 0;</span>
+<span class="nc" id="L86">	}</span>
+
+	/**
+	 * Builds a new JMTPoint from a given point
+	 * @param point point for coordinates
+	 * @param rotate true if station is rotated
+	 * @param angle value of the rotation angle
+	 */
+<span class="nc" id="L94">	public JMTPoint(Point2D point, boolean rotate, double angle) {</span>
+<span class="nc" id="L95">		this.x = point.getX();</span>
+<span class="nc" id="L96">		this.y = point.getY();</span>
+<span class="nc" id="L97">		this.rotate = rotate;</span>
+<span class="nc" id="L98">		this.angle = angle;</span>
+<span class="nc" id="L99">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.awt.geom.Point2D#getX()
+	 */
+	@Override
+	public double getX() {
+<span class="fc" id="L106">		return x;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.geom.Point2D#getY()
+	 */
+	@Override
+	public double getY() {
+<span class="fc" id="L114">		return y;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.awt.geom.Point2D#setLocation(double, double)
+	 */
+	@Override
+	public void setLocation(double x, double y) {
+<span class="nc" id="L122">		this.x = x;</span>
+<span class="nc" id="L123">		this.y = y;</span>
+<span class="nc" id="L124">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.awt.geom.Point2D#clone()
+	 */
+	@Override
+	public Object clone() {
+<span class="nc" id="L131">		return new JMTPoint(x, y, rotate);</span>
+	}
+
+	/**
+	 * @return true if station is rotated
+	 */
+	public boolean isRotate() {
+<span class="fc" id="L138">		return rotate;</span>
+	}
+
+	/**
+	 * @return the value of the rotation angle
+	 */
+	public double getAngle() {
+<span class="fc" id="L145">		return angle;</span>
+	}
+
+	/**
+	 * @param angle = value of the rotation angle
+	 */
+	public void setAngle(double angle) {
+<span class="nc" id="L152">		this.angle= angle;</span>
+<span class="nc" id="L153">	}</span>
+
+	/**
+	 * @param rotate true if station is rotated
+	 */
+	public void setRotate(boolean rotate) {
+<span class="nc" id="L159">		this.rotate = rotate;</span>
+<span class="nc" id="L160">	}</span>
+
+	/**
+	 * @param x x coordinate
+	 */
+	public void setX(double x) {
+<span class="nc" id="L166">		this.x = x;</span>
+<span class="nc" id="L167">	}</span>
+
+	/**
+	 * @param y y coordinate
+	 */
+	public void setY(double y) {
+<span class="nc" id="L173">		this.y = y;</span>
+<span class="nc" id="L174">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

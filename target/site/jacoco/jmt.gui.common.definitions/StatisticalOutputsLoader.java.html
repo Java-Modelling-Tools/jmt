@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatisticalOutputsLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions</a> &gt; <span class="el_source">StatisticalOutputsLoader.java</span></div><h1>StatisticalOutputsLoader.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.definitions;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.text.ParseException;
+
+import javax.swing.SwingWorker;
+
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.measureOutputs.VerboseCSVMeasureOutputReader;
+import jmt.engine.math.SampleStatistics;
+
+/**
+ *&lt;p&gt;Title: StatisticalOutputsParameters&lt;/p&gt;
+ * &lt;p&gt;Description: Consists of the controlling elements of the StatisticalOutputsEditor,
+ *  and the various parameters needed to display statistical outputs and generate required graphs.&lt;/p&gt;
+ * 
+ * @author Samarth Shukla, Aneish Goel
+ *         Month: June 2013
+ */     
+public class StatisticalOutputsLoader {
+
+	// Percentage upgrade time. Since it is a costly operation it is performed based on time.
+	private static final int UPDATE_PCT_MILLIS = 500;
+	private SampleStatistics statistics;
+	//private MeasureDefinition measureDefinition;
+	private String filename;
+<span class="nc" id="L47">	private double progress = 0.0;</span>
+<span class="nc" id="L48">	private ProgressTimeListener ptlistener = null;</span>
+<span class="nc" id="L49">	private int start = -1;</span>
+<span class="nc" id="L50">	private int end = -1;</span>
+<span class="nc" id="L51">	private int totalLines = 0;</span>
+<span class="nc" id="L52">	private double maxSimTime = Double.NaN;</span>
+<span class="nc" id="L53">	private double initialSimTime = Double.NaN;</span>
+<span class="nc" id="L54">	private double finalSimTime = Double.NaN;</span>
+<span class="nc" id="L55">	private double distMin = Double.NaN;</span>
+<span class="nc" id="L56">	private double distMax = Double.NaN;</span>
+<span class="nc" id="L57">	private int distIntervals = -1;</span>
+	private String logDecimalSeparator;
+	private String logCsvDelimiter;
+
+	private CSVLoader currentLoader;
+
+<span class="nc" id="L63">	public StatisticalOutputsLoader(MeasureDefinition measureDefinition, int measureIndex) throws FileNotFoundException {</span>
+<span class="nc" id="L64">		this.logDecimalSeparator = measureDefinition.getLogDecimalSeparator();</span>
+<span class="nc" id="L65">		this.logCsvDelimiter = measureDefinition.getLogCsvDelimiter();</span>
+<span class="nc" id="L66">		this.filename = measureDefinition.getLogFileName(measureIndex);</span>
+<span class="nc" id="L67">		this.start = measureDefinition.getDiscardedSamples(measureIndex);</span>
+
+		// Starts loading of CSV file in a separate thread.
+<span class="nc" id="L70">		reloadData();</span>
+<span class="nc" id="L71">	}</span>
+
+<span class="nc" id="L73">	public StatisticalOutputsLoader(Measure measure, String logDecimalSeparator, String logCsvDelimiter) throws FileNotFoundException, IOException, ParseException {</span>
+<span class="nc" id="L74">		this.filename = measure.getOutput().getOutputFile().getAbsolutePath();</span>
+<span class="nc" id="L75">		this.start = measure.getDiscardedSamples();</span>
+<span class="nc" id="L76">		this.logDecimalSeparator = logDecimalSeparator;</span>
+<span class="nc" id="L77">		this.logCsvDelimiter = logCsvDelimiter;</span>
+
+		// Starts loading of CSV file in a separate thread.
+<span class="nc" id="L80">		loadCSV();</span>
+<span class="nc" id="L81">	}</span>
+
+	public SampleStatistics getStatistics() {
+<span class="nc" id="L84">		return statistics;</span>
+	}
+
+	public void setDistribution(double min, double max, int intervals) {
+<span class="nc" id="L88">		this.distMin = min;</span>
+<span class="nc" id="L89">		this.distMax = max;</span>
+<span class="nc" id="L90">		this.distIntervals = intervals;</span>
+<span class="nc" id="L91">	}</span>
+
+	public double getPercentage(double linesRead, double totalLines) {
+<span class="nc" id="L94">		double percent = linesRead / totalLines;</span>
+<span class="nc" id="L95">		return percent;</span>
+	}
+
+	//reads file and generates graph. Code linked with code of CSVOutputReader.
+	private void loadCSV() throws IOException, ParseException {
+<span class="nc" id="L100">		File measureFile = new File(filename);</span>
+<span class="nc" id="L101">		VerboseCSVMeasureOutputReader reader = new VerboseCSVMeasureOutputReader(measureFile, logDecimalSeparator, logCsvDelimiter);</span>
+<span class="nc" id="L102">		statistics = new SampleStatistics();</span>
+
+		// Fill distribution if requested.
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (distIntervals &gt; 0) {</span>
+<span class="nc" id="L106">			statistics.initializeDistrubution(distMin, distMax, distIntervals);</span>
+		}
+
+		// Skips header.
+<span class="nc" id="L110">		updateProgress(0.0);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		reader.openFile(start &gt; 1 ? start : 1);</span>
+		try {
+<span class="nc" id="L113">			long lastUpdateTime = System.currentTimeMillis();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			while (reader.hasMoreLines()) {</span>
+<span class="nc" id="L115">				reader.readLine();</span>
+
+				// Check bounds on simulation time
+<span class="nc bnc" id="L118" title="All 4 branches missed.">				if (!Double.isNaN(initialSimTime) &amp;&amp; reader.getParsedSimulationTime() &lt; initialSimTime) {</span>
+<span class="nc" id="L119">					continue;</span>
+				}
+<span class="nc bnc" id="L121" title="All 4 branches missed.">				if ((!Double.isNaN(finalSimTime) &amp;&amp; reader.getParsedSimulationTime() &gt; finalSimTime)) {</span>
+<span class="nc" id="L122">					break;</span>
+				}
+
+				// Process sample
+<span class="nc" id="L126">				statistics.putNewSample(reader.getParsedSample(), reader.getParsedWeight(), reader.getParsedSimulationTime());</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">				if (System.currentTimeMillis() - lastUpdateTime &gt; UPDATE_PCT_MILLIS) {</span>
+<span class="nc" id="L129">					updateProgress(reader.getParsedPercentage());</span>
+<span class="nc" id="L130">					lastUpdateTime = System.currentTimeMillis();</span>
+				}
+<span class="nc bnc" id="L132" title="All 4 branches missed.">				if (end &gt; 0 &amp;&amp; reader.getLineNumber() &gt;= end) {</span>
+<span class="nc" id="L133">					break;</span>
+				}
+
+			}
+			// If totalLines was not set, count them.
+<span class="nc bnc" id="L138" title="All 2 branches missed.">			if (totalLines &lt;= 0) {</span>
+<span class="nc bnc" id="L139" title="All 2 branches missed.">				while (reader.hasMoreLines()) {</span>
+<span class="nc" id="L140">					reader.readLine();</span>
+				}
+<span class="nc" id="L142">				totalLines = reader.getLineNumber();</span>
+<span class="nc" id="L143">				maxSimTime = reader.getParsedSimulationTime();</span>
+			}
+		} finally {
+<span class="nc" id="L146">			reader.closeFile();</span>
+<span class="nc" id="L147">			updateProgress(100.0);</span>
+<span class="nc" id="L148">			statistics.finalizeLoading();</span>
+		}
+<span class="nc" id="L150">	}</span>
+
+	public double getProgress() {
+<span class="nc" id="L153">		return progress;</span>
+	}
+
+	/**
+	 * Update progress time loading the file
+	 * @param percentage the progress percentage
+	 */
+	private void updateProgress(double percentage) {
+<span class="nc" id="L161">		progress = percentage;</span>
+
+<span class="nc bnc" id="L163" title="All 2 branches missed.">		if (ptlistener != null) {</span>
+<span class="nc" id="L164">			ptlistener.timeChanged(percentage);</span>
+		}
+<span class="nc" id="L166">	}</span>
+
+	public synchronized void setProgressTimeListener(ProgressTimeListener listener) {
+<span class="nc" id="L169">		ptlistener = listener;</span>
+<span class="nc" id="L170">	}</span>
+
+	public void setStart(int str) {
+<span class="nc" id="L173">		start = str;</span>
+<span class="nc" id="L174">	}</span>
+
+	public void setEnd(int en) {
+<span class="nc" id="L177">		end = en;</span>
+<span class="nc" id="L178">	}</span>
+
+	/**
+	 * Set bounds on initial simulation time
+	 * @param initialSimTime initial simulation time or NaN to skip
+	 */
+	public void setInitialSimTime(double initialSimTime) {
+<span class="nc" id="L185">		this.initialSimTime = initialSimTime;</span>
+<span class="nc" id="L186">	}</span>
+
+	/**
+	 * Set bounds on final simulation time
+	 * @param finalSimTime final simulation time or NaN to skip
+	 */
+	public void setFinalSimTime(double finalSimTime) {
+<span class="nc" id="L193">		this.finalSimTime = finalSimTime;</span>
+<span class="nc" id="L194">	}</span>
+
+	public int getTotalLines() {
+<span class="nc" id="L197">		return totalLines;</span>
+	}
+
+	/**
+	 * Returns maximum simulation file in the entire file
+	 * @return the maximum simulation time
+	 */
+	public double getMaxSimulationTime() {
+<span class="nc" id="L205">		return maxSimTime;</span>
+	}
+
+	/** listener for ProgressBar in StatisticalOutputsEditor. */
+	public interface ProgressTimeListener {
+		public void timeChanged(double progressPct);
+	}
+
+	/**
+	 * Reloads the data structure
+	 */
+	public void reloadData() {
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		if (currentLoader != null) {</span>
+			// Avoid concurrent reloads.
+<span class="nc" id="L219">			return;</span>
+		}
+<span class="nc" id="L221">		currentLoader = new CSVLoader();</span>
+<span class="nc" id="L222">		currentLoader.execute();</span>
+<span class="nc" id="L223">	}</span>
+
+	/**
+	 * Loads verbose measure from CSV file in the background
+	 * @author Marco Bertoli
+	 */
+<span class="nc" id="L229">	private class CSVLoader extends SwingWorker&lt;Object, Object&gt; {</span>
+
+		/* (non-Javadoc)
+		 * @see javax.swing.SwingWorker#doInBackground()
+		 */
+		@Override
+		protected Object doInBackground() throws Exception {
+<span class="nc" id="L236">			loadCSV();</span>
+<span class="nc" id="L237">			currentLoader = null;</span>
+<span class="nc" id="L238">			return null;</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

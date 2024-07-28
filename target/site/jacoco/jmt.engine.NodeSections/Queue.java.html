@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Queue.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Queue.java</span></div><h1>Queue.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.*;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Balking;
+import jmt.engine.NetStrategies.ImpatienceStrategies.Impatience;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.BooleanValueImpatienceMeasurement;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceMeasurement.DoubleValueImpatienceMeasurement;
+import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
+import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
+import jmt.engine.NetStrategies.QueueGetStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
+import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
+import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
+import jmt.engine.QueueNet.*;
+import jmt.engine.NetStrategies.QueuePutStrategy;
+import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.simEngine.RemoveToken;
+
+/**
+ * This class implements a generic finite/infinite queue. In finite queue, if
+ * the queue is full, new jobs could be dropped or not. It could implement
+ * different job strategy and/or waiting requests strategy.
+ *
+ * &lt;br&gt;&lt;br&gt;
+ * It can also define the queue of a station which is inside a blocking region.
+ * When a job arrives at this node section, the source node of the message is found out.
+ * If the source node is inside the same region, there are no problems and the message
+ * is processed as usual.
+ * Otherwise, if the source node is outside the blocking region, this message is not
+ * processed but redirected to the fictitious station (called &quot;region input station&quot;)
+ * which controls the access to the blocking region.
+ * &lt;br&gt;&lt;br&gt;
+ * &lt;p&gt;
+ * The class has different constructors to create a generic queue or a redirecting queue.
+ * &lt;br&gt;
+ * However it is also possible to create a generic queue and then to turn on/off the
+ * &quot;redirecting queue&quot; behaviour using the &lt;tt&gt;redirectionTurnON(..)&lt;/tt&gt; and
+ * &lt;tt&gt;redirectionTurnOFF()&lt;/tt&gt; methods.
+ *
+ * @author Francesco Radaelli, Stefano Omini, Bertoli Marco
+ * &lt;p&gt;
+ * Modified by Ashanka (Oct 2009) for FCR Bug fix: Events are created with job instead of null for EVENT_JOB_OUT_OF_REGION
+ */
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; Queue&lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt;
+ *
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 15/nov/2009
+ * &lt;b&gt;Time:&lt;/b&gt; 23.08.16&lt;/p&gt;
+ *
+ * @author Bertoli Marco [marco.bertoli@neptuny.com]
+ * @version 3.0
+ */
+public class Queue extends InputSection {
+
+	public static final String FINITE_DROP = &quot;drop&quot;;
+	public static final String FINITE_BLOCK = &quot;BAS blocking&quot;;
+	public static final String FINITE_WAITING = &quot;waiting queue&quot;;
+	public static final String FINITE_RETRIAL = &quot;retrial&quot;;
+
+	private int capacity;
+	private boolean infinite;
+
+	private boolean coolStart;
+	private boolean switchOverRequest;
+
+	private boolean[] drop;
+	private boolean[] block;
+	private boolean[] waiting;
+	private boolean[] retrial;
+
+	private JobClassList jobClasses;
+
+	//the JobInfoList of the owner NetNode
+	private JobInfoList nodeJobsList;
+	//the JobInfoList of the global Network -- model level
+	private GlobalJobInfoList netJobsList;
+	//the JobInfoList used for Fork nodes
+	private JobInfoList FJList;
+	// Backup buffer when the main jobsList is full
+	private JobInfoList waitingRequests;
+
+	// Retrial distribution for each class
+	private ServiceStrategy[] retrialDistributions;
+	// Impatience strategy for each class
+	private Impatience[] impatienceStrategies;
+
+	// Get and put strategies for the Queue
+	private QueueGetStrategy getStrategy;
+	private QueuePutStrategy[] putStrategies;
+	// Class soft deadlines for the overall station
+	private double[] softDeadlines;
+	private boolean workingAsTransition;
+	private TransitionMatrix[] enablingConditions;
+	private TransitionMatrix[] inhibitingConditions;
+	private TransitionMatrix[] resourceConditions;
+	private TransitionMatrix storageSituation;
+	List&lt;NetMessage&gt; jobsFromPlaces;
+	private int savedEnablingDegree;
+	private int unfinishedRequestNumber;
+
+	//--------------------BLOCKING REGION PROPERTIES--------------------//
+	//true if the redirection behaviour is turned on
+	private boolean redirectionON;
+	//the blocking region that the owner node of this section belongs to
+	private BlockingRegion myRegion;
+	//the input station of the blocking region
+	private NetNode regionInputStation;
+	//------------------------------------------------------------------//
+
+<span class="nc" id="L135">	private enum BufferType {</span>
+<span class="nc" id="L136">		FJ_LIST,</span>
+<span class="nc" id="L137">		JOBS_LIST,</span>
+<span class="nc" id="L138">		JOBS_LIST_FIRST,</span>
+<span class="nc" id="L139">		JOBS_LIST_LAST,</span>
+<span class="nc" id="L140">		WAITING_REQUESTS,</span>
+	}
+
+	public Queue(Integer capacity, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies) {
+<span class="nc" id="L144">		this(capacity, dropStrategies, null, getStrategy, putStrategies, null,</span>
+<span class="nc" id="L145">				false, null, null, null);</span>
+<span class="nc" id="L146">	}</span>
+
+	public Queue(Integer capacity, String[] dropStrategies, ServiceStrategy[] retrialDistributions, QueueGetStrategy getStrategy,
+				 QueuePutStrategy[] putStrategies) {
+<span class="nc" id="L150">		this(capacity, dropStrategies, retrialDistributions, getStrategy, putStrategies, null,</span>
+<span class="nc" id="L151">				false, null, null, null);</span>
+<span class="nc" id="L152">	}</span>
+
+	public Queue(Integer capacity, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies,
+				 Impatience[] impatienceStrategies) {
+<span class="nc" id="L156">		this(capacity, dropStrategies, null, getStrategy, putStrategies, impatienceStrategies,</span>
+<span class="nc" id="L157">				false, null, null, null);</span>
+<span class="nc" id="L158">	}</span>
+
+	public Queue(Integer capacity, String[] dropStrategies, QueueGetStrategy getStrategy, QueuePutStrategy[] putStrategies,
+				 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions){
+<span class="nc" id="L162">		this(capacity, dropStrategies, null, getStrategy, putStrategies, null, true,</span>
+				enablingConditions, inhibitingConditions, resourceConditions);
+<span class="nc" id="L164">	}</span>
+
+	/**
+	 * Creates a new instance of finite Queue. This is the newest constructor that supports
+	 * different drop strategies. Other constructors are left for compatibility.
+	 * @param capacity Station capacity (-1 = infinite capacity).
+	 * @param dropStrategies Drop strategy per class: FINITE_DROP || FINITE_BLOCK
+	 * || FINITE_WAITING || FINITE_RETRIAL.
+	 * @param retrialDistributions Retrial distribution per class.
+	 * @param getStrategy Queue get strategy.
+	 * @param putStrategies Queue put strategy per class.
+	 * @param impatienceStrategies Impatience strategy per class.
+	 */
+	public Queue(Integer capacity, String[] dropStrategies, ServiceStrategy[] retrialDistributions, QueueGetStrategy getStrategy,
+				 QueuePutStrategy[] putStrategies, Impatience[] impatienceStrategies, Boolean workingAsTransition,
+				 TransitionMatrix[] enablingConditions, TransitionMatrix[] inhibitingConditions, TransitionMatrix[] resourceConditions) {
+		//auto = false, otherwise when a JOB message is received,
+		//the corresponding Job object is automatically added to
+		//JobInfoList
+<span class="nc" id="L183">		super(false);</span>
+<span class="nc" id="L184">		this.capacity = capacity.intValue();</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">		this.infinite = this.capacity &lt;= 0;</span>
+		// Decodes drop strategies
+<span class="nc" id="L187">		this.drop = new boolean[dropStrategies.length];</span>
+<span class="nc" id="L188">		this.block = new boolean[dropStrategies.length];</span>
+<span class="nc" id="L189">		this.waiting = new boolean[dropStrategies.length];</span>
+<span class="nc" id="L190">		this.retrial = new boolean[dropStrategies.length];</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		for (int i = 0; i &lt; dropStrategies.length; i++) {</span>
+<span class="nc bnc" id="L192" title="All 5 branches missed.">			switch (dropStrategies[i]) {</span>
+				case FINITE_DROP:
+<span class="nc" id="L194">					drop[i] = true;</span>
+<span class="nc" id="L195">					break;</span>
+				case FINITE_BLOCK:
+<span class="nc" id="L197">					block[i] = true;</span>
+<span class="nc" id="L198">					break;</span>
+				case FINITE_WAITING:
+<span class="nc" id="L200">					waiting[i] = true;</span>
+<span class="nc" id="L201">					break;</span>
+				case FINITE_RETRIAL:
+<span class="nc" id="L203">					retrial[i] = true;</span>
+<span class="nc" id="L204">					break;</span>
+				default:
+					break;
+			}
+		}
+<span class="nc" id="L209">		this.getStrategy = getStrategy;</span>
+<span class="nc" id="L210">		this.putStrategies = putStrategies;</span>
+<span class="nc" id="L211">		this.retrialDistributions = retrialDistributions;</span>
+<span class="nc" id="L212">		this.impatienceStrategies = impatienceStrategies;</span>
+
+<span class="nc" id="L214">		this.workingAsTransition = workingAsTransition;</span>
+<span class="nc" id="L215">		this.enablingConditions = enablingConditions;</span>
+<span class="nc" id="L216">		this.inhibitingConditions = inhibitingConditions;</span>
+<span class="nc" id="L217">		this.resourceConditions = resourceConditions;</span>
+
+<span class="nc" id="L219">		coolStart = true;</span>
+<span class="nc" id="L220">		switchOverRequest = false;</span>
+		//this node does not belong to any blocking region
+<span class="nc" id="L222">		redirectionTurnOFF();</span>
+<span class="nc" id="L223">	}</span>
+
+	/**
+	 * Tells whether the &quot;redirecting queue&quot; behaviour has been turned on.
+	 * @return true, if the &quot;redirecting queue&quot; behaviour is on; false otherwise.
+	 */
+	public boolean isRedirectionON() {
+<span class="nc" id="L230">		return redirectionON;</span>
+	}
+
+	/**
+	 * Turns on the &quot;redirecting queue&quot; behaviour.
+	 * @param region the blocking region to which the owner node of this queue
+	 * belongs.
+	 */
+	public void redirectionTurnON(BlockingRegion region) {
+		//sets blocking region properties
+<span class="nc" id="L240">		redirectionON = true;</span>
+<span class="nc" id="L241">		myRegion = region;</span>
+<span class="nc" id="L242">		regionInputStation = myRegion.getInputStation();</span>
+<span class="nc" id="L243">	}</span>
+
+	/**
+	 * Turns off the &quot;redirecting queue&quot; behaviour.
+	 */
+	public void redirectionTurnOFF() {
+		//sets blocking region properties
+<span class="nc" id="L250">		redirectionON = false;</span>
+<span class="nc" id="L251">		myRegion = null;</span>
+<span class="nc" id="L252">		regionInputStation = null;</span>
+<span class="nc" id="L253">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+		// for easier reference
+<span class="nc" id="L258">		jobClasses = getJobClasses();</span>
+<span class="nc" id="L259">		nodeJobsList = node.getJobInfoList();</span>
+
+<span class="nc" id="L261">		waitingRequests = new LinkedJobInfoList(jobClasses, getClassCompatibilities(),getOwnerNode().getName(), getServerTypes());</span>
+<span class="nc" id="L262">		waitingRequests.setNetSystem(node.getNetSystem());</span>
+
+<span class="nc bnc" id="L264" title="All 2 branches missed.">		if (putStrategies == null) {</span>
+<span class="nc" id="L265">			putStrategies = new QueuePutStrategy[jobClasses.size()];</span>
+<span class="nc" id="L266">			Arrays.fill(putStrategies, new TailStrategy());</span>
+		}
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		if (getStrategy instanceof PollingGetStrategy) {</span>
+<span class="nc" id="L270">			((PollingGetStrategy) getStrategy).setPollingQueues(jobClasses);</span>
+		}
+
+<span class="nc bnc" id="L273" title="All 2 branches missed.">		if (node.getSection(NodeSection.OUTPUT) instanceof Fork) {</span>
+<span class="nc" id="L274">			FJList = new LinkedJobInfoList(jobClasses, getClassCompatibilities(),getOwnerNode().getName(), getServerTypes());</span>
+<span class="nc" id="L275">			FJList.setNetSystem(node.getNetSystem());</span>
+		}
+
+<span class="nc bnc" id="L278" title="All 2 branches missed.">		if(workingAsTransition) {</span>
+<span class="nc" id="L279">			this.storageSituation = new TransitionMatrix(jobClasses.size());</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			for (String nodeName : enablingConditions[0].keySet()) {</span>
+<span class="nc" id="L281">				storageSituation.setVector(new TransitionVector(nodeName, jobClasses.size()));</span>
+<span class="nc" id="L282">			}</span>
+<span class="nc" id="L283">			this.savedEnablingDegree = 0;</span>
+<span class="nc" id="L284">			this.unfinishedRequestNumber = 0;</span>
+<span class="nc" id="L285">			this.jobsFromPlaces = new LinkedList&lt;NetMessage&gt;();</span>
+		}
+<span class="nc" id="L287">	}</span>
+
+	/**
+	 * Preloads the specified numbers of jobs for each class.
+	 * @param jobsPerClass the specified numbers of jobs for each class.
+	 * @throws NetException
+	 */
+	public void preloadJobs(int[] jobsPerClass) throws NetException {
+<span class="nc" id="L295">		netJobsList = getOwnerNode().getQueueNet().getJobInfoList();</span>
+<span class="nc" id="L296">		NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L297">		int totalJobs = 0;</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">		for (int i = 0; i &lt; jobsPerClass.length; i++) {</span>
+<span class="nc" id="L299">			totalJobs += jobsPerClass[i];</span>
+		}
+<span class="nc" id="L301">		Job[] jobPermutation = new Job[totalJobs];</span>
+<span class="nc" id="L302">		int index = 0;</span>
+<span class="nc bnc" id="L303" title="All 2 branches missed.">		for (int i = 0; i &lt; jobsPerClass.length; i++) {</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">			for (int j = 0; j &lt; jobsPerClass[i]; j++) {</span>
+<span class="nc" id="L305">				Job job = new Job(jobClasses.get(i), netJobsList);</span>
+<span class="nc" id="L306">				job.initialize(netSystem);</span>
+<span class="nc" id="L307">				updateVisitPath(job);</span>
+<span class="nc" id="L308">				jobPermutation[index] = job;</span>
+<span class="nc" id="L309">				index++;</span>
+			}
+		}
+
+        /* Commented to ensure a deterministic initialization
+		// Durstenfeld Shuffle
+		RandomEngine randomEngine = netSystem.getEngine();
+		for (int i = jobPermutation.length - 1; i &gt; 0; i--) {
+			int j = (int) Math.floor(randomEngine.raw() * (i + 1));
+			Job job = jobPermutation[i];
+			jobPermutation[i] = jobPermutation[j];
+			jobPermutation[j] = job;
+		}*/
+
+<span class="nc bnc" id="L323" title="All 2 branches missed.">		for (int i = 0; i &lt; jobPermutation.length; i++) {</span>
+<span class="nc" id="L324">			Job job = jobPermutation[i];</span>
+<span class="nc" id="L325">			JobInfo jobInfo = new JobInfo(job);</span>
+<span class="nc" id="L326">			putStrategies[job.getJobClass().getId()].put(job, jobsList, this);</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">			if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {</span>
+<span class="nc" id="L328">				FJList.add(jobInfo);</span>
+			}
+<span class="nc" id="L330">			nodeJobsList.add(jobInfo);</span>
+<span class="nc" id="L331">			netJobsList.addJob(job);</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">			if (redirectionON) {</span>
+<span class="nc" id="L333">				myRegion.increaseOccupation(job.getJobClass());</span>
+			}
+		}
+
+<span class="nc" id="L337">	}</span>
+
+	/**
+	 * This method implements a generic finite/infinite queue.
+	 *
+	 * @param message message to be processed.
+	 * @throws NetException
+	 */
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc" id="L347">		NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L348">		Job job = message.getJob();</span>
+<span class="nc" id="L349">		JobInfo jobInfo = null;</span>
+<span class="nc" id="L350">		int jobClass = -1;</span>
+<span class="nc" id="L351">		Job jobSent = null;</span>
+<span class="nc" id="L352">		boolean isRetrialJob = false;</span>
+<span class="nc" id="L353">		int mode = 0;</span>
+<span class="nc" id="L354">        NetNode sourceNode = message.getSource();</span>
+<span class="nc" id="L355">		int sourceSection = message.getSourceSection();</span>
+<span class="nc bnc" id="L356" title="All 6 branches missed.">		boolean comingFromStorageSection = sourceNode != null &amp;&amp; sourceSection &gt; 0 &amp;&amp; (sourceNode.getSection(sourceSection) instanceof Linkage);</span>
+
+<span class="nc bnc" id="L358" title="All 16 branches missed.">		switch (message.getEvent()) {</span>
+
+			case NetEvent.EVENT_START: {
+
+				//EVENT_START
+				//If there are jobs in queue, the first (chosen using the specified
+				//get strategy) is forwarded and coolStart becomes false.
+
+<span class="nc" id="L366">				netJobsList = getOwnerNode().getQueueNet().getJobInfoList();</span>
+
+<span class="nc bnc" id="L368" title="All 4 branches missed.">				if (!(workingAsTransition &amp;&amp; savedEnablingDegree == 0)) {</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">					if (jobsList.size() &gt; 0) {</span>
+						//the first job is forwarded to service section
+<span class="nc" id="L371">						jobSent = getStrategy.get(jobsList);</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">						if (getStrategy instanceof PollingGetStrategy) {</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">							if (jobSent == null) {</span>
+<span class="nc" id="L374">								sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0);</span>
+<span class="nc" id="L375">								switchOverRequest = true;</span>
+							} else {
+<span class="nc" id="L377">								sendForward(jobSent, 0.0);</span>
+							}
+						} else {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">							if (getOwnerNode().getServer() != null) {</span>
+<span class="nc" id="L381">								jobSent = getStrategy.get(jobsList, getOwnerNode());</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">								if (jobSent != null) {</span>
+<span class="nc" id="L383">							sendForward(jobSent, 0.0);</span>
+								}
+							} else{
+<span class="nc" id="L386">								sendForward(jobSent, 0.0);</span>
+							}
+						}
+<span class="nc" id="L389">						coolStart = false;</span>
+
+<span class="nc" id="L391">						Iterator&lt;JobInfo&gt; it = jobsList.getInternalJobInfoList().iterator();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">						while (it.hasNext()) {</span>
+<span class="nc" id="L393">							createRenegingEvent(it.next().getJob());</span>
+						}
+<span class="nc" id="L395">					}</span>
+				}
+
+				break;
+			}
+
+			case NetEvent.EVENT_RETRIAL:
+<span class="nc" id="L402">				double randomDelay = retrialDistributions[job.getJobClass().getId()].wait(this, job.getJobClass());</span>
+<span class="nc" id="L403">				nodeJobsList.addToRetrialOrbit(job);</span>
+<span class="nc" id="L404">				sendMe(NetEvent.EVENT_RETRIAL_JOB, job, randomDelay);</span>
+<span class="nc" id="L405">				break;</span>
+
+			case NetEvent.EVENT_RETRIAL_JOB:
+<span class="nc" id="L408">				jobInfo = nodeJobsList.lookFor(job);</span>
+<span class="nc" id="L409">				nodeJobsList.retryJob(jobInfo);</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">				if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L411">					netJobsList.retryJob(job);</span>
+				}
+<span class="nc" id="L413">				isRetrialJob = true;</span>
+<span class="nc" id="L414">				break;</span>
+
+			case NetEvent.EVENT_JOB: {
+				//EVENT_JOB
+				//If the queue is a redirecting queue, jobs arriving from the outside of
+				//the blocking region must be redirected to the region input station
+				//
+				//Otherwise the job is processed as usual.
+				//
+				//If coolStart is true, the queue is empty, so the job is added to the job list
+				//and immediately forwarded to the next section. An ack is sent and coolStart is
+				//set to false.
+				//
+				//If the queue is not empty, it should be distinguished between finite/infinite queue.
+				//
+				//If the queue is finite, checks the size: if it is not full the job is put into the
+				//queue and an ack is sent. Else, if it is full, checks the owner node: if the
+				//source node is the owner node of this section, an ack is sent and a waiting
+				//request is created. If the source is another node the waiting request is created
+				//only if drop is false, otherwise an ack is sent but the job is rejected.
+				//
+				//If the queue is infinite, the job is put into the queue and an ack is sent
+
+				//----REDIRECTION BEHAVIOUR----------//
+<span class="nc bnc" id="L438" title="All 2 branches missed.">				if (redirectionON) {</span>
+<span class="nc" id="L439">					NetNode source = message.getSource();</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">					if (!myRegion.belongsToRegion(source)) {</span>
+						//this message has arrived from the outside of the blocking region
+<span class="nc bnc" id="L442" title="All 2 branches missed.">						if ((source != regionInputStation)) {</span>
+							//the external source is not the input station
+							//the message must be redirected to the input station,
+							//without processing it
+
+							//redirects the message to the inputStation
+<span class="nc" id="L448">							redirect(job, 0.0, NodeSection.INPUT, regionInputStation);</span>
+							//send an ack to the source
+<span class="nc" id="L450">							send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+<span class="nc" id="L451">							break;</span>
+						}
+					}
+				}
+				//----END REDIRECTION BEHAVIOUR-------//
+
+<span class="nc bnc" id="L457" title="All 2 branches missed.">				if(comingFromStorageSection){</span>
+<span class="nc" id="L458">					jobsFromPlaces.add(message);</span>
+<span class="nc" id="L459">					break;</span>
+				}
+
+				//
+				//two possible cases:
+				//1 - the queue is a generic queue (!redirectionOn)
+				//2 - the queue is a redirecting queue, but the message has arrived
+				//from the inside of the region or from the inputStation:
+				//in this case the redirecting queue acts as a normal queue
+				//therefore in both cases the behaviour is the same
+
+				// Before even entering the queue, we first check if the job will balk.
+				// If it balks, do not proceed further with the rest of the code.
+<span class="nc bnc" id="L472" title="All 2 branches missed.">				if (jobWillBalk(job)) {</span>
+<span class="nc" id="L473">					performBalkingOperations(job);</span>
+<span class="nc" id="L474">					sendAckToMessageSource(message, job);</span>
+<span class="nc" id="L475">					break;</span>
+				}
+				// Check if there is still capacity.
+				// &lt;= size because the arriving job has not been inserted in Queue
+				// job list but has been inserted in NetNode job list !!
+				// If true, then retrial will be considered as successful
+<span class="nc" id="L481">				jobClass = job.getJobClass().getId();</span>
+<span class="nc" id="L482">				boolean isJobInQueue = true;</span>
+<span class="nc bnc" id="L483" title="All 4 branches missed.">				if (infinite || nodeJobsList.size() &lt;= capacity) {</span>
+					// Queue is not full. Okay.
+<span class="nc bnc" id="L485" title="All 2 branches missed.">					if (nodeJobsList.getRetrialOrbit().containsKey(job.getId())) {</span>
+<span class="nc" id="L486">						nodeJobsList.removeFromRetrialOrbit(job);</span>
+					}
+					// If parent node is a fork node adds job to FJ info list
+<span class="nc bnc" id="L489" title="All 2 branches missed.">					if (getOwnerNode().getSection(NodeSection.OUTPUT) instanceof Fork) {</span>
+<span class="nc" id="L490">						addJobToBuffer(job, message, BufferType.FJ_LIST);</span>
+					}
+
+<span class="nc bnc" id="L493" title="All 2 branches missed.">			if (softDeadlines != null) {</span>
+<span class="nc" id="L494">						job.setCurrentStationSoftDeadline(softDeadlines[job.getJobClass().getId()]</span>
+<span class="nc" id="L495">								+ getOwnerNode().getNetSystem().getTime());</span>
+					}
+
+<span class="nc" id="L498">					putStrategies[jobClass].put(job, jobsList, this);</span>
+
+<span class="nc" id="L500">					Server server = getOwnerNode().getServer();</span>
+
+<span class="nc bnc" id="L502" title="All 4 branches missed.">					if(!(workingAsTransition &amp;&amp; savedEnablingDegree == 0)) {</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">						if (coolStart) {</span>
+<span class="nc" id="L504">							jobSent = getStrategy.get(jobsList);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">							if (getStrategy instanceof PollingGetStrategy) {</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">								if (!switchOverRequest) {</span>
+<span class="nc bnc" id="L507" title="All 2 branches missed.">									if (jobSent == null) {</span>
+<span class="nc" id="L508">										sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);</span>
+<span class="nc" id="L509">										switchOverRequest = true;</span>
+									} else {
+<span class="nc" id="L511">										sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L512">										isJobInQueue = false;</span>
+									}
+								}
+							} else {
+<span class="nc" id="L516">								sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L517">								isJobInQueue = false;</span>
+							}
+
+<span class="nc" id="L520">							coolStart = false;</span>
+						} else {
+<span class="nc bnc" id="L522" title="All 2 branches missed.">							if (putStrategies[jobClass] instanceof PreemptiveStrategy) {</span>
+<span class="nc" id="L523">								PreemptiveStrategy preemptiveStrategy = (PreemptiveStrategy) putStrategies[jobClass];</span>
+<span class="nc" id="L524">								Job lastJobInService = ((PreemptiveServer) getOwnerNode().getSection(NodeSection.SERVICE)).getLastJobInfo().getJob();</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">								if (preemptiveStrategy.compare(job, lastJobInService) &gt; 0) {</span>
+<span class="nc bnc" id="L526" title="All 2 branches missed.">									if(server != null) {</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">										if (jobsList.size() &gt; 0) {</span>
+<span class="nc" id="L528">											jobSent = getStrategy.get(jobsList, getOwnerNode());</span>
+<span class="nc bnc" id="L529" title="All 2 branches missed.">											if (jobSent != null) {</span>
+<span class="nc" id="L530">												sendForward(jobSent, 0.0);</span>
+											}
+<span class="nc bnc" id="L532" title="All 2 branches missed.">										} else if (server.getNumOfFreeServersForClass(job.getJobClass().getId()) &gt; 0) {</span>
+<span class="nc" id="L533">											sendForward(job, 0.0);</span>
+										}
+									} else {
+<span class="nc" id="L536">										jobSent = getStrategy.get(jobsList);</span>
+<span class="nc" id="L537">										sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L538">										isJobInQueue = false;</span>
+									}
+								}
+							}
+						}
+					}
+
+					// sends an ACK backward
+<span class="nc bnc" id="L546" title="All 2 branches missed.">					if (!isRetrialJob) {</span>
+<span class="nc" id="L547">						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+					}
+
+<span class="nc" id="L550">				} else {</span>
+					// Queue is full. Now we use an additional queue or drop.
+					// if the job has been sent by the owner node of this queue section
+<span class="nc bnc" id="L553" title="All 4 branches missed.">					if (isMyOwnerNode(message.getSource()) &amp;&amp; !isRetrialJob) {</span>
+						// job sent by the node itself (corner case) -- should always be successful
+<span class="nc" id="L555">						addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);</span>
+<span class="nc" id="L556">						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+<span class="nc bnc" id="L557" title="All 2 branches missed.">					} else if (drop[jobClass]) {</span>
+						// otherwise if the drop strategy is enabled
+<span class="nc bnc" id="L559" title="All 2 branches missed.">						if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L560">							netJobsList.dropJob(job);</span>
+						}
+<span class="nc" id="L562">						sendAckAfterDrop(job, 0.0, message.getSourceSection(), message.getSource());</span>
+<span class="nc bnc" id="L563" title="All 2 branches missed.">						if (redirectionON) {</span>
+<span class="nc" id="L564">							myRegion.decreaseOccupation(job.getJobClass());</span>
+<span class="nc" id="L565">							send(NetEvent.EVENT_JOB_OUT_OF_REGION, job, 0.0, NodeSection.INPUT, regionInputStation);</span>
+						}
+<span class="nc" id="L567">						isJobInQueue = false;</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">					} else if (block[jobClass]) {</span>
+						// otherwise if the blocking strategy is enabled
+<span class="nc" id="L570">						addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);</span>
+<span class="nc bnc" id="L571" title="All 2 branches missed.">					} else if (waiting[jobClass]) {</span>
+						// otherwise if the waiting strategy is enabled
+<span class="nc" id="L573">						addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);</span>
+<span class="nc" id="L574">						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">					} else if (retrial[jobClass]) {</span>
+						// otherwise if the retrial strategy is enabled
+<span class="nc" id="L577">						sendMe(NetEvent.EVENT_RETRIAL, job, 0.0);</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">						if (!isRetrialJob) {</span>
+<span class="nc" id="L579">							send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+						}
+<span class="nc" id="L581">						isJobInQueue = false;</span>
+					} else {
+						// otherwise
+<span class="nc" id="L584">						return MSG_NOT_PROCESSED;</span>
+					}
+				}
+<span class="nc bnc" id="L587" title="All 2 branches missed.">				if (isJobInQueue) {</span>
+<span class="nc" id="L588">					createRenegingEvent(job);</span>
+				}
+
+				break;
+			}
+
+			case NetEvent.EVENT_POLLING_SERVER_READY:
+<span class="nc bnc" id="L595" title="All 2 branches missed.">				if (jobsList.size() &gt; 0) {</span>
+<span class="nc" id="L596">					jobSent = getStrategy.get(jobsList);</span>
+<span class="nc bnc" id="L597" title="All 2 branches missed.">					if (jobSent == null) {</span>
+<span class="nc" id="L598">						sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);</span>
+					} else {
+<span class="nc" id="L600">						sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L601">						cancelRenegingEvent(jobSent);</span>
+<span class="nc" id="L602">						switchOverRequest = false;</span>
+					}
+				} else {
+<span class="nc" id="L605">					coolStart = true;</span>
+<span class="nc" id="L606">					switchOverRequest = false;</span>
+				}
+<span class="nc" id="L608">				break;</span>
+
+			case NetEvent.EVENT_ACK:
+				//EVENT_ACK
+				//If there are waiting requests, the first is taken (if the source node of this request
+				//is the owner node of this section, an ack message is sent).
+				//The job contained is put into the queue using the specified put strategy.
+				//At this point, if there are jobs in queue, the first is taken (using the
+				//specified get strategy) and forwarded. Otherwise, if there are no jobs,
+				//coolStart is set true.
+
+<span class="nc bnc" id="L619" title="All 2 branches missed.">				if (waitingRequests.size() &gt; 0) {</span>
+<span class="nc" id="L620">					WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();</span>
+<span class="nc bnc" id="L621" title="All 4 branches missed.">					if (!isMyOwnerNode(wr.getSource()) &amp;&amp; block[wr.getJob().getJobClass().getId()]) {</span>
+<span class="nc" id="L622">						send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSourceSection(), wr.getSource());</span>
+					}
+<span class="nc" id="L624">					addJobToBuffer(wr.getJob(), message, BufferType.JOBS_LIST);</span>
+				}
+
+<span class="nc bnc" id="L627" title="All 2 branches missed.">				if (jobsList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">					if(getOwnerNode().getServer() != null) {</span>
+<span class="nc" id="L629">						jobSent = getStrategy.get(jobsList, getOwnerNode());</span>
+<span class="nc bnc" id="L630" title="All 2 branches missed.">						if (jobSent != null) {</span>
+<span class="nc" id="L631">							sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L632">							cancelRenegingEvent(jobSent);</span>
+						} else {
+<span class="nc" id="L634">							coolStart = true;</span>
+						}
+					} else {
+<span class="nc" id="L637">					jobSent = getStrategy.get(jobsList);</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">					if (getStrategy instanceof PollingGetStrategy) {</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">						if (!switchOverRequest) {</span>
+<span class="nc bnc" id="L640" title="All 2 branches missed.">							if (jobSent == null) {</span>
+<span class="nc" id="L641">								sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);</span>
+<span class="nc" id="L642">								switchOverRequest = true;</span>
+							} else {
+<span class="nc" id="L644">								sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L645">								cancelRenegingEvent(jobSent);</span>
+							}
+						}
+					} else {
+<span class="nc" id="L649">						sendForward(jobSent, 0.0);</span>
+<span class="nc" id="L650">						cancelRenegingEvent(jobSent);</span>
+					}
+<span class="nc" id="L652">					coolStart = false;</span>
+					}
+				} else {
+					// GC: new section, if it is not execute then it will be &quot;wait-and-see&quot; polling
+<span class="nc bnc" id="L656" title="All 2 branches missed.">					if (getStrategy instanceof PollingGetStrategy) {</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">						if (!switchOverRequest) {</span>
+<span class="nc" id="L658">							sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);</span>
+<span class="nc" id="L659">							switchOverRequest = true;</span>
+						}
+					}
+<span class="nc" id="L662">					coolStart = true;</span>
+				}
+
+<span class="nc" id="L665">				break;</span>
+
+			case NetEvent.EVENT_PREEMPTED_JOB:
+<span class="nc" id="L668">				addJobToBuffer(job, message, BufferType.JOBS_LIST_FIRST);</span>
+<span class="nc" id="L669">				createRenegingEvent(job);</span>
+<span class="nc" id="L670">				break;</span>
+
+			case NetEvent.EVENT_JOIN:
+<span class="nc" id="L673">				jobInfo = getJobInfoFromBuffer(job, FJList);</span>
+<span class="nc bnc" id="L674" title="All 2 branches missed.">				if (jobInfo != null) {</span>
+<span class="nc" id="L675">					FJList.remove(jobInfo);</span>
+				}
+				break;
+
+			case NetEvent.EVENT_RENEGE:
+<span class="nc bnc" id="L680" title="All 2 branches missed.">				if (getJobInfoFromBuffer(job, waitingRequests) != null) {</span>
+<span class="nc" id="L681">					performRenegingOperations(job, waitingRequests);</span>
+				}
+<span class="nc bnc" id="L683" title="All 2 branches missed.">				if (getJobInfoFromBuffer(job, jobsList) != null) {</span>
+<span class="nc" id="L684">					performRenegingOperations(job, jobsList);</span>
+<span class="nc bnc" id="L685" title="All 2 branches missed.">					if (waitingRequests.size() &gt; 0) {</span>
+<span class="nc" id="L686">						WaitingRequest wr = (WaitingRequest) waitingRequests.removeFirst();</span>
+<span class="nc bnc" id="L687" title="All 4 branches missed.">						if (!isMyOwnerNode(wr.getSource()) &amp;&amp; block[wr.getJob().getJobClass().getId()]) {</span>
+<span class="nc" id="L688">							send(NetEvent.EVENT_ACK, wr.getJob(), 0.0, wr.getSourceSection(), wr.getSource());</span>
+						}
+<span class="nc" id="L690">						addJobToBuffer(wr.getJob(), message, BufferType.JOBS_LIST);</span>
+					}
+				}
+
+			case NetEvent.EVENT_JOB_RELEASE:
+<span class="nc" id="L695">				break;</span>
+
+			case NetEvent.EVENT_STOP:
+<span class="nc" id="L698">				break;</span>
+
+			case NetEvent.EVENT_JOB_CHANGE: {
+				//Calcolo enabling degree
+<span class="nc" id="L702">				Object data = message.getData();</span>
+<span class="nc bnc" id="L703" title="All 2 branches missed.">				if(data != null){</span>
+<span class="nc" id="L704">					TransitionVector storageVector = (TransitionVector) data;</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">					for(int i = 0; i &lt; jobClasses.size(); i++) {</span>
+<span class="nc" id="L706">						storageSituation.setEntry(storageVector.getKey(), i, storageVector.getEntry(i));</span>
+					}
+				}
+
+<span class="nc" id="L710">				int enablingDegree = -1;</span>
+
+				OUTER_LOOP:
+<span class="nc bnc" id="L713" title="All 2 branches missed.">				for(String nodeName : enablingConditions[mode].keySet()){</span>
+<span class="nc bnc" id="L714" title="All 2 branches missed.">					if(enablingConditions[mode].getTotal(nodeName) &gt; 0){</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">						for(int j = 0; j &lt; jobClasses.size(); j++){</span>
+<span class="nc" id="L716">							int availableJobNumber = storageSituation.getEntry(nodeName, j);</span>
+<span class="nc" id="L717">							int requiredJobNumber = enablingConditions[mode].getEntry(nodeName, j);</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">							if(requiredJobNumber &gt; 0){</span>
+<span class="nc bnc" id="L719" title="All 2 branches missed.">								if(enablingDegree &lt; 0){</span>
+<span class="nc" id="L720">									enablingDegree = availableJobNumber / requiredJobNumber;</span>
+								}else{
+<span class="nc" id="L722">									enablingDegree = Math.min(enablingDegree, availableJobNumber / requiredJobNumber);</span>
+								}
+<span class="nc bnc" id="L724" title="All 2 branches missed.">								if(enablingDegree == 0){</span>
+<span class="nc" id="L725">									break OUTER_LOOP;</span>
+								}
+							}
+						}
+					}
+
+<span class="nc bnc" id="L731" title="All 2 branches missed.">					if(inhibitingConditions[mode].getTotal(nodeName) &gt; 0){</span>
+<span class="nc bnc" id="L732" title="All 2 branches missed.">						for(int j = 0; j &lt; jobClasses.size(); j++){</span>
+<span class="nc" id="L733">							int availableJobNumber = storageSituation.getEntry(nodeName, j);</span>
+<span class="nc" id="L734">							int requiredJobNumber = inhibitingConditions[mode].getEntry(nodeName, j);</span>
+<span class="nc bnc" id="L735" title="All 4 branches missed.">							if(requiredJobNumber &gt; 0 &amp;&amp; availableJobNumber &gt;= requiredJobNumber){</span>
+<span class="nc" id="L736">								enablingDegree = 0;</span>
+<span class="nc" id="L737">								break OUTER_LOOP;</span>
+							}
+						}
+					}
+<span class="nc" id="L741">				}</span>
+
+<span class="nc" id="L743">				savedEnablingDegree = enablingDegree;</span>
+<span class="nc" id="L744">				sendForward(NetEvent.EVENT_ENABLING, enablingDegree, 0.0);</span>
+
+<span class="nc" id="L746">				break;</span>
+			}
+
+			case NetEvent.EVENT_TIMING:{
+<span class="nc bnc" id="L750" title="All 2 branches missed.">				for(String nodeName : enablingConditions[mode].keySet()){</span>
+<span class="nc" id="L751">					int enablingJobNumberFromNode = enablingConditions[mode].getTotal(nodeName);</span>
+<span class="nc" id="L752">					int resourceJobNumberFromNode = resourceConditions[mode].getTotal(nodeName);</span>
+<span class="nc bnc" id="L753" title="All 2 branches missed.">					if(enablingJobNumberFromNode - resourceJobNumberFromNode &gt; 0){</span>
+<span class="nc" id="L754">						send(NetEvent.EVENT_JOB_REQUEST_FROM_SERVER, new RequestToPlace(</span>
+<span class="nc" id="L755">								enablingConditions[mode].getVector(nodeName),</span>
+<span class="nc" id="L756">								resourceConditions[mode].getVector(nodeName)),</span>
+<span class="nc" id="L757">								0.0, NodeSection.OUTPUT, netSystem.getNode(nodeName)</span>
+						);
+
+<span class="nc" id="L760">						unfinishedRequestNumber++;</span>
+					}
+<span class="nc" id="L762">				}</span>
+
+<span class="nc bnc" id="L764" title="All 2 branches missed.">				if(unfinishedRequestNumber == 0){</span>
+<span class="nc" id="L765">					sendForward(NetEvent.EVENT_FIRING, null, 0.0);</span>
+				}
+				break;
+			}
+
+			case NetEvent.EVENT_JOB_FINISH:{
+<span class="nc bnc" id="L771" title="All 2 branches missed.">				if(unfinishedRequestNumber &lt;= 0){</span>
+<span class="nc" id="L772">					return MSG_NOT_PROCESSED;</span>
+				}
+
+<span class="nc" id="L775">				unfinishedRequestNumber--;</span>
+<span class="nc bnc" id="L776" title="All 2 branches missed.">				if(unfinishedRequestNumber == 0){</span>
+<span class="nc bnc" id="L777" title="All 2 branches missed.">					while(!jobsFromPlaces.isEmpty()){</span>
+<span class="nc" id="L778">						NetMessage m = jobsFromPlaces.remove(0);</span>
+<span class="nc" id="L779">						Job j = m.getJob();</span>
+<span class="nc bnc" id="L780" title="All 2 branches missed.">						if(j != null){</span>
+<span class="nc" id="L781">							netJobsList.consumeJob(j);</span>
+						}
+<span class="nc" id="L783">					}</span>
+
+<span class="nc" id="L785">					sendForward(NetEvent.EVENT_FIRING, null, 0.0);</span>
+				}
+
+				break;
+			}
+
+			case NetEvent.EVENT_RESET_COOLSTART:{
+<span class="nc" id="L792">				coolStart = (boolean) message.getData();</span>
+<span class="nc" id="L793">				break;</span>
+			}
+
+			default:
+<span class="nc" id="L797">				return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L800">		return MSG_PROCESSED;</span>
+	}
+
+	/**
+	 * This method returns the capacity of the station (queue+server).
+	 */
+	public int getStationCapacity() {
+<span class="nc" id="L807">		return capacity;</span>
+	}
+
+	/**
+	 * This method should be used only in process(), and whenever a job is to be added to a buffer in this class.
+	 */
+	private void addJobToBuffer(Job job, NetMessage message, BufferType bufferType) throws NetException {
+<span class="nc bnc" id="L814" title="All 6 branches missed.">		switch (bufferType) {</span>
+			case FJ_LIST:
+<span class="nc" id="L816">				FJList.add(new JobInfo(job));</span>
+<span class="nc" id="L817">				break;</span>
+			case JOBS_LIST:
+<span class="nc" id="L819">				putStrategies[getJobClassId(job)].put(job, jobsList, this);</span>
+<span class="nc" id="L820">				break;</span>
+			case JOBS_LIST_FIRST:
+<span class="nc" id="L822">				jobsList.addFirst(new JobInfo(job));</span>
+<span class="nc" id="L823">				break;</span>
+			case JOBS_LIST_LAST:
+<span class="nc" id="L825">				jobsList.addLast(new JobInfo(job));</span>
+<span class="nc" id="L826">				break;</span>
+			case WAITING_REQUESTS:
+<span class="nc" id="L828">				JobInfo waitingRequestInfo = new WaitingRequest(job, message.getSourceSection(), message.getSource());</span>
+<span class="nc" id="L829">				waitingRequests.add(waitingRequestInfo);</span>
+				break;
+		}
+<span class="nc" id="L832">	}</span>
+
+	private void sendAckToMessageSource(NetMessage message, Job job) {
+<span class="nc" id="L835">		send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+<span class="nc" id="L836">	}</span>
+
+	/**
+	 * Checks if the job is will balk before even entering the queue.
+	 * If it balks, call another method to handle the balking operation.
+	 *
+	 * @param job the job being processed.
+	 */
+	private boolean jobWillBalk(Job job) {
+<span class="nc" id="L845">		int jobClassId = getJobClassId(job);</span>
+		// Allows the job to balk only if the impatience strategy for the station-class is Balking
+<span class="nc bnc" id="L847" title="All 2 branches missed.">		if (jobClassHasRequiredImpatience(jobClassId, ImpatienceType.BALKING)) {</span>
+<span class="nc" id="L848">			boolean priorityActivated = ((Balking) impatienceStrategies[jobClassId]).isPriorityActivated();</span>
+<span class="nc" id="L849">			int jobClassPriority = job.getJobClass().getPriority();</span>
+<span class="nc" id="L850">			BooleanValueImpatienceMeasurement balkingStatus =</span>
+					new BooleanValueImpatienceMeasurement(jobsList, waitingRequests, jobClassPriority, priorityActivated);
+<span class="nc bnc" id="L852" title="All 2 branches missed.">			if (balkingStatus.getQueueLength() &lt;= 0) {</span>
+<span class="nc" id="L853">				return false;</span>
+			}
+<span class="nc" id="L855">			impatienceStrategies[jobClassId].generateImpatience(balkingStatus);</span>
+<span class="nc" id="L856">			return balkingStatus.getBooleanValue();</span>
+		}
+<span class="nc" id="L858">		return false;</span>
+	}
+
+	/**
+	 * Creates the reneging event of the job and updates the reneging message accordingly.
+	 *
+	 * @param job the job being processed.
+	 */
+	private void createRenegingEvent(Job job) {
+<span class="nc" id="L867">		int jobClassId = getJobClassId(job);</span>
+		// Allows the job to renege only if the impatience strategy for the station-class is Reneging
+<span class="nc bnc" id="L869" title="All 2 branches missed.">		if (jobClassHasRequiredImpatience(jobClassId, ImpatienceType.RENEGING)) {</span>
+<span class="nc" id="L870">			DoubleValueImpatienceMeasurement renegingDelay = new DoubleValueImpatienceMeasurement();</span>
+<span class="nc" id="L871">			impatienceStrategies[jobClassId].generateImpatience(renegingDelay);</span>
+<span class="nc" id="L872">			RemoveToken renegingMessage = sendMe(NetEvent.EVENT_RENEGE, job, renegingDelay.doubleValue());</span>
+<span class="nc" id="L873">			job.setRenegingMessage(renegingMessage);</span>
+		}
+<span class="nc" id="L875">	}</span>
+
+	/**
+	 * Cancel the reneging event of the job and updates the reneging message accordingly.
+	 *
+	 * @param job the job being processed.
+	 */
+	private void cancelRenegingEvent(Job job) {
+<span class="nc" id="L883">		int jobClassId = getJobClassId(job);</span>
+		// Allows the job to renege only if the impatience strategy for the station-class is Reneging
+<span class="nc bnc" id="L885" title="All 2 branches missed.">		if (jobClassHasRequiredImpatience(jobClassId, ImpatienceType.RENEGING)) {</span>
+<span class="nc" id="L886">			RemoveToken renegingMessage = job.getRenegingMessage();</span>
+<span class="nc" id="L887">			removeMessage(renegingMessage);</span>
+<span class="nc" id="L888">			job.setRenegingMessage(null);</span>
+		}
+<span class="nc" id="L890">	}</span>
+
+	/**
+	 * Checks if the particular job class has an Impatience object attached to it.
+	 */
+	private boolean jobClassHasRequiredImpatience(int jobClassId, ImpatienceType requiredImpatience) {
+<span class="nc bnc" id="L896" title="All 4 branches missed.">		return impatienceStrategies != null &amp;&amp; impatienceStrategies[jobClassId] != null</span>
+<span class="nc bnc" id="L897" title="All 2 branches missed.">				&amp;&amp; impatienceStrategies[jobClassId].isImpatienceType(requiredImpatience);</span>
+	}
+
+	/**
+	 * Balks the job from the Queue, NetNode, and System. Thereafter, updates the counters for balking.
+	 *
+	 * @param job the job being balked.
+	 */
+	private void performBalkingOperations(Job job) {
+<span class="nc" id="L906">		JobInfo jobInfoInNetNode = getJobInfoFromBuffer(job, nodeJobsList);</span>
+<span class="nc" id="L907">		nodeJobsList.balkJob(jobInfoInNetNode);</span>
+<span class="nc bnc" id="L908" title="All 2 branches missed.">		if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L909">			netJobsList.balkJob(job);</span>
+		}
+<span class="nc" id="L911">	}</span>
+
+	/**
+	 * Reneges the job from the Queue, NetNode, and System. Thereafter, updates the counters for reneging.
+	 *
+	 * @param job         the job being reneged.
+	 * @param jobsInQueue the JobInfoList belonging to the Queue, from which the job will renege.
+	 */
+	private void performRenegingOperations(Job job, JobInfoList jobsInQueue) {
+<span class="nc" id="L920">		JobInfo jobInfoInQueueClass = getJobInfoFromBuffer(job, jobsInQueue);</span>
+<span class="nc" id="L921">		JobInfo jobInfoInNetNode = getJobInfoFromBuffer(job, nodeJobsList);</span>
+<span class="nc" id="L922">		jobsInQueue.renegeJob(jobInfoInQueueClass);</span>
+<span class="nc" id="L923">		nodeJobsList.renegeJob(jobInfoInNetNode);</span>
+<span class="nc bnc" id="L924" title="All 2 branches missed.">		if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L925">			netJobsList.renegeJob(job);</span>
+		}
+<span class="nc" id="L927">	}</span>
+
+	private int getJobClassId(Job job) {
+<span class="nc" id="L930">		return job.getJobClass().getId();</span>
+	}
+
+	private JobInfo getJobInfoFromBuffer(Job job, JobInfoList buffer) {
+<span class="nc" id="L934">		return buffer.lookFor(job);</span>
+	}
+
+	@Override
+	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
+<span class="nc bnc" id="L939" title="All 3 branches missed.">		switch (name) {</span>
+			case SimConstants.FORK_JOIN_NUMBER_OF_JOBS:
+<span class="nc" id="L941">				FJList.analyzeQueueLength(jobClass, measurement, false, 0);</span>
+<span class="nc" id="L942">				break;</span>
+			case SimConstants.FORK_JOIN_RESPONSE_TIME:
+<span class="nc" id="L944">				FJList.analyzeResponseTime(jobClass, measurement, false, 0);</span>
+<span class="nc" id="L945">				break;</span>
+			default:
+<span class="nc" id="L947">				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+		}
+<span class="nc" id="L949">	}</span>
+
+<span class="nc" id="L951">	public boolean isStationWorkingAsATransition(){ return workingAsTransition; }</span>
+
+public void setSoftDeadlines(double[] softDeadlines) {
+<span class="nc" id="L954">		this.softDeadlines = softDeadlines;</span>
+<span class="nc" id="L955">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SafeFunction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration</a> &gt; <span class="el_source">SafeFunction.java</span></div><h1>SafeFunction.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration;
+
+import java.math.BigDecimal;
+
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+
+/**
+ * Abstract class that implements the Function interface. Requires that
+ * dimensionality and the location of the point in the domain be enforced before
+ * a safe evaluation of the function is performed
+ */
+public abstract class SafeFunction implements Function {
+
+	protected final int ndim;
+
+	/**
+	 * Initialized the SafeFunction object
+	 * 
+	 * @param ndim dimensionality of the function
+	 */
+<span class="nc" id="L21">	public SafeFunction(int ndim) {</span>
+<span class="nc" id="L22">		this.ndim = ndim;</span>
+<span class="nc" id="L23">	}</span>
+
+	/**
+	 * Checks that the provided point has length equal the function domain
+	 * dimensionality
+	 * 
+	 * @param point Point to be checked
+	 * @throws InternalErrorException When point is invalid
+	 */
+	protected void checkPoint(double[] point) throws InternalErrorException {
+<span class="nc bnc" id="L33" title="All 2 branches missed.">		if (point.length != this.ndim)</span>
+<span class="nc" id="L34">			throw new InternalErrorException(&quot;Dimensionality of integrated point invalid!&quot;);</span>
+<span class="nc" id="L35">	}</span>
+
+	/**
+	 * Function that checks point in within the domain of the function
+	 * 
+	 * @param point Point to be checked
+	 * @throws InternalErrorException When point is invalid
+	 */
+	protected abstract void checkInDomain(double[] point) throws InternalErrorException;
+
+	/**
+	 * Implements the Function evaluate interface with a safe one
+	 * 
+	 * @param point Array representing point to be evaluated
+	 * @return Function value at point
+	 * @throws InternalErrorException When point is not in function domain
+	 */
+	@Override
+	public BigDecimal evaluate(double[] point) throws InternalErrorException {
+<span class="nc" id="L54">		this.checkPoint(point);</span>
+<span class="nc" id="L55">		this.checkInDomain(point);</span>
+<span class="nc" id="L56">		return this.safeEvaluate(point);</span>
+	}
+
+	/**
+	 * The evaluation of the function, given that the point is within the domain
+	 * 
+	 * @param point Array representing point to be evaluated
+	 * @return Function value at point
+	 */
+	protected abstract BigDecimal safeEvaluate(double[] point) throws InternalErrorException;
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

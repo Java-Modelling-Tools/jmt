@@ -1,0 +1,531 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MainPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.wizard.panels</a> &gt; <span class="el_source">MainPanel.java</span></div><h1>MainPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmch.wizard.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
+
+import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
+
+import jmt.framework.gui.components.JMTMenuBar;
+import jmt.framework.gui.components.JMTToolBar;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.listeners.MenuAction;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.jmch.Constants;
+import jmt.jmch.wizard.actionsWizard.About;
+import jmt.jmch.wizard.actionsWizard.AbstractMCHAction;
+import jmt.jmch.wizard.actionsWizard.Help;
+import jmt.jmch.simulation.Simulation;
+import jmt.jmch.simulation.SimulationFactory;
+import jmt.jmch.simulation.SimulationType;
+import jmt.jmch.wizard.MainWizard;
+
+/**
+ * Main Panel of the MainWizard. This panel offers the possibility of choosing between a JTeach Model or Markov chain.
+ *
+ * @author Lorenzo Torri
+ * Date: 29-mar-2024
+ * Time: 15.04
+ */
+public class MainPanel extends JMCHWizardPanel{
+
+    private static final String PANEL_NAME = &quot;Main Panel&quot;;
+    private static final String IMG_STARTSCREEN = &quot;StartScreenJMCH&quot;;
+	private int imgHeight;
+	private int imgWeight;
+	private int BUTTONHEIGHT;
+
+	private JMTMenuBar menu;
+	private JMTToolBar toolbar;
+    private HoverHelp help; //retrieve from parent the HoverHelp
+
+	//----------- variables for the panel with all the buttons of the graph
+<span class="nc" id="L83">	private final String[] data = {&quot;Non-preemptive&quot;, &quot;&quot;, &quot;Preemptive&quot;, &quot;&quot;, &quot;Processor Sharing&quot;, &quot;&quot;, &quot;Round Robin&quot;, &quot;&quot;, &quot;Probabilities&quot;, &quot;&quot;, &quot;...&quot;, &quot;&quot;, &quot;Markov Chains&quot;}; //some of them are empty because they represent the empty box between two elements of the list</span>
+<span class="nc" id="L84">	private final JList&lt;String&gt; list = new JList&lt;&gt;(data);</span>
+
+	//all actions associated to the buttons of the Menu and ToolBar
+    private AbstractMCHAction openHelp;
+	private AbstractMCHAction about;
+
+
+	//all the AbstractActions associated to the buttons related of this panel only
+<span class="nc" id="L92">	protected AbstractAction FCFS = new AbstractAction(Constants.FCFS) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L95">			putValue(Action.SHORT_DESCRIPTION, Constants.PREEMPTIVE_TOOLTIPS[0]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L99">			Simulation sim = SimulationFactory.createSimulation(SimulationType.NON_PREEMPTIVE, Constants.FCFS);</span>
+<span class="nc" id="L100">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L101">		}</span>
+	};
+
+<span class="nc" id="L104">	protected AbstractAction LCFS = new AbstractAction(Constants.LCFS) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L107">			putValue(Action.SHORT_DESCRIPTION, Constants.PREEMPTIVE_TOOLTIPS[1]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L111">			Simulation sim = SimulationFactory.createSimulation(SimulationType.NON_PREEMPTIVE, Constants.LCFS);</span>
+<span class="nc" id="L112">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L113">		}</span>
+	};
+
+<span class="nc" id="L116">	protected AbstractAction SJF = new AbstractAction(Constants.SJF) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L119">			putValue(Action.SHORT_DESCRIPTION, Constants.PREEMPTIVE_TOOLTIPS[2]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L123">			Simulation sim = SimulationFactory.createSimulation(SimulationType.NON_PREEMPTIVE, Constants.SJF);</span>
+<span class="nc" id="L124">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L125">		}</span>
+	};
+
+<span class="nc" id="L128">	protected AbstractAction LJF = new AbstractAction(Constants.LJF) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L131">			putValue(Action.SHORT_DESCRIPTION, Constants.PREEMPTIVE_TOOLTIPS[3]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L135">			Simulation sim = SimulationFactory.createSimulation(SimulationType.NON_PREEMPTIVE, Constants.LJF);</span>
+<span class="nc" id="L136">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L137">		}</span>
+	};
+
+<span class="nc" id="L140">	protected AbstractAction PS = new AbstractAction(Constants.PS) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L143">			putValue(Action.SHORT_DESCRIPTION, Constants.PROCESSOR_SHARING_TOOLTIPS[0]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L147">			Simulation sim = SimulationFactory.createSimulation(SimulationType.PROCESSOR_SHARING, Constants.PS);</span>
+<span class="nc" id="L148">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L149">		}</span>
+	};
+
+<span class="nc" id="L152">	protected AbstractAction RR = new AbstractAction(&quot;Round Robin&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L155">			putValue(Action.SHORT_DESCRIPTION, Constants.ROUTING_TOOLTIPS[0]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L159">			Simulation sim = SimulationFactory.createSimulation(SimulationType.ROUTING, Constants.RR);</span>
+<span class="nc" id="L160">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L161">		}</span>
+	};
+
+<span class="nc" id="L164">	protected AbstractAction PROBABILISTIC = new AbstractAction(&quot;Probabilities&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L167">			putValue(Action.SHORT_DESCRIPTION, Constants.ROUTING_TOOLTIPS[1]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L171">			Simulation sim = SimulationFactory.createSimulation(SimulationType.ROUTING, Constants.PROBABILISTIC);</span>
+<span class="nc" id="L172">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L173">		}</span>
+	};
+
+<span class="nc" id="L176">	protected AbstractAction JSQ = new AbstractAction(&quot;Join Shortest Queue&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L179">			putValue(Action.SHORT_DESCRIPTION, Constants.ROUTING_TOOLTIPS[2]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L183">			Simulation sim = SimulationFactory.createSimulation(SimulationType.ROUTING, Constants.JSQ);</span>
+<span class="nc" id="L184">			parent.setAnimationPanelEnv(sim);</span>
+<span class="nc" id="L185">		}</span>
+	};
+
+<span class="nc" id="L188">	protected AbstractAction MM1 = new AbstractAction(&quot;M/M/1&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L191">			putValue(Action.SHORT_DESCRIPTION, Constants.MARKOV_TOOLTIPS[0]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L195">			parent.setMMQueuesPanelEnv(&quot;mm1&quot;);	</span>
+<span class="nc" id="L196">		}</span>
+	};
+
+<span class="nc" id="L199">	protected AbstractAction MM1K = new AbstractAction(&quot;M/M/1/k&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L202">			putValue(Action.SHORT_DESCRIPTION, Constants.MARKOV_TOOLTIPS[1]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L206">			parent.setMMQueuesPanelEnv(&quot;mm1k&quot;);</span>
+<span class="nc" id="L207">		}</span>
+	};
+
+<span class="nc" id="L210">	protected AbstractAction MMC = new AbstractAction(&quot;M/M/c&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L213">			putValue(Action.SHORT_DESCRIPTION, Constants.MARKOV_TOOLTIPS[2]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L217">			parent.setMMQueuesPanelEnv(&quot;mmn&quot;);</span>
+<span class="nc" id="L218">		}</span>
+	};
+
+<span class="nc" id="L221">	protected AbstractAction MMCK = new AbstractAction(&quot;M/M/c/k&quot;) {</span>
+		private static final long serialVersionUID = 1L;
+		{
+<span class="nc" id="L224">			putValue(Action.SHORT_DESCRIPTION, Constants.MARKOV_TOOLTIPS[3]);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L228">			parent.setMMQueuesPanelEnv(&quot;mmnk&quot;);</span>
+<span class="nc" id="L229">		}</span>
+	};
+
+<span class="nc" id="L232">    public MainPanel(MainWizard main){</span>
+<span class="nc" id="L233">        parent = main;</span>
+<span class="nc" id="L234">		help = parent.getHoverHelp();</span>
+
+<span class="nc" id="L236">        openHelp = new Help(this);</span>
+<span class="nc" id="L237">		about = new About(this);</span>
+
+<span class="nc" id="L239">        initGUI();</span>
+<span class="nc" id="L240">    }</span>
+
+    public void initGUI(){
+<span class="nc" id="L243">		this.setLayout(new BorderLayout()); //border layout to help the resizing of the central image</span>
+
+		//---------------upper and bottom panels
+<span class="nc" id="L246">		JPanel upper = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L247">		JLabel upperLabel = new JLabel();</span>
+<span class="nc" id="L248">		upperLabel.setPreferredSize(new Dimension(300, 10));</span>
+<span class="nc" id="L249">		upper.add(upperLabel);</span>
+			
+<span class="nc" id="L251">		JPanel bottom = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L252">		JLabel bottomLabel = new JLabel();</span>
+<span class="nc" id="L253">		bottomLabel.setPreferredSize(new Dimension(300, 10));</span>
+<span class="nc" id="L254">		bottom.add(bottomLabel);</span>
+
+<span class="nc" id="L256">		this.add(upper, BorderLayout.NORTH);</span>
+<span class="nc" id="L257">		this.add(bottom, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L259">		deterimineSize();</span>
+
+		//--------------- image
+<span class="nc" id="L262">		JLabel imageLabel = new JLabel();</span>
+<span class="nc" id="L263">		imageLabel.setBorder(BorderFactory.createEmptyBorder((int)(BUTTONHEIGHT * 0.5), 1, 0, 0));</span>
+<span class="nc" id="L264">		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(imgWeight, imgHeight)));</span>
+<span class="nc" id="L265">		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);</span>
+<span class="nc" id="L266">		imageLabel.setVerticalAlignment(SwingConstants.NORTH);</span>
+<span class="nc" id="L267">		this.add(imageLabel, BorderLayout.CENTER);</span>
+
+		//---------------------panel with all the buttons
+<span class="nc" id="L270">		JPanel eastPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L271">		eastPanel.add(Box.createHorizontalStrut(150), BorderLayout.EAST);</span>
+<span class="nc" id="L272">		eastPanel.add(Box.createHorizontalStrut(10), BorderLayout.WEST);</span>
+<span class="nc" id="L273">		list.setCellRenderer(selectedRender(-1)); //-1 since no element is highlighted</span>
+<span class="nc" id="L274">		list.setBackground(null);</span>
+
+		//TODO: add help for each element of the list
+		/*ListModel&lt;String&gt; model = list.getModel();
+		ListCellRenderer&lt;? super String&gt; cellRenderer = list.getCellRenderer();
+		List&lt;Component&gt; components = new ArrayList&lt;&gt;();
+		for(int i = 0; i &lt; model.getSize(); i++){
+			if(i % 2 == 0){
+				Component component = cellRenderer.getListCellRendererComponent(list, list.getModel().getElementAt(i), i, false, false);
+				if(component != null){
+					components.add(component);
+				}
+				
+			}
+		}*/
+
+<span class="nc" id="L290">		help.addHelp(list, &quot;Select the JMCH Mode&quot;);</span>
+<span class="nc" id="L291">		eastPanel.add(list, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L293">		final JPopupMenu[] popupMenu = createSubMenus();</span>
+
+		//change the type of subMenu each time the cursor moves
+<span class="nc" id="L296">        list.addMouseMotionListener(new MouseMotionAdapter() {</span>
+            @Override
+            public void mouseMoved(MouseEvent e) {
+<span class="nc" id="L299">                int index = list.locationToIndex(e.getPoint());</span>
+				//if the selected item in the list is -1 or is not a separator, or its subMenu has already at least one element, we can show its submenu, otherwise setVisible = false to all subMenus
+<span class="nc bnc" id="L301" title="All 6 branches missed.">                if (index != -1 &amp;&amp; index % 2 == 0 &amp;&amp; popupMenu[index].getSubElements().length != 0) { </span>
+<span class="nc" id="L302">                    Rectangle cellBounds = list.getCellBounds(index, index);</span>
+<span class="nc bnc" id="L303" title="All 4 branches missed.">                    if (cellBounds != null &amp;&amp; cellBounds.contains(e.getPoint())) {</span>
+<span class="nc" id="L304">                        popupMenu[index].show(list, cellBounds.x + cellBounds.width, cellBounds.y);						</span>
+<span class="nc" id="L305">                        list.setCellRenderer(selectedRender(index));</span>
+                    } else {
+<span class="nc" id="L307">                        popupMenu[index].setVisible(false);</span>
+<span class="nc" id="L308">						list.setCellRenderer(selectedRender(-1));</span>
+                    }
+<span class="nc" id="L310">                } else {</span>
+<span class="nc" id="L311">					list.setCellRenderer(selectedRender(-1));</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">					for(int i = 0; i &lt; popupMenu.length; i++){</span>
+<span class="nc" id="L313">						popupMenu[i].setVisible(false);					</span>
+					}                
+                }
+<span class="nc" id="L316">            }</span>
+        });
+
+
+<span class="nc" id="L320">		this.add(eastPanel, BorderLayout.EAST);</span>
+		
+<span class="nc" id="L322">        createMenu();</span>
+<span class="nc" id="L323">        createToolBar();</span>
+<span class="nc" id="L324">    }</span>
+
+	/* Custom method to resize the content of the main panel based on the dimensions of the user's screen */
+	private void deterimineSize(){
+<span class="nc" id="L328">		Toolkit toolkit =  Toolkit.getDefaultToolkit ();</span>
+<span class="nc" id="L329">		Dimension dim = toolkit.getScreenSize();</span>
+<span class="nc bnc" id="L330" title="All 2 branches missed.">		int height = (CommonConstants.MAX_GUI_HEIGHT_JWAT+150) &lt; (int) dim.getHeight() ? (CommonConstants.MAX_GUI_HEIGHT_JWAT+150) : (int) dim.getHeight();</span>
+<span class="nc" id="L331">		double aspectRatio = 501/498;</span>
+
+		
+<span class="nc" id="L334">		imgHeight = height * 315 / 600; //we know for sure that if the height of the panel is 600, then the image's height is 315</span>
+<span class="nc" id="L335">		BUTTONHEIGHT = 30 * height / (CommonConstants.MAX_GUI_HEIGHT_JWAT+150);//we know that if the panel is 768 in height, then the correct size of BUTTONHEIGHT = 30</span>
+<span class="nc" id="L336">		imgWeight = (int) (aspectRatio * imgHeight);</span>
+<span class="nc" id="L337">	}</span>
+
+	/**
+	 * To set the look of each element inside the JList.
+	 * @param i index of the element of the JList that needs to be rendered
+	 * @return ListCellRenderer, a class that is encharge of changing the look of the cell
+	 */
+	public ListCellRenderer&lt;String&gt; selectedRender(final int i){
+<span class="nc" id="L345">		return new ListCellRenderer&lt;String&gt;() {</span>
+            @Override
+            public Component getListCellRendererComponent(JList&lt;? extends String&gt; list, String value, int index, boolean isSelected, boolean cellHasFocus) {
+<span class="nc" id="L348">            	JLabel label = new JLabel(value);</span>
+            	
+<span class="nc bnc" id="L350" title="All 2 branches missed.">            	if(index % 2 != 0) { //index odd are divisors</span>
+<span class="nc" id="L351">            		label.setPreferredSize(new Dimension(150, 30));</span>
+<span class="nc" id="L352">            		label.setMinimumSize(new Dimension(150, 30));</span>
+            	}
+            	else {            		
+<span class="nc" id="L355">					label.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L356">					Border borderEmpty = BorderFactory.createEmptyBorder(BUTTONHEIGHT-18, 5, BUTTONHEIGHT-18, 5);</span>
+<span class="nc" id="L357">					Border borderEtched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);</span>
+<span class="nc" id="L358">					Border compoundBorder = BorderFactory.createCompoundBorder(borderEtched, borderEmpty);</span>
+<span class="nc" id="L359">                    label.setBorder(compoundBorder);</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">					if(index == i) { //if the label is selected then highlight it</span>
+<span class="nc" id="L361">            			label.setBackground(Color.DARK_GRAY);</span>
+            		}
+					else{
+<span class="nc" id="L364">						label.setBackground(null);</span>
+					}
+            	}
+                
+<span class="nc" id="L368">                return label;</span>
+            }
+        };
+	}
+
+	/**
+	 * To create all the subMenus for each element of the JList
+	 * @return the array of subMenus
+	 */
+	public JPopupMenu[] createSubMenus() {
+<span class="nc" id="L378">		JPopupMenu[] subMenus = new JPopupMenu[13];</span>
+		
+<span class="nc" id="L380">		subMenus[0] = new JPopupMenu();</span>
+<span class="nc" id="L381">		subMenus[0].add(new CustomMenuItem(FCFS, true));</span>
+<span class="nc" id="L382">		subMenus[0].add(new CustomMenuItem(LCFS, true));</span>
+<span class="nc" id="L383">		subMenus[0].add(new CustomMenuItem(SJF, true));</span>
+<span class="nc" id="L384">		subMenus[0].add(new CustomMenuItem(LJF, true));</span>
+		
+<span class="nc" id="L386">		subMenus[1] = new JPopupMenu(); //subMenu for the separator</span>
+
+<span class="nc" id="L388">		subMenus[2] = new JPopupMenu();</span>
+<span class="nc" id="L389">		subMenus[2].add(new CustomMenuItem(&quot;FCFS-PR&quot;, false));</span>
+<span class="nc" id="L390">		subMenus[2].add(new CustomMenuItem(&quot;LCFS-PR&quot;, false));</span>
+<span class="nc" id="L391">		subMenus[2].add(new CustomMenuItem(&quot;SRPT&quot;, false));</span>
+<span class="nc" id="L392">		subMenus[2].add(new CustomMenuItem(&quot;EDF&quot;, false));</span>
+
+<span class="nc" id="L394">		subMenus[3] = new JPopupMenu(); //subMenu for the separator</span>
+		
+<span class="nc" id="L396">		subMenus[4] = new JPopupMenu();</span>
+<span class="nc" id="L397">		subMenus[4].add(new CustomMenuItem(PS, true));</span>
+		
+<span class="nc" id="L399">		subMenus[5] = new JPopupMenu(); //subMenu for the separator</span>
+		
+<span class="nc" id="L401">		subMenus[6] = new JPopupMenu();</span>
+<span class="nc" id="L402">		subMenus[6].add(new CustomMenuItem(RR, true));</span>
+		
+<span class="nc" id="L404">		subMenus[7] = new JPopupMenu(); //subMenu for the separator</span>
+		
+<span class="nc" id="L406">		subMenus[8] = new JPopupMenu();</span>
+<span class="nc" id="L407">		subMenus[8].add(new CustomMenuItem(PROBABILISTIC, true));</span>
+		
+<span class="nc" id="L409">		subMenus[9] = new JPopupMenu(); //subMenu for the separator</span>
+		
+<span class="nc" id="L411">		subMenus[10] = new JPopupMenu();</span>
+<span class="nc" id="L412">		subMenus[10].add(new CustomMenuItem(JSQ, true));</span>
+<span class="nc" id="L413">		subMenus[10].add(new CustomMenuItem(&quot;Random&quot;, false));</span>
+<span class="nc" id="L414">		subMenus[10].add(new CustomMenuItem(&quot;Shortest Response Time&quot;, false));</span>
+<span class="nc" id="L415">		subMenus[10].add(new CustomMenuItem(&quot;Least Utilization&quot;, false));</span>
+<span class="nc" id="L416">		subMenus[10].add(new CustomMenuItem(&quot;Fastest Service&quot;, false));</span>
+<span class="nc" id="L417">		subMenus[10].add(new CustomMenuItem(&quot;Load Dependend Routing&quot;, false));</span>
+<span class="nc" id="L418">		subMenus[10].add(new CustomMenuItem(&quot;Power of K&quot;, false));</span>
+<span class="nc" id="L419">		subMenus[10].add(new CustomMenuItem(&quot;Weighted Round Robin&quot;, false));</span>
+<span class="nc" id="L420">		subMenus[10].add(new CustomMenuItem(&quot;Class Switch&quot;, false));</span>
+
+
+<span class="nc" id="L423">		subMenus[11] = new JPopupMenu(); //subMenu for the separator</span>
+
+<span class="nc" id="L425">		subMenus[12] = new JPopupMenu();</span>
+<span class="nc" id="L426">		subMenus[12].add(new CustomMenuItem(MM1, true));</span>
+<span class="nc" id="L427">		subMenus[12].add(new CustomMenuItem(MM1K, true));</span>
+<span class="nc" id="L428">		subMenus[12].add(new CustomMenuItem(MMC, true));</span>
+<span class="nc" id="L429">		subMenus[12].add(new CustomMenuItem(MMCK, true));</span>
+		
+<span class="nc" id="L431">		return subMenus;	</span>
+	}
+
+    @Override
+    public String getName() {
+<span class="nc" id="L436">        return PANEL_NAME;</span>
+    }
+
+    /**
+	 * Creates a menu to be displayed in the MainWizard
+	 */
+	public void createMenu() {
+<span class="nc" id="L443">		menu = new JMTMenuBar(JMTImageLoader.getImageLoader());</span>
+
+        //File window
+<span class="nc" id="L446">        MenuAction action = new MenuAction(&quot;File&quot;, new AbstractMCHAction[] { null});</span>
+
+        //Help window
+<span class="nc" id="L449">        action = new MenuAction(&quot;Help&quot;, new AbstractMCHAction[] {openHelp, null, about});</span>
+<span class="nc" id="L450">		menu.addMenu(action);</span>
+
+<span class="nc" id="L452">        parent.setMenuBar(menu);</span>
+<span class="nc" id="L453">	}</span>
+
+    /**
+	 * Creates a toolbar to be displayed in the MainWizard.
+	 */
+	public void createToolBar() {
+<span class="nc" id="L459">        toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());	</span>
+
+        //first add all the icons with their actions
+<span class="nc" id="L462">        AbstractMCHAction[] actions = new AbstractMCHAction[] {openHelp}; // Builds an array with all actions to be put in the toolbar</span>
+<span class="nc" id="L463">		String[] helpText = {&quot;Open the help page&quot;};</span>
+<span class="nc" id="L464">        toolbar.populateToolbar(actions);</span>
+<span class="nc" id="L465">        ArrayList&lt;AbstractButton&gt; buttons = new ArrayList&lt;AbstractButton&gt;(); //create a list of AbstractButtons for the helpLabel</span>
+<span class="nc" id="L466">		buttons.addAll(toolbar.populateToolbar(actions));</span>
+
+        //add help for each Action/JComboBox with helpLabel
+<span class="nc bnc" id="L469" title="All 2 branches missed.">		for (int i = 0; i &lt; buttons.size(); i++) {</span>
+<span class="nc" id="L470">			AbstractButton button = buttons.get(i);</span>
+<span class="nc" id="L471">			help.addHelp(button, helpText[i]);</span>
+		}
+		  
+<span class="nc" id="L474">		parent.setToolBar(toolbar);</span>
+<span class="nc" id="L475">	}</span>
+
+	
+	@Override
+	public void gotFocus() { //this method is essential for controlling if the user tries to go back to the main panel from a panel like the Result one
+<span class="nc bnc" id="L480" title="All 2 branches missed.">		if (parent.getNumbersPanel() &gt; 0) {</span>
+<span class="nc bnc" id="L481" title="All 2 branches missed.">			if (JOptionPane.showConfirmDialog(this, &quot;This operation resets the Results table only when a different algorithm group is selected (Scheduling or Routing, Single Station). \n Are you sure you want to go back to start screen?&quot;, &quot;Back operation&quot;, JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">				if(parent.getAnimationPanel() != null){</span>
+<span class="nc" id="L483">					parent.getAnimationPanel().terminateThreads();</span>
+				}
+				
+<span class="nc" id="L486">				parent.saveResults();</span>
+<span class="nc" id="L487">				parent.resetScreen();</span>
+			} else {
+<span class="nc" id="L489">				parent.setLastPanel();</span>
+			}
+		}
+<span class="nc" id="L492">	}</span>
+
+
+	@Override
+    public void setLastPanel(){
+<span class="nc" id="L497">        parent.setLastPanel(Constants.PANEL_MAIN);</span>
+<span class="nc" id="L498">    }</span>
+
+	@Override
+    public void lostFocus() { 
+<span class="nc" id="L502">        setLastPanel();</span>
+<span class="nc" id="L503">    }</span>
+}
+
+
+/**
+ * Class for a custom item of the JPopMenu
+ * Two possible outcomes
+ *  - a cell that is selectable (if an animation panel with the correspondant algoritm is present)
+ *  - a cell that is not selectable
+ */
+class CustomMenuItem extends JMenuItem{
+	public CustomMenuItem(Action a, boolean implemented){
+<span class="nc" id="L515">		super(a);</span>
+
+<span class="nc bnc" id="L517" title="All 2 branches missed.">		if(!implemented){</span>
+<span class="nc" id="L518">			this.setEnabled(false);</span>
+		}
+<span class="nc" id="L520">	}</span>
+
+	public CustomMenuItem(String txt, boolean implemented){
+<span class="nc" id="L523">		super(txt);</span>
+
+<span class="nc bnc" id="L525" title="All 2 branches missed.">		if(!implemented){</span>
+<span class="nc" id="L526">			this.setEnabled(false);</span>
+		}
+<span class="nc" id="L528">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

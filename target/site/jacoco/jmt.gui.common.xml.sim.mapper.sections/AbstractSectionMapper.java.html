@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractSectionMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper.sections</a> &gt; <span class="el_source">AbstractSectionMapper.java</span></div><h1>AbstractSectionMapper.java</h1><pre class="source lang-java linenums">/**
+ * Base class for all section-level mappers, providing shared utilities for
+ * DTO-to-model and model-to-DTO conversions of node section parameters.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper.sections;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.xml.sim.dto.NodeDescriptor;
+import jmt.gui.common.xml.sim.dto.ParameterDescriptor;
+import jmt.gui.common.xml.sim.dto.SectionDescriptor;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.mapper.MappingContext;
+import jmt.gui.common.xml.sim.mapper.ModelElementMapper;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+<span class="fc" id="L27">public abstract class AbstractSectionMapper implements ModelElementMapper {</span>
+
+
+    // =========================================================================================
+
+    public abstract void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
+
+    public abstract void mapCommonModelToDto(SectionDescriptor section, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, WritingContext context);
+
+    @Override
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
+        // This will be implemented by concrete mappers that operate on the whole model
+<span class="nc" id="L39">    }</span>
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+        // This will be implemented by concrete mappers that operate on the whole model
+<span class="nc" id="L44">    }</span>
+
+    // =========================================================================================
+    // --- SHARED WRITING (Model -&gt; DTO -&gt; XML) ---
+    // =========================================================================================
+
+    protected void addServiceStrategyParameter(SectionDescriptor sec, CommonModel model, Object key, WritingContext ctx) {
+<span class="fc" id="L51">        ParameterDescriptor serviceStrategy = makeContainer(PARAM_SERVICE_STRATEGY, SERVICE_STRATEGY_CLASS);</span>
+<span class="fc" id="L52">        serviceStrategy.setArray(true);</span>
+
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        for (Object classKey : model.getClassKeys()) {</span>
+<span class="fc" id="L55">            Object serviceDist = model.getServiceTimeDistribution(key, classKey);</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">            if (serviceDist != null) {</span>
+<span class="fc" id="L57">                ParameterDescriptor stStrategy = getDistributionParameter(serviceDist, model, classKey, PARAM_SERVICE_TIME_STRATEGY, SERVICE_TIME_STRATEGY_CLASS, ctx);</span>
+<span class="fc" id="L58">                serviceStrategy.addSubParameter(stStrategy);</span>
+            }
+<span class="fc" id="L60">        }</span>
+<span class="pc bpc" id="L61" title="1 of 2 branches missed.">        if (!serviceStrategy.getSubParameters().isEmpty()) {</span>
+<span class="fc" id="L62">            sec.addParameter(serviceStrategy);</span>
+        }
+<span class="fc" id="L64">    }</span>
+
+    protected ParameterDescriptor getDistributionParameter(Object distrObj, CommonModel model, Object classKey, String paramName, String classPath, WritingContext ctx) {
+<span class="fc" id="L67">        ParameterDescriptor p = makeContainer(paramName, classPath);</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        if (classKey != null) {</span>
+<span class="fc" id="L69">            p.setRefClass(model.getClassName(classKey));</span>
+        }
+
+<span class="fc bfc" id="L72" title="All 4 branches covered.">        if (distrObj == null || distrObj instanceof ZeroStrategy) {</span>
+<span class="fc" id="L73">            p.setName(ZERO_SERVICE_TIME_STRATEGY);</span>
+<span class="fc" id="L74">            p.setClassPath(ZeroStrategy.getEngineClassPath());</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        } else if (distrObj instanceof DisabledStrategy) {</span>
+<span class="nc" id="L76">            p.setName(DISABLED_SERVICE_TIME_STRATEGY);</span>
+<span class="nc" id="L77">            p.setClassPath(DisabledStrategy.getEngineClassPath());</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">        } else if (distrObj instanceof Distribution) {</span>
+<span class="fc" id="L79">            handleDistribution(p, (Distribution) distrObj, ctx);</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">        } else if (distrObj instanceof LDStrategy) {</span>
+<span class="fc" id="L81">            handleLDStrategy(p, (LDStrategy) distrObj, model, ctx);</span>
+        }
+<span class="fc" id="L83">        return p;</span>
+    }
+
+    private void handleDistribution(ParameterDescriptor p, Distribution dist, WritingContext ctx) {
+<span class="fc" id="L87">        ParameterDescriptor distDesc = makeContainer(dist.getName(), dist.getClassPath());</span>
+<span class="fc" id="L88">        ParameterDescriptor distParDesc = makeContainer(PARAM_DISTR_PAR, dist.getParameterClassPath());</span>
+
+<span class="fc bfc" id="L90" title="All 2 branches covered.">        for (int i = 0; i &lt; dist.getNumberOfParameters(); i++) {</span>
+<span class="fc" id="L91">            Distribution.Parameter param = dist.getParameter(i);</span>
+<span class="fc" id="L92">            ParameterDescriptor paramDesc = createParameterDescriptor(param, ctx);</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (param.isDirectParameter()) distDesc.addSubParameter(paramDesc);</span>
+<span class="fc" id="L94">            else distParDesc.addSubParameter(paramDesc);</span>
+        }
+<span class="fc" id="L96">        p.addSubParameter(distDesc);</span>
+<span class="fc" id="L97">        p.addSubParameter(distParDesc);</span>
+<span class="fc" id="L98">    }</span>
+
+    private void handleLDStrategy(ParameterDescriptor p, LDStrategy strategy, CommonModel model, WritingContext ctx) {
+<span class="fc" id="L101">        p.setName(LOAD_DEPENDENT_STRATEGY);</span>
+<span class="fc" id="L102">        p.setClassPath(CP_LOAD_DEPENDENT_STRATEGY);</span>
+
+<span class="fc" id="L104">        ParameterDescriptor ldArray = makeContainer(LD_PARAMETER, CP_LD_PARAMETER);</span>
+<span class="fc" id="L105">        ldArray.setArray(true);</span>
+
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        for (Object rKey : strategy.getAllRanges()) {</span>
+<span class="fc" id="L108">            ParameterDescriptor range = makeContainer(LD_PARAMETER, CP_LD_PARAMETER);</span>
+<span class="fc" id="L109">            range.addSubParameter(makeParam(PARAM_FROM, XML_INTEGER_CLASS, String.valueOf(strategy.getRangeFrom(rKey))));</span>
+
+<span class="fc" id="L111">            Distribution d = strategy.getRangeDistribution(rKey);</span>
+<span class="fc" id="L112">            ParameterDescriptor dP = getDistributionParameter(d, model, null, PARAM_DISTR, CP_DISTRIBUTION, ctx);</span>
+<span class="pc bpc" id="L113" title="2 of 4 branches missed.">            if (dP != null &amp;&amp; dP.getSubParameters().size() &gt;= 2) {</span>
+<span class="fc" id="L114">                range.addSubParameter(dP.getSubParameters().get(0));</span>
+<span class="fc" id="L115">                range.addSubParameter(dP.getSubParameters().get(1));</span>
+            }
+
+            // Legacy XMLWriter emits LDParameter mean as string sub-parameter named &quot;function&quot;.
+<span class="fc" id="L119">            range.addSubParameter(makeParam(PARAM_FUNCTION, XML_STRING_CLASS, String.valueOf(strategy.getRangeDistributionMean(rKey))));</span>
+<span class="fc" id="L120">            ldArray.addSubParameter(range);</span>
+        }
+<span class="fc" id="L122">        p.addSubParameter(ldArray);</span>
+<span class="fc" id="L123">    }</span>
+
+    private ParameterDescriptor createParameterDescriptor(Distribution.Parameter param, WritingContext ctx) {
+<span class="fc" id="L126">        ParameterDescriptor p = makeContainer(param.getName(), null);</span>
+<span class="fc" id="L127">        Object val = param.getValue();</span>
+
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (val instanceof Distribution) {</span>
+<span class="fc" id="L130">            p.setClassPath(CP_DISTRIBUTION_CONTAINER);</span>
+<span class="fc" id="L131">            ParameterDescriptor nested = getDistributionParameter(val, null, null, PARAM_DISTR, CP_DISTRIBUTION, ctx);</span>
+<span class="fc" id="L132">            p.addSubParameter(nested.getSubParameters().get(0));</span>
+<span class="fc" id="L133">            p.addSubParameter(nested.getSubParameters().get(1));</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        } else if (val instanceof Object[][]) {</span>
+<span class="fc" id="L135">            createMatrixParameterDescriptor(p, param, (Object[][]) val);</span>
+        } else {
+<span class="fc" id="L137">            p.setClassPath(param.getValueClass().getName());</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">            if (val != null) p.setValue(val.toString());</span>
+        }
+<span class="fc" id="L140">        return p;</span>
+    }
+
+    private void createMatrixParameterDescriptor(ParameterDescriptor p, Distribution.Parameter param, Object[][] matrix) {
+<span class="fc" id="L144">        p.setArray(true);</span>
+        // Legacy XMLWriter encodes distribution matrices as Object[] of Object[] rows.
+<span class="fc" id="L146">        p.setClassPath(Object.class.getName());</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">        for (Object[] row : matrix) {</span>
+<span class="fc" id="L148">            ParameterDescriptor rowP = makeContainer(&quot;vector&quot;, Object.class.getName());</span>
+<span class="fc" id="L149">            rowP.setArray(true);</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            for (Object cell : row) {</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">                rowP.addSubParameter(makeParam(&quot;entry&quot;, param.getValueClass().getName(), cell != null ? cell.toString() : VAL_ZERO));</span>
+            }
+<span class="fc" id="L153">            p.addSubParameter(rowP);</span>
+        }
+<span class="fc" id="L155">    }</span>
+
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model) {
+<span class="nc" id="L158">        mapTransitionConditions(key, sec, model, true);</span>
+<span class="nc" id="L159">    }</span>
+
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, boolean includeResource) {
+<span class="fc" id="L162">        ParameterDescriptor enablingConditions = createConditionMatrix(PREFIX_ENABLING, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -&gt; model.getEnablingCondition(s, i, from, cl));</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if (enablingConditions != null) sec.addParameter(enablingConditions);</span>
+
+<span class="fc" id="L165">        ParameterDescriptor inhibitingConditions = createConditionMatrix(PREFIX_INHIBITING, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -&gt; model.getInhibitingCondition(s, i, from, cl));</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (inhibitingConditions != null) sec.addParameter(inhibitingConditions);</span>
+
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (includeResource) {</span>
+<span class="nc" id="L169">            ParameterDescriptor resourceConditions = createConditionMatrix(PREFIX_RESOURCE, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -&gt; model.getResourceCondition(s, i, from, cl));</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">            if (resourceConditions != null) sec.addParameter(resourceConditions);</span>
+        }
+<span class="fc" id="L172">    }</span>
+
+    /**
+     * Legacy parity for Queue section of Server/Delay nodes:
+     * conditions are emitted only on backward connected places and with a single mode.
+     */
+    protected void mapTransitionLikeConditionsForServerDelay(Object key, SectionDescriptor sec, CommonModel model) {
+<span class="fc" id="L179">        List&lt;Object&gt; stationKeys = model.getBackwardConnectedPlaces(key);</span>
+<span class="pc bpc" id="L180" title="1 of 4 branches missed.">        if (stationKeys == null || stationKeys.isEmpty()) {</span>
+<span class="fc" id="L181">            return;</span>
+        }
+
+<span class="fc" id="L184">        ParameterDescriptor enabling = createConditionMatrixForStations(PREFIX_ENABLING, SUFFIX_CONDITION, key, model,</span>
+<span class="fc" id="L185">                (s, m, i, from, cl) -&gt; model.getEnablingCondition(s, i, from, cl), stationKeys, 1);</span>
+<span class="fc" id="L186">        sec.addParameter(enabling);</span>
+
+<span class="fc" id="L188">        ParameterDescriptor inhibiting = createConditionMatrixForStations(PREFIX_INHIBITING, SUFFIX_CONDITION, key, model,</span>
+<span class="fc" id="L189">                (s, m, i, from, cl) -&gt; model.getInhibitingCondition(s, i, from, cl), stationKeys, 1);</span>
+<span class="fc" id="L190">        sec.addParameter(inhibiting);</span>
+
+<span class="fc" id="L192">        ParameterDescriptor resource = createConditionMatrixForStations(PREFIX_RESOURCE, SUFFIX_CONDITION, key, model,</span>
+<span class="fc" id="L193">                (s, m, i, from, cl) -&gt; model.getResourceCondition(s, i, from, cl), stationKeys, 1);</span>
+<span class="fc" id="L194">        sec.addParameter(resource);</span>
+<span class="fc" id="L195">    }</span>
+
+    protected ParameterDescriptor createConditionMatrix(String baseName, String suffix, Object key, CommonModel model, ConditionGetter getter) {
+<span class="fc" id="L198">        return createConditionMatrix(baseName, suffix, key, model, getter, true);</span>
+    }
+
+    protected ParameterDescriptor createConditionMatrix(String baseName, String suffix, Object key, CommonModel model, ConditionGetter getter, boolean backward) {
+<span class="fc" id="L202">        int modes = model.getTransitionModeListSize(key);</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">        if (modes &lt;= 0) return null;</span>
+
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        List&lt;Object&gt; stationKeys = backward ? model.getBackwardConnections(key) : model.getForwardConnections(key);</span>
+<span class="pc bpc" id="L206" title="1 of 4 branches missed.">        if (stationKeys == null || stationKeys.isEmpty()) return null;</span>
+
+<span class="fc" id="L208">        return createConditionMatrixForStations(baseName, suffix, key, model, getter, stationKeys, modes);</span>
+    }
+
+    private ParameterDescriptor createConditionMatrixForStations(String baseName, String suffix, Object key, CommonModel model,
+                                                                 ConditionGetter getter, List&lt;Object&gt; stationKeys, int modes) {
+<span class="fc" id="L213">        ParameterDescriptor matrix = makeContainer(baseName + suffix + &quot;s&quot;, CP_TRANSITION_MATRIX);</span>
+<span class="fc" id="L214">        matrix.setArray(true);</span>
+<span class="fc" id="L215">        populateMatrixModes(matrix, baseName, suffix, stationKeys, key, model, getter, modes);</span>
+
+        // Legacy XMLWriter always emits transition condition matrices, even when all entries are zero.
+<span class="fc" id="L218">        return matrix;</span>
+    }
+
+    // Parameters reduced to 7 by deriving 'modes' and 'classKeys' directly from 'model'
+    private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, List&lt;Object&gt; stationKeys, Object key, CommonModel model, ConditionGetter getter, int modes) {
+<span class="fc" id="L223">        boolean hasNonZero = false;</span>
+
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        for (int i = 0; i &lt; modes; i++) {</span>
+<span class="fc" id="L226">            ParameterDescriptor condition = makeContainer(baseName + suffix, CP_TRANSITION_MATRIX);</span>
+<span class="fc" id="L227">            ParameterDescriptor vectors = makeContainer(baseName + &quot;Vectors&quot;, CP_TRANSITION_VECTOR);</span>
+<span class="fc" id="L228">            vectors.setArray(true);</span>
+
+<span class="fc bfc" id="L230" title="All 2 branches covered.">            for (Object stationKey : stationKeys) {</span>
+<span class="fc" id="L231">                hasNonZero |= buildAndAddVector(vectors, baseName, stationKey, key, model, i, getter);</span>
+<span class="fc" id="L232">            }</span>
+<span class="fc" id="L233">            condition.addSubParameter(vectors);</span>
+<span class="fc" id="L234">            matrix.addSubParameter(condition);</span>
+        }
+<span class="fc" id="L236">        return hasNonZero;</span>
+    }
+
+    private boolean buildAndAddVector(ParameterDescriptor vectors, String baseName, Object stationKey, Object key, CommonModel model, int modeIndex, ConditionGetter getter) {
+<span class="fc" id="L240">        boolean hasNonZero = false;</span>
+<span class="fc" id="L241">        ParameterDescriptor vector = makeContainer(baseName + &quot;Vector&quot;, CP_TRANSITION_VECTOR);</span>
+<span class="fc" id="L242">        vector.addSubParameter(makeParam(&quot;stationName&quot;, XML_STRING_CLASS, model.getStationName(stationKey)));</span>
+
+<span class="fc" id="L244">        ParameterDescriptor entries = makeContainer(baseName + &quot;Entries&quot;, XML_INTEGER_CLASS);</span>
+        // Legacy XMLWriter emits entries as an Integer array container.
+<span class="fc" id="L246">        entries.setArray(true);</span>
+
+<span class="fc bfc" id="L248" title="All 2 branches covered.">        for (Object classKey : model.getClassKeys()) {</span>
+<span class="fc" id="L249">            Integer val = getter.get(key, model, modeIndex, stationKey, classKey);</span>
+<span class="pc bpc" id="L250" title="1 of 4 branches missed.">            if (val != null &amp;&amp; val &gt; 0) hasNonZero = true;</span>
+
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">            entries.addSubParameter(makeRefParam(baseName + &quot;Entry&quot;, XML_INTEGER_CLASS, model.getClassName(classKey), val != null ? val.toString() : VAL_ZERO));</span>
+<span class="fc" id="L253">        }</span>
+<span class="fc" id="L254">        vector.addSubParameter(entries);</span>
+<span class="fc" id="L255">        vectors.addSubParameter(vector);</span>
+<span class="fc" id="L256">        return hasNonZero;</span>
+    }
+
+    @FunctionalInterface
+    protected interface ConditionGetter {
+        Integer get(Object stationKey, CommonModel model, int modeIndex, Object fromStationKey, Object classKey);
+    }
+
+    // =========================================================================================
+    // --- SHARED PARSING (XML -&gt; DTO -&gt; Model) ---
+    // =========================================================================================
+    protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if (p == null) return null;</span>
+<span class="fc" id="L269">        String cp = p.getClassPath();</span>
+
+<span class="pc bpc" id="L271" title="2 of 6 branches missed.">        if (cp != null &amp;&amp; (cp.contains(STR_ZERO_STRATEGY) || ZeroStrategy.getEngineClassPath().equals(cp)))</span>
+<span class="fc" id="L272">            return new ZeroStrategy();</span>
+<span class="pc bpc" id="L273" title="3 of 6 branches missed.">        if (cp != null &amp;&amp; (cp.contains(STR_DISABLED_STRATEGY) || DisabledStrategy.getEngineClassPath().equals(cp)))</span>
+<span class="nc" id="L274">            return new DisabledStrategy();</span>
+
+<span class="pc bpc" id="L276" title="2 of 6 branches missed.">        if (cp != null &amp;&amp; (cp.contains(STR_LOAD_DEPENDENT) || LDStrategy.getEngineClassPath().equals(cp))) {</span>
+<span class="fc" id="L277">            return parseLDStrategy(p, ctx);</span>
+        }
+
+<span class="fc" id="L280">        List&lt;ParameterDescriptor&gt; distribution = getSubParams(p);</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">        if (distribution.isEmpty()) return null;</span>
+<span class="pc bpc" id="L282" title="1 of 2 branches missed.">        return parseDistribution(distribution.get(0), distribution.size() &gt; 1 ? distribution.get(1) : null, ctx);</span>
+    }
+
+    private LDStrategy parseLDStrategy(ParameterDescriptor p, MappingContext ctx) {
+<span class="fc" id="L286">        LDStrategy strategy = new LDStrategy();</span>
+<span class="fc" id="L287">        ParameterDescriptor ldArray = getFirst(getSubParams(p));</span>
+<span class="pc bpc" id="L288" title="1 of 2 branches missed.">        if (ldArray != null) {</span>
+<span class="fc" id="L289">            getSubParams(ldArray).forEach(range -&gt; parseLDRange(range, strategy, ctx));</span>
+        }
+<span class="fc" id="L291">        return strategy;</span>
+    }
+
+    private void parseLDRange(ParameterDescriptor range, LDStrategy strategy, MappingContext ctx) {
+<span class="fc" id="L295">        List&lt;ParameterDescriptor&gt; rParams = getSubParams(range);</span>
+<span class="fc" id="L296">        int from = valI(getAt(rParams, 0));</span>
+<span class="fc" id="L297">        Distribution distr = parseDistribution(getAt(rParams, 1), getAt(rParams, 2), ctx);</span>
+<span class="fc" id="L298">        String mean = val(getAt(rParams, 3));</span>
+
+<span class="fc bfc" id="L300" title="All 2 branches covered.">        Object rKey = (from == 1) ? strategy.getAllRanges()[0] : strategy.addRange();</span>
+<span class="fc bfc" id="L301" title="All 2 branches covered.">        if (from != 1) strategy.setRangeFrom(rKey, from);</span>
+<span class="fc bfc" id="L302" title="All 2 branches covered.">        strategy.setRangeDistributionNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, distr);</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">        strategy.setRangeDistributionMeanNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, mean);</span>
+<span class="fc" id="L304">    }</span>
+
+    protected Distribution parseDistribution(ParameterDescriptor distr, ParameterDescriptor distrPar, MappingContext ctx) {
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">        if (distr == null) return null;</span>
+
+<span class="fc" id="L309">        Distribution template = findDistributionTemplate(distr.getClassPath(), ctx);</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">        if (template == null) return null;</span>
+
+<span class="fc" id="L312">        Distribution dist = template.clone();</span>
+<span class="fc" id="L313">        List&lt;ParameterDescriptor&gt; params = new ArrayList&lt;&gt;(getSubParams(distr));</span>
+<span class="pc bpc" id="L314" title="1 of 2 branches missed.">        if (distrPar != null) params.addAll(getSubParams(distrPar));</span>
+
+<span class="fc bfc" id="L316" title="All 2 branches covered.">        for (ParameterDescriptor p : params) {</span>
+<span class="fc" id="L317">            parseDistributionParam(p, dist, ctx);</span>
+<span class="fc" id="L318">        }</span>
+<span class="fc" id="L319">        dist.updateCM();</span>
+<span class="fc" id="L320">        return dist;</span>
+    }
+
+    private Distribution findDistributionTemplate(String cp, MappingContext ctx) {
+<span class="fc" id="L324">        Distribution template = ctx.getEngineToGuiDistr().get(cp);</span>
+<span class="pc bpc" id="L325" title="3 of 4 branches missed.">        if (template == null &amp;&amp; cp != null) {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">            for (String key : ctx.getEngineToGuiDistr().keySet()) {</span>
+<span class="nc bnc" id="L327" title="All 4 branches missed.">                if (cp.endsWith(key) || key.endsWith(cp)) {</span>
+<span class="nc" id="L328">                    return ctx.getEngineToGuiDistr().get(key);</span>
+                }
+<span class="nc" id="L330">            }</span>
+        }
+<span class="fc" id="L332">        return template;</span>
+    }
+
+    private void parseDistributionParam(ParameterDescriptor p, Distribution dist, MappingContext ctx) {
+<span class="fc" id="L336">        String name = p.getName();</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        if (CP_DISTRIBUTION_CONTAINER.equals(p.getClassPath())) {</span>
+<span class="fc" id="L338">            List&lt;ParameterDescriptor&gt; nested = getSubParams(p);</span>
+<span class="pc bpc" id="L339" title="1 of 2 branches missed.">            if (!nested.isEmpty()) {</span>
+<span class="fc" id="L340">                dist.getParameter(name).setValue(parseDistribution(getAt(nested, 0), getAt(nested, 1), ctx));</span>
+            }
+<span class="fc bfc" id="L342" title="All 2 branches covered.">        } else if (p.isArray()) {</span>
+<span class="fc" id="L343">            parseDistributionArrayParam(p, dist, name);</span>
+        } else {
+<span class="fc" id="L345">            String valStr = val(p);</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">            if (valStr != null) dist.getParameter(name).setValue(valStr);</span>
+        }
+<span class="fc" id="L348">    }</span>
+
+    private void parseDistributionArrayParam(ParameterDescriptor p, Distribution dist, String name) {
+<span class="fc" id="L351">        List&lt;ParameterDescriptor&gt; vectors = getSubParams(p);</span>
+<span class="fc" id="L352">        Object[][] val = new Object[vectors.size()][];</span>
+
+<span class="fc bfc" id="L354" title="All 2 branches covered.">        for (int j = 0; j &lt; vectors.size(); j++) {</span>
+<span class="fc" id="L355">            List&lt;ParameterDescriptor&gt; entries = getSubParams(getAt(vectors, j));</span>
+<span class="fc" id="L356">            val[j] = new Object[entries.size()];</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">            for (int k = 0; k &lt; entries.size(); k++) {</span>
+<span class="fc" id="L358">                String valueStr = val(getAt(entries, k));</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">                val[j][k] = dist.getParameter(name).parseValue(valueStr != null ? valueStr : VAL_ZERO);</span>
+            }
+        }
+<span class="fc" id="L362">        dist.getParameter(name).setValue(val);</span>
+<span class="fc" id="L363">    }</span>
+
+    protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
+<span class="fc bfc" id="L366" title="All 2 branches covered.">        if (en != null) populateConditionMap(key, en, ctx.enablingConditionMap, ctx);</span>
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        if (in != null) populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">        if (res != null) populateConditionMap(key, res, ctx.resourceConditionMap, ctx);</span>
+<span class="fc" id="L369">    }</span>
+
+    private void populateConditionMap(Object key, ParameterDescriptor condParam, Map&lt;Object[], Integer&gt; targetMap, MappingContext ctx) {
+<span class="fc" id="L372">        List&lt;ParameterDescriptor&gt; modes = getSubParams(condParam);</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        for (int i = 0; i &lt; modes.size(); i++) {</span>
+<span class="fc" id="L374">            final int modeIndex = i;</span>
+
+<span class="fc" id="L376">            List&lt;ParameterDescriptor&gt; modeElements = getSubParams(modes.get(i));</span>
+<span class="pc bpc" id="L377" title="1 of 2 branches missed.">            if (modeElements.isEmpty()) continue;</span>
+
+<span class="fc bfc" id="L379" title="All 2 branches covered.">            for (ParameterDescriptor vector : getSubParams(modeElements.get(0))) {</span>
+<span class="fc" id="L380">                processVectorForConditionMap(key, modeIndex, vector, targetMap, ctx);</span>
+<span class="fc" id="L381">            }</span>
+        }
+<span class="fc" id="L383">    }</span>
+
+    private void processVectorForConditionMap(Object key, int modeIndex, ParameterDescriptor vector, Map&lt;Object[], Integer&gt; targetMap, MappingContext ctx) {
+<span class="fc" id="L386">        List&lt;ParameterDescriptor&gt; vectorElements = getSubParams(vector);</span>
+<span class="pc bpc" id="L387" title="1 of 2 branches missed.">        if (vectorElements.size() &lt; 2) return;</span>
+
+<span class="fc" id="L389">        String stationName = val(vectorElements.get(0));</span>
+<span class="pc bpc" id="L390" title="1 of 2 branches missed.">        if (stationName == null) return;</span>
+
+<span class="fc" id="L392">        getRefClassMap(vectorElements.get(1)).forEach((className, entryParam) -&gt; {</span>
+<span class="fc" id="L393">            Integer vVal = valI(entryParam);</span>
+<span class="pc bpc" id="L394" title="1 of 2 branches missed.">            if (vVal != null) {</span>
+<span class="fc" id="L395">                targetMap.put(new Object[]{key, modeIndex, stationName, ctx.classes.get(className)}, vVal);</span>
+            }
+<span class="fc" id="L397">        });</span>
+<span class="fc" id="L398">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

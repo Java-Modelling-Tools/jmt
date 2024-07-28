@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EmpiricalEntry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">EmpiricalEntry.java</span></div><h1>EmpiricalEntry.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+/**
+
+ * Class used for the empirical distribution, through which the user provides
+ * the data needed to construct the empirical distribution: for each
+ * empirical entry the requested data are a value and the probability of that value.
+ *
+ * @author cattai
+ * @version Date: 27-nov-2003 Time: 10.27.00
+
+ */
+public class EmpiricalEntry {
+
+	/** The &lt;code&gt;EmpiricalEntry&lt;/code&gt; value. */
+	protected Object value;
+	/** The &lt;code&gt;EmpiricalEntry&lt;/code&gt; probability. */
+	protected double probability;
+
+	/**
+	 * Creates a new instance of an &lt;code&gt;EmpiricalEntry&lt;/code&gt; object with
+	 * specified value and probability.
+	 * @param value A given &lt;code&gt;String&lt;/code&gt; representing a node value.
+	 * @param probability A given &lt;code&gt;String&lt;/code&gt; representing
+	 * the value probability.
+	 */
+<span class="nc" id="L45">	public EmpiricalEntry(String value, String probability) {</span>
+<span class="nc" id="L46">		this.value = value;</span>
+<span class="nc" id="L47">		this.probability = Double.parseDouble(probability);</span>
+<span class="nc" id="L48">	}</span>
+
+	/**
+	 * Creates a new instance of an &lt;code&gt;EmpiricalEntry&lt;/code&gt; object with
+	 * specified value and probability.
+	 * @param value A given &lt;code&gt;String&lt;/code&gt; representing a node value.
+	 * @param probability A given &lt;code&gt;double&lt;/code&gt; probability linked to
+	 * the &lt;i&gt;value&lt;/i&gt;.
+	 */
+<span class="nc" id="L57">	public EmpiricalEntry(String value, double probability) {</span>
+<span class="nc" id="L58">		this.value = value;</span>
+<span class="nc" id="L59">		this.probability = probability;</span>
+<span class="nc" id="L60">	}</span>
+
+	/**
+	 * Creates a new instance of an &lt;code&gt;EmpiricalEntry&lt;/code&gt; object with
+	 * specified value and probability.
+	 * @param value A given &lt;code&gt;String&lt;/code&gt; representing a node value.
+	 * @param probability A given &lt;code&gt;Double&lt;/code&gt; probability linked to
+	 * the &lt;i&gt;value&lt;/i&gt;.
+	 */
+<span class="nc" id="L69">	public EmpiricalEntry(String value, Double probability) {</span>
+<span class="nc" id="L70">		this.value = value;</span>
+<span class="nc" id="L71">		this.probability = probability.doubleValue();</span>
+<span class="nc" id="L72">	}</span>
+
+	/**
+	 * Returns the internal value.
+	 * @return An object representing the internal value.
+	 */
+	public Object getValue() {
+<span class="nc" id="L79">		return value;</span>
+	}
+
+	/**
+	 * Sets the internal &lt;i&gt;value&lt;/i&gt; with the given &lt;code&gt;Object&lt;/code&gt;.
+	 * @param value A given &lt;code&gt;Object&lt;/code&gt;.
+	 */
+	public void setValue(Object value) {
+<span class="nc" id="L87">		this.value = value;</span>
+<span class="nc" id="L88">	}</span>
+
+	/**
+	 * Returns the probability linked to the internal value.
+	 * @return A &lt;code&gt;double&lt;/code&gt; representing the probability.
+	 */
+	public double getProbability() {
+<span class="nc" id="L95">		return probability;</span>
+	}
+
+	/**
+	 * Sets the internal probability linked to the &lt;i&gt;value&lt;/i&gt;.
+	 * @param probability A given &lt;code&gt;Double&lt;/code&gt; probability.
+	 */
+	public void setProbability(double probability) {
+<span class="nc" id="L103">		this.probability = probability;</span>
+<span class="nc" id="L104">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

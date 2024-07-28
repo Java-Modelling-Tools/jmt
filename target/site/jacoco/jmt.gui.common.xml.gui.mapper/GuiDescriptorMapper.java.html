@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GuiDescriptorMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.gui.mapper</a> &gt; <span class="el_source">GuiDescriptorMapper.java</span></div><h1>GuiDescriptorMapper.java</h1><pre class="source lang-java linenums">/**
+ * Bidirectional mapper between a {@link GuiDescriptor} DTO and the live
+ * {@link jmt.gui.jsimgraph.definitions.JSimGraphModel}.
+ *
+ * &lt;p&gt;&lt;b&gt;Reading phase&lt;/b&gt; ({@link #mapDtoToModel}): applies GUI metadata (colours,
+ * positions, connection shapes, parametric analysis configuration) to an already
+ * populated {@link jmt.gui.common.definitions.CommonModel}.
+ * This method must be called &lt;em&gt;after&lt;/em&gt; the simulation data has been loaded, since
+ * it resolves station and class names against keys that the sim mapper already created.
+ *
+ * &lt;p&gt;&lt;b&gt;Writing phase&lt;/b&gt; ({@link #mapModelToDto}): extracts GUI metadata from the model
+ * into a fresh {@link GuiDescriptor} ready for serialization.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.gui.mapper;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisModelFactory;
+import jmt.gui.common.xml.GuiXMLConstants;
+import jmt.gui.common.xml.gui.dto.*;
+import jmt.gui.jsimgraph.definitions.JMTArc;
+import jmt.gui.jsimgraph.definitions.JMTPath;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.Point2D;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+<span class="fc" id="L39">public class GuiDescriptorMapper implements GuiXMLConstants {</span>
+
+    // -----------------------------------------------------------------------
+    // Reading phase  (DTO → Model)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Applies all GUI metadata stored in the {@link GuiDescriptor} DTO to the given
+     * {@link CommonModel}.  When the model is not a {@link JSimGraphModel} the graphical
+     * sections are silently skipped; the parametric analysis block is always processed.
+     *
+     * @param dto   the DTO produced by {@link jmt.gui.common.xml.gui.parsers.GuiParser}
+     * @param model the target model, already populated with simulation data
+     */
+    public void mapDtoToModel(GuiDescriptor dto, CommonModel model) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">        if (model instanceof JSimGraphModel) {</span>
+<span class="fc" id="L55">            JSimGraphModel graphModel = (JSimGraphModel) model;</span>
+<span class="fc" id="L56">            applyClassColors(dto, graphModel);</span>
+<span class="fc" id="L57">            applyStationPositions(dto, graphModel);</span>
+<span class="fc" id="L58">            applyConnectionShapes(dto, graphModel);</span>
+        }
+<span class="fc" id="L60">        applyParametricAnalysis(dto, model);</span>
+<span class="fc" id="L61">    }</span>
+
+    private void applyClassColors(GuiDescriptor dto, JSimGraphModel model) {
+<span class="fc" id="L64">        Map&lt;String, Object&gt; classKeysByName = buildClassNameMap(model);</span>
+
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (ClassColorDescriptor desc : dto.getClassColors()) {</span>
+<span class="fc" id="L67">            Object key = classKeysByName.get(desc.getName());</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">            if (key == null) {</span>
+<span class="nc" id="L69">                System.out.println(&quot;Warning - Found color info for class '&quot;</span>
+<span class="nc" id="L70">                        + desc.getName() + &quot;' which is not present in the model.&quot;);</span>
+<span class="nc" id="L71">                continue;</span>
+            }
+<span class="fc" id="L73">            String hex = desc.getColor();</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            if (hex == null) {</span>
+<span class="nc" id="L75">                hex = &quot;&quot;;</span>
+            }
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">            if (hex.startsWith(&quot;#&quot;)) {</span>
+<span class="fc" id="L78">                hex = hex.substring(1);</span>
+            }
+            try {
+<span class="fc" id="L81">                Color color = new Color((int) Long.parseLong(hex, 16), true);</span>
+<span class="fc" id="L82">                model.setClassColor(key, color);</span>
+<span class="nc" id="L83">            } catch (NumberFormatException e) {</span>
+<span class="nc" id="L84">                System.out.println(&quot;Warning - Bad color format for class '&quot;</span>
+<span class="nc" id="L85">                        + desc.getName() + &quot;'. Assigning a new color.&quot;);</span>
+<span class="nc" id="L86">                model.setClassColor(key, model.getNewColor());</span>
+<span class="fc" id="L87">            }</span>
+<span class="fc" id="L88">        }</span>
+<span class="fc" id="L89">    }</span>
+
+    private void applyStationPositions(GuiDescriptor dto, JSimGraphModel model) {
+<span class="fc" id="L92">        Map&lt;String, Object&gt; stationKeysByName = buildStationNameMap(model);</span>
+
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        for (StationPositionDescriptor desc : dto.getStationPositions()) {</span>
+<span class="fc" id="L95">            Object key = stationKeysByName.get(desc.getName());</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">            if (key == null) {</span>
+<span class="nc" id="L97">                System.out.println(&quot;Error - Found position info for station '&quot;</span>
+<span class="nc" id="L98">                        + desc.getName() + &quot;' which is not present in the model.&quot;);</span>
+<span class="nc" id="L99">                continue;</span>
+            }
+<span class="fc" id="L101">            model.setStationPosition(key,</span>
+<span class="fc" id="L102">                    new JMTPoint(desc.getX(), desc.getY(), desc.isRotate(), desc.getAngle()));</span>
+<span class="fc" id="L103">        }</span>
+<span class="fc" id="L104">    }</span>
+
+    private void applyConnectionShapes(GuiDescriptor dto, JSimGraphModel model) {
+<span class="fc" id="L107">        Map&lt;String, Object&gt; stationKeysByName = buildStationNameMap(model);</span>
+
+<span class="fc bfc" id="L109" title="All 2 branches covered.">        for (ConnectionShapeDescriptor shape : dto.getConnectionShapes()) {</span>
+<span class="fc" id="L110">            Object sourceKey = stationKeysByName.get(shape.getSource());</span>
+<span class="fc" id="L111">            Object targetKey = stationKeysByName.get(shape.getTarget());</span>
+
+<span class="pc bpc" id="L113" title="2 of 4 branches missed.">            if (sourceKey == null || targetKey == null</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">                    || !model.areConnected(sourceKey, targetKey)) {</span>
+<span class="nc" id="L115">                System.out.println(&quot;Error - Found connection shape info for '&quot;</span>
+<span class="nc" id="L116">                        + shape.getSource() + &quot;' → '&quot; + shape.getTarget()</span>
+                        + &quot;' which is not present in the model.&quot;);
+<span class="nc" id="L118">                continue;</span>
+            }
+
+<span class="fc" id="L121">            ArrayList&lt;JMTArc&gt; arcList = new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">            for (ArcDescriptor arc : shape.getArcs()) {</span>
+<span class="fc" id="L123">                ArrayList&lt;Point2D&gt; controlPoints = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L124">                controlPoints.add(new Point2D.Double(arc.getControlPoint1X(), arc.getControlPoint1Y()));</span>
+<span class="fc" id="L125">                controlPoints.add(new Point2D.Double(arc.getControlPoint2X(), arc.getControlPoint2Y()));</span>
+<span class="fc" id="L126">                arcList.add(new JMTArc(</span>
+<span class="fc" id="L127">                        new Point2D.Double(arc.getSourceX(), arc.getSourceY()),</span>
+                        controlPoints,
+<span class="fc" id="L129">                        new Point2D.Double(arc.getTargetX(), arc.getTargetY())));</span>
+<span class="fc" id="L130">            }</span>
+<span class="fc" id="L131">            model.setConnectionShape(sourceKey, targetKey, new JMTPath(arcList));</span>
+<span class="fc" id="L132">        }</span>
+<span class="fc" id="L133">    }</span>
+
+    private void applyParametricAnalysis(GuiDescriptor dto, CommonModel model) {
+<span class="fc" id="L136">        ParametricAnalysisDescriptor pad = dto.getParametricAnalysis();</span>
+<span class="pc bpc" id="L137" title="1 of 4 branches missed.">        if (pad == null || !pad.isEnabled()) return;</span>
+
+<span class="fc" id="L139">        model.setParametricAnalysisEnabled(true);</span>
+<span class="fc" id="L140">        String classPath = pad.getClassPath();</span>
+
+        try {
+<span class="fc" id="L143">            Class&lt;?&gt;[] paramTypes = {</span>
+                    jmt.gui.common.definitions.ClassDefinition.class,
+                    jmt.gui.common.definitions.StationDefinition.class,
+                    jmt.gui.common.definitions.SimulationDefinition.class
+            };
+<span class="fc" id="L148">            Object[] params = {model, model, model};</span>
+<span class="fc" id="L149">            ParametricAnalysisDefinition paModel =</span>
+<span class="fc" id="L150">                    (ParametricAnalysisDefinition) Class.forName(classPath)</span>
+<span class="fc" id="L151">                            .getConstructor(paramTypes)</span>
+<span class="fc" id="L152">                            .newInstance(params);</span>
+
+<span class="fc bfc" id="L154" title="All 2 branches covered.">            for (Map.Entry&lt;String, String&gt; entry : pad.getProperties().entrySet()) {</span>
+<span class="fc" id="L155">                paModel.setProperty(entry.getKey(), entry.getValue());</span>
+<span class="fc" id="L156">            }</span>
+<span class="fc" id="L157">            paModel.searchForAvailableSteps();</span>
+<span class="fc" id="L158">            paModel.createValuesSet();</span>
+<span class="fc" id="L159">            model.setParametricAnalysisModel(paModel);</span>
+
+<span class="nc" id="L161">        } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L162">            JOptionPane.showMessageDialog(null, &quot;Invocation target exception: &quot; + classPath);</span>
+<span class="nc" id="L163">        } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L164">            JOptionPane.showMessageDialog(null, &quot;No such method: &quot; + classPath);</span>
+<span class="nc" id="L165">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L166">            JOptionPane.showMessageDialog(null, &quot;Class not found: &quot; + classPath);</span>
+<span class="nc" id="L167">        } catch (InstantiationException e) {</span>
+<span class="nc" id="L168">            JOptionPane.showMessageDialog(null, &quot;Instantiation exception: &quot; + classPath);</span>
+<span class="nc" id="L169">        } catch (IllegalAccessException e) {</span>
+<span class="nc" id="L170">            JOptionPane.showMessageDialog(null, &quot;Illegal access exception: &quot; + classPath);</span>
+<span class="pc" id="L171">        }</span>
+<span class="fc" id="L172">    }</span>
+
+    // -----------------------------------------------------------------------
+    // Writing phase  (Model → DTO)
+    // -----------------------------------------------------------------------
+
+    /**
+     * Extracts all GUI metadata from the given {@link CommonModel} into a fresh
+     * {@link GuiDescriptor} DTO.
+     * When the model is not a {@link JSimGraphModel} only the parametric analysis
+     * block is written.
+     *
+     * @param model the source model
+     * @return a populated {@link GuiDescriptor} ready for serialization
+     */
+    public GuiDescriptor mapModelToDto(CommonModel model) {
+<span class="fc" id="L188">        GuiDescriptor dto = new GuiDescriptor();</span>
+
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (model instanceof JSimGraphModel) {</span>
+<span class="fc" id="L191">            JSimGraphModel graphModel = (JSimGraphModel) model;</span>
+<span class="fc" id="L192">            extractClassColors(graphModel, dto);</span>
+<span class="fc" id="L193">            extractStationPositions(graphModel, dto);</span>
+<span class="fc" id="L194">            extractConnectionShapes(graphModel, dto);</span>
+        }
+<span class="fc" id="L196">        extractParametricAnalysis(model, dto);</span>
+<span class="fc" id="L197">        return dto;</span>
+    }
+
+    private void extractClassColors(JSimGraphModel model, GuiDescriptor dto) {
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        for (Object key : model.getClassKeys()) {</span>
+<span class="fc" id="L202">            ClassColorDescriptor desc = new ClassColorDescriptor();</span>
+<span class="fc" id="L203">            desc.setName(model.getClassName(key));</span>
+            // Convert Color to web-style hex string (matches GuiXMLWriter behavior)
+<span class="fc" id="L205">            String hex = &quot;#&quot; + Integer.toHexString(model.getClassColor(key).getRGB()).toUpperCase();</span>
+<span class="fc" id="L206">            desc.setColor(hex);</span>
+<span class="fc" id="L207">            dto.addClassColor(desc);</span>
+<span class="fc" id="L208">        }</span>
+<span class="fc" id="L209">    }</span>
+
+    private void extractStationPositions(JSimGraphModel model, GuiDescriptor dto) {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        for (Object key : model.getStationKeys()) {</span>
+<span class="fc" id="L213">            JMTPoint pos = model.getStationPosition(key);</span>
+<span class="fc" id="L214">            StationPositionDescriptor desc = new StationPositionDescriptor();</span>
+<span class="fc" id="L215">            desc.setName(model.getStationName(key));</span>
+<span class="fc" id="L216">            desc.setX(pos.getX());</span>
+<span class="fc" id="L217">            desc.setY(pos.getY());</span>
+<span class="fc" id="L218">            desc.setRotate(pos.isRotate());</span>
+<span class="fc" id="L219">            desc.setAngle(pos.getAngle());</span>
+<span class="fc" id="L220">            dto.addStationPosition(desc);</span>
+<span class="fc" id="L221">        }</span>
+<span class="fc" id="L222">    }</span>
+
+    private void extractConnectionShapes(JSimGraphModel model, GuiDescriptor dto) {
+<span class="fc" id="L225">        List&lt;Object&gt; keys = model.getStationKeys();</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">        for (int i = 0; i &lt; keys.size(); i++) {</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            for (int j = 0; j &lt; keys.size(); j++) {</span>
+<span class="fc" id="L228">                Object src = keys.get(i);</span>
+<span class="fc" id="L229">                Object tgt = keys.get(j);</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">                if (!model.hasConnectionShape(src, tgt)) continue;</span>
+
+<span class="fc" id="L232">                JMTPath path = model.getConnectionShape(src, tgt);</span>
+<span class="fc" id="L233">                ConnectionShapeDescriptor shape = new ConnectionShapeDescriptor();</span>
+<span class="fc" id="L234">                shape.setSource(model.getStationName(src));</span>
+<span class="fc" id="L235">                shape.setTarget(model.getStationName(tgt));</span>
+
+<span class="fc bfc" id="L237" title="All 2 branches covered.">                for (int k = 0; k &lt; path.getArcsNb(); k++) {</span>
+<span class="fc" id="L238">                    JMTArc jmtArc = path.getArc(k);</span>
+<span class="fc" id="L239">                    ArcDescriptor arc = new ArcDescriptor();</span>
+<span class="fc" id="L240">                    arc.setSourceX(jmtArc.getSource().getX());</span>
+<span class="fc" id="L241">                    arc.setSourceY(jmtArc.getSource().getY());</span>
+<span class="fc" id="L242">                    arc.setControlPoint1X(jmtArc.getArcPoints().get(0).getX());</span>
+<span class="fc" id="L243">                    arc.setControlPoint1Y(jmtArc.getArcPoints().get(0).getY());</span>
+<span class="fc" id="L244">                    arc.setControlPoint2X(jmtArc.getArcPoints().get(1).getX());</span>
+<span class="fc" id="L245">                    arc.setControlPoint2Y(jmtArc.getArcPoints().get(1).getY());</span>
+<span class="fc" id="L246">                    arc.setTargetX(jmtArc.getTarget().getX());</span>
+<span class="fc" id="L247">                    arc.setTargetY(jmtArc.getTarget().getY());</span>
+<span class="fc" id="L248">                    shape.addArc(arc);</span>
+                }
+<span class="fc" id="L250">                dto.addConnectionShape(shape);</span>
+            }
+        }
+<span class="fc" id="L253">    }</span>
+
+    private void extractParametricAnalysis(CommonModel model, GuiDescriptor dto) {
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        if (!model.isParametricAnalysisEnabled()) {</span>
+<span class="fc" id="L257">            return;</span>
+        }
+
+<span class="fc" id="L260">        ParametricAnalysisDefinition paModel = model.getParametricAnalysisModel();</span>
+        // Consistency check: ask the user to correct the PA model if stale
+<span class="fc" id="L262">        int result = paModel.checkCorrectness(false);</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">        if (result != 0) {</span>
+<span class="nc" id="L264">            int choice = JOptionPane.showConfirmDialog(null,</span>
+                    &quot;The parametric analysis model is not consistent with the simulation model, try to change it?&quot;,
+                    &quot;JMT - Warning&quot;, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+<span class="nc bnc" id="L267" title="All 2 branches missed.">            if (choice == JOptionPane.YES_OPTION) {</span>
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                if (result == 2) {</span>
+<span class="nc" id="L269">                    ParametricAnalysisChecker checker = new ParametricAnalysisChecker(model, model, model);</span>
+<span class="nc bnc" id="L270" title="All 2 branches missed.">                    if (!checker.canBeEnabled()) {</span>
+<span class="nc" id="L271">                        return;</span>
+                    }
+<span class="nc" id="L273">                    String available = checker.getRunnableParametricAnalysis()[0];</span>
+<span class="nc" id="L274">                    paModel = ParametricAnalysisModelFactory</span>
+<span class="nc" id="L275">                            .createParametricAnalysisModel(available, model, model, model);</span>
+<span class="nc" id="L276">                } else {</span>
+<span class="nc" id="L277">                    paModel.checkCorrectness(true);</span>
+                }
+            }
+        }
+
+<span class="fc" id="L282">        ParametricAnalysisDescriptor pad = new ParametricAnalysisDescriptor();</span>
+<span class="fc" id="L283">        pad.setEnabled(true);</span>
+<span class="fc" id="L284">        pad.setClassPath(paModel.getClass().getName());</span>
+<span class="fc" id="L285">        paModel.getProperties().forEach(pad::addProperty);</span>
+<span class="fc" id="L286">        dto.setParametricAnalysis(pad);</span>
+<span class="fc" id="L287">    }</span>
+
+    // -----------------------------------------------------------------------
+    // Helpers
+    // -----------------------------------------------------------------------
+
+    private Map&lt;String, Object&gt; buildClassNameMap(CommonModel model) {
+<span class="fc" id="L294">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L295" title="All 2 branches covered.">        for (Object key : model.getClassKeys()) {</span>
+<span class="fc" id="L296">            map.put(model.getClassName(key), key);</span>
+<span class="fc" id="L297">        }</span>
+<span class="fc" id="L298">        return map;</span>
+    }
+
+    private Map&lt;String, Object&gt; buildStationNameMap(CommonModel model) {
+<span class="fc" id="L302">        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">        for (Object key : model.getStationKeys()) {</span>
+<span class="fc" id="L304">            map.put(model.getStationName(key), key);</span>
+<span class="fc" id="L305">        }</span>
+<span class="fc" id="L306">        return map;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

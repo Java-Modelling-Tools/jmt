@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MMNLogic.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov.Queues</a> &gt; <span class="el_source">MMNLogic.java</span></div><h1>MMNLogic.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package jmt.jmarkov.Queues;
+
+import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
+
+/**
+ * @author arifc
+ *
+ */
+public class MMNLogic extends MM1Logic {
+
+	private int numberOfServer;
+
+	/**
+	 * @param lambda
+	 * @param s
+	 * @param aNumberOfServer
+	 */
+	public MMNLogic(double lambda, double s, int aNumberOfServer) {
+<span class="nc" id="L22">		super(lambda, s);</span>
+<span class="nc" id="L23">		numberOfServer = aNumberOfServer;</span>
+<span class="nc" id="L24">	}</span>
+
+	@Override
+	public double getStatusProbability(int status) throws NonErgodicException {
+		//Correct
+<span class="nc bnc" id="L29" title="All 2 branches missed.">		if (status &lt;= numberOfServer) {</span>
+<span class="nc" id="L30">			return pzero() * Math.pow(utilization(), status) / factorial(status);</span>
+		} else {
+<span class="nc" id="L32">			return pzero() * Math.pow(numberOfServer, numberOfServer) * Math.pow(utilization() / numberOfServer, status) / factorial(numberOfServer);</span>
+		}
+
+	}
+
+	private double pzero() throws NonErgodicException //pzero = (u+v) to the -1
+	{
+<span class="nc" id="L39">		return 1 / (u() + v());</span>
+
+	}
+
+	private double u() throws NonErgodicException { //it is not utilization it is: sum from n=0 to m-1 ( (mp) to n / fact(n))
+<span class="nc" id="L44">		double result = 0;</span>
+<span class="nc" id="L45">		double utilization = utilization();//m*p</span>
+<span class="nc" id="L46">		double utilizationToN = 1;//for to the 0</span>
+<span class="nc" id="L47">		double factorialN = 1;//for 0</span>
+
+		//bas case 0:
+<span class="nc" id="L50">		result += utilizationToN / factorialN;</span>
+
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		for (int n = 1; n &lt; numberOfServer; n++) {</span>
+<span class="nc" id="L53">			utilizationToN *= utilization;</span>
+<span class="nc" id="L54">			factorialN *= n;</span>
+<span class="nc" id="L55">			result += utilizationToN / factorialN;</span>
+		}
+<span class="nc" id="L57">		return result;</span>
+	}
+
+	private double v() throws NonErgodicException {// ((mp) to the m) / factorial(m) / (1-p)
+<span class="nc" id="L61">		return (Math.pow(utilization(), numberOfServer)) / factorial(numberOfServer) / (1 - (utilization() / numberOfServer));</span>
+
+	}
+
+	private double Pq() throws NonErgodicException {//The probability Pq that upon an arrival all servers are busy and the customer has to wait is
+<span class="nc" id="L66">		return v() / (u() + v());</span>
+	}
+
+	@Override
+	public double mediaJobs() throws NonErgodicException {
+<span class="nc" id="L71">		return utilization() + (Pq() * (utilization() / numberOfServer) / (1 - (utilization() / numberOfServer)));</span>
+	}
+
+	/**
+	 * Calcola il traffico offerto in base ai parametri
+	 * lambda[job/s] e s[ms]
+	 * 
+	 * @return
+	 */
+	@Override
+	public double utilization() throws NonErgodicException {
+<span class="nc bnc" id="L82" title="All 2 branches missed.">		if ((lambda * s) &gt; numberOfServer) {</span>
+<span class="nc" id="L83">			throw new NonErgodicException();</span>
+		} else {
+<span class="nc" id="L85">			return (lambda * s);</span>
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see Queues.QueueLogic#throughput()
+	 */
+	@Override
+	public double throughput() throws NonErgodicException {
+<span class="nc" id="L94">		double u = utilization();</span>
+<span class="nc" id="L95">		return lambda * u / u;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Queues.QueueLogic#responseTime()
+	 */
+	@Override
+	public double responseTime() throws NonErgodicException {
+<span class="nc" id="L103">		return mediaJobs() / lambda;</span>
+	}
+
+	@Override
+	public int getNumberServer() {
+<span class="nc" id="L108">		return numberOfServer;</span>
+	}
+
+	private double factorial(int n) {
+<span class="nc" id="L112">		double result = 1;</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		for (int i = 2; i &lt;= n; i++) {</span>
+<span class="nc" id="L114">			result *= i;</span>
+		}
+
+<span class="nc" id="L117">		return result;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnablingSectionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">EnablingSectionPanel.java</span></div><h1>EnablingSectionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.table.ExactCellEditor;
+import jmt.gui.table.ExactCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+
+/**
+ * &lt;p&gt;Title: Enabling Section Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to parametrise the enabling section.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 24-06-2016
+ * Time: 16.00.00
+ */
+public class EnablingSectionPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private static final String NO_INPUT_PLACES_ERROR =
+			&quot;Error: No input places are defined, but the number of servers is infinite. &quot;
+			+ &quot;The transition will have an infinite enabling degree for this mode.&quot;;
+	private static final String NO_INPUT_PLACES_WARNING =
+			&quot;Warning: No input places are defined, and the number of servers is finite. &quot;
+			+ &quot;The transition will have a constant enabling degree for this mode.&quot;;
+	private static final String NO_ENABLING_CONDITION_ERROR =
+			&quot;Error: No enabling condition is specified, but the number of servers is infinite. &quot;
+			+ &quot;The transition will have an infinite enabling degree for this mode.&quot;;
+	private static final String NO_ENABLING_CONDITION_WARNING =
+			&quot;Warning: No enabling condition is specified, and the number of servers is finite. &quot;
+			+ &quot;The transition will have a constant enabling degree for this mode.&quot;;
+	private static final String INVALID_INPUT_CONDITION_WARNING =
+			&quot;Warning: The enabling condition is invalidated by the inhibiting condition. &quot;
+			+ &quot;The transition will never be enabled for this mode.&quot;;
+
+	private boolean isInitComplete;
+
+	private StationDefinition stationData;
+	private ClassDefinition classData;
+	private Object stationKey;
+	private Vector&lt;Object&gt; stationInKeys;
+	private Vector&lt;Object&gt; classKeys;
+	private int currentModeIndex;
+
+	private WarningScrollTable leftPanel;
+	private TitledBorder enablingBorder;
+	private ConditionTable enablingTable;
+	private JScrollPane enablingPane;
+	private TitledBorder inhibitingBorder;
+	private ConditionTable inhibitingTable;
+	private JScrollPane inhibitingPane;
+	private JButton addModeButton;
+	private ModeTable modeTable;
+	private JTextArea noticeText;
+
+<span class="nc" id="L110">	public EnablingSectionPanel(StationDefinition sd, ClassDefinition cd, Object sk) {</span>
+<span class="nc" id="L111">		isInitComplete = false;</span>
+<span class="nc" id="L112">		setData(sd, cd, sk);</span>
+<span class="nc" id="L113">		initComponents();</span>
+<span class="nc" id="L114">		addDataManagers();</span>
+<span class="nc" id="L115">		isInitComplete = true;</span>
+<span class="nc" id="L116">	}</span>
+
+	public void setData(StationDefinition sd, ClassDefinition cd, Object sk) {
+<span class="nc" id="L119">		stationData = sd;</span>
+<span class="nc" id="L120">		classData = cd;</span>
+<span class="nc" id="L121">		stationKey = sk;</span>
+<span class="nc" id="L122">		stationInKeys = sd.getBackwardConnections(stationKey);</span>
+<span class="nc" id="L123">		classKeys = cd.getClassKeys();</span>
+<span class="nc" id="L124">		currentModeIndex = 0;</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		if (isInitComplete) {</span>
+<span class="nc" id="L126">			leftPanel.clearCheckVectors();</span>
+<span class="nc" id="L127">			leftPanel.addCheckVector(stationInKeys);</span>
+<span class="nc" id="L128">			leftPanel.addCheckVector(classKeys);</span>
+<span class="nc" id="L129">			enablingTable.updateStructure();</span>
+<span class="nc" id="L130">			inhibitingTable.updateStructure();</span>
+		}
+<span class="nc" id="L132">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L135">		setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L137">		String modeName = stationData.getTransitionModeName(stationKey, 0);</span>
+<span class="nc" id="L138">		enablingBorder = new TitledBorder(new EtchedBorder(), &quot;Enabling Condition for &quot; + modeName);</span>
+<span class="nc" id="L139">		enablingTable = new ConditionTable(true);</span>
+<span class="nc" id="L140">		enablingPane = new JScrollPane(enablingTable);</span>
+<span class="nc" id="L141">		enablingPane.setBorder(enablingBorder);</span>
+<span class="nc" id="L142">		enablingPane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L144">		inhibitingBorder = new TitledBorder(new EtchedBorder(), &quot;Inhibiting Condition for &quot; + modeName);</span>
+<span class="nc" id="L145">		inhibitingTable = new ConditionTable(false);</span>
+<span class="nc" id="L146">		inhibitingPane = new JScrollPane(inhibitingTable);</span>
+<span class="nc" id="L147">		inhibitingPane.setBorder(inhibitingBorder);</span>
+<span class="nc" id="L148">		inhibitingPane.setMinimumSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L150">		JPanel conditionPanel = new JPanel(new GridLayout(2, 1, 3, 3));</span>
+<span class="nc" id="L151">		conditionPanel.add(enablingPane);</span>
+<span class="nc" id="L152">		conditionPanel.add(inhibitingPane);</span>
+
+<span class="nc" id="L154">		leftPanel = new WarningScrollTable(conditionPanel, WARNING_CLASS_INCOMING_ROUTING);</span>
+<span class="nc" id="L155">		leftPanel.addCheckVector(stationInKeys);</span>
+<span class="nc" id="L156">		leftPanel.addCheckVector(classKeys);</span>
+
+<span class="nc" id="L158">		addModeButton = new JButton(&quot;Add Mode&quot;);</span>
+<span class="nc" id="L159">		addModeButton.setMinimumSize(DIM_BUTTON_M);</span>
+<span class="nc" id="L160">		modeTable = new ModeTable();</span>
+<span class="nc" id="L161">		JPanel modePanel = new JPanel(new BorderLayout(5, 5));</span>
+<span class="nc" id="L162">		modePanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Modes&quot;));</span>
+<span class="nc" id="L163">		modePanel.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L164">		modePanel.add(addModeButton, BorderLayout.NORTH);</span>
+<span class="nc" id="L165">		modePanel.add(new JScrollPane(modeTable), BorderLayout.CENTER);</span>
+
+<span class="nc" id="L167">		noticeText = new JTextArea(&quot;&quot;);</span>
+<span class="nc" id="L168">		noticeText.setOpaque(false);</span>
+<span class="nc" id="L169">		noticeText.setEditable(false);</span>
+<span class="nc" id="L170">		noticeText.setLineWrap(true);</span>
+<span class="nc" id="L171">		noticeText.setWrapStyleWord(true);</span>
+<span class="nc" id="L172">		JScrollPane noticePane = new JScrollPane(noticeText);</span>
+<span class="nc" id="L173">		noticePane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Notice&quot;));</span>
+<span class="nc" id="L174">		noticePane.setMinimumSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(120 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L176">		JSplitPane rightPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);</span>
+<span class="nc" id="L177">		rightPanel.setBorder(new EmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L178">		rightPanel.setDividerSize(4);</span>
+<span class="nc" id="L179">		rightPanel.setResizeWeight(1.0);</span>
+<span class="nc" id="L180">		rightPanel.setLeftComponent(modePanel);</span>
+<span class="nc" id="L181">		rightPanel.setRightComponent(noticePane);</span>
+
+<span class="nc" id="L183">		JSplitPane mainPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L184">		mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+<span class="nc" id="L185">		mainPanel.setDividerSize(4);</span>
+<span class="nc" id="L186">		mainPanel.setResizeWeight(1.0);</span>
+<span class="nc" id="L187">		mainPanel.setLeftComponent(leftPanel);</span>
+<span class="nc" id="L188">		mainPanel.setRightComponent(rightPanel);</span>
+
+<span class="nc" id="L190">		add(mainPanel);</span>
+<span class="nc" id="L191">	}</span>
+
+	private void addDataManagers() {
+<span class="nc" id="L194">		addModeButton.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L197">				stopAllCellEditing();</span>
+<span class="nc" id="L198">				int index = stationData.getTransitionModeListSize(stationKey);</span>
+<span class="nc" id="L199">				stationData.addTransitionMode(stationKey, Defaults.get(&quot;transitionModeName&quot;) + (index + 1));</span>
+<span class="nc" id="L200">				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">				if (stationData instanceof JSimGraphModel) {</span>
+<span class="nc" id="L202">					JSimGraphModel model = (JSimGraphModel) stationData;</span>
+<span class="nc" id="L203">					String icon = model.getStationIcon(stationKey);</span>
+<span class="nc" id="L204">					model.setStationIcon(stationKey, icon);</span>
+<span class="nc" id="L205">					model.refreshGraph();</span>
+				}
+<span class="nc" id="L207">			}</span>
+		});
+
+<span class="nc" id="L210">		modeTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">				if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L214">					return;</span>
+				}
+<span class="nc" id="L216">				int index = modeTable.getSelectedRow();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">				if (index &gt;= 0) {</span>
+<span class="nc" id="L218">					stopAllCellEditing();</span>
+<span class="nc" id="L219">					String modeName = stationData.getTransitionModeName(stationKey, index);</span>
+<span class="nc" id="L220">					enablingBorder.setTitle(&quot;Enabling Condition for &quot; + modeName);</span>
+<span class="nc" id="L221">					inhibitingBorder.setTitle(&quot;Inhibiting Condition for &quot; + modeName);</span>
+<span class="nc" id="L222">					currentModeIndex = index;</span>
+<span class="nc" id="L223">					enablingPane.repaint();</span>
+<span class="nc" id="L224">					inhibitingPane.repaint();</span>
+<span class="nc" id="L225">					updateNotice();</span>
+<span class="nc" id="L226">				} else {</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">					if (currentModeIndex &gt;= stationData.getTransitionModeListSize(stationKey)) {</span>
+<span class="nc" id="L228">						currentModeIndex--;</span>
+					}
+<span class="nc" id="L230">					modeTable.setRowSelectionInterval(currentModeIndex, currentModeIndex);</span>
+				}
+<span class="nc" id="L232">			}</span>
+		});
+<span class="nc" id="L234">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L241">		return &quot;Enabling Section&quot;;</span>
+	}
+
+	/**
+	 * called by the Wizard before when switching to another panel
+	 */
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L249">		stopAllCellEditing();</span>
+<span class="nc" id="L250">	}</span>
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L257">		modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));</span>
+<span class="nc" id="L258">		modeTable.setRowSelectionInterval(0, 0);</span>
+<span class="nc" id="L259">		updateNotice();</span>
+<span class="nc" id="L260">	}</span>
+
+	private void stopAllCellEditing() {
+<span class="nc" id="L263">		TableCellEditor editor = null;</span>
+<span class="nc" id="L264">		editor = enablingTable.getCellEditor();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L266">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L268">		editor = inhibitingTable.getCellEditor();</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L270">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L272">		editor = modeTable.getCellEditor();</span>
+<span class="nc bnc" id="L273" title="All 4 branches missed.">		if (editor != null &amp;&amp; editor != modeTable.deleteEditor) {</span>
+<span class="nc" id="L274">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L276">	}</span>
+
+	private void updateNotice() {
+<span class="nc bnc" id="L279" title="All 2 branches missed.">		if (classKeys.isEmpty()) {</span>
+<span class="nc" id="L280">			noticeText.setText(&quot;&quot;);</span>
+<span class="nc" id="L281">			noticeText.setForeground(Color.BLACK);</span>
+<span class="nc" id="L282">			return;</span>
+		}
+
+<span class="nc bnc" id="L285" title="All 2 branches missed.">		if (stationInKeys.isEmpty()) {</span>
+<span class="nc" id="L286">			int numberOfServers = stationData.getNumberOfServers(stationKey, currentModeIndex).intValue();</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			if (numberOfServers &lt; 1) {</span>
+<span class="nc" id="L288">				noticeText.setText(NO_INPUT_PLACES_ERROR);</span>
+<span class="nc" id="L289">				noticeText.setForeground(Color.RED);</span>
+			} else {
+<span class="nc" id="L291">				noticeText.setText(NO_INPUT_PLACES_WARNING);</span>
+<span class="nc" id="L292">				noticeText.setForeground(Color.BLUE);</span>
+			}
+<span class="nc" id="L294">		} else {</span>
+<span class="nc" id="L295">			boolean hasEnablingValues = false;</span>
+<span class="nc" id="L296">			boolean hasInvalidValues = false;</span>
+			OUTER_LOOP:
+<span class="nc bnc" id="L298" title="All 2 branches missed.">			for (Object stationInKey : stationInKeys) {</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">				for (Object classKey : classKeys) {</span>
+<span class="nc" id="L300">					int enablingValue = stationData.getEnablingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L301">							stationInKey, classKey).intValue();</span>
+<span class="nc" id="L302">					int inhibitingValue = stationData.getInhibitingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L303">							stationInKey, classKey).intValue();</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">					if (enablingValue &gt; 0) {</span>
+<span class="nc" id="L305">						hasEnablingValues = true;</span>
+					}
+<span class="nc bnc" id="L307" title="All 4 branches missed.">					if (inhibitingValue &gt; 0 &amp;&amp; enablingValue &gt;= inhibitingValue) {</span>
+<span class="nc" id="L308">						hasInvalidValues = true;</span>
+					}
+<span class="nc bnc" id="L310" title="All 4 branches missed.">					if (hasEnablingValues &amp;&amp; hasInvalidValues) {</span>
+<span class="nc" id="L311">						break OUTER_LOOP;</span>
+					}
+<span class="nc" id="L313">				}</span>
+<span class="nc" id="L314">			}</span>
+
+<span class="nc bnc" id="L316" title="All 2 branches missed.">			if (!hasEnablingValues) {</span>
+<span class="nc" id="L317">				int numberOfServers = stationData.getNumberOfServers(stationKey, currentModeIndex).intValue();</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">				if (numberOfServers &lt; 1) {</span>
+<span class="nc" id="L319">					noticeText.setText(NO_ENABLING_CONDITION_ERROR);</span>
+<span class="nc" id="L320">					noticeText.setForeground(Color.RED);</span>
+				} else {
+<span class="nc" id="L322">					noticeText.setText(NO_ENABLING_CONDITION_WARNING);</span>
+<span class="nc" id="L323">					noticeText.setForeground(Color.BLUE);</span>
+				}
+<span class="nc" id="L325">			} else {</span>
+<span class="nc bnc" id="L326" title="All 2 branches missed.">				if (hasInvalidValues) {</span>
+<span class="nc" id="L327">					noticeText.setText(INVALID_INPUT_CONDITION_WARNING);</span>
+<span class="nc" id="L328">					noticeText.setForeground(Color.BLUE);</span>
+				} else {
+<span class="nc" id="L330">					noticeText.setText(&quot;&quot;);</span>
+<span class="nc" id="L331">					noticeText.setForeground(Color.BLACK);</span>
+				}
+			}
+		}
+<span class="nc" id="L335">	}</span>
+
+	private class ConditionTable extends ExactTable {
+
+		private static final long serialVersionUID = 1L;
+
+		private boolean isEnablingTable;
+		private InfiniteExactCellRenderer inhibitingRenderer;
+
+<span class="nc" id="L344">		public ConditionTable(boolean isEnabling) {</span>
+<span class="nc" id="L345">			super(new ConditionTableModel(isEnabling));</span>
+<span class="nc" id="L346">			isEnablingTable = isEnabling;</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">			inhibitingRenderer = isEnabling ? null : new InfiniteExactCellRenderer();</span>
+<span class="nc" id="L348">			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L349">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L350">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L351">			setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L352">			setBatchEditingEnabled(true);</span>
+<span class="nc" id="L353">		}</span>
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L357" title="All 2 branches missed.">			if (!isEnablingTable) {</span>
+<span class="nc" id="L358">				return inhibitingRenderer;</span>
+			} else {
+<span class="nc" id="L360">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+	}
+
+	private class ConditionTableModel extends ExactTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+		private boolean isEnablingModel;
+
+<span class="nc" id="L372">		public ConditionTableModel(boolean isEnabling) {</span>
+<span class="nc" id="L373">			rowHeaderPrototype = &quot;Station10000&quot;;</span>
+<span class="nc" id="L374">			prototype = &quot;Class10000&quot;;</span>
+<span class="nc" id="L375">			isEnablingModel = isEnabling;</span>
+<span class="nc" id="L376">		}</span>
+
+		@Override
+		public int getRowCount() {
+<span class="nc" id="L380">			return stationInKeys.size();</span>
+		}
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L385">			return classKeys.size();</span>
+		}
+
+		@Override
+		protected String getRowName(int rowIndex) {
+<span class="nc" id="L390">			return stationData.getStationName(stationInKeys.get(rowIndex));</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			if (columnIndex &gt;= classKeys.size()) {</span>
+<span class="nc" id="L396">				return &quot;&quot;;</span>
+			}
+<span class="nc" id="L398">			return classData.getClassName(classKeys.get(columnIndex));</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc bnc" id="L403" title="All 2 branches missed.">			if (columnIndex == -1) {</span>
+<span class="nc" id="L404">				return String.class;</span>
+			} else {
+<span class="nc" id="L406">				return String.class;</span>
+			}
+		}
+
+		@Override
+		public Object getPrototype(int i) {
+<span class="nc bnc" id="L412" title="All 2 branches missed.">			if (i == -1) {</span>
+<span class="nc" id="L413">				return rowHeaderPrototype;</span>
+			} else {
+<span class="nc" id="L415">				return prototype;</span>
+			}
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L421">			return true;</span>
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L426" title="All 2 branches missed.">			if (isEnablingModel) {</span>
+<span class="nc" id="L427">				return stationData.getEnablingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L428">						stationInKeys.get(rowIndex), classKeys.get(columnIndex));</span>
+			} else {
+<span class="nc" id="L430">				return stationData.getInhibitingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L431">						stationInKeys.get(rowIndex), classKeys.get(columnIndex));</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+			try {
+<span class="nc" id="L438">				Integer ivalue = Integer.valueOf((String) value);</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">				if (isEnablingModel) {</span>
+<span class="nc" id="L440">					stationData.setEnablingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L441">							stationInKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);</span>
+				} else {
+<span class="nc" id="L443">					stationData.setInhibitingCondition(stationKey, currentModeIndex,</span>
+<span class="nc" id="L444">							stationInKeys.get(rowIndex), classKeys.get(columnIndex), ivalue);</span>
+				}
+<span class="nc bnc" id="L446" title="All 2 branches missed.">				if (stationData instanceof JSimGraphModel) {</span>
+<span class="nc" id="L447">					JSimGraphModel model = (JSimGraphModel) stationData;</span>
+<span class="nc bnc" id="L448" title="All 2 branches missed.">					for (Object stationInKey : stationInKeys) {</span>
+<span class="nc" id="L449">						int end = model.getConnectionEnd(stationInKey, stationKey);</span>
+<span class="nc" id="L450">						model.setConnectionEnd(stationInKey, stationKey, end);</span>
+<span class="nc" id="L451">					}</span>
+<span class="nc" id="L452">					model.refreshGraph();</span>
+				}
+<span class="nc" id="L454">				updateNotice();</span>
+<span class="nc" id="L455">			} catch (NumberFormatException e) {</span>
+				// Aborts modification if String is invalid
+<span class="nc" id="L457">			}</span>
+<span class="nc" id="L458">		}</span>
+
+		@Override
+		public void clear(int row, int col) {
+<span class="nc" id="L462">			setValueAt(&quot;0&quot;, row, col);</span>
+<span class="nc" id="L463">		}</span>
+
+	}
+
+<span class="nc" id="L467">	private class InfiniteExactCellRenderer extends ExactCellRenderer {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L473" title="All 4 branches missed.">			if (value != null &amp;&amp; ((Integer) value).intValue() &lt;= 0) {</span>
+<span class="nc" id="L474">				value = Double.POSITIVE_INFINITY;</span>
+			}
+<span class="nc" id="L476">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+	private class ModeTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		private ButtonCellEditor deleteEditor;
+		private ButtonCellEditor deleteRenderer;
+
+<span class="nc" id="L488">		private AbstractAction deleteMode = new AbstractAction(&quot;&quot;) {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			{
+<span class="nc" id="L493">				putValue(Action.SHORT_DESCRIPTION, &quot;Delete&quot;);</span>
+<span class="nc" id="L494">				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+			}
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L498">				stopAllCellEditing();</span>
+<span class="nc" id="L499">				int index = modeTable.getSelectedRow();</span>
+<span class="nc" id="L500">				stationData.deleteTransitionMode(stationKey, index);</span>
+<span class="nc" id="L501">				modeTable.tableChanged(new TableModelEvent(modeTable.getModel()));</span>
+<span class="nc bnc" id="L502" title="All 2 branches missed.">				if (stationData instanceof JSimGraphModel) {</span>
+<span class="nc" id="L503">					JSimGraphModel model = (JSimGraphModel) stationData;</span>
+<span class="nc" id="L504">					String icon = model.getStationIcon(stationKey);</span>
+<span class="nc" id="L505">					model.setStationIcon(stationKey, icon);</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">					for (Object stationInKey : stationInKeys) {</span>
+<span class="nc" id="L507">						int end = model.getConnectionEnd(stationInKey, stationKey);</span>
+<span class="nc" id="L508">						model.setConnectionEnd(stationInKey, stationKey, end);</span>
+<span class="nc" id="L509">					}</span>
+<span class="nc" id="L510">					model.refreshGraph();</span>
+				}
+<span class="nc" id="L512">			}</span>
+
+		};
+
+<span class="nc" id="L516">		public ModeTable() {</span>
+<span class="nc" id="L517">			JButton deleteButton = new JButton(deleteMode);</span>
+<span class="nc" id="L518">			deleteButton.setFocusable(false);</span>
+<span class="nc" id="L519">			deleteEditor = new ButtonCellEditor(deleteButton);</span>
+<span class="nc" id="L520">			deleteRenderer = new DisabledButtonCellRenderer(new JButton(deleteMode));</span>
+<span class="nc" id="L521">			setModel(new ModeTableModel());</span>
+<span class="nc" id="L522">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L523">			sizeColumns();</span>
+<span class="nc" id="L524">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L525">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L526">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L527">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L531">				getColumnModel().getColumn(i).setPreferredWidth(((ModeTableModel) getModel()).getColumnSize(i));</span>
+			}
+<span class="nc" id="L533">		}</span>
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L537" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L538">				return deleteEditor;</span>
+			} else {
+<span class="nc" id="L540">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L546" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L547">				return deleteRenderer;</span>
+			} else {
+<span class="nc" id="L549">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+	}
+
+<span class="nc" id="L555">	private class ModeTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L559">		private String[] columnNames = new String[] { &quot;Mode&quot;, &quot;&quot; };</span>
+<span class="nc" id="L560">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L561">		private int[] columnSizes = new int[] { 160, 40 };</span>
+
+		@Override
+		public int getRowCount() {
+<span class="nc" id="L565">			return stationData.getTransitionModeListSize(stationKey);</span>
+		}
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L570">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L575">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L580">			return columnClasses[columnIndex];</span>
+		}
+
+		public int getColumnSize(int columnIndex) {
+<span class="nc" id="L584">			return columnSizes[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L589" title="All 4 branches missed.">			if (columnIndex == 1 &amp;&amp; stationData.getTransitionModeListSize(stationKey) &lt; 2) {</span>
+<span class="nc" id="L590">				return false;</span>
+			} else {
+<span class="nc" id="L592">				return true;</span>
+			}
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L598" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L599">				return stationData.getTransitionModeName(stationKey, rowIndex);</span>
+			} else {
+<span class="nc" id="L601">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L607" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L608">				String modeName = (String) aValue;</span>
+<span class="nc" id="L609">				stationData.setTransitionModeName(stationKey, rowIndex, modeName);</span>
+<span class="nc" id="L610">				enablingBorder.setTitle(&quot;Enabling Condition for &quot; + modeName);</span>
+<span class="nc" id="L611">				inhibitingBorder.setTitle(&quot;Inhibiting Condition for &quot; + modeName);</span>
+<span class="nc" id="L612">				enablingPane.repaint();</span>
+<span class="nc" id="L613">				inhibitingPane.repaint();</span>
+			}
+<span class="nc" id="L615">		}</span>
+
+	}
+
+	private class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JButton button;
+
+<span class="nc" id="L625">		public DisabledButtonCellRenderer(JButton jbutt) {</span>
+<span class="nc" id="L626">			super(jbutt);</span>
+<span class="nc" id="L627">			button = jbutt;</span>
+<span class="nc" id="L628">		}</span>
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L632" title="All 2 branches missed.">			if (table.isCellEditable(row, column)) {</span>
+<span class="nc" id="L633">				button.setEnabled(true);</span>
+			} else {
+<span class="nc" id="L635">				button.setEnabled(false);</span>
+			}
+<span class="nc" id="L637">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

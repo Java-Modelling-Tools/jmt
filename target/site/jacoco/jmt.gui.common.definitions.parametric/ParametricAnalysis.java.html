@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParametricAnalysis.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.definitions.parametric</a> &gt; <span class="el_source">ParametricAnalysis.java</span></div><h1>ParametricAnalysis.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.definitions.parametric;
+
+import java.util.HashMap;
+import java.util.Set;
+import java.util.Vector;
+
+import jmt.gui.common.definitions.ClassDefinition;
+
+/**
+ * &lt;p&gt;Title:&lt;/p&gt;
+ * &lt;p&gt;Description:&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 29-gen-2006
+ *         Time: 21.51.35
+ */
+public interface ParametricAnalysis {
+	public final String PA_TYPE_NUMBER_OF_CUSTOMERS = &quot;Number of customers&quot;;
+	public final String PA_TYPE_POPULATION_MIX = &quot;Population mix&quot;;
+	public final String PA_TYPE_SERVICE_TIMES = &quot;Service times&quot;;
+	public final String PA_TYPE_ARRIVAL_RATE = &quot;Arrival rates&quot;;
+	public final String PA_TYPE_NUMBER_OF_SERVERS = &quot;Number of servers&quot;;
+	public final String PA_TYPE_TOTAL_CAPACITY = &quot;Total capacity&quot;;
+	public final String PA_TYPE_ROUTING_PROBABILITY = &quot;Routing probability&quot;;
+	public final String PA_TYPE_SEED = &quot;Seed&quot;;
+	public final int MAX_STEP_NUMBER = 1000;
+
+	/**
+	* &lt;p&gt;Title: ValuesTable&lt;/p&gt;
+	* &lt;p&gt;Description: this class represents a table used to contain the values that the varying will assume
+	*                during the parametric analysis. It contains a HashMap, used to contain a Vector for each
+	*                class, containing the values that the parameter will assume step by step.&lt;/p&gt;
+	*
+	* @author Francesco D'Aquino
+	*         Date: 18-dic-2005
+	*         Time: 09.09.09
+	*/
+
+	public class ValuesTable {
+		HashMap&lt;Object, Vector&gt; table;
+		ClassDefinition classDef;
+		int numberOfSteps;
+		Vector&lt;Object&gt; classSet;
+
+<span class="nc" id="L63">		public ValuesTable(ClassDefinition cd, Vector&lt;Object&gt; classSet, int numberOfSteps) {</span>
+<span class="nc" id="L64">			this.numberOfSteps = numberOfSteps;</span>
+<span class="nc" id="L65">			this.classSet = classSet;</span>
+<span class="nc" id="L66">			table = new HashMap&lt;Object, Vector&gt;(numberOfSteps, 1);</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">			for (int i = 0; i &lt; classSet.size(); i++) {</span>
+<span class="nc" id="L68">				table.put(classSet.get(i), new Vector(numberOfSteps));</span>
+			}
+<span class="nc" id="L70">			classDef = cd;</span>
+<span class="nc" id="L71">		}</span>
+
+		/**
+		 * Sets the next-step value for the parameter of class &lt;code&gt;classKey&lt;/code&gt;.
+		 * @param classKey the class of the parameter
+		 * @param value the value it will assume
+		 */
+		public void setValue(Object classKey, double value) {
+<span class="nc" id="L79">			Vector&lt;Double&gt; classValues = table.get(classKey);</span>
+<span class="nc" id="L80">			classValues.add(new Double(value));</span>
+<span class="nc" id="L81">		}</span>
+
+		/**
+		 * Gets the value assumed by the parameter of class &lt;code&gt;classKey&lt;/code&gt; at step &lt;code&gt;step&lt;/code&gt;.
+		 * @param classKey the class the parameter belongs to.
+		 * @param step the step we are interested in.
+		 * @return the value the parameter will assume.
+		 */
+		public double getValue(Object classKey, int step) {
+<span class="nc" id="L90">			Vector classValues = table.get(classKey);</span>
+<span class="nc" id="L91">			return ((Double) (classValues.get(step))).doubleValue();</span>
+		}
+
+		/**
+		 * Gets the total number of steps inserted.
+		 * @return the total number of steps inserted.
+		 */
+		public int getNumberOfInsertedSteps() {
+<span class="nc" id="L99">			int steps = 0;</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			if (!table.isEmpty()) {</span>
+<span class="nc" id="L101">				Vector temp = table.get(classSet.get(0));</span>
+<span class="nc" id="L102">				steps = temp.size();</span>
+			}
+<span class="nc" id="L104">			return steps;</span>
+		}
+
+		/**
+		 * Gets the number of classes the table contains
+		 * @return the number of contained classes
+		 */
+		public int getNumberOfClasses() {
+<span class="nc" id="L112">			return table.keySet().size();</span>
+		}
+
+		/**
+		 * Returns a Set containing the class Keys
+		 * @return a Set containing the class Keys
+		 */
+		public Set&lt;Object&gt; getClassKeySet() {
+<span class="nc" id="L120">			return table.keySet();</span>
+		}
+
+<span class="nc" id="L123">		public HashMap&lt;Object, Vector&gt; getTable() { return table; }</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

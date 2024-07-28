@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebugSolverPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">DebugSolverPanel.java</span></div><h1>DebugSolverPanel.java</h1><pre class="source lang-java linenums">package jmt.gui.common.panels;
+
+import jmt.engine.log.JSimLogger;
+import jmt.engine.log.LoggerStateManager;
+import jmt.gui.jsimgraph.controller.Mediator;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.io.File;
+import java.util.Objects;
+
+public class DebugSolverPanel extends JPanel {
+    private Mediator mediator;
+    private JTextField logPathField;
+    private JButton enableButton, browseButton, selectAllButton, cancelButton;
+    private JList&lt;CheckListItem&gt; eventList;
+    private DefaultListModel&lt;CheckListItem&gt; listModel;
+<span class="nc" id="L22">    private boolean allSelected = false;</span>
+
+    private JComboBox&lt;String&gt; delimiterComboBox, decimalSeparatorComboBox;
+
+    private File file;
+
+<span class="nc" id="L28">    public DebugSolverPanel(Mediator mediator) {</span>
+<span class="nc" id="L29">        this.mediator = mediator;</span>
+<span class="nc" id="L30">        initComponent();</span>
+<span class="nc" id="L31">    }</span>
+
+    private void initComponent() {
+<span class="nc" id="L34">        setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L36">        String[] eventNames = {</span>
+                &quot;EVENT_ABORT&quot;, &quot;EVENT_STOP&quot;, &quot;EVENT_START&quot;, &quot;EVENT_JOB&quot;, &quot;EVENT_ACK&quot;, &quot;EVENT_PREEMPTED_JOB&quot;, &quot;EVENT_KEEP_AWAKE&quot;,
+                &quot;EVENT_JOIN&quot;, &quot;EVENT_JOB_OUT_OF_REGION&quot;, &quot;EVENT_DISTRIBUTION_CHANGE&quot;, &quot;EVENT_JOB_CHANGE&quot;, &quot;EVENT_ENABLING&quot;,
+                &quot;EVENT_TIMING&quot;, &quot;EVENT_FIRING&quot;, &quot;EVENT_JOB_REQUEST&quot;, &quot;EVENT_JOB_RELEASE&quot;, &quot;EVENT_JOB_FINISH&quot;, &quot;EVENT_POLLING_SERVER_NEXT&quot;,
+                &quot;EVENT_POLLING_SERVER_READY&quot;, &quot;EVENT_RENEGE&quot;, &quot;EVENT_RETRIAL&quot;, &quot;EVENT_RETRIAL_JOB&quot;, &quot;EVENT_SETUP_JOB&quot;, &quot;EVENT_JOB_REQUEST_FROM_SERVER&quot;,
+                &quot;EVENT_RESET_COOLSTART&quot;,&quot;MSG_NOT_PROCESSED&quot;
+        };
+
+<span class="nc" id="L44">        listModel = new DefaultListModel&lt;&gt;();</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">        for (String event : eventNames) {</span>
+<span class="nc" id="L46">            listModel.addElement(new CheckListItem(event));</span>
+        }
+
+<span class="nc" id="L49">        eventList = new JList&lt;&gt;(listModel);</span>
+<span class="nc" id="L50">        eventList.setCellRenderer(new CheckListRenderer());</span>
+<span class="nc" id="L51">        eventList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);</span>
+<span class="nc" id="L52">        eventList.addMouseListener(new MouseAdapter() {</span>
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+<span class="nc" id="L55">                int index = eventList.locationToIndex(evt.getPoint());</span>
+<span class="nc" id="L56">                CheckListItem item = listModel.getElementAt(index);</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">                item.setSelected(!item.isSelected());</span>
+<span class="nc" id="L58">                eventList.repaint();</span>
+
+<span class="nc bnc" id="L60" title="All 2 branches missed.">                if (item.isSelected()) {</span>
+<span class="nc" id="L61">                    LoggerStateManager.addAllowedEvent(item.toString());</span>
+                } else {
+<span class="nc" id="L63">                    LoggerStateManager.deleteAllowedEvent(item.toString());</span>
+                }
+<span class="nc" id="L65">            }</span>
+        });
+
+<span class="nc" id="L68">        JScrollPane listScrollPane = new JScrollPane(eventList);</span>
+<span class="nc" id="L69">        listScrollPane.setBorder(BorderFactory.createTitledBorder(&quot;Recorded Events&quot;));</span>
+
+<span class="nc" id="L71">        logPathField = new JTextField(30);</span>
+<span class="nc" id="L72">        logPathField.setEditable(false);</span>
+<span class="nc" id="L73">        browseButton = new JButton(&quot;Browse&quot;);</span>
+<span class="nc" id="L74">        browseButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e1) {
+<span class="nc" id="L77">                DebugSolverPanel.this.browseForPath(e1);</span>
+<span class="nc" id="L78">            }</span>
+        });
+
+<span class="nc" id="L81">        enableButton = new JButton(&quot;Enable debug logging&quot;);</span>
+<span class="nc" id="L82">        enableButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e1) {
+<span class="nc" id="L85">                DebugSolverPanel.this.enableDebugSolver(e1);</span>
+<span class="nc" id="L86">            }</span>
+        });
+
+<span class="nc" id="L89">        cancelButton = new JButton(&quot;disable debug logging&quot;);</span>
+<span class="nc" id="L90">        cancelButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L93">                mediator.toggleDebug(false);</span>
+<span class="nc" id="L94">                JOptionPane.showMessageDialog(DebugSolverPanel.this, &quot;Debug logging disabled&quot;);</span>
+<span class="nc" id="L95">                SwingUtilities.getWindowAncestor(DebugSolverPanel.this).dispose();</span>
+<span class="nc" id="L96">            }</span>
+        });
+
+<span class="nc" id="L99">        selectAllButton = new JButton(&quot;Select All&quot;);</span>
+<span class="nc" id="L100">        selectAllButton.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L103">                DebugSolverPanel.this.selectAllEvents();</span>
+<span class="nc" id="L104">            }</span>
+        });
+
+        // New components for delimiter and decimal separator selection
+<span class="nc" id="L108">        delimiterComboBox = new JComboBox&lt;&gt;(new String[]{&quot;,&quot;, &quot;;&quot;, &quot;Tab&quot;, &quot;Space&quot;});</span>
+<span class="nc" id="L109">        decimalSeparatorComboBox = new JComboBox&lt;&gt;(new String[]{&quot;.&quot;, &quot;,&quot;});</span>
+
+<span class="nc" id="L111">        delimiterComboBox.setPreferredSize(new Dimension(50, delimiterComboBox.getPreferredSize().height));</span>
+<span class="nc" id="L112">        decimalSeparatorComboBox.setPreferredSize(new Dimension(50, decimalSeparatorComboBox.getPreferredSize().height));</span>
+
+<span class="nc" id="L114">        JPanel northPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L115">        northPanel.add(new JLabel(&quot;Log Path:&quot;), BorderLayout.WEST);</span>
+<span class="nc" id="L116">        northPanel.add(logPathField, BorderLayout.CENTER);</span>
+<span class="nc" id="L117">        northPanel.add(browseButton, BorderLayout.EAST);</span>
+
+<span class="nc" id="L119">        JPanel southPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));</span>
+<span class="nc" id="L120">        southPanel.add(enableButton);</span>
+<span class="nc" id="L121">        southPanel.add(cancelButton);</span>
+
+        // Panel for delimiter and decimal separator selection
+<span class="nc" id="L124">        JPanel delimiterPanel = new JPanel(new GridLayout(2, 2, 5, 5));</span>
+<span class="nc" id="L125">        delimiterPanel.setBorder(BorderFactory.createTitledBorder(&quot;CSV Configuration&quot;));</span>
+<span class="nc" id="L126">        delimiterPanel.add(new JLabel(&quot;Delimiter:&quot;));</span>
+<span class="nc" id="L127">        delimiterPanel.add(delimiterComboBox);</span>
+<span class="nc" id="L128">        delimiterPanel.add(new JLabel(&quot;Decimal Separator:&quot;));</span>
+<span class="nc" id="L129">        delimiterPanel.add(decimalSeparatorComboBox);</span>
+
+<span class="nc" id="L131">        JPanel centerPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L132">        centerPanel.add(listScrollPane, BorderLayout.CENTER);</span>
+
+        // Create a panel to hold the select all button
+<span class="nc" id="L135">        JPanel selectAllPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L136">        selectAllPanel.add(selectAllButton);</span>
+
+        // Add selectAllPanel and delimiterPanel to centerPanel
+<span class="nc" id="L139">        JPanel eventsAndSelectAllPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L140">        eventsAndSelectAllPanel.add(listScrollPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L141">        eventsAndSelectAllPanel.add(selectAllPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L143">        centerPanel.add(eventsAndSelectAllPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L144">        centerPanel.add(delimiterPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L146">        add(northPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L147">        add(centerPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L148">        add(southPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L150">        setBorder(BorderFactory.createTitledBorder(&quot;Log calendar configuration&quot;));</span>
+<span class="nc" id="L151">    }</span>
+
+    private void browseForPath(ActionEvent e) {
+<span class="nc" id="L154">        JFileChooser fileChooser = new JFileChooser();</span>
+<span class="nc" id="L155">        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);</span>
+<span class="nc" id="L156">        int option = fileChooser.showOpenDialog(this);</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">        if (option == JFileChooser.APPROVE_OPTION) {</span>
+<span class="nc" id="L158">            file = fileChooser.getSelectedFile();</span>
+<span class="nc" id="L159">            logPathField.setText(file.getAbsolutePath());</span>
+        }
+<span class="nc" id="L161">    }</span>
+
+    private void enableDebugSolver(ActionEvent e) {
+<span class="nc bnc" id="L164" title="All 2 branches missed.">        if (LoggerStateManager.getAllowedEvents().length == 0) {</span>
+<span class="nc" id="L165">            JOptionPane.showMessageDialog(this, &quot;Please select at least one event to log&quot;);</span>
+<span class="nc" id="L166">            return;</span>
+        }
+<span class="nc bnc" id="L168" title="All 2 branches missed.">        if (file != null) {</span>
+<span class="nc" id="L169">            JSimLogger.resetDebugLoggerStorePath(file.getAbsolutePath());</span>
+        } else {
+<span class="nc" id="L171">            JSimLogger.resetDebugLoggerStorePath(System.getProperty(&quot;user.home&quot;)+ System.getProperty(&quot;file.separator&quot;) + &quot;JMT&quot;);</span>
+        }
+
+        // Set delimiter and decimal separator
+<span class="nc" id="L175">        String delimiter = resolveDelimiter((String) Objects.requireNonNull(delimiterComboBox.getSelectedItem()));</span>
+<span class="nc" id="L176">        String decimalSeparator = (String) decimalSeparatorComboBox.getSelectedItem();</span>
+<span class="nc" id="L177">        JSimLogger.setDelimiter(delimiter);</span>
+<span class="nc" id="L178">        JSimLogger.setDecimalSeparator(decimalSeparator);</span>
+
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        if (logPathField.getText().isEmpty()) {</span>
+<span class="nc" id="L181">            JOptionPane.showMessageDialog(this, &quot;log file will generate at default position(user\\JMT\\JSIM_debug.csv) since&quot; +</span>
+                    &quot; no input of log path, Simulation started... Delimiter: &quot; + delimiter + &quot;, Decimal Separator: &quot; + decimalSeparator);
+        } else {
+<span class="nc" id="L184">            JOptionPane.showMessageDialog(this, &quot;log file will generate at &quot; + logPathField.getText() + &quot;\\JSIM_debug.csv, Simulation started... Delimiter: &quot; + delimiter + &quot;, Decimal Separator: &quot; + decimalSeparator);</span>
+        }
+<span class="nc" id="L186">        mediator.toggleDebug(true);</span>
+
+        // Close the dialog/window if needed
+<span class="nc" id="L189">        SwingUtilities.getWindowAncestor(this).dispose();</span>
+<span class="nc" id="L190">    }</span>
+
+    private String resolveDelimiter(String delimiter) {
+<span class="nc bnc" id="L193" title="All 3 branches missed.">        switch (delimiter) {</span>
+            case &quot;Tab&quot;:
+<span class="nc" id="L195">                return &quot;\t&quot;;</span>
+            case &quot;Space&quot;:
+<span class="nc" id="L197">                return &quot; &quot;;</span>
+            default:
+<span class="nc" id="L199">                return delimiter;</span>
+        }
+    }
+
+    private void selectAllEvents() {
+<span class="nc bnc" id="L204" title="All 2 branches missed.">        allSelected = !allSelected; // Toggle the selection state</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for (int i = 0; i &lt; listModel.size(); i++) {</span>
+<span class="nc" id="L206">            CheckListItem item = listModel.getElementAt(i);</span>
+<span class="nc" id="L207">            item.setSelected(allSelected);</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">            if (allSelected) {</span>
+<span class="nc" id="L209">                LoggerStateManager.addAllowedEvent(item.toString());</span>
+            } else {
+<span class="nc" id="L211">                LoggerStateManager.deleteAllowedEvent(item.toString());</span>
+            }
+        }
+<span class="nc" id="L214">        eventList.repaint();</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        selectAllButton.setText(allSelected ? &quot;Deselect All&quot; : &quot;Select All&quot;);</span>
+<span class="nc" id="L216">    }</span>
+
+    static class CheckListItem {
+        private String label;
+<span class="nc" id="L220">        private boolean isSelected = false;</span>
+
+<span class="nc" id="L222">        public CheckListItem(String label) {</span>
+<span class="nc" id="L223">            this.label = label;</span>
+<span class="nc" id="L224">        }</span>
+
+        public boolean isSelected() {
+<span class="nc" id="L227">            return isSelected;</span>
+        }
+
+        public void setSelected(boolean isSelected) {
+<span class="nc" id="L231">            this.isSelected = isSelected;</span>
+<span class="nc" id="L232">        }</span>
+
+        @Override
+        public String toString() {
+<span class="nc" id="L236">            return label;</span>
+        }
+    }
+
+<span class="nc" id="L240">    static class CheckListRenderer extends JCheckBox implements ListCellRenderer&lt;CheckListItem&gt; {</span>
+        @Override
+        public Component getListCellRendererComponent(JList&lt;? extends CheckListItem&gt; list, CheckListItem value, int index,
+                                                      boolean isSelected, boolean cellHasFocus) {
+<span class="nc" id="L244">            setEnabled(list.isEnabled());</span>
+<span class="nc" id="L245">            setSelected(value.isSelected());</span>
+<span class="nc" id="L246">            setFont(list.getFont());</span>
+<span class="nc" id="L247">            setBackground(list.getBackground());</span>
+<span class="nc" id="L248">            setForeground(list.getForeground());</span>
+<span class="nc" id="L249">            setText(value.toString());</span>
+<span class="nc" id="L250">            return this;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

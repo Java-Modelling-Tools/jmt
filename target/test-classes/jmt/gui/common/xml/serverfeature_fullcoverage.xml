@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="FullCoverage_ParserTest.jsimg" timestamp="Sun Mar 22 18:50:00 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," maxSamples="1000000" name="FullCoverage_ParserTest.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+
+        <userClass name="Class1" priority="0" referenceSource="Node1_Polling" type="closed" customers="10"/>
+        <userClass name="Class2" priority="0" referenceSource="Node1_Polling" type="closed" customers="10"/>
+
+        <node name="Node3_Heterogeneous">
+            <section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter></section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy" array="true">
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>4.0</value></subParameter></subParameter></subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>5.0</value></subParameter></subParameter></subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>6.0</value></subParameter></subParameter></subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>7.0</value></subParameter></subParameter></subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="serverNames" array="true"><subParameter classPath="java.lang.String" name="serverName"><value>ServerA</value></subParameter><subParameter classPath="java.lang.String" name="serverName"><value>ServerB</value></subParameter></parameter>
+                <parameter classPath="java.lang.Integer" name="serversPerServerType" array="true"><subParameter classPath="java.lang.Integer" name="count"><value>2</value></subParameter><subParameter classPath="java.lang.Integer" name="count"><value>3</value></subParameter></parameter>
+                <parameter classPath="java.lang.Boolean" name="serverCompatibilities" array="true">
+                    <subParameter classPath="java.lang.Boolean" name="serverTypesCompatibilities"><subParameter classPath="java.lang.Boolean" name="compat"><value>true</value></subParameter><subParameter classPath="java.lang.Boolean" name="compat"><value>false</value></subParameter></subParameter>
+                    <subParameter classPath="java.lang.Boolean" name="serverTypesCompatibilities"><subParameter classPath="java.lang.Boolean" name="compat"><value>false</value></subParameter><subParameter classPath="java.lang.Boolean" name="compat"><value>true</value></subParameter></subParameter>
+                </parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node1_Polling">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+            </section>
+            <section className="LimitedPollingServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>2</value></parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning"><value>10</value></parameter>
+                <parameter array="true" classPath="" name="switchoverTimes"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="SwitchoverStrategy"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="switchoverStrategies"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="switchoverStrategy"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter></subParameter></subParameter></parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node2_SetupDelay">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+            </section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter array="true" classPath="" name="switchoverTimes"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>2.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="SwitchoverStrategy"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>2.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="switchoverStrategies"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>2.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="switchoverStrategy"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>2.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="delayOffTimes"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>3.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="delayOffTime"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>3.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+                <parameter array="true" classPath="" name="delayOffStrategies"><refClass>Class1</refClass><subParameter classPath="" name="TargetClass"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="java.lang.Double" name="lambda"><value>3.0</value></subParameter></subParameter></subParameter></subParameter></parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node4_PS">
+            <section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter></section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.PSStrategy" name="psStrategy" array="true"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.PSStrategies.DPSStrategy" name="DPSStrategy"/><refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.PSStrategies.EPSStrategyPriority" name="EPSStrategyPriority"/></parameter>
+                <parameter classPath="" name="serviceWeights" array="true"><refClass>Class1</refClass><subParameter classPath="" name="weight"><value>2.5</value></subParameter><refClass>Class2</refClass><subParameter classPath="" name="weight"><value>1.5</value></subParameter></parameter>
+                <parameter classPath="" name="PSPriorityUsed"><value>true</value></parameter>
+                <parameter classPath="java.lang.Integer" name="serversNumRequired" array="true"><refClass>Class1</refClass><subParameter classPath="java.lang.Integer" name="par"><value>3</value></subParameter><refClass>Class2</refClass><subParameter classPath="java.lang.Integer" name="par"><value>1</value></subParameter></parameter>
+                <parameter classPath="java.lang.Integer" name="numRequired" array="true"><refClass>Class1</refClass><subParameter classPath="java.lang.Integer" name="par"><value>3</value></subParameter><refClass>Class2</refClass><subParameter classPath="java.lang.Integer" name="par"><value>1</value></subParameter></parameter>
+                <parameter classPath="java.lang.Integer" name="classParallelism" array="true"><refClass>Class1</refClass><subParameter classPath="java.lang.Integer" name="par"><value>3</value></subParameter><refClass>Class2</refClass><subParameter classPath="java.lang.Integer" name="par"><value>1</value></subParameter></parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node5_VacationIdle">
+            <section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter></section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.VacationStrategies.VacationWhenIdleStrategy" name="vacationStrategy"><subParameter classPath="" name="type"><value>1</value></subParameter><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="" name="lambda"><value>0.5</value></subParameter></subParameter></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy" array="true"><refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy"><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="" name="lambda"><value>10.0</value></subParameter></subParameter></subParameter></parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node6_VacationBernoulli">
+            <section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter></section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.VacationStrategies.BernoulliVacationStrategy" name="vacationStrategy"><subParameter classPath="" name="p"><value>0.2</value></subParameter><subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/><subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar"><subParameter classPath="" name="lambda"><value>0.8</value></subParameter></subParameter></parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node7_ExtraPS">
+            <section className="Queue"><parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter></section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter>
+                <parameter classPath="jmt.engine.NetStrategies.PSStrategy" name="psStrategy" array="true">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.PSStrategies.GPSStrategy" name="GPSStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.PSStrategies.QBPSStrategy" name="QBPSStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node8_Put_Tail">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategyPriority" name="TailStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node9_Put_Head">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.HeadStrategy" name="HeadStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.HeadStrategyPriority" name="HeadStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node10_Put_Rand">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategy" name="RandStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.RandStrategyPriority" name="RandStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node11_Put_SJF">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SJFStrategy" name="SJFStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SJFStrategyPriority" name="SJFStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node12_Put_LJF">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LJFStrategy" name="LJFStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LJFStrategyPriority" name="LJFStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node13_Put_SEPT">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SEPTStrategy" name="SEPTStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SEPTStrategyPriority" name="SEPTStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node14_Put_LEPT">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LEPTStrategy" name="LEPTStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LEPTStrategyPriority" name="LEPTStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node15_Put_FCFSPR">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.FCFSPRStrategy" name="FCFSPRStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.FCFSPRStrategyPriority" name="FCFSPRStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node16_Put_LCFSPR">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LCFSPRStrategy" name="LCFSPRStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LCFSPRStrategyPriority" name="LCFSPRStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node17_Put_SRPT">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SRPTStrategy" name="SRPTStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.SRPTStrategyPriority" name="SRPTStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node18_Put_EDD">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.EDDStrategy" name="EDDStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.EDDStrategyPriority" name="EDDStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node19_Put_EDF">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.EDFStrategy" name="EDFStrategy"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.EDFStrategyPriority" name="EDFStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="Server"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <node name="Node20_Put_TBS">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TBSStrategyPriority" name="TBSStrategyPriority"/>
+                    <refClass>Class2</refClass><subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TBSStrategyPriority" name="TBSStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="PreemptiveServer"><parameter classPath="java.lang.Integer" name="maxJobs"><value>1</value></parameter></section>
+            <section className="Router"><parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/></section>
+        </node>
+
+        <measure alpha="0.01" name="System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <connection source="Node1_Polling" target="Node2_SetupDelay"/>
+    </sim>
+</archive>

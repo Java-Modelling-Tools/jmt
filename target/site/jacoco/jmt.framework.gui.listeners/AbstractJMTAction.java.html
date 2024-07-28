@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractJMTAction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.gui.listeners</a> &gt; <span class="el_source">AbstractJMTAction.java</span></div><h1>AbstractJMTAction.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.framework.gui.listeners;
+
+import java.awt.event.KeyEvent;
+import java.util.Arrays;
+import java.util.Collection;
+
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
+
+import jmt.framework.gui.image.ImageLoader;
+
+public abstract class AbstractJMTAction extends AbstractAction {
+
+	private static final long serialVersionUID = 1L;
+	/** Name of the icon to be shown in the button */
+	public static final String IMAGE_NAME = &quot;AbstractJMTAction.image.name&quot;;
+	/** Tells if this action is selectable */
+	public static final String SELECTABLE = &quot;AbstractJMTAction.selectable&quot;;
+	/** Tells if this action is part of a group. Valid only if selectable is true */
+	public static final String GROUP = &quot;AbstractJMTAction.group&quot;;
+	/** A Collection of submenu items iff this action is a menu */
+	public static final String MENUACTIONS = &quot;AbstractJMTAction.menu.actions&quot;;
+	/** This property change event is fired each time selection is toggled */
+	public static final String PROPERTY_SELECTED = &quot;AbstractJMTAction.selected&quot;;
+
+	/** To support sharing of toggle status between components */
+<span class="nc" id="L45">	private boolean selected = false;</span>
+
+	/**
+	 * Builds a new AbstractJMTAction, not selectable by default
+	 */
+<span class="nc" id="L50">	public AbstractJMTAction() {</span>
+<span class="nc" id="L51">		setSelectable(false);</span>
+<span class="nc" id="L52">	}</span>
+
+	/**
+	 * Builds a new AbstractJMTAction, not selectable by default with given name
+	 * @param name name of the action.
+	 */
+	public AbstractJMTAction(String name) {
+<span class="nc" id="L59">		this();</span>
+<span class="nc" id="L60">		setName(name);</span>
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * Sets the icon associated with this image
+	 * @param iconName name of the icon
+	 * @param loader loader to load the icon
+	 */
+	protected void setIcon(String iconName, ImageLoader loader) {
+<span class="nc" id="L69">		this.putValue(IMAGE_NAME, iconName);</span>
+<span class="nc" id="L70">		this.putValue(SMALL_ICON, loader.loadIcon(iconName));</span>
+<span class="nc" id="L71">	}</span>
+
+	/**
+	 * Text to be displayed in the menu or button (that is the name of the action)
+	 * @param text name of the action
+	 */
+	protected void setName(String text) {
+<span class="nc" id="L78">		this.putValue(NAME, text);</span>
+<span class="nc" id="L79">	}</span>
+
+	/**
+	 * Text to be displayed as tooltip
+	 * @param text tooltip for the action
+	 */
+	protected void setTooltipText(String text) {
+<span class="nc" id="L86">		this.putValue(SHORT_DESCRIPTION, text);</span>
+<span class="nc" id="L87">	}</span>
+
+	/**
+	 * Text to be displayed in context-sensitive help
+	 * @param text help for the action
+	 */
+	protected void setHelpText(String text) {
+<span class="nc" id="L94">		this.putValue(LONG_DESCRIPTION, text);</span>
+<span class="nc" id="L95">	}</span>
+
+	/**
+	 * Sets an accelerator key to perform this action
+	 * @param key key to be pressed
+	 * @param modifiers a bitwise-ored combination of any modifiers.
+	 * @see KeyEvent for keys and modifiers
+	 */
+	protected void setAcceleratorKey(int key, int modifiers) {
+<span class="nc" id="L104">		putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(key, modifiers));</span>
+<span class="nc" id="L105">	}</span>
+
+	/**
+	 * Sets mnemonic key to call this action
+	 * @param key key to be pressed
+	 * @see KeyEvent for keys and modifiers
+	 */
+	protected void setMnemonicKey(int key) {
+<span class="nc" id="L113">		putValue(MNEMONIC_KEY, new Integer(key));</span>
+<span class="nc" id="L114">	}</span>
+
+	/**
+	 * Sets if this action is selectable (a toggle button for example)
+	 * @param selectable true if this is selectable
+	 */
+	protected void setSelectable(boolean selectable) {
+<span class="nc" id="L121">		putValue(SELECTABLE, new Boolean(selectable));</span>
+<span class="nc" id="L122">	}</span>
+
+	/**
+	 * Sets the group associated to this action if it is selectable
+	 * @param group identifier of group. Must be greater than or equal
+	 * to zero.
+	 */
+	protected void setGroup(int group) {
+<span class="nc" id="L130">		putValue(GROUP, new Integer(group));</span>
+<span class="nc" id="L131">	}</span>
+
+	/**
+	 * Sets a collection of AbstractJMTAction iff this action is a menu.
+	 * A null value is used as separator. 
+	 * @param actions a Collection of AbstractJMTAction
+	 */
+	protected void setMenuActions(Collection&lt;AbstractJMTAction&gt; actions) {
+<span class="nc" id="L139">		putValue(MENUACTIONS, actions);</span>
+<span class="nc" id="L140">	}</span>
+
+	/**
+	 * Sets a collection of AbstractJMTAction iff this action is a menu.
+	 * A null value is used as separator. 
+	 * @param actions an array of AbstractJMTAction
+	 */
+	protected void setMenuActions(AbstractJMTAction[] actions) {
+<span class="nc" id="L148">		putValue(MENUACTIONS, Arrays.asList(actions));</span>
+<span class="nc" id="L149">	}</span>
+
+	/**
+	 * Returns a collection of AbstractJMTAction menu actions if this action is a menu.
+	 * @return a Collection of AbstractJMTAction. Null if this action is not a menu.
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	public Collection&lt;AbstractJMTAction&gt; getMenuActions() {
+<span class="nc" id="L157">		return (Collection&lt;AbstractJMTAction&gt;) getValue(MENUACTIONS);</span>
+	}
+
+	/**
+	 * Tells if this action is selected. Valid only if this action is selectable
+	 * @return truth value
+	 * @see AbstractJMTAction#setSelectable(boolean)
+	 */
+	public boolean isSelected() {
+<span class="nc" id="L166">		return selected;</span>
+	}
+
+	/**
+	 * Sets if this action is selected
+	 * @param newValue true to select this action, false otherwise.
+	 */
+	public void setSelected(boolean newValue) {
+<span class="nc" id="L174">		boolean oldValue = selected;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if (oldValue != newValue) {</span>
+<span class="nc" id="L176">			selected = newValue;</span>
+<span class="nc" id="L177">			firePropertyChange(PROPERTY_SELECTED, Boolean.valueOf(oldValue), Boolean.valueOf(newValue));</span>
+		}
+<span class="nc" id="L179">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

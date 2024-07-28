@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServiceDemandsPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">ServiceDemandsPanel.java</span></div><h1>ServiceDemandsPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.gui.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.EventObject;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.jmva.LDEditor;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.gui.JMVAWizard;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 23.48.19
+
+ */
+
+/**
+ * 4th panel: service times
+ */
+public final class ServiceDemandsPanel extends WizardPanel implements ExactConstants, ForceUpdatablePanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JMVAWizard ew;
+	private HoverHelp help;
+	private static final String helpText = &quot;&lt;html&gt;In this panel you can edit service demands of LI and delay stations for each class.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot; To enter values, double-click on desired cell&quot;
+			+ &quot; and start typing.&lt;br&gt; To select multiple cells drag mouse on them; click or drag on&quot;
+			+ &quot; row/column headers to select the whole of rows/columns.&lt;br&gt; &lt;b&gt;For a list of available operations right-click&quot;
+			+ &quot; on the table&lt;/b&gt;; all operations except pasting affect selected cells.&lt;br&gt;&quot;
+			+ &quot; To copy one value to multiple cells click on the cell containing the value, select&quot;
+			+ &quot; target cells by dragging and then select &lt;b&gt;\&quot;Fill\&quot;&lt;/b&gt;.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot; To edit service demands of an LD station double-click anywhere on its row.&lt;br&gt;&lt;/html&gt;&quot;;
+
+	private boolean zeroLD;
+	private int classes;
+	private int stations;
+	private String[] classNames;
+	private String[] stationNames;
+	private int[] stationTypes;
+	private double[][][] serviceDemands;
+
+	private STTable stTable;
+
+<span class="nc" id="L89">	private AbstractAction SWITCH_TO_ST_V = new AbstractAction(&quot;Service Times and Visits&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L96">			putValue(Action.SHORT_DESCRIPTION, &quot;Input by Service Times and Visits&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L100">			ew.switchFromSDtoSTV();</span>
+<span class="nc" id="L101">		}</span>
+	};
+
+<span class="nc" id="L104">	public ServiceDemandsPanel(JMVAWizard ew) {</span>
+<span class="nc" id="L105">		this.ew = ew;</span>
+<span class="nc" id="L106">		help = ew.getHelp();</span>
+
+		/* sync status with data object */
+<span class="nc" id="L109">		sync();</span>
+<span class="nc" id="L110">		initComponents();</span>
+<span class="nc" id="L111">	}</span>
+
+	/**
+	 * gets status from data object
+	 */
+	public void sync() {
+		/* arrays are copied to ensure data object consistency is preserved */
+<span class="nc" id="L118">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L119">		synchronized (data) {</span>
+<span class="nc bnc" id="L120" title="All 4 branches missed.">			zeroLD = (data.isLd() &amp;&amp; (data.getTotalPop() == 0));</span>
+<span class="nc" id="L121">			classes = data.getClasses();</span>
+<span class="nc" id="L122">			stations = data.getStations();</span>
+
+<span class="nc" id="L124">			classNames = data.getClassNames();</span>
+<span class="nc" id="L125">			stationNames = data.getStationNames();</span>
+<span class="nc" id="L126">			stationTypes = data.getStationTypes();</span>
+
+<span class="nc" id="L128">			serviceDemands = ArrayUtils.copy3per2(data.getServiceTimes(), data.getVisits());</span>
+<span class="nc" id="L129">		}</span>
+<span class="nc" id="L130">	}</span>
+
+	/**
+	 * Set up the panel contents and layout
+	 */
+	private void initComponents() {
+<span class="nc" id="L136">		stTable = new STTable();</span>
+
+		/* and now some Box black magic */
+
+<span class="nc" id="L140">		Box hBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L141">		hBox.add(Box.createHorizontalStrut(20));</span>
+		//Horizontal box containing Description label and buttons
+<span class="nc" id="L143">		Box descrBox = Box.createVerticalBox();</span>
+<span class="nc" id="L144">		descrBox.add(new JLabel(DESCRIPTION_SERVICEDEMANDS));</span>
+<span class="nc" id="L145">		descrBox.add(Box.createHorizontalStrut(10));</span>
+<span class="nc" id="L146">		descrBox.add(new JButton(SWITCH_TO_ST_V));</span>
+<span class="nc" id="L147">		descrBox.setPreferredSize(new Dimension(220, 1000));</span>
+<span class="nc" id="L148">		descrBox.setMinimumSize(new Dimension(200, 200));</span>
+
+<span class="nc" id="L150">		hBox.add(descrBox);</span>
+<span class="nc" id="L151">		hBox.add(Box.createHorizontalStrut(10));</span>
+<span class="nc" id="L152">		JScrollPane visitTablePane = new JScrollPane(stTable);</span>
+<span class="nc" id="L153">		visitTablePane.setPreferredSize(new Dimension(1000, 1000));</span>
+<span class="nc" id="L154">		visitTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L155">		visitTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L156">		hBox.add(visitTablePane);</span>
+<span class="nc" id="L157">		hBox.add(Box.createHorizontalStrut(20));</span>
+
+<span class="nc" id="L159">		Box totalBox = Box.createVerticalBox();</span>
+<span class="nc" id="L160">		totalBox.add(Box.createVerticalStrut(30));</span>
+<span class="nc" id="L161">		totalBox.add(hBox);</span>
+<span class="nc" id="L162">		totalBox.add(Box.createVerticalStrut(30));</span>
+
+<span class="nc" id="L164">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L165">		add(totalBox, BorderLayout.CENTER);</span>
+<span class="nc" id="L166">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L170">		return &quot;Service Demands&quot;;</span>
+	}
+
+	private void commit() {
+<span class="nc" id="L174">		stTable.stopEditing();</span>
+
+<span class="nc" id="L176">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L177">		synchronized (data) {</span>
+<span class="nc" id="L178">			boolean whatIfChanged = false;</span>
+
+<span class="nc" id="L180">			whatIfChanged |= data.setServiceTimes(serviceDemands);</span>
+<span class="nc" id="L181">			whatIfChanged |= data.setVisits(createUnitaryVisits());</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			if (whatIfChanged) {</span>
+<span class="nc" id="L184">				data.recalculateWhatifValues();</span>
+			}
+<span class="nc" id="L186">		}</span>
+<span class="nc" id="L187">	}</span>
+
+	private double[][] createUnitaryVisits() {
+<span class="nc" id="L190">		double[][] visits = new double[serviceDemands.length][];</span>
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		for (int i = 0; i &lt; serviceDemands.length; i++) {</span>
+<span class="nc" id="L192">			visits[i] = new double[serviceDemands[i].length];</span>
+<span class="nc" id="L193">			Arrays.fill(visits[i], 1.0);</span>
+		}
+<span class="nc" id="L195">		return visits;</span>
+	}
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L200">		sync();</span>
+<span class="nc" id="L201">		stTable.updateStructure();</span>
+<span class="nc" id="L202">	}</span>
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L206">		commit();</span>
+		//release();
+<span class="nc" id="L208">	}</span>
+
+	/**
+	 * Make sure we cannot finish if we are editing LD data
+	 */
+	@Override
+	public boolean canFinish() {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		return !stTable.isLDEditing();</span>
+	}
+
+	/**
+	 * Make sure we cannot switch tabs if we are editing LD data
+	 */
+	@Override
+	public boolean canGoBack() {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">		return !stTable.isLDEditing();</span>
+	}
+
+	/**
+	 * Make sure we cannot switch tabs if we are editing LD data
+	 */
+	@Override
+	public boolean canGoForward() {
+<span class="nc bnc" id="L231" title="All 2 branches missed.">		return !stTable.isLDEditing();</span>
+	}
+
+	@Override
+	public void help() {
+<span class="nc" id="L236">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+
+<span class="nc" id="L238">	}</span>
+
+	/**{@see ForceUpdatablePanel} for further details*/
+	public void retrieveData() {
+<span class="nc" id="L242">		this.sync();</span>
+<span class="nc" id="L243">	}</span>
+
+	/**{@see ForceUpdatablePanel} for further details*/
+	public void commitData() {
+<span class="nc" id="L247">		this.commit();</span>
+<span class="nc" id="L248">	}</span>
+
+	private class STTable extends ExactTable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private LDEditor ldEditor;
+
+<span class="nc" id="L258">		STTable() {</span>
+<span class="nc" id="L259">			super(new STTableModel());</span>
+<span class="nc" id="L260">			autoResizeMode = AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L261">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+
+<span class="nc" id="L263">			setDisplaysScrollLabels(true);</span>
+<span class="nc" id="L264">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L265">			setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L266">			setBatchEditingEnabled(true);</span>
+
+<span class="nc" id="L268">			help.addHelp(this,</span>
+					&quot;Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations&quot;);
+<span class="nc" id="L270">			help.addHelp(moreColumnsLabel, &quot;There are more classes: scroll right to see them&quot;);</span>
+<span class="nc" id="L271">			help.addHelp(moreRowsLabel, &quot;There are more stations: scroll down to see them&quot;);</span>
+<span class="nc" id="L272">			help.addHelp(selectAllButton, &quot;Click to select all cells&quot;);</span>
+<span class="nc" id="L273">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L274">			help.addHelp(tableHeader, &quot;Click, SHIFT-click or drag to select columns&quot;);</span>
+<span class="nc" id="L275">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L276">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select rows&quot;);</span>
+<span class="nc" id="L277">		}</span>
+
+		/**
+		 * We do not want selectable columns
+		 */
+		/*public boolean getColumnSelectionAllowed() {return false;} */
+
+		/**
+		 * A little hack to make LD rows selectable
+		 * @return true iif the focused cell is on a LD row
+		 */
+		/*public boolean getRowSelectionAllowed() {
+			if (stationTypes[selectionModel.getAnchorSelectionIndex()]==STATION_LD) return true;
+			return false;
+		} */
+
+		/**
+		 * @return true if the LDEditor window is currently open
+		 */
+		public boolean isLDEditing() {
+<span class="nc" id="L297">			return (cellEditor instanceof LDEditor);</span>
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			if (stationTypes[row] == STATION_LD) {</span>
+<span class="nc" id="L303">				return new ButtonCellEditor(new JButton(&quot;LD Settings...&quot;));</span>
+			} else {
+<span class="nc" id="L305">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+		/**
+		 * Overridden to obtain a different editor for LD stations.
+		 * Cannot choose editor via standard JTable mechanism because cell type is not column-dependent
+		 */
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L315" title="All 2 branches missed.">			if (stationTypes[row] == STATION_LD) {</span>
+<span class="nc" id="L316">				return getLDEditor();</span>
+			} else {
+<span class="nc" id="L318">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		/**
+		 * the LDEditor needs to be treated in a special way.
+		 */
+		@Override
+		public Component prepareEditor(TableCellEditor editor, int row, int column) {
+<span class="nc bnc" id="L327" title="All 2 branches missed.">			if (editor instanceof LDEditor) {</span>
+<span class="nc" id="L328">				LDEditor lde = ((LDEditor) editor);</span>
+<span class="nc" id="L329">				lde.setStatus(&quot;Editing Service Demands of &quot; + stationNames[row], classNames[column], serviceDemands[row][column]);</span>
+<span class="nc" id="L330">				lde.startEditing(this, row);</span>
+
+<span class="nc" id="L332">				return getCellRenderer(row, column).getTableCellRendererComponent(this, &quot;LD Settings...&quot;, true, true, row, column);</span>
+			} else {
+<span class="nc" id="L334">				return super.prepareEditor(editor, row, column);</span>
+			}
+		}
+
+		/**
+		 * If the request is to edit ld times in a system with zero customers, shows a warning messages and returns false.
+		 * Otherwise passes request to superclass method
+		 */
+		@Override
+		public boolean editCellAt(int row, int col, EventObject e) {
+<span class="nc bnc" id="L344" title="All 4 branches missed.">			if (zeroLD &amp;&amp; (stationTypes[row] == STATION_LD)) {</span>
+<span class="nc" id="L345">				JOptionPane.showMessageDialog(ServiceDemandsPanel.this,</span>
+						&quot;&lt;html&gt;&lt;center&gt;Cannot edit LD service times in a system with zero customers&lt;/center&gt;&lt;/html&gt;&quot;, &quot;Warning&quot;,
+						JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L348">				return false;</span>
+			}
+<span class="nc" id="L350">			return super.editCellAt(row, col, e);</span>
+		}
+
+		/**
+		 * @return a lazily created LDEditor. Creation of the LDEditor at initialization time is not possible
+		 * because the LDEditor needs a reference to the root Frame.
+		 */
+		private LDEditor getLDEditor() {
+<span class="nc bnc" id="L358" title="All 2 branches missed.">			if (ldEditor == null) {</span>
+<span class="nc" id="L359">				ldEditor = new LDEditor(parentWizard);</span>
+			}
+<span class="nc" id="L361">			return ldEditor;</span>
+		}
+
+	}
+
+	/**
+	 * the model backing the service times table.
+	 * Rows represent stations, columns classes.
+	 */
+	private class STTableModel extends ExactTableModel {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L377">		STTableModel() {</span>
+<span class="nc" id="L378">			prototype = &quot;LD Settings Button&quot;;</span>
+<span class="nc" id="L379">			rowHeaderPrototype = &quot;Station10000&quot;;</span>
+<span class="nc" id="L380">		}</span>
+
+		public int getRowCount() {
+<span class="nc" id="L383">			return stations;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L387">			return classes;</span>
+		}
+
+		@Override
+		public String getColumnName(int index) {
+<span class="nc" id="L392">			return classNames[index];</span>
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L397" title="All 3 branches missed.">			switch (stationTypes[rowIndex]) {</span>
+				case STATION_DELAY:
+				case STATION_LI:
+<span class="nc" id="L400">					return new Double(serviceDemands[rowIndex][columnIndex][0]);</span>
+				case STATION_LD:
+<span class="nc" id="L402">					return &quot;LD&quot;;</span>
+				default:
+<span class="nc" id="L404">					return null;</span>
+			}
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc" id="L410">			return stationNames[rowIndex];</span>
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L415" title="All 2 branches missed.">			if (value instanceof String) { //coming from the defaultEditor</span>
+				try {
+<span class="nc" id="L417">					double newVal = Double.parseDouble((String) value);</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">					if (newVal &gt;= 0) {</span>
+<span class="nc" id="L419">						serviceDemands[rowIndex][columnIndex][0] = newVal;</span>
+					}
+<span class="nc" id="L421">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L422">				}</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">			} else if (value instanceof double[]) { // coming from the LDEditor</span>
+<span class="nc" id="L424">				serviceDemands[rowIndex][columnIndex] = (double[]) value;</span>
+			}
+<span class="nc" id="L426">		}</span>
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L430">			return true;</span>
+		}
+
+		@Override
+		public void clear(int row, int col) {
+<span class="nc bnc" id="L435" title="All 2 branches missed.">			if (stationTypes[row] == STATION_LD) {</span>
+<span class="nc" id="L436">				return;</span>
+			}
+<span class="nc" id="L438">			serviceDemands[row][col][0] = 0;</span>
+<span class="nc" id="L439">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

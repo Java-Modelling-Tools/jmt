@@ -1,0 +1,994 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DispatcherJMVAschema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.engine</a> &gt; <span class="el_source">DispatcherJMVAschema.java</span></div><h1>DispatcherJMVAschema.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.engine;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.QueueNetwork;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.TempMeasure;
+import jmt.engine.log.JSimLogger;
+import jmt.engine.simDispatcher.ModelTransformer;
+import jmt.engine.simEngine.SimLoader;
+import jmt.engine.simEngine.Simulation;
+import jmt.framework.xml.XMLUtils;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.convertors.JMVAtoJSIMConvertor;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.xml.XMLConstantNames;
+import jmt.gui.common.xml.sim.XMLSimWriter;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; DispatcherJMVAschema&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; Receives the absolute path of a xml file which describes the model using the
+ * JMTmodel.xsd schema.
+ * This file is converted into another xml file in order to be passed to the
+ * simulator. The simulation results, at the end, are converted and
+ * are inserted in the original file.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 13-lug-2006
+ * &lt;b&gt;Time:&lt;/b&gt; 11.15.47&lt;/p&gt;
+ * @author Stefano Omini, Bertoli Marco
+ * @version 2.0
+ */
+public class DispatcherJMVAschema {
+<span class="nc" id="L66">	private static final String SEPARATOR = System.getProperty(&quot;file.separator&quot;);</span>
+
+	//xml files containing model definition, simmodel definition and sim results
+	File modelDefinition;
+	File simModelDefinition;
+	File simResults;
+
+	//path of the xml files
+	String modelDefinitionPath;
+	String simModelDefinitionPath;
+	String simResultsPath;
+
+	//if true, deletes the intermediate temp files created to solve the model with JSIM.
+	//Only the initial passed file (containing the results)
+<span class="nc" id="L80">	boolean deleteIntermediateFiles = false;</span>
+
+	//true if the simulation results have been already obtained, false otherwise
+<span class="nc" id="L83">	boolean resultsObtained = false;</span>
+
+	//if true, the simulation seed
+<span class="nc" id="L86">	private boolean automaticSeed = true;</span>
+	//if true, the simulation seed
+	private long simulationSeed;
+
+<span class="nc" id="L90">	private static JSimLogger logger = JSimLogger.getLogger(JSimLogger.STD_LOGGER);</span>
+
+	//used to compute the progress of the simulation
+<span class="nc" id="L93">	private boolean simStarted = false;</span>
+<span class="nc" id="L94">	private boolean simFinished = false;</span>
+	private QueueNetwork net;
+
+	// Used to tell if transformer input and output must be validated
+<span class="nc" id="L98">	private boolean validate = true;</span>
+
+	//used to store temp measures info
+<span class="nc" id="L101">	private TempMeasure[] tempMeasures = null;</span>
+
+	/**
+	 * This constructor receives the absolute path of the xml file containing
+	 * the model to be solved.
+	 * The model must be described using the JMTmodel.xsd schema
+	 *
+	 * @param absolutePath absolute path of the xml file containing the
+	 * model to be solved
+	 */
+<span class="nc" id="L111">	public DispatcherJMVAschema(String absolutePath) {</span>
+<span class="nc" id="L112">		modelDefinitionPath = absolutePath;</span>
+<span class="nc" id="L113">		modelDefinition = new File(absolutePath);</span>
+<span class="nc" id="L114">	}</span>
+
+	/**
+	 * This constructor receives the absolute path of the xml file containing
+	 * the model to be solved.
+	 * The model must be described using the JMTmodel.xsd schema
+	 *
+	 * @param model the xml file containing the
+	 * model to be solved
+	 */
+<span class="nc" id="L124">	public DispatcherJMVAschema(File model) {</span>
+<span class="nc" id="L125">		modelDefinition = model;</span>
+<span class="nc" id="L126">		modelDefinitionPath = model.getAbsolutePath();</span>
+
+<span class="nc" id="L128">	}</span>
+
+	/**
+	 * By invoking this method, simulation will generate a random simulation seed
+	 */
+	public void automaticSimulationSeed() {
+<span class="nc" id="L134">		automaticSeed = true;</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * Specifies the seed to be used in the simulation.
+	 * @param seed the simulation seed
+	 */
+	public void setSimulationSeed(long seed) {
+<span class="nc" id="L142">		simulationSeed = seed;</span>
+<span class="nc" id="L143">		automaticSeed = false;</span>
+<span class="nc" id="L144">	}</span>
+
+	/**
+	 * Determine whether the intermediate files must be deleted or not.
+	 * @param deleteIntermediateFiles if true, intermediate files will be deleted
+	 */
+	public void setDeleteIntermediateFiles(boolean deleteIntermediateFiles) {
+<span class="nc" id="L151">		this.deleteIntermediateFiles = deleteIntermediateFiles;</span>
+<span class="nc" id="L152">	}</span>
+
+	public boolean solveModel() {
+
+<span class="nc" id="L156">		boolean transfSuccess = false;</span>
+
+		/*********************DEFINITION MODEL*********************/
+
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		if (!modelDefinition.exists()) {</span>
+			//the passed file does not exist
+<span class="nc" id="L162">			logger.error(&quot;The model file &quot; + modelDefinitionPath + &quot; does not exist...&quot;);</span>
+<span class="nc" id="L163">			return false;</span>
+		} else {
+<span class="nc" id="L165">			logger.debug(&quot;Model definition path: &quot; + modelDefinitionPath);</span>
+		}
+
+		/*********************SIM DEFINITION MODEL*********************/
+
+		//first of all transforms the JMTmodel into SIMmodeldefinition
+<span class="nc" id="L171">		ModelTransformer md = new ModelTransformer();</span>
+<span class="nc" id="L172">		md.setValidate(validate);</span>
+
+		//save the file in the same directory of model file, with the same name preceded by &quot;sim_&quot;
+
+<span class="nc" id="L176">		String modelDefinitionParent = modelDefinition.getParent();</span>
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		if (modelDefinitionParent.endsWith(SEPARATOR)) {</span>
+<span class="nc" id="L179">			simModelDefinitionPath = modelDefinitionParent + &quot;sim_&quot; + modelDefinition.getName();</span>
+		} else {
+<span class="nc" id="L181">			simModelDefinitionPath = modelDefinitionParent + SEPARATOR + &quot;sim_&quot; + modelDefinition.getName();</span>
+		}
+
+<span class="nc" id="L184">		transfSuccess = md.MVAtoSIM(modelDefinitionPath, simModelDefinitionPath);</span>
+
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (!transfSuccess) {</span>
+<span class="nc" id="L187">			logger.error(&quot;MVA to SIM transformation failed for model file &quot; + modelDefinitionPath);</span>
+<span class="nc" id="L188">			return false;</span>
+		} else {
+<span class="nc" id="L190">			logger.debug(&quot;JSIM model definiton path: &quot; + simModelDefinitionPath);</span>
+		}
+
+		/*********************SIMULATION LOADING AND RUNNING*********************/
+
+		//sim model successfully created
+		//now prepare simulation
+		try {
+<span class="nc" id="L198">			SimLoader simLoader = new SimLoader(simModelDefinitionPath);</span>
+<span class="nc" id="L199">			Simulation sim = simLoader.getSim();</span>
+
+			//sets in the Simulation object the path of the original (i.e. MVA)
+			//xml model definition
+<span class="nc" id="L203">			sim.setXmlModelDefPath(modelDefinitionPath);</span>
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">			if (!automaticSeed) {</span>
+				//if !automaticSeed, then a user defined seed is present
+<span class="nc" id="L207">				sim.setRandomEngineSeed(simulationSeed);</span>
+<span class="nc" id="L208">				sim.initialize();</span>
+<span class="nc" id="L209">				logger.debug(&quot;JSIM correctly initialized with simulation seed = &quot; + simulationSeed);</span>
+			} else {
+<span class="nc" id="L211">				sim.initialize();</span>
+<span class="nc" id="L212">				logger.debug(&quot;JSIM correctly initialized&quot;);</span>
+			}
+
+			//Avoid saturation
+<span class="nc bnc" id="L216" title="All 2 branches missed.">			if (sim.getAllRegions() == null) {</span>
+				//if there are no regions...
+<span class="nc" id="L218">				boolean sufficientProcessingCapacity = checkProcessingCapacity();</span>
+
+<span class="nc bnc" id="L220" title="All 2 branches missed.">				if (!sufficientProcessingCapacity) {</span>
+<span class="nc" id="L221">					logger.warn(&quot;Current workload causes system saturation. Simulation will not be started.&quot;);</span>
+<span class="nc" id="L222">					return false;</span>
+				}
+			}
+
+<span class="nc" id="L226">			simStarted = true;</span>
+<span class="nc" id="L227">			net = sim.getNetwork();</span>
+
+			long start, stop;
+			double elapsed;
+
+			//Start time
+<span class="nc" id="L233">			start = System.currentTimeMillis();</span>
+
+<span class="nc" id="L235">			sim.run();</span>
+
+			//Stop time
+<span class="nc" id="L238">			stop = System.currentTimeMillis();</span>
+<span class="nc" id="L239">			elapsed = ((stop - start)) / 1000.0;</span>
+
+<span class="nc" id="L241">			simFinished = true;</span>
+
+<span class="nc" id="L243">			logger.info(&quot;Model &quot; + modelDefinitionPath + &quot; solved by JSIM in &quot; + Double.toString(elapsed) + &quot; seconds&quot;);</span>
+
+<span class="nc" id="L245">		} catch (Exception e) {</span>
+<span class="nc" id="L246">			e.printStackTrace();</span>
+<span class="nc" id="L247">			logger.error(e.getMessage());</span>
+<span class="nc" id="L248">			return false;</span>
+<span class="nc" id="L249">		}</span>
+
+<span class="nc" id="L251">		simModelDefinition = new File(simModelDefinitionPath);</span>
+
+		/*********************COPYING SIMULATION RESULTS*********************/
+
+		//the results file has been obtained
+		//the file has been saved in the same directory of model file, with the same name preceded by &quot;res_sim_&quot;
+
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		if (modelDefinitionParent.endsWith(SEPARATOR)) {</span>
+<span class="nc" id="L259">			simResultsPath = modelDefinition.getParent() + &quot;res_&quot; + simModelDefinition.getName();</span>
+		} else {
+<span class="nc" id="L261">			simResultsPath = modelDefinition.getParent() + SEPARATOR + &quot;res_&quot; + simModelDefinition.getName();</span>
+		}
+
+<span class="nc" id="L264">		simResults = new File(simResultsPath);</span>
+
+<span class="nc" id="L266">		logger.debug(&quot;JSIM results path: &quot; + simResultsPath);</span>
+
+		//transforms the SIMmodeloutput into JMTmodel
+
+		//resets the transformer
+<span class="nc" id="L271">		md = new ModelTransformer();</span>
+<span class="nc" id="L272">		md.setValidate(validate);</span>
+		//create temp file to contain model definition and results
+<span class="nc" id="L274">		File temp = null;</span>
+<span class="nc" id="L275">		String tempPath = null;</span>
+
+		try {
+<span class="nc" id="L278">			temp = File.createTempFile(&quot;~jmt_model&quot;, &quot;.xml&quot;, modelDefinition.getParentFile());</span>
+<span class="nc" id="L279">			tempPath = temp.getAbsolutePath();</span>
+<span class="nc" id="L280">		} catch (IOException e) {</span>
+<span class="nc" id="L281">			e.printStackTrace();</span>
+<span class="nc" id="L282">			logger.error(e.getMessage());</span>
+<span class="nc" id="L283">			logger.error(&quot;Error in creating temp file for model &quot; + modelDefinitionPath);</span>
+
+<span class="nc" id="L285">			return false;</span>
+<span class="nc" id="L286">		}</span>
+
+<span class="nc" id="L288">		transfSuccess = md.OUTtoMVAScaling(simResultsPath, tempPath);</span>
+
+<span class="nc bnc" id="L290" title="All 2 branches missed.">		if (!transfSuccess) {</span>
+<span class="nc" id="L291">			logger.error(&quot;OUT to MVA transformation failed model &quot; + modelDefinitionPath);</span>
+<span class="nc" id="L292">			return false;</span>
+		} else {
+			//if successful, rename to model definition file, after deleting the old version
+<span class="nc bnc" id="L295" title="All 2 branches missed.">			if (modelDefinition.exists()) {</span>
+<span class="nc" id="L296">				modelDefinition.delete();</span>
+			}
+			//copy the model with results (rename does not work!)
+
+			//if (!temp.renameTo(modelDefinition)) {
+<span class="nc bnc" id="L301" title="All 2 branches missed.">			if (!copyFile(temp, modelDefinition)) {</span>
+<span class="nc" id="L302">				logger.error(&quot;could not copy results into model &quot; + modelDefinitionPath);</span>
+			} else {
+<span class="nc" id="L304">				resultsObtained = true;</span>
+<span class="nc" id="L305">				logger.debug(&quot;JSIM results copied into model &quot; + modelDefinitionPath);</span>
+			}
+
+			//delete temp file
+<span class="nc bnc" id="L309" title="All 2 branches missed.">			if (!temp.delete()) {</span>
+<span class="nc" id="L310">				temp.deleteOnExit();</span>
+<span class="nc" id="L311">				logger.warn(&quot;Could not delete a temp file. Deletion will be retried on JVM exit.&quot;);</span>
+			}
+
+		}
+
+		/*********************DELETE INTERMEDIATE FILES*********************/
+
+		//if true delete intermediate files
+<span class="nc bnc" id="L319" title="All 2 branches missed.">		if (deleteIntermediateFiles) {</span>
+
+			//false if one or more files cannot be deleted
+<span class="nc" id="L322">			boolean successfulDelete = true;</span>
+
+<span class="nc bnc" id="L324" title="All 2 branches missed.">			if (simModelDefinition.exists()) {</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">				if (!simModelDefinition.delete()) {</span>
+<span class="nc" id="L326">					successfulDelete = false;</span>
+					//try in another way
+<span class="nc" id="L328">					simModelDefinition.deleteOnExit();</span>
+				}
+			}
+<span class="nc bnc" id="L331" title="All 2 branches missed.">			if (simResults.exists()) {</span>
+<span class="nc bnc" id="L332" title="All 2 branches missed.">				if (!simResults.delete()) {</span>
+<span class="nc" id="L333">					successfulDelete = false;</span>
+					//try in another way
+<span class="nc" id="L335">					simResults.deleteOnExit();</span>
+				}
+			}
+
+<span class="nc bnc" id="L339" title="All 2 branches missed.">			if (successfulDelete) {</span>
+<span class="nc" id="L340">				logger.debug(&quot;Intermediate files deleted for model &quot; + modelDefinitionPath);</span>
+			} else {
+<span class="nc" id="L342">				logger.warn(&quot;Could not delete some intermediate files. They will be deleted on JVM exit.&quot;);</span>
+			}
+		}
+
+<span class="nc" id="L346">		return true;</span>
+	}
+
+	/**
+	 * Transforms model using new Java class to perform transformation instead of old bugged XSLT transformer.
+	 * Avoid to measure elements with null service demand.
+	 * @param inputModel input model in exact solver format
+	 * @param outputModel output model in simulator format
+	 * @return open ExactModel or null if an error occurred
+	 */
+	public ExactModel getTransformedModel(String inputModel, String outputModel) {
+		/*********************DEFINITION MODEL*********************/
+<span class="nc" id="L358">		File input = new File(inputModel);</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">		if (!input.exists()) {</span>
+			//the passed file does not exist
+<span class="nc" id="L361">			logger.error(&quot;The model file &quot; + inputModel + &quot; does not exist...&quot;);</span>
+<span class="nc" id="L362">			return null;</span>
+		} else {
+<span class="nc" id="L364">			logger.debug(&quot;Model definition path: &quot; + input.getAbsolutePath());</span>
+		}
+
+		/*********************SIM DEFINITION MODEL*********************/
+
+		//Loads ExactModel and transforms it to CommonModel
+<span class="nc" id="L370">		ExactModel exact = new ExactModel();</span>
+<span class="nc" id="L371">		XMLUtils xmlUtils = new XMLUtils();</span>
+		Document inputDoc;
+		try {
+<span class="nc" id="L374">			inputDoc = xmlUtils.loadXML(input);</span>
+<span class="nc" id="L375">			exact.loadDocument(inputDoc);</span>
+<span class="nc" id="L376">		} catch (SAXException e1) {</span>
+<span class="nc" id="L377">			logger.error(&quot;Cannot parse correctly input JMVA model: &quot; + e1.getMessage());</span>
+<span class="nc" id="L378">			return null;</span>
+<span class="nc" id="L379">		} catch (IOException e1) {</span>
+<span class="nc" id="L380">			logger.error(&quot;I/O error opening input JMVA model: &quot; + e1.getMessage());</span>
+<span class="nc" id="L381">			return null;</span>
+<span class="nc" id="L382">		}</span>
+<span class="nc" id="L383">		logger.debug(&quot;Input model opened correctly...&quot;);</span>
+<span class="nc" id="L384">		CommonModel simModel = new CommonModel();</span>
+<span class="nc" id="L385">		List&lt;String&gt; warnings = JMVAtoJSIMConvertor.convert(exact, simModel);</span>
+		// Last element of warning is transform matrix
+<span class="nc bnc" id="L387" title="All 2 branches missed.">		for (int i = 0; i &lt; warnings.size(); i++) {</span>
+<span class="nc" id="L388">			logger.warn(&quot;Warning during conversion: &quot; + warnings.get(i));</span>
+		}
+		// Removes all measures from classes with null service demands
+<span class="nc" id="L391">		removeNullMeasures(exact, simModel);</span>
+<span class="nc" id="L392">		logger.debug(&quot;Removed null measures from simulator model&quot;);</span>
+
+<span class="nc" id="L394">		Document modelDocument = XMLSimWriter.getDocument(simModel, outputModel);</span>
+<span class="nc" id="L395">		logger.debug(&quot;Converted JMVA xml to JSIM one&quot;);</span>
+		// Adds blocking region informations to model document
+<span class="nc" id="L397">		NodeList blockingList = inputDoc.getElementsByTagName(XMLConstantNames.XML_E_REGION);</span>
+		// If model has one blocking region only, adds router to it (otherwise a job will exit from
+		// region when it is not requested
+<span class="nc bnc" id="L400" title="All 2 branches missed.">		if (blockingList.getLength() == 1) {</span>
+<span class="nc" id="L401">			Element region = (Element) blockingList.item(0);</span>
+<span class="nc" id="L402">			Element router = inputDoc.createElement(XMLConstantNames.XML_E_REGIONNODE);</span>
+<span class="nc" id="L403">			router.setAttribute(XMLConstantNames.XML_A_REGIONNODE_NAME, &quot;Router&quot;);</span>
+<span class="nc" id="L404">			region.insertBefore(router, region.getFirstChild());</span>
+		}
+<span class="nc" id="L406">		Element root = modelDocument.getDocumentElement();</span>
+<span class="nc" id="L407">		NodeList preload = root.getElementsByTagName(XMLConstantNames.XML_E_PRELOAD);</span>
+<span class="nc" id="L408">		NodeList measures = root.getElementsByTagName(XMLConstantNames.XML_E_MEASURE);</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">		Node lastMeasure = measures.getLength() &gt; 0 ? measures.item(measures.getLength() - 1) : null;</span>
+<span class="nc bnc" id="L410" title="All 2 branches missed.">		for (int i = 0; i &lt; blockingList.getLength(); i++) {</span>
+<span class="nc" id="L411">			Element imported = (Element) modelDocument.importNode(blockingList.item(i), true);</span>
+<span class="nc" id="L412">			String name = imported.getAttribute(XMLConstantNames.XML_A_REGION_NAME);</span>
+<span class="nc bnc" id="L413" title="All 2 branches missed.">			if (preload.getLength() &gt; 0) {</span>
+<span class="nc" id="L414">				root.insertBefore(imported, preload.item(0));</span>
+			} else {
+<span class="nc" id="L416">				root.appendChild(imported);</span>
+			}
+			// Adds blocking region measures
+<span class="nc" id="L419">			Element dropRate = (Element) lastMeasure.cloneNode(true);</span>
+<span class="nc" id="L420">			dropRate.setAttribute(XMLConstantNames.XML_A_MEASURE_NODETYPE, XMLConstantNames.NODETYPE_REGION);</span>
+<span class="nc" id="L421">			dropRate.setAttribute(XMLConstantNames.XML_A_MEASURE_STATION, name);</span>
+<span class="nc" id="L422">			dropRate.setAttribute(XMLConstantNames.XML_A_MEASURE_TYPE, SimulationDefinition.MEASURE_DR);</span>
+			// For each class add drop rate measure
+<span class="nc bnc" id="L424" title="All 2 branches missed.">			for (int j = 0; j &lt; exact.getClasses(); j++) {</span>
+<span class="nc" id="L425">				Element cloned = (Element) dropRate.cloneNode(true);</span>
+<span class="nc" id="L426">				cloned.setAttribute(XMLConstantNames.XML_A_MEASURE_CLASS, exact.getClassNames()[j]);</span>
+<span class="nc" id="L427">				cloned.setAttribute(XMLConstantNames.XML_A_MEASURE_NAME, exact.getClassNames()[j] + &quot;_&quot; + name + &quot;_Drop Rate&quot;);</span>
+<span class="nc" id="L428">				root.insertBefore(cloned, lastMeasure);</span>
+<span class="nc" id="L429">				lastMeasure = cloned;</span>
+			}
+		}
+<span class="nc" id="L432">		logger.debug(&quot;Added finite capacity regions&quot;);</span>
+
+<span class="nc" id="L434">		XMLSimWriter.writeXML(outputModel, modelDocument);</span>
+
+<span class="nc" id="L436">		logger.debug(&quot;JSIM model definition wrote to disk&quot;);</span>
+
+<span class="nc" id="L438">		return exact;</span>
+	}
+
+	/**
+	 * Solves model using new Java class to perform transformation instead of old bugged XSLT transformer.
+	 * Avoid to measure elements with null service demand.
+	 * @return true if model was solved correctly, false otherwise.
+	 */
+	public boolean solveModelNewTransform() {
+<span class="nc" id="L447">		boolean transfSuccess = false;</span>
+		//get file name: same directory of model file, with the same name preceded by &quot;sim_&quot;
+<span class="nc" id="L449">		String modelDefinitionParent = modelDefinition.getParent();</span>
+
+<span class="nc bnc" id="L451" title="All 2 branches missed.">		if (modelDefinitionParent.endsWith(SEPARATOR)) {</span>
+<span class="nc" id="L452">			simModelDefinitionPath = modelDefinitionParent + &quot;sim_&quot; + modelDefinition.getName();</span>
+		} else {
+<span class="nc" id="L454">			simModelDefinitionPath = modelDefinitionParent + SEPARATOR + &quot;sim_&quot; + modelDefinition.getName();</span>
+		}
+
+<span class="nc" id="L457">		ExactModel inputModel = getTransformedModel(modelDefinitionPath, simModelDefinitionPath);</span>
+<span class="nc bnc" id="L458" title="All 2 branches missed.">		if (inputModel == null) {</span>
+<span class="nc" id="L459">			return false;</span>
+		}
+
+		/*********************SIMULATION LOADING AND RUNNING*********************/
+
+		//sim model successfully created
+		//now prepare simulation
+		try {
+<span class="nc" id="L467">			SimLoader simLoader = new SimLoader(simModelDefinitionPath);</span>
+<span class="nc" id="L468">			Simulation sim = simLoader.getSim();</span>
+         
+			//sets in the Simulation object the path of the original (i.e. MVA)
+			//xml model definition
+<span class="nc" id="L472">			sim.setXmlModelDefPath(modelDefinitionPath);</span>
+
+<span class="nc bnc" id="L474" title="All 2 branches missed.">			if (!automaticSeed) {</span>
+				//if !automaticSeed, then a user defined seed is present
+<span class="nc" id="L476">				sim.setRandomEngineSeed(simulationSeed);</span>
+<span class="nc" id="L477">				sim.initialize();</span>
+<span class="nc" id="L478">				logger.debug(&quot;JSIM correctly initialized with simulation seed = &quot; + simulationSeed);</span>
+			} else {
+<span class="nc" id="L480">				sim.initialize();</span>
+<span class="nc" id="L481">				logger.debug(&quot;JSIM correctly initialized&quot;);</span>
+			}
+
+			//Avoid saturation
+<span class="nc bnc" id="L485" title="All 2 branches missed.">			if (sim.getAllRegions() == null) {</span>
+				//if there are no regions...
+<span class="nc bnc" id="L487" title="All 2 branches missed.">				boolean sufficientProcessingCapacity = inputModel.checkSaturation() == ExactModel.NO_SATURATION;</span>
+
+<span class="nc bnc" id="L489" title="All 2 branches missed.">				if (!sufficientProcessingCapacity) {</span>
+<span class="nc" id="L490">					logger.warn(&quot;Current workload causes system saturation. Simulation will not be started.&quot;);</span>
+<span class="nc" id="L491">					return false;</span>
+				}
+			}
+
+<span class="nc" id="L495">			simStarted = true;</span>
+<span class="nc" id="L496">			net = sim.getNetwork();</span>
+
+			long start, stop;
+			double elapsed;
+
+			//Start time
+<span class="nc" id="L502">			start = System.currentTimeMillis();</span>
+
+<span class="nc" id="L504">			sim.run();</span>
+
+			//Stop time
+<span class="nc" id="L507">			stop = System.currentTimeMillis();</span>
+<span class="nc" id="L508">			elapsed = ((stop - start)) / 1000.0;</span>
+
+<span class="nc" id="L510">			simFinished = true;</span>
+
+<span class="nc" id="L512">			logger.info(&quot;Model &quot; + modelDefinitionPath + &quot; solved by JSIM in &quot; + Double.toString(elapsed) + &quot; seconds&quot;);</span>
+
+<span class="nc" id="L514">		} catch (Exception e) {</span>
+<span class="nc" id="L515">			e.printStackTrace();</span>
+<span class="nc" id="L516">			logger.error(e.getMessage());</span>
+<span class="nc" id="L517">			return false;</span>
+<span class="nc" id="L518">		}</span>
+
+<span class="nc" id="L520">		simModelDefinition = new File(simModelDefinitionPath);</span>
+
+		/*********************COPYING SIMULATION RESULTS*********************/
+
+		//the results file has been obtained
+		//the file has been saved in the same directory of model file, with the same name preceded by &quot;res_sim_&quot;
+
+<span class="nc bnc" id="L527" title="All 2 branches missed.">		if (modelDefinitionParent.endsWith(SEPARATOR)) {</span>
+<span class="nc" id="L528">			simResultsPath = modelDefinition.getParent() + &quot;res_&quot; + simModelDefinition.getName();</span>
+		} else {
+<span class="nc" id="L530">			simResultsPath = modelDefinition.getParent() + SEPARATOR + &quot;res_&quot; + simModelDefinition.getName();</span>
+		}
+
+<span class="nc" id="L533">		simResults = new File(simResultsPath);</span>
+
+<span class="nc" id="L535">		logger.debug(&quot;JSIM results path: &quot; + simResultsPath);</span>
+
+		//transforms the SIMmodeloutput into JMTmodel
+
+		//setup transformer
+<span class="nc" id="L540">		ModelTransformer md = new ModelTransformer();</span>
+<span class="nc" id="L541">		md.setValidate(validate);</span>
+		//create temp file to contain model definition and results
+<span class="nc" id="L543">		File temp = null;</span>
+<span class="nc" id="L544">		String tempPath = null;</span>
+
+		try {
+<span class="nc" id="L547">			temp = File.createTempFile(&quot;~jmt_model&quot;, &quot;.xml&quot;, modelDefinition.getParentFile());</span>
+<span class="nc" id="L548">			tempPath = temp.getAbsolutePath();</span>
+<span class="nc" id="L549">		} catch (IOException e) {</span>
+<span class="nc" id="L550">			e.printStackTrace();</span>
+<span class="nc" id="L551">			logger.error(e.getMessage());</span>
+<span class="nc" id="L552">			logger.error(&quot;Error in creating temp file for model &quot; + modelDefinitionPath);</span>
+
+<span class="nc" id="L554">			return false;</span>
+<span class="nc" id="L555">		}</span>
+
+<span class="nc" id="L557">		transfSuccess = md.OUTtoMVA(simResultsPath, tempPath);</span>
+
+<span class="nc bnc" id="L559" title="All 2 branches missed.">		if (!transfSuccess) {</span>
+<span class="nc" id="L560">			logger.error(&quot;OUT to MVA transformation failed model &quot; + modelDefinitionPath);</span>
+<span class="nc" id="L561">			return false;</span>
+		} else {
+			//if successful, rename to model definition file, after deleting the old version
+<span class="nc bnc" id="L564" title="All 2 branches missed.">			if (modelDefinition.exists()) {</span>
+<span class="nc" id="L565">				modelDefinition.delete();</span>
+			}
+
+			// Put in place all measures from classes with null service demands and adjusts throughputs
+			Document outDocument;
+<span class="nc" id="L570">			XMLUtils xmlUtils = new XMLUtils();</span>
+			try {
+<span class="nc" id="L572">				outDocument = xmlUtils.loadXML(temp);</span>
+<span class="nc" id="L573">				addNullMeasuresCorrectThroughputs(inputModel, outDocument);</span>
+<span class="nc" id="L574">			} catch (SAXException e1) {</span>
+<span class="nc" id="L575">				logger.error(&quot;Cannot parse correctly output JMVA model: &quot; + e1.getMessage());</span>
+<span class="nc" id="L576">				return false;</span>
+<span class="nc" id="L577">			} catch (IOException e2) {</span>
+<span class="nc" id="L578">				logger.error(&quot;I/O error opening output JMVA model: &quot; + e2.getMessage());</span>
+<span class="nc" id="L579">				return false;</span>
+<span class="nc" id="L580">			}</span>
+<span class="nc" id="L581">			logger.debug(&quot;Added null measures to final results&quot;);</span>
+
+			try {
+<span class="nc" id="L584">				xmlUtils.saveXML(outDocument, modelDefinition);</span>
+<span class="nc" id="L585">			} catch (Exception e3) {</span>
+<span class="nc" id="L586">				logger.error(&quot;could not copy results into model &quot; + modelDefinitionPath);</span>
+<span class="nc" id="L587">				return false;</span>
+<span class="nc" id="L588">			}</span>
+
+<span class="nc" id="L590">			resultsObtained = true;</span>
+<span class="nc" id="L591">			logger.debug(&quot;JSIM results copied into model &quot; + modelDefinitionPath);</span>
+
+			//delete temp file
+<span class="nc bnc" id="L594" title="All 2 branches missed.">			if (!temp.delete()) {</span>
+<span class="nc" id="L595">				temp.deleteOnExit();</span>
+<span class="nc" id="L596">				logger.warn(&quot;Could not delete a temp file. Deletion will be retried on JVM exit.&quot;);</span>
+			}
+
+		}
+
+		/*********************DELETE INTERMEDIATE FILES*********************/
+
+		//if true delete intermediate files
+<span class="nc bnc" id="L604" title="All 2 branches missed.">		if (deleteIntermediateFiles) {</span>
+
+			//false if one or more files cannot be deleted
+<span class="nc" id="L607">			boolean successfulDelete = true;</span>
+
+<span class="nc bnc" id="L609" title="All 2 branches missed.">			if (simModelDefinition.exists()) {</span>
+<span class="nc bnc" id="L610" title="All 2 branches missed.">				if (!simModelDefinition.delete()) {</span>
+<span class="nc" id="L611">					successfulDelete = false;</span>
+					//try in another way
+<span class="nc" id="L613">					simModelDefinition.deleteOnExit();</span>
+				}
+			}
+<span class="nc bnc" id="L616" title="All 2 branches missed.">			if (simResults.exists()) {</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">				if (!simResults.delete()) {</span>
+<span class="nc" id="L618">					successfulDelete = false;</span>
+					//try in another way
+<span class="nc" id="L620">					simResults.deleteOnExit();</span>
+				}
+			}
+
+<span class="nc bnc" id="L624" title="All 2 branches missed.">			if (successfulDelete) {</span>
+<span class="nc" id="L625">				logger.debug(&quot;Intermediate files deleted for model &quot; + modelDefinitionPath);</span>
+			} else {
+<span class="nc" id="L627">				logger.warn(&quot;Could not delete some intermediate files. They will be deleted on JVM exit.&quot;);</span>
+			}
+		}
+
+<span class="nc" id="L631">		return true;</span>
+	}
+
+	/**
+	 * allows to know the state of simulation
+	 * @return the percentage of progress (= number of computed confidence intervals /
+	 * total number of required confidence intervals)
+	 */
+	public double checkSimProgress() {
+<span class="nc bnc" id="L640" title="All 2 branches missed.">		if (!simStarted) {</span>
+			//not started yet
+<span class="nc" id="L642">			return 0.0;</span>
+		}
+<span class="nc bnc" id="L644" title="All 2 branches missed.">		if (simFinished) {</span>
+			//already finished
+<span class="nc" id="L646">			return 1.0;</span>
+		}
+		try {
+			//compute progress
+
+<span class="nc bnc" id="L651" title="All 2 branches missed.">			if (pauseSim()) {</span>
+<span class="nc" id="L652">				double progress = net.getNetSystem().checkProgress(net);</span>
+<span class="nc" id="L653">				restartSim();</span>
+<span class="nc" id="L654">				return progress;</span>
+			} else {
+<span class="nc" id="L656">				return 0.0;</span>
+			}
+
+<span class="nc" id="L659">		} catch (NetException e) {</span>
+<span class="nc" id="L660">			return 0.0;</span>
+		}
+
+	}
+
+	/**
+	 * Pauses the simulation, refreshes temp measures and then restarts simulation
+	 */
+	public void refreshTempMeasures() {
+
+		//simulation not started yet
+<span class="nc bnc" id="L671" title="All 2 branches missed.">		if (!simStarted) {</span>
+<span class="nc" id="L672">			return;</span>
+		}
+
+		//pauses the computation
+<span class="nc bnc" id="L676" title="All 2 branches missed.">		if (pauseSim()) {</span>
+
+			//at the first execution, measures must be retrieved
+<span class="nc bnc" id="L679" title="All 2 branches missed.">			if (tempMeasures == null) {</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">				if (net == null) {</span>
+<span class="nc" id="L681">					return;</span>
+				} else {
+					//gets the measures defined for this queue network
+<span class="nc" id="L684">					LinkedList&lt;Measure&gt; measures = net.getMeasures();</span>
+
+					//creates the array of temp measures
+<span class="nc" id="L687">					tempMeasures = new TempMeasure[measures.size()];</span>
+
+<span class="nc bnc" id="L689" title="All 2 branches missed.">					for (int m = 0; m &lt; measures.size(); m++) {</span>
+<span class="nc" id="L690">						tempMeasures[m] = new TempMeasure((Measure) measures.get(m));</span>
+<span class="nc" id="L691">						tempMeasures[m].refreshMeasure();</span>
+					}
+<span class="nc" id="L693">				}</span>
+			} else {
+				//temp measures have already been retrieved
+				//only refresh temp values
+<span class="nc bnc" id="L697" title="All 2 branches missed.">				for (TempMeasure tempMeasure : tempMeasures) {</span>
+<span class="nc" id="L698">					tempMeasure.refreshMeasure();</span>
+				}
+			}
+
+			//restart computation
+<span class="nc" id="L703">			restartSim();</span>
+
+		}
+<span class="nc" id="L706">		return;</span>
+	}
+
+	/**
+	 * gets the temp measures
+	 * @return the temp measure
+	 */
+	public TempMeasure[] getTempMeasures() {
+<span class="nc" id="L714">		return tempMeasures;</span>
+	}
+
+	public boolean abortAllMeasures() {
+<span class="nc bnc" id="L718" title="All 2 branches missed.">		if (!simStarted) {</span>
+<span class="nc" id="L719">			return false;</span>
+		}
+
+<span class="nc bnc" id="L722" title="All 2 branches missed.">		if (simFinished) {</span>
+<span class="nc" id="L723">			return true;</span>
+		}
+
+<span class="nc bnc" id="L726" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc" id="L727">			refreshTempMeasures();</span>
+
+<span class="nc" id="L729">			logger.debug(&quot;All remaining measures will be aborted&quot;);</span>
+<span class="nc bnc" id="L730" title="All 2 branches missed.">			for (int m = 0; m &lt; tempMeasures.length; m++) {</span>
+<span class="nc" id="L731">				abortMeasure(m);</span>
+			}
+
+<span class="nc" id="L734">			return true;</span>
+
+		} else {
+<span class="nc" id="L737">			return false;</span>
+		}
+	}
+
+	public boolean abortMeasure(int index) {
+<span class="nc" id="L742">		boolean success = false;</span>
+
+<span class="nc bnc" id="L744" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc" id="L745">			refreshTempMeasures();</span>
+
+<span class="nc bnc" id="L747" title="All 4 branches missed.">			if ((0 &lt;= index) &amp;&amp; (index &lt;= tempMeasures.length)) {</span>
+<span class="nc" id="L748">				success = tempMeasures[index].abort();</span>
+			} else {
+<span class="nc" id="L750">				success = false;</span>
+			}
+<span class="nc" id="L752">			restartSim();</span>
+		}
+
+<span class="nc" id="L755">		return success;</span>
+	}
+
+	/**
+	 * Prints on System.out the temp values of measures that have not finished yet
+	 */
+	public void printTempMeasures() {
+
+<span class="nc bnc" id="L763" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc bnc" id="L764" title="All 2 branches missed.">			if (tempMeasures != null) {</span>
+<span class="nc bnc" id="L765" title="All 2 branches missed.">				for (TempMeasure temp : tempMeasures) {</span>
+<span class="nc bnc" id="L766" title="All 2 branches missed.">					if (temp.isFinished()) {</span>
+<span class="nc" id="L767">						continue;</span>
+					} else {
+<span class="nc" id="L769">						System.out.println(temp.getName() + &quot;: &quot; + Double.toString(temp.getTempMean()) + &quot; &quot; + temp.getNsamples());</span>
+					}
+				}
+			}
+<span class="nc" id="L773">			restartSim();</span>
+		}
+<span class="nc" id="L775">		return;</span>
+
+	}
+
+	/**
+	 * Pauses the simulation
+	 * @return true if the operation was successful, false otherwise (for example
+	 * simulation not started or already finished)
+	 */
+	private boolean pauseSim() {
+<span class="nc" id="L785">		return net.getNetSystem().pause();</span>
+	}
+
+	/**
+	 * Resumes the simulation
+	 * @return true if the operation was successful, false otherwise (for example
+	 * simulation not started or already finished)
+	 */
+	private boolean restartSim() {
+<span class="nc" id="L794">		return net.getNetSystem().restartFromPause();</span>
+	}
+
+	private boolean copyFile(File input, File output_file) {
+
+<span class="nc" id="L799">		FileInputStream inputStream = null;</span>
+<span class="nc" id="L800">		FileOutputStream outputStream_file1 = null;</span>
+<span class="nc" id="L801">		int fileLength = 0;</span>
+
+		try {
+<span class="nc" id="L804">			inputStream = new FileInputStream(input.getAbsolutePath());</span>
+<span class="nc" id="L805">		} catch (IOException e) {</span>
+<span class="nc" id="L806">			e.printStackTrace();</span>
+<span class="nc" id="L807">			logger.error(&quot;Error while reading input file &quot; + input.getAbsolutePath());</span>
+<span class="nc" id="L808">			return false;</span>
+<span class="nc" id="L809">		}</span>
+
+		// try to open the new files, to be written with FileOutputStream.
+
+		try {
+<span class="nc" id="L814">			outputStream_file1 = new FileOutputStream(output_file);</span>
+<span class="nc" id="L815">		} catch (IOException e) {</span>
+<span class="nc" id="L816">			e.printStackTrace();</span>
+<span class="nc" id="L817">			logger.error(&quot;Error while creating the copy of input file &quot; + input.getAbsolutePath());</span>
+			try {
+<span class="nc" id="L819">				inputStream.close();</span>
+<span class="nc" id="L820">			} catch (IOException e1) {</span>
+<span class="nc" id="L821">				logger.error(&quot;Error while closing stream&quot;);</span>
+<span class="nc" id="L822">			}</span>
+<span class="nc" id="L823">			return false;</span>
+<span class="nc" id="L824">		}</span>
+
+		try {
+			//number of available bytes
+<span class="nc" id="L828">			fileLength = inputStream.available();</span>
+<span class="nc" id="L829">		} catch (IOException e) {</span>
+<span class="nc" id="L830">			e.printStackTrace();</span>
+<span class="nc" id="L831">			logger.error(&quot;Error while computing the length of input file &quot; + input.getAbsolutePath());</span>
+			try {
+<span class="nc" id="L833">				inputStream.close();</span>
+<span class="nc" id="L834">				outputStream_file1.close();</span>
+<span class="nc" id="L835">			} catch (IOException e1) {</span>
+<span class="nc" id="L836">				logger.error(&quot;Error while closing stream&quot;);</span>
+<span class="nc" id="L837">			}</span>
+<span class="nc" id="L838">			return false;</span>
+<span class="nc" id="L839">		}</span>
+
+		// Reads the bytes from input stream and copies them into the output stream
+		// using FileInputStream.read() and FileOutputStream.write().
+
+		try {
+			int byte_read;
+<span class="nc bnc" id="L846" title="All 2 branches missed.">			for (int i = 0; i &lt; fileLength; i++) {</span>
+				//reads one byte
+<span class="nc" id="L848">				byte_read = inputStream.read();</span>
+				//copies one byte
+<span class="nc" id="L850">				outputStream_file1.write(byte_read);</span>
+			}
+<span class="nc" id="L852">		} catch (IOException e) {</span>
+<span class="nc" id="L853">			e.printStackTrace();</span>
+<span class="nc" id="L854">			logger.error(&quot;Error while copying input file &quot; + input.getAbsolutePath());</span>
+			try {
+<span class="nc" id="L856">				inputStream.close();</span>
+<span class="nc" id="L857">				outputStream_file1.close();</span>
+<span class="nc" id="L858">			} catch (IOException e1) {</span>
+<span class="nc" id="L859">				logger.error(&quot;Error while closing stream&quot;);</span>
+<span class="nc" id="L860">			}</span>
+<span class="nc" id="L861">			return false;</span>
+<span class="nc" id="L862">		}</span>
+
+		// The file has been copied, now closes the stream...
+
+		try {
+			// closes InputStream
+<span class="nc" id="L868">			inputStream.close();</span>
+			// closes OutputStream
+<span class="nc" id="L870">			outputStream_file1.close();</span>
+<span class="nc" id="L871">		} catch (IOException e) {</span>
+<span class="nc" id="L872">			e.printStackTrace();</span>
+<span class="nc" id="L873">			logger.error(&quot;Error while closing the copy of input file &quot; + input.getAbsolutePath());</span>
+<span class="nc" id="L874">			return false;</span>
+<span class="nc" id="L875">		}</span>
+
+		// OK, file has been copied
+<span class="nc" id="L878">		return true;</span>
+	}
+
+	/**
+	 * A system is said to have sufficient capacity to process a given load
+	 * &lt;tt&gt;lambda&lt;/tt&gt; if no service center is saturated as a result of the combined loads
+	 * of all the open classes.
+	 * &lt;br&gt;
+	 * WARNING: This method should be called before solving the system.
+	 * @return true if sufficient capacity exists for the given workload, false otherwise
+	 */
+	public boolean checkProcessingCapacity() {
+<span class="nc" id="L890">		ExactModel exact = new ExactModel();</span>
+<span class="nc" id="L891">		XMLUtils xmlUtils = new XMLUtils();</span>
+		Document inputDoc;
+		try {
+<span class="nc" id="L894">			inputDoc = xmlUtils.loadXML(modelDefinition);</span>
+<span class="nc" id="L895">			exact.loadDocument(inputDoc);</span>
+<span class="nc" id="L896">		} catch (SAXException e1) {</span>
+<span class="nc" id="L897">			logger.error(&quot;Cannot parse correctly input JMVA model: &quot; + e1.getMessage());</span>
+<span class="nc" id="L898">			return false;</span>
+<span class="nc" id="L899">		} catch (IOException e1) {</span>
+<span class="nc" id="L900">			logger.error(&quot;I/O error opening input JMVA model: &quot; + e1.getMessage());</span>
+<span class="nc" id="L901">			return false;</span>
+<span class="nc" id="L902">		}</span>
+<span class="nc bnc" id="L903" title="All 2 branches missed.">		return exact.checkSaturation() == ExactModel.NO_SATURATION;</span>
+	}
+
+	/**
+	 * Sets if parser must validate 
+	 * @param validate true if parser must validate, false otherwise
+	 */
+	public void setValidate(boolean validate) {
+<span class="nc" id="L911">		this.validate = validate;</span>
+<span class="nc" id="L912">	}</span>
+
+	/**
+	 * Removes all null measures from output model. A null measure is a measure from a class
+	 * with 0 service demand at a station. Removed measures are stored to be later restored.
+	 * @param input input JMVA model
+	 * @param output output JSIM model
+	 */
+	protected void removeNullMeasures(ExactModel input, CommonModel output) {
+		// Finds a mapping between indices in ExactModel data structure and in CommonModel one
+<span class="nc" id="L922">		Object[] classKeys = new Object[input.getClasses()];</span>
+<span class="nc" id="L923">		Object[] stationKeys = new Object[input.getStations()];</span>
+<span class="nc bnc" id="L924" title="All 2 branches missed.">		for (int i = 0; i &lt; input.getClasses(); i++) {</span>
+<span class="nc" id="L925">			classKeys[i] = output.getClassByName(input.getClassNames()[i]);</span>
+		}
+<span class="nc bnc" id="L927" title="All 2 branches missed.">		for (int i = 0; i &lt; input.getStations(); i++) {</span>
+<span class="nc" id="L928">			stationKeys[i] = output.getStationByName(input.getStationNames()[i]);</span>
+		}
+
+		// Search for null elements and remove them
+<span class="nc bnc" id="L932" title="All 2 branches missed.">		for (int i = 0; i &lt; input.getStations(); i++) {</span>
+<span class="nc bnc" id="L933" title="All 2 branches missed.">			for (int j = 0; j &lt; input.getClasses(); j++) {</span>
+<span class="nc bnc" id="L934" title="All 2 branches missed.">				if (input.getVisits()[i][j] == 0</span>
+<span class="nc bnc" id="L935" title="All 4 branches missed.">						|| (input.getServiceTimes()[i][j][0] == 0 &amp;&amp; input.getStationTypes()[i] != ExactConstants.STATION_LD)) {</span>
+					// Removes all measures from station i for class j
+<span class="nc" id="L937">					Iterator&lt;Object&gt; it = output.getMeasureKeys().iterator();</span>
+<span class="nc bnc" id="L938" title="All 2 branches missed.">					while (it.hasNext()) {</span>
+<span class="nc" id="L939">						Object key = it.next();</span>
+<span class="nc bnc" id="L940" title="All 4 branches missed.">						if (output.getMeasureClass(key) == classKeys[j] &amp;&amp; output.getMeasureStation(key) == stationKeys[i]) {</span>
+<span class="nc" id="L941">							it.remove();</span>
+						}
+<span class="nc" id="L943">					}</span>
+				}
+			}
+		}
+<span class="nc" id="L947">	}</span>
+
+	/**
+	 * Adds all removed null measures to output document
+	 * @param input input exactmodel
+	 * @param output output document
+	 */
+	protected void addNullMeasuresCorrectThroughputs(ExactModel input, Document output) {
+<span class="nc" id="L955">		Element solutions = (Element) output.getElementsByTagName(&quot;solutions&quot;).item(0);</span>
+		// Search for null elements adds them
+<span class="nc bnc" id="L957" title="All 2 branches missed.">		for (int i = 0; i &lt; input.getStations(); i++) {</span>
+			// for all stations
+<span class="nc" id="L959">			NodeList stations = solutions.getElementsByTagName(&quot;stationresults&quot;);</span>
+<span class="nc" id="L960">			Element station = null;</span>
+<span class="nc bnc" id="L961" title="All 2 branches missed.">			for (int k = 0; k &lt; stations.getLength(); k++) {</span>
+<span class="nc" id="L962">				station = (Element) stations.item(k);</span>
+<span class="nc bnc" id="L963" title="All 2 branches missed.">				if (station.getAttribute(&quot;station&quot;).equals(input.getStationNames()[i])) {</span>
+<span class="nc" id="L964">					break;</span>
+				}
+			}
+<span class="nc bnc" id="L967" title="All 2 branches missed.">			for (int j = 0; j &lt; input.getClasses(); j++) {</span>
+				// for all classes
+<span class="nc" id="L969">				NodeList classes = station.getElementsByTagName(&quot;classresults&quot;);</span>
+<span class="nc" id="L970">				Element customerclass = null;</span>
+<span class="nc bnc" id="L971" title="All 2 branches missed.">				for (int k = 0; k &lt; stations.getLength(); k++) {</span>
+<span class="nc" id="L972">					customerclass = (Element) classes.item(k);</span>
+<span class="nc bnc" id="L973" title="All 2 branches missed.">					if (customerclass.getAttribute(&quot;customerclass&quot;).equals(input.getClassNames()[j])) {</span>
+<span class="nc" id="L974">						break;</span>
+					}
+				}
+<span class="nc bnc" id="L977" title="All 2 branches missed.">				if (input.getVisits()[i][j] == 0</span>
+<span class="nc bnc" id="L978" title="All 4 branches missed.">						|| (input.getServiceTimes()[i][j][0] == 0 &amp;&amp; input.getStationTypes()[i] != ExactConstants.STATION_LD)) {</span>
+					// Create a null measure for each measure type
+<span class="nc bnc" id="L980" title="All 2 branches missed.">					for (String element : ExactConstants.INDICES_TYPES) {</span>
+<span class="nc" id="L981">						Element measure = output.createElement(&quot;measure&quot;);</span>
+<span class="nc" id="L982">						measure.setAttribute(&quot;measureType&quot;, element);</span>
+<span class="nc" id="L983">						measure.setAttribute(&quot;meanValue&quot;, &quot;0.0&quot;);</span>
+<span class="nc" id="L984">						measure.setAttribute(&quot;successful&quot;, &quot;true&quot;);</span>
+<span class="nc" id="L985">						measure.setAttribute(&quot;lowerLimit&quot;, &quot;0.0&quot;);</span>
+<span class="nc" id="L986">						measure.setAttribute(&quot;upperLimit&quot;, &quot;0.0&quot;);</span>
+<span class="nc" id="L987">						customerclass.appendChild(measure);</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L992">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

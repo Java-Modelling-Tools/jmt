@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ActionBezierEdgeUnlockTangents.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.controller.actions</a> &gt; <span class="el_source">ActionBezierEdgeUnlockTangents.java</span></div><h1>ActionBezierEdgeUnlockTangents.java</h1><pre class="source lang-java linenums">package jmt.gui.jsimgraph.controller.actions;
+
+import jmt.gui.jsimgraph.controller.BezierEdgeModificationState;
+import jmt.gui.jsimgraph.controller.Mediator;
+
+import java.awt.event.ActionEvent;
+
+public class ActionBezierEdgeUnlockTangents extends AbstractJmodelAction {
+
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Defines an &lt;code&gt;Action&lt;/code&gt; object with a default
+     * description string and default icon.
+     */
+    public ActionBezierEdgeUnlockTangents(Mediator mediator) {
+<span class="nc" id="L18">        super(&quot;UnlockTangents&quot;, &quot;BezierUnlockTangents_v2&quot;, mediator);</span>
+<span class="nc" id="L19">        putValue(SHORT_DESCRIPTION, &quot;Unlock tangents position&quot;);</span>
+<span class="nc" id="L20">        setGroup(1);</span>
+<span class="nc" id="L21">        setSelectable(true);</span>
+<span class="nc" id="L22">        setEnabled(true);</span>
+<span class="nc" id="L23">    }</span>
+
+    /**
+     * Invoked when an action occurs.
+     */
+    public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L29" title="All 2 branches missed.">        if (mediator.getMouseListener().getCurrentState() instanceof BezierEdgeModificationState){</span>
+<span class="nc" id="L30">            ((BezierEdgeModificationState) mediator.getMouseListener().getCurrentState()).setState(&quot;UNLOCK&quot;);</span>
+        }
+<span class="nc" id="L32">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,953 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ForkEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">ForkEditor.java</span></div><h1>ForkEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.AbstractTableModel;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.panels.WarningScrollTable;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+
+public class ForkEditor extends JSplitPane implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+	private Map&lt;Object, OutPath&gt; outPaths;
+	private Map&lt;Object, Double&gt; combProbs;
+	private Map&lt;Object, Object&gt; out;
+	private ArrayList&lt;Object&gt; keys;
+	private StationDefinition stations;
+	private ClassDefinition classes;
+	private Object stationKey, classKey;
+
+	private WarningScrollTable rtPane;
+	private WarningScrollTable otPane;
+	private WarningScrollTable cbPane;
+	private WarningScrollTable csPane;
+	private WarningScrollTable onPane;
+	private WarningScrollTable cnPane;
+<span class="nc" id="L74">	private ForkTable forkTable = new ForkTable();</span>
+<span class="nc" id="L75">	private OutPathTable outTable = new OutPathTable();</span>
+<span class="nc" id="L76">	private CombTable combTable = new CombTable();</span>
+<span class="nc" id="L77">	private ClassNumTable classNumTable = new ClassNumTable();</span>
+<span class="nc" id="L78">	private ForkSwitchTable switchTable = new ForkSwitchTable();</span>
+<span class="nc" id="L79">	private OutNumTable numTable = new OutNumTable();</span>
+<span class="nc" id="L80">	private JTextArea noOptLabel = new JTextArea(&quot;No options available for this fork strategy&quot;);</span>
+<span class="nc" id="L81">	private JScrollPane noOptLabelPanel = new JScrollPane(noOptLabel);</span>
+<span class="nc" id="L82">	private JSplitPane jsp = new JSplitPane();</span>
+	private JPanel buttons;
+
+<span class="nc" id="L85">	public ForkEditor(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {</span>
+<span class="nc" id="L86">		setOrientation(JSplitPane.VERTICAL_SPLIT);</span>
+<span class="nc" id="L87">		setDividerSize(3);</span>
+<span class="nc" id="L88">		setBorder(new EmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L89">		setResizeWeight(0.5);</span>
+<span class="nc" id="L90">		initComponents();</span>
+<span class="nc" id="L91">		setData(sd, cd, stationKey, classKey);</span>
+<span class="nc" id="L92">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L95">		rtPane = new WarningScrollTable(forkTable, WARNING_OUTGOING_ROUTING);</span>
+<span class="nc" id="L96">		otPane = new WarningScrollTable(outTable, &quot;Select a branch&quot;);</span>
+<span class="nc" id="L97">		cbPane = new WarningScrollTable(combTable, WARNING_OUTGOING_ROUTING);</span>
+<span class="nc" id="L98">		cnPane = new WarningScrollTable(classNumTable, WARNING_OUTGOING_ROUTING);</span>
+<span class="nc" id="L99">		csPane = new WarningScrollTable(switchTable, WARNING_OUTGOING_ROUTING);</span>
+<span class="nc" id="L100">		onPane = new WarningScrollTable(numTable, &quot;Select a branch&quot;);</span>
+
+<span class="nc" id="L102">		forkTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L105" title="All 4 branches missed.">				if (!e.getValueIsAdjusting() &amp;&amp; forkTable.getSelectedRow() &gt; -1) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">					if (out != null) {</span>
+<span class="nc" id="L107">						stations.normalizeForkProbabilities((Map) out);</span>
+					}
+<span class="nc" id="L109">					out = outPaths.get(indexToKey(forkTable.getSelectedRow())).getOutParameters();</span>
+<span class="nc" id="L110">					keys = new ArrayList&lt;Object&gt;(out.keySet());</span>
+<span class="nc" id="L111">					jsp.getRightComponent().setVisible(true);</span>
+<span class="nc" id="L112">					jsp.setDividerLocation(-1);</span>
+<span class="nc" id="L113">					outTable.updateUI();</span>
+<span class="nc" id="L114">					otPane.updateUI();</span>
+				}
+<span class="nc" id="L116">			}</span>
+
+			private Object indexToKey(int index) {
+<span class="nc bnc" id="L119" title="All 2 branches missed.">				if (stationKey == null) {</span>
+<span class="nc" id="L120">					return null;</span>
+				}
+<span class="nc" id="L122">				return stations.getForwardConnections(stationKey).get(index);</span>
+			}
+		});
+
+<span class="nc" id="L126">		switchTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L129" title="All 4 branches missed.">				if (!e.getValueIsAdjusting() &amp;&amp; switchTable.getSelectedRow() &gt; -1) {</span>
+<span class="nc" id="L130">					out = outPaths.get(indexToKey(switchTable.getSelectedRow())).getOutParameters();</span>
+<span class="nc" id="L131">					numTable.updateUI();</span>
+<span class="nc" id="L132">					onPane.updateUI();</span>
+				}
+<span class="nc" id="L134">			}</span>
+
+			private Object indexToKey(int index) {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">				if (stationKey == null) {</span>
+<span class="nc" id="L138">					return null;</span>
+				}
+<span class="nc" id="L140">				return stations.getForwardConnections(stationKey).get(index);</span>
+			}
+		});
+
+<span class="nc" id="L144">		noOptLabelPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Fork Options&quot;));</span>
+<span class="nc" id="L145">		noOptLabel.setOpaque(false);</span>
+<span class="nc" id="L146">		noOptLabel.setEditable(false);</span>
+<span class="nc" id="L147">		noOptLabel.setLineWrap(true);</span>
+<span class="nc" id="L148">		noOptLabel.setWrapStyleWord(true); </span>
+<span class="nc" id="L149">		rtPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Branch Probabilities&quot;));</span>
+<span class="nc" id="L150">		cbPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Branch Distribution&quot;));</span>
+<span class="nc" id="L151">		cnPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Number of Tasks per Class&quot;));</span>
+<span class="nc" id="L152">		csPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Branches&quot;));</span>
+<span class="nc" id="L153">		onPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Number of Tasks per Class&quot;));</span>
+
+<span class="nc" id="L155">		JButton add = new JButton(&quot;Add&quot;);</span>
+<span class="nc" id="L156">		JButton delete = new JButton(&quot;Delete&quot;);</span>
+
+<span class="nc" id="L158">		add.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L161" title="All 4 branches missed.">				if (out != null &amp;&amp; keys != null) {</span>
+<span class="nc" id="L162">					int max = 0;</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">					for (int i = 0; i &lt; keys.size(); i++) {</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">						if (((Integer) keys.get(i)).intValue() &gt; max) {</span>
+<span class="nc" id="L165">							max = ((Integer) keys.get(i)).intValue();</span>
+						}
+					}
+<span class="nc" id="L168">					out.put(max + 1, new Double(0.0));</span>
+<span class="nc" id="L169">					keys.add(max + 1);</span>
+<span class="nc" id="L170">					outTable.updateUI();</span>
+				}
+<span class="nc" id="L172">			}</span>
+		});
+
+<span class="nc" id="L175">		delete.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L178">				int selected = outTable.getSelectedRow();</span>
+<span class="nc" id="L179">				int count = outTable.getRowCount();</span>
+<span class="nc bnc" id="L180" title="All 4 branches missed.">				if (selected &gt; -1 &amp;&amp; count &gt; 1) {</span>
+<span class="nc" id="L181">					out.remove(keys.get(selected));</span>
+<span class="nc" id="L182">					keys.remove(selected);</span>
+<span class="nc bnc" id="L183" title="All 2 branches missed.">					if (selected == count - 1) {</span>
+<span class="nc" id="L184">						outTable.setRowSelectionInterval(selected - 1, selected - 1);</span>
+					}
+<span class="nc" id="L186">					outTable.updateUI();</span>
+				}
+<span class="nc" id="L188">			}</span>
+		});
+
+<span class="nc" id="L191">		buttons = new JPanel();</span>
+<span class="nc" id="L192">		buttons.setLayout(new GridLayout(1, 2));</span>
+<span class="nc" id="L193">		buttons.add(add);</span>
+<span class="nc" id="L194">		buttons.add(delete);</span>
+<span class="nc" id="L195">		jsp.setOrientation(JSplitPane.VERTICAL_SPLIT);</span>
+<span class="nc" id="L196">		jsp.setDividerSize(0);</span>
+<span class="nc" id="L197">		jsp.setBorder(new EmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L198">		jsp.setResizeWeight(1.0);</span>
+<span class="nc" id="L199">		jsp.setBorder(new TitledBorder(new EtchedBorder(), &quot;Task Distribution&quot;));</span>
+<span class="nc" id="L200">		jsp.setLeftComponent(otPane);</span>
+<span class="nc" id="L201">		jsp.setRightComponent(buttons);</span>
+<span class="nc" id="L202">	}</span>
+
+	public void setData(StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+<span class="nc" id="L205">		ForkStrategy fs = (ForkStrategy) sd.getForkStrategy(stationKey, classKey);</span>
+<span class="nc" id="L206">		forkTable.clearSelection();</span>
+<span class="nc" id="L207">		outTable.clearSelection();</span>
+<span class="nc" id="L208">		combTable.clearSelection();</span>
+<span class="nc" id="L209">		classNumTable.clearSelection();</span>
+<span class="nc" id="L210">		switchTable.clearSelection();</span>
+<span class="nc" id="L211">		numTable.clearSelection();</span>
+<span class="nc" id="L212">		jsp.getRightComponent().setVisible(false);</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		if (fs == null) {</span>
+<span class="nc" id="L214">			emptyPane();</span>
+		} else {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">			if (fs instanceof ProbabilitiesFork) {</span>
+<span class="nc" id="L217">				createDetails(fs, sd, stationKey, classKey);</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">			} else if (fs instanceof CombFork) {</span>
+<span class="nc" id="L219">				createCombDetails(fs, sd, stationKey, classKey);</span>
+<span class="nc bnc" id="L220" title="All 2 branches missed.">			} else if (fs instanceof ClassSwitchFork) {</span>
+<span class="nc" id="L221">				createClassSwitchDetails(fs, sd, cd, stationKey, classKey);</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">			} else if (fs instanceof MultiBranchClassSwitchFork) {</span>
+<span class="nc" id="L223">				createMultiBranchClassSwitchDetails(fs, sd, cd, stationKey, classKey);</span>
+			} else {
+<span class="nc" id="L225">				emptyPane();</span>
+			}
+		}
+<span class="nc" id="L228">		doLayout();</span>
+<span class="nc" id="L229">	}</span>
+
+	private void emptyPane() {
+<span class="nc" id="L232">		setLeftComponent(noOptLabelPanel);</span>
+<span class="nc" id="L233">		setRightComponent(new JPanel());</span>
+<span class="nc" id="L234">		out = null;</span>
+<span class="nc" id="L235">	}</span>
+
+	private void createDetails(ForkStrategy fs, StationDefinition sd, Object stationKey, Object classKey) {
+<span class="nc" id="L238">		outPaths = (Map&lt;Object, OutPath&gt;) fs.getOutDetails();</span>
+<span class="nc" id="L239">		stations = sd;</span>
+<span class="nc" id="L240">		this.stationKey = stationKey;</span>
+<span class="nc" id="L241">		this.classKey = classKey;</span>
+<span class="nc" id="L242">		combProbs = null;</span>
+<span class="nc" id="L243">		out = null;</span>
+<span class="nc" id="L244">		keys = null;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">		if (outPaths.isEmpty()) {</span>
+<span class="nc" id="L246">			setupFork();</span>
+		}
+<span class="nc bnc" id="L248" title="All 2 branches missed.">		if (stations.getForwardConnections(stationKey).isEmpty()) {</span>
+<span class="nc" id="L249">			setLeftComponent(rtPane);</span>
+<span class="nc" id="L250">			setRightComponent(new JPanel());</span>
+		} else {
+<span class="nc" id="L252">			setLeftComponent(rtPane);</span>
+<span class="nc" id="L253">			setRightComponent(jsp);</span>
+		}
+<span class="nc" id="L255">	}</span>
+
+	private void createCombDetails(ForkStrategy fs, StationDefinition sd, Object stationKey, Object classKey) {
+<span class="nc" id="L258">		combProbs = (Map&lt;Object, Double&gt;) fs.getOutDetails();</span>
+<span class="nc" id="L259">		stations = sd;</span>
+<span class="nc" id="L260">		this.stationKey = stationKey;</span>
+<span class="nc" id="L261">		this.classKey = classKey;</span>
+<span class="nc" id="L262">		outPaths = null;</span>
+<span class="nc" id="L263">		out = null;</span>
+<span class="nc" id="L264">		keys = null;</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (combProbs.isEmpty()) {</span>
+<span class="nc" id="L266">			setupCombFork();</span>
+		}
+<span class="nc" id="L268">		setLeftComponent(cbPane);</span>
+<span class="nc" id="L269">		setRightComponent(new JPanel());</span>
+<span class="nc" id="L270">	}</span>
+
+	private void createClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+<span class="nc" id="L273">		outPaths = (Map&lt;Object, OutPath&gt;) fs.getOutDetails();</span>
+<span class="nc" id="L274">		stations = sd;</span>
+<span class="nc" id="L275">		classes = cd;</span>
+<span class="nc" id="L276">		this.stationKey = stationKey;</span>
+<span class="nc" id="L277">		this.classKey = classKey;</span>
+<span class="nc" id="L278">		combProbs = null;</span>
+<span class="nc" id="L279">		out = null;</span>
+<span class="nc" id="L280">		keys = null;</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">		if (outPaths.isEmpty()) {</span>
+<span class="nc" id="L282">			setupClassSwitchFork();</span>
+		}
+<span class="nc bnc" id="L284" title="All 2 branches missed.">		if (outPaths.size() &gt; 0) {</span>
+<span class="nc" id="L285">			out = outPaths.values().iterator().next().getOutParameters();</span>
+		}
+<span class="nc" id="L287">		setLeftComponent(cnPane);</span>
+<span class="nc" id="L288">		setRightComponent(new JPanel());</span>
+<span class="nc" id="L289">	}</span>
+
+	private void createMultiBranchClassSwitchDetails(ForkStrategy fs, StationDefinition sd, ClassDefinition cd, Object stationKey, Object classKey) {
+<span class="nc" id="L292">		outPaths = (Map&lt;Object, OutPath&gt;) fs.getOutDetails();</span>
+<span class="nc" id="L293">		stations = sd;</span>
+<span class="nc" id="L294">		classes = cd;</span>
+<span class="nc" id="L295">		this.stationKey = stationKey;</span>
+<span class="nc" id="L296">		this.classKey = classKey;</span>
+<span class="nc" id="L297">		combProbs = null;</span>
+<span class="nc" id="L298">		out = null;</span>
+<span class="nc" id="L299">		keys = null;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">		if (outPaths.isEmpty()) {</span>
+<span class="nc" id="L301">			setupMultiBranchClassSwitchFork();</span>
+		}
+<span class="nc bnc" id="L303" title="All 2 branches missed.">		if (stations.getForwardConnections(stationKey).isEmpty()) {</span>
+<span class="nc" id="L304">			setLeftComponent(csPane);</span>
+<span class="nc" id="L305">			setRightComponent(new JPanel());</span>
+		} else {
+<span class="nc" id="L307">			setLeftComponent(csPane);</span>
+<span class="nc" id="L308">			setRightComponent(onPane);</span>
+		}
+<span class="nc" id="L310">	}</span>
+
+	/**
+	 * sets up all of the entries in routing table from output connections for
+	 * specified station
+	 */
+	protected void setupFork() {
+<span class="nc bnc" id="L317" title="All 8 branches missed.">		if (stationKey == null || classKey == null || stations == null || outPaths == null) {</span>
+<span class="nc" id="L318">			return;</span>
+		}
+		// fetching output-connected stations list
+<span class="nc" id="L321">		Vector&lt;Object&gt; outputs = stations.getForwardConnections(stationKey);</span>
+		// saving all entries of routing strategy in a temporary data structure
+<span class="nc" id="L323">		HashMap&lt;Object, OutPath&gt; temp = new HashMap&lt;Object, OutPath&gt;(outPaths);</span>
+<span class="nc" id="L324">		outPaths.clear();</span>
+<span class="nc bnc" id="L325" title="All 2 branches missed.">		for (int i = 0; i &lt; outputs.size(); i++) {</span>
+			// add old entries to map only if they are still in the current
+			// connection set
+<span class="nc" id="L328">			Object currentKey = outputs.get(i);</span>
+<span class="nc bnc" id="L329" title="All 2 branches missed.">			if (temp.containsKey(currentKey)) {</span>
+<span class="nc" id="L330">				outPaths.put(currentKey, temp.get(currentKey));</span>
+			} else {
+				// if connection set contains new entries, set them to (1, 1.0)
+				// by default
+<span class="nc" id="L334">				OutPath tempPath = new OutPath();</span>
+<span class="nc" id="L335">				tempPath.setProbability(1.0);</span>
+<span class="nc" id="L336">				tempPath.putEntry(1, 0.0);</span>
+<span class="nc" id="L337">				outPaths.put(currentKey, tempPath);</span>
+			}
+		}
+<span class="nc" id="L340">	}</span>
+
+	protected void setupCombFork() {
+<span class="nc bnc" id="L343" title="All 8 branches missed.">		if (stationKey == null || classKey == null || stations == null || combProbs == null) {</span>
+<span class="nc" id="L344">			return;</span>
+		}
+<span class="nc" id="L346">		Vector&lt;Object&gt; outputs = stations.getForwardConnections(stationKey);</span>
+<span class="nc" id="L347">		HashMap&lt;Object, Double&gt; temp = new HashMap&lt;Object, Double&gt;(combProbs);</span>
+<span class="nc" id="L348">		combProbs.clear();</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">		for (int i = 0; i &lt; outputs.size(); i++) {</span>
+			// add old entries to map only if they are still in the current
+			// connection set
+<span class="nc" id="L352">			String key = Integer.toString(i + 1);</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">			if (temp.containsKey(key)) {</span>
+<span class="nc" id="L354">				combProbs.put(key, temp.get(key));</span>
+			} else {
+				// if connection set contains new entries, set them to 0 by
+				// default
+<span class="nc" id="L358">				combProbs.put(key, new Double(0.0));</span>
+			}
+		}
+<span class="nc" id="L361">	}</span>
+
+	protected void setupClassSwitchFork() {
+<span class="nc bnc" id="L364" title="All 8 branches missed.">		if (stationKey == null || classKey == null || stations == null || outPaths == null) {</span>
+<span class="nc" id="L365">			return;</span>
+		}
+		// fetching output-connected stations list
+<span class="nc" id="L368">		Vector&lt;Object&gt; outputs = stations.getForwardConnections(stationKey);</span>
+		// saving all entries of routing strategy in a temporary data structure
+<span class="nc" id="L370">		HashMap&lt;Object, OutPath&gt; temp = new HashMap&lt;Object, OutPath&gt;(outPaths);</span>
+<span class="nc" id="L371">		outPaths.clear();</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">		for (int i = 0; i &lt; outputs.size(); i++) {</span>
+			// add old entries to map only if they are still in the current
+			// connection set
+<span class="nc" id="L375">			Object currentKey = outputs.get(i);</span>
+
+<span class="nc bnc" id="L377" title="All 2 branches missed.">			if (temp.containsKey(currentKey)) {</span>
+<span class="nc" id="L378">				outPaths.put(currentKey, temp.get(currentKey));</span>
+			} else {
+<span class="nc" id="L380">				OutPath tempPath = new OutPath();</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">				for (Object o : classes.getClassKeys()) {</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">					if (o == classKey) {</span>
+<span class="nc" id="L383">						tempPath.putEntry(o, 1);</span>
+					} else {
+<span class="nc" id="L385">						tempPath.putEntry(o, 0);</span>
+					}
+<span class="nc" id="L387">				}</span>
+<span class="nc" id="L388">				outPaths.put(currentKey, tempPath);</span>
+			}
+		}
+<span class="nc" id="L391">	}</span>
+
+	protected void setupMultiBranchClassSwitchFork() {
+<span class="nc bnc" id="L394" title="All 8 branches missed.">		if (stationKey == null || classKey == null || stations == null || outPaths == null) {</span>
+<span class="nc" id="L395">			return;</span>
+		}
+		// fetching output-connected stations list
+<span class="nc" id="L398">		Vector&lt;Object&gt; outputs = stations.getForwardConnections(stationKey);</span>
+		// saving all entries of routing strategy in a temporary data structure
+<span class="nc" id="L400">		HashMap&lt;Object, OutPath&gt; temp2 = new HashMap&lt;Object, OutPath&gt;(outPaths);</span>
+<span class="nc" id="L401">		outPaths.clear();</span>
+<span class="nc bnc" id="L402" title="All 2 branches missed.">		for (int i = 0; i &lt; outputs.size(); i++) {</span>
+			// add old entries to map only if they are still in the current
+			// connection set
+<span class="nc" id="L405">			Object currentKey = outputs.get(i);</span>
+
+<span class="nc bnc" id="L407" title="All 2 branches missed.">			if (temp2.containsKey(currentKey)) {</span>
+<span class="nc" id="L408">				outPaths.put(currentKey, temp2.get(currentKey));</span>
+			} else {
+<span class="nc" id="L410">				OutPath tempPath = new OutPath();</span>
+<span class="nc bnc" id="L411" title="All 2 branches missed.">				for (Object o : classes.getClassKeys()) {</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">					if (o == classKey) {</span>
+<span class="nc" id="L413">						tempPath.putEntry(o, 1);</span>
+					} else {
+<span class="nc" id="L415">						tempPath.putEntry(o, 0);</span>
+					}
+<span class="nc" id="L417">				}</span>
+<span class="nc" id="L418">				outPaths.put(currentKey, tempPath);</span>
+			}
+		}
+<span class="nc" id="L421">	}</span>
+
+	public void stopEditing() {
+<span class="nc bnc" id="L424" title="All 2 branches missed.">		if (forkTable.getCellEditor() != null) {</span>
+<span class="nc" id="L425">			forkTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L427" title="All 2 branches missed.">		if (outTable.getCellEditor() != null) {</span>
+<span class="nc" id="L428">			outTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L430" title="All 2 branches missed.">		if (combTable.getCellEditor() != null) {</span>
+<span class="nc" id="L431">			combTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L433" title="All 2 branches missed.">		if (classNumTable.getCellEditor() != null) {</span>
+<span class="nc" id="L434">			classNumTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L436" title="All 2 branches missed.">		if (switchTable.getCellEditor() != null) {</span>
+<span class="nc" id="L437">			switchTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L439" title="All 2 branches missed.">		if (numTable.getCellEditor() != null) {</span>
+<span class="nc" id="L440">			numTable.getCellEditor().stopCellEditing();</span>
+		}
+<span class="nc bnc" id="L442" title="All 2 branches missed.">		if (stations != null) {</span>
+<span class="nc" id="L443">			ForkStrategy fs = (ForkStrategy) stations.getForkStrategy(stationKey, classKey);</span>
+<span class="nc bnc" id="L444" title="All 4 branches missed.">			if (fs instanceof ProbabilitiesFork &amp;&amp; out != null) {</span>
+<span class="nc" id="L445">				stations.normalizeForkProbabilities((Map) out);</span>
+<span class="nc bnc" id="L446" title="All 4 branches missed.">			} else if (fs instanceof CombFork &amp;&amp; combProbs != null) {</span>
+<span class="nc" id="L447">				stations.normalizeForkProbabilities(combProbs);</span>
+			}
+		}
+<span class="nc" id="L450">	}</span>
+
+	protected class ForkTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L456">		public ForkTable() {</span>
+<span class="nc" id="L457">			setModel(new ForkTableModel());</span>
+<span class="nc" id="L458">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L459">			sizeColumns();</span>
+<span class="nc" id="L460">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L461">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L462">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L465" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L466">				getColumnModel().getColumn(i).setMinWidth(((ForkTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L468">		}</span>
+
+	}
+
+<span class="nc" id="L472">	protected class ForkTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L475">		private String[] columnNames = new String[] { &quot;Destination&quot;, &quot;Probability&quot; };</span>
+<span class="nc" id="L476">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L477">		public int[] columnSizes = new int[] { 80, 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L480" title="All 2 branches missed.">			if (stationKey != null) {</span>
+<span class="nc" id="L481">				return stations.getForwardConnections(stationKey).size();</span>
+			} else {
+<span class="nc" id="L483">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L488">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L493">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L498">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L503" title="All 2 branches missed.">			return columnIndex == 1;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L507" title="All 2 branches missed.">			if (outPaths == null) {</span>
+<span class="nc" id="L508">				return null;</span>
+			}
+<span class="nc bnc" id="L510" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L511">				return stations.getStationName(indexToKey(rowIndex));</span>
+<span class="nc bnc" id="L512" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L513">				return outPaths.get(indexToKey(rowIndex)).getProbability();</span>
+			} else {
+<span class="nc" id="L515">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L521" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L523">					Double value = Double.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L524" title="All 4 branches missed.">					if (value.doubleValue() &gt;= 0.0 &amp;&amp; value.doubleValue() &lt;= 1.0) {</span>
+<span class="nc" id="L525">						outPaths.get(indexToKey(rowIndex)).setProbability(value);</span>
+					}
+<span class="nc" id="L527">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L528">				}</span>
+			}
+<span class="nc" id="L530">		}</span>
+
+		// retrieves station search key from index in table
+		private Object indexToKey(int index) {
+<span class="nc bnc" id="L534" title="All 2 branches missed.">			if (stationKey == null) {</span>
+<span class="nc" id="L535">				return null;</span>
+			}
+<span class="nc" id="L537">			return stations.getForwardConnections(stationKey).get(index);</span>
+		}
+
+	}
+
+	protected class OutPathTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L546">		public OutPathTable() {</span>
+<span class="nc" id="L547">			setModel(new OutPathTableModel());</span>
+<span class="nc" id="L548">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L549">			sizeColumns();</span>
+<span class="nc" id="L550">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L551">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L552">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L555" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L556">				getColumnModel().getColumn(i).setMinWidth(((OutPathTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L558">		}</span>
+
+	}
+
+<span class="nc" id="L562">	protected class OutPathTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L565">		private String[] columnNames = new String[] { &quot;Number of Tasks&quot;, &quot;Probability&quot; };</span>
+<span class="nc" id="L566">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L567">		public int[] columnSizes = new int[] { 80, 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L570" title="All 2 branches missed.">			if (out != null) {</span>
+<span class="nc" id="L571">				return keys.size();</span>
+			} else {
+<span class="nc" id="L573">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L578">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L583">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L588">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L593">			return true;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L597" title="All 2 branches missed.">			if (out == null) {</span>
+<span class="nc" id="L598">				return null;</span>
+			}
+<span class="nc bnc" id="L600" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L601">				return indexToKey(rowIndex);</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L603">				return out.get(indexToKey(rowIndex));</span>
+			} else {
+<span class="nc" id="L605">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L611" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L612">				Object oldValue = indexToKey(rowIndex);</span>
+<span class="nc" id="L613">				Double temp = (Double) out.get(oldValue);</span>
+				try {
+<span class="nc" id="L615">					Integer value = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L616" title="All 4 branches missed.">					if (value.intValue() &gt; 0 &amp;&amp; !keys.contains(value)) {</span>
+<span class="nc" id="L617">						keys.set(keys.indexOf(oldValue), value);</span>
+<span class="nc" id="L618">						out.remove(oldValue);</span>
+<span class="nc" id="L619">						out.put(value, temp);</span>
+					}
+<span class="nc" id="L621">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L622">				}</span>
+			}
+<span class="nc bnc" id="L624" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L626">					Double value = Double.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L627" title="All 2 branches missed.">					if (value.doubleValue() &gt;= 0.0) {</span>
+<span class="nc" id="L628">						out.put(indexToKey(rowIndex), value);</span>
+					}
+<span class="nc" id="L630">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L631">				}</span>
+			}
+<span class="nc" id="L633">		}</span>
+
+		// retrieves station search key from index in table
+		private Object indexToKey(int index) {
+<span class="nc bnc" id="L637" title="All 2 branches missed.">			if (stationKey == null) {</span>
+<span class="nc" id="L638">				return null;</span>
+			}
+<span class="nc" id="L640">			return keys.get(index);</span>
+		}
+
+	}
+
+	//for the combination fork
+	protected class CombTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L650">		public CombTable() {</span>
+<span class="nc" id="L651">			setModel(new CombTableModel());</span>
+<span class="nc" id="L652">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L653">			sizeColumns();</span>
+<span class="nc" id="L654">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L655">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L656">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L659" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L660">				getColumnModel().getColumn(i).setMinWidth(((CombTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L662">		}</span>
+
+	}
+
+<span class="nc" id="L666">	protected class CombTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L669">		private String[] columnNames = new String[] { &quot;Number of Branches&quot;, &quot;Probability&quot; };</span>
+<span class="nc" id="L670">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L671">		public int[] columnSizes = new int[] { 100, 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L674" title="All 2 branches missed.">			if (stationKey != null) {</span>
+<span class="nc" id="L675">				return stations.getForwardConnections(stationKey).size();</span>
+			} else {
+<span class="nc" id="L677">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L682">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L687">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L692">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L697" title="All 2 branches missed.">			return columnIndex == 1;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L701" title="All 2 branches missed.">			if (combProbs == null) {</span>
+<span class="nc" id="L702">				return null;</span>
+			}
+<span class="nc bnc" id="L704" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L705">				return indexToKey(rowIndex);</span>
+<span class="nc bnc" id="L706" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L707">				return combProbs.get(indexToKey(rowIndex));</span>
+
+			} else {
+<span class="nc" id="L710">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L716" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L718">					Double value = Double.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L719" title="All 2 branches missed.">					if (value.doubleValue() &gt;= 0.0) {</span>
+<span class="nc" id="L720">						combProbs.put(indexToKey(rowIndex), value);</span>
+					}
+<span class="nc" id="L722">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L723">				}</span>
+			}
+<span class="nc" id="L725">		}</span>
+
+		private Object indexToKey(int index) {
+<span class="nc" id="L728">			return Integer.toString(index + 1);</span>
+		}
+
+	}
+
+	protected class ClassNumTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L737">		public ClassNumTable() {</span>
+<span class="nc" id="L738">			setModel(new ClassNumTableModel());</span>
+<span class="nc" id="L739">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L740">			setDefaultRenderer(Object.class, new DisabledCellRenderer());</span>
+<span class="nc" id="L741">			sizeColumns();</span>
+<span class="nc" id="L742">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L743">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L744">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L747" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L748">				getColumnModel().getColumn(i).setMinWidth(((ClassNumTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L750">		}</span>
+
+	}
+
+<span class="nc" id="L754">	protected class ClassNumTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L757">		private String[] columnNames = new String[] { &quot;Class&quot;, &quot;Number of Tasks&quot; };</span>
+<span class="nc" id="L758">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, Object.class };</span>
+<span class="nc" id="L759">		public int[] columnSizes = new int[] { 80, 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L762" title="All 4 branches missed.">			if (classes.getClassKeys() != null &amp;&amp; out != null) {</span>
+<span class="nc" id="L763">				return classes.getClassKeys().size();</span>
+			} else {
+<span class="nc" id="L765">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L770">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L775">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L780">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L785">			int rowClassType = classes.getClassType(indexToKey(rowIndex));</span>
+<span class="nc" id="L786">			int classType = classes.getClassType(classKey);</span>
+<span class="nc bnc" id="L787" title="All 4 branches missed.">			return (columnIndex == 1) &amp;&amp; (rowClassType == classType);</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L791" title="All 2 branches missed.">			if (out == null) {</span>
+<span class="nc" id="L792">				return null;</span>
+			}
+<span class="nc bnc" id="L794" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L795">				return classes.getClassName(indexToKey(rowIndex));</span>
+<span class="nc bnc" id="L796" title="All 4 branches missed.">			} else if (columnIndex == 1 &amp;&amp; isCellEditable(rowIndex, columnIndex)) {</span>
+<span class="nc" id="L797">				return out.get(indexToKey(rowIndex));</span>
+
+			} else {
+<span class="nc" id="L800">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L806" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L808">					Integer value = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L809" title="All 2 branches missed.">					if (value.intValue() &gt;= 0) {</span>
+<span class="nc bnc" id="L810" title="All 2 branches missed.">						for (Entry&lt;Object, OutPath&gt; m : outPaths.entrySet()) {</span>
+<span class="nc" id="L811">							m.getValue().getOutParameters().put(indexToKey(rowIndex), value);</span>
+<span class="nc" id="L812">						}</span>
+					}
+<span class="nc" id="L814">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L815">				}</span>
+			}
+<span class="nc" id="L817">		}</span>
+
+		private Object indexToKey(int index) {
+<span class="nc" id="L820">			return classes.getClassKeys().get(index);</span>
+		}
+
+	}
+
+	protected class ForkSwitchTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L829">		public ForkSwitchTable() {</span>
+<span class="nc" id="L830">			setModel(new ForkSwitchTableModel());</span>
+<span class="nc" id="L831">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L832">			sizeColumns();</span>
+<span class="nc" id="L833">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L834">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L835">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L838" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L839">				getColumnModel().getColumn(i).setMinWidth(((ForkSwitchTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L841">		}</span>
+
+	}
+
+<span class="nc" id="L845">	protected class ForkSwitchTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L848">		private String[] columnNames = new String[] { &quot;Destination&quot; };</span>
+<span class="nc" id="L849">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class };</span>
+<span class="nc" id="L850">		public int[] columnSizes = new int[] { 80 };</span>
+
+		public int getRowCount() {
+<span class="nc bnc" id="L853" title="All 2 branches missed.">			if (stationKey != null) {</span>
+<span class="nc" id="L854">				return stations.getForwardConnections(stationKey).size();</span>
+			} else {
+<span class="nc" id="L856">				return 0;</span>
+			}
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L861">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L866">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L871">			return columnClasses[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L876">			return false;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L880" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L881">				return stations.getStationName(indexToKey(rowIndex));</span>
+			} else {
+<span class="nc" id="L883">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L889">			return;</span>
+		}
+
+		// retrieves station search key from index in table
+		private Object indexToKey(int index) {
+<span class="nc bnc" id="L894" title="All 2 branches missed.">			if (stationKey == null) {</span>
+<span class="nc" id="L895">				return null;</span>
+			}
+<span class="nc" id="L897">			return stations.getForwardConnections(stationKey).get(index);</span>
+		}
+
+	}
+
+	protected class OutNumTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L906">		public OutNumTable() {</span>
+<span class="nc" id="L907">			setModel(new OutNumTableModel());</span>
+<span class="nc" id="L908">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L909">			setDefaultRenderer(Object.class, new DisabledCellRenderer());</span>
+<span class="nc" id="L910">			sizeColumns();</span>
+<span class="nc" id="L911">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L912">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L913">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L916" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L917">				getColumnModel().getColumn(i).setMinWidth(((OutNumTableModel) getModel()).columnSizes[i]);</span>
+			}
+<span class="nc" id="L919">		}</span>
+
+	}
+
+<span class="nc" id="L923">	protected class OutNumTableModel extends ClassNumTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public int getRowCount() {
+<span class="nc bnc" id="L929" title="All 2 branches missed.">			if (out != null) {</span>
+<span class="nc" id="L930">				return out.keySet().size();</span>
+			} else {
+<span class="nc" id="L932">				return 0;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L938" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L940">					Integer value = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L941" title="All 2 branches missed.">					if (value.intValue() &gt;= 0) {</span>
+<span class="nc" id="L942">						out.put(super.indexToKey(rowIndex), value);</span>
+					}
+<span class="nc" id="L944">				} catch (NumberFormatException e) {</span>
+<span class="nc" id="L945">				}</span>
+			}
+<span class="nc" id="L947">		}</span>
+
+	}
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Animator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.animation</a> &gt; <span class="el_source">Animator.java</span></div><h1>Animator.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmch.animation;
+
+
+public class Animator extends Thread{
+<span class="nc" id="L23">	private final Object mutex = new Object();</span>
+
+	//tells whether this animation is running.
+<span class="nc" id="L26">	private boolean isWorking = false;</span>
+<span class="nc" id="L27">	private boolean isPaused = false;</span>
+	private long startPause;
+
+
+	//number of millisecs between two frames of the animation
+	private long sleepTime;
+
+	/**The {@link jmt.gui.common.animation.Animation} implementing class that has to be
+	 * updated to show the animation.
+	 */
+<span class="nc" id="L37">	protected Animation animation = null;</span>
+
+	/**Creates a new instance of Animator.
+	 * Frame rate is set by default at 30 frames per seconds.
+	 * @param a: Animation to be updated by this animator.{@see animation}
+	 */
+	public Animator(Animation a) {
+<span class="nc" id="L44">		this(60, a);</span>
+<span class="nc" id="L45">	}</span>
+
+	/**Creates a new instance of Animator with explicit definition of framerate.
+	 * @param fps: framerate for this animation.
+	 * @param a: Animation to be updated by this animator.{@see animation}
+	 */
+	public Animator(double fps, Animation a) {
+<span class="nc" id="L52">		super();</span>
+<span class="nc" id="L53">		animation = a;</span>
+<span class="nc" id="L54">		sleepTime = (long) (1000 / fps);</span>
+<span class="nc" id="L55">	}</span>
+
+	/**Starts the handled animation, otherwise if the Animator is paused it restarts the animation*/
+	@Override
+	public void start() {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">		if(!isPaused) {</span>
+<span class="nc" id="L61">			isWorking = true;</span>
+<span class="nc" id="L62">			super.start();</span>
+		}
+		else {
+<span class="nc" id="L65">			restart();</span>
+		}
+<span class="nc" id="L67">	}</span>
+	
+	/** Pause the animation, save also the time at which the animation was paused */
+	public void pause() {
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if(!isPaused){</span>
+<span class="nc" id="L72">			isPaused = true;</span>
+<span class="nc" id="L73">			startPause = System.currentTimeMillis();</span>
+<span class="nc" id="L74">			animation.updateAnimResults();</span>
+		}	
+<span class="nc" id="L76">	}</span>
+	
+	/** Restart the animation, update also the components of animation to let them know the animation was paused for a certain period of time */
+	public void restart() {
+<span class="nc" id="L80">		long pausedTime = System.currentTimeMillis()- startPause;</span>
+<span class="nc" id="L81">		animation.updatePause(pausedTime);</span>
+<span class="nc" id="L82">		isPaused = false;</span>
+<span class="nc" id="L83">	}</span>
+
+	/**Performs update of the handled animation as far as terminate() method has not been called.*/
+	@Override
+	public void run() {
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		while (isWorking) {</span>
+			try {
+<span class="nc" id="L90">				Thread.sleep(sleepTime);</span>
+<span class="nc" id="L91">			} catch (InterruptedException e) {</span>
+<span class="nc" id="L92">				Thread.currentThread().interrupt();</span>
+<span class="nc" id="L93">				break;</span>
+<span class="nc" id="L94">			}</span>
+	
+<span class="nc bnc" id="L96" title="All 4 branches missed.">			if (isWorking &amp;&amp; !isPaused) {</span>
+<span class="nc" id="L97">				animation.refresh();</span>
+			}
+		}
+<span class="nc" id="L100">	}</span>
+
+	/**Terminates current animation*/
+	public void terminate() {
+		//animation.updateAnimResults();
+<span class="nc" id="L105">		isWorking = false;</span>
+<span class="nc" id="L106">	}</span>
+
+	/** To know if the animator is paused */
+	public boolean isPaused() {
+<span class="nc" id="L110">		return isPaused;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

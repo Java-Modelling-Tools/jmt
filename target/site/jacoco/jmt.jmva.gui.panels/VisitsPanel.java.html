@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VisitsPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">VisitsPanel.java</span></div><h1>VisitsPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.gui.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.gui.JMVAWizard;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 11-set-2003
+ * Time: 23.48.19
+
+ */
+
+/**
+ * 3rd panel: visits
+ */
+public final class VisitsPanel extends WizardPanel implements ExactConstants, ForceUpdatablePanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JMVAWizard ew;
+	private HoverHelp help;
+	private static final String helpText = &quot;&lt;html&gt;In this panel you can edit the station visits for each class.&lt;br&gt;&lt;br&gt;&quot;
+			+ &quot; To enter values, double-click on the desired cell&quot;
+			+ &quot; and start typing.&lt;br&gt; To select multiple cells drag the mouse on them; click or drag on&quot;
+			+ &quot; row/column headers to select whole rows/columns.&lt;br&gt; &lt;b&gt;For a list of the available operations right-click&quot;
+			+ &quot; on the table&lt;/b&gt;; all operations except pasting affect selected cells.&lt;br&gt;&quot;
+			+ &quot; To copy one value to multiple cells click on the cell containing the value, select the&quot;
+			+ &quot; target cells by dragging and select &lt;b&gt;\&quot;Fill\&quot;&lt;/b&gt;.&lt;br&gt;&lt;br&gt;&lt;/html&gt;&quot;;
+
+	private int classes;
+	private int stations;
+	private String[] classNames;
+	private String[] stationNames;
+	private double[][] visits;
+	private int[] ReferenceStation;
+	
+
+	private VisitTable visitTable;
+
+	public static void infoBox(String infoMessage, String location)
+    {
+<span class="nc" id="L80">        JOptionPane.showMessageDialog(null, infoMessage, &quot;InfoBox: &quot; + location, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L81">    }</span>
+	
+<span class="nc" id="L83">	public VisitsPanel(JMVAWizard ew) {</span>
+<span class="nc" id="L84">		this.ew = ew;</span>
+<span class="nc" id="L85">		help = ew.getHelp();</span>
+
+		/* sync status with data object */
+<span class="nc" id="L88">		sync();</span>
+<span class="nc" id="L89">		initComponents();</span>
+<span class="nc" id="L90">	}</span>
+
+	/**
+	 * gets status from data object
+	 */
+	private void sync() {
+		/* arrays are copied to ensure data object consistency is preserved */
+<span class="nc" id="L97">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L98">		synchronized (data) {</span>
+<span class="nc" id="L99">			classes = data.getClasses();</span>
+<span class="nc" id="L100">			stations = data.getStations();</span>
+
+<span class="nc" id="L102">			classNames = data.getClassNames();</span>
+<span class="nc" id="L103">			stationNames = data.getStationNames();</span>
+<span class="nc" id="L104">			visits = ArrayUtils.copy2(data.getVisits());</span>
+<span class="nc" id="L105">			ReferenceStation = ArrayUtils.copy(data.getReferenceStation());</span>
+			
+<span class="nc" id="L107">		}</span>
+<span class="nc" id="L108">	}</span>
+
+	/**
+	 * Set up the panel contents and layout
+	 */
+	private void initComponents() {
+
+<span class="nc" id="L115">		visitTable = new VisitTable();</span>
+
+<span class="nc" id="L117">		JPanel totalBox = new JPanel(new BorderLayout(10, 10));</span>
+
+		//Horizontal box containing Description label and buttons
+<span class="nc" id="L120">		JLabel descrLabel = new JLabel(DESCRIPTION_VISITS);</span>
+<span class="nc" id="L121">		JPanel descrBox = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L122">		descrBox.setPreferredSize(new Dimension(200, 1000));</span>
+<span class="nc" id="L123">		descrBox.add(descrLabel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L125">		JScrollPane visitTablePane = new JScrollPane(visitTable);</span>
+<span class="nc" id="L126">		visitTablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L127">		visitTablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);</span>
+
+<span class="nc" id="L129">		totalBox.add(visitTablePane, BorderLayout.CENTER);</span>
+<span class="nc" id="L130">		totalBox.add(descrBox, BorderLayout.WEST);</span>
+
+<span class="nc" id="L132">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L133">		add(totalBox, BorderLayout.CENTER);</span>
+<span class="nc" id="L134">		add(Box.createVerticalStrut(30), BorderLayout.NORTH);</span>
+<span class="nc" id="L135">		add(Box.createVerticalStrut(30), BorderLayout.SOUTH);</span>
+<span class="nc" id="L136">		add(Box.createHorizontalStrut(20), BorderLayout.EAST);</span>
+<span class="nc" id="L137">		add(Box.createHorizontalStrut(20), BorderLayout.WEST);</span>
+
+<span class="nc" id="L139">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L143">		return &quot;Visits&quot;;</span>
+	}
+
+	private void commit() {
+
+<span class="nc" id="L148">		visitTable.stopEditing();</span>
+
+<span class="nc" id="L150">		ExactModel data = ew.getData();</span>
+<span class="nc" id="L151">		synchronized (data) {</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">			if (data.setVisits(visits)) {</span>
+<span class="nc" id="L153">				data.recalculateWhatifValues();</span>
+			}
+<span class="nc" id="L155">		}</span>
+<span class="nc" id="L156">	}</span>
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L160">		sync();</span>
+<span class="nc" id="L161">		visitTable.updateStructure();</span>
+<span class="nc" id="L162">	}</span>
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L166">		commit();</span>
+		//release();
+<span class="nc" id="L168">	}</span>
+
+	@Override
+	public void help() {
+<span class="nc" id="L172">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L173">	}</span>
+
+	/**{@see ForceUpdatablePanel} for further details*/
+	public void retrieveData() {
+<span class="nc" id="L177">		this.sync();</span>
+<span class="nc" id="L178">	}</span>
+
+	/**{@see ForceUpdatablePanel} for further details*/
+	public void commitData() {
+<span class="nc" id="L182">		this.commit();</span>
+<span class="nc" id="L183">	}</span>
+
+	private class VisitTable extends ExactTable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L192">		VisitTable() {</span>
+<span class="nc" id="L193">			super(new VisitTableModel());</span>
+<span class="nc" id="L194">			autoResizeMode = AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L195">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+
+<span class="nc" id="L197">			setDisplaysScrollLabels(true);</span>
+<span class="nc" id="L198">			help.addHelp(this,</span>
+					&quot;Click or drag to select cells; to edit data double-click and start typing. Right-click for a list of available operations&quot;);
+<span class="nc" id="L200">			help.addHelp(moreColumnsLabel, &quot;There are more classes: scroll right to see them&quot;);</span>
+<span class="nc" id="L201">			help.addHelp(moreRowsLabel, &quot;There are more stations: scroll down to see them&quot;);</span>
+<span class="nc" id="L202">			help.addHelp(selectAllButton, &quot;Click to select all cells&quot;);</span>
+<span class="nc" id="L203">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L204">			help.addHelp(tableHeader, &quot;Click, SHIFT-click or drag to select columns&quot;);</span>
+<span class="nc" id="L205">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L206">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select rows&quot;);</span>
+
+<span class="nc" id="L208">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L209">			setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L210">			setBatchEditingEnabled(true);</span>
+<span class="nc" id="L211">		}</span>
+
+	}
+
+	/**
+	 * the model backing the visit table.
+	 * Rows represent stations, columns classes.
+	 */
+	private class VisitTableModel extends ExactTableModel {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L226">		VisitTableModel() {</span>
+<span class="nc" id="L227">			prototype = new Double(1000);</span>
+<span class="nc" id="L228">			rowHeaderPrototype = &quot;Station1000&quot;;</span>
+<span class="nc" id="L229">		}</span>
+
+		public int getRowCount() {
+<span class="nc" id="L232">			return stations;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L236">			return classes;</span>
+		}
+
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc" id="L241">			return stationNames[rowIndex];</span>
+		}
+
+		@Override
+		public String getColumnName(int index) {
+<span class="nc" id="L246">			return classNames[index];</span>
+		}
+
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc" id="L251">			return new Double(visits[rowIndex][columnIndex]);</span>
+		}
+
+		@Override
+		public void setValueAt(Object value, int rowIndex, int columnIndex) {
+			try {
+<span class="nc" id="L257">				double newVal = Double.parseDouble((String) value);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">				if (newVal &gt; 0) {</span>
+<span class="nc" id="L259">					visits[rowIndex][columnIndex] = newVal;</span>
+<span class="nc bnc" id="L260" title="All 4 branches missed.">				} else if (newVal == 0 &amp;&amp; ReferenceStation[columnIndex] == rowIndex) {</span>
+<span class="nc" id="L261">					infoBox(&quot;you can not change the number of visits to Zero because you have chosen this station as the ReferenceStation&quot;,&quot;Warning!&quot;);</span>
+<span class="nc" id="L262">					visits[rowIndex][columnIndex] = 1;					</span>
+				} else {
+<span class="nc" id="L264">					visits[rowIndex][columnIndex] = 0;</span>
+				}
+<span class="nc" id="L266">			} catch (NumberFormatException e) {</span>
+<span class="nc" id="L267">			}</span>
+<span class="nc" id="L268">		}</span>
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L272">			return true;</span>
+		}
+
+		@Override
+		public void clear(int row, int col) {
+<span class="nc" id="L277">			visits[row][col] = 0;</span>
+<span class="nc" id="L278">		}</span>
+
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

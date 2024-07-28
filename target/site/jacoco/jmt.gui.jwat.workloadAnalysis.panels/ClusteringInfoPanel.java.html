@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClusteringInfoPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.panels</a> &gt; <span class="el_source">ClusteringInfoPanel.java</span></div><h1>ClusteringInfoPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.workloadAnalysis.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.engine.jwat.workloadAnalysis.WorkloadAnalysisSession;
+import jmt.engine.jwat.workloadAnalysis.clustering.Clustering;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.ClusteringInfosFuzzy;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.FuzzyKMean;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.ClusteringInfosKMean;
+import jmt.engine.jwat.workloadAnalysis.clustering.kMean.KMean;
+import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.JWatWizard;
+import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.DispersionFuzzyPanel;
+import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.FuzzyInfoCluster;
+import jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels.FuzzyInfoClustering;
+import jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels.DispersionkMeanPanel;
+import jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels.KMeansInfoCluster;
+import jmt.gui.jwat.workloadAnalysis.clustering.kMean.panels.KMeansInfoClustering;
+
+public class ClusteringInfoPanel extends WizardPanel implements CommonConstants, JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L76">	private final String CLUSTERING_INFO_DESCRIPTION = HTML_START</span>
+			+ HTML_FONT_TITLE
+			+ &quot;Clustering information&quot;
+			+ HTML_FONT_TIT_END
+			+ HTML_FONT_NORM
+			+ &quot;Select a clustering from Clustering table, cluster partition from the Cluster table and see statistics and graphs of the algorithm result&quot;
+			+ HTML_FONT_NOR_END + HTML_END;
+	private ModelWorkloadAnalysis model;
+	private WorkloadAnalysisSession session;
+
+	private JTable clusteringTable;
+	private JTable clusterTable;
+
+	private JTabbedPane tabbed;
+
+<span class="nc" id="L91">	private boolean changedType = false;</span>
+
+	private JPanel clusingP;
+	private JPanel clustP;
+	private JPanel matrixPanel;
+<span class="nc" id="L96">	private JPanel cluster = new JPanel(new BorderLayout(0, 5));</span>
+
+<span class="nc" id="L98">	protected AbstractAction deleteVar = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L103">			putValue(Action.SHORT_DESCRIPTION, &quot;Delete&quot;);</span>
+<span class="nc" id="L104">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (clusteringTable.getSelectedRow() &gt;= 0) {</span>
+<span class="nc" id="L109">				session.removeClustering(clusteringTable.getSelectedRow());</span>
+<span class="nc" id="L110">				clusteringTable.tableChanged(new TableModelEvent(clusteringTable.getModel()));</span>
+				//Non ci sono più clustering passo a finestra precedente
+<span class="nc bnc" id="L112" title="All 2 branches missed.">				if (session.getListOfClustering().size() == 0) {</span>
+<span class="nc" id="L113">					parent.setLastPanel(WORKLOAD_CLUSTERING_PANEL);</span>
+<span class="nc" id="L114">					parent.setLastPanel();</span>
+				}
+			}
+<span class="nc" id="L117">		}</span>
+
+	};
+
+<span class="nc" id="L121">	protected JButton delVar = new JButton() {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L126">			setAction(deleteVar);</span>
+<span class="nc" id="L127">			setFocusable(true);</span>
+		}
+
+	};
+
+	private MainJwatWizard parent;
+<span class="nc" id="L133">	private HoverHelp help = null;</span>
+
+<span class="nc" id="L135">	public ClusteringInfoPanel(MainJwatWizard parent) {</span>
+<span class="nc" id="L136">		this.parent = parent;</span>
+<span class="nc" id="L137">		this.model = (ModelWorkloadAnalysis) parent.getModel();</span>
+<span class="nc" id="L138">		this.session = (WorkloadAnalysisSession) parent.getSession();</span>
+<span class="nc" id="L139">		this.help = parent.getHelp();</span>
+<span class="nc" id="L140">		initPanel();</span>
+<span class="nc" id="L141">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L145">		return &quot;Clustering Information&quot;;</span>
+	}
+
+	private void initPanel() {
+<span class="nc" id="L149">		this.setLayout(new BorderLayout(20, 5));</span>
+
+		/*Set Description Label*/
+<span class="nc" id="L152">		Box label = Box.createVerticalBox();</span>
+<span class="nc" id="L153">		label.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L154">		label.add(new JLabel(CLUSTERING_INFO_DESCRIPTION));</span>
+<span class="nc" id="L155">		this.add(label, BorderLayout.NORTH);</span>
+<span class="nc" id="L156">		JPanel p1 = new JPanel(new BorderLayout());</span>
+
+		/*Set list of clustering*/
+<span class="nc" id="L159">		Box listsPanel = Box.createHorizontalBox();</span>
+<span class="nc" id="L160">		listsPanel.add(Box.createHorizontalStrut(10));</span>
+
+<span class="nc" id="L162">		JPanel west = new JPanel(new GridLayout(2, 1, 0, 0));</span>
+<span class="nc" id="L163">		west.setPreferredSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L165">		listsPanel.add(west);</span>
+<span class="nc" id="L166">		listsPanel.add(Box.createHorizontalStrut(10));</span>
+
+<span class="nc" id="L168">		JPanel clusting = new JPanel(new BorderLayout(0, 5));</span>
+
+		//La Table del clustering sempre presente e poi aggiunta a seconda del tipo
+<span class="nc" id="L171">		clusting.add(new JLabel(HTML_START + HTML_FONT_TITLE + &quot;Clusterings&quot; + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM), BorderLayout.NORTH);</span>
+<span class="nc" id="L172">		clusting.add(new JScrollPane(getClusteringTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,</span>
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+
+<span class="nc" id="L175">		west.add(clusting);</span>
+<span class="nc" id="L176">		west.add(cluster);</span>
+<span class="nc" id="L177">		p1.add(listsPanel, BorderLayout.WEST);</span>
+
+		/*Set Tabbed for statistics*/
+<span class="nc" id="L180">		tabbed = new JTabbedPane();</span>
+<span class="nc" id="L181">		tabbed.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L182">		p1.add(tabbed, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L184">		clusingP = new JPanel(new GridLayout(1, 1));</span>
+<span class="nc" id="L185">		clusingP.setName(&quot;Clustering Info&quot;);</span>
+<span class="nc" id="L186">		clusingP.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L187">		tabbed.add(clusingP);</span>
+
+<span class="nc" id="L189">		clustP = new JPanel(new GridLayout(1, 1));</span>
+<span class="nc" id="L190">		clustP.setName(&quot;Cluster Info&quot;);</span>
+<span class="nc" id="L191">		clustP.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L192">		tabbed.add(clustP);</span>
+
+<span class="nc" id="L194">		matrixPanel = new JPanel(new GridLayout(1, 1));</span>
+<span class="nc" id="L195">		matrixPanel.setPreferredSize(new Dimension((int)(600 * CommonConstants.widthScaling), (int)(400 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L196">		matrixPanel.setName(&quot;Dispersion Matrix&quot;);</span>
+<span class="nc" id="L197">		tabbed.add(matrixPanel);</span>
+
+<span class="nc" id="L199">		this.add(p1, BorderLayout.CENTER);</span>
+<span class="nc" id="L200">	}</span>
+
+	private JTable getClusteringTable() {
+<span class="nc" id="L203">		clusteringTable = new JTable(new ClusteringTableModel(session.getListOfClustering())) {</span>
+
+			private static final long serialVersionUID = 1L;
+			{
+<span class="nc" id="L207">				getColumnModel().getColumn(0).setPreferredWidth(110);</span>
+<span class="nc" id="L208">				getColumnModel().getColumn(1).setPreferredWidth(20);</span>
+<span class="nc" id="L209">				getColumnModel().getColumn(2).setPreferredWidth(18);</span>
+<span class="nc" id="L210">				setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+			}
+
+			@Override
+			public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L215" title="All 2 branches missed.">				if (column == 2) {</span>
+<span class="nc" id="L216">					return new ButtonCellEditor(delVar);</span>
+				}
+<span class="nc" id="L218">				return getDefaultRenderer(String.class);</span>
+			}
+
+			@Override
+			public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L223" title="All 2 branches missed.">				if (column == 2) {</span>
+<span class="nc" id="L224">					return new ButtonCellEditor(new JButton(deleteVar));</span>
+				}
+<span class="nc" id="L226">				return super.getCellEditor(row, column);</span>
+			}
+
+		};
+<span class="nc" id="L230">		clusteringTable.setFont(new Font(clusteringTable.getFont().getName(), clusteringTable.getFont().getStyle(), clusteringTable.getFont()</span>
+<span class="nc" id="L231">				.getSize() + 1));</span>
+<span class="nc" id="L232">		clusteringTable.setSelectionBackground(new Color(83, 126, 126));</span>
+<span class="nc" id="L233">		clusteringTable.setSelectionForeground(Color.BLACK);</span>
+<span class="nc" id="L234">		clusteringTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L235">		clusteringTable.setBorder(BorderFactory.createLoweredBevelBorder());</span>
+<span class="nc" id="L236">		clusteringTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+			public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L238" title="All 2 branches missed.">				if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L239">					return;</span>
+				}
+<span class="nc bnc" id="L241" title="All 2 branches missed.">				if (clusteringTable.getSelectedRow() &gt;= 0) {</span>
+<span class="nc" id="L242">					changedType = true;</span>
+					//Selezionare il tipo do clustering corrente
+<span class="nc bnc" id="L244" title="All 3 branches missed.">					switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {</span>
+					case KMEANS:
+<span class="nc" id="L246">						resetPanels();</span>
+<span class="nc" id="L247">						cluster.removeAll();</span>
+<span class="nc" id="L248">						cluster.add(</span>
+								new JLabel(HTML_START + HTML_FONT_TITLE + &quot;Num. of clusters&quot; + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
+								BorderLayout.NORTH);
+<span class="nc" id="L251">						cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,</span>
+								ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+<span class="nc" id="L253">						cluster.revalidate();</span>
+<span class="nc" id="L254">						cluster.repaint();</span>
+<span class="nc" id="L255">						((ClusterTableModelKMeans) clusterTable.getModel()).setCluster(((KMean) session.getListOfClustering().get(</span>
+<span class="nc" id="L256">								clusteringTable.getSelectedRow())).getResults());</span>
+<span class="nc" id="L257">						tabbed.setSelectedIndex(0);</span>
+<span class="nc" id="L258">						break;</span>
+					case FUZZYK:
+<span class="nc" id="L260">						resetPanels();</span>
+<span class="nc" id="L261">						cluster.removeAll();</span>
+<span class="nc" id="L262">						cluster.add(</span>
+								new JLabel(HTML_START + HTML_FONT_TITLE + &quot;Num. of clusters&quot; + HTML_FONT_TIT_END_NO_CAPO + HTML_FONT_NORM),
+								BorderLayout.NORTH);
+<span class="nc" id="L265">						cluster.add(new JScrollPane(getClusterTable(), ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,</span>
+								ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), BorderLayout.CENTER);
+<span class="nc" id="L267">						cluster.revalidate();</span>
+<span class="nc" id="L268">						cluster.repaint();</span>
+<span class="nc" id="L269">						((ClusterTableModelFuzzy) clusterTable.getModel()).setCluster(((FuzzyKMean) session.getListOfClustering().get(</span>
+<span class="nc" id="L270">								clusteringTable.getSelectedRow())).getEntropy());</span>
+<span class="nc" id="L271">						tabbed.setSelectedIndex(0);</span>
+						break;
+					}
+<span class="nc" id="L274">					clusterTable.setRowSelectionInterval(0, 0);</span>
+				} else {
+<span class="nc bnc" id="L276" title="All 2 branches missed.">					if (clusteringTable.getRowCount() &gt; 0) {</span>
+<span class="nc" id="L277">						clusteringTable.setRowSelectionInterval(0, 0);</span>
+					} else {
+						//Annullare pannelli
+<span class="nc" id="L280">						resetPanels();</span>
+					}
+				}
+<span class="nc" id="L283">			}</span>
+		});
+<span class="nc" id="L285">		return clusteringTable;</span>
+	}
+
+	private void resetPanels() {
+<span class="nc" id="L289">		clusingP.removeAll();</span>
+<span class="nc" id="L290">		clustP.removeAll();</span>
+<span class="nc" id="L291">		matrixPanel.removeAll();</span>
+<span class="nc" id="L292">		matrixPanel.revalidate();</span>
+<span class="nc" id="L293">		matrixPanel.repaint();</span>
+<span class="nc" id="L294">		clusingP.revalidate();</span>
+<span class="nc" id="L295">		clusingP.repaint();</span>
+<span class="nc" id="L296">		clustP.revalidate();</span>
+<span class="nc" id="L297">		clustP.repaint();</span>
+<span class="nc" id="L298">		cluster.removeAll();</span>
+<span class="nc" id="L299">		cluster.revalidate();</span>
+<span class="nc" id="L300">		cluster.repaint();</span>
+<span class="nc" id="L301">	}</span>
+
+	private DispersionkMeanPanel panelDisp;
+	private DispersionFuzzyPanel panelDispF;
+
+	private JTable getClusterTable() {
+<span class="nc bnc" id="L307" title="All 2 branches missed.">		if (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType() == KMEANS) {</span>
+<span class="nc" id="L308">			clusterTable = new ClusterTableKMeans(new ClusterTableModelKMeans());</span>
+<span class="nc" id="L309">			clusterTable.setFont(new Font(clusterTable.getFont().getName(), clusterTable.getFont().getStyle(), clusterTable.getFont().getSize() + 1));</span>
+<span class="nc" id="L310">			clusterTable.setSelectionBackground(new Color(83, 126, 126));</span>
+<span class="nc" id="L311">			clusterTable.setSelectionForeground(Color.BLACK);</span>
+<span class="nc" id="L312">			clusterTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L313">			clusterTable.setBorder(BorderFactory.createLoweredBevelBorder());</span>
+<span class="nc" id="L314">			clusterTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L315">			clusterTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+				public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L317" title="All 2 branches missed.">					if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L318">						return;</span>
+					}
+					//Se entrambe le tabelle sono selezionate
+<span class="nc bnc" id="L321" title="All 2 branches missed.">					if (clusterTable.getSelectedRow() &gt;= 0) {</span>
+<span class="nc" id="L322">						clusingP.removeAll();</span>
+<span class="nc" id="L323">						clustP.removeAll();</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">						if (changedType) {</span>
+<span class="nc" id="L325">							matrixPanel.removeAll();</span>
+						}
+<span class="nc bnc" id="L327" title="All 2 branches missed.">						switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {</span>
+						case KMEANS:
+<span class="nc" id="L329">							clusingP.add(new KMeansInfoClustering((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(</span>
+<span class="nc" id="L330">									clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable</span>
+<span class="nc" id="L331">									.getSelectedRow() + 2, model));</span>
+<span class="nc" id="L332">							clustP.add(new KMeansInfoCluster((ClusteringInfosKMean) ((KMean) session.getListOfClustering().get(</span>
+<span class="nc" id="L333">									clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow() + 1), clusterTable</span>
+<span class="nc" id="L334">									.getSelectedRow() + 2, session, clusteringTable.getSelectedRow()));</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">							if (changedType) {</span>
+<span class="nc" id="L336">								panelDisp = new DispersionkMeanPanel(session, clusteringTable.getSelectedRow(),</span>
+<span class="nc" id="L337">										clusterTable.getSelectedRow() + 1);</span>
+<span class="nc" id="L338">								matrixPanel.add(panelDisp);</span>
+							}
+<span class="nc" id="L340">							panelDisp.setClustering(clusterTable.getSelectedRow() + 1);</span>
+							break;
+						}
+<span class="nc" id="L343">						matrixPanel.revalidate();</span>
+<span class="nc" id="L344">						matrixPanel.repaint();</span>
+<span class="nc" id="L345">						clusingP.revalidate();</span>
+<span class="nc" id="L346">						clusingP.repaint();</span>
+<span class="nc" id="L347">						clustP.revalidate();</span>
+<span class="nc" id="L348">						clustP.repaint();</span>
+					} else {
+<span class="nc bnc" id="L350" title="All 2 branches missed.">						if (clusterTable.getRowCount() &gt; 0) {</span>
+<span class="nc" id="L351">							clusterTable.setRowSelectionInterval(0, 0);</span>
+						}
+					}
+<span class="nc" id="L354">				}</span>
+			});
+<span class="nc" id="L356">			return clusterTable;</span>
+		}
+<span class="nc bnc" id="L358" title="All 2 branches missed.">		if (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType() == FUZZYK) {</span>
+<span class="nc" id="L359">			clusterTable = new ClusterTableFuzzy(new ClusterTableModelFuzzy());</span>
+<span class="nc" id="L360">			clusterTable.setFont(new Font(clusterTable.getFont().getName(), clusterTable.getFont().getStyle(), clusterTable.getFont().getSize() + 1));</span>
+<span class="nc" id="L361">			clusterTable.setSelectionBackground(new Color(83, 126, 126));</span>
+<span class="nc" id="L362">			clusterTable.setSelectionForeground(Color.BLACK);</span>
+<span class="nc" id="L363">			clusterTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L364">			clusterTable.setBorder(BorderFactory.createLoweredBevelBorder());</span>
+<span class="nc" id="L365">			clusterTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L366">			clusterTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {</span>
+				public void valueChanged(ListSelectionEvent e) {
+<span class="nc bnc" id="L368" title="All 2 branches missed.">					if (e.getValueIsAdjusting()) {</span>
+<span class="nc" id="L369">						return;</span>
+					}
+					//Se entrambe le tabelle sono selezionate
+<span class="nc bnc" id="L372" title="All 2 branches missed.">					if (clusterTable.getSelectedRow() &gt;= 0) {</span>
+<span class="nc" id="L373">						clusingP.removeAll();</span>
+<span class="nc" id="L374">						clustP.removeAll();</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">						if (changedType) {</span>
+<span class="nc" id="L376">							matrixPanel.removeAll();</span>
+						}
+<span class="nc bnc" id="L378" title="All 2 branches missed.">						switch (session.getListOfClustering().get(clusteringTable.getSelectedRow()).getClusteringType()) {</span>
+						case FUZZYK:
+<span class="nc" id="L380">							ClusteringInfosFuzzy infos = ((ClusteringInfosFuzzy) ((FuzzyKMean) session.getListOfClustering().get(</span>
+<span class="nc" id="L381">									clusteringTable.getSelectedRow())).getClusteringInfos(clusterTable.getSelectedRow()));</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">							if (infos.getError() == -1) {</span>
+<span class="nc" id="L383">								infos.setError(model.getMatrix(), 0.1);</span>
+							}
+<span class="nc bnc" id="L385" title="All 2 branches missed.">							if (changedType) {</span>
+<span class="nc" id="L386">								panelDispF = new DispersionFuzzyPanel(session, clusteringTable.getSelectedRow(), clusterTable</span>
+<span class="nc" id="L387">										.getSelectedRow());</span>
+<span class="nc" id="L388">								matrixPanel.add(panelDispF);</span>
+							}
+<span class="nc" id="L390">							panelDispF.setClustering(clusterTable.getSelectedRow());</span>
+<span class="nc" id="L391">							FuzzyInfoClustering ficg = new FuzzyInfoClustering(model.getMatrix(), panelDispF.getMatrix(), clusterTable</span>
+<span class="nc" id="L392">									.getSelectedRow() + 2, ((FuzzyKMean) session.getListOfClustering().get(clusteringTable.getSelectedRow()))</span>
+<span class="nc" id="L393">									.getEntropy()[clusterTable.getSelectedRow()], infos);</span>
+<span class="nc" id="L394">							clusingP.add(ficg);</span>
+<span class="nc" id="L395">							FuzzyInfoCluster fic = new FuzzyInfoCluster(infos, clusterTable.getSelectedRow() + 2, session, clusteringTable</span>
+<span class="nc" id="L396">									.getSelectedRow());</span>
+<span class="nc" id="L397">							ficg.setPanelCluster(fic);</span>
+<span class="nc" id="L398">							clustP.add(fic);</span>
+<span class="nc" id="L399">							tabbed.setSelectedIndex(0);</span>
+							break;
+						}
+<span class="nc" id="L402">						matrixPanel.revalidate();</span>
+<span class="nc" id="L403">						matrixPanel.repaint();</span>
+<span class="nc" id="L404">						clusingP.revalidate();</span>
+<span class="nc" id="L405">						clusingP.repaint();</span>
+<span class="nc" id="L406">						clustP.revalidate();</span>
+<span class="nc" id="L407">						clustP.repaint();</span>
+					} else {
+<span class="nc bnc" id="L409" title="All 2 branches missed.">						if (clusterTable.getRowCount() &gt; 0) {</span>
+<span class="nc" id="L410">							clusterTable.setRowSelectionInterval(0, 0);</span>
+						}
+					}
+<span class="nc" id="L413">				}</span>
+			});
+<span class="nc" id="L415">			return clusterTable;</span>
+		}
+<span class="nc" id="L417">		return null;</span>
+	}
+
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L422">		((ClusteringTableModel) clusteringTable.getModel()).setClustering(session.getListOfClustering());</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">		if (clusteringTable.getRowCount() &gt; 0) {</span>
+<span class="nc" id="L424">			clusteringTable.setRowSelectionInterval(0, 0);</span>
+<span class="nc" id="L425">			((JWatWizard) getParentWizard()).setEnableButton(&quot;Solve&quot;, false);</span>
+<span class="nc" id="L426">			parent.setCurrentPanel(WORKLOAD_INFOCLUSTERING_PANEL);</span>
+		} else {
+<span class="nc" id="L428">			parent.setLastPanel();</span>
+		}
+<span class="nc" id="L430">	}</span>
+
+	private class ClusteringTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L436">		private String[] header = { &quot;Clustering&quot;, &quot;Cl.&quot;, &quot;&quot; };</span>
+<span class="nc" id="L437">		private Vector&lt;Clustering&gt; clusterings = null;</span>
+
+		public int getColumnCount() {
+<span class="nc" id="L440">			return header.length;</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L444">			return clusterings.size();</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L448" title="All 2 branches missed.">			if (rowIndex &lt; clusterings.size()) {</span>
+<span class="nc bnc" id="L449" title="All 3 branches missed.">				switch (columnIndex) {</span>
+				case 0:
+<span class="nc" id="L451">					return &quot;  &quot; + clusterings.get(rowIndex).getName();</span>
+				case 1:
+<span class="nc" id="L453">					return Integer.toString(clusterings.get(rowIndex).getNumCluster());</span>
+				default:
+<span class="nc" id="L455">					return null;</span>
+				}
+			}
+<span class="nc" id="L458">			return null;</span>
+		}
+
+<span class="nc" id="L461">		public ClusteringTableModel(Vector&lt;Clustering&gt; cl) {</span>
+<span class="nc" id="L462">			clusterings = cl;</span>
+<span class="nc" id="L463">		}</span>
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L467" title="All 2 branches missed.">			if (columnIndex &lt; header.length) {</span>
+<span class="nc" id="L468">				return header[columnIndex];</span>
+			}
+<span class="nc" id="L470">			return &quot;&quot;;</span>
+		}
+
+		/**
+		 * Tells whether data contained in a specific cell(given row and column
+		 * index) is editable or not. In this case distribution column is not
+		 * editable, as editing functionality is implemented via edit button
+		 */
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L480" title="All 2 branches missed.">			if (columnIndex == 2) {</span>
+<span class="nc" id="L481">				return true;</span>
+			}
+<span class="nc" id="L483">			return false;</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int index) {
+<span class="nc bnc" id="L488" title="All 2 branches missed.">			if (index == 2) {</span>
+<span class="nc" id="L489">				return JButton.class;</span>
+			}
+<span class="nc" id="L491">			return String.class;</span>
+		}
+
+		public void setClustering(Vector&lt;Clustering&gt; cl) {
+<span class="nc" id="L495">			clusterings = cl;</span>
+<span class="nc" id="L496">			fireTableDataChanged();</span>
+<span class="nc" id="L497">		}</span>
+
+	}
+
+	private class ClusterTableFuzzy extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L505">		public ClusterTableFuzzy(AbstractTableModel model) {</span>
+<span class="nc" id="L506">			super(model);</span>
+<span class="nc" id="L507">			getColumnModel().getColumn(0).setPreferredWidth(20);</span>
+<span class="nc" id="L508">			getColumnModel().getColumn(1).setPreferredWidth(75);</span>
+<span class="nc" id="L509">			getColumnModel().getColumn(2).setPreferredWidth(75);</span>
+<span class="nc" id="L510">		}</span>
+
+	}
+
+	private class ClusterTableModelFuzzy extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L518">		private String[] header = { &quot;Cl&quot;, &quot;Entropy&quot;, &quot;Ratio&quot; };</span>
+		private double[] entropy;
+
+		public int getColumnCount() {
+<span class="nc" id="L522">			return header.length;</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L526">			return entropy.length;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L530" title="All 2 branches missed.">			if (rowIndex &lt; entropy.length) {</span>
+<span class="nc bnc" id="L531" title="All 4 branches missed.">				switch (columnIndex) {</span>
+				case 0:
+<span class="nc" id="L533">					return new Integer(rowIndex + 2);</span>
+				case 1:
+<span class="nc" id="L535">					return defaultFormat.format(entropy[rowIndex]);</span>
+				case 2:
+<span class="nc bnc" id="L537" title="All 2 branches missed.">					if (rowIndex == 0) {</span>
+<span class="nc" id="L538">						return &quot; -&quot;;//defaultFormat.format(Double.NaN); </span>
+					}
+<span class="nc" id="L540">					return defaultFormat.format(entropy[rowIndex] / entropy[rowIndex - 1]);</span>
+				default:
+<span class="nc" id="L542">					return null;</span>
+				}
+			}
+<span class="nc" id="L545">			return null;</span>
+		}
+
+<span class="nc" id="L548">		public ClusterTableModelFuzzy(double[] cl) {</span>
+<span class="nc" id="L549">			entropy = cl;</span>
+<span class="nc" id="L550">		}</span>
+
+<span class="nc" id="L552">		public ClusterTableModelFuzzy() {</span>
+<span class="nc" id="L553">			entropy = new double[0];</span>
+<span class="nc" id="L554">		}</span>
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L558" title="All 2 branches missed.">			if (columnIndex &lt; header.length) {</span>
+<span class="nc" id="L559">				return header[columnIndex];</span>
+			}
+<span class="nc" id="L561">			return &quot;&quot;;</span>
+		}
+
+		/**
+		 * Tells whether data contained in a specific cell(given row and column
+		 * index) is editable or not. In this case distribution column is not
+		 * editable, as editing functionality is implemented via edit button
+		 */
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L571">			return false;</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int index) {
+<span class="nc bnc" id="L576" title="All 2 branches missed.">			if (index == 0) {</span>
+<span class="nc" id="L577">				return Integer.class;</span>
+			}
+<span class="nc" id="L579">			return String.class;</span>
+		}
+
+		public void setCluster(double[] cl) {
+<span class="nc" id="L583">			entropy = cl;</span>
+<span class="nc" id="L584">			fireTableDataChanged();</span>
+<span class="nc" id="L585">		}</span>
+
+	}
+
+	private class ClusterTableKMeans extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L593">		public ClusterTableKMeans(AbstractTableModel model) {</span>
+<span class="nc" id="L594">			super(model);</span>
+<span class="nc" id="L595">			getColumnModel().getColumn(0).setPreferredWidth(20);</span>
+<span class="nc" id="L596">			getColumnModel().getColumn(1).setPreferredWidth(20);</span>
+<span class="nc" id="L597">			getColumnModel().getColumn(2).setPreferredWidth(75);</span>
+<span class="nc" id="L598">			getColumnModel().getColumn(3).setPreferredWidth(75);</span>
+<span class="nc" id="L599">		}</span>
+
+	}
+
+	private class ClusterTableModelKMeans extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L607">		private String[] header = { &quot;Cl&quot;, &quot;G&quot;, &quot;OMSR&quot;, &quot;Ratio&quot; };</span>
+<span class="nc" id="L608">		private ClusteringInfosKMean[] clusters = null;</span>
+
+		public int getColumnCount() {
+<span class="nc" id="L611">			return header.length;</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L615">			return clusters.length - 1;</span>
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L619" title="All 2 branches missed.">			if (rowIndex &lt; clusters.length) {</span>
+<span class="nc bnc" id="L620" title="All 5 branches missed.">				switch (columnIndex) {</span>
+				case 0:
+<span class="nc" id="L622">					return new Integer(rowIndex + 2);</span>
+				case 1:
+<span class="nc bnc" id="L624" title="All 2 branches missed.">					if ((clusters[rowIndex + 1]).isGoodCluster == 1) {</span>
+<span class="nc" id="L625">						return JMTImageLoader.loadImage(&quot;Measure_ok&quot;, new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));</span>
+					} else {
+<span class="nc" id="L627">						return JMTImageLoader.loadImage(&quot;Measure_fail&quot;, new Dimension((int) (BUTTONSIZE * 0.5), (int) (BUTTONSIZE * 0.5)));</span>
+					}
+				case 2:
+<span class="nc" id="L630">					return defaultFormat.format((clusters[rowIndex + 1]).omsr);</span>
+				case 3:
+<span class="nc" id="L632">					return defaultFormat.format((clusters[rowIndex + 1]).ratio);</span>
+				default:
+<span class="nc" id="L634">					return null;</span>
+				}
+			}
+<span class="nc" id="L637">			return null;</span>
+		}
+
+<span class="nc" id="L640">		public ClusterTableModelKMeans(ClusteringInfosKMean[] cl) {</span>
+<span class="nc" id="L641">			clusters = cl;</span>
+<span class="nc" id="L642">		}</span>
+
+<span class="nc" id="L644">		public ClusterTableModelKMeans() {</span>
+<span class="nc" id="L645">			clusters = new ClusteringInfosKMean[0];</span>
+<span class="nc" id="L646">		}</span>
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L650" title="All 2 branches missed.">			if (columnIndex &lt; header.length) {</span>
+<span class="nc" id="L651">				return header[columnIndex];</span>
+			}
+<span class="nc" id="L653">			return &quot;&quot;;</span>
+		}
+
+		/**
+		 * Tells whether data contained in a specific cell(given row and column
+		 * index) is editable or not. In this case distribution column is not
+		 * editable, as editing functionality is implemented via edit button
+		 */
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L663">			return false;</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int index) {
+<span class="nc bnc" id="L668" title="All 2 branches missed.">			if (index == 0) {</span>
+<span class="nc" id="L669">				return Integer.class;</span>
+			}
+<span class="nc bnc" id="L671" title="All 2 branches missed.">			if (index == 1) {</span>
+<span class="nc" id="L672">				return ImageIcon.class;</span>
+			}
+<span class="nc" id="L674">			return String.class;</span>
+		}
+
+		public void setCluster(ClusteringInfosKMean[] cl) {
+<span class="nc" id="L678">			clusters = cl;</span>
+<span class="nc" id="L679">			fireTableDataChanged();</span>
+<span class="nc" id="L680">		}</span>
+
+	}
+
+	private static final String helpText = &quot;&lt;HTML&gt;&quot; + &quot;This panel shows clustering results information.&lt;br&gt;&quot;
+			+ &quot;&lt;UL&gt;&lt;LI&gt;Clustering panel shows statistics about how data are aprtitioned in clusters.&lt;br&gt;&lt;/LI&gt;&quot;
+			+ &quot;&lt;LI&gt;Cluster panel shows statistics and graphs of a single cluster.&lt;br&gt;&lt;/LI&gt;&quot;
+			+ &quot;&lt;LI&gt;Scatter plot matrix panel show every variable vs. variable graphs and can be enlarged&lt;p&gt;with double click.&lt;br&gt;&lt;/LI&gt;&quot; + &quot;&lt;/HTML&gt;&quot;;
+
+	@Override
+	public void help() {
+<span class="nc" id="L691">		JOptionPane.showMessageDialog(this, helpText, &quot;Help&quot;, JOptionPane.INFORMATION_MESSAGE);</span>
+<span class="nc" id="L692">	}</span>
+
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L696">		parent.setLastPanel(WORKLOAD_INFOCLUSTERING_PANEL);</span>
+<span class="nc" id="L697">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultsPanelScheduling.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.wizard.panels.resultsPanel</a> &gt; <span class="el_source">ResultsPanelScheduling.java</span></div><h1>ResultsPanelScheduling.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmch.wizard.panels.resultsPanel;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.table.TableCellRenderer;
+
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.table.DisabledCellRenderer;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+import jmt.gui.table.ListOp;
+import jmt.jmch.Constants;
+import jmt.jmch.wizard.MainWizard;
+
+/**
+ * Panel for showing the results of the Scheduling simulations
+ *
+ * @author Lorenzo Torri
+ * Date: 29-apr-2024
+ * Time: 20.10
+ */
+public class ResultsPanelScheduling extends ResultsPanel{
+    //------------ variables of the TABLE
+    private ResultTable table;
+<span class="nc" id="L60">    private int nResults = 0; //n of Simulations, which is also the number of rows of the table</span>
+    
+    
+<span class="nc" id="L63">	private boolean deleting = false;</span>
+
+    // Column numbers
+	private final static int COL_TYPE_RESULT = 0;
+    private final static int COL_GEN_JOBS = 1;
+    private final static int COL_ALGO = 2;
+	private final static int COL_DISTR_ARRIVAL = 3;
+	private final static int COL_LAMBDA = 4;
+	private final static int COL_DISTR_SERVICE = 5;
+    private final static int COL_NSERVERS = 6;
+	private final static int COL_SERVICE = 7;
+    private final static int COL_R = 8;
+    private final static int COL_QUEUETIME = 9; 
+    private final static int COL_NQUEUE = 10;
+    private final static int COL_THROUGHPUT = 11;
+	private final static int COL_DELETE_BUTTON = 12;
+
+    /** This Action is only for displaying the X in each row */
+<span class="nc" id="L81">    private AbstractAction deleteOneResult = new AbstractAction(&quot;&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L88">			putValue(Action.SHORT_DESCRIPTION, &quot;Delete This Simulation&quot;);</span>
+<span class="nc" id="L89">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L93">		}</span>
+	};
+
+    /** This action is for deleting more rows in one time */
+<span class="nc" id="L97">    private AbstractAction deleteResults = new AbstractAction(&quot;Delete selected classes&quot;) {</span>
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L104">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L105">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes selected classes from the system&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L109">			deleteSelectedRows();</span>
+<span class="nc" id="L110">		}</span>
+	};
+
+    @Override
+    public void addResult(String typeRes, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double nCustomer){
+<span class="nc bnc" id="L115" title="All 2 branches missed.">        if(typeRes.equals(Constants.RESULT_ANIM)){ //save the row that needs to be updated real time</span>
+<span class="nc" id="L116">            animRow = nResults;</span>
+        }
+<span class="nc" id="L118">        setNumberOfResults(nResults+1, typeRes, generatedJob, algorithm, arrivalDistr, lambda, serviceDistr, nServers, service, responseTime, queueTime, thoughput, nCustomer);</span>
+<span class="nc" id="L119">    }</span>
+
+    private void addRow() {
+		//setNumberOfResults(nResults + 1);
+<span class="nc" id="L123">	}</span>
+
+    /** Change the size of data structures updating also the table */
+    private void setNumberOfResults(int number, String typeRes, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double nCustomer) {
+<span class="nc" id="L127">		table.stopEditing();</span>
+<span class="nc" id="L128">		nResults = number;</span>
+
+        //resize the arrays
+<span class="nc" id="L131">		typeOfResult = ArrayUtils.resize(typeOfResult, nResults, null);</span>
+<span class="nc" id="L132">        generatedJobs = ArrayUtils.resize(generatedJobs, nResults, 0);</span>
+<span class="nc" id="L133">        algorithms = ArrayUtils.resize(algorithms, nResults, null);</span>
+<span class="nc" id="L134">        arrivalDistibutions = ArrayUtils.resize(arrivalDistibutions, nResults, null);</span>
+<span class="nc" id="L135">        lambdas = ArrayUtils.resize(lambdas, nResults, 0.0);</span>
+<span class="nc" id="L136">        serviceDistributions = ArrayUtils.resize(serviceDistributions, nResults, null);</span>
+<span class="nc" id="L137">        serversNumber = ArrayUtils.resize(serversNumber, nResults, 0);</span>
+<span class="nc" id="L138">        services = ArrayUtils.resize(services, nResults, 0.0);</span>
+<span class="nc" id="L139">        responseTimes = ArrayUtils.resize(responseTimes, nResults, 0.0);</span>
+<span class="nc" id="L140">        queueTimes = ArrayUtils.resize(queueTimes, nResults, 0.0);</span>
+<span class="nc" id="L141">        thoughputs = ArrayUtils.resize(thoughputs, nResults, 0);</span>
+<span class="nc" id="L142">        nCustomers = ArrayUtils.resize(nCustomers, nResults, 0);</span>
+
+        //add new values
+<span class="nc" id="L145">        typeOfResult[nResults-1] = typeRes;</span>
+<span class="nc" id="L146">        generatedJobs[nResults-1] = generatedJob;</span>
+<span class="nc" id="L147">        algorithms[nResults-1] = algorithm;		</span>
+<span class="nc" id="L148">        arrivalDistibutions[nResults-1] = arrivalDistr;</span>
+<span class="nc" id="L149">        lambdas[nResults-1] = lambda;</span>
+<span class="nc" id="L150">        serviceDistributions[nResults-1] = serviceDistr;</span>
+<span class="nc" id="L151">        serversNumber[nResults-1] = nServers;</span>
+<span class="nc" id="L152">        services[nResults-1] =  service;</span>
+<span class="nc" id="L153">        responseTimes[nResults-1] = responseTime;</span>
+<span class="nc" id="L154">        queueTimes[nResults-1] = queueTime;</span>
+<span class="nc" id="L155">        thoughputs[nResults-1] = thoughput;</span>
+<span class="nc" id="L156">        nCustomers[nResults-1] = nCustomer;</span>
+       
+<span class="nc" id="L158">		updateTable();</span>
+<span class="nc" id="L159">	}</span>
+
+    @Override
+    public void updateResult(int generatedJob, double responseTime, double queueTime, double thoughput, double nCustomer) {
+<span class="nc bnc" id="L163" title="All 4 branches missed.">        if(animRow &gt;= 0 &amp;&amp; animRow &lt;= nResults){ //update only if the animRow is still there (maybe it was deleted by the user)            </span>
+<span class="nc" id="L164">            generatedJobs[animRow] = generatedJob;</span>
+<span class="nc" id="L165">            responseTimes[animRow] = responseTime;</span>
+<span class="nc" id="L166">            queueTimes[animRow] = queueTime;</span>
+<span class="nc" id="L167">            thoughputs[animRow] = thoughput;</span>
+<span class="nc" id="L168">            nCustomers[animRow] = nCustomer;</span>
+
+<span class="nc" id="L170">            updateTable();</span>
+        }  
+<span class="nc" id="L172">    }</span>
+
+
+    /** Update the changes on the table */
+    private void updateTable(){
+<span class="nc" id="L177">        table.updateStructure();</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">		if (!deleting) {</span>
+<span class="nc" id="L179">			classOps.add(ListOp.createResizeOp(nResults));</span>
+		}
+
+<span class="nc" id="L182">		table.updateDeleteCommand();</span>
+<span class="nc" id="L183">    }</span>
+
+
+    public ResultsPanelScheduling(MainWizard main){
+<span class="nc" id="L187">        super(main);</span>
+
+<span class="nc" id="L189">        initGUI();</span>
+<span class="nc" id="L190">    }</span>
+
+    public void initGUI(){
+<span class="nc" id="L193">        this.setLayout(new BorderLayout());</span>
+
+<span class="nc" id="L195">        table = new ResultTable();</span>
+
+        //----upper part
+<span class="nc" id="L198">        Box introductionBox = Box.createHorizontalBox();</span>
+<span class="nc" id="L199">        JLabel label = new JLabel(Constants.INTRODUCTION_RESULTS);</span>
+<span class="nc" id="L200">        introductionBox.add(label);</span>
+
+<span class="nc" id="L202">        introductionBox.add(Box.createHorizontalStrut(20));</span>
+
+<span class="nc" id="L204">        statusResultsLabel = new JLabel(statusResults);</span>
+<span class="nc" id="L205">        endResult();</span>
+<span class="nc" id="L206">        introductionBox.add(statusResultsLabel);</span>
+ 
+        //----center part
+<span class="nc" id="L209">        Box resultBox = Box.createVerticalBox();</span>
+<span class="nc" id="L210">        resultBox.add(Box.createVerticalStrut(5));</span>
+<span class="nc" id="L211">		resultBox.add(introductionBox);</span>
+<span class="nc" id="L212">		resultBox.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L213">        JScrollPane tablePane = new JScrollPane(table);</span>
+<span class="nc" id="L214">		tablePane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L215">		tablePane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L216">        resultBox.add(tablePane);</span>
+<span class="nc" id="L217">		resultBox.add(Box.createVerticalStrut(1));</span>
+
+<span class="nc" id="L219">        Box totalBox = Box.createHorizontalBox(); //this box is for adding also the horizontal padding</span>
+<span class="nc" id="L220">		totalBox.add(Box.createHorizontalStrut(20));</span>
+<span class="nc" id="L221">		totalBox.add(resultBox);</span>
+<span class="nc" id="L222">		totalBox.add(Box.createHorizontalStrut(20));</span>
+<span class="nc" id="L223">        this.add(totalBox, BorderLayout.CENTER);</span>
+
+        /*----lower part
+        Box numberBox = Box.createVerticalBox();
+        numberBox.add(new JButton(addResult));
+        this.add(numberBox, BorderLayout.SOUTH); */
+        
+		
+<span class="nc" id="L231">        addRow();</span>
+<span class="nc" id="L232">    }</span>
+
+    /** Adds the possibility of deleting multiple rows by selecting them with 2 clicks of the mouse + Shift */
+    private void deleteSelectedRows() {
+<span class="nc" id="L236">		int[] selectedRows = table.getSelectedRows();</span>
+<span class="nc" id="L237">		int nrows = selectedRows.length;</span>
+<span class="nc" id="L238">		int left = table.getRowCount() - nrows;</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (left &lt; 0) { // 1 if you want that at least one row is in the table</span>
+<span class="nc" id="L240">			table.removeRowSelectionInterval(selectedRows[nrows - 1], selectedRows[nrows - 1]);</span>
+<span class="nc" id="L241">			deleteSelectedRows();</span>
+<span class="nc" id="L242">			return;</span>
+		}
+<span class="nc" id="L244">		deleteResults(selectedRows);</span>
+<span class="nc" id="L245">	}</span>
+
+    /** 
+     * Remove selected Rows from arrays 
+     * @param idx, array of indices of the rows selected to be deleted
+     */
+	private void deleteResults(int[] idx) {
+<span class="nc" id="L252">		deleting = true;</span>
+<span class="nc" id="L253">		Arrays.sort(idx);</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		for (int i = idx.length - 1; i &gt;= 0; i--) {</span>
+            //update the value of animRow based on the value of the row to be deleted
+<span class="nc bnc" id="L256" title="All 2 branches missed.">            if(idx[i] &lt; animRow){</span>
+<span class="nc" id="L257">                animRow--;</span>
+            }
+<span class="nc bnc" id="L259" title="All 2 branches missed.">            else if(idx[i] == animRow){</span>
+<span class="nc" id="L260">                animRow = -1;</span>
+            }
+<span class="nc" id="L262">			deleteResult(idx[i]);</span>
+		}
+<span class="nc" id="L264">		updateTable();</span>
+<span class="nc" id="L265">		deleting = false;</span>
+<span class="nc" id="L266">	}</span>
+
+    /** 
+     * Delete a single Result 
+     * @param i, the index of the row to be deleted
+     */
+	private void deleteResult(int i) {
+<span class="nc" id="L273">		nResults--;</span>
+
+<span class="nc" id="L275">        typeOfResult = ArrayUtils.delete(typeOfResult, i);</span>
+<span class="nc" id="L276">        generatedJobs = ArrayUtils.delete(generatedJobs, i);</span>
+<span class="nc" id="L277">        algorithms = ArrayUtils.delete(algorithms, i);</span>
+<span class="nc" id="L278">		arrivalDistibutions = ArrayUtils.delete(arrivalDistibutions, i);</span>
+<span class="nc" id="L279">		lambdas = ArrayUtils.delete(lambdas, i);</span>
+<span class="nc" id="L280">		serviceDistributions = ArrayUtils.delete(serviceDistributions, i);</span>
+<span class="nc" id="L281">        serversNumber = ArrayUtils.delete(serversNumber, i);</span>
+<span class="nc" id="L282">        services = ArrayUtils.delete(services, i);</span>
+<span class="nc" id="L283">        responseTimes = ArrayUtils.delete(responseTimes, i);</span>
+<span class="nc" id="L284">        queueTimes = ArrayUtils.delete(queueTimes, i);</span>
+<span class="nc" id="L285">        thoughputs = ArrayUtils.delete(thoughputs, i);</span>
+<span class="nc" id="L286">        nCustomers = ArrayUtils.delete(nCustomers, i);</span>
+
+<span class="nc" id="L288">		classOps.add(ListOp.createDeleteOp(i));</span>
+<span class="nc" id="L289">	}</span>
+
+    /* 
+    private void updateSizes() {
+		setNumberOfResults(nResults);
+	} */
+
+    public int getRows(){
+<span class="nc" id="L297">        return nResults;</span>
+    }
+
+    //END of ResultsPanel logic
+
+    /*
+        ------------------------------------------------------------------
+        ResultTable needs access to the data structures of the ResultPanel,
+        so having it as an inner class is *much* more practical
+        ------------------------------------------------------------------
+    */
+
+    /*
+     * The big table
+     */
+    private class ResultTable extends ExactTable {
+
+        TableCellRenderer disabledCellRenderer;
+        JButton deleteButton;
+        ButtonCellEditor deleteButtonCellRenderer;
+
+<span class="nc" id="L318">        public ResultTable() {</span>
+<span class="nc" id="L319">            super(new ResultsTableModel());</span>
+<span class="nc" id="L320">            setName(&quot;ResultTable&quot;);</span>
+<span class="nc" id="L321">			disabledCellRenderer = new DisabledCellRenderer();</span>
+            
+<span class="nc" id="L323">			deleteButton = new JButton(deleteOneResult);</span>
+<span class="nc" id="L324">			deleteButtonCellRenderer = new ButtonCellEditor(deleteButton);</span>
+<span class="nc" id="L325">			enableDeletes();</span>
+<span class="nc" id="L326">			rowHeader.setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L327">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+
+<span class="nc" id="L329">            setDefaultRenderer(DisabledCellRenderer.class, disabledCellRenderer);</span>
+
+<span class="nc" id="L331">            setRowSelectionAllowed(true);</span>
+<span class="nc" id="L332">			setColumnSelectionAllowed(false);</span>
+
+<span class="nc" id="L334">            installKeyboardAction(getInputMap(), getActionMap(), deleteResults); //add the action of deleting a row </span>
+
+            //add popup menu when right clicking
+<span class="nc" id="L337">			mouseHandler = new ExactTable.MouseHandler(makeMouseMenu());</span>
+<span class="nc" id="L338">			mouseHandler.install();</span>
+
+<span class="nc" id="L340">            help.addHelp(this,</span>
+					&quot;Click or drag to select classes. Right-click for a list of available operations&quot;);
+<span class="nc" id="L342">			help.addHelp(moreRowsLabel, &quot;There are more classes: scroll down to see them&quot;);</span>
+<span class="nc" id="L343">			help.addHelp(selectAllButton, &quot;Click to select all classes&quot;);</span>
+<span class="nc" id="L344">            help.addHelp(tableHeader, &quot;Parameters of the simulation&quot;);</span>
+<span class="nc" id="L345">			tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L346">			rowHeader.setToolTipText(null);</span>
+<span class="nc" id="L347">			help.addHelp(rowHeader, &quot;Number of simulations&quot;);</span>
+<span class="nc" id="L348">        }  </span>
+
+        @Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+            //different renderers based on the column
+<span class="nc bnc" id="L353" title="All 2 branches missed.">            if (column == COL_DELETE_BUTTON) {</span>
+<span class="nc" id="L354">				return deleteButtonCellRenderer;</span>
+			} else {
+<span class="nc" id="L356">				return disabledCellRenderer;</span>
+			}
+		}
+
+        /*enables deleting operations with last column's button*/
+		private void enableDeletes() {
+<span class="nc bnc" id="L362" title="All 2 branches missed.">			deleteOneResult.setEnabled(nResults &gt; 0); // 1 if you want that at least one row is in the table</span>
+			
+<span class="nc" id="L364">			this.addMouseListener(new MouseAdapter() { //detection of the rows selected</span>
+				@Override
+				public void mouseClicked(MouseEvent e) {
+<span class="nc bnc" id="L367" title="All 4 branches missed.">					if ((columnAtPoint(e.getPoint()) == getColumnCount() - 1) &amp;&amp; getRowCount() &gt; 0) { // 1 if you want that at least one row is in the table</span>
+<span class="nc" id="L368">						setRowSelectionInterval(rowAtPoint(e.getPoint()), rowAtPoint(e.getPoint()));</span>
+<span class="nc" id="L369">						deleteSelectedRows();</span>
+					}
+<span class="nc" id="L371">				}</span>
+			});
+<span class="nc" id="L373">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L374">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+<span class="nc" id="L375">		}</span>
+
+        @Override
+		protected JPopupMenu makeMouseMenu() { //this is for popping the menu when right clicking on selected rows
+<span class="nc" id="L379">			JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L380">			menu.add(deleteResults);</span>
+<span class="nc" id="L381">			return menu;</span>
+		}
+
+        /** Called by ResultPanel to update the Delete Buttons */
+        protected void updateDeleteCommand() {
+<span class="nc bnc" id="L386" title="All 2 branches missed.">			deleteOneResult.setEnabled(nResults &gt; 0); // 1 if you want that at least one row is in the table</span>
+<span class="nc" id="L387">			getColumnModel().getColumn(getColumnCount() - 1).setMinWidth(20);</span>
+<span class="nc" id="L388">			getColumnModel().getColumn(getColumnCount() - 1).setMaxWidth(20);</span>
+<span class="nc" id="L389">		} </span>
+
+        @Override
+		protected void updateActions() {
+<span class="nc bnc" id="L393" title="All 4 branches missed.">			boolean isEnabled = nResults &gt; 0 &amp;&amp; getSelectedRowCount() &gt; 0; // 1 if you want that at least one row is in the table</span>
+<span class="nc" id="L394">			deleteResults.setEnabled(isEnabled);</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			deleteOneResult.setEnabled(nResults &gt; 0); // 1 if you want that at least one row is in the table</span>
+<span class="nc" id="L396">		}</span>
+    }
+
+    /** The model for the table */
+<span class="nc" id="L400">    private class ResultsTableModel extends ExactTableModel{</span>
+<span class="nc" id="L401">        private final int nColumns = 13;</span>
+
+        //------------------------------index, typeOfRe,algorithm, distribution arrival, l, distribution service,  nS,  S,  R,  Q,  N,  X, delete
+<span class="nc" id="L404">        private Object[] prototypes = { &quot;100&quot;, &quot;&quot;, &quot;------&quot;, &quot;------------------&quot;, &quot;&quot;, &quot;------------------&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot;, &quot;&quot; };</span>
+
+		@Override
+		public Object getPrototype(int columnIndex) {
+<span class="nc" id="L408">			return prototypes[columnIndex + 1];</span>
+		}
+
+        @Override
+        public String getColumnName(int index) {
+<span class="nc bnc" id="L413" title="All 13 branches missed.">            switch (index) {</span>
+                case COL_TYPE_RESULT:
+<span class="nc" id="L415">                    return &quot;Sim Type&quot;;</span>
+                case COL_GEN_JOBS:
+<span class="nc" id="L417">                    return &quot;Gen Jobs&quot;;</span>
+                case COL_ALGO:
+<span class="nc" id="L419">                    return &quot;Scheduling Algo.&quot;;</span>
+                case COL_DISTR_ARRIVAL:
+<span class="nc" id="L421">                    return &quot;Arrival Distr.&quot;;</span>
+                case COL_LAMBDA:
+<span class="nc" id="L423">                    return &quot;\u03BB&quot;;</span>
+                case COL_DISTR_SERVICE:
+<span class="nc" id="L425">                    return &quot;Service Distr.&quot;;</span>
+                case COL_NSERVERS:
+<span class="nc" id="L427">                    return &quot;N.Servers&quot;;</span>
+                case COL_SERVICE:
+<span class="nc" id="L429">                    return &quot;S&quot;;</span>
+                case COL_R:
+<span class="nc" id="L431">                    return &quot;R&quot;;</span>
+                case COL_QUEUETIME:
+<span class="nc" id="L433">                    return &quot;Q&quot;;</span>
+                case COL_NQUEUE:
+<span class="nc" id="L435">                    return &quot;N&quot;;</span>
+                case COL_THROUGHPUT:
+<span class="nc" id="L437">                    return &quot;X&quot;;                 </span>
+                default:
+<span class="nc" id="L439">                    return null;</span>
+            }
+        }
+
+        @Override
+        public int getRowCount() {
+<span class="nc" id="L445">            return nResults;</span>
+        }
+
+        @Override
+        public int getColumnCount() {
+<span class="nc" id="L450">            return nColumns;</span>
+        }
+
+        @Override
+        protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L455" title="All 13 branches missed.">            switch (columnIndex) { //select the column, then the value in the row</span>
+                case COL_TYPE_RESULT:
+<span class="nc" id="L457">                    return typeOfResult[rowIndex];</span>
+                case COL_GEN_JOBS:
+<span class="nc" id="L459">                    return generatedJobs[rowIndex];</span>
+                case COL_ALGO:
+<span class="nc" id="L461">                    return algorithms[rowIndex];</span>
+                case COL_DISTR_ARRIVAL:
+<span class="nc" id="L463">                    return arrivalDistibutions[rowIndex];</span>
+                case COL_LAMBDA:
+<span class="nc" id="L465">                    return lambdas[rowIndex];</span>
+                case COL_DISTR_SERVICE:
+<span class="nc" id="L467">                    return serviceDistributions[rowIndex];</span>
+                case COL_NSERVERS:
+<span class="nc" id="L469">                    return serversNumber[rowIndex];</span>
+                case COL_SERVICE:
+<span class="nc" id="L471">                    return services[rowIndex];</span>
+                case COL_R:
+<span class="nc" id="L473">                    return responseTimes[rowIndex];</span>
+                case COL_QUEUETIME:
+<span class="nc" id="L475">                    return queueTimes[rowIndex];             </span>
+                case COL_NQUEUE:
+<span class="nc" id="L477">                    return nCustomers[rowIndex];  </span>
+                case COL_THROUGHPUT:
+<span class="nc" id="L479">                    return thoughputs[rowIndex];       </span>
+                default:
+<span class="nc" id="L481">                    return null;</span>
+            }
+        }
+
+        @Override
+        protected Object getRowName(int rowIndex) {
+<span class="nc" id="L487">            return rowIndex+1;</span>
+        }
+
+    }
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

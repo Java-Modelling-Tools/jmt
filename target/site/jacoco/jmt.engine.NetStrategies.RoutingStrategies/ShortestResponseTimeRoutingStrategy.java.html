@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ShortestResponseTimeRoutingStrategy.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.RoutingStrategies</a> &gt; <span class="el_source">ShortestResponseTimeRoutingStrategy.java</span></div><h1>ShortestResponseTimeRoutingStrategy.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NetStrategies.RoutingStrategies;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.RoutingStrategy;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeList;
+import jmt.engine.QueueNet.NodeSection;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * This strategy sends jobs to the resource with the shortest response time.
+ *
+ * Date: 13-nov-2005
+ * @author Bertoli Marco
+ */
+<span class="nc" id="L35">public class ShortestResponseTimeRoutingStrategy extends RoutingStrategy {</span>
+
+<span class="nc" id="L37">	private int CLOSED_CLASS = JobClass.CLOSED_CLASS;</span>
+<span class="nc" id="L38">	private int infinityQ = Integer.MAX_VALUE;</span>
+<span class="nc" id="L39">	private double infinityR = Double.POSITIVE_INFINITY;</span>
+<span class="nc" id="L40">	private byte inputSection = NodeSection.INPUT;</span>
+<span class="nc" id="L41">	private byte serviceSection = NodeSection.SERVICE;</span>
+<span class="nc" id="L42">	private int propertyQ = NodeSection.PROPERTY_ID_RESIDENT_JOBS;</span>
+<span class="nc" id="L43">	private int propertyR = NetNode.PROPERTY_ID_RESIDENCE_TIME;</span>
+<span class="nc" id="L44">	private double epsilon = 1e-14; // Used to make equality checks (100 times machine precision)</span>
+
+	/**
+	 * This strategy selects the resource with the shortest response time for this jobClass
+	 * among the output nodes.
+	 * @param ownerNode Owner node of the output section.
+	 * @param jobClass Class of current job to be routed.
+	 * @return Selected node.
+	 */
+	@Override
+	public NetNode getOutNode(NetNode ownerNode, JobClass jobClass) {
+<span class="nc" id="L55">		RandomEngine randomEngine = ownerNode.getNetSystem().getEngine();</span>
+<span class="nc" id="L56">		NodeList nodeList = ownerNode.getOutputNodes();</span>
+<span class="nc bnc" id="L57" title="All 2 branches missed.">		if (nodeList.size() == 0) {</span>
+<span class="nc" id="L58">			return null;</span>
+		}
+
+		// output node candidates... Holds an array of them as on equality of response time they
+		// will be chosen randomly
+<span class="nc" id="L63">		NetNode[] output = new NetNode[nodeList.size()];</span>
+<span class="nc" id="L64">		int length = 0;</span>
+<span class="nc" id="L65">		boolean foundZeroQueue = false;</span>
+<span class="nc" id="L66">		double leastRTime = infinityR;</span>
+		try {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">			for (int i = 0; i &lt; nodeList.size(); i++) {</span>
+<span class="nc" id="L69">				NetNode node = nodeList.get(i);</span>
+<span class="nc" id="L70">				int tmpQ = 0;</span>
+<span class="nc" id="L71">				double tmpR = 0.0;</span>
+				// Checks if output is a sink... If class is open, sinks are preferred as have
+				// 0 queue length and response time. If class is closed, avoid it
+<span class="nc bnc" id="L74" title="All 2 branches missed.">				if (node.isSink()) {</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">					if (jobClass.getType() == CLOSED_CLASS) {</span>
+<span class="nc" id="L76">						tmpQ = infinityQ;</span>
+<span class="nc" id="L77">						tmpR = infinityR;</span>
+					} else {
+<span class="nc" id="L79">						tmpQ = 0;</span>
+<span class="nc" id="L80">						tmpR = 0.0;</span>
+					}
+				} else {
+<span class="nc" id="L83">					tmpQ = node.getSection(inputSection).getIntSectionProperty(propertyQ)</span>
+<span class="nc" id="L84">							+ node.getSection(serviceSection).getIntSectionProperty(propertyQ);</span>
+<span class="nc" id="L85">					tmpR = node.getDoubleNodeProperty(propertyR, jobClass);</span>
+				}
+
+<span class="nc bnc" id="L88" title="All 4 branches missed.">				if (tmpQ == 0 &amp;&amp; !foundZeroQueue) {</span>
+					// Zero queue found, put it in output and reset length
+<span class="nc" id="L90">					foundZeroQueue = true;</span>
+<span class="nc" id="L91">					leastRTime = tmpR;</span>
+<span class="nc" id="L92">					output[0] = node;</span>
+<span class="nc" id="L93">					length = 1;</span>
+<span class="nc bnc" id="L94" title="All 8 branches missed.">				} else if ((tmpQ == 0 &amp;&amp; foundZeroQueue) || (tmpQ != 0 &amp;&amp; !foundZeroQueue)) {</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">					if (Math.abs(tmpR - leastRTime) &lt; epsilon) {</span>
+						// This is minimum too, put it in output and increment length
+<span class="nc" id="L97">						output[length] = node;</span>
+<span class="nc" id="L98">						length++;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">					} else if (tmpR &lt; leastRTime) {</span>
+						// New minimum value found, put it in output and reset length
+<span class="nc" id="L101">						leastRTime = tmpR;</span>
+<span class="nc" id="L102">						output[0] = node;</span>
+<span class="nc" id="L103">						length = 1;</span>
+					}
+				}
+			}
+<span class="nc" id="L107">		} catch (NetException e) {</span>
+<span class="nc" id="L108">			System.out.println(&quot;Shortest Response Time Routing Error: Cannot read queue length or response time from output node&quot;);</span>
+<span class="nc" id="L109">			e.printStackTrace();</span>
+<span class="nc" id="L110">			return null;</span>
+<span class="nc" id="L111">		}</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if (leastRTime == infinityR) {</span>
+<span class="nc" id="L113">			return null;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">		} else if (length == 1) {</span>
+<span class="nc" id="L115">			return output[0];</span>
+		} else {
+<span class="nc" id="L117">			return output[(int) Math.floor(randomEngine.raw() * length)];</span>
+		}
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

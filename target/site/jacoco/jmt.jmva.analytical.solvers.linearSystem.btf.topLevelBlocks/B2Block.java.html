@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>B2Block.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.topLevelBlocks</a> &gt; <span class="el_source">B2Block.java</span></div><h1>B2Block.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.topLevelBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks.B2MacroBlock;
+import jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks.MacroBlock;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class implements the B2 Block of the B matrix.
+ * 
+ * The Factory Methods newMacroBlock and subBlockCopy are implemented to return the correct 
+ * block type in the parallel hierarchy.
+ * 
+ * Type 1 Macro Blocks are selected for lower class linear systems
+ * 
+ * @author Jack Bradshaw
+ */
+public class B2Block extends TopLevelBlock {
+
+	public B2Block(QNModel qnm, CoMoMBasis basis)
+			throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L27">		super(qnm, basis, new Position(MiscMathsFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M, 0));</span>
+<span class="nc" id="L28">		selection_policy = new TypeOneBlocks(qnm, this, current_class);</span>
+<span class="nc" id="L29">	}</span>
+	
+	public B2Block(QNModel qnm, CoMoMBasis basis, Position position) //TODO two
+			throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L33">		super(qnm, basis, position);</span>
+<span class="nc" id="L34">		selection_policy = new TypeOneBlocks(qnm, this, current_class);		</span>
+<span class="nc" id="L35">	}</span>
+	
+	public B2Block(B2Block full_block, int current_class) {
+<span class="nc" id="L38">		super(full_block, current_class);		</span>
+<span class="nc" id="L39">	}</span>
+
+	@Override
+	protected TopLevelBlock subBlockCopy(int current_class) throws BTFMatrixErrorException, InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L43">		return new B2Block(this, current_class);</span>
+	}
+	
+	@Override
+	protected MacroBlock newMacroBlock(Position block_position, int h) throws InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L48">		return new B2MacroBlock(qnm, basis, block_position, h);</span>
+	}
+	
+	public void update(int current_class_population) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		for (int i = 0; i &lt; macro_blocks.length; i++) {</span>
+<span class="nc" id="L53">			((B2MacroBlock) macro_blocks[i]).update(current_class_population);</span>
+		}
+<span class="nc" id="L55">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

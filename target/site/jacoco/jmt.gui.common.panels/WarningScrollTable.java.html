@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>WarningScrollTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">WarningScrollTable.java</span></div><h1>WarningScrollTable.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagLayout;
+import java.util.Vector;
+
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+
+/**
+ * &lt;p&gt;Title: Warning ScrollPanel for Tables&lt;/p&gt;
+ * &lt;p&gt;Description: This class will add scrollbars to a given table and displays a given warning
+ * message if the table is empty of if any of specified Vectors is empty.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 7-ott-2005
+ *         Time: 14.30.24
+ */
+public class WarningScrollTable extends JRootPane {
+
+	private static final long serialVersionUID = 1L;
+
+	protected static final int BORDERSIZE = 3;
+<span class="nc" id="L55">	protected static final Dimension warningBoxSize = new Dimension((int)(210 * CommonConstants.widthScaling), (int)(95 * CommonConstants.heightScaling));</span>
+	protected JTable table;
+	protected Vector&lt;Vector&lt;Object&gt;&gt; vectors;
+
+	/**
+	 * Constructs a new WarningScrollTable, given a table and a warning message to display if the
+	 * table is empty
+	 * @param table table to be shown in the panel
+	 * @param warningMsg message to be shown if the table is empty
+	 */
+<span class="nc" id="L65">	public WarningScrollTable(JTable table, String warningMsg) {</span>
+<span class="nc" id="L66">		this.table = table;</span>
+		// Uses GlassPane to show overlay warning message
+<span class="nc" id="L68">		getContentPane().add(new JScrollPane(table));</span>
+<span class="nc" id="L69">		setGlassPane(createWarningPanel(warningMsg));</span>
+<span class="nc" id="L70">	}</span>
+
+	/**
+	 * Constructs a new WarningScrollTable, given a component and a warning message to display if the
+	 * specified vectors are empty. This implementation does not add scrollBars despite the name
+	 * of this class.
+	 * @param component component to be shown in the panel
+	 * @param warningMsg message to be shown if vectors are empty
+	 */
+<span class="nc" id="L79">	public WarningScrollTable(JComponent component, String warningMsg) {</span>
+		// Uses GlassPane to show overlay warning message
+<span class="nc" id="L81">		getContentPane().add(component);</span>
+<span class="nc" id="L82">		setGlassPane(createWarningPanel(warningMsg));</span>
+<span class="nc" id="L83">	}</span>
+
+	/**
+	 * Adds a new Vector to be checked. If this method is used behaviour of WarningScrollTable will
+	 * change and warning message will be shown only if any of input vectors is empty
+	 * @param v input vector to be checked
+	 */
+	public void addCheckVector(Vector&lt;Object&gt; v) {
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		if (vectors == null) {</span>
+<span class="nc" id="L92">			vectors = new Vector&lt;Vector&lt;Object&gt;&gt;();</span>
+		}
+<span class="nc" id="L94">		vectors.add(v);</span>
+<span class="nc" id="L95">	}</span>
+
+	/**
+	 * Cleans all check vectors
+	 */
+	public void clearCheckVectors() {
+<span class="nc" id="L101">		vectors = null;</span>
+<span class="nc" id="L102">	}</span>
+
+	/**
+	 * Override default paint method
+	 * @param g graphic object
+	 */
+	@Override
+	public void paint(Graphics g) {
+<span class="nc bnc" id="L110" title="All 2 branches missed.">		if (vectors == null) {</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">			if (table == null) {</span>
+<span class="nc" id="L112">				getGlassPane().setVisible(true);</span>
+			} else {
+<span class="nc bnc" id="L114" title="All 4 branches missed.">				getGlassPane().setVisible(table.getRowCount() == 0 || table.getColumnCount() == 0);</span>
+			}
+		} else {
+<span class="nc" id="L117">			getGlassPane().setVisible(checkEmptyVectors());</span>
+		}
+<span class="nc" id="L119">		super.paint(g);</span>
+<span class="nc" id="L120">	}</span>
+
+	/**
+	 * Tells if any vector added with &lt;code&gt;addCheckVector(Vector v)&lt;/code&gt; method is empty
+	 * @return true iff any vector is empty
+	 * @see this.addCheckVector(Vector)
+	 */
+	protected boolean checkEmptyVectors() {
+<span class="nc" id="L128">		boolean res = false;</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		for (int i = 0; i &lt; vectors.size(); i++) {</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">			if (vectors.get(i).size() == 0) {</span>
+<span class="nc" id="L131">				res = true;</span>
+<span class="nc" id="L132">				break;</span>
+			}
+		}
+<span class="nc" id="L135">		return res;</span>
+	}
+
+	/**
+	 * Creates the panel to be shown when the table is empty
+	 * @param msg message to be shown on the panel
+	 * @return created warning panel
+	 */
+	protected JPanel createWarningPanel(String msg) {
+<span class="nc" id="L144">		JPanel warning = new JPanel(new GridBagLayout());</span>
+<span class="nc" id="L145">		JPanel innerPanel = new JPanel(new BorderLayout());</span>
+		// Adds image
+<span class="nc" id="L147">		JLabel icon = new JLabel(&quot;&quot;);</span>
+<span class="nc" id="L148">		icon.setIcon(JMTImageLoader.loadImage(&quot;Triangle&quot;));</span>
+<span class="nc" id="L149">		icon.setHorizontalAlignment(SwingConstants.CENTER);</span>
+<span class="nc" id="L150">		icon.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));</span>
+<span class="nc" id="L151">		innerPanel.add(icon, BorderLayout.NORTH);</span>
+		// Adds Text Area
+<span class="nc" id="L153">		JTextArea text = new JTextArea();</span>
+<span class="nc" id="L154">		text.setOpaque(false);</span>
+<span class="nc" id="L155">		text.setEditable(false);</span>
+<span class="nc" id="L156">		text.setWrapStyleWord(true);</span>
+<span class="nc" id="L157">		text.setLineWrap(true);</span>
+<span class="nc" id="L158">		text.setText(msg);</span>
+<span class="nc" id="L159">		text.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));</span>
+<span class="nc" id="L160">		text.setBackground(icon.getBackground());</span>
+<span class="nc" id="L161">		JScrollPane textPane = new JScrollPane(text);</span>
+<span class="nc" id="L162">		textPane.setBorder(new EmptyBorder(0, 0, 0, 0));</span>
+<span class="nc" id="L163">		innerPanel.add(textPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L164">		innerPanel.setBorder(BorderFactory.createEtchedBorder());</span>
+<span class="nc" id="L165">		innerPanel.setPreferredSize(warningBoxSize);</span>
+<span class="nc" id="L166">		warning.add(innerPanel);</span>
+<span class="nc" id="L167">		return warning;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

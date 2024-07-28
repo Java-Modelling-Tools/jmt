@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Parser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math.parser</a> &gt; <span class="el_source">Parser.java</span></div><h1>Parser.java</h1><pre class="source lang-java linenums">/**
+  * Copyright 2006 Bertoli Marco
+
+  *  Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+  *  you may not use this file except in compliance with the License.
+  *  You may obtain a copy of the License at
+
+  *  http://www.apache.org/licenses/LICENSE-2.0
+
+  *  Unless required by applicable law or agreed to in writing, software
+  *  distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  *  See the License for the specific language governing permissions and
+  *  limitations under the License.
+  */
+package jmt.engine.math.parser;
+
+import java.util.HashSet;
+
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; Parser&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * Simple Java arithmetic expression parser and ELL(1) grammar syntactical analyzer and evaluator.
+ * Parser supports detection of implicit multiplication when a constant is followed by a variable or function.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Grammar:&lt;/b&gt;&lt;br&gt;
+ * S -&amp;gt; E (('+' | '-') E)*&lt;br&gt;
+ * E -&amp;gt; G ('*' G)*&lt;br&gt;
+ * G -&amp;gt; H ('/' H)*&lt;br&gt;
+ * H -&amp;gt; T ('%' T)*&lt;br&gt;
+ * T -&amp;gt; F | '-' F&lt;br&gt;
+ * F -&amp;gt; U ('^' U)*&lt;br&gt;
+ * U -&amp;gt; function '(' S ')' | number | '(' S ')' | variable&lt;br&gt;
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 08/dic/06
+ * &lt;b&gt;Time:&lt;/b&gt; 13:58:28&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class Parser {
+	// Special tokens
+	private static final char TERM = '@'; // Input end character
+	private static final char NUM = 'n'; // number
+	private static final char FUNC = 'f'; // function
+	private static final char VAR = 'x'; // variable
+	private static final char OP_BRACKET = '('; // open bracket
+	private static final char CL_BRACKET = ')'; // closed bracket
+
+	private char[] input;
+	private boolean error;
+	private int inp_cur; // Current input position
+	private Element cc; // Current character
+	private ExpressionNode root; // Root of expression tree
+
+	private HashSet&lt;String&gt; functions; // Used functions
+	private HashSet&lt;String&gt; variables; // Used variables
+	
+	// if not in a simulation, the default engine used
+<span class="nc" id="L61">	private RandomEngine engine = RandomEngine.makeDefault(); </span>
+
+	/**
+	 * Class constructor
+	 * @param str Input string to be analyzed
+	 */
+	public Parser(String str) {
+<span class="nc" id="L68">		this(str, false);</span>
+<span class="nc" id="L69">	}</span>
+
+	/**
+	 * Class constructor
+	 * @param str Input string to be analyzed
+	 * @param error if true, an exception is raised when value is get
+	 * from a variable not initialized. If false, that variable is
+	 * considered as zero.
+	 */
+<span class="nc" id="L78">	public Parser(String str, boolean error) {</span>
+<span class="nc" id="L79">		input = convertInput(str);</span>
+<span class="nc" id="L80">		root = null;</span>
+<span class="nc" id="L81">		inp_cur = 0;</span>
+<span class="nc" id="L82">		this.error = error;</span>
+<span class="nc" id="L83">		functions = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L84">		variables = new HashSet&lt;String&gt;();</span>
+<span class="nc" id="L85">	}</span>
+
+	/**
+	 * Converts input string in a character array and removes unsupported characters
+	 * @param str input string
+	 * @return converted string, terminated by TERM character
+	 */
+	protected char[] convertInput(String str) {
+<span class="nc" id="L93">		char[] input = str.toCharArray();</span>
+<span class="nc" id="L94">		char[] output = new char[input.length + 1]; // One more space for terminator</span>
+<span class="nc" id="L95">		int pos = 0; // Position on output</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		for (char c : input) {</span>
+<span class="nc bnc" id="L97" title="All 8 branches missed.">			if (isNumber(c) || isOperator(c) || isText(c) || isBracket(c)) {</span>
+<span class="nc" id="L98">				output[pos++] = c;</span>
+			}
+		}
+<span class="nc" id="L101">		output[pos++] = TERM;</span>
+<span class="nc" id="L102">		return output;</span>
+	}
+
+	/**
+	 * Returns the tree of the function generated by the parser
+	 * @return Node root node of parsed tree
+	 * @throws ParseError if parsed input string was malformed
+	 */
+	public ExpressionNode getTree() throws ParseError {
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		if (root == null) { // Function need parsing</span>
+<span class="nc" id="L112">			cc = parse();</span>
+<span class="nc" id="L113">			root = S();</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			if (!isEndOfExpression(cc.getToken())) {</span>
+<span class="nc" id="L115">				throw new ParseError(&quot;Expecting operator or end of input&quot;, inp_cur);</span>
+			}
+<span class="nc" id="L117">			return root;</span>
+		} else {
+<span class="nc" id="L119">			return root; // Parsing was already performed before</span>
+		}
+	}
+
+	/**
+	 * Returns if input character is a number
+	 * @param c input character
+	 * @return truth value
+	 */
+	private boolean isNumber(char c) {
+<span class="nc bnc" id="L129" title="All 6 branches missed.">		if ((c &gt;= '0' &amp;&amp; c &lt;= '9') || c == '.') {</span>
+<span class="nc" id="L130">			return true;</span>
+		}
+<span class="nc" id="L132">		return false;</span>
+	}
+
+	/**
+	 * Returns if input character character is an operator
+	 * @param c input character
+	 * @return truth value
+	 */
+	private boolean isOperator(char c) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		for (char element : OperatorNode.OPERATIONS) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (c == element) {</span>
+<span class="nc" id="L143">				return true;</span>
+			}
+		}
+<span class="nc" id="L146">		return false;</span>
+	}
+
+	/**
+	 * Returns if input character is valid text
+	 * @param c input character
+	 * @return truth value
+	 */
+	private boolean isText(char c) {
+<span class="nc bnc" id="L155" title="All 10 branches missed.">		return ((c &gt;= 'A' &amp;&amp; c &lt;= 'Z') || (c &gt;= 'a' &amp;&amp; c &lt;= 'z') || c == '_');</span>
+	}
+
+	/**
+	 * Returns if input character is a bracket
+	 * @param c character
+	 * @return truth value
+	 */
+	private boolean isBracket(char c) {
+<span class="nc bnc" id="L164" title="All 4 branches missed.">		return (c == OP_BRACKET) || (c == CL_BRACKET);</span>
+	}
+
+	/**
+	 * Returns if input character is the last one (TERM)
+	 * @param c input character
+	 * @return truth value
+	 */
+	private boolean isEndOfExpression(char c) {
+<span class="nc bnc" id="L173" title="All 2 branches missed.">		return c == TERM;</span>
+	}
+
+	/**
+	 * Perform parsing of input string
+	 * @return Element
+	 */
+	private Element parse() {
+		// Detects implicit multiplication
+<span class="nc bnc" id="L182" title="All 2 branches missed.">		if (detectImplicitMult()) {</span>
+<span class="nc" id="L183">			return new Element('*');</span>
+		}
+		// Matches operators, brackets and termination character
+<span class="nc bnc" id="L186" title="All 6 branches missed.">		if (isOperator(input[inp_cur]) || isBracket(input[inp_cur]) || isEndOfExpression(input[inp_cur])) {</span>
+<span class="nc" id="L187">			return new Element(input[inp_cur++]);</span>
+		}
+
+		// Matches numbers
+<span class="nc bnc" id="L191" title="All 2 branches missed.">		if (isNumber(input[inp_cur])) {</span>
+<span class="nc" id="L192">			int tmp = inp_cur++;</span>
+			// Finds the end of number
+<span class="nc bnc" id="L194" title="All 2 branches missed.">			while (isNumber(input[inp_cur])) {</span>
+<span class="nc" id="L195">				inp_cur++;</span>
+			}
+			// Eventual exponential
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			if (Character.toLowerCase(input[inp_cur]) == 'e') {</span>
+<span class="nc bnc" id="L199" title="All 4 branches missed.">				if (input[inp_cur + 1] == '-' || isNumber(input[inp_cur + 1])) {</span>
+<span class="nc" id="L200">					inp_cur += 2;</span>
+				}
+<span class="nc bnc" id="L202" title="All 2 branches missed.">				while (isNumber(input[inp_cur])) {</span>
+<span class="nc" id="L203">					inp_cur++;</span>
+				}
+			}
+<span class="nc" id="L206">			String s = new String(input, tmp, inp_cur - tmp);</span>
+			double d;
+			try {
+<span class="nc" id="L209">				d = Double.valueOf(s).doubleValue();</span>
+<span class="nc" id="L210">			} catch (NumberFormatException ex) {</span>
+<span class="nc" id="L211">				throw new ParseError(&quot;Invalid number: &quot; + s, inp_cur);</span>
+<span class="nc" id="L212">			}</span>
+<span class="nc" id="L213">			return new Element(NUM, d);</span>
+		}
+
+		// Matches text (functions or variables or built-in constants)
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		if (isText(input[inp_cur])) {</span>
+<span class="nc" id="L218">			int tmp = inp_cur++;</span>
+			// Finds the end of text
+<span class="nc bnc" id="L220" title="All 4 branches missed.">			while (isText(input[inp_cur]) || isNumber(input[inp_cur])) {</span>
+<span class="nc" id="L221">				inp_cur++;</span>
+			}
+<span class="nc" id="L223">			String s = new String(input, tmp, inp_cur - tmp);</span>
+
+<span class="nc" id="L225">			String lower = s.toLowerCase();</span>
+			// Now searches if this string is a function
+<span class="nc bnc" id="L227" title="All 2 branches missed.">			for (int i = 0; i &lt; FunctionNode.FUNCTIONS.length; i++) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">				if (lower.equals(FunctionNode.FUNCTIONS[i])) {</span>
+<span class="nc" id="L229">					functions.add(FunctionNode.FUNCTIONS[i]);</span>
+<span class="nc" id="L230">					return new Element(FUNC, i);</span>
+				}
+			}
+
+			// Now searches if this string is a built-in constant
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			for (int i = 0; i &lt; ConstantNode.CONSTANTS.length; i++) {</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">				if (lower.equals(ConstantNode.CONSTANTS[i])) {</span>
+<span class="nc" id="L237">					return new Element(NUM, i);</span>
+				}
+			}
+
+			// String was not a function, so treat it as a variable
+<span class="nc" id="L242">			variables.add(s);</span>
+<span class="nc" id="L243">			return new Element(VAR, s);</span>
+		}
+		//At this point everything not recognized is an error
+<span class="nc" id="L246">		throw new ParseError(&quot;Unrecognized identifier&quot;, inp_cur);</span>
+	}
+
+	/**
+	 * Helper method to detect implicit multiplication
+	 * @return true only if inplicit multiplication is detected
+	 */
+	private boolean detectImplicitMult() {
+<span class="nc bnc" id="L254" title="All 4 branches missed.">		if (cc != null &amp;&amp; cc.getToken() == NUM) {</span>
+<span class="nc" id="L255">			cc = null; // Otherwise we will loop forever</span>
+			// Stores old pointer to restore it back
+<span class="nc" id="L257">			int old_input = inp_cur;</span>
+<span class="nc" id="L258">			Element next = parse();</span>
+			// Restores old pointer back
+<span class="nc" id="L260">			inp_cur = old_input;</span>
+<span class="nc bnc" id="L261" title="All 4 branches missed.">			if (next.getToken() == VAR || next.getToken() == FUNC) {</span>
+<span class="nc" id="L262">				return true;</span>
+			}
+		}
+<span class="nc" id="L265">		return false;</span>
+	}
+
+	/**
+	 * Grammar Axiom S&lt;br&gt;
+	 * S -&amp;gt; E (('+' | '-') E)*
+	 * @return Node
+	 */
+	private ExpressionNode S() {
+<span class="nc" id="L274">		ExpressionNode current = E();</span>
+<span class="nc bnc" id="L275" title="All 4 branches missed.">		while (cc.getToken() == '+' || cc.getToken() == '-') {</span>
+<span class="nc" id="L276">			char operator = cc.getToken();</span>
+<span class="nc" id="L277">			cc = parse();</span>
+<span class="nc" id="L278">			current = new OperatorNode(current, E(), operator);</span>
+<span class="nc" id="L279">		}</span>
+<span class="nc" id="L280">		return current;</span>
+	}
+
+	/**
+	 * Non-terminal E&lt;br&gt;
+	 * E -&amp;gt; G ('*' G)*&lt;br&gt;
+	 * @return Node
+	 */
+	private ExpressionNode E() {
+<span class="nc" id="L289">		ExpressionNode current = G();</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">		while (cc.getToken() == '*') {</span>
+<span class="nc" id="L291">			cc = parse();</span>
+<span class="nc" id="L292">			current = new OperatorNode(current, G(), '*');</span>
+		}
+<span class="nc" id="L294">		return current;</span>
+	}
+
+	/**
+	 * Non-terminal G&lt;br&gt;
+	 * G -&amp;gt; H ('/' H)*&lt;br&gt;
+	 * @return Node
+	 */
+	private ExpressionNode G() {
+<span class="nc" id="L303">		ExpressionNode current = H();</span>
+<span class="nc bnc" id="L304" title="All 2 branches missed.">		while (cc.getToken() == '/') {</span>
+<span class="nc" id="L305">			cc = parse();</span>
+<span class="nc" id="L306">			current = new OperatorNode(current, H(), '/');</span>
+		}
+<span class="nc" id="L308">		return current;</span>
+	}
+
+	/**
+	 * Non-terminal H&lt;br&gt;
+	 * H -&amp;gt; T ('%' T)*&lt;br&gt;
+	 * @return Node
+	 */
+	private ExpressionNode H() {
+<span class="nc" id="L317">		ExpressionNode current = T();</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">		while (cc.getToken() == '%') {</span>
+<span class="nc" id="L319">			cc = parse();</span>
+<span class="nc" id="L320">			current = new OperatorNode(current, T(), '%');</span>
+		}
+<span class="nc" id="L322">		return current;</span>
+	}
+
+	/**
+	 * Non-terminal T&lt;br&gt;
+	 * T -&amp;gt; F | '-' F&lt;br&gt;
+	 * @return Node
+	 */
+	private ExpressionNode T() {
+<span class="nc bnc" id="L331" title="All 2 branches missed.">		if (cc.getToken() == '-') {</span>
+<span class="nc" id="L332">			cc = parse();</span>
+<span class="nc" id="L333">			FunctionNode fn = new FunctionNode(F(), &quot;-&quot;);</span>
+<span class="nc" id="L334">			fn.setParser(this); </span>
+<span class="nc" id="L335">			return fn;</span>
+		}
+<span class="nc" id="L337">		return F();</span>
+	}
+
+	/**
+	 * Non-terminal F&lt;br&gt;
+	 * F -&amp;gt; U ('^' U)*
+	 * @return Node
+	 */
+	private ExpressionNode F() {
+		ExpressionNode left;
+<span class="nc" id="L347">		left = U();</span>
+<span class="nc bnc" id="L348" title="All 2 branches missed.">		if (cc.getToken() == '^') {</span>
+<span class="nc" id="L349">			cc = parse();</span>
+<span class="nc" id="L350">			return new OperatorNode(left, F(), '^');</span>
+		}
+<span class="nc" id="L352">		return left;</span>
+	}
+
+	/**
+	 * Non-terminal U&lt;br&gt;
+	 * U -&amp;gt; function '(' S ')' | number | '(' S ')' | variable
+	 * @return Node
+	 */
+	private ExpressionNode U() {
+<span class="nc bnc" id="L361" title="All 5 branches missed.">		switch (cc.getToken()) {</span>
+			case NUM:
+<span class="nc" id="L363">				double n = cc.number;</span>
+<span class="nc" id="L364">				int constPosition = cc.position; // Position if this is a built-in constant</span>
+<span class="nc" id="L365">				cc = parse();</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">				if (constPosition &gt;= 0) {</span>
+<span class="nc" id="L367">					return new ConstantNode(constPosition);</span>
+				} else {
+<span class="nc" id="L369">					return new ConstantNode(n);</span>
+				}
+			case VAR:
+<span class="nc" id="L372">				String name = cc.name;</span>
+<span class="nc" id="L373">				cc = parse();</span>
+<span class="nc" id="L374">				return new VariableNode(name, error);</span>
+			case OP_BRACKET:
+<span class="nc" id="L376">				cc = parse();</span>
+<span class="nc" id="L377">				ExpressionNode tmp = S();</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">				if (cc.getToken() == CL_BRACKET) {</span>
+<span class="nc" id="L379">					cc = parse();</span>
+<span class="nc" id="L380">					return tmp;</span>
+				}
+<span class="nc" id="L382">				throw new ParseError(&quot;Semantic Error, expected '&quot; + CL_BRACKET + &quot;'&quot;, inp_cur);</span>
+			case FUNC:
+<span class="nc" id="L384">				int function = cc.position;</span>
+<span class="nc" id="L385">				cc = parse();</span>
+<span class="nc bnc" id="L386" title="All 2 branches missed.">				if (cc.getToken() == OP_BRACKET) {</span>
+<span class="nc" id="L387">					cc = parse();</span>
+				} else {
+<span class="nc" id="L389">					throw new ParseError(&quot;Semantic Error, expected '&quot; + OP_BRACKET + &quot;'&quot;, inp_cur);</span>
+				}
+<span class="nc" id="L391">				ExpressionNode tmp2 = S();</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">				if (cc.getToken() == CL_BRACKET) {</span>
+<span class="nc" id="L393">					cc = parse();</span>
+				} else {
+<span class="nc" id="L395">					throw new ParseError(&quot;Semantic Error, expected '&quot; + CL_BRACKET + &quot;'&quot;, inp_cur);</span>
+				}
+<span class="nc" id="L397">				FunctionNode fn = new FunctionNode(tmp2, function);</span>
+<span class="nc" id="L398">				fn.setParser(this); </span>
+<span class="nc" id="L399">				return fn;</span>
+		}
+<span class="nc" id="L401">		throw new ParseError(&quot;Semantic Error, expected function or variable or constant or '('&quot;, inp_cur);</span>
+	}
+
+	/**
+	 * Data structure used internally to return parsed elements.
+	 */
+	private class Element {
+		private char token;
+<span class="nc" id="L409">		public double number = Double.NaN;</span>
+<span class="nc" id="L410">		public int position = -1;</span>
+<span class="nc" id="L411">		public String name = null;</span>
+
+<span class="nc" id="L413">		public Element(char token) {</span>
+<span class="nc" id="L414">			this.token = token;</span>
+<span class="nc" id="L415">		}</span>
+
+<span class="nc" id="L417">		public Element(char token, double number) {</span>
+<span class="nc" id="L418">			this.token = token;</span>
+<span class="nc" id="L419">			this.number = number;</span>
+<span class="nc" id="L420">		}</span>
+
+<span class="nc" id="L422">		public Element(char token, String name) {</span>
+<span class="nc" id="L423">			this.token = token;</span>
+<span class="nc" id="L424">			this.name = name;</span>
+<span class="nc" id="L425">		}</span>
+
+<span class="nc" id="L427">		public Element(char token, int position) {</span>
+<span class="nc" id="L428">			this.token = token;</span>
+<span class="nc" id="L429">			this.position = position;</span>
+<span class="nc" id="L430">		}</span>
+
+		/**
+		 * Returns the token
+		 * @return char
+		 */
+		public char getToken() {
+<span class="nc" id="L437">			return token;</span>
+		}
+	}
+
+	/**
+	 * Sets the value for a given variable
+	 * @param name name of the variable to be set (case sensitive)
+	 * @param value value for the variable
+	 * @throws ParseError if parsed input string was malformed
+	 */
+	public void setVariable(String name, double value) throws ParseError {
+<span class="nc" id="L448">		getTree();</span>
+<span class="nc" id="L449">		root.setVariable(name, value);</span>
+<span class="nc" id="L450">	}</span>
+
+	/**
+	 * Returns the value for evaluated expression
+	 * @return value of expression
+	 * @throws ParseError if parsed input string was malformed
+	 * @throws EvaluationException if one variable was not initialized and parser was 
+	 * created with &lt;code&gt;error = true&lt;/code&gt;
+	 * @see #Parser(String, boolean)
+	 */
+	public double getValue() throws ParseError, EvaluationException {
+<span class="nc" id="L461">		getTree();</span>
+<span class="nc" id="L462">		return root.getValue();</span>
+	}
+
+	/**
+	 * Returns a string representation of parsed expression with the right parenthesis
+	 * @return a string representation of parsed expression with the right parenthesis
+	 * @throws ParseError if parsed input string was malformed
+	 */
+	public String getExpression() throws ParseError {
+<span class="nc" id="L471">		getTree();</span>
+<span class="nc" id="L472">		return root.toString();</span>
+	}
+
+	/**
+	 * Returns a Set of all functions parsed in input string
+	 * @return a set with all parsed functions
+	 * @throws ParseError if parsed input string was malformed
+	 */
+	public HashSet&lt;String&gt; getParsedFunctions() throws ParseError {
+<span class="nc" id="L481">		getTree();</span>
+<span class="nc" id="L482">		return functions;</span>
+	}
+
+	/**
+	 * Returns a Set of all variables parsed in input string
+	 * @return a set with all parsed variables
+	 * @throws ParseError if parsed input string was malformed
+	 */
+	public HashSet&lt;String&gt; getParsedVariables() throws ParseError {
+<span class="nc" id="L491">		getTree();</span>
+<span class="nc" id="L492">		return variables;</span>
+	}
+
+	/**
+	 * Returns input string, without invalid characters
+	 * @return input string without invalid characters
+	 */
+	public String getInputString() {
+<span class="nc" id="L500">		StringBuffer output = new StringBuffer();</span>
+<span class="nc bnc" id="L501" title="All 4 branches missed.">		for (int i = 0; i &lt; input.length &amp;&amp; input[i] != TERM; i++) {</span>
+<span class="nc" id="L502">			output.append(input[i]);</span>
+		}
+<span class="nc" id="L504">		return output.toString();</span>
+	}
+
+	public RandomEngine getEngine() {
+<span class="nc" id="L508">		return engine;</span>
+	}
+	
+	public void setEngine(RandomEngine engine) {
+<span class="nc" id="L512">		this.engine = engine;</span>
+<span class="nc" id="L513">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

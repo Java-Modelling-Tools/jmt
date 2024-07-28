@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FuzzyKMeanClusteringEngine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean</a> &gt; <span class="el_source">FuzzyKMeanClusteringEngine.java</span></div><h1>FuzzyKMeanClusteringEngine.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.Observation;
+import jmt.engine.jwat.TimeConsumingWorker;
+import jmt.engine.jwat.VariableNumber;
+
+public class FuzzyKMeanClusteringEngine {
+
+<span class="nc" id="L28">	class SFKMClust {</span>
+String centers; // contains cluster centers
+String log; // general informations
+/** TO BE FIXED **/
+String[] clus_log; /*= new String[37]; // log of Cluster values = new String[MAXCLU]*/
+	}
+
+	public String m_strFKMLog;
+	public SFKMClust m_arrClust[];
+	public double clus_entropy[]; // entropie finali dei Cluster
+	public int m_nMaxClust;
+	private VariableNumber[] listOfVars; //Solo quelle selezionate
+
+	private Observation[] obsSel;
+	private int[] varS;
+
+<span class="nc" id="L44">	private double[][] U = null;//0</span>
+<span class="nc" id="L45">	private double[][] newU = null;//1</span>
+<span class="nc" id="L46">	private double[][] centers = null;//2</span>
+<span class="nc" id="L47">	private double[][] mrow = null;//3</span>
+<span class="nc" id="L48">	private double[][] singularity = null;//4</span>
+<span class="nc" id="L49">	private double[][] distance = null;//5</span>
+
+	private int m_nNumNorm;
+	private int m_nFLev;
+	private int m_nIter;
+
+<span class="nc" id="L55">	private FuzzyKMean fuzzy = null;</span>
+	private TimeConsumingWorker worker;
+
+<span class="nc" id="L58">	public FuzzyKMeanClusteringEngine(FuzzyKMean f, TimeConsumingWorker worker) {</span>
+<span class="nc" id="L59">		this.worker = worker;</span>
+<span class="nc" id="L60">		fuzzy = f;</span>
+<span class="nc" id="L61">	}</span>
+
+	public void PrepFClustering(MatrixObservations m, int indVarSel[], int nMaxClust, int nFLev, int nIter) {
+<span class="nc" id="L64">		m_nNumNorm = indVarSel.length;</span>
+<span class="nc" id="L65">m_nMaxClust = nMaxClust; // Maximum number of clusters to consider</span>
+<span class="nc" id="L66">m_nFLev = nFLev; // Level of fuzzyness</span>
+<span class="nc" id="L67">m_nIter = nIter; // Fault tolerance value</span>
+<span class="nc" id="L68">		clus_entropy = new double[m_nMaxClust - 1];</span>
+
+<span class="nc" id="L70">		obsSel = m.getVariables()[indVarSel[0]].getCurObs();</span>
+<span class="nc" id="L71">		varS = indVarSel;</span>
+
+<span class="nc" id="L73">		listOfVars = new VariableNumber[indVarSel.length];</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">		for (int i = 0; i &lt; indVarSel.length; i++) {</span>
+<span class="nc" id="L75">			listOfVars[i] = m.getVariables()[indVarSel[i]];</span>
+		}
+<span class="nc" id="L77">		m_arrClust = new SFKMClust[m_nMaxClust];</span>
+<span class="nc" id="L78">	}</span>
+
+	public void DoFClustering() {
+<span class="nc" id="L81">		double entropy[] = new double[m_nMaxClust - 1];</span>
+<span class="nc" id="L82">		int currClust = 0;</span>
+<span class="nc" id="L83">		int nObs = listOfVars[0].getCurObs().length;</span>
+
+//initialize entropy vector
+<span class="nc bnc" id="L86" title="All 2 branches missed.">		for (int temp = 0; temp &lt; m_nMaxClust - 1; temp++) {</span>
+<span class="nc" id="L87">			entropy[temp] = 0.0;</span>
+		}
+
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		for (int r = 0; r &lt; m_nMaxClust; r++) {</span>
+<span class="nc" id="L91">			m_arrClust[r] = new SFKMClust();</span>
+<span class="nc" id="L92">			m_arrClust[r].clus_log = new String[r + 1];</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			for (int j = 0; j &lt; r; j++) {</span>
+<span class="nc" id="L94">				m_arrClust[r].clus_log[j] = &quot;&quot;;</span>
+			}
+<span class="nc" id="L96">			m_arrClust[r].log = &quot;&quot;;</span>
+		}
+
+<span class="nc bnc" id="L99" title="All 2 branches missed.">		for (int cltemp = 2; cltemp &lt; m_nMaxClust + 1; cltemp++) {</span>
+
+<span class="nc" id="L101">			initMatrix(0, cltemp, nObs);</span>
+<span class="nc" id="L102">			initMatrix(1, cltemp, nObs);</span>
+
+//REPEAT FOR THE NUMBER OF ITERATIONS
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			for (int kh = 0; kh &lt; m_nIter; kh++) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">				if (worker.isCanceled()) {</span>
+<span class="nc" id="L107">					return;</span>
+				}
+<span class="nc" id="L109">				worker.updateInfos(2 + m_nIter + ((cltemp - 2) * m_nIter), &quot;Clustering &quot; + (cltemp) + &quot; Iteration &quot; + (kh + 1), false);</span>
+
+<span class="nc" id="L111">				initMatrix(3, cltemp, 2);</span>
+<span class="nc" id="L112">				initMatrix(2, cltemp, m_nNumNorm);</span>
+<span class="nc" id="L113">				initMatrix(4, nObs, 1);</span>
+<span class="nc" id="L114">				initMatrix(5, cltemp, nObs);</span>
+
+				/*** OK ***/
+<span class="nc bnc" id="L117" title="All 2 branches missed.">				for (int i = 0; i &lt; cltemp; i++) { //inizialiaze/calculate mrow</span>
+<span class="nc" id="L118">					mrow[i][1] = 0;</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">					for (int k = 0; k &lt; nObs; k++) {</span>
+<span class="nc" id="L120">						mrow[i][1] = mrow[i][1] + Math.pow(U[i][k], m_nFLev);</span>
+
+					}
+				}
+
+				/*** OK ***/
+<span class="nc bnc" id="L126" title="All 2 branches missed.">				for (int i = 0; i &lt; cltemp; i++) { //calculate centers</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">					for (int j = 0; j &lt; m_nNumNorm; j++) {</span>
+<span class="nc" id="L128">						centers[i][j] = 0;</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">						for (int k = 0; k &lt; nObs; k++) {</span>
+							//centers[i][j]=centers[i][j] + Math.pow(U[i][k], (double)m_nFLev)*(Double.parseDouble(m_arrNorm[j].m_numArray.get(k).toString()));
+<span class="nc" id="L131">							centers[i][j] = centers[i][j] + Math.pow(U[i][listOfVars[j].getObsID(k) - 1], m_nFLev) * listOfVars[j].getValue(k);</span>
+						}
+<span class="nc" id="L133">						centers[i][j] = centers[i][j] / mrow[i][1];</span>
+					}
+				}
+				/*** OK ***/
+<span class="nc bnc" id="L137" title="All 2 branches missed.">				for (int k = 0; k &lt; nObs; k++) {</span>
+<span class="nc" id="L138">					singularity[k][0] = -1;//era [1]</span>
+				}
+
+<span class="nc bnc" id="L141" title="All 2 branches missed.">				for (int i = 0; i &lt; cltemp; i++) { //distance datapoint-centers</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">					for (int k = 0; k &lt; nObs; k++) {</span>
+<span class="nc" id="L143">						distance[i][obsSel[k].getID() - 1] = 0;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">						for (int j = 0; j &lt; m_nNumNorm; j++) {</span>
+							//distance[i][k] = distance[i][k] + Math.pow(centers[i][j]-(Double.parseDouble(m_arrNorm[j].m_numArray.get(k).toString())),2.0);
+<span class="nc" id="L146">							distance[i][obsSel[k].getID() - 1] = distance[i][obsSel[k].getID() - 1]</span>
+<span class="nc" id="L147">									+ Math.pow(centers[i][j] - obsSel[k].getIndex(varS[j]), 2.0);</span>
+						}
+<span class="nc" id="L149">						distance[i][obsSel[k].getID() - 1] = Math.sqrt(distance[i][obsSel[k].getID() - 1]);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">						if (distance[i][obsSel[k].getID() - 1] == 0) {</span>
+<span class="nc" id="L151">							singularity[obsSel[k].getID() - 1][0] = i;//era[1]</span>
+						}
+					}
+				}
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">				for (int i = 0; i &lt; cltemp; i++) {</span>
+<span class="nc bnc" id="L157" title="All 2 branches missed.">					for (int k = 0; k &lt; nObs; k++) {</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">						if (singularity[obsSel[k].getID() - 1][0] &gt;= 0) {//era[1]</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">							for (int j = 0; j &lt; cltemp; j++) {</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">								if (j == singularity[obsSel[k].getID() - 1][0]) {</span>
+<span class="nc" id="L161">									newU[j][obsSel[k].getID() - 1] = 1;</span>
+								}
+<span class="nc" id="L163">								newU[j][obsSel[k].getID() - 1] = 0;</span>
+							}
+						} else {
+<span class="nc" id="L166">							newU[i][obsSel[k].getID() - 1] = 0;</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">							for (int j = 0; j &lt; cltemp; j++) {</span>
+<span class="nc" id="L168">								newU[i][obsSel[k].getID() - 1] = newU[i][obsSel[k].getID() - 1]</span>
+<span class="nc" id="L169">										+ Math.pow(distance[j][obsSel[k].getID() - 1], (-2 / (m_nFLev - 1)));</span>
+							}
+<span class="nc" id="L171">							newU[i][obsSel[k].getID() - 1] = newU[i][obsSel[k].getID() - 1]</span>
+<span class="nc" id="L172">									* Math.pow(distance[i][obsSel[k].getID() - 1], (2 / (m_nFLev - 1)));</span>
+<span class="nc" id="L173">							newU[i][obsSel[k].getID() - 1] = 1 / newU[i][obsSel[k].getID() - 1];</span>
+						}
+					}
+				}
+
+<span class="nc" id="L178">				U = newU;</span>
+			}
+
+<span class="nc" id="L181">			fuzzy.setAssign(currClust++, newU);</span>
+
+//calculate the entropies
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			for (int i = 0; i &lt; cltemp; i++) {</span>
+<span class="nc bnc" id="L185" title="All 2 branches missed.">				for (int k = 0; k &lt; nObs; k++) {</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">					if (U[i][k] != 0) {</span>
+<span class="nc" id="L187">						entropy[cltemp - 2] = entropy[cltemp - 2] + U[i][k] * Math.log(U[i][k]);</span>
+					}
+				}
+			}
+<span class="nc" id="L191">			entropy[cltemp - 2] = entropy[cltemp - 2] / (-nObs);</span>
+<span class="nc" id="L192">			clus_entropy[cltemp - 2] = entropy[cltemp - 2];</span>
+		}
+<span class="nc" id="L194">		fuzzy.setEntropy(clus_entropy);</span>
+<span class="nc" id="L195">	}</span>
+
+	private void initMatrix(int pos, int row, int col) {
+<span class="nc" id="L198">		double[][] m = new double[0][0];</span>
+<span class="nc bnc" id="L199" title="All 7 branches missed.">		switch (pos) {</span>
+			case 0:
+<span class="nc" id="L201">				U = new double[row][col];</span>
+				//m = U;
+//initialization as suggested by E.N.Magenis
+<span class="nc bnc" id="L204" title="All 2 branches missed.">				for (int i = 0; i &lt; row; i++) {</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">					for (int j = 0; j &lt; col; j++) {</span>
+<span class="nc bnc" id="L206" title="All 6 branches missed.">						if ((i == j) || ((i == row - 1) &amp;&amp; (j &gt; row - 1))) {</span>
+<span class="nc" id="L207">							U[i][j] = 1;</span>
+						} else {
+<span class="nc" id="L209">							U[i][j] = 0;</span>
+						}
+					}
+				}
+<span class="nc" id="L213">				break;</span>
+			case 1:
+<span class="nc" id="L215">				newU = new double[row][col];</span>
+				//m = newU;
+<span class="nc" id="L217">				break;</span>
+			case 2:
+<span class="nc" id="L219">				centers = new double[row][col];</span>
+				//m = centers;
+<span class="nc" id="L221">				break;</span>
+			case 3:
+<span class="nc" id="L223">				mrow = new double[row][col];</span>
+				//m = mrow;
+<span class="nc" id="L225">				break;</span>
+			case 4:
+<span class="nc" id="L227">				singularity = new double[row][col];</span>
+				//m = singularity;
+<span class="nc" id="L229">				break;</span>
+			case 5:
+<span class="nc" id="L231">				distance = new double[row][col];</span>
+				//m = distance;
+				break;
+		}
+<span class="nc" id="L235">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

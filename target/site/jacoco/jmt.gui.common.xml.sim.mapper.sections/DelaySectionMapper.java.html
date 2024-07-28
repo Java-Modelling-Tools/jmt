@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DelaySectionMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper.sections</a> &gt; <span class="el_source">DelaySectionMapper.java</span></div><h1>DelaySectionMapper.java</h1><pre class="source lang-java linenums">/**
+ * This class maps the Delay section of a node.
+ * It reads service strategies (and legacy transition conditions if present) and writes only service strategies.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper.sections;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.sim.dto.NodeDescriptor;
+import jmt.gui.common.xml.sim.dto.ParameterDescriptor;
+import jmt.gui.common.xml.sim.dto.SectionDescriptor;
+import jmt.gui.common.xml.sim.mapper.MappingContext;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+<span class="fc" id="L17">public class DelaySectionMapper extends AbstractSectionMapper {</span>
+
+    // --- READING PHASE (XML -&gt; DTO -&gt; Model) ---
+
+    @Override
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+<span class="fc" id="L23">        ParameterDescriptor serviceStrategyParam = getParam(sec, &quot;ServiceStrategy&quot;);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (serviceStrategyParam != null) {</span>
+<span class="fc" id="L25">            getRefClassMap(serviceStrategyParam).forEach((className, subParam) -&gt; {</span>
+<span class="fc" id="L26">                Object classKey = ctx.classes.get(className);</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">                if (classKey != null) {</span>
+<span class="fc" id="L28">                    Object parsedDistribution = parseServiceStrategy(subParam, ctx);</span>
+<span class="fc" id="L29">                    model.setServiceTimeDistribution(key, classKey, parsedDistribution);</span>
+                }
+<span class="fc" id="L31">            });</span>
+        }
+
+        // Legacy XMLReader: transition conditions for Delay/Server are parsed from Queue section, not Delay section.
+        // See XMLReader.parseQueueSectionDelay() vs XMLReader.parseDelaySection()
+<span class="fc" id="L36">    }</span>
+
+    // --- WRITING PHASE (Model -&gt; DTO -&gt; XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
+<span class="fc" id="L42">        addServiceStrategyParameter(sec, model, key, context);</span>
+        // Transition conditions for Server/Delay are serialized in Queue section.
+        // Keeping Delay section limited to ServiceStrategy preserves engine constructor compatibility.
+<span class="fc" id="L45">    }</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

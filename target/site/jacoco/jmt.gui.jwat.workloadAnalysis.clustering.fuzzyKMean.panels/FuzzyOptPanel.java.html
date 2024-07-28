@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FuzzyOptPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels</a> &gt; <span class="el_source">FuzzyOptPanel.java</span></div><h1>FuzzyOptPanel.java</h1><pre class="source lang-java linenums">package jmt.gui.jwat.workloadAnalysis.clustering.fuzzyKMean.panels;
+
+import java.awt.Dimension;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JSpinner;
+import javax.swing.KeyStroke;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import jmt.engine.jwat.ProgressStatusListener;
+import jmt.engine.jwat.VariableNumber;
+import jmt.engine.jwat.input.ProgressMonitorShow;
+import jmt.engine.jwat.workloadAnalysis.clustering.fuzzyKMean.MainFuzzyKMean;
+import jmt.engine.jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jwat.workloadAnalysis.panels.ClusterPanel;
+
+public class FuzzyOptPanel extends JPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private ClusterPanel parent;
+
+<span class="nc" id="L41">	private final String fuzzylevelDescription = HTML_START + HTML_FONT_NORM + &quot;Specify the fuzziness level&lt;p&gt;for the algorithm&quot;</span>
+			+ HTML_FONT_NOR_END + HTML_END;
+<span class="nc" id="L43">	private final String FKMEANS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Fuzzy k-Means Clustering&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM</span>
+			+ &quot;Specify maximum number of clusters, iterations and fuzziness that the algorithm has to perform&quot; + HTML_FONT_NOR_END + HTML_END;
+<span class="nc" id="L45">	private final String FKMEANS_OPTIONS_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Transformations&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM</span>
+			+ &quot;Specify the transformation to apply to&lt;p&gt;&quot; + &quot;selected variables.&quot; + HTML_FONT_NOR_END + HTML_END;
+<span class="nc" id="L47">	private final String FKMEANS_FLEVEL_DESCRIPTION = HTML_START + HTML_FONT_TITLE + &quot;Fuzziness Level&quot; + HTML_FONT_TIT_END + HTML_FONT_NORM</span>
+			+ &quot;Fuzziness level is the fuzzy exponent and&lt;p&gt;&quot; + &quot;range from (2 to 100).It determines the&lt;p&gt;&quot;
+			+ &quot;degree of fuzziness of the final solution&quot; + HTML_FONT_NOR_END + HTML_END;
+
+	private static final int BUTTONSIZE = 25;
+
+	private ProgressStatusListener lst;
+	private ModelWorkloadAnalysis model;
+	private JRadioButton noneT;
+	private JRadioButton minmaxT;
+	private JRadioButton stdDevT;
+	private JSpinner numOfClust;
+	private JSpinner numOfIter;
+	private JSpinner fuzzyLevel;
+
+<span class="nc" id="L62">	public FuzzyOptPanel(WizardPanel parent, ProgressStatusListener p, ModelWorkloadAnalysis m) {</span>
+<span class="nc" id="L63">		this.parent = (ClusterPanel) parent;</span>
+<span class="nc" id="L64">		this.model = m;</span>
+<span class="nc" id="L65">		this.lst = p;</span>
+<span class="nc" id="L66">		setSolveAction();</span>
+<span class="nc" id="L67">		initPanel();</span>
+<span class="nc" id="L68">	}</span>
+
+	private void initPanel() {
+<span class="nc" id="L71">		this.setLayout(new BorderLayout());</span>
+
+		//UPDATE 13 Nov 2006
+<span class="nc" id="L74">		JPanel northPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L75">		northPanel.add(Box.createHorizontalStrut(5), BorderLayout.EAST);</span>
+<span class="nc" id="L76">		northPanel.add(new JLabel(FKMEANS_DESCRIPTION), BorderLayout.CENTER);</span>
+<span class="nc" id="L77">		this.add(northPanel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L79">		JPanel centralPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L80">		this.add(centralPanel, BorderLayout.CENTER);</span>
+		//NORTH Panel options
+<span class="nc" id="L82">		JPanel northCPanel = new JPanel(new GridLayout(2, 1));</span>
+
+<span class="nc" id="L84">		JPanel clustNorth = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L85">		clustNorth.add(new JLabel(&quot;number of clusters:    &quot;));</span>
+<span class="nc" id="L86">		numOfClust = new JSpinner(new SpinnerNumberModel(3, 2, 37, 1));</span>
+<span class="nc" id="L87">		clustNorth.add(numOfClust);</span>
+
+<span class="nc" id="L89">		JPanel iterNorth = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L90">		iterNorth.add(new JLabel(&quot;number of iterations: &quot;));</span>
+<span class="nc" id="L91">		numOfIter = new JSpinner(new SpinnerNumberModel(4, 2, 50, 1));</span>
+<span class="nc" id="L92">		iterNorth.add(numOfIter);</span>
+
+<span class="nc" id="L94">		northCPanel.add(clustNorth);</span>
+<span class="nc" id="L95">		northCPanel.add(iterNorth);</span>
+
+<span class="nc" id="L97">		centralPanel.add(northCPanel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L99">		JPanel fuzzyPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L100">		fuzzyPanel.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;Fuzzy options&quot;)));</span>
+
+<span class="nc" id="L102">		JPanel option = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L103">		JPanel northOpt = new JPanel(new FlowLayout(FlowLayout.LEFT));</span>
+<span class="nc" id="L104">		northOpt.add(new JLabel(&quot;fuzziness level: &quot;));</span>
+<span class="nc" id="L105">		fuzzyLevel = new JSpinner(new SpinnerNumberModel(2, 2.0, 50.0, 0.1));</span>
+<span class="nc" id="L106">		northOpt.add(fuzzyLevel);</span>
+<span class="nc" id="L107">		option.add(northOpt, BorderLayout.NORTH);</span>
+<span class="nc" id="L108">		option.add(new JLabel(fuzzylevelDescription), BorderLayout.CENTER);</span>
+
+<span class="nc" id="L110">		JPanel descrFuzzy = new JPanel();</span>
+<span class="nc" id="L111">		descrFuzzy.add(new JLabel(FKMEANS_FLEVEL_DESCRIPTION));</span>
+
+<span class="nc" id="L113">		fuzzyPanel.add(option, BorderLayout.WEST);</span>
+<span class="nc" id="L114">		fuzzyPanel.add(descrFuzzy, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L116">		centralPanel.add(fuzzyPanel, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L118">		JPanel transf = new JPanel(new BorderLayout()); //Terzo panel</span>
+<span class="nc" id="L119">		transf.setBorder(new TitledBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;Transformations&quot;)));</span>
+<span class="nc" id="L120">		JPanel options = new JPanel(new GridLayout(3, 1)); //Panel ratio buttons</span>
+<span class="nc" id="L121">		noneT = new JRadioButton(&quot;none&quot;);</span>
+<span class="nc" id="L122">		minmaxT = new JRadioButton(&quot;(value - min) / (max - min)&quot;);</span>
+<span class="nc" id="L123">		stdDevT = new JRadioButton(&quot;(value - mean) / std. dev.&quot;);</span>
+<span class="nc" id="L124">		ButtonGroup op = new ButtonGroup();</span>
+<span class="nc" id="L125">		op.add(noneT);</span>
+<span class="nc" id="L126">		minmaxT.setSelected(true);</span>
+<span class="nc" id="L127">		op.add(minmaxT);</span>
+<span class="nc" id="L128">		op.add(stdDevT);</span>
+<span class="nc" id="L129">		options.add(noneT);</span>
+<span class="nc" id="L130">		options.add(minmaxT);</span>
+<span class="nc" id="L131">		options.add(stdDevT);</span>
+<span class="nc" id="L132">		transf.add(options, BorderLayout.EAST);</span>
+<span class="nc" id="L133">		transf.add(new JLabel(FKMEANS_OPTIONS_DESCRIPTION), BorderLayout.WEST);</span>
+
+<span class="nc" id="L135">		centralPanel.add(transf, BorderLayout.SOUTH);</span>
+<span class="nc" id="L136">	}</span>
+
+	private void setSolveAction() {
+<span class="nc" id="L139">		Action buttonAction = new AbstractAction() {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">				if (parent.getVarSelected().length &gt;= 2) {</span>
+<span class="nc" id="L145">					short trasf = VariableNumber.NONE;</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">					if (minmaxT.isSelected()) {</span>
+<span class="nc" id="L147">						trasf = VariableNumber.MINMAX;</span>
+					}
+<span class="nc bnc" id="L149" title="All 2 branches missed.">					if (stdDevT.isSelected()) {</span>
+<span class="nc" id="L150">						trasf = VariableNumber.STDEV;</span>
+					}
+<span class="nc" id="L152">					MainFuzzyKMean eng = new MainFuzzyKMean(new ProgressMonitorShow(parent, &quot;Processing...&quot;, 1), model.getMatrix(),</span>
+<span class="nc" id="L153">							parent.getVarSelected(), ((Integer) numOfClust.getValue()).intValue(), ((Integer) numOfIter.getValue()).intValue(),</span>
+<span class="nc" id="L154">							((Double) fuzzyLevel.getValue()).intValue(), trasf);</span>
+<span class="nc" id="L155">					eng.addStatusListener(lst);</span>
+<span class="nc" id="L156">					eng.start();</span>
+<span class="nc" id="L157">				} else {</span>
+<span class="nc" id="L158">					JOptionPane.showMessageDialog(parent, &quot;Select at least two variables to proceed with clustering&quot;, &quot;Warning&quot;,</span>
+							JOptionPane.WARNING_MESSAGE);
+				}
+<span class="nc" id="L161">			}</span>
+
+		};
+<span class="nc" id="L164">		((MainJwatWizard) parent.getParentWizard()).setActionButton(&quot;Solve&quot;, buttonAction);</span>
+
+<span class="nc" id="L166">		Action itemAction = new AbstractAction() {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			{
+<span class="nc" id="L171">				putValue(Action.SHORT_DESCRIPTION, &quot;Clusterize&quot;);</span>
+<span class="nc" id="L172">				putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Sim&quot;, new Dimension(BUTTONSIZE + 10,BUTTONSIZE + 10)));</span>
+<span class="nc" id="L173">				putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_L, ActionEvent.CTRL_MASK));</span>
+<span class="nc" id="L174">				putValue(Action.MNEMONIC_KEY, new Integer(KeyEvent.VK_L));</span>
+			}
+
+			public void actionPerformed(ActionEvent e) {
+<span class="nc bnc" id="L178" title="All 2 branches missed.">				if (parent.getVarSelected().length &gt;= 2) {</span>
+<span class="nc" id="L179">					short trasf = VariableNumber.NONE;</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">					if (minmaxT.isSelected()) {</span>
+<span class="nc" id="L181">						trasf = VariableNumber.MINMAX;</span>
+					}
+<span class="nc bnc" id="L183" title="All 2 branches missed.">					if (stdDevT.isSelected()) {</span>
+<span class="nc" id="L184">						trasf = VariableNumber.STDEV;</span>
+					}
+<span class="nc" id="L186">					MainFuzzyKMean eng = new MainFuzzyKMean(new ProgressMonitorShow(parent, &quot;Processing...&quot;, 1), model.getMatrix(),</span>
+<span class="nc" id="L187">							parent.getVarSelected(), ((Integer) numOfClust.getValue()).intValue(), ((Integer) numOfIter.getValue()).intValue(),</span>
+<span class="nc" id="L188">							((Double) fuzzyLevel.getValue()).intValue(), trasf);</span>
+<span class="nc" id="L189">					eng.addStatusListener(lst);</span>
+<span class="nc" id="L190">					eng.start();</span>
+<span class="nc" id="L191">				} else {</span>
+<span class="nc" id="L192">					JOptionPane.showMessageDialog(parent, &quot;Select at least two variables to proceed with clustering&quot;, &quot;Warning&quot;,</span>
+							JOptionPane.WARNING_MESSAGE);
+				}
+<span class="nc" id="L195">			}</span>
+
+		};
+<span class="nc" id="L198">		((MainJwatWizard) parent.getParentWizard()).setActionMenuBar(&quot;Clusterize&quot;, itemAction);</span>
+<span class="nc" id="L199">		((MainJwatWizard) parent.getParentWizard()).setActionToolBar(&quot;Clusterize&quot;, itemAction);</span>
+
+<span class="nc" id="L201">		((MainJwatWizard) parent.getParentWizard()).setEnableButton(&quot;Solve&quot;, true);</span>
+<span class="nc" id="L202">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

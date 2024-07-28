@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWatVariableInputTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.tables</a> &gt; <span class="el_source">JWatVariableInputTable.java</span></div><h1>JWatVariableInputTable.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.workloadAnalysis.tables;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.DefaultCellEditor;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.table.ComboBoxCell;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
+
+public class JWatVariableInputTable extends JTable implements CommonConstants, JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	/* Set of column dimensions */
+<span class="nc" id="L56">	protected int[] columnSizes = new int[] { 38, 100, 60, 145, 30, 100, 30, 30, 18 };</span>
+
+<span class="nc" id="L58">	public static final Object[] VarTypes = new Object[] { &quot;Numeric&quot;, &quot;String&quot;, &quot;Date&quot; };</span>
+<span class="nc" id="L59">	protected JComboBox combobox = new JComboBox(VarTypes);</span>
+
+<span class="nc" id="L61">	protected AbstractAction deleteVar = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L66">			putValue(Action.SHORT_DESCRIPTION, &quot;Delete&quot;);</span>
+<span class="nc" id="L67">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L71">			((JWatVariableInputTableModel) JWatVariableInputTable.this.getModel()).deleteRow(JWatVariableInputTable.this.getSelectedRow());</span>
+<span class="nc" id="L72">			JWatVariableInputTable.this.tableChanged(new TableModelEvent(JWatVariableInputTable.this.getModel()));</span>
+<span class="nc" id="L73">			fireDeleteEvent();</span>
+<span class="nc" id="L74">		}</span>
+
+	};
+
+<span class="nc" id="L78">	protected JButton delVar = new JButton() {</span>
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L82">			setAction(deleteVar);</span>
+<span class="nc" id="L83">			setFocusable(true);</span>
+		}
+	};
+
+	// Sets a table model for visualization and editing of data
+	public void setModel(JWatVariableInputTableModel tabMod) {
+<span class="nc" id="L89">		super.setModel(tabMod);</span>
+<span class="nc" id="L90">		sizeColumnsAndRows();</span>
+<span class="nc" id="L91">		setRowHeight(ROW_HEIGHT);</span>
+		// Arif Canakoglu: name column is not a combobox
+<span class="nc" id="L93">		this.getColumnModel().getColumn(columnSizes.length - 1).setCellEditor(new ButtonCellEditor(new JButton(deleteVar)));</span>
+<span class="nc" id="L94">	}</span>
+
+	// set sizes for columns and rows of this table.
+	protected void sizeColumnsAndRows() {
+<span class="nc bnc" id="L98" title="All 4 branches missed.">		for (int i = 0; i &lt; columnSizes.length &amp;&amp; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L99">			this.getColumnModel().getColumn(i).setPreferredWidth(columnSizes[i]);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			if (i == 2) {</span>
+<span class="nc" id="L101">				this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);</span>
+			}
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			if (i == 0) {</span>
+<span class="nc" id="L104">				this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);</span>
+			}
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			if (i == columnSizes.length - 1) {</span>
+				// delete button and containing table cells as well, must be square
+<span class="nc" id="L108">				this.getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);</span>
+<span class="nc" id="L109">				this.setRowHeight(columnSizes[i]);</span>
+			}
+		}
+<span class="nc" id="L112">	}</span>
+
+	@Override
+	public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		if (column == 2) {</span>
+<span class="nc" id="L117">			return new ComboBoxCell(VarTypes);</span>
+<span class="nc bnc" id="L118" title="All 2 branches missed.">		} else if (column == columnSizes.length - 1) {</span>
+<span class="nc" id="L119">			return new ButtonCellEditor(delVar);</span>
+		} else {
+<span class="nc" id="L121">			return super.getCellRenderer(row, column);</span>
+		}
+	}
+
+	/* returns customized editor for table cells. */
+	@Override
+	public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		if (column == 2) {</span>
+<span class="nc" id="L129">			return new DefaultCellEditor(combobox);</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		} else if (column == columnSizes.length - 1) {</span>
+<span class="nc" id="L131">			return new ButtonCellEditor(new JButton(deleteVar));</span>
+		} else {
+<span class="nc" id="L133">			return super.getCellEditor(row, column);</span>
+		}
+	}
+
+	protected MouseHandler mouseHandler;
+<span class="nc" id="L138">	private Vector&lt;RowDeleteListener&gt; deleteLisener = new Vector&lt;RowDeleteListener&gt;(); //&lt;RowDeleteListener&gt;</span>
+
+	public void addDeleteRowListener(RowDeleteListener r) {
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		if (!deleteLisener.contains(r)) {</span>
+<span class="nc" id="L142">			deleteLisener.add(r);</span>
+		}
+<span class="nc" id="L144">	}</span>
+
+	private void fireDeleteEvent() {
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		for (int i = 0; i &lt; deleteLisener.size(); i++) {</span>
+<span class="nc" id="L148">			deleteLisener.get(i).rowsDeletedEvent();</span>
+		}
+<span class="nc" id="L150">	}</span>
+
+<span class="nc" id="L152">	public AbstractAction CLEAR_ACTION = new AbstractAction(&quot;Clear&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L157">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L158">			putValue(Action.SHORT_DESCRIPTION, &quot;Clears selected cells&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L162">			clearCells();</span>
+<span class="nc" id="L163">		}</span>
+
+	};
+
+<span class="nc" id="L167">	public AbstractAction DESEL_ACTION = new AbstractAction(&quot;Deselect all&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L172">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L173">			putValue(Action.SHORT_DESCRIPTION, &quot;Deselected all variable in format table&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L177">			((JWatVariableInputTableModel) dataModel).deselectAll();</span>
+<span class="nc" id="L178">			tableChanged(new TableModelEvent(dataModel));</span>
+<span class="nc" id="L179">		}</span>
+
+	};
+
+<span class="nc" id="L183">	private AbstractAction deleteClass = new AbstractAction(&quot;Delete selected varaible&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L188">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0, false));</span>
+<span class="nc" id="L189">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes selected variable from the format&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L193">			clearCells();</span>
+<span class="nc" id="L194">		}</span>
+
+	};
+
+<span class="nc" id="L198">	private AbstractAction deselectAll = new AbstractAction(&quot;Deselect all variables&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L203">			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_D, ActionEvent.CTRL_MASK, false));</span>
+<span class="nc" id="L204">			putValue(Action.SHORT_DESCRIPTION, &quot;Deselected all variable in format table&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L208">			((JWatVariableInputTableModel) dataModel).deselectAll();</span>
+<span class="nc" id="L209">			tableChanged(new TableModelEvent(dataModel));</span>
+<span class="nc" id="L210">		}</span>
+
+	};
+
+	protected void installKeyboard() {
+<span class="nc" id="L215">		InputMap im = getInputMap();</span>
+<span class="nc" id="L216">		ActionMap am = getActionMap();</span>
+<span class="nc" id="L217">		installKeyboardAction(im, am, CLEAR_ACTION);</span>
+<span class="nc" id="L218">		installKeyboardAction(im, am, DESEL_ACTION);</span>
+<span class="nc" id="L219">	}</span>
+
+	protected void installKeyboardAction(Action a) {
+<span class="nc" id="L222">		installKeyboardAction(getInputMap(), getActionMap(), a);</span>
+<span class="nc" id="L223">	}</span>
+
+	protected void installKeyboardAction(InputMap im, ActionMap am, Action a) {
+<span class="nc" id="L226">		Object name = a.getValue(Action.NAME);</span>
+<span class="nc" id="L227">		KeyStroke key = (KeyStroke) a.getValue(Action.ACCELERATOR_KEY);</span>
+<span class="nc" id="L228">		im.put(key, name);</span>
+<span class="nc" id="L229">		am.put(name, a);</span>
+<span class="nc" id="L230">	}</span>
+
+	private void clearCells() {
+<span class="nc" id="L233">		int numrows = getSelectedRowCount();</span>
+<span class="nc" id="L234">		int[] rowsselected = getSelectedRows();</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">		for (int i = 0; i &lt; numrows; i++) {</span>
+<span class="nc" id="L236">			((JWatVariableInputTableModel) dataModel).deleteRow(rowsselected[numrows - 1 - i]);</span>
+		}
+<span class="nc" id="L238">		tableChanged(new TableModelEvent(dataModel));</span>
+<span class="nc" id="L239">		fireDeleteEvent();</span>
+<span class="nc" id="L240">	}</span>
+
+	public JWatVariableInputTable() {
+<span class="nc" id="L243">		super();</span>
+<span class="nc" id="L244">		combobox.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc bnc" id="L247" title="All 2 branches missed.">				if (JWatVariableInputTable.this.getSelectedRow() != -1) {</span>
+<span class="nc bnc" id="L248" title="All 4 branches missed.">					switch (combobox.getSelectedIndex()) {</span>
+					case NUMERIC:
+<span class="nc" id="L250">						JWatVariableInputTable.this.setValueAt(&quot;&quot;, JWatVariableInputTable.this.getSelectedRow(), 4);</span>
+<span class="nc" id="L251">						JWatVariableInputTable.this.setValueAt(&quot;([+-])?\\d+([.]\\d+)?&quot;, JWatVariableInputTable.this.getSelectedRow(), 5);</span>
+<span class="nc" id="L252">						break;</span>
+					case STRING:
+<span class="nc" id="L254">						JWatVariableInputTable.this.setValueAt(&quot;\&quot;&quot;, JWatVariableInputTable.this.getSelectedRow(), 4);</span>
+<span class="nc" id="L255">						JWatVariableInputTable.this.setValueAt(&quot;\\w+&quot;, JWatVariableInputTable.this.getSelectedRow(), 5);</span>
+<span class="nc" id="L256">						break;</span>
+					case DATE:
+<span class="nc" id="L258">						JWatVariableInputTable.this.setValueAt(&quot;[]&quot;, JWatVariableInputTable.this.getSelectedRow(), 4);</span>
+<span class="nc" id="L259">						JWatVariableInputTable.this.setValueAt(&quot;\\d\\d/\\w\\w\\w/\\d\\d\\d\\d:\\d\\d:\\d\\d:\\d\\d[^\\]]+&quot;,</span>
+<span class="nc" id="L260">								JWatVariableInputTable.this.getSelectedRow(), 5);</span>
+<span class="nc" id="L261">						break;</span>
+					default:
+					}
+				}
+<span class="nc" id="L265">			}</span>
+		});
+<span class="nc" id="L267">		setSelectionBackground(new Color(83, 126, 126));</span>
+<span class="nc" id="L268">		setSelectionForeground(Color.BLACK);</span>
+<span class="nc" id="L269">		installKeyboard();</span>
+<span class="nc" id="L270">		installMouse();</span>
+<span class="nc" id="L271">	}</span>
+
+	protected JPopupMenu makeMouseMenu() {
+<span class="nc" id="L274">		JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L275">		menu.add(deleteClass);</span>
+<span class="nc" id="L276">		menu.add(new JSeparator());</span>
+<span class="nc" id="L277">		menu.add(deselectAll);</span>
+<span class="nc" id="L278">		return menu;</span>
+	}
+
+	protected void installMouse() {
+<span class="nc" id="L282">		mouseHandler = new MouseHandler(makeMouseMenu());</span>
+<span class="nc" id="L283">		mouseHandler.install();</span>
+<span class="nc" id="L284">	}</span>
+
+	private void controlSelection() {
+<span class="nc bnc" id="L287" title="All 2 branches missed.">		if (getSelectedRow() != -1) {</span>
+<span class="nc" id="L288">			CLEAR_ACTION.setEnabled(true);</span>
+<span class="nc" id="L289">			deleteClass.setEnabled(true);</span>
+		} else {
+<span class="nc" id="L291">			CLEAR_ACTION.setEnabled(false);</span>
+<span class="nc" id="L292">			deleteClass.setEnabled(false);</span>
+		}
+<span class="nc" id="L294">	}</span>
+
+	protected class MouseHandler extends MouseAdapter {
+
+		private boolean isInstalled;
+		private JPopupMenu menu;
+
+<span class="nc" id="L301">		public MouseHandler(JPopupMenu menu) {</span>
+<span class="nc" id="L302">			this.menu = menu;</span>
+<span class="nc" id="L303">		}</span>
+
+		public void install() {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			if (!isInstalled) {</span>
+<span class="nc" id="L307">				addMouseListener(this);</span>
+<span class="nc" id="L308">				isInstalled = true;</span>
+			}
+<span class="nc" id="L310">		}</span>
+
+		public void uninstall() {
+<span class="nc bnc" id="L313" title="All 2 branches missed.">			if (isInstalled) {</span>
+<span class="nc" id="L314">				removeMouseListener(this);</span>
+<span class="nc" id="L315">				isInstalled = false;</span>
+			}
+<span class="nc" id="L317">		}</span>
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+<span class="nc" id="L321">			processME(e);</span>
+<span class="nc" id="L322">		}</span>
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L326">			processME(e);</span>
+<span class="nc" id="L327">		}</span>
+
+		protected void processME(MouseEvent e) {
+<span class="nc bnc" id="L330" title="All 2 branches missed.">			if (e.isPopupTrigger()) {</span>
+<span class="nc" id="L331">				controlSelection();</span>
+<span class="nc" id="L332">				menu.show(e.getComponent(), e.getX(), e.getY());</span>
+			}
+<span class="nc" id="L334">		}</span>
+
+		public JPopupMenu getMenu() {
+<span class="nc" id="L337">			return menu;</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TANotifier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov.Graphics</a> &gt; <span class="el_source">TANotifier.java</span></div><h1>TANotifier.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * Created on 16-mar-2004 by Ernesto
+ *
+ */
+package jmt.jmarkov.Graphics;
+
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.jmarkov.Graphics.constants.DrawConstrains;
+import jmt.jmarkov.Graphics.constants.DrawNormal;
+import jmt.jmarkov.utils.Formatter;
+
+// this is using for showing log
+public class TANotifier extends JTable implements Notifier {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	//private static final String newline = System.getProperty(&quot;line.separator&quot;);
+	DefaultTableModel model;
+	//private int MAXIMUM_LOG = 1000000;
+
+	//for using avg jobs in Q + Server
+	private double totNumberOfJobsInSystem;
+
+	private double lastUpdateTimeNumJobs;
+	private int numberOfJobsInTheSystem;
+
+	//avg utilization
+	//avg service time
+	private double totalServiceTime;
+
+	//avg throughput
+	private int totalCustomerExit;
+
+	//avg response time
+	private double totalResponseTime;
+
+	//total customer arrived
+	//arrival rate
+	private int totalCustomerArrived;
+
+	private int numberOfJobLost;
+
+<span class="nc" id="L70">	private static String columnNames[] = { &quot;&quot;, &quot;Simulation Result&quot;, &quot;Analytical Result&quot; };</span>
+
+<span class="nc" id="L72">	private static String rowNames[] = { &quot;Avg. Cust. N in Station (Queue+Service)&quot;,//0</span>
+			&quot;Avg. Utilization(All Servers) U&quot;,//1
+			&quot;Avg. Throughput X&quot;,//2
+			&quot;Avg. Response Time R&quot;,//3
+			&quot;Arrival Rate (lambda)&quot;,//4
+			&quot;Avg. Service Time S&quot;,//5
+			&quot;Cust. Dropped Rate&quot;, //6
+			&quot;Total Customer Arrived&quot;,//7
+			&quot;Current Simulation Time&quot;//8
+	};
+
+<span class="nc" id="L83">	private static String rowUnit[] = { &quot; cust.&quot;,//0</span>
+			&quot; &quot;,//1
+			&quot; cust./s&quot;,//2
+			&quot; s&quot;,//3
+			&quot; cust./s&quot;,//4
+			&quot; s&quot;,//5
+			&quot; &quot;, //6
+			&quot; cust.&quot;,//7
+			&quot; s&quot;//8
+	};
+
+	/**
+	 * 
+	 */
+	public TANotifier() {
+<span class="nc" id="L98">		super();</span>
+<span class="nc" id="L99">		initTable();</span>
+<span class="nc" id="L100">		reset();</span>
+<span class="nc" id="L101">	}</span>
+
+	void initTable() {
+<span class="nc" id="L104">		this.setFont(new DrawNormal().getFont());</span>
+<span class="nc" id="L105">		model = new DefaultTableModel() {</span>
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isCellEditable(int row, int col) {
+<span class="nc" id="L113">				return false;</span>
+			}
+		};
+<span class="nc" id="L116">		super.setModel(model);</span>
+
+<span class="nc" id="L118">		TableCellRenderer renderer = new DefaultTableCellRenderer() {</span>
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc" id="L126">				Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">				if (!isSelected) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">					if (column == 0) {</span>
+<span class="nc" id="L129">						cell.setBackground(Color.LIGHT_GRAY);</span>
+					} else {
+<span class="nc" id="L131">						cell.setBackground(Color.WHITE);</span>
+					}
+<span class="nc bnc" id="L133" title="All 2 branches missed.">				} else if (column == 0) {</span>
+<span class="nc" id="L134">					cell.setBackground(Color.DARK_GRAY);</span>
+				} else {
+<span class="nc" id="L136">					cell.setBackground(Color.BLUE);</span>
+				}
+
+<span class="nc" id="L139">				return cell;</span>
+			}
+		};
+<span class="nc" id="L142">		this.setDefaultRenderer(Object.class, renderer);</span>
+<span class="nc" id="L143">		this.getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		for (String columnName : columnNames) {</span>
+<span class="nc" id="L145">			model.addColumn(columnName);</span>
+		}
+<span class="nc bnc" id="L147" title="All 2 branches missed.">		for (int row = 0; row &lt; rowNames.length; row++) {</span>
+<span class="nc" id="L148">			setCell(row, 0, rowNames[row]);</span>
+		}
+
+<span class="nc" id="L151">	}</span>
+
+	private void setCell(int row, int column, Object value) {
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		while (model.getRowCount() - 1 &lt; row) {</span>
+<span class="nc" id="L155">			model.addRow(new Object[] {});</span>
+		}
+<span class="nc bnc" id="L157" title="All 4 branches missed.">		if (value == null || column == 0) {</span>
+<span class="nc" id="L158">			model.setValueAt(value, row, column);</span>
+		} else {
+<span class="nc" id="L160">			model.setValueAt(value.toString() + rowUnit[row], row, column);</span>
+		}
+<span class="nc" id="L162">	}</span>
+
+	private void setCell(int row, int column, String value) {
+<span class="nc" id="L165">		setCell(row, column, (Object) value);</span>
+<span class="nc" id="L166">	}</span>
+
+	private void setCell(int row, int column, int value) {
+<span class="nc" id="L169">		setCell(row, column, Formatter.formatNumber(value, 0));</span>
+<span class="nc" id="L170">	}</span>
+
+	private void setCell(int row, int column, double value) {
+<span class="nc" id="L173">		setCell(row, column, Formatter.formatNumber(value, 2));</span>
+<span class="nc" id="L174">	}</span>
+
+	private void currentTime(double time) {
+<span class="nc" id="L177">		setCell(8, 1, (int) time);</span>
+<span class="nc" id="L178">	}</span>
+
+	private void updateJobsInSystem(double now) {
+<span class="nc" id="L181">		totNumberOfJobsInSystem += (now - lastUpdateTimeNumJobs) * numberOfJobsInTheSystem;</span>
+<span class="nc" id="L182">		lastUpdateTimeNumJobs = now;</span>
+		//average jobs in Q+S : totNumberOfJobsInSystem / now; #jobs
+<span class="nc" id="L184">		setCell(0, 1, totNumberOfJobsInSystem / now);</span>
+<span class="nc" id="L185">	}</span>
+
+	private void updateUtilization(double enterCpuTime, double exitSystemTime) {
+<span class="nc" id="L188">		double now = exitSystemTime;</span>
+<span class="nc" id="L189">		totalServiceTime += exitSystemTime - enterCpuTime;</span>
+		//average utilization : totalServiceTime / now
+		//average service time : totalServiceTime / totalCustomerExit 
+<span class="nc" id="L192">		setCell(1, 1, totalServiceTime / now);</span>
+<span class="nc" id="L193">		setCell(5, 1, totalServiceTime / totalCustomerExit);</span>
+<span class="nc" id="L194">	}</span>
+
+	private void updateThroughput(double now) {
+<span class="nc" id="L197">		totalCustomerExit++;</span>
+		//average throughput : totalCustomerExit / now  # jobs/s
+<span class="nc" id="L199">		setCell(2, 1, totalCustomerExit / now);</span>
+<span class="nc" id="L200">	}</span>
+
+	private void updateResponseTime(double enterQueueTime, double exitSystemTime) {
+<span class="nc" id="L203">		totalResponseTime += exitSystemTime - enterQueueTime;</span>
+		//average response time = totalResponseTime / totalcustomerexit
+<span class="nc" id="L205">		setCell(3, 1, totalResponseTime / totalCustomerExit);</span>
+<span class="nc" id="L206">	}</span>
+
+	private void updateCustomerArrived(double now) {
+<span class="nc" id="L209">		totalCustomerArrived++;</span>
+		//total customer arrived : totalCustomerArrived
+		//arrival rate : totalcustomerarrived / now
+<span class="nc" id="L212">		setCell(4, 1, totalCustomerArrived / now);</span>
+<span class="nc" id="L213">		setCell(7, 1, totalCustomerArrived);</span>
+<span class="nc" id="L214">	}</span>
+
+	private void updateJobLost() {
+<span class="nc" id="L217">		numberOfJobLost++;</span>
+		//avg number of dropped job :  numberOfJobLost/ totalCustomerArrived
+<span class="nc" id="L219">		setCell(6, 1, (double) numberOfJobLost / (double) totalCustomerArrived);</span>
+<span class="nc" id="L220">	}</span>
+
+	/**
+	 * @param dCst
+	 */
+	public void changeDrawSettings(DrawConstrains dCst) {
+<span class="nc" id="L226">		this.setFont(dCst.getFont());</span>
+<span class="nc" id="L227">	}</span>
+
+	public void enterProcessor(int jobId, int processorId, double time, double executionTime) {
+		//setCell(jobId, 2, time / 1000);
+		//setCell(jobId, 3, processorId);
+<span class="nc" id="L232">	}</span>
+
+	public void enterQueue(int jobId, double time) {
+		//setCell(jobId, 0, jobId);
+		//setCell(jobId, 1, time / 1000);
+<span class="nc" id="L237">		updateJobsInSystem(time / 1000);</span>
+<span class="nc" id="L238">		numberOfJobsInTheSystem++;</span>
+<span class="nc" id="L239">		updateCustomerArrived(time / 1000);</span>
+<span class="nc" id="L240">		currentTime(time / 1000);</span>
+<span class="nc" id="L241">	}</span>
+
+	public void exitProcessor(int jobId, int processorId, double time) {
+		//setCell(jobId, 4, time / 1000);
+<span class="nc" id="L245">		updateJobsInSystem(time / 1000);</span>
+<span class="nc" id="L246">		numberOfJobsInTheSystem--;</span>
+<span class="nc" id="L247">		updateThroughput(time / 1000);</span>
+<span class="nc" id="L248">		currentTime(time / 1000);</span>
+<span class="nc" id="L249">	}</span>
+
+	public void exitQueue(int jobId, double time) {
+<span class="nc" id="L252">		currentTime(time / 1000);</span>
+<span class="nc" id="L253">	}</span>
+
+	public void exitSystem(int jobId, int processorId, double enterQueueTime, double enterCpuTime, double exitSystemTime) {
+<span class="nc" id="L256">		updateUtilization(enterCpuTime / 1000, exitSystemTime / 1000);</span>
+<span class="nc" id="L257">		updateResponseTime(enterQueueTime / 1000, exitSystemTime / 1000);</span>
+<span class="nc" id="L258">	}</span>
+
+	public void jobLost(int jobId, double time) {
+		//setCell(jobId, 0, jobId);
+		//setCell(jobId, 1, time / 1000);
+		//setCell(jobId, 2, &quot;Dropped&quot;);
+		//setCell(jobId, 3, &quot;Dropped&quot;);
+		//setCell(jobId, 4, &quot;Dropped&quot;);
+<span class="nc" id="L266">		updateCustomerArrived(time / 1000);</span>
+<span class="nc" id="L267">		updateJobLost();</span>
+<span class="nc" id="L268">		currentTime(time / 1000);</span>
+<span class="nc" id="L269">	}</span>
+
+	public void reset() {
+		//setText(&quot;&quot;);
+		//model.setRowCount(0);
+		//model.getDataVector().clear();
+<span class="nc" id="L275">		totNumberOfJobsInSystem = 0;</span>
+<span class="nc" id="L276">		lastUpdateTimeNumJobs = 0;</span>
+<span class="nc" id="L277">		numberOfJobsInTheSystem = 0;</span>
+
+<span class="nc" id="L279">		totalServiceTime = 0;</span>
+
+<span class="nc" id="L281">		totalCustomerExit = 0;</span>
+
+<span class="nc" id="L283">		totalResponseTime = 0;</span>
+
+<span class="nc" id="L285">		totalCustomerArrived = 0;</span>
+
+<span class="nc" id="L287">		numberOfJobLost = 0;</span>
+
+<span class="nc bnc" id="L289" title="All 2 branches missed.">		for (int i = 0; i &lt; rowNames.length; i++) {</span>
+<span class="nc" id="L290">			setCell(i, 1, null);</span>
+<span class="nc" id="L291">			setCell(i, 2, null);</span>
+		}
+<span class="nc" id="L293">	}</span>
+
+	public void updateProcessor(int jobId, int processorId, double remainingTime, double time) {
+<span class="nc" id="L296">		currentTime(time / 1000);</span>
+<span class="nc" id="L297">	}</span>
+
+	public void updateQueue(int jobId, double time) {
+<span class="nc" id="L300">		currentTime(time / 1000);</span>
+
+<span class="nc" id="L302">	}</span>
+
+	public void refresh() {
+
+<span class="nc" id="L306">	}</span>
+
+	public void setAnalyticalResult(double avgCustInStation,//1
+			double avgUtilization,//2
+			double avgThroughput,//3
+			double avgResponseTime,//4
+			double arrivalRate,//5
+			double serviceTime,//6
+			double custDroppedRate)//7
+	{
+<span class="nc" id="L316">		setCell(0, 2, avgCustInStation);</span>
+<span class="nc" id="L317">		setCell(1, 2, avgUtilization);</span>
+<span class="nc" id="L318">		setCell(2, 2, avgThroughput);</span>
+<span class="nc" id="L319">		setCell(3, 2, avgResponseTime);</span>
+<span class="nc" id="L320">		setCell(4, 2, arrivalRate);</span>
+<span class="nc" id="L321">		setCell(5, 2, serviceTime);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		if (custDroppedRate == 0) {</span>
+<span class="nc" id="L323">			setCell(6, 2, &quot;---&quot;);</span>
+		} else {
+<span class="nc" id="L325">			setCell(6, 2, custDroppedRate);</span>
+		}
+<span class="nc" id="L327">		setCell(7, 2, &quot;---&quot;);</span>
+<span class="nc" id="L328">		setCell(8, 2, &quot;---&quot;);</span>
+
+<span class="nc" id="L330">	}</span>
+
+	public void setAnalyticalResult() {
+<span class="nc bnc" id="L333" title="All 2 branches missed.">		for (int i = 0; i &lt; rowNames.length - 2; i++) {</span>
+<span class="nc" id="L334">			setCell(i, 2, &quot;---&quot;);</span>
+		}
+<span class="nc" id="L336">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

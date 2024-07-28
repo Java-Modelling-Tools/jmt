@@ -1,0 +1,2820 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExactModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical</a> &gt; <span class="el_source">ExactModel.java</span></div><h1>ExactModel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.jmva.analytical.exactModelUtils.ExactDocumentCreator;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.util.*;
+
+import static jmt.jmva.analytical.exactModelUtils.ExactDocumentConstants.*;
+
+/**
+ * An object grouping all the data describing a system.
+ * &lt;br&gt;&lt;br&gt;
+ * WARNING:
+ * ACCESS TO THIS OBJECT MUST BE IMPLEMENTED IN A TRANSACTION-LIKE SYNCHRONIZED WAY!
+ *
+ * @author alyf (Andrea Conti), Stefano Omini, Bertoli Marco
+ * 
+ * @author Ashanka
+ * Cleaned code by removing unnecessary comments of old code.
+ * @version Date: Sep-2009
+ * 
+ * @author Kourosh
+ *  Add a new property ReferenceStation which is used to declare the reference station for each closed class. and save and load the files
+ * @version Date: OCT-2013
+ * @author Cerotti
+ *  Fixed results retrieval according to reference station
+ * @version Date: JAN-2015
+ */
+
+// TODO: This file needs breaking up, it's too big
+// E.g. separate the functions for saving and loading into a separate file
+// (maybe even 2 separate files, 1 for loading, 1 for saving)
+// The WhatIf parts could be in a separate class and then composition used if the file is still too long
+
+public class ExactModel implements ExactConstants  {
+
+	//Set by default to the Exact MVA algorithm
+<span class="nc" id="L63">	public SolverAlgorithm algorithmType = SolverAlgorithm.EXACT;</span>
+	//Set by default if user does not enter a tolerance value
+<span class="nc" id="L65">	public double tolerance = SolverMultiClosedAMVA.DEFAULT_TOLERANCE;</span>
+	//Set by default if user does not enter a max samples value
+	//private int maxSamples = SolverMultiClosedMonteCarlo.DEFAULT_MAX_SAMPLES;
+<span class="nc" id="L68">	private int maxSamples = SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES;</span>
+	//Names of the algorithms to be compared
+	private Set&lt;SolverAlgorithm&gt; whatifAlgorithms;
+	private Map&lt;SolverAlgorithm, Double&gt; whatifAlgorithmsTolerance;
+	private Map&lt;SolverAlgorithm, Integer&gt; whatifAlgorithmsMaxSamples;
+
+	//true if the model is closed
+	private boolean closed;
+	//true if the model is open
+	private boolean open;
+	//true if the model contains load dependent stations
+	private boolean ld;
+	//true if visits are set (otherwise they will be all unitary)
+	private boolean unitaryVisits;
+	//true if the model contains priority stations
+	private boolean priority;
+
+	//true if the model has been modified
+	private boolean changed;
+	//true if results are available
+	private boolean hasResults;
+	//true if the results are valid (no modify has been made in the model after results computation)
+	private boolean resultsOK;
+	//description of the model
+	private String description;
+
+	/***********************STATIONS AND CLASSES******************************/
+
+	//number of service centers
+	private int stations;
+	//number of classes
+	private int classes;
+	//total population (computed as the sum of all closed class populations)
+	private int totalPop;
+
+	//class data is class population for closed classes, class arrival rate for open classes
+	//dim: classData[classes]
+	private double[] classData;
+	//station names
+	//dim: stationNames[stations]
+	private String[] stationNames;
+	//station types
+	//dim: stationTypes[stations]
+	private int[] stationTypes;
+	//number of servers of each station
+	//dim: stationServers[stations]
+	private int[] stationServers;
+	//class names
+	//dim: classNames[classes]
+	private String[] classNames;
+	//class types
+	//dim: classTypes[classes]
+	private int[] classTypes;
+	//class priorities
+	//dim: classPriorities[classes]
+	private int[] classPriorities;
+	//class refstations
+	//private double[][] ReferenceStation;
+	private int[] referenceStation;
+
+	/***********************SERVICE PARAMETERS**************************/
+
+	/**
+	 * visits to the service centers
+	 * dim: visits[stations][classes]
+	 */
+	private double[][] visits;
+	/**
+	 * service times of the service centers
+	 * dim: serviceTimes[stations][classes][p]
+	 * p=totalPop   if stationTypes[s]==STATION_LD
+	 * p=1          otherwise
+	 */
+	private double[][][] serviceTimes;
+
+	/***********************RESULTS******************************/
+
+	/**
+	 * number of iterations algorithm performed for each (what-if) iteration/execution
+	 * dim: algIterations&lt;Algorithm, [iterations]&gt;
+	 */
+	private Map&lt;SolverAlgorithm, int[]&gt; algIterations;
+
+	/**
+	 * queue length
+	 * dim: queueLen&lt;Algorithm, [stations][classes][iterations]&gt;
+	 */
+	private Map&lt;SolverAlgorithm, double[][][]&gt; queueLen;
+
+	/**
+	 * throughput
+	 * dim: throughput&lt;Algorithm, [stations][classes][iterations]&gt;
+	 */
+	private Map&lt;SolverAlgorithm, double[][][]&gt; throughput;
+
+	/**
+	 * residence times
+	 * dim: resTimes&lt;Algorithm, [stations][classes][iterations]&gt;
+	 */
+	private Map&lt;SolverAlgorithm, double[][][]&gt; resTimes;
+
+	/**
+	 * utilization
+	 * dim: util&lt;Algorithm, [stations][classes][iterations]&gt;
+	 */
+	private Map&lt;SolverAlgorithm, double[][][]&gt; util;
+
+	/**
+	 * logarithm of normalising constants
+	 * dim: logNormConst&lt;Algorithm, 1&gt;
+	 */
+	private Map&lt;SolverAlgorithm, Double&gt; logNormConst;
+
+	/*****************************************************************/
+	//parameters for randomization
+	private static final double MAXRAND = 100;
+	private static final double MAXRANGE = 10;
+
+	/*****************************************************************/
+
+	/********************** WHAT-IF ANALYSIS *** Bertoli Marco *******/
+	/** Number of iterations (1 for normal use, &gt;1 for what-if analysis) */
+<span class="nc" id="L190">	private int iterations = 1;</span>
+	/** Index of class selected for what-if analysis. -1 means all classes */
+<span class="nc" id="L192">	private int whatIfClass = -1;</span>
+	/** Index of station selected for what-if analysis. -1 means all stations */
+<span class="nc" id="L194">	private int whatIfStation = -1;</span>
+	/**
+	 * Type of what-if analysis
+	 * @see ExactConstants
+	 */
+	private String whatIfType;
+	/** Array with considered values */
+	private double[] whatIfValues;
+
+	/**
+	 * make an object with default values
+	 */
+<span class="nc" id="L206">	public ExactModel() {</span>
+<span class="nc" id="L207">		setDefaults();</span>
+<span class="nc" id="L208">	}</span>
+
+	/**
+	 * copy constructor
+	 */
+<span class="nc" id="L213">	public ExactModel(ExactModel e) {</span>
+<span class="nc" id="L214">		closed = e.closed;</span>
+<span class="nc" id="L215">		open = e.open;</span>
+<span class="nc" id="L216">		unitaryVisits = e.unitaryVisits;</span>
+<span class="nc" id="L217">		hasResults = e.hasResults;</span>
+<span class="nc" id="L218">		resultsOK = e.resultsOK;</span>
+<span class="nc" id="L219">		changed = e.changed;</span>
+
+<span class="nc" id="L221">		stations = e.stations;</span>
+<span class="nc" id="L222">		classes = e.classes;</span>
+<span class="nc" id="L223">		totalPop = e.totalPop;</span>
+
+<span class="nc" id="L225">		description = e.description;</span>
+
+<span class="nc" id="L227">		stationNames = ArrayUtils.copy(e.stationNames);</span>
+<span class="nc" id="L228">		stationTypes = ArrayUtils.copy(e.stationTypes);</span>
+<span class="nc" id="L229">		stationServers = ArrayUtils.copy(e.stationServers);</span>
+
+<span class="nc" id="L231">		classNames = ArrayUtils.copy(e.classNames);</span>
+<span class="nc" id="L232">		classTypes = ArrayUtils.copy(e.classTypes);</span>
+<span class="nc" id="L233">		classData = ArrayUtils.copy(e.classData);</span>
+<span class="nc" id="L234">		classPriorities = ArrayUtils.copy(e.classPriorities);</span>
+
+<span class="nc" id="L236">		algorithmType = e.algorithmType;</span>
+<span class="nc" id="L237">		tolerance = e.tolerance;</span>
+<span class="nc" id="L238">		maxSamples = e.maxSamples;</span>
+<span class="nc" id="L239">		whatifAlgorithms = EnumSet.copyOf(e.whatifAlgorithms);</span>
+<span class="nc" id="L240">		whatifAlgorithmsTolerance = new EnumMap&lt;SolverAlgorithm, Double&gt;(e.whatifAlgorithmsTolerance);</span>
+<span class="nc" id="L241">		whatifAlgorithmsMaxSamples = new EnumMap&lt;SolverAlgorithm, Integer&gt;(e.whatifAlgorithmsMaxSamples);</span>
+
+<span class="nc" id="L243">		visits = ArrayUtils.copy2(e.visits);</span>
+
+<span class="nc" id="L245">		serviceTimes = ArrayUtils.copy3(e.serviceTimes);				</span>
+
+		//ReferenceStation = ArrayUtils.copy2(e.ReferenceStation);
+<span class="nc" id="L248">		referenceStation = ArrayUtils.copy(e.referenceStation);</span>
+
+		// What-if analysis
+<span class="nc" id="L251">		iterations = e.iterations;</span>
+<span class="nc" id="L252">		whatIfClass = e.whatIfClass;</span>
+<span class="nc" id="L253">		whatIfStation = e.whatIfStation;</span>
+<span class="nc" id="L254">		whatIfType = e.whatIfType;</span>
+<span class="nc" id="L255">		whatIfValues = e.whatIfValues;</span>
+
+<span class="nc bnc" id="L257" title="All 2 branches missed.">		if (hasResults) {</span>
+<span class="nc" id="L258">			queueLen = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L259">			throughput = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L260">			resTimes = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L261">			util = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L262">			logNormConst = new LinkedHashMap&lt;SolverAlgorithm, Double&gt;();</span>
+<span class="nc" id="L263">			algIterations = new LinkedHashMap&lt;SolverAlgorithm, int[]&gt;();</span>
+
+<span class="nc bnc" id="L265" title="All 2 branches missed.">			for (SolverAlgorithm alg : e.queueLen.keySet()) {</span>
+<span class="nc" id="L266">				queueLen.put(alg, ArrayUtils.copy3(e.queueLen.get(alg)));</span>
+<span class="nc" id="L267">				throughput.put(alg, ArrayUtils.copy3(e.throughput.get(alg)));</span>
+<span class="nc" id="L268">				resTimes.put(alg, ArrayUtils.copy3(e.resTimes.get(alg)));</span>
+<span class="nc" id="L269">				util.put(alg, ArrayUtils.copy3(e.util.get(alg)));</span>
+<span class="nc" id="L270">				logNormConst.put(alg, e.logNormConst.get(alg));</span>
+<span class="nc" id="L271">				algIterations.put(alg, ArrayUtils.copy(e.algIterations.get(alg)));</span>
+<span class="nc" id="L272">			}</span>
+		}
+<span class="nc" id="L274">	}</span>
+
+	public SolverAlgorithm getAlgorithmType() {
+<span class="nc" id="L277">		return algorithmType;</span>
+	}
+
+	public void setAlgorithmType(SolverAlgorithm algType) {
+<span class="nc" id="L281">		algorithmType = algType;</span>
+<span class="nc" id="L282">	}</span>
+
+	public double getTolerance() {
+<span class="nc" id="L285">		return tolerance;</span>
+	}
+
+	public void setTolerance (double tol) {
+<span class="nc" id="L289">		tolerance = tol;</span>
+<span class="nc" id="L290">	}</span>
+
+	public int getMaxSamples() {
+<span class="nc" id="L293">		return maxSamples;</span>
+	}
+
+	public void setMaxSamples(int mSamples) {
+<span class="nc" id="L297">		maxSamples = mSamples;</span>
+<span class="nc" id="L298">	}</span>
+
+	/**
+	 * @return the set of algorithm to perform whatif on
+	 */
+	public Set&lt;SolverAlgorithm&gt; getWhatifAlgorithms() {
+<span class="nc" id="L304">		return whatifAlgorithms;</span>
+	}
+
+	/**
+	 * Set algorithm to perform whatif on
+	 * @param algorithm the algorithm
+	 * @param compare true to do whatif, false otherwise
+	 */
+	public void setWhatifAlgorithm(SolverAlgorithm algorithm, boolean compare) {
+<span class="nc bnc" id="L313" title="All 2 branches missed.">		if (compare) {</span>
+<span class="nc" id="L314">			this.whatifAlgorithms.add(algorithm);</span>
+		} else {
+<span class="nc" id="L316">			this.whatifAlgorithms.remove(algorithm);</span>
+		}
+<span class="nc" id="L318">	}</span>
+
+	/**
+	 * Returns the tolerance for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @return the tolerance
+	 */
+	public double getWhatifAlgorithmTolerance(SolverAlgorithm algorithm) {
+<span class="nc" id="L326">		Double val = whatifAlgorithmsTolerance.get(algorithm);</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">		if (val != null) {</span>
+<span class="nc" id="L328">			return val;</span>
+		} else {
+<span class="nc" id="L330">			return SolverMultiClosedAMVA.DEFAULT_TOLERANCE;</span>
+		}
+	}
+
+	/**
+	 * Sets the tolerance for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @param value the tolerance
+	 */
+	public void setWhatifAlgorithmTolerance(SolverAlgorithm algorithm, double value) {
+<span class="nc" id="L340">		whatifAlgorithmsTolerance.put(algorithm, value);</span>
+<span class="nc" id="L341">	}</span>
+
+	/**
+	 * Returns the max samples for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @return the max samples
+	 */
+	public int getWhatifAlgorithmMaxSamples(SolverAlgorithm algorithm) {
+<span class="nc" id="L349">		Integer val = whatifAlgorithmsMaxSamples.get(algorithm);</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">		if (val != null) {</span>
+<span class="nc" id="L351">			return val;</span>
+		} else {
+			//return SolverMultiClosedMonteCarlo.DEFAULT_MAX_SAMPLES;
+<span class="nc" id="L354">			return SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES;</span>
+		}
+	}
+
+	/**
+	 * Sets the max samples for a whatif algorithm
+	 * @param algorithm the algorithm
+	 * @param value the max samples
+	 */
+	public void setWhatifAlgorithmMaxSamples(SolverAlgorithm algorithm, int value) {
+<span class="nc" id="L364">		whatifAlgorithmsMaxSamples.put(algorithm, value);</span>
+<span class="nc" id="L365">	}</span>
+
+	/**
+	 * @return true if AMVA algorithm comparison was requested. false otherwise.
+	 */
+	public boolean isWhatifAlgorithms() {
+<span class="nc bnc" id="L371" title="All 2 branches missed.">		return whatifAlgorithms.size() &gt; 0;</span>
+	}
+
+	/**
+	 * Clears whatif algorithms selection
+	 */
+	public void clearWhatifAlgorithms() {
+<span class="nc" id="L378">		whatifAlgorithms.clear();</span>
+<span class="nc" id="L379">	}</span>
+
+	public int getIterations() {
+<span class="nc" id="L382">		return iterations;</span>
+	}
+
+	/**
+	 * Clears all the results
+	 */
+	public void discardResults() {
+<span class="nc" id="L389">		queueLen = null;</span>
+<span class="nc" id="L390">		throughput = null;</span>
+<span class="nc" id="L391">		resTimes = null;</span>
+<span class="nc" id="L392">		util = null;</span>
+<span class="nc" id="L393">		logNormConst = null;</span>
+<span class="nc" id="L394">		discardChanges();</span>
+<span class="nc" id="L395">	}</span>
+
+	/**
+	 * Discards all change elements but does not touch results
+	 */
+	public void discardChanges() {
+<span class="nc" id="L401">		hasResults = false;</span>
+<span class="nc" id="L402">		resultsOK = false;</span>
+<span class="nc" id="L403">		changed = true;</span>
+<span class="nc" id="L404">	}</span>
+
+	/**
+	 * sets all the result data for this model.
+	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 */
+	public void setResults(SolverAlgorithm alg, int[] algIterations, double[][][] queueLen, double[][][] throughput, double[][][] resTimes, double[][][] util, double logNormConst) {
+<span class="nc bnc" id="L411" title="All 6 branches missed.">		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {</span>
+<span class="nc" id="L412">			throw new IllegalArgumentException(&quot;queueLen must be non null and of size [stations][classes][iterations]&quot;);</span>
+		}
+<span class="nc bnc" id="L414" title="All 6 branches missed.">		if (throughput == null || throughput.length != stations || throughput[0].length != classes) {</span>
+<span class="nc" id="L415">			throw new IllegalArgumentException(&quot;throughput must be non null and of size [stations][classes][iterations]&quot;);</span>
+		}
+<span class="nc bnc" id="L417" title="All 6 branches missed.">		if (resTimes == null || resTimes.length != stations || resTimes[0].length != classes) {</span>
+<span class="nc" id="L418">			throw new IllegalArgumentException(&quot;resTimes must be non null and of size [stations][classes][iterations]&quot;);</span>
+		}
+<span class="nc bnc" id="L420" title="All 6 branches missed.">		if (util == null || util.length != stations || util[0].length != classes) {</span>
+<span class="nc" id="L421">			throw new IllegalArgumentException(&quot;util must be non null and of size [stations][classes][iterations]&quot;);</span>
+		}
+		// it does not check the number of classes for all station, just for the first one!!
+<span class="nc" id="L424">		this.queueLen.put(alg, ArrayUtils.copy3(queueLen));</span>
+<span class="nc" id="L425">		this.throughput.put(alg, ArrayUtils.copy3(throughput));</span>
+<span class="nc" id="L426">		this.resTimes.put(alg, ArrayUtils.copy3(resTimes));</span>
+<span class="nc" id="L427">		this.util.put(alg, ArrayUtils.copy3(util));</span>
+<span class="nc" id="L428">		this.logNormConst.put(alg, new Double(logNormConst));</span>
+<span class="nc" id="L429">		this.algIterations.put(alg, ArrayUtils.copy(algIterations));</span>
+
+<span class="nc" id="L431">		iterations = queueLen[0][0].length;</span>
+<span class="nc" id="L432">	}</span>
+
+	/**
+	 * sets all the result data for this model. This is called when only one iteration is performed.
+	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 */
+	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst) {
+<span class="nc" id="L439">		resetResults();</span>
+<span class="nc" id="L440">		setResults(alg, algIterations, queueLen, throughput, resTimes, util, logNormConst, 0);</span>
+<span class="nc" id="L441">	}</span>
+
+	/**
+	 * Sets ResultsOK flag
+	 * @param value value of ResultsOK flag
+	 */
+	public void setResultsOK(boolean value) {
+<span class="nc" id="L448">		this.resultsOK = value;</span>
+<span class="nc" id="L449">	}</span>
+
+	/**
+	 * sets all the result data for this model. This is called on multiple iterations (what-if analysis)
+	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 */
+	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst, int iteration) {
+<span class="nc bnc" id="L456" title="All 6 branches missed.">		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {</span>
+<span class="nc" id="L457">			throw new IllegalArgumentException(&quot;queueLen must be non null and of size [stations][classes]&quot;);</span>
+		}
+<span class="nc bnc" id="L459" title="All 6 branches missed.">		if (throughput == null || throughput.length != stations || throughput[0].length != classes) {</span>
+<span class="nc" id="L460">			throw new IllegalArgumentException(&quot;throughput must be non null and of size [stations][classes]&quot;);</span>
+		}
+<span class="nc bnc" id="L462" title="All 6 branches missed.">		if (resTimes == null || resTimes.length != stations || resTimes[0].length != classes) {</span>
+<span class="nc" id="L463">			throw new IllegalArgumentException(&quot;resTimes must be non null and of size [stations][classes]&quot;);</span>
+		}
+<span class="nc bnc" id="L465" title="All 6 branches missed.">		if (util == null || util.length != stations || util[0].length != classes) {</span>
+<span class="nc" id="L466">			throw new IllegalArgumentException(&quot;util must be non null and of size [stations][classes]&quot;);</span>
+		}
+<span class="nc bnc" id="L468" title="All 2 branches missed.">		if (iteration &gt;= iterations) {</span>
+<span class="nc" id="L469">			throw new IllegalArgumentException(&quot;iteration is greater than expected number of iterations&quot;);</span>
+		}
+<span class="nc bnc" id="L471" title="All 2 branches missed.">		if (this.queueLen.get(alg) == null) {</span>
+<span class="nc" id="L472">			this.queueLen.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L473">			this.throughput.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L474">			this.resTimes.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L475">			this.util.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L476">			this.logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L477">			this.algIterations.put(alg, new int[iterations]);</span>
+		}
+
+<span class="nc" id="L480">		ArrayUtils.copy2to3(queueLen, this.queueLen.get(alg), iteration);</span>
+<span class="nc" id="L481">		ArrayUtils.copy2to3(throughput, this.throughput.get(alg), iteration);</span>
+<span class="nc" id="L482">		ArrayUtils.copy2to3(resTimes, this.resTimes.get(alg), iteration);</span>
+<span class="nc" id="L483">		ArrayUtils.copy2to3(util, this.util.get(alg), iteration);</span>
+<span class="nc" id="L484">		this.logNormConst.put(alg, new Double(logNormConst));</span>
+<span class="nc" id="L485">		this.algIterations.get(alg)[iteration] = algIterations;</span>
+<span class="nc" id="L486">	}</span>
+
+	public void setResultsBooleans(boolean value) {
+<span class="nc" id="L489">		hasResults = value;</span>
+<span class="nc" id="L490">		resultsOK = value;</span>
+<span class="nc" id="L491">		changed = value;</span>
+<span class="nc" id="L492">	}</span>
+
+	/**
+	 * Resets a particular algorithm's arrays used to store results
+	 */
+	public void resetAlgResults(SolverAlgorithm alg) {
+<span class="nc bnc" id="L498" title="All 2 branches missed.">		if (queueLen.containsKey(alg)) {</span>
+<span class="nc" id="L499">			queueLen.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L500">			throughput.put(alg, new double[stations][classes][iterations]);			</span>
+<span class="nc" id="L501">			resTimes.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L502">			util.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L503">			logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L504">			algIterations.put(alg, new int[iterations]);</span>
+		}
+
+<span class="nc" id="L507">		hasResults = false;</span>
+<span class="nc" id="L508">		changed = true;</span>
+<span class="nc" id="L509">	}</span>
+
+	/**
+	 * Resets all algorithms' arrays used to store results
+	 */
+	public void resetAlgResults() {
+<span class="nc bnc" id="L515" title="All 2 branches missed.">		for (SolverAlgorithm alg : queueLen.keySet()) {</span>
+<span class="nc" id="L516">			queueLen.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L517">			throughput.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L518">			resTimes.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L519">			util.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L520">			logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L521">			algIterations.put(alg, new int[iterations]);</span>
+<span class="nc" id="L522">		}</span>
+
+<span class="nc" id="L524">		hasResults = false;</span>
+<span class="nc" id="L525">		changed = true;</span>
+<span class="nc" id="L526">	}</span>
+
+	/**
+	 * Resets arrays used to store results
+	 */
+	public void resetResults() {
+<span class="nc" id="L532">		queueLen = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L533">		throughput = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L534">		resTimes = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L535">		util = new LinkedHashMap&lt;SolverAlgorithm, double[][][]&gt;();</span>
+<span class="nc" id="L536">		logNormConst = new LinkedHashMap&lt;SolverAlgorithm, Double&gt;();</span>
+<span class="nc" id="L537">		algIterations = new LinkedHashMap&lt;SolverAlgorithm, int[]&gt;();</span>
+
+<span class="nc" id="L539">		hasResults = false;</span>
+<span class="nc" id="L540">		changed = true;</span>
+<span class="nc" id="L541">	}</span>
+
+	/**
+	 * Initialize the object with defaults:
+	 * 1 closed class, 1 LI station, 0 customers, all visits to one, all service times to zero, no results
+	 */
+	public void setDefaults() {
+<span class="nc" id="L548">		closed = true;</span>
+<span class="nc" id="L549">		hasResults = false;</span>
+<span class="nc" id="L550">		resultsOK = false;</span>
+<span class="nc" id="L551">		stations = 1;</span>
+<span class="nc" id="L552">		classes = 1;</span>
+
+<span class="nc" id="L554">		totalPop = 1;</span>
+<span class="nc" id="L555">		changed = true;</span>
+
+<span class="nc" id="L557">		classData = new double[1];</span>
+<span class="nc" id="L558">		classData[0] = 1;</span>
+
+<span class="nc" id="L560">		stationNames = new String[1];</span>
+<span class="nc" id="L561">		stationNames[0] = &quot;Station1&quot;;</span>
+
+<span class="nc" id="L563">		stationTypes = new int[1];</span>
+<span class="nc" id="L564">		stationTypes[0] = STATION_LI;</span>
+
+<span class="nc" id="L566">		stationServers = new int[1];</span>
+<span class="nc" id="L567">		stationServers[0] = 1;</span>
+
+<span class="nc" id="L569">		classNames = new String[1];</span>
+<span class="nc" id="L570">		classNames[0] = &quot;Class1&quot;;</span>
+
+<span class="nc" id="L572">		classTypes = new int[1];</span>
+<span class="nc" id="L573">		classTypes[0] = CLASS_CLOSED;</span>
+
+<span class="nc" id="L575">		classPriorities = new int[1];</span>
+<span class="nc" id="L576">		classPriorities[0]  = DEFAULT_CLASS_PRIORITY;</span>
+
+<span class="nc" id="L578">		visits = new double[1][1];</span>
+<span class="nc" id="L579">		visits[0][0] = 1.0;</span>
+
+		//ReferenceStation = new double[1][2];
+		//ReferenceStation[0][0]= 0.0;
+		//ReferenceStation[0][1]= 0.0;
+
+<span class="nc" id="L585">		referenceStation = new int[1];</span>
+<span class="nc" id="L586">		referenceStation[0]= 0;</span>
+
+<span class="nc" id="L588">		serviceTimes = new double[1][1][1];</span>
+<span class="nc" id="L589">		serviceTimes[0][0][0] = 0.0;</span>
+
+<span class="nc" id="L591">		description = &quot;&quot;;</span>
+
+<span class="nc" id="L593">		whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);</span>
+<span class="nc" id="L594">		whatifAlgorithmsTolerance = new EnumMap&lt;SolverAlgorithm, Double&gt;(SolverAlgorithm.class);</span>
+<span class="nc" id="L595">		whatifAlgorithmsMaxSamples = new EnumMap&lt;SolverAlgorithm, Integer&gt;(SolverAlgorithm.class);</span>
+<span class="nc" id="L596">	}</span>
+
+	/**
+	 * Gets the model description
+	 * @return the model description
+	 */
+	public String getDescription() {
+<span class="nc" id="L603">		return description;</span>
+	}
+
+	/**
+	 * Sets the model description
+	 * @param description the model description
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setDescription(String description) {
+<span class="nc bnc" id="L612" title="All 2 branches missed.">		if (description.equals(this.description)) {</span>
+<span class="nc" id="L613">			return false;</span>
+		}
+<span class="nc" id="L615">		this.description = description;</span>
+<span class="nc" id="L616">		changed = true;</span>
+<span class="nc" id="L617">		return true;</span>
+	}
+
+	/**
+	 * @return true if this object describes a single class system
+	 */
+	public boolean isSingleClass() {
+<span class="nc bnc" id="L624" title="All 2 branches missed.">		return (classes == 1);</span>
+	}
+
+	/**
+	 * @return true if this object describes a multiclass system
+	 */
+	public boolean isMultiClass() {
+<span class="nc bnc" id="L631" title="All 2 branches missed.">		return (classes &gt; 1);</span>
+	}
+
+	/**
+	 * @return true if this object describes a closed system
+	 */
+	public boolean isClosed() {
+<span class="nc" id="L638">		return closed;</span>
+	}
+
+	/**
+	 * @return true if this object describes an open system
+	 */
+	public boolean isOpen() {
+<span class="nc" id="L645">		return open;</span>
+	}
+
+	/**
+	 * @return true if this object describes a mixed system
+	 */
+	public boolean isMixed() {
+<span class="nc bnc" id="L652" title="All 4 branches missed.">		return !(closed || open);</span>
+	}
+
+	/**
+	 * @return true if this object describes a system containing LD stations
+	 */
+	public boolean isLd() {
+<span class="nc" id="L659">		return ld;</span>
+	}
+
+	/**
+	 * @return true if this object describes a system containing priority stations
+	 */
+	public boolean isPriority() {
+<span class="nc" id="L666">		return priority;</span>
+	}
+
+	/**
+	 * @return number of service centers
+	 */
+	public int getStations() {
+<span class="nc" id="L673">		return stations;</span>
+	}
+
+	/**
+	 * @return number of classes
+	 */
+	public int getClasses() {
+<span class="nc" id="L680">		return classes;</span>
+	}
+
+	/**
+	 * @return get the matrix of ReferenceStations
+	 */
+	/*public double[][] getReferenceStation() {
+		return ReferenceStation;
+	}*/
+
+	/**
+	 * @return get the matrix of ReferenceStations
+	 */
+	public int[] getReferenceStation() {
+<span class="nc" id="L694">		return referenceStation;</span>
+	}
+
+	/**
+	 * @return total population
+	 */
+	public int getTotalPop() {
+<span class="nc" id="L701">		return totalPop;</span>
+	}
+
+	/**
+	 * @return names of the service centers
+	 */
+	public String[] getStationNames() {
+<span class="nc" id="L708">		return stationNames;</span>
+	}
+
+	/**
+	 * @return the number of servers for each station. For delay stations this parameter is unsensed.
+	 */
+	public int[] getStationServers() {
+<span class="nc" id="L715">		return stationServers;</span>
+	}
+
+	/**
+	 * @return true if this model contains multiple server for a station.
+	 */
+	public boolean isMultipleServers() {
+<span class="nc bnc" id="L722" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L723" title="All 4 branches missed.">			if (stationServers[i] &gt; 1 &amp;&amp; stationTypes[i] != ExactConstants.STATION_DELAY) {</span>
+<span class="nc" id="L724">				return true;</span>
+			}
+		}
+<span class="nc" id="L727">		return false;</span>
+	}
+
+	/**
+	 * sets the number of servers for each station
+	 * @param stationServers the number of servers of each station
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setStationServers(int[] stationServers) {
+<span class="nc bnc" id="L737" title="All 2 branches missed.">		if (stationServers.length != stations) {</span>
+<span class="nc" id="L738">			throw new IllegalArgumentException(&quot;stationServers.length != stations&quot;);</span>
+		}
+<span class="nc bnc" id="L740" title="All 2 branches missed.">		if (Arrays.equals(this.stationServers, stationServers)) {</span>
+<span class="nc" id="L741">			return false;</span>
+		}
+
+<span class="nc" id="L744">		this.stationServers = stationServers;</span>
+<span class="nc" id="L745">		resultsNotOkDueToModelChange();</span>
+<span class="nc" id="L746">		return true;</span>
+	}
+
+	/**
+	 * sets the names of the service centers.
+	 * @param stationNames the names of the service centers
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setStationNames(String[] stationNames) {
+<span class="nc bnc" id="L756" title="All 2 branches missed.">		if (stationNames.length != stations) {</span>
+<span class="nc" id="L757">			throw new IllegalArgumentException(&quot;stationNames.length!=stations&quot;);</span>
+		}
+<span class="nc bnc" id="L759" title="All 2 branches missed.">		if (!changed) {</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">			if (Arrays.equals(this.stationNames, stationNames)) {</span>
+<span class="nc" id="L761">				return false;</span>
+			}
+		}
+<span class="nc" id="L764">		this.stationNames = stationNames;</span>
+<span class="nc" id="L765">		changed = true;</span>
+<span class="nc" id="L766">		return true;</span>
+	}
+
+	/**
+	 * @return names of the classes
+	 */
+	public String[] getClassNames() {
+<span class="nc" id="L773">		return classNames;</span>
+	}
+
+	/**
+	 * sets the names of the classes.
+	 * @param classNames the names of the classes
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setClassNames(String[] classNames) {
+<span class="nc bnc" id="L783" title="All 2 branches missed.">		if (classNames.length != classes) {</span>
+<span class="nc" id="L784">			throw new IllegalArgumentException(&quot;classNames.length!=classes&quot;);</span>
+		}
+<span class="nc bnc" id="L786" title="All 2 branches missed.">		if (Arrays.equals(this.classNames, classNames)) {</span>
+<span class="nc" id="L787">			return false;</span>
+		}
+
+<span class="nc" id="L790">		this.classNames = classNames;</span>
+<span class="nc" id="L791">		changed = true;</span>
+<span class="nc" id="L792">		return true;</span>
+	}
+
+	/**
+	 * @return data for the classes.
+	 */
+	public double[] getClassData() {
+<span class="nc" id="L799">		return classData;</span>
+	}
+
+	/**
+	 * sets the data for the classes
+	 * @param classData the data for the classes
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setClassData(double[] classData) {
+<span class="nc bnc" id="L809" title="All 2 branches missed.">		if (classData.length != classes) {</span>
+<span class="nc" id="L810">			throw new IllegalArgumentException(&quot;classData.length!=classes&quot;);</span>
+		}
+<span class="nc bnc" id="L812" title="All 2 branches missed.">		if (Arrays.equals(this.classData, classData)) {</span>
+<span class="nc" id="L813">			return false;</span>
+		}
+
+<span class="nc" id="L816">		this.classData = classData;</span>
+<span class="nc" id="L817">		resultsNotOkDueToModelChange();</span>
+
+		// make sure 3rd dimension of serviceTimes is ok
+<span class="nc" id="L820">		resize(stations, classes);</span>
+<span class="nc" id="L821">		return true;</span>
+	}
+
+	/**
+	 * @return type of the classes
+	 */
+	public int[] getClassTypes() {
+<span class="nc" id="L828">		return classTypes;</span>
+	}
+
+	/**
+	 * sets the type of the classes
+	 * @param classTypes the type of the classes
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setClassTypes(int[] classTypes) {
+<span class="nc bnc" id="L838" title="All 2 branches missed.">		if (classTypes.length != classes) {</span>
+<span class="nc" id="L839">			throw new IllegalArgumentException(&quot;classTypes.length!=classes&quot;);</span>
+		}
+<span class="nc bnc" id="L841" title="All 2 branches missed.">		if (Arrays.equals(this.classTypes, classTypes)) {</span>
+<span class="nc" id="L842">			return false;</span>
+		}
+
+<span class="nc" id="L845">		this.classTypes = classTypes;</span>
+<span class="nc" id="L846">		closed = calcClosed();</span>
+<span class="nc" id="L847">		open = calcOpen();</span>
+<span class="nc" id="L848">		resultsNotOkDueToModelChange();</span>
+<span class="nc" id="L849">		return true;</span>
+	}
+
+	/**
+	 * @return priorities of the classes
+	 */
+	public int[] getClassPriorities() {
+<span class="nc" id="L856">		return classPriorities;</span>
+	}
+
+	/**
+	 * sets the priorities of the classes
+	 * @param classPriorities the priority of the classes
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setClassPriorities(int[] classPriorities) {
+		//System.out.println(&quot;&quot; + classPriorities.length + &quot; &quot;+classes);
+<span class="nc bnc" id="L867" title="All 2 branches missed.">		if (classPriorities.length != classes) {</span>
+<span class="nc" id="L868">			throw new IllegalArgumentException(&quot;classPriorities.length!=classes&quot;);</span>
+		}
+<span class="nc bnc" id="L870" title="All 2 branches missed.">		if (Arrays.equals(this.classPriorities, classPriorities)) {</span>
+<span class="nc" id="L871">			return false;</span>
+		}
+
+<span class="nc" id="L874">		this.classPriorities = classPriorities;</span>
+<span class="nc" id="L875">		resultsNotOkDueToModelChange();</span>
+<span class="nc" id="L876">		return true;</span>
+	}
+
+	/**
+	 * @return type of the stations
+	 */
+	public int[] getStationTypes() {
+<span class="nc" id="L883">		return stationTypes;</span>
+	}
+
+	/**
+	 * sets the type of the stations
+	 * @param stationTypes the type of the stations
+	 * @throws IllegalArgumentException if the array is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setStationTypes(int[] stationTypes) {
+<span class="nc bnc" id="L893" title="All 2 branches missed.">		if (stationTypes.length != stations) {</span>
+<span class="nc" id="L894">			throw new IllegalArgumentException(&quot;stationTypes.length!=stations&quot;);</span>
+		}
+<span class="nc bnc" id="L896" title="All 2 branches missed.">		if (Arrays.equals(this.stationTypes, stationTypes)) {</span>
+<span class="nc" id="L897">			return false;</span>
+		}
+
+<span class="nc" id="L900">		this.stationTypes = stationTypes;</span>
+		// adjusts serviceTimes size and recalculates flags
+<span class="nc" id="L902">		resize(stations, classes, true);</span>
+<span class="nc" id="L903">		resultsNotOkDueToModelChange();</span>
+<span class="nc" id="L904">		return true;</span>
+	}
+
+	/**
+	 * @return the matrix of visits
+	 */
+	public double[][] getVisits() {
+<span class="nc" id="L911">		return visits;</span>
+	}
+
+	/**
+	 * sets the matrix of visits
+	 * @param visits the matrix of visits
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setVisits(double[][] visits) {
+<span class="nc bnc" id="L921" title="All 4 branches missed.">		if (visits.length != stations || visits[0].length != classes) {</span>
+<span class="nc" id="L922">			throw new IllegalArgumentException(&quot;incorrect array dimension&quot;);</span>
+		}
+<span class="nc bnc" id="L924" title="All 2 branches missed.">		if (ArrayUtils.equals2(this.visits, visits)) {</span>
+<span class="nc" id="L925">			return false;</span>
+		}
+
+<span class="nc" id="L928">		this.visits = visits;</span>
+<span class="nc" id="L929">		resultsNotOkDueToModelChange();</span>
+
+		// Checks if visits are all one
+<span class="nc" id="L932">		calcUnitaryVisits();</span>
+<span class="nc" id="L933">		return true;</span>
+	}
+
+	/**
+	 * @return the matrix of service times
+	 */
+	public double[][][] getServiceTimes() {
+<span class="nc" id="L940">		return serviceTimes;</span>
+	}
+
+	/**
+	 * sets the matrix of service times
+	 * @param serviceTimes the matrix of service times
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setServiceTimes(double[][][] serviceTimes) {
+<span class="nc bnc" id="L950" title="All 4 branches missed.">		if (serviceTimes.length != stations || serviceTimes[0].length != classes) {</span>
+<span class="nc" id="L951">			throw new IllegalArgumentException(&quot;incorrect array dimension&quot;);</span>
+		}
+<span class="nc bnc" id="L953" title="All 2 branches missed.">		if (ArrayUtils.equals3(this.serviceTimes, serviceTimes)) {</span>
+<span class="nc" id="L954">			return false;</span>
+		}
+
+		int currSize;
+		double[][] subST;
+
+		//validate sizes
+<span class="nc bnc" id="L961" title="All 2 branches missed.">		for (int s = 0; s &lt; stations; s++) {</span>
+<span class="nc bnc" id="L962" title="All 2 branches missed.">			currSize = (stationTypes[s] == STATION_LD ? totalPop : 1);</span>
+			// if a station is LD but there are no jobs, totalPop = 0
+<span class="nc bnc" id="L964" title="All 2 branches missed.">			if (currSize == 0) {</span>
+<span class="nc" id="L965">				currSize = 1;</span>
+			}
+<span class="nc" id="L967">			subST = serviceTimes[s];</span>
+<span class="nc bnc" id="L968" title="All 2 branches missed.">			for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc bnc" id="L969" title="All 2 branches missed.">				if (subST[c].length != currSize) {</span>
+<span class="nc" id="L970">					throw new IllegalArgumentException(&quot;Wrong size for station &quot; + stationNames[s]);</span>
+				}
+			}
+		}
+
+<span class="nc" id="L975">		this.serviceTimes = serviceTimes;</span>
+<span class="nc" id="L976">		resultsNotOkDueToModelChange();</span>
+<span class="nc" id="L977">		return true;</span>
+	}
+
+	/**
+	 * Used to invalidated current results and note that the model has been edited
+	 */
+	private void resultsNotOkDueToModelChange() {
+<span class="nc" id="L984">		changed = true;</span>
+<span class="nc" id="L985">		resultsOK = false;</span>
+<span class="nc" id="L986">	}</span>
+
+	/**
+	 * sets the matrix of ReferenceStation
+	 * @param ReferenceStation the matrix of ReferenceStation
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	/*public boolean setReferenceStation(double[][] ReferenceStation) {
+		if (ReferenceStation.length != classes) {
+			throw new IllegalArgumentException(&quot;incorrect array dimension&quot;);
+		}
+		this.ReferenceStation = ReferenceStation;
+		changed = true;
+		resultsOK = false;
+		return true;
+	}*/
+
+	/**
+	 * sets the matrix of ReferenceStation
+	 * @param ReferenceStation the matrix of ReferenceStation
+	 * @throws IllegalArgumentException if the matrix is not of the correct size
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setReferenceStation(int[] ReferenceStation) {
+<span class="nc bnc" id="L1011" title="All 2 branches missed.">		if (ReferenceStation.length != classes) {</span>
+<span class="nc" id="L1012">			throw new IllegalArgumentException(&quot;incorrect array dimension&quot;);</span>
+		}
+<span class="nc" id="L1014">		this.referenceStation = ReferenceStation;</span>
+		//changed = true;
+<span class="nc" id="L1016">		resultsOK = false;</span>
+<span class="nc" id="L1017">		return true;</span>
+	}
+
+	/**
+	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean resize(int stations, int classes, boolean forceResize) {
+<span class="nc bnc" id="L1025" title="All 4 branches missed.">		if (stations &lt;= 0 || classes &lt;= 0) {</span>
+<span class="nc" id="L1026">			throw new IllegalArgumentException(&quot;stations and classes must be &gt; 0&quot;);</span>
+		}
+<span class="nc bnc" id="L1028" title="All 6 branches missed.">		if (forceResize || this.stations != stations || this.classes != classes) {</span>
+			// Other cases already handled in setXXX methods
+<span class="nc" id="L1030">			discardResults();</span>
+
+<span class="nc" id="L1032">			this.stations = stations;</span>
+<span class="nc" id="L1033">			this.classes = classes;</span>
+
+<span class="nc" id="L1035">			stationNames = ArrayUtils.resize(stationNames, stations, null);</span>
+<span class="nc" id="L1036">			stationTypes = ArrayUtils.resize(stationTypes, stations, STATION_LI);</span>
+<span class="nc" id="L1037">			stationServers = ArrayUtils.resize(stationServers, stations, 1);</span>
+<span class="nc" id="L1038">			ld = calcLD();</span>
+<span class="nc" id="L1039">			priority = calcPriority();</span>
+
+<span class="nc" id="L1041">			visits = ArrayUtils.resize2(visits, stations, classes, 1.0);</span>
+
+<span class="nc" id="L1043">			classNames = ArrayUtils.resize(classNames, classes, null);</span>
+<span class="nc" id="L1044">			classTypes = ArrayUtils.resize(classTypes, classes, CLASS_CLOSED);</span>
+<span class="nc" id="L1045">			closed = calcClosed();</span>
+
+<span class="nc" id="L1047">			classData = ArrayUtils.resize(classData, classes, 0.0);</span>
+
+<span class="nc" id="L1049">			totalPop = calcTotalPop();</span>
+
+<span class="nc" id="L1051">			serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);</span>
+			// Checks if visits are all one
+<span class="nc" id="L1053">			calcUnitaryVisits();</span>
+
+			//ReferenceStation = ArrayUtils.resize2(ReferenceStation, classes, 2, 0.0);			
+<span class="nc" id="L1056">			referenceStation = ArrayUtils.resize(referenceStation, classes, 0);</span>
+
+<span class="nc" id="L1058">			return true;</span>
+		} else {
+			// Checks if total population was changed.
+<span class="nc" id="L1061">			int newTotalPop = calcTotalPop();</span>
+<span class="nc bnc" id="L1062" title="All 2 branches missed.">			if (newTotalPop != totalPop) {</span>
+<span class="nc" id="L1063">				totalPop = newTotalPop;</span>
+<span class="nc" id="L1064">				serviceTimes = ArrayUtils.resize3var(serviceTimes, stations, classes, calcSizes(), 0.0);</span>
+<span class="nc" id="L1065">				return true;</span>
+			}
+		}
+<span class="nc" id="L1068">		return false;</span>
+	}
+
+	/**
+	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean resize(int stations, int classes) {
+<span class="nc" id="L1076">		return resize(stations, classes, false);</span>
+	}
+
+	/**
+	 * @return algorithm iterations
+	 */
+	public Map&lt;SolverAlgorithm, int[]&gt; getAlgIterations() {
+<span class="nc" id="L1083">		return algIterations;</span>
+	}
+
+	/**
+	 * @return algorithm iterations for the given algorithm
+	 */
+	public int[] getAlgIterations(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1090" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1091">			return algIterations.get(alg);</span>
+		}
+<span class="nc" id="L1093">		return null;</span>
+	}
+
+	/**
+	 * @return queue lengths
+	 */
+	public Map&lt;SolverAlgorithm, double[][][]&gt; getQueueLen() {
+<span class="nc" id="L1100">		return queueLen;</span>
+	}
+
+	/**
+	 * @return queue lengths for the given algorithm
+	 */
+	public double[][][] getQueueLen(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1107" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1108">			return queueLen.get(alg);</span>
+		}
+<span class="nc" id="L1110">		return null;</span>
+	}
+
+	/**
+	 * @return residence times
+	 */
+	public Map&lt;SolverAlgorithm, double[][][]&gt; getResidTimes() {
+<span class="nc" id="L1117">		return resTimes;</span>
+	}
+
+	/**
+	 * @return response times for the given algorithm
+	 */
+	public double[][][] getResidTimes(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1124" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1125">			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));</span>
+<span class="nc bnc" id="L1126" title="All 2 branches missed.">			for (int s = 0; s &lt; stations; s++)</span>
+<span class="nc bnc" id="L1127" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++)</span>
+<span class="nc bnc" id="L1128" title="All 2 branches missed.">					for (int i = 0; i &lt; iterations; i++)</span>
+<span class="nc bnc" id="L1129" title="All 2 branches missed.">						if (classTypes[c] == CLASS_CLOSED)</span>
+<span class="nc bnc" id="L1130" title="All 2 branches missed.">							if (visits[referenceStation[c]][c] != 0)</span>
+<span class="nc" id="L1131">								res[s][c][i] /= (visits[referenceStation[c]][c]);</span>
+<span class="nc" id="L1132">			return res;</span>
+		}
+<span class="nc" id="L1134">		return null;</span>
+	}
+
+	/**
+	 * @return residence times for the given algorithm
+	 */
+	public double[][][] getRespTimes(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1141" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1142">			double[][][] res = ArrayUtils.copy3(resTimes.get(alg));</span>
+<span class="nc bnc" id="L1143" title="All 2 branches missed.">			for (int s = 0; s &lt; stations; s++)</span>
+<span class="nc bnc" id="L1144" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++)</span>
+<span class="nc bnc" id="L1145" title="All 2 branches missed.">					for (int i = 0; i &lt; iterations; i++)</span>
+<span class="nc bnc" id="L1146" title="All 2 branches missed.">						if (classTypes[c] == CLASS_CLOSED) {</span>
+<span class="nc bnc" id="L1147" title="All 2 branches missed.">							if (visits[referenceStation[c]][c] != 0) {</span>
+<span class="nc" id="L1148">								res[s][c][i] /= (visits[referenceStation[c]][c]);</span>
+							}
+<span class="nc bnc" id="L1150" title="All 2 branches missed.">							if (visits[s][c] != 0) {</span>
+<span class="nc" id="L1151">								res[s][c][i] /= (visits[s][c]);</span>
+							}
+						}
+<span class="nc" id="L1154">			return res;</span>
+		}
+<span class="nc" id="L1156">		return null;</span>
+	}
+
+	/**
+	 * @return throughputs
+	 */
+	public Map&lt;SolverAlgorithm, double[][][]&gt; getThroughput() {
+<span class="nc" id="L1163">		return throughput;</span>
+	}
+
+	/**
+	 * @return throughputs for the given algorithm
+	 */
+	public double[][][] getThroughput(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1170" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1171">			return throughput.get(alg);</span>
+		}
+<span class="nc" id="L1173">		return null;</span>
+	}
+
+	/**
+	 * @return utilizations
+	 */
+	public Map&lt;SolverAlgorithm, double[][][]&gt; getUtilization() {
+<span class="nc" id="L1180">		return util;</span>
+	}
+
+	/**
+	 * @return utilizations for the given algorithm
+	 */
+	public double[][][] getUtilization(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1187" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1188">			return util.get(alg);</span>
+		}
+<span class="nc" id="L1190">		return null;</span>
+	}
+
+	/**
+	 * @return logarithms of normalising constants
+	 */
+	public Map&lt;SolverAlgorithm, Double&gt; getLogNormConst() {
+<span class="nc" id="L1197">		return logNormConst;</span>
+	}
+
+	/**
+	 * @return logarithm of normalising constant for the given algorithm
+	 */
+	public double setLogNormConst(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1204" title="All 2 branches missed.">		if (alg != null) {</span>
+<span class="nc" id="L1205">			return logNormConst.get(alg).doubleValue();</span>
+		}
+<span class="nc" id="L1207">		return Double.NaN;</span>
+	}
+
+	/**
+	 * Removes all LD stations, converting them into LI stations
+	 */
+	public void removeLD() {
+<span class="nc bnc" id="L1214" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L1215" title="All 2 branches missed.">			if (stationTypes[i] == STATION_LD) {</span>
+<span class="nc" id="L1216">				stationTypes[i] = STATION_LI;</span>
+
+				//clear old LD service times
+<span class="nc" id="L1219">				serviceTimes[i] = new double[classes][1];</span>
+<span class="nc bnc" id="L1220" title="All 2 branches missed.">				for (int c = 0; c &lt; classes; c++) {</span>
+<span class="nc" id="L1221">					serviceTimes[i][c][0] = 0.0;</span>
+				}
+			}
+		}
+<span class="nc" id="L1225">		ld = false;</span>
+<span class="nc" id="L1226">	}</span>
+
+	/**
+	 * This method will find if current visits matrix is unitary or not.
+	 * If a value is 0 will check service demand. This is used to show correct
+	 * panel layout upon loading of a model
+	 */
+	private void calcUnitaryVisits() {
+<span class="nc" id="L1234">		double epsilon = 1e-14;</span>
+<span class="nc bnc" id="L1235" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L1236" title="All 2 branches missed.">			for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc bnc" id="L1237" title="All 4 branches missed.">				if ((Math.abs(visits[i][j]) &lt; epsilon &amp;&amp; Math.abs(serviceTimes[i][j][0]) &gt; epsilon)</span>
+<span class="nc bnc" id="L1238" title="All 4 branches missed.">						|| (!(Math.abs(visits[i][j]) &lt; epsilon) &amp;&amp; Math.abs(visits[i][j] - 1.0) &gt; epsilon)) {</span>
+<span class="nc" id="L1239">					unitaryVisits = true;</span>
+<span class="nc" id="L1240">					return;</span>
+				}
+			}
+		}
+<span class="nc" id="L1244">		unitaryVisits = false;</span>
+<span class="nc" id="L1245">	}</span>
+
+	/**
+	 * @return true if the model contains only closed stations
+	 */
+	private boolean calcClosed() {
+<span class="nc bnc" id="L1251" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L1252" title="All 2 branches missed.">			if (classTypes[i] != CLASS_CLOSED) {</span>
+				//make sure we stay in a consistent state
+				//removeLD();
+				//Removes LD as multiclass LD is not supported
+<span class="nc" id="L1256">				return false;</span>
+			}
+		}
+<span class="nc" id="L1259">		return true;</span>
+	}
+
+	/**
+	 * @return true if the model contains only open stations
+	 */
+	private boolean calcOpen() {
+<span class="nc bnc" id="L1266" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L1267" title="All 2 branches missed.">			if (classTypes[i] != CLASS_OPEN) {</span>
+<span class="nc" id="L1268">				return false;</span>
+			}
+		}
+<span class="nc" id="L1271">		return true;</span>
+	}
+
+	/**
+	 * @return true if the model contains Load Dependent stations
+	 */
+	private boolean calcLD() {
+<span class="nc bnc" id="L1278" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L1279" title="All 2 branches missed.">			if (stationTypes[i] == STATION_LD) {</span>
+<span class="nc" id="L1280">				return true;</span>
+			}
+		}
+<span class="nc" id="L1283">		return false;</span>
+	}
+
+	/**
+	 * @return true if the model contains Priority stations
+	 */
+	private boolean calcPriority() {
+<span class="nc bnc" id="L1290" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L1291" title="All 4 branches missed.">			if (stationTypes[i] == STATION_PRS || stationTypes[i] == STATION_HOL) {</span>
+<span class="nc" id="L1292">				return true;</span>
+			}
+		}
+<span class="nc" id="L1295">		return false;</span>
+	}
+
+	/**
+	 * @return the total population (sum of the customers of all closed class)
+	 */
+	private int calcTotalPop() {
+		/* sum all the closed classes' customers */
+<span class="nc" id="L1303">		int totalPop = 0;</span>
+<span class="nc bnc" id="L1304" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L1305" title="All 2 branches missed.">			if (classTypes[i] == CLASS_CLOSED) {</span>
+<span class="nc" id="L1306">				totalPop += (int) classData[i];</span>
+			}
+		}
+<span class="nc" id="L1309">		return totalPop;</span>
+	}
+
+	/**
+	 * @return the sizes of service times for each station (total pop for LD stations, 1 for LI stations)
+	 */
+	private int[] calcSizes() {
+<span class="nc bnc" id="L1316" title="All 2 branches missed.">		int mp = (totalPop &gt; 0 ? totalPop : 1);</span>
+<span class="nc" id="L1317">		int[] sizes = new int[stations];</span>
+<span class="nc bnc" id="L1318" title="All 2 branches missed.">		for (int s = 0; s &lt; stations; s++) {</span>
+<span class="nc bnc" id="L1319" title="All 2 branches missed.">			sizes[s] = (stationTypes[s] == STATION_LD ? mp : 1);</span>
+		}
+<span class="nc" id="L1321">		return sizes;</span>
+	}
+
+	/**
+	 * Warning: Calling this on large systems *will* result in OutOfMemory errors. You have been warned.
+	 * @return a String representation of the parameters of this object
+	 */
+	public String toString() {
+<span class="nc" id="L1329">		StringBuffer s = new StringBuffer();</span>
+<span class="nc" id="L1330">		s.append(&quot;stations=&quot;).append(stations)</span>
+<span class="nc" id="L1331">				.append(&quot; classes=&quot;).append(classes)</span>
+<span class="nc" id="L1332">				.append(&quot; pop=&quot;).append(totalPop)</span>
+<span class="nc" id="L1333">				.append(&quot; changed=&quot;).append(changed)</span>
+<span class="nc" id="L1334">				.append(&quot; ld=&quot;).append(ld)</span>
+<span class="nc" id="L1335">				.append(&quot; open=&quot;).append(open)</span>
+<span class="nc" id="L1336">				.append(&quot; closed=&quot;).append(closed)</span>
+<span class="nc" id="L1337">				.append(&quot; priority=&quot;).append(priority)</span>
+<span class="nc" id="L1338">				.append(&quot; hasResults=&quot;).append(hasResults)</span>
+<span class="nc" id="L1339">				.append(&quot; resultsOK=&quot;).append(resultsOK).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1340">				.append(&quot;stationNames=&quot;).append(ArrayUtils.toString(stationNames)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1341">				.append(&quot;stationTypes=&quot;).append(ArrayUtils.toString(stationTypes)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1342">				.append(&quot;classNames=&quot;).append(ArrayUtils.toString(classNames)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1343">				.append(&quot;classTypes=&quot;).append(ArrayUtils.toString(classTypes)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1344">				.append(&quot;classData=&quot;).append(ArrayUtils.toString(classData)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1345">				.append(&quot;visits=&quot;).append(ArrayUtils.toString2(visits)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1346">				.append(&quot;serviceTimes=&quot;).append(ArrayUtils.toString3(serviceTimes)).append(&quot;\n&quot;);</span>
+<span class="nc bnc" id="L1347" title="All 2 branches missed.">		if (hasResults) {</span>
+<span class="nc bnc" id="L1348" title="All 2 branches missed.">			for (SolverAlgorithm alg : queueLen.keySet()) {</span>
+<span class="nc" id="L1349">				double[][][] queueLens = queueLen.get(alg);</span>
+<span class="nc" id="L1350">				double[][][] throughputs = throughput.get(alg);</span>
+<span class="nc" id="L1351">				double[][][] resTime = resTimes.get(alg);</span>
+<span class="nc" id="L1352">				double[][][] utils = util.get(alg);</span>
+<span class="nc" id="L1353">				double logNC = logNormConst.get(alg).doubleValue();</span>
+
+<span class="nc" id="L1355">				s.append(&quot;algorithm=&quot;).append(alg).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1356">						.append(&quot;number of customers=&quot;).append(ArrayUtils.toString3(queueLens)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1357">						.append(&quot;throughput=&quot;).append(ArrayUtils.toString3(throughputs)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1358">						.append(&quot;resTimes=&quot;).append(ArrayUtils.toString3(resTime)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1359">						.append(&quot;utilization=&quot;).append(ArrayUtils.toString3(utils)).append(&quot;\n&quot;)</span>
+<span class="nc" id="L1360">						.append(&quot;logarithm of normalising constant=&quot;).append(Double.toString(logNC)).append(&quot;\n&quot;);</span>
+<span class="nc" id="L1361">			}</span>
+		}
+
+<span class="nc" id="L1364">		return s.toString();</span>
+	}
+
+	/**
+	 * Deletes a class
+	 * @param i the index of the class
+	 */
+	public void deleteClass(int i) {
+<span class="nc bnc" id="L1372" title="All 2 branches missed.">		if (classes &lt; 2) {</span>
+<span class="nc" id="L1373">			throw new RuntimeException(&quot;System must have at least one class&quot;);</span>
+		}
+
+<span class="nc" id="L1376">		classes--;</span>
+
+<span class="nc" id="L1378">		classNames = ArrayUtils.delete(classNames, i);</span>
+<span class="nc" id="L1379">		classTypes = ArrayUtils.delete(classTypes, i);</span>
+<span class="nc" id="L1380">		classData = ArrayUtils.delete(classData, i);</span>
+
+<span class="nc" id="L1382">		visits = ArrayUtils.delete2_2(visits, i);</span>
+<span class="nc" id="L1383">		serviceTimes = ArrayUtils.delete3_2(serviceTimes, i);					</span>
+		//ReferenceStation = ArrayUtils.delete2_1(ReferenceStation, i);
+<span class="nc" id="L1385">		referenceStation = ArrayUtils.delete(referenceStation, i);</span>
+<span class="nc" id="L1386">		resize(stations, classes);</span>
+		//DEK (Federico Granata) 3-10-2003
+		//it was considering the results valid when a class is cancelled
+<span class="nc" id="L1389">		hasResults = false;</span>
+		//END
+<span class="nc" id="L1391">	}</span>
+
+	/**
+	 * Deletes a station
+	 * @param i the index of the station
+	 */
+	public void deleteStation(int i) {
+<span class="nc bnc" id="L1398" title="All 2 branches missed.">		if (stations &lt; 2) {</span>
+<span class="nc" id="L1399">			throw new RuntimeException(&quot;System must have at least one station&quot;);</span>
+		}
+<span class="nc" id="L1401">		stations--;</span>
+<span class="nc" id="L1402">		stationNames = ArrayUtils.delete(stationNames, i);</span>
+<span class="nc" id="L1403">		stationTypes = ArrayUtils.delete(stationTypes, i);</span>
+<span class="nc" id="L1404">		stationServers = ArrayUtils.delete(stationServers, i);</span>
+
+<span class="nc" id="L1406">		visits = ArrayUtils.delete2_1(visits, i);</span>
+<span class="nc" id="L1407">		serviceTimes = ArrayUtils.delete3_1(serviceTimes, i);</span>
+
+<span class="nc" id="L1409">		resize(stations, classes);</span>
+
+		//it was considering the results valid when a class is cancelled
+<span class="nc" id="L1412">		hasResults = false;</span>
+		//END
+
+		//Delete the selected station in ReferenceStation (Kourosh OCT 2013)		
+<span class="nc bnc" id="L1416" title="All 2 branches missed.">		for (int j=0; j&lt; classes; j++)</span>
+<span class="nc bnc" id="L1417" title="All 2 branches missed.">			if (referenceStation[j] == i)</span>
+<span class="nc" id="L1418">				referenceStation[j] = 0;</span>
+<span class="nc" id="L1419">	}</span>
+
+	/**
+	 * @return true if the model has been changed
+	 */
+	public boolean isChanged() {
+<span class="nc" id="L1425">		return changed;</span>
+	}
+
+	/**
+	 * resets the changed flag.
+	 * &lt;br&gt;
+	 * WARNING: this enables change checking on parameter setting, which can be quite time-consuming.
+	 */
+	public void resetChanged() {
+<span class="nc" id="L1434">		changed = false;</span>
+<span class="nc" id="L1435">	}</span>
+
+	/**
+	 * flags the model as changed.
+	 * There is no need to call this, except to disable time-consuming change checking if you're not interested in it
+	 */
+	public void setChanged() {
+<span class="nc" id="L1442">		changed = true;</span>
+<span class="nc" id="L1443">	}</span>
+
+	/**
+	 * @return true if results are available
+	 */
+	public boolean hasResults() {
+<span class="nc" id="L1449">		return hasResults;</span>
+	}
+
+	/**
+	 * @return true if results are valid
+	 */
+	public boolean areResultsOK() {
+<span class="nc" id="L1456">		return resultsOK;</span>
+	}
+
+	/**
+	 * Creates a DOM representation of this object
+	 * @return a DOM representation of this object
+	 */
+	public Document createDocument() {
+<span class="nc" id="L1464">		return ExactDocumentCreator.createDocument(this);</span>
+	}
+
+	//Not used
+	/*private void appendMatrixCSV(Document root, Element base, double[][] arr, String outer, String inner) {
+		// forse devo usare questo per trattare anche il caso LD
+		Element elems, elem;
+		int n = arr.length;
+		elems = root.createElement(outer);
+		base.appendChild(elems);
+		for (int i = 0; i &lt; n; i++) {
+			elem = root.createElement(inner);
+			// separa i diversi elementi dell'array con &quot;;&quot;
+			elem.appendChild(root.createTextNode(ArrayUtils.toCSV(arr[i])));
+			elems.appendChild(elem);
+		}
+	}*/
+
+	/**
+	 * load the state of this object from the Document.
+	 * @return true if the operation was successful.
+	 * WARNING: If the operation fails the object is left in an incorrect state and should be discarded.
+	 */
+	public boolean loadDocument(Document doc) {
+<span class="nc" id="L1488">		Node classNode = doc.getElementsByTagName(&quot;classes&quot;).item(0);</span>
+<span class="nc" id="L1489">		Node stationNode = doc.getElementsByTagName(&quot;stations&quot;).item(0);</span>
+
+<span class="nc" id="L1491">		Node ReferenceStationNode = doc.getElementsByTagName(&quot;ReferenceStation&quot;).item(0);</span>
+<span class="nc" id="L1492">		NodeList descList = doc.getElementsByTagName(&quot;description&quot;);</span>
+<span class="nc" id="L1493">		NodeList solList = doc.getElementsByTagName(&quot;solutions&quot;);</span>
+
+		//load description
+<span class="nc bnc" id="L1496" title="All 2 branches missed.">		if (descList.item(0) != null) {</span>
+<span class="nc bnc" id="L1497" title="All 2 branches missed.">			if (!loadDescription((Element) descList.item(0))) {</span>
+				//description loading failed!
+<span class="nc" id="L1499">				return false;</span>
+			}
+		} else {
+<span class="nc" id="L1502">			description = &quot;&quot;;</span>
+		}
+
+		//load classes
+<span class="nc bnc" id="L1506" title="All 2 branches missed.">		if (classNode != null) {</span>
+<span class="nc bnc" id="L1507" title="All 2 branches missed.">			if (!loadClasses(classNode)) {</span>
+				//classes loading failed!
+<span class="nc" id="L1509">				return false;</span>
+			}
+		}
+
+		//load stations
+<span class="nc bnc" id="L1514" title="All 2 branches missed.">		if (stationNode != null) {</span>
+<span class="nc bnc" id="L1515" title="All 2 branches missed.">			if (!loadStations(stationNode)) {</span>
+				//stations loading failed!
+<span class="nc" id="L1517">				return false;</span>
+			}
+		}
+
+		//load ReferenceStation
+<span class="nc bnc" id="L1522" title="All 2 branches missed.">		if (ReferenceStationNode != null) {</span>
+<span class="nc bnc" id="L1523" title="All 2 branches missed.">			if (!loadReferenceStation(ReferenceStationNode)) {</span>
+				//ReferenceStation loading failed!
+<span class="nc" id="L1525">				return false;</span>
+			}
+		} else {
+<span class="nc" id="L1528">			loadReferenceStationDefault(classNode);</span>
+		}
+
+		/* Algorithm parameters */
+<span class="nc" id="L1532">		NodeList algParams = doc.getElementsByTagName(&quot;algParams&quot;);</span>
+<span class="nc bnc" id="L1533" title="All 2 branches missed.">		if (algParams.getLength() &gt; 0) {</span>
+<span class="nc" id="L1534">			Element algParam = (Element) algParams.item(0);</span>
+
+<span class="nc" id="L1536">			Element algType = (Element) algParam.getElementsByTagName(&quot;algType&quot;).item(0);</span>
+<span class="nc" id="L1537">			setAlgorithmType(SolverAlgorithm.fromString(algType.getAttribute(&quot;name&quot;)));</span>
+<span class="nc" id="L1538">			setTolerance(Double.parseDouble(algType.getAttribute(&quot;tolerance&quot;)));</span>
+<span class="nc bnc" id="L1539" title="All 2 branches missed.">			if (!algType.getAttribute(&quot;maxSamples&quot;).isEmpty()) {</span>
+<span class="nc" id="L1540">				setMaxSamples(Integer.parseInt(algType.getAttribute(&quot;maxSamples&quot;)));</span>
+			}
+
+<span class="nc" id="L1543">			Element compareAlgs = (Element) algParam.getElementsByTagName(&quot;compareAlgs&quot;).item(0);</span>
+<span class="nc" id="L1544">			NodeList whatIfAlgs = compareAlgs.getElementsByTagName(&quot;whatIfAlg&quot;);</span>
+<span class="nc bnc" id="L1545" title="All 2 branches missed.">			for (int i = 0; i &lt; whatIfAlgs.getLength(); i++) {</span>
+<span class="nc" id="L1546">				Element alg = (Element) whatIfAlgs.item(i);</span>
+<span class="nc" id="L1547">				String name = alg.getAttribute(&quot;name&quot;);</span>
+<span class="nc" id="L1548">				SolverAlgorithm algo = SolverAlgorithm.fromString(name);</span>
+<span class="nc" id="L1549">				this.setWhatifAlgorithm(algo, true);</span>
+<span class="nc" id="L1550">				this.setWhatifAlgorithmTolerance(algo, Double.parseDouble(alg.getAttribute(&quot;tolerance&quot;)));</span>
+<span class="nc bnc" id="L1551" title="All 2 branches missed.">				if (!alg.getAttribute(&quot;maxSamples&quot;).isEmpty()) {</span>
+<span class="nc" id="L1552">					this.setWhatifAlgorithmMaxSamples(algo, Integer.parseInt(alg.getAttribute(&quot;maxSamples&quot;)));</span>
+				}
+			}
+<span class="nc" id="L1555">		} else {</span>
+<span class="nc" id="L1556">			this.whatifAlgorithms = EnumSet.noneOf(SolverAlgorithm.class);</span>
+<span class="nc" id="L1557">			this.whatifAlgorithmsTolerance = new EnumMap&lt;SolverAlgorithm, Double&gt;(SolverAlgorithm.class);</span>
+<span class="nc" id="L1558">			this.whatifAlgorithmsMaxSamples = new EnumMap&lt;SolverAlgorithm, Integer&gt;(SolverAlgorithm.class);</span>
+		}
+
+		/* What-if Analysis - Bertoli Marco */
+<span class="nc" id="L1562">		NodeList whatIfs = doc.getElementsByTagName(&quot;whatIf&quot;);</span>
+<span class="nc bnc" id="L1563" title="All 2 branches missed.">		if (whatIfs.getLength() &gt; 0) {</span>
+			// What-if analysis was saved
+<span class="nc" id="L1565">			Element whatIf = (Element) whatIfs.item(0);</span>
+<span class="nc" id="L1566">			setWhatIfType(whatIf.getAttribute(&quot;type&quot;));</span>
+<span class="nc" id="L1567">			setWhatIfValues(ArrayUtils.fromCSV(whatIf.getAttribute(&quot;values&quot;)));</span>
+			// Try to retrieve what-if class informations
+<span class="nc" id="L1569">			setWhatIfClass(-1);</span>
+<span class="nc" id="L1570">			String className = whatIf.getAttribute(&quot;className&quot;);</span>
+<span class="nc bnc" id="L1571" title="All 4 branches missed.">			if (className != null &amp;&amp; !className.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L1572" title="All 2 branches missed.">				for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L1573" title="All 2 branches missed.">					if (classNames[i].equals(className)) {</span>
+<span class="nc" id="L1574">						setWhatIfClass(i);</span>
+<span class="nc" id="L1575">						break;</span>
+					}
+				}
+			}
+			// Try to retrieve what-if station informations
+<span class="nc" id="L1580">			setWhatIfStation(-1);</span>
+<span class="nc" id="L1581">			String stationName = whatIf.getAttribute(&quot;stationName&quot;);</span>
+<span class="nc bnc" id="L1582" title="All 4 branches missed.">			if (stationName != null &amp;&amp; !stationName.equals(&quot;&quot;)) {</span>
+<span class="nc bnc" id="L1583" title="All 2 branches missed.">				for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L1584" title="All 2 branches missed.">					if (stationNames[i].equals(stationName)) {</span>
+<span class="nc" id="L1585">						setWhatIfStation(i);</span>
+<span class="nc" id="L1586">						break;</span>
+					}
+				}
+			}
+<span class="nc" id="L1590">		} else {</span>
+			// What-if analysis was not saved
+<span class="nc" id="L1592">			iterations = 1;</span>
+<span class="nc" id="L1593">			setWhatIfClass(-1);</span>
+<span class="nc" id="L1594">			setWhatIfStation(-1);</span>
+		}
+
+		//load solution
+<span class="nc bnc" id="L1598" title="All 2 branches missed.">		if (solList.getLength() &gt; 0) {</span>
+<span class="nc bnc" id="L1599" title="All 2 branches missed.">			if (!loadSolution(solList)) {</span>
+<span class="nc" id="L1600">				return false;</span>
+			}
+<span class="nc" id="L1602">			hasResults = true;</span>
+		} else {
+<span class="nc" id="L1604">			this.resetResults(); </span>
+		}
+
+		//compute flags
+<span class="nc" id="L1608">		resize(stations, classes);</span>
+<span class="nc" id="L1609">		changed = false;</span>
+<span class="nc" id="L1610">		return true;</span>
+	}
+
+	public boolean loadDescription(Element desc) {
+<span class="nc" id="L1614">		description = desc.getFirstChild().getNodeValue();</span>
+<span class="nc" id="L1615">		return true;</span>
+	}
+
+	public boolean loadClasses(Node classNode) {
+<span class="nc" id="L1619">		classes = Integer.parseInt(((Element) classNode).getAttribute(&quot;number&quot;));</span>
+
+<span class="nc" id="L1621">		classNames = new String[classes];</span>
+<span class="nc" id="L1622">		classTypes = new int[classes];</span>
+<span class="nc" id="L1623">		classData = new double[classes];</span>
+<span class="nc" id="L1624">		classPriorities = new int[classes];</span>
+		//ReferenceStation = new double[classes][];
+<span class="nc" id="L1626">		referenceStation = new int[classes];</span>
+<span class="nc" id="L1627">		NodeList classList = classNode.getChildNodes();				</span>
+<span class="nc" id="L1628">		int classNum = 0;</span>
+
+<span class="nc" id="L1630">		totalPop = 0;</span>
+		Node n;
+		Element current;
+<span class="nc" id="L1633">		closed = true;</span>
+<span class="nc" id="L1634">		open = true;</span>
+
+		/* classes */
+<span class="nc bnc" id="L1637" title="All 2 branches missed.">		for (int i = 0; i &lt; classList.getLength(); i++) {</span>
+<span class="nc" id="L1638">			n = classList.item(i);</span>
+<span class="nc bnc" id="L1639" title="All 2 branches missed.">			if (!(n instanceof Element)) {</span>
+<span class="nc" id="L1640">				continue;</span>
+			}
+<span class="nc" id="L1642">			current = (Element) n;</span>
+<span class="nc" id="L1643">			classNames[classNum] = current.getAttribute(DOC_CLASS_NAME);</span>
+
+			// For backwards compatibility so it can still load models which didn't have any priorities
+<span class="nc" id="L1646">			String priority_str = current.getAttribute(DOC_CLASS_PRIORITY);</span>
+<span class="nc bnc" id="L1647" title="All 2 branches missed.">			if (priority_str.equals(&quot;&quot;)) {</span>
+				// Priority wasn't set
+<span class="nc" id="L1649">				classPriorities[classNum] = DEFAULT_CLASS_PRIORITY;</span>
+			} else {
+<span class="nc" id="L1651">				classPriorities[classNum] = Integer.parseInt(priority_str);</span>
+			}
+
+<span class="nc bnc" id="L1654" title="All 2 branches missed.">			if (current.getTagName().equals(DOC_CLASS_CLOSED)) {</span>
+<span class="nc" id="L1655">				classTypes[classNum] = CLASS_CLOSED;</span>
+<span class="nc" id="L1656">				classData[classNum] = Double.parseDouble(current.getAttribute(DOC_CLASS_POPULATION));</span>
+				//ReferenceStation[classNum][2] = 0;
+				//for (int j=0; j&lt;stations; j++)
+				//	if (stationNames[j] == current.getAttribute(&quot;refStation&quot;))
+				//ReferenceStation[classNum][2] = j;
+<span class="nc" id="L1661">				totalPop += (int) classData[classNum];</span>
+<span class="nc" id="L1662">				open = false;</span>
+			} else {
+<span class="nc" id="L1664">				classTypes[classNum] = CLASS_OPEN;</span>
+<span class="nc" id="L1665">				classData[classNum] = Double.parseDouble(current.getAttribute(DOC_CLASS_RATE));</span>
+				//ReferenceStation[classNum][2] = 0;
+				//for (int j=0; j&lt;stations; j++)
+				//	if (stationNames[j] == current.getAttribute(&quot;refStation&quot;))
+				//ReferenceStation[classNum][2] = j;
+<span class="nc" id="L1670">				closed = false;</span>
+			}
+<span class="nc" id="L1672">			classNum++;</span>
+		}
+
+<span class="nc" id="L1675">		return true;</span>
+	}
+
+	public boolean loadStations(Node stationNode) {
+<span class="nc" id="L1679">		stations = Integer.parseInt(((Element) stationNode).getAttribute(DOC_STATION_NUMBER));</span>
+
+<span class="nc" id="L1681">		stationNames = new String[stations];</span>
+<span class="nc" id="L1682">		stationTypes = new int[stations];</span>
+<span class="nc" id="L1683">		stationServers = new int[stations];</span>
+<span class="nc" id="L1684">		visits = new double[stations][];</span>
+<span class="nc" id="L1685">		serviceTimes = new double[stations][][];</span>
+
+<span class="nc" id="L1687">		NodeList stationList = stationNode.getChildNodes();</span>
+
+<span class="nc" id="L1689">		ld = false;</span>
+<span class="nc" id="L1690">		priority = false;</span>
+
+		String statType;
+<span class="nc" id="L1693">		NodeList sTimes = null;</span>
+<span class="nc" id="L1694">		int stationNum = 0;</span>
+
+		/* stations */
+
+		Node n;
+		Element current;
+
+<span class="nc bnc" id="L1701" title="All 2 branches missed.">		for (int i = 0; i &lt; stationList.getLength(); i++) {</span>
+<span class="nc" id="L1702">			n = stationList.item(i);</span>
+<span class="nc bnc" id="L1703" title="All 2 branches missed.">			if (!(n instanceof Element)) {</span>
+<span class="nc" id="L1704">				continue;</span>
+			}
+<span class="nc" id="L1706">			current = (Element) n;</span>
+<span class="nc" id="L1707">			statType = current.getTagName();</span>
+<span class="nc" id="L1708">			stationNames[stationNum] = current.getAttribute(DOC_STATION_NAME);</span>
+<span class="nc bnc" id="L1709" title="All 2 branches missed.">			if (current.hasAttribute(DOC_STATION_SERVERS)) {</span>
+<span class="nc" id="L1710">				stationServers[stationNum] = Integer.parseInt(current.getAttribute(DOC_STATION_SERVERS));</span>
+			} else {
+<span class="nc" id="L1712">				stationServers[stationNum] = 1;</span>
+			}
+
+			/* make arrays */
+
+<span class="nc" id="L1717">			visits[stationNum] = new double[classes];</span>
+<span class="nc" id="L1718">			serviceTimes[stationNum] = new double[classes][];</span>
+
+			/* station types and service times */
+
+<span class="nc bnc" id="L1722" title="All 2 branches missed.">			if (statType.equals(DOC_STATION_TYPE_LD)) {</span>
+				// Load Dependent
+<span class="nc bnc" id="L1724" title="All 2 branches missed.">				if (!loadLDStation(stationNum, current, sTimes)) {</span>
+<span class="nc" id="L1725">					return false;</span>
+				}
+			} else { //Delay, LI, PRS, HOL
+<span class="nc bnc" id="L1728" title="All 2 branches missed.">				if (statType.equals(DOC_STATION_TYPE_DELAY)) {</span>
+<span class="nc" id="L1729">					stationTypes[stationNum] = STATION_DELAY;</span>
+<span class="nc bnc" id="L1730" title="All 2 branches missed.">				} else if (statType.equals(DOC_STATION_TYPE_LI)) {</span>
+<span class="nc" id="L1731">					stationTypes[stationNum] = STATION_LI;</span>
+<span class="nc bnc" id="L1732" title="All 2 branches missed.">				} else if (statType.equals(DOC_STATION_TYPE_PRS)) {</span>
+<span class="nc" id="L1733">					stationTypes[stationNum] = STATION_PRS;</span>
+<span class="nc" id="L1734">					priority = true;</span>
+<span class="nc bnc" id="L1735" title="All 2 branches missed.">				} else if (statType.equals(DOC_STATION_TYPE_HOL)) {</span>
+<span class="nc" id="L1736">					stationTypes[stationNum] = STATION_HOL;</span>
+<span class="nc" id="L1737">					priority = true;</span>
+				} else {
+					// Station type isn't known
+<span class="nc" id="L1740">					return false;</span>
+				}
+
+				/* create arrays */
+
+<span class="nc" id="L1745">				sTimes = current.getElementsByTagName(DOC_STATION_SERVICE_TIME);</span>
+<span class="nc" id="L1746">				NodeList visitsNodeList = current.getElementsByTagName(DOC_STATION_VISIT);</span>
+
+<span class="nc" id="L1748">				serviceTimes[stationNum] = new double[classes][1];</span>
+<span class="nc" id="L1749">				visits[stationNum] = new double[classes];</span>
+<span class="nc bnc" id="L1750" title="All 2 branches missed.">				for (int k = 0; k &lt; classes; k++) {</span>
+<span class="nc" id="L1751">					Node node = sTimes.item(k).getFirstChild();</span>
+<span class="nc" id="L1752">					String nodeValue = (node).getNodeValue();</span>
+<span class="nc" id="L1753">					serviceTimes[stationNum][k][0] = Double.parseDouble(nodeValue);</span>
+<span class="nc" id="L1754">					visits[stationNum][k] = Double.parseDouble((visitsNodeList.item(k).getFirstChild()).getNodeValue());</span>
+				}
+			}
+<span class="nc" id="L1757">			stationNum++;</span>
+		}
+<span class="nc" id="L1759">		return true;</span>
+	}
+
+	private boolean loadLDStation(int stationNum, Element current, NodeList sTimes) {
+<span class="nc" id="L1763">		ld = true;</span>
+<span class="nc bnc" id="L1764" title="All 2 branches missed.">		if (totalPop == 0) {</span>
+<span class="nc" id="L1765">			System.err.println(&quot;LD station with zero customers&quot;);</span>
+<span class="nc" id="L1766">			return false;</span>
+		}
+<span class="nc" id="L1768">		stationTypes[stationNum] = STATION_LD;</span>
+
+		/* create arrays */
+<span class="nc bnc" id="L1771" title="All 2 branches missed.">		for (int k = 0; k &lt; classes; k++) {</span>
+			//serviceTimes[stationNum] = new double[classes][totalPop + 1];
+<span class="nc" id="L1773">			serviceTimes[stationNum] = new double[classes][totalPop];</span>
+		}
+
+		//Element sTimesElem = (Element) current.getElementsByTagName(&quot;servicetimes&quot;).item(0);
+<span class="nc" id="L1777">		Element sTimesElem = (Element) current.getElementsByTagName(&quot;servicetimes&quot;).item(0);</span>
+<span class="nc" id="L1778">		sTimes = sTimesElem.getElementsByTagName(&quot;servicetimes&quot;);</span>
+
+<span class="nc bnc" id="L1780" title="All 2 branches missed.">		if (sTimes.getLength() != classes) {</span>
+<span class="nc" id="L1781">			System.err.println(&quot;Wrong number of service times sets for LD station &quot; + stationNames[stationNum]);</span>
+<span class="nc" id="L1782">			return false;</span>
+		}
+
+<span class="nc" id="L1785">		Element visitsElem = (Element) current.getElementsByTagName(&quot;visits&quot;).item(0);</span>
+<span class="nc" id="L1786">		NodeList visitsNodeList = visitsElem.getElementsByTagName(&quot;visit&quot;);</span>
+
+<span class="nc bnc" id="L1788" title="All 2 branches missed.">		for (int k = 0; k &lt; classes; k++) {</span>
+<span class="nc" id="L1789">			String visit = (visitsNodeList.item(k).getFirstChild()).getNodeValue();</span>
+<span class="nc" id="L1790">			visits[stationNum][k] = Double.parseDouble(visit);</span>
+
+			//string of LD service times for class k
+<span class="nc" id="L1793">			Element class_st = (Element) sTimes.item(k);</span>
+<span class="nc" id="L1794">			String stimes = class_st.getFirstChild().getNodeValue();</span>
+
+<span class="nc" id="L1796">			double[] servt_arr = new double[totalPop];</span>
+<span class="nc" id="L1797">			ArrayUtils.fromCSV(servt_arr, stimes);</span>
+
+<span class="nc" id="L1799">			System.arraycopy(servt_arr, 0, serviceTimes[stationNum][k], 0, totalPop);</span>
+		}
+
+<span class="nc" id="L1802">		return true;</span>
+	}
+
+	public boolean loadReferenceStation(Node ReferenceStationNode) {
+<span class="nc" id="L1806">		classes = Integer.parseInt(((Element) ReferenceStationNode).getAttribute(&quot;number&quot;));</span>
+<span class="nc" id="L1807">		referenceStation = new int[classes];</span>
+<span class="nc" id="L1808">		NodeList classList = ReferenceStationNode.getChildNodes();</span>
+<span class="nc" id="L1809">		int classNum = 0;</span>
+		Node n;
+		Element current;
+<span class="nc bnc" id="L1812" title="All 2 branches missed.">		for (int i = 0; i &lt; classList.getLength(); i++) {</span>
+<span class="nc" id="L1813">			n = classList.item(i);</span>
+<span class="nc bnc" id="L1814" title="All 2 branches missed.">			if (!(n instanceof Element)) {</span>
+<span class="nc" id="L1815">				continue;</span>
+			}
+<span class="nc" id="L1817">			current = (Element) n;</span>
+<span class="nc bnc" id="L1818" title="All 2 branches missed.">			for (int j = 0; j &lt; stations; j++) {</span>
+<span class="nc bnc" id="L1819" title="All 2 branches missed.">				if (stationNames[j].equals(current.getAttribute(&quot;refStation&quot;))) {</span>
+<span class="nc" id="L1820">					referenceStation[classNum] = j;</span>
+<span class="nc" id="L1821">					break;</span>
+<span class="nc bnc" id="L1822" title="All 2 branches missed.">				} else if (current.getAttribute(&quot;refStation&quot;).equals(&quot;Arrival Process&quot;)) {						</span>
+<span class="nc" id="L1823">					referenceStation[classNum] = stationNames.length;</span>
+				} else {
+<span class="nc" id="L1825">					referenceStation[classNum] = 0;</span>
+				}
+			}
+<span class="nc" id="L1828">			classNum++;</span>
+		}
+<span class="nc" id="L1830">		return true;</span>
+	}
+
+	public boolean loadReferenceStationDefault(Node classNode) {
+<span class="nc" id="L1834">		classes = Integer.parseInt(((Element) classNode).getAttribute(&quot;number&quot;));</span>
+<span class="nc bnc" id="L1835" title="All 2 branches missed.">		for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L1836">			referenceStation[i] = 0;</span>
+		}
+<span class="nc" id="L1838">		return true;</span>
+	}
+
+	/**
+	 * Load solutions from xml file
+	 * @param sol NodeList of solution elements
+	 * @return true if load was successful, false otherwise
+	 */
+	public boolean loadSolution(NodeList sol) {
+<span class="nc" id="L1847">		resultsOK = true;</span>
+<span class="nc bnc" id="L1848" title="All 2 branches missed.">		if (queueLen == null) {</span>
+<span class="nc" id="L1849">			resetResults();</span>
+		}
+<span class="nc bnc" id="L1851" title="All 2 branches missed.">		for (int i = 0; i &lt; sol.getLength(); i++) {</span>
+<span class="nc" id="L1852">			Element solution = (Element) sol.item(i);</span>
+<span class="nc" id="L1853">			String status = solution.getAttribute(&quot;ok&quot;);</span>
+<span class="nc bnc" id="L1854" title="All 4 branches missed.">			resultsOK = resultsOK &amp;&amp; (status.equals(&quot;true&quot;));</span>
+<span class="nc bnc" id="L1855" title="All 2 branches missed.">			if (solution.hasAttribute(&quot;algCount&quot;)) {</span>
+<span class="nc" id="L1856">				int algCount = Integer.parseInt(solution.getAttribute(&quot;algCount&quot;));</span>
+<span class="nc bnc" id="L1857" title="All 2 branches missed.">				for (int a = 0; a &lt; algCount; a++) {</span>
+<span class="nc" id="L1858">					Element a_alg = (Element) solution.getElementsByTagName(&quot;algorithm&quot;).item(a);</span>
+<span class="nc" id="L1859">					SolverAlgorithm alg = SolverAlgorithm.fromString(a_alg.getAttribute(&quot;name&quot;));</span>
+
+<span class="nc bnc" id="L1861" title="All 2 branches missed.">					if (alg == null) {</span>
+<span class="nc" id="L1862">						continue;</span>
+					}
+<span class="nc bnc" id="L1864" title="All 2 branches missed.">					if (i == 0) {</span>
+<span class="nc" id="L1865">						queueLen.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1866">						throughput.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1867">						resTimes.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1868">						util.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1869">						logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L1870">						algIterations.put(alg, new int[iterations]);</span>
+					}
+
+<span class="nc" id="L1873">					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, &quot;Number of Customers&quot;), queueLen.get(alg), i);</span>
+<span class="nc" id="L1874">					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, &quot;Throughput&quot;), throughput.get(alg), i);</span>
+<span class="nc" id="L1875">					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, &quot;Residence time&quot;), resTimes.get(alg), i);</span>
+<span class="nc" id="L1876">					ArrayUtils.copy2to3(loadResultsMatrix(a_alg, stations, classes, &quot;Utilization&quot;), util.get(alg), i);</span>
+<span class="nc bnc" id="L1877" title="All 2 branches missed.">					if (a_alg.getElementsByTagName(&quot;normconst&quot;).getLength() &gt; 0) {</span>
+<span class="nc" id="L1878">						Element nc = (Element) a_alg.getElementsByTagName(&quot;normconst&quot;).item(0);</span>
+<span class="nc" id="L1879">						logNormConst.put(alg, new Double(Double.parseDouble(nc.getAttribute(&quot;logValue&quot;))));</span>
+<span class="nc" id="L1880">					} else {</span>
+<span class="nc" id="L1881">						logNormConst.put(alg, new Double(Double.NaN));</span>
+					}
+<span class="nc bnc" id="L1883" title="All 2 branches missed.">					if (a_alg.hasAttribute(&quot;iterations&quot;)) {</span>
+<span class="nc" id="L1884">						algIterations.get(alg)[i] = Integer.parseInt(a_alg.getAttribute(&quot;iterations&quot;));</span>
+					} else {
+<span class="nc" id="L1886">						algIterations.get(alg)[i] = 0;</span>
+					}
+				}
+<span class="nc" id="L1889">			} else {</span>
+<span class="nc" id="L1890">				SolverAlgorithm alg = SolverAlgorithm.EXACT;</span>
+
+<span class="nc bnc" id="L1892" title="All 2 branches missed.">				if (i == 0) {</span>
+<span class="nc" id="L1893">					queueLen.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1894">					throughput.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1895">					resTimes.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1896">					util.put(alg, new double[stations][classes][iterations]);</span>
+<span class="nc" id="L1897">					logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L1898">					algIterations.put(alg, new int[iterations]);</span>
+				}
+
+<span class="nc" id="L1901">				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, &quot;Number of Customers&quot;), queueLen.get(alg), i);</span>
+<span class="nc" id="L1902">				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, &quot;Throughput&quot;), throughput.get(alg), i);</span>
+<span class="nc" id="L1903">				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, &quot;Residence time&quot;), resTimes.get(alg), i);</span>
+<span class="nc" id="L1904">				ArrayUtils.copy2to3(loadResultsMatrix(solution, stations, classes, &quot;Utilization&quot;), util.get(alg), i);</span>
+<span class="nc" id="L1905">				logNormConst.put(alg, new Double(Double.NaN));</span>
+<span class="nc" id="L1906">				algIterations.get(alg)[i] = 0;</span>
+			}
+		}
+<span class="nc" id="L1909">		return true;</span>
+	}
+
+	public double[][] loadResultsMatrix(Element base, int len1, int len2, String res) {
+		//matrix of results
+<span class="nc" id="L1914">		double[][] arr = new double[len1][len2];</span>
+
+<span class="nc bnc" id="L1916" title="All 2 branches missed.">		if (base.getElementsByTagName(&quot;stationresults&quot;).getLength() != len1) {</span>
+<span class="nc" id="L1917">			return null;</span>
+		}
+
+<span class="nc bnc" id="L1920" title="All 2 branches missed.">		for (int i = 0; i &lt; len1; i++) {</span>
+<span class="nc" id="L1921">			Element s_res = (Element) base.getElementsByTagName(&quot;stationresults&quot;).item(i);</span>
+<span class="nc bnc" id="L1922" title="All 2 branches missed.">			for (int c = 0; c &lt; len2; c++) {</span>
+<span class="nc" id="L1923">				Element n_cls = (Element) s_res.getElementsByTagName(&quot;classresults&quot;).item(c);</span>
+
+<span class="nc" id="L1925">				NodeList measure_list = n_cls.getElementsByTagName(&quot;measure&quot;);</span>
+				Element measure;
+<span class="nc" id="L1927">				String value = null;</span>
+
+<span class="nc bnc" id="L1929" title="All 2 branches missed.">				for (int m = 0; m &lt; measure_list.getLength(); m++) {</span>
+<span class="nc" id="L1930">					measure = (Element) measure_list.item(m);</span>
+					//Below IF clause is added for backward compatibility of the Perf Index : Number of customers
+					//as previously it was known as Queue Length.
+<span class="nc bnc" id="L1933" title="All 2 branches missed.">					if (res.equalsIgnoreCase(&quot;Number of Customers&quot;)) {</span>
+<span class="nc bnc" id="L1934" title="All 2 branches missed.">						if (measure.getAttribute(&quot;measureType&quot;).equalsIgnoreCase(&quot;Queue length&quot;)) {</span>
+<span class="nc" id="L1935">							res = &quot;Queue length&quot;;</span>
+						}
+					}
+<span class="nc bnc" id="L1938" title="All 2 branches missed.">					if (measure.getAttribute(&quot;measureType&quot;).equalsIgnoreCase(res)) {</span>
+						//it is the measure we are searching for
+<span class="nc" id="L1940">						value = measure.getAttribute(&quot;meanValue&quot;);</span>
+<span class="nc" id="L1941">						break;</span>
+					}
+				}
+
+				//Element r = (Element) n_cls.getElementsByTagName(res).item(0);
+				//String value = r.getFirstChild().getNodeValue();
+
+<span class="nc bnc" id="L1948" title="All 2 branches missed.">				if (value != null) {</span>
+<span class="nc" id="L1949">					arr[i][c] = Double.parseDouble(value);</span>
+				} else {
+<span class="nc" id="L1951">					arr[i][c] = 0.0;</span>
+				}
+
+			}
+		}
+<span class="nc" id="L1956">		return arr;</span>
+	}
+
+	//methods for aggregate results retrieval
+
+	/**Returns per-class aggregate for throughput*/
+	public double[][] getPerClassX(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1963" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L1964">			return null;</span>
+		}
+<span class="nc" id="L1966">		double[][] retVal = new double[classes][iterations];</span>
+<span class="nc" id="L1967">		double[][][] throughput = this.throughput.get(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L1969" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+			//scan columns to get one value per column
+<span class="nc bnc" id="L1971" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+				//throughput is ratio of specific throughput on specific num of visits
+<span class="nc bnc" id="L1973" title="All 2 branches missed.">				if (classTypes[i] == CLASS_OPEN) {</span>
+<span class="nc" id="L1974">					retVal[i][k] = throughput[0][i][k] / visits[0][i];</span>
+					// retVal[i][k] = classData[i];
+				} else {
+					// Added by Cerotti
+<span class="nc" id="L1978">					retVal[i][k] = throughput[referenceStation[i]][i][k];</span>
+				}
+			}
+		}
+<span class="nc" id="L1982">		return retVal;</span>
+	}
+
+	/**Returns per-station aggregate for throughput*/
+	public double[][] getPerStationX(SolverAlgorithm alg) {
+<span class="nc bnc" id="L1987" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L1988">			return null;</span>
+		}
+<span class="nc" id="L1990">		double[][] retVal = new double[stations][iterations];</span>
+<span class="nc" id="L1991">		double[][][] throughput = this.throughput.get(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L1993" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L1994" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L1995">				retVal[i][k] = 0;</span>
+<span class="nc bnc" id="L1996" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L1997">					retVal[i][k] += throughput[i][j][k];</span>
+				}
+			}
+		}
+<span class="nc" id="L2001">		return retVal;</span>
+	}
+
+	/**Returns global aggregate for throughput*/
+	public double[] getGlobalX(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2006" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2007">			return null;</span>
+		}
+<span class="nc" id="L2009">		double[] retVal = new double[iterations];</span>
+<span class="nc" id="L2010">		double[][] xClassAggs = getPerClassX(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2012" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc" id="L2013">			retVal[k] = 0;</span>
+<span class="nc bnc" id="L2014" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L2015">				retVal[k] += xClassAggs[i][k];</span>
+			}
+		}
+<span class="nc" id="L2018">		return retVal;</span>
+	}
+
+	/**Returns per-class aggregate for queue length*/
+	public double[][] getPerClassQ(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2023" title="All 2 branches missed.">		if (queueLen == null) {</span>
+<span class="nc" id="L2024">			return null;</span>
+		}
+<span class="nc" id="L2026">		double[][] retVal = new double[classes][iterations];</span>
+<span class="nc" id="L2027">		double[][][] queueLen = this.queueLen.get(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2029" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2030" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L2031">				retVal[i][k] = 0;</span>
+<span class="nc bnc" id="L2032" title="All 2 branches missed.">				for (int j = 0; j &lt; stations; j++) {</span>
+<span class="nc" id="L2033">					retVal[i][k] += queueLen[j][i][k];</span>
+				}
+			}
+		}
+<span class="nc" id="L2037">		return retVal;</span>
+	}
+
+	/**Returns per-station aggregate for queue length*/
+	public double[][] getPerStationQ(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2042" title="All 2 branches missed.">		if (queueLen == null) {</span>
+<span class="nc" id="L2043">			return null;</span>
+		}
+<span class="nc" id="L2045">		double[][] retVal = new double[stations][iterations];</span>
+<span class="nc" id="L2046">		double[][][] queueLen = this.queueLen.get(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2048" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2049" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L2050">				retVal[i][k] = 0;</span>
+<span class="nc bnc" id="L2051" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L2052">					retVal[i][k] += queueLen[i][j][k];</span>
+				}
+			}
+		}
+<span class="nc" id="L2056">		return retVal;</span>
+	}
+
+	/**Returns global aggregate for queue length*/
+	public double[] getGlobalQ(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2061" title="All 2 branches missed.">		if (queueLen == null) {</span>
+<span class="nc" id="L2062">			return null;</span>
+		}
+<span class="nc" id="L2064">		double[] retVal = new double[iterations];</span>
+<span class="nc" id="L2065">		double[][] qClassAggs = getPerClassQ(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2067" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc" id="L2068">			retVal[k] = 0;</span>
+<span class="nc bnc" id="L2069" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L2070">				retVal[k] += qClassAggs[i][k];</span>
+			}
+		}
+<span class="nc" id="L2073">		return retVal;</span>
+	}
+
+	/**Returns per-class aggregate for residence times*/
+	public double[][] getPerClassR(SolverAlgorithm alg, boolean with) {
+<span class="nc bnc" id="L2078" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2079">			return null;</span>
+		}
+<span class="nc" id="L2081">		double[][] retVal = new double[classes][iterations];</span>
+<span class="nc" id="L2082">		double[][][] resTimes = this.getResidTimes(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2084" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2085" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L2086">				retVal[i][k] = 0;</span>
+<span class="nc bnc" id="L2087" title="All 2 branches missed.">				for (int j = 0; j &lt; stations; j++) {</span>
+<span class="nc bnc" id="L2088" title="All 6 branches missed.">					if (with || classTypes[i] == CLASS_OPEN || j != referenceStation[i]) {</span>
+<span class="nc" id="L2089">						retVal[i][k] += resTimes[j][i][k];</span>
+					}
+				}
+			}
+		}
+<span class="nc" id="L2094">		return retVal;</span>
+	}
+
+	/**Returns per-station aggregate for response times*/
+	public double[][] getPerStationRespT(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2099" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2100">			return null;</span>
+		}
+<span class="nc bnc" id="L2102" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2103">			return null;</span>
+		}
+<span class="nc" id="L2105">		double[][] retVal = new double[stations][iterations];</span>
+<span class="nc" id="L2106">		double[][] xClassAggs = getPerClassX(alg);</span>
+<span class="nc" id="L2107">		double[][][] resTimes = this.getResidTimes(alg);</span>
+<span class="nc" id="L2108">		double[][] visits = this.getVisits();</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2110" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2111" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L2112">				retVal[i][k] = 0;</span>
+<span class="nc" id="L2113">				double dividend = 0;</span>
+<span class="nc bnc" id="L2114" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc bnc" id="L2115" title="All 2 branches missed.">					if (visits[i][j] &gt; 0.0) {</span>
+<span class="nc" id="L2116">						retVal[i][k] += xClassAggs[j][k] * resTimes[i][j][k] / visits[i][j];</span>
+<span class="nc" id="L2117">						dividend += xClassAggs[j][k];</span>
+					}
+				}
+<span class="nc bnc" id="L2120" title="All 2 branches missed.">				if (dividend &gt; 0) {</span>
+<span class="nc" id="L2121">					retVal[i][k] /= dividend;</span>
+				} else {
+<span class="nc" id="L2123">					retVal[i][k] = 0;</span>
+				}
+			}
+		}
+<span class="nc" id="L2127">		return retVal;</span>
+	}
+
+	/**Returns per-station aggregate for residence times*/
+	public double[][] getPerStationResidT(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2132" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2133">			return null;</span>
+		}
+<span class="nc bnc" id="L2135" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2136">			return null;</span>
+		}
+<span class="nc" id="L2138">		double[][] retVal = new double[stations][iterations];</span>
+<span class="nc" id="L2139">		double[][] xClassAggs = getPerClassX(alg);</span>
+<span class="nc" id="L2140">		double[][][] resTimes = this.getResidTimes(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2142" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2143" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L2144">				retVal[i][k] = 0;</span>
+<span class="nc" id="L2145">				double dividend = 0;</span>
+<span class="nc bnc" id="L2146" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L2147">					retVal[i][k] += xClassAggs[j][k] * resTimes[i][j][k];</span>
+<span class="nc" id="L2148">					dividend += xClassAggs[j][k];</span>
+				}
+<span class="nc bnc" id="L2150" title="All 2 branches missed.">				if (dividend &gt; 0) {</span>
+<span class="nc" id="L2151">					retVal[i][k] /= dividend;</span>
+				} else {
+<span class="nc" id="L2153">					retVal[i][k] = 0;</span>
+				}
+			}
+		}
+<span class="nc" id="L2157">		return retVal;</span>
+	}
+
+	/**Returns system response time*/
+	public double[] getGlobalR(SolverAlgorithm alg, boolean with) {
+<span class="nc bnc" id="L2162" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2163">			return null;</span>
+		}
+<span class="nc bnc" id="L2165" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2166">			return null;</span>
+		}
+<span class="nc" id="L2168">		double[] retVal = new double[iterations];</span>
+<span class="nc" id="L2169">		double[][] xClassAggs = getPerClassX(alg);		</span>
+<span class="nc" id="L2170">		double[][] rClassAggs = getPerClassR(alg, with);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2172" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc" id="L2173">			retVal[k] = 0;</span>
+<span class="nc" id="L2174">			double dividend = 0;</span>
+<span class="nc bnc" id="L2175" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc" id="L2176">				retVal[k] += xClassAggs[i][k] * rClassAggs[i][k];</span>
+<span class="nc" id="L2177">				dividend += xClassAggs[i][k];</span>
+			}
+<span class="nc bnc" id="L2179" title="All 2 branches missed.">			if (dividend &gt; 0) {</span>
+<span class="nc" id="L2180">				retVal[k] /= dividend;</span>
+			} else {
+<span class="nc" id="L2182">				retVal[k] = 0;</span>
+			}
+		}
+<span class="nc" id="L2185">		return retVal;</span>
+	}
+
+	public double[][] getPerStationU(SolverAlgorithm alg) {
+<span class="nc bnc" id="L2189" title="All 2 branches missed.">		if (util == null) {</span>
+<span class="nc" id="L2190">			return null;</span>
+		}
+<span class="nc" id="L2192">		double[][] retVal = new double[stations][iterations];</span>
+<span class="nc" id="L2193">		double[][][] util = this.util.get(alg);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2195" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2196" title="All 2 branches missed.">			for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc" id="L2197">				retVal[i][k] = 0;</span>
+<span class="nc bnc" id="L2198" title="All 2 branches missed.">				for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc" id="L2199">					retVal[i][k] += util[i][j][k];</span>
+				}
+			}
+		}
+<span class="nc" id="L2203">		return retVal;</span>
+	}
+
+	//Per-class System Power
+	public double[][] getPerClassSP(SolverAlgorithm alg, boolean with) {
+<span class="nc bnc" id="L2208" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2209">			return null;</span>
+		}
+<span class="nc bnc" id="L2211" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2212">			return null;</span>
+		}
+<span class="nc" id="L2214">		double[][] retVal = new double[classes][iterations];</span>
+<span class="nc" id="L2215">		double[][] xClassAggs = getPerClassX(alg);</span>
+<span class="nc" id="L2216">		double[][] rClassAggs = getPerClassR(alg, with);</span>
+		// Scans for every iteration (what if analysis)
+<span class="nc bnc" id="L2218" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2219" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L2220" title="All 2 branches missed.">				if (rClassAggs[i][k] &gt; 0) {</span>
+<span class="nc" id="L2221">					retVal[i][k] = xClassAggs[i][k] / rClassAggs[i][k];</span>
+				} else {
+<span class="nc" id="L2223">					retVal[i][k] = 0;</span>
+				}
+			}
+		}
+<span class="nc" id="L2227">		return retVal;</span>
+	}
+
+	//System Power
+	public double[] getGlobalSP(SolverAlgorithm alg, boolean with) {
+<span class="nc bnc" id="L2232" title="All 2 branches missed.">		if (throughput == null) {</span>
+<span class="nc" id="L2233">			return null;</span>
+		}
+<span class="nc bnc" id="L2235" title="All 2 branches missed.">		if (resTimes == null) {</span>
+<span class="nc" id="L2236">			return null;</span>
+		}
+<span class="nc" id="L2238">		double[] retVal = new double[iterations];</span>
+<span class="nc" id="L2239">		double[] xGlobalAggs = getGlobalX(alg);</span>
+<span class="nc" id="L2240">		double[] rGlobalAggs = getGlobalR(alg, with);</span>
+<span class="nc bnc" id="L2241" title="All 2 branches missed.">		for (int k = 0; k &lt; iterations; k++) {</span>
+<span class="nc bnc" id="L2242" title="All 2 branches missed.">			if (rGlobalAggs[k] &gt; 0) {</span>
+<span class="nc" id="L2243">				retVal[k] = xGlobalAggs[k] / rGlobalAggs[k];</span>
+			} else {
+<span class="nc" id="L2245">				retVal[k] = 0;</span>
+			}
+		}
+<span class="nc" id="L2248">		return retVal;</span>
+	}
+
+	//Added by ASHANKA STOP
+	/**
+	 * This method tells if visits were set or are all unitary (or zero if
+	 * corresponding service time is zero). This is used to show correct panel layout
+	 * upon loading
+	 * @return true iff visits were not set
+	 */
+	public boolean areVisitsSet() {
+<span class="nc" id="L2259">		return unitaryVisits;</span>
+	}
+
+	//NEW Federico Dall'Orso
+	/**Randomizes model's service times and visits.*/
+	public void randomizeModelData() {
+<span class="nc" id="L2265">		double globRate = globalArrRate();</span>
+<span class="nc bnc" id="L2266" title="All 2 branches missed.">		for (int i = 0; i &lt; serviceTimes.length; i++) {</span>
+<span class="nc bnc" id="L2267" title="All 2 branches missed.">			for (int j = 0; j &lt; serviceTimes[i].length; j++) {</span>
+<span class="nc bnc" id="L2268" title="All 2 branches missed.">				for (int k = 0; k &lt; serviceTimes[i][j].length; k++) {</span>
+<span class="nc bnc" id="L2269" title="All 2 branches missed.">					if (j &lt; classTypes.length) {</span>
+<span class="nc bnc" id="L2270" title="All 2 branches missed.">						if (classTypes[j] == CLASS_CLOSED) {</span>
+<span class="nc" id="L2271">							serviceTimes[i][j][k] = MAXRAND * Math.exp(-Math.random() * MAXRANGE);</span>
+						} else {
+<span class="nc bnc" id="L2273" title="All 2 branches missed.">							if (globRate != 0) {</span>
+<span class="nc" id="L2274">								serviceTimes[i][j][k] = Math.random() * (0.9) / globRate;</span>
+							} else {
+<span class="nc" id="L2276">								serviceTimes[i][j][k] = Math.random();</span>
+							}
+						}
+<span class="nc" id="L2279">						serviceTimes[i][j][k]=Math.ceil(serviceTimes[i][j][k]*1000)/1000; // keep 3 decimal digits</span>
+					}
+				}
+			}
+		}
+<span class="nc bnc" id="L2284" title="All 2 branches missed.">		for (int i = 0; i &lt; visits.length; i++) {</span>
+<span class="nc bnc" id="L2285" title="All 2 branches missed.">			for (int j = 0; j &lt; visits[i].length; j++) {</span>
+<span class="nc" id="L2286">				visits[i][j] = 1;</span>
+			}
+		}
+<span class="nc" id="L2289">		changed = true;</span>
+<span class="nc" id="L2290">	}</span>
+
+	//calculates global arrival rate for open classes
+	private double globalArrRate() {
+<span class="nc" id="L2294">		double sum = 0;</span>
+<span class="nc bnc" id="L2295" title="All 4 branches missed.">		for (int i = 0; i &lt; classTypes.length &amp;&amp; i &lt; classData.length; i++) {</span>
+<span class="nc bnc" id="L2296" title="All 2 branches missed.">			if (classTypes[i] == CLASS_OPEN) {</span>
+<span class="nc" id="L2297">				sum += classData[i];</span>
+			}
+		}
+<span class="nc" id="L2300">		return sum;</span>
+	}
+
+	//END
+
+	//---- Methods for What-If analysis ---- Bertoli Marco ------------------------------
+	/**
+	 * Tells if this model includes a what-if analysis
+	 * @return true if this model includes a what-if analysis
+	 */
+	public boolean isWhatIf() {
+<span class="nc bnc" id="L2311" title="All 2 branches missed.">		return iterations &gt; 1;</span>
+	}
+
+	/**
+	 * Removes What-if analysis from current model
+	 */
+	public void removeWhatIf() {
+<span class="nc bnc" id="L2318" title="All 2 branches missed.">		if (iterations != 1) {</span>
+<span class="nc" id="L2319">			iterations = 1;</span>
+<span class="nc" id="L2320">			changed = true;</span>
+		}
+<span class="nc" id="L2322">	}</span>
+
+	/**
+	 * Sets the array of values used for what-if analysis
+	 * @param values vector with values to be used in iterations of what-if analysis
+	 */
+	public boolean setWhatIfValues(double[] values) {
+<span class="nc bnc" id="L2329" title="All 4 branches missed.">		if (whatIfValues == null &amp;&amp; values == null) {</span>
+<span class="nc" id="L2330">			return false;</span>
+		}
+
+<span class="nc bnc" id="L2333" title="All 4 branches missed.">		if (whatIfValues == null || !Arrays.equals(whatIfValues, values)) {</span>
+<span class="nc" id="L2334">			whatIfValues = values;</span>
+<span class="nc bnc" id="L2335" title="All 2 branches missed.">			if (values != null) {</span>
+<span class="nc" id="L2336">				iterations = values.length;</span>
+			} else {
+<span class="nc" id="L2338">				iterations = 1;</span>
+			}
+<span class="nc" id="L2340">			changed = true;</span>
+<span class="nc" id="L2341">			resultsOK = false;</span>
+<span class="nc" id="L2342">			return true;</span>
+		}
+<span class="nc" id="L2344">		return true;</span>
+	}
+
+	/**
+	 * Sets class used for what-if analysis
+	 * @param classNum ordered number of selected class or -1 for every class
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setWhatIfClass(int classNum) {
+<span class="nc bnc" id="L2353" title="All 2 branches missed.">		if (whatIfClass != classNum) {</span>
+<span class="nc" id="L2354">			whatIfClass = classNum;</span>
+<span class="nc" id="L2355">			changed = true;</span>
+<span class="nc" id="L2356">			resultsOK = false;</span>
+<span class="nc" id="L2357">			return true;</span>
+		}
+<span class="nc" id="L2359">		return false;</span>
+	}
+
+	/**
+	 * Sets station used for what-if analysis
+	 * @param stationNum ordered number of selected station or -1 for every station
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setWhatIfStation(int stationNum) {
+<span class="nc bnc" id="L2368" title="All 2 branches missed.">		if (whatIfStation != stationNum) {</span>
+<span class="nc" id="L2369">			whatIfStation = stationNum;</span>
+<span class="nc" id="L2370">			changed = true;</span>
+<span class="nc" id="L2371">			resultsOK = false;</span>
+<span class="nc" id="L2372">			return true;</span>
+		}
+<span class="nc" id="L2374">		return false;</span>
+	}
+
+	/**
+	 * Sets type of what-if analysis
+	 * @param type WHAT_IF_ARRIVAL, WHAT_IF_CUSTOMERS, WHAT_IF_MIX, WHAT_IF_DEMANDS
+	 * @see ExactConstants
+	 * @return true if data was changed, false otherwise
+	 */
+	public boolean setWhatIfType(String type) {
+<span class="nc bnc" id="L2384" title="All 4 branches missed.">		if (whatIfType == null &amp;&amp; type == null) {</span>
+<span class="nc" id="L2385">			return false;</span>
+		}
+<span class="nc bnc" id="L2387" title="All 4 branches missed.">		if (whatIfType == null || !whatIfType.equalsIgnoreCase(type)) {</span>
+<span class="nc" id="L2388">			whatIfType = type;</span>
+<span class="nc" id="L2389">			changed = true;</span>
+<span class="nc" id="L2390">			resultsOK = false;</span>
+<span class="nc" id="L2391">			return true;</span>
+		}
+<span class="nc" id="L2393">		return false;</span>
+	}
+
+	/**
+	 * Returns type of what-if analysis
+	 * @return WHAT_IF_ARRIVAL, WHAT_IF_CUSTOMERS, WHAT_IF_MIX, WHAT_IF_DEMANDS
+	 * @see ExactConstants
+	 */
+	public String getWhatIfType() {
+<span class="nc" id="L2402">		return whatIfType;</span>
+	}
+
+	/**
+	 * Returns index of station selected for what-if analysis or -1 if every station is selected
+	 * @return index of station selected for what-if analysis or -1 if every station is selected
+	 */
+	public int getWhatIfStation() {
+<span class="nc" id="L2410">		return whatIfStation;</span>
+	}
+
+	/**
+	 * Returns index of class selected for what-if analysis or -1 if every class is selected
+	 * @return index of class selected for what-if analysis or -1 if every class is selected
+	 */
+	public int getWhatIfClass() {
+<span class="nc" id="L2418">		return whatIfClass;</span>
+	}
+
+	/**
+	 * Returns the array of values used for what-if analysis
+	 * @return the array of values used for what-if analysis
+	 */
+	public double[] getWhatIfValues() {
+<span class="nc" id="L2426">		return whatIfValues;</span>
+	}
+
+	/**
+	 * This method is used to generate a suitable vector of values for what-if analysis.
+	 * @param type type of what-if analysis to be performed. (WHAT_IF_ARRIVAL,
+	 * WHAT_IF_CUSTOMERS, WHAT_IF_MIX, WHAT_IF_DEMANDS)
+	 * @param from initial value
+	 * @param to final value
+	 * @param iterations expected number of iterations (will be adjusted to be compliant
+	 * with specified from and to values in WHAT_IF_CUSTOMERS and WHAT_IF_MIX)
+	 * @param ClassRef index of class to be analyzed or -1 for all classes
+	 * @param stationRef index of station to be analyzed (only for WHAT_IF_DEMANDS)
+	 * @return suitable array of iterations to be performed
+	 */
+	public double[] generateWhatIfValues(String type, double from, double to, int iterations, int ClassRef, int stationRef) {
+		double[] ret, tmp;
+<span class="nc" id="L2443">		int n = iterations - 1;</span>
+<span class="nc" id="L2444">		boolean inverted = false; // tells if 'from' and 'to' values were exchanged</span>
+		// order from and to values
+		double f, t;
+<span class="nc bnc" id="L2447" title="All 2 branches missed.">		if (from &lt; to) {</span>
+<span class="nc" id="L2448">			f = from;</span>
+<span class="nc" id="L2449">			t = to;</span>
+<span class="nc bnc" id="L2450" title="All 2 branches missed.">		} else if (from &gt; to) {</span>
+<span class="nc" id="L2451">			f = to;</span>
+<span class="nc" id="L2452">			t = from;</span>
+<span class="nc" id="L2453">			inverted = true;</span>
+		} else {
+			// In the case of overlapping from and to values, returns a single-number array
+<span class="nc" id="L2456">			return new double[] { from };</span>
+		}
+
+		// Avoid 0 arrival rate
+<span class="nc bnc" id="L2460" title="All 4 branches missed.">		if (type.equals(WHAT_IF_ARRIVAL) &amp;&amp; f == 0.0) {</span>
+<span class="nc" id="L2461">			f = 1e-5;</span>
+		}
+
+		// Arrival rate and service Demands: this are really simple.
+<span class="nc bnc" id="L2465" title="All 4 branches missed.">		if (type.equals(WHAT_IF_ARRIVAL) || type.equals(WHAT_IF_DEMANDS)) {</span>
+<span class="nc" id="L2466">			ret = new double[iterations];</span>
+<span class="nc bnc" id="L2467" title="All 2 branches missed.">			for (int i = 0; i &lt;= n; i++) {</span>
+<span class="nc" id="L2468">				ret[i] = (f * (n - i) + i * t) / n;</span>
+			}
+		}
+		// Number of customers: this is complex because only integer values are allowed.
+<span class="nc bnc" id="L2472" title="All 2 branches missed.">		else if (type.equals(WHAT_IF_CUSTOMERS)) {</span>
+			// Single class
+<span class="nc bnc" id="L2474" title="All 2 branches missed.">			if (ClassRef &gt;= 0) {</span>
+<span class="nc" id="L2475">				tmp = new double[iterations];</span>
+<span class="nc" id="L2476">				int c = 0; // a simple counter to remove duplicates</span>
+<span class="nc bnc" id="L2477" title="All 2 branches missed.">				for (int i = 0; i &lt; iterations; i++) {</span>
+<span class="nc" id="L2478">					tmp[c] = Math.rint((f * (n - i) + i * t) / n);</span>
+					// Increment counter only if last element was not repeated
+<span class="nc bnc" id="L2480" title="All 4 branches missed.">					if (c &lt; 1 || tmp[c] != tmp[c - 1]) {</span>
+<span class="nc" id="L2481">						c++;</span>
+					}
+				}
+				// Pack target array
+<span class="nc" id="L2485">				ret = new double[c];</span>
+<span class="nc" id="L2486">				System.arraycopy(tmp, 0, ret, 0, c);</span>
+<span class="nc" id="L2487">			}</span>
+			// Multiclass
+			else {
+				// An array that will hold number of customers for each closed class.
+<span class="nc" id="L2491">				int[] customers = new int[classes];</span>
+<span class="nc" id="L2492">				int c = 0; // counter of closed classes</span>
+<span class="nc bnc" id="L2493" title="All 2 branches missed.">				for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L2494" title="All 2 branches missed.">					if (classTypes[c] == CLASS_CLOSED) {</span>
+<span class="nc" id="L2495">						customers[c++] = (int) classData[i];</span>
+					}
+				}
+				// Inverse of Highest Common Factor is the minimum percentage allowed.
+<span class="nc" id="L2499">				int hcf = hcf(customers, c);</span>
+<span class="nc bnc" id="L2500" title="All 2 branches missed.">				if (hcf == 0) {</span>
+<span class="nc" id="L2501">					hcf = 1;</span>
+				}
+<span class="nc" id="L2503">				double step = 1.0 / hcf;</span>
+<span class="nc bnc" id="L2504" title="All 2 branches missed.">				if (f &lt; step) {</span>
+<span class="nc" id="L2505">					f = step;</span>
+				}
+<span class="nc bnc" id="L2507" title="All 2 branches missed.">				if (t &lt; f) {</span>
+<span class="nc" id="L2508">					return new double[] { f };</span>
+				}
+
+<span class="nc" id="L2511">				c = 0; // counter of created steps</span>
+<span class="nc" id="L2512">				tmp = new double[iterations];</span>
+<span class="nc bnc" id="L2513" title="All 2 branches missed.">				for (int i = 0; i &lt; iterations; i++) {</span>
+<span class="nc" id="L2514">					tmp[c] = Math.rint((f / step * (n - i) + i * t / step) / n);</span>
+					// Increment counter only if last element was not repeated
+<span class="nc bnc" id="L2516" title="All 4 branches missed.">					if (c &lt; 1 || tmp[c] != tmp[c - 1]) {</span>
+<span class="nc" id="L2517">						c++;</span>
+					}
+				}
+
+				// Now creates results array
+<span class="nc" id="L2522">				ret = new double[c];</span>
+<span class="nc bnc" id="L2523" title="All 2 branches missed.">				for (int i = 0; i &lt; c; i++) {</span>
+<span class="nc" id="L2524">					ret[i] = tmp[i] * step;</span>
+				}
+<span class="nc" id="L2526">			}</span>
+		}
+		// Population mix: this is complex because only integer values are allowed.
+<span class="nc bnc" id="L2529" title="All 2 branches missed.">		else if (type.equals(WHAT_IF_MIX)) {</span>
+<span class="nc" id="L2530">			int cl2 = -1;</span>
+			// Finds second class
+<span class="nc bnc" id="L2532" title="All 2 branches missed.">			for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L2533" title="All 4 branches missed.">				if (classTypes[i] == CLASS_CLOSED &amp;&amp; i != ClassRef) {</span>
+<span class="nc" id="L2534">					cl2 = i;</span>
+<span class="nc" id="L2535">					break;</span>
+				}
+			}
+
+<span class="nc" id="L2539">			int N = (int) (classData[ClassRef] + classData[cl2]);</span>
+
+<span class="nc" id="L2541">			double step = 1.0 / N;</span>
+<span class="nc bnc" id="L2542" title="All 2 branches missed.">			if (f &lt; step) {</span>
+<span class="nc" id="L2543">				f = step;</span>
+			}
+<span class="nc bnc" id="L2545" title="All 2 branches missed.">			if (t &gt; (N - 1) * step) {</span>
+<span class="nc" id="L2546">				t = (N - 1) * step;</span>
+			}
+<span class="nc bnc" id="L2548" title="All 2 branches missed.">			if (t &lt; f) {</span>
+<span class="nc" id="L2549">				return new double[] { f };</span>
+			}
+
+<span class="nc" id="L2552">			int c = 0; // counter of created steps</span>
+<span class="nc" id="L2553">			tmp = new double[iterations];</span>
+<span class="nc bnc" id="L2554" title="All 2 branches missed.">			for (int i = 0; i &lt; iterations; i++) {</span>
+<span class="nc" id="L2555">				tmp[c] = Math.rint((f / step * (n - i) + i * t / step) / n);</span>
+				// Increment counter only if last element was not repeated
+<span class="nc bnc" id="L2557" title="All 4 branches missed.">				if (c &lt; 1 || tmp[c] != tmp[c - 1]) {</span>
+<span class="nc" id="L2558">					c++;</span>
+				}
+			}
+
+			// Now creates results array
+<span class="nc" id="L2563">			ret = new double[c];</span>
+<span class="nc bnc" id="L2564" title="All 2 branches missed.">			for (int i = 0; i &lt; c; i++) {</span>
+<span class="nc" id="L2565">				ret[i] = tmp[i] * step;</span>
+			}
+<span class="nc" id="L2567">		} else {</span>
+<span class="nc" id="L2568">			ret = null;</span>
+		}
+
+		// Inverts results if from and to values were exchanged
+<span class="nc bnc" id="L2572" title="All 4 branches missed.">		if (inverted &amp;&amp; ret != null) {</span>
+<span class="nc" id="L2573">			double[] inv = new double[ret.length];</span>
+<span class="nc bnc" id="L2574" title="All 2 branches missed.">			for (int i = 0; i &lt; ret.length; i++) {</span>
+<span class="nc" id="L2575">				inv[ret.length - 1 - i] = ret[i];</span>
+			}
+<span class="nc" id="L2577">			ret = inv;</span>
+		}
+<span class="nc" id="L2579">		return ret;</span>
+	}
+
+	/**
+	 * This method will recalculate whatif analysis values after the initial values were changed. At first
+	 * detects changes, than applies modifications. If what-if analysis is no longer appliable, resets it.
+	 */
+	public void recalculateWhatifValues() {
+<span class="nc bnc" id="L2587" title="All 2 branches missed.">		if (whatIfType == null) {</span>
+<span class="nc" id="L2588">			return;</span>
+		}
+
+<span class="nc" id="L2591">		HashSet&lt;Integer&gt; closedClasses = new HashSet&lt;Integer&gt;();</span>
+<span class="nc" id="L2592">		HashSet&lt;Integer&gt; openClasses = new HashSet&lt;Integer&gt;();</span>
+
+<span class="nc bnc" id="L2594" title="All 2 branches missed.">		for (int i = 0; i &lt; classTypes.length; i++) {</span>
+<span class="nc bnc" id="L2595" title="All 2 branches missed.">			if (classTypes[i] == CLASS_OPEN) {</span>
+<span class="nc" id="L2596">				openClasses.add(new Integer(i));</span>
+<span class="nc bnc" id="L2597" title="All 2 branches missed.">			} else if (classTypes[i] == CLASS_CLOSED) {</span>
+<span class="nc" id="L2598">				closedClasses.add(new Integer(i));</span>
+			}
+		}
+
+		// Checks validity first
+<span class="nc bnc" id="L2603" title="All 4 branches missed.">		if (classTypes.length &lt;= whatIfClass || stationTypes.length &lt;= whatIfStation) {</span>
+<span class="nc" id="L2604">			removeWhatIf();</span>
+<span class="nc bnc" id="L2605" title="All 2 branches missed.">		} else if (WHAT_IF_ARRIVAL.equals(whatIfType)) {</span>
+<span class="nc bnc" id="L2606" title="All 6 branches missed.">			if (openClasses.size() == 0 || (whatIfClass &gt;= 0 &amp;&amp; classTypes[whatIfClass] != CLASS_OPEN)) {</span>
+<span class="nc" id="L2607">				removeWhatIf();</span>
+			}
+<span class="nc bnc" id="L2609" title="All 2 branches missed.">		} else if (WHAT_IF_CUSTOMERS.equals(whatIfType)) {</span>
+<span class="nc bnc" id="L2610" title="All 6 branches missed.">			if (closedClasses.size() == 0 || (whatIfClass &gt;= 0 &amp;&amp; classTypes[whatIfClass] != CLASS_CLOSED)) {</span>
+<span class="nc" id="L2611">				removeWhatIf();</span>
+			}
+<span class="nc bnc" id="L2613" title="All 2 branches missed.">		} else if (WHAT_IF_MIX.equals(whatIfType)) {</span>
+<span class="nc bnc" id="L2614" title="All 6 branches missed.">			if (closedClasses.size() != 2 || (whatIfClass &gt;= 0 &amp;&amp; classTypes[whatIfClass] != CLASS_CLOSED)) {</span>
+<span class="nc" id="L2615">				removeWhatIf();</span>
+			}
+<span class="nc bnc" id="L2617" title="All 2 branches missed.">		} else if (WHAT_IF_DEMANDS.equals(whatIfType)) {</span>
+<span class="nc bnc" id="L2618" title="All 4 branches missed.">			if (whatIfStation &gt;= 0 &amp;&amp; stationTypes[whatIfStation] == STATION_LD) {</span>
+<span class="nc" id="L2619">				removeWhatIf();</span>
+			}
+		}
+
+		// If what-if is still valid, updates initial values
+<span class="nc bnc" id="L2624" title="All 2 branches missed.">		if (whatIfType != null) {</span>
+			// Check if class data was changed
+<span class="nc bnc" id="L2626" title="All 2 branches missed.">			if (whatIfClass &gt;= 0) {</span>
+<span class="nc bnc" id="L2627" title="All 6 branches missed.">				if ((WHAT_IF_ARRIVAL.equals(whatIfType) || WHAT_IF_CUSTOMERS.equals(whatIfType)) &amp;&amp; classData[whatIfClass] != whatIfValues[0]) {</span>
+<span class="nc" id="L2628">					setWhatIfValues(generateWhatIfValues(whatIfType, classData[whatIfClass], whatIfValues[iterations - 1], iterations, whatIfClass,</span>
+							whatIfStation));
+<span class="nc bnc" id="L2630" title="All 4 branches missed.">				} else if (WHAT_IF_DEMANDS.equals(whatIfType)</span>
+						&amp;&amp; serviceTimes[whatIfStation][whatIfClass][0] * visits[whatIfStation][whatIfClass] != whatIfValues[0]) {
+<span class="nc" id="L2632">					setWhatIfValues(generateWhatIfValues(whatIfType,</span>
+							serviceTimes[whatIfStation][whatIfClass][0] * visits[whatIfStation][whatIfClass], whatIfValues[iterations - 1],
+							iterations, whatIfClass, whatIfStation));
+<span class="nc bnc" id="L2635" title="All 2 branches missed.">				} else if (WHAT_IF_MIX.equals(whatIfType)) {</span>
+					// Check that no fractionary values are used
+<span class="nc" id="L2637">					int class2 = -1;</span>
+<span class="nc bnc" id="L2638" title="All 2 branches missed.">					for (Integer integer : closedClasses) {</span>
+<span class="nc" id="L2639">						int idx = integer.intValue();</span>
+<span class="nc bnc" id="L2640" title="All 2 branches missed.">						if (idx != whatIfClass) {</span>
+<span class="nc" id="L2641">							class2 = idx;</span>
+<span class="nc" id="L2642">							break;</span>
+						}
+<span class="nc" id="L2644">					}</span>
+<span class="nc bnc" id="L2645" title="All 2 branches missed.">					for (int i = 0; i &lt; iterations; i++) {</span>
+<span class="nc" id="L2646">						double fClassVal = whatIfValues[i] * classData[whatIfClass];</span>
+<span class="nc" id="L2647">						double sClassVal = (1 - whatIfValues[i]) * classData[class2];</span>
+<span class="nc bnc" id="L2648" title="All 4 branches missed.">						if (Math.abs(fClassVal - Math.rint(fClassVal)) &gt; 1e-8 || Math.abs(sClassVal - Math.rint(sClassVal)) &gt; 1e-8) {</span>
+<span class="nc" id="L2649">							setWhatIfValues(generateWhatIfValues(whatIfType, 0, 1, iterations, whatIfClass, whatIfStation));</span>
+<span class="nc" id="L2650">							break;</span>
+						}
+
+					}
+				}
+			}
+		}
+<span class="nc" id="L2657">	}</span>
+
+	/**
+	 * Helper method that finds Highest Common Factor in a given array of integer values.
+	 * @param values array of integer values. MUST have at least 2 elements
+	 * @param len number of elements to be considered in input array (must be at least 2)
+	 * @return found hcf
+	 */
+	private static int hcf(int[] values, int len) {
+		int min, max, tmp;
+<span class="nc" id="L2667">		min = values[0];</span>
+
+<span class="nc bnc" id="L2669" title="All 2 branches missed.">		for (int i = 1; i &lt; len; i++) {</span>
+			// Finds minimum value between min (previous hcf) and values[i]
+<span class="nc bnc" id="L2671" title="All 2 branches missed.">			if (values[i] &gt; min) {</span>
+<span class="nc" id="L2672">				max = values[i];</span>
+			} else {
+<span class="nc" id="L2674">				max = min;</span>
+<span class="nc" id="L2675">				min = values[i];</span>
+			}
+<span class="nc" id="L2677">			tmp = max % min;</span>
+<span class="nc bnc" id="L2678" title="All 2 branches missed.">			while (tmp &gt; 0) {</span>
+<span class="nc" id="L2679">				max = min;</span>
+<span class="nc" id="L2680">				min = tmp;</span>
+<span class="nc" id="L2681">				tmp = max % min;</span>
+			}
+			// At this point 'min' holds the hcf value
+		}
+<span class="nc" id="L2685">		return min;</span>
+	}
+
+	/**
+	 * This function will check if one or more resources are in saturation. This will
+	 * consider each iteration of what-if analysis if present.
+	 * @return NO_SATURATION if everything is okay, SATURATION if a class saturation is
+	 * detected with specified parameters and SATURATION_WHATIF if a saturation will be caused
+	 * by whatif values.
+	 */
+	public int checkSaturation() {
+		// Checks saturation without what-if analysis
+<span class="nc bnc" id="L2697" title="All 2 branches missed.">		if (checkForSaturation(classData, visits, serviceTimes, stationServers)) {</span>
+<span class="nc" id="L2698">			return SATURATION;</span>
+		}
+<span class="nc bnc" id="L2700" title="All 2 branches missed.">		if (isWhatIf()) {</span>
+<span class="nc" id="L2701">			double maxValue = whatIfValues[iterations - 1];</span>
+			// Checks if values are inverted
+<span class="nc bnc" id="L2703" title="All 2 branches missed.">			if (whatIfValues[0] &gt; maxValue) {</span>
+<span class="nc" id="L2704">				maxValue = whatIfValues[0];</span>
+			}
+
+			// What if arrival rates
+<span class="nc bnc" id="L2708" title="All 2 branches missed.">			if (whatIfType.equals(WHAT_IF_ARRIVAL)) {</span>
+<span class="nc" id="L2709">				double[] newClassData = (double[]) classData.clone();</span>
+				// Change arrival rate of a single class only
+<span class="nc bnc" id="L2711" title="All 2 branches missed.">				if (whatIfClass &gt;= 0) {</span>
+<span class="nc" id="L2712">					newClassData[whatIfClass] = maxValue;</span>
+				}
+				// Change arrival rate of all open classes
+				else {
+<span class="nc bnc" id="L2716" title="All 2 branches missed.">					for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L2717" title="All 2 branches missed.">						if (classTypes[i] == ExactConstants.CLASS_OPEN) {</span>
+<span class="nc" id="L2718">							newClassData[i] *= maxValue;</span>
+						}
+					}
+				}
+<span class="nc bnc" id="L2722" title="All 2 branches missed.">				if (checkForSaturation(newClassData, visits, serviceTimes, stationServers)) {</span>
+<span class="nc" id="L2723">					return SATURATION_WHATIF;</span>
+				}
+<span class="nc" id="L2725">			}</span>
+			// What if service demands
+<span class="nc bnc" id="L2727" title="All 2 branches missed.">			else if (whatIfType.equals(WHAT_IF_DEMANDS)) {</span>
+<span class="nc" id="L2728">				double[][][] newServiceTimes = (double[][][]) serviceTimes.clone();</span>
+<span class="nc" id="L2729">				double[][] newVisits = (double[][]) visits.clone();</span>
+
+				// Change service demands of a LI station for a single (open) class only
+<span class="nc bnc" id="L2732" title="All 4 branches missed.">				if (whatIfClass &gt;= 0 &amp;&amp; classTypes[whatIfClass] == CLASS_OPEN) {</span>
+<span class="nc" id="L2733">					newServiceTimes[whatIfStation][whatIfClass][0] = maxValue;</span>
+<span class="nc" id="L2734">					newVisits[whatIfStation][whatIfClass] = 1;</span>
+				}
+				// Change service demands of a LI station for all (open) classes
+				else {
+<span class="nc bnc" id="L2738" title="All 2 branches missed.">					for (int i = 0; i &lt; classes; i++) {</span>
+<span class="nc bnc" id="L2739" title="All 2 branches missed.">						if (classTypes[i] == ExactConstants.CLASS_OPEN) {</span>
+<span class="nc" id="L2740">							newServiceTimes[whatIfStation][i][0] *= maxValue;</span>
+						}
+					}
+				}
+<span class="nc bnc" id="L2744" title="All 2 branches missed.">				if (checkForSaturation(classData, newVisits, newServiceTimes, stationServers)) {</span>
+<span class="nc" id="L2745">					return SATURATION_WHATIF;</span>
+				}
+			}
+		}
+<span class="nc" id="L2749">		return NO_SATURATION;</span>
+	}
+
+	public static final int NO_SATURATION = 0;
+	public static final int SATURATION = 1;
+	public static final int SATURATION_WHATIF = 2;
+
+	/**
+	 * Checks current model for saturation, given arrival rates for customer classes
+	 * @param classData arrival rates for customer classes
+	 * @param visits number of visits for station
+	 * @param serviceTimes service times for station
+	 * @param stationServers number of servers for each station
+	 * @return true if model will saturate, false otherwise
+	 */
+	private boolean checkForSaturation(double[] classData, double[][] visits, double[][][] serviceTimes, int[] stationServers) {
+<span class="nc bnc" id="L2765" title="All 2 branches missed.">		for (int i = 0; i &lt; stations; i++) {</span>
+<span class="nc bnc" id="L2766" title="All 2 branches missed.">			if (stationTypes[i] == STATION_DELAY) {</span>
+				//delay station: do not check saturation
+<span class="nc" id="L2768">				continue;</span>
+			}
+
+			//utiliz is the aggregate utilization for station j
+<span class="nc" id="L2772">			double utiliz = 0;</span>
+<span class="nc bnc" id="L2773" title="All 2 branches missed.">			for (int j = 0; j &lt; classes; j++) {</span>
+				//consider only open classes
+<span class="nc bnc" id="L2775" title="All 2 branches missed.">				if (classTypes[j] == CLASS_OPEN) {</span>
+<span class="nc" id="L2776">					utiliz += classData[j] * visits[i][j] * serviceTimes[i][j][0];</span>
+				}
+			}
+<span class="nc bnc" id="L2779" title="All 2 branches missed.">			if (utiliz &gt;= stationServers[i]) {</span>
+<span class="nc" id="L2780">				return true;</span>
+			}
+		}
+		//there are no stations in saturation
+<span class="nc" id="L2784">		return false;</span>
+	}
+	//-----------------------------------------------------------------------------------
+
+	/**
+	 * Checks current model for reference station consistency: all the visits of closed class in the reference station must be different from zero
+	 * @return true if model is consistent, false otherwise
+	 */
+	public boolean checkVisitReferenceStation() {
+<span class="nc bnc" id="L2793" title="All 2 branches missed.">		for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc bnc" id="L2794" title="All 2 branches missed.">			if (classTypes[j] == CLASS_CLOSED) { // for all closed classes</span>
+<span class="nc bnc" id="L2795" title="All 2 branches missed.">				if (visits[referenceStation[j]][j]==0) // check that visits in reference station must be different from zero</span>
+<span class="nc" id="L2796">					return false;</span>
+			}			
+		}
+<span class="nc" id="L2799">		return true;</span>
+	}
+
+	/**
+	 * Checks current model for reference station consistency: the reference station must be the same for all closed classes
+	 * @return true if model is consistent, false otherwise
+	 */
+	public boolean checkClassesReferenceStation() {
+<span class="nc" id="L2807">		int classindex=-1;		</span>
+<span class="nc bnc" id="L2808" title="All 2 branches missed.">		for (int j = 0; j &lt; classes; j++) {</span>
+<span class="nc bnc" id="L2809" title="All 2 branches missed.">			if (classTypes[j] == CLASS_CLOSED) { // for all closed classes</span>
+<span class="nc bnc" id="L2810" title="All 2 branches missed.">				if (classindex==-1)</span>
+<span class="nc" id="L2811">					classindex= referenceStation[j]; // store the first closed class index</span>
+<span class="nc bnc" id="L2812" title="All 2 branches missed.">				else if (classindex!= referenceStation[j]) // all other closed classes must coincide with the first one</span>
+<span class="nc" id="L2813">					return false;									</span>
+			}			
+		}
+<span class="nc" id="L2816">		return true;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

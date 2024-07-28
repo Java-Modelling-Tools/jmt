@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MoMSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet</a> &gt; <span class="el_source">MoMSolver.java</span></div><h1>MoMSolver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystemSolver.ModularSolver;
+import jmt.jmva.analytical.solvers.linearSystemSolver.SimpleSolver;
+import jmt.jmva.analytical.solvers.linearSystemSolver.Solver;
+import jmt.jmva.analytical.solvers.utilities.CanonicalMultiplicitiesVectorCalculator;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+import jmt.jmva.analytical.solvers.utilities.Timer;
+
+/**
+ * This class implements the MoMSolver object, which computes the normalising
+ * constant for a network using the MoM algorithm. This algorithm is linear
+ * system solver agnostic.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class MoMSolver extends QNSolver {
+
+	/**
+	 * The matrix A of the algorithm.
+	 */
+	/**
+	 * The matrix B of the algorithm.
+	 */
+	private BigRational[][] A, B;
+	/**
+	 * Contains the positions of A that need to be updated in each iteration.
+	 */
+	private List&lt;Tuple&lt;Integer, Integer&gt;&gt; UList;
+	private Set&lt;Integer&gt; uncomputables;
+	private int sz, matrixSize;
+	private CanonicalMultiplicitiesVectorCalculator canonicalMVCalc;
+	private BigRational[] lastG, prevG;
+	private int nThreads;
+	private Timer selfTimer, mulTimer, solverTimer;
+
+	/**
+	 * Creates and initialises a RECALSolver object.
+	 * 
+	 * @param qnm      The QNModel object that we are working on
+	 * @param nThreads The number of threads the MoMSolver must use for solution. If
+	 *                 nThreads &gt;= 2, then LinearSystem.ModularSolver is used.
+	 */
+	public MoMSolver(QNModel qnm, int nThreads) {
+<span class="nc" id="L78">		super(qnm);</span>
+<span class="nc" id="L79">		initialise(nThreads);</span>
+<span class="nc" id="L80">	}</span>
+
+	/**
+	 * Prints a short welcome message that says which solver is used.
+	 */
+	@Override
+	public void printWelcome() {
+<span class="nc" id="L87">		System.out.println(&quot;Using MoM (matrixSize = &quot; + matrixSize + &quot;)&quot;);</span>
+<span class="nc" id="L88">	}</span>
+
+	/**
+	 * This method can allow in the future easy use of a sparse matrix
+	 * implementation of A. A similar method can be written for B.
+	 *
+	 * @param i
+	 * @param j
+	 * @param val
+	 */
+	private void writeToA(int i, int j, BigRational val) {
+<span class="nc" id="L99">		A[i][j] = val;</span>
+<span class="nc" id="L100">		uncomputables.remove(j);</span>
+<span class="nc" id="L101">	}</span>
+
+	private void generateABU(PopulationVector N, int s) throws InternalErrorException {
+		MultiplicitiesVector dM;
+<span class="nc" id="L105">		int M = qnm.M, R = qnm.R, row = -1;</span>
+<span class="nc" id="L106">		A = new BigRational[matrixSize][matrixSize];</span>
+<span class="nc" id="L107">		B = new BigRational[matrixSize][matrixSize];</span>
+<span class="nc" id="L108">		UList = new LinkedList&lt;Tuple&lt;Integer, Integer&gt;&gt;();</span>
+<span class="nc" id="L109">		uncomputables = new HashSet&lt;Integer&gt;();</span>
+
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		for (int i = 0; i &lt; matrixSize; i++) {</span>
+<span class="nc bnc" id="L112" title="All 2 branches missed.">			for (int j = 0; j &lt; matrixSize; j++) {</span>
+<span class="nc" id="L113">				A[i][j] = BigRational.ZERO; // We do not use writeToA() as this would remove j from the uncomputable set</span>
+											// and we are in the initialisation phase.
+<span class="nc" id="L115">				B[i][j] = BigRational.ZERO;</span>
+			}
+<span class="nc" id="L117">			uncomputables.add(i);</span>
+		}
+<span class="nc" id="L119">		int limit = (int) ((float) R / M * MiscMathsFunctions.binomialCoefficient(M + R - 1, R) - 1);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		for (int i = 0; i &lt;= limit; i++) { // (* Add to the linear system all convolution equations *)</span>
+<span class="nc" id="L121">			dM = canonicalMVCalc.inttovec(i);</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">			if (dM.sum() == R - 1) {</span>
+<span class="nc" id="L123">				MultiplicitiesVector dMPlusk = dM.copy();</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">				for (int k = 1; k &lt;= M; k++) {</span>
+<span class="nc" id="L125">					dMPlusk.plusOne(k);</span>
+<span class="nc" id="L126">					row++;</span>
+<span class="nc" id="L127">					int pos = canonicalMVCalc.vectoint(dMPlusk);</span>
+<span class="nc" id="L128">					writeToA(row, pos, BigRational.ONE);</span>
+
+<span class="nc" id="L130">					writeToA(row, i, new BigRational(-1));</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">					for (int r = 1; r &lt;= s - 1; r++) {</span>
+<span class="nc" id="L132">						int pos2 = sz * r + canonicalMVCalc.vectoint(dMPlusk);</span>
+<span class="nc" id="L133">						writeToA(row, pos2, qnm.getDemandAsBigRational(k - 1, r - 1).negate());</span>
+					}
+<span class="nc" id="L135">					B[row][pos] = qnm.getDemandAsBigRational(k - 1, s - 1);</span>
+<span class="nc" id="L136">					dMPlusk.restore();</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		for (int i = 0; i &lt;= limit; i++) { // (* Add to the linear system all population constraints *)</span>
+<span class="nc" id="L141">			dM = canonicalMVCalc.inttovec(i);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (dM.sum() == R - 1) {</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">				for (int r = 1; r &lt;= s - 1; r++) {</span>
+<span class="nc" id="L144">					row++;</span>
+<span class="nc" id="L145">					writeToA(row, i, N.getAsBigRational(r - 1));</span>
+<span class="nc" id="L146">					int pos = sz * r + i;</span>
+<span class="nc" id="L147">					writeToA(row, pos, qnm.getDelayAsBigRational(r - 1).negate());</span>
+<span class="nc" id="L148">					MultiplicitiesVector dMPlusk = dM.copy();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">					for (int k = 1; k &lt;= M; k++) {</span>
+<span class="nc" id="L150">						dMPlusk.plusOne(k);</span>
+<span class="nc" id="L151">						int f = dM.get(k - 1) + qnm.multiplicities.get(k - 1);</span>
+<span class="nc" id="L152">						BigRational bf = new BigRational(f);</span>
+<span class="nc" id="L153">						pos = sz * r + canonicalMVCalc.vectoint(dMPlusk);</span>
+<span class="nc" id="L154">						writeToA(row, pos, bf.negate().multiply(qnm.getDemandAsBigRational(k - 1, r - 1)));</span>
+<span class="nc" id="L155">						dMPlusk.restore();</span>
+					}
+				}
+			}
+<span class="nc bnc" id="L159" title="All 2 branches missed.">			for (int r = 0; r &lt;= s - 1; r++) {</span>
+<span class="nc" id="L160">				row++;</span>
+<span class="nc" id="L161">				int pos = sz * r + i;</span>
+<span class="nc" id="L162">				writeToA(row, pos, N.getAsBigRational(s - 1));</span>
+<span class="nc" id="L163">				UList.add(new Tuple&lt;Integer, Integer&gt;(row, pos));</span>
+<span class="nc" id="L164">				B[row][pos] = qnm.getDelayAsBigRational(s - 1);</span>
+<span class="nc" id="L165">				MultiplicitiesVector dMPlusk = dM.copy();</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">				for (int k = 1; k &lt;= M; k++) {</span>
+<span class="nc" id="L167">					dMPlusk.plusOne(k);</span>
+<span class="nc" id="L168">					int f = dM.get(k - 1) + qnm.multiplicities.get(k - 1);</span>
+<span class="nc" id="L169">					BigRational bf = new BigRational(f);</span>
+<span class="nc" id="L170">					B[row][sz * r + canonicalMVCalc.vectoint(dMPlusk)] = bf</span>
+<span class="nc" id="L171">							.multiply(qnm.getDemandAsBigRational(k - 1, s - 1));</span>
+<span class="nc" id="L172">					dMPlusk.restore();</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		for (int i = row + 1; i &lt; sz * R; i++) {</span>
+<span class="nc" id="L177">			writeToA(i, i, BigRational.ONE);</span>
+<span class="nc" id="L178">			B[i][i] = BigRational.ONE;</span>
+		}
+<span class="nc" id="L180">	}</span>
+
+	/**
+	 * Initialises the MoMSolver according to the specified QNModel.
+	 */
+	private void initialise(int nThreads) {
+<span class="nc" id="L186">		selfTimer = new Timer();</span>
+<span class="nc" id="L187">		mulTimer = new Timer();</span>
+<span class="nc" id="L188">		totalTimer = new Timer();</span>
+
+<span class="nc" id="L190">		this.nThreads = nThreads;</span>
+<span class="nc" id="L191">		int R = qnm.R, M = qnm.M;</span>
+<span class="nc" id="L192">		sz = MiscMathsFunctions.binomialCoefficient(M + R, R);</span>
+<span class="nc" id="L193">		matrixSize = sz * R;</span>
+<span class="nc" id="L194">		canonicalMVCalc = new CanonicalMultiplicitiesVectorCalculator(qnm);</span>
+<span class="nc" id="L195">	}</span>
+
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException {
+<span class="nc" id="L199">		totalTimer.start();</span>
+<span class="nc" id="L200">		PopulationVector N = qnm.N.copy();</span>
+<span class="nc" id="L201">		int r = 0, Nr;</span>
+<span class="nc" id="L202">		int R = qnm.R, M = qnm.M;</span>
+<span class="nc" id="L203">		BigRational[] curG = new BigRational[matrixSize], G_1 = null;</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		for (int i = 0; i &lt; matrixSize; i++) {</span>
+<span class="nc" id="L205">			curG[i] = BigRational.ONE;</span>
+		}
+<span class="nc" id="L207">		PopulationVector N0 = new PopulationVector(0, R);</span>
+<span class="nc" id="L208">		N0.set(0, 1);</span>
+<span class="nc" id="L209">		System.out.println(&quot;Initialising data structures of class &quot; + (r + 1));</span>
+<span class="nc" id="L210">		generateABU(N0, 1);</span>
+		try {
+			Solver s;
+<span class="nc bnc" id="L213" title="All 2 branches missed.">			if (nThreads == 1) {</span>
+<span class="nc" id="L214">				s = new SimpleSolver();</span>
+			} else {
+<span class="nc" id="L216">				s = new ModularSolver(nThreads);</span>
+			}
+<span class="nc" id="L218">			Integer maxA = (int) getMaxAElement();</span>
+<span class="nc" id="L219">			Integer val = matrixSize;</span>
+<span class="nc" id="L220">			BigInteger maxB = qnm.getMaxG().multiply(new BigInteger(maxA.toString()))</span>
+<span class="nc" id="L221">					.multiply(new BigInteger(val.toString()));</span>
+<span class="nc" id="L222">			s.initialise(A, UList, uncomputables, maxA, maxB, new BigRational(qnm.getMaxG()));</span>
+<span class="nc" id="L223">			N0.set(0, 0);</span>
+<span class="nc" id="L224">			int N0r = 1;</span>
+<span class="nc" id="L225">			int Ntot = 0;</span>
+
+<span class="nc bnc" id="L227" title="All 2 branches missed.">			for (r = 1; r &lt;= R; r++) {</span>
+<span class="nc" id="L228">				System.out.println(&quot;Processing class &quot; + r);</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">				for (Nr = N0r; Nr &lt;= N.get(r - 1) - 1; Nr++) {</span>
+<span class="nc" id="L230">					mulTimer.start();</span>
+<span class="nc" id="L231">					BigRational[] sysB = MiscMathsFunctions.matrixVectorMultiply(B, curG);</span>
+<span class="nc" id="L232">					mulTimer.pause();</span>
+<span class="nc" id="L233">					s.goToULevel(Nr - 1);</span>
+<span class="nc" id="L234">					curG = solve(s, sysB);</span>
+<span class="nc" id="L235">					Ntot++;</span>
+<span class="nc" id="L236">					System.out.println(&quot;Population &quot; + Nr + &quot; completed (total population &quot; + Ntot + &quot; jobs)&quot;);</span>
+				}
+<span class="nc" id="L238">				G_1 = curG;</span>
+<span class="nc" id="L239">				mulTimer.start();</span>
+<span class="nc" id="L240">				BigRational[] sysB = MiscMathsFunctions.matrixVectorMultiply(B, curG);</span>
+<span class="nc" id="L241">				mulTimer.pause();</span>
+<span class="nc" id="L242">				s.goToULevel(Nr - 1);</span>
+<span class="nc" id="L243">				curG = solve(s, sysB);</span>
+<span class="nc" id="L244">				Ntot++;</span>
+<span class="nc" id="L245">				System.out.println(&quot;Population &quot; + Nr + &quot; completed (total population &quot; + Ntot + &quot; jobs)&quot;);</span>
+<span class="nc" id="L246">				N0.set(r - 1, N.get(r - 1));</span>
+<span class="nc" id="L247">				System.out.println(&quot;Class &quot; + r + &quot; completed&quot;);</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">				if (r &lt; R) {</span>
+<span class="nc" id="L249">					N0.set(r, 1);</span>
+<span class="nc" id="L250">					N0r = 1;</span>
+<span class="nc" id="L251">					System.out.println(&quot;Initialising data structures of class &quot; + (r + 1));</span>
+<span class="nc" id="L252">					generateABU(N0, r + 1);</span>
+<span class="nc" id="L253">					s.initialise(A, UList, uncomputables, maxA, maxB, new BigRational(qnm.getMaxG()));</span>
+				}
+			}
+<span class="nc bnc" id="L256" title="All 2 branches missed.">			if (!curG[0].isUndefined()) {</span>
+<span class="nc" id="L257">				this.G = curG[0];</span>
+			} else {
+<span class="nc" id="L259">				throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+			}
+<span class="nc" id="L261">			totalTimer.pause();</span>
+<span class="nc" id="L262">			memUsage = MemoryUsageUtils.memoryUsage();</span>
+<span class="nc" id="L263">			solverTimer = s.getTimer();</span>
+<span class="nc" id="L264">			s.shutdown();</span>
+<span class="nc" id="L265">		} catch (OperationNotSupportedException ex) {</span>
+			// ex.printStackTrace();
+<span class="nc" id="L267">			throw new InternalErrorException(&quot;Error in linear system solver.&quot;);</span>
+<span class="nc" id="L268">		} catch (InconsistentLinearSystemException ex) {</span>
+			// ex.printStackTrace();
+<span class="nc" id="L270">			throw new InternalErrorException(ex.getMessage());</span>
+<span class="nc" id="L271">		}</span>
+<span class="nc" id="L272">		qnm.setNormalisingConstant(G);</span>
+<span class="nc" id="L273">		this.lastG = curG;</span>
+<span class="nc" id="L274">		this.prevG = G_1;</span>
+<span class="nc" id="L275">	}</span>
+
+	@Override
+	public void computePerformanceMeasures() throws InternalErrorException {
+<span class="nc" id="L279">		totalTimer.start();</span>
+<span class="nc" id="L280">		BigRational[] X = new BigRational[qnm.R];</span>
+<span class="nc" id="L281">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">		if (lastG[0].isUndefined()) {</span>
+<span class="nc" id="L284">			throw new InternalErrorException((&quot;Singular system. Cannot compute performance indices.&quot;));</span>
+		}
+<span class="nc bnc" id="L286" title="All 2 branches missed.">		for (int i = 0; i &lt; qnm.M; i++) {</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">			for (int r = 0; r &lt; qnm.R - 1; r++) {</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">				if (!lastG[sz * (r + 1) + i + 1].isUndefined()) {</span>
+<span class="nc" id="L289">					Q[i][r] = qnm.getDemandAsBigRational(i, r).multiply(lastG[sz * (r + 1) + i + 1]).divide(lastG[0]);</span>
+				} else {
+<span class="nc" id="L291">					throw new InternalErrorException((&quot;Singular system. Cannot compute performance indices.&quot;));</span>
+				}
+			}
+<span class="nc bnc" id="L294" title="All 2 branches missed.">			if (!prevG[i + 1].isUndefined()) {</span>
+<span class="nc" id="L295">				Q[i][qnm.R - 1] = qnm.getDemandAsBigRational(i, qnm.R - 1).multiply(prevG[i + 1]).divide(lastG[0]);</span>
+			} else {
+<span class="nc" id="L297">				throw new InternalErrorException((&quot;Singular system. Cannot compute performance indices.&quot;));</span>
+			}
+		}
+<span class="nc bnc" id="L300" title="All 2 branches missed.">		for (int r = 0; r &lt; qnm.R - 1; r++) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">			if (!lastG[sz * (r + 1)].isUndefined()) {</span>
+<span class="nc" id="L302">				X[r] = lastG[sz * (r + 1)].divide(lastG[0]);</span>
+			} else {
+<span class="nc" id="L304">				throw new InternalErrorException((&quot;Singular system. Cannot compute performance indices.&quot;));</span>
+			}
+		}
+<span class="nc bnc" id="L307" title="All 2 branches missed.">		if (!prevG[0].isUndefined()) {</span>
+<span class="nc" id="L308">			X[qnm.R - 1] = prevG[0].divide(lastG[0]);</span>
+		} else {
+<span class="nc" id="L310">			throw new InternalErrorException((&quot;Singular system. Cannot compute performance indices.&quot;));</span>
+		}
+<span class="nc" id="L312">		totalTimer.pause();</span>
+<span class="nc" id="L313">		qnm.setPerformanceMeasures(Q, X);</span>
+<span class="nc" id="L314">	}</span>
+
+	@Override
+	public void printTimeStatistics() {
+<span class="nc" id="L318">		long selfTime = totalTimer.getInterval() - mulTimer.getInterval() - solverTimer.getInterval();</span>
+<span class="nc" id="L319">		selfTimer = new Timer(selfTime);</span>
+
+<span class="nc" id="L321">		System.out.println(&quot;MoM time: &quot; + selfTimer.getPrettyInterval());</span>
+<span class="nc" id="L322">		System.out.println(&quot;LS Solver time: &quot; + solverTimer.getPrettyInterval());</span>
+<span class="nc" id="L323">		System.out.println(&quot;Multiplier time: &quot; + mulTimer.getPrettyInterval());</span>
+<span class="nc" id="L324">		System.out.println(&quot;Total time: &quot; + totalTimer.getPrettyInterval());</span>
+<span class="nc" id="L325">	}</span>
+
+	private BigRational[] solve(Solver s, BigRational[] b)
+			throws InconsistentLinearSystemException, OperationNotSupportedException, InternalErrorException {
+<span class="nc" id="L329">		BigRational[] sol = s.solve(b);</span>
+		// If the first element (current normalising constant) has been corrupted
+		// then there is no recovery
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		if (sol[0].isUndefined()) {</span>
+<span class="nc" id="L333">			throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+		}
+<span class="nc" id="L335">		return sol;</span>
+	}
+
+	private double getMaxAElement() throws OperationNotSupportedException {
+<span class="nc" id="L339">		double max = qnm.getMaxModelValue();</span>
+<span class="nc" id="L340">		max *= qnm.multiplicities.max() + qnm.R;</span>
+<span class="nc" id="L341">		return max;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

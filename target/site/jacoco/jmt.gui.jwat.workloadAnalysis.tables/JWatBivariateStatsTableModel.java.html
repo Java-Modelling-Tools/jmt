@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JWatBivariateStatsTableModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.workloadAnalysis.tables</a> &gt; <span class="el_source">JWatBivariateStatsTableModel.java</span></div><h1>JWatBivariateStatsTableModel.java</h1><pre class="source lang-java linenums">package jmt.gui.jwat.workloadAnalysis.tables;
+
+import javax.swing.table.AbstractTableModel;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.StatBivariate;
+import jmt.gui.jwat.JWATConstants;
+
+//TODO: al modello deve essere passati i nomi delle variabili e le statisctiche bivariate
+public class JWatBivariateStatsTableModel extends AbstractTableModel implements JWATConstants {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+<span class="nc" id="L15">	private String[] names = new String[0];</span>
+<span class="nc" id="L16">	private MatrixObservations matrix = null;</span>
+
+	//private DecimalFormat format = new DecimalFormat(&quot;####.####E0&quot;);
+
+<span class="nc" id="L20">	public JWatBivariateStatsTableModel(MatrixObservations m) {</span>
+<span class="nc" id="L21">		matrix = m;</span>
+<span class="nc" id="L22">	}</span>
+
+	/**
+	 * Returns name for each column (given its index) to be displayed inside
+	 * table header
+	 */
+	@Override
+	public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L30" title="All 2 branches missed.">		if (matrix != null) {</span>
+<span class="nc" id="L31">			names = matrix.getVariableNames();</span>
+		}
+<span class="nc bnc" id="L33" title="All 2 branches missed.">		if (columnIndex &lt; names.length) {</span>
+<span class="nc" id="L34">			return names[columnIndex];</span>
+		} else {
+<span class="nc" id="L36">			return null;</span>
+		}
+	}
+
+	public int getRowCount() {
+<span class="nc bnc" id="L41" title="All 2 branches missed.">		if (matrix == null) {</span>
+<span class="nc" id="L42">			return 0;</span>
+		}
+<span class="nc" id="L44">		return names.length;</span>
+	}
+
+	public int getColumnCount() {
+<span class="nc" id="L48">		return names.length;</span>
+	}
+
+	public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		if (matrix != null) {</span>
+<span class="nc" id="L53">			StatBivariate b = matrix.getBivStatObj();</span>
+
+<span class="nc bnc" id="L55" title="All 2 branches missed.">			if (rowIndex == columnIndex) {</span>
+<span class="nc" id="L56">				return null;</span>
+			}
+<span class="nc" id="L58">			return defaultFormat.format(b.getCovariance(rowIndex, columnIndex));</span>
+		}
+<span class="nc" id="L60">		return null;</span>
+	}
+
+	@Override
+	public Class getColumnClass(int index) {
+<span class="nc" id="L65">		return String.class;</span>
+	}
+
+	public String[] getNames() {
+<span class="nc bnc" id="L69" title="All 2 branches missed.">		if (matrix != null) {</span>
+<span class="nc" id="L70">			return matrix.getVariableNames();</span>
+		}
+<span class="nc" id="L72">		return names;</span>
+	}
+
+	public void setMatrixObs(MatrixObservations m) {
+<span class="nc" id="L76">		matrix = m;</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if (matrix == null) {</span>
+<span class="nc" id="L78">			names = new String[0];</span>
+		} else {
+<span class="nc" id="L80">			names = matrix.getVariableNames();</span>
+		}
+<span class="nc" id="L82">		this.fireTableStructureChanged();</span>
+<span class="nc" id="L83">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

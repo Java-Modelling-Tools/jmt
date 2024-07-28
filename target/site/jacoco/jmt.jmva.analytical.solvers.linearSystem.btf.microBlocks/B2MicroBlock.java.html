@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>B2MicroBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks</a> &gt; <span class="el_source">B2MicroBlock.java</span></div><h1>B2MicroBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationChangeVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class implements the Micro Blocks of the B2 block of the B matrix.
+ * @author Jack Bradshaw
+ */
+public class B2MicroBlock extends MicroBlock {
+	
+	/**
+	 * The population of the current class under consideration,
+	 * this variable needs to be updated as the iteration of the current class proceeds
+	 */
+	private int current_class_population;
+	
+	public B2MicroBlock(QNModel qnm, CoMoMBasis basis, Position position, int h) {
+<span class="nc" id="L25">		super(qnm, basis, position, h);</span>
+<span class="nc" id="L26">		computeDimensions();		</span>
+<span class="nc" id="L27">	}</span>
+
+	public B2MicroBlock(MicroBlock micro_block, int current_class) {
+<span class="nc" id="L30">		super(micro_block, current_class);</span>
+<span class="nc" id="L31">		current_class_population = 0;</span>
+<span class="nc" id="L32">	}</span>
+
+	@Override
+	protected void initialiseDataStructures() {
+		//No underlying data structure		
+<span class="nc" id="L37">	}</span>
+	
+	@Override
+	protected MicroBlock subBlockCopy(int current_class) {
+<span class="nc" id="L41">		return new B2MicroBlock(this, current_class);</span>
+	}
+	
+	@Override
+	protected void computeDimensions() {
+<span class="nc" id="L46">		size.row = MiscMathsFunctions.binomialCoefficient(qnm.M, h);</span>
+<span class="nc" id="L47">		size.col = 0;</span>
+<span class="nc" id="L48">	}</span>
+
+	@Override
+	public int addCE(int position, PopulationChangeVector n, int queue)
+			throws BTFMatrixErrorException, InternalErrorException {
+		//Do Nothing, should never be used
+<span class="nc" id="L54">		return position;</span>
+	}
+
+	@Override
+	public int addPC(int position, PopulationChangeVector n, int _class)
+			throws BTFMatrixErrorException, InternalErrorException {
+		//Do Nothing, should never be used
+<span class="nc" id="L61">		return position;</span>
+	}
+	
+	public void update(int current_class_population) {
+<span class="nc" id="L65">		this.current_class_population = current_class_population;</span>
+<span class="nc" id="L66">	}</span>
+		
+	@Override
+	public void printRow2(int row) {
+		
+<span class="nc" id="L71">		int number_of_queue_constants = MiscMathsFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M;</span>
+		
+<span class="nc" id="L73">		int row_to_print = row - position.row;		</span>
+<span class="nc bnc" id="L74" title="All 4 branches missed.">		if (row_to_print &gt;= 0 &amp;&amp; row_to_print &lt; size.row) {</span>
+			
+			//cols_printed = 0;
+			//print white offset
+<span class="nc" id="L78">			int first_column = (position.row + row_to_print - number_of_queue_constants) * qnm.M;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">			for (int i = 0; i &lt; first_column; i++) {</span>
+<span class="nc" id="L80">				System.out.format(&quot;%2s &quot;, &quot; &quot;);</span>
+<span class="nc" id="L81">				cols_printed++;</span>
+			}
+			//print Demand for each queue
+<span class="nc bnc" id="L84" title="All 2 branches missed.">			for (int k = 1; k &lt;= qnm.M; k++) {</span>
+<span class="nc" id="L85">				System.out.format(&quot;%2s &quot;, qnm.getDemandAsBigInteger(k - 1, current_class - 1)).toString();</span>
+<span class="nc" id="L86">				cols_printed++;</span>
+			}			
+			//print white space to next block
+<span class="nc bnc" id="L89" title="All 2 branches missed.">			for (int i = cols_printed; i &lt; number_of_queue_constants; i++) {</span>
+<span class="nc" id="L90">				System.out.format(&quot;%2s &quot;, &quot; &quot;);</span>
+			}			
+			//print whitespace to delays
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			for (int i = 0; i &lt;= (row - number_of_queue_constants); i++) {</span>
+<span class="nc" id="L94">				System.out.format(&quot;%2s &quot;, &quot; &quot;);</span>
+			}
+			//print Delay
+<span class="nc" id="L97">			System.out.format(&quot;%2s &quot;, qnm.getDelayAsBigRational(current_class - 1).toString());</span>
+		}
+
+<span class="nc" id="L100">	}</span>
+	
+	private BigRational multiplyRow(int index) {
+		
+<span class="nc" id="L104">		int number_of_queue_constants = MiscMathsFunctions.binomialCoefficient(qnm.M + qnm.R - 1, qnm.M) * qnm.M;</span>
+		
+<span class="nc" id="L106">		BigRational result = BigRational.ZERO;</span>
+		
+<span class="nc bnc" id="L108" title="All 2 branches missed.">		for (int k = 1; k &lt;= qnm.M; k++) {</span>
+<span class="nc" id="L109">			result = result.</span>
+<span class="nc" id="L110">					add((basis.getOldValue(((position.row + index - number_of_queue_constants) * qnm.M) + k - 1).</span>
+<span class="nc" id="L111">							multiply(qnm.getDemandAsBigInteger(k - 1, current_class - 1))));</span>
+		}
+<span class="nc" id="L113">		result = result.</span>
+<span class="nc" id="L114">				add((basis.getOldValue(position.row + index)).</span>
+<span class="nc" id="L115">					multiply(qnm.getDelayAsBigRational(current_class - 1)));</span>
+		
+<span class="nc" id="L117">		return result;</span>
+	}
+	
+	@Override
+	public void multiply(BigRational[] result)
+			throws BTFMatrixErrorException {
+		
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		for (int i = 0; i &lt; size.row; i++) {</span>
+<span class="nc" id="L125">			result[position.row + i] = multiplyRow(i);</span>
+		}
+<span class="nc" id="L127">	}</span>
+	
+	@Override
+	public void solve(BigRational[] rhs) {
+		
+		BigRational value;
+		
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		for (int i = 0; i &lt; size.row; i++) {</span>
+			
+<span class="nc" id="L136">			value = multiplyRow(i);</span>
+			
+			//Divide by N_r in A
+<span class="nc" id="L139">			value = value.divide(new BigRational(current_class_population));</span>
+<span class="nc" id="L140">			basis.setValue(value, position.row + i);</span>
+		
+		}		
+<span class="nc" id="L143">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

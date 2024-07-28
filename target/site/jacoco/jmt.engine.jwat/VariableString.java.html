@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VariableString.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat</a> &gt; <span class="el_source">VariableString.java</span></div><h1>VariableString.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.engine.jwat;
+
+import jmt.engine.jwat.input.StringMapping;
+import jmt.engine.jwat.input.VariableMapping;
+
+public class VariableString extends VariableNumber {
+	// used to keep the association ra number with string
+    
+	public VariableString(Observation[] valObs, String vName, int pos, short type, VariableMapping varMapping) {
+<span class="nc" id="L27">		super(valObs, vName, pos, type, varMapping);</span>
+<span class="nc" id="L28">	}</span>
+
+	/**
+	 * Returns Index-th value of the variable
+	 * @param Index index of variable's value desired
+	 * @return value of Index-th value
+	 * @throws ArrayIndexOutOfBoundsException throws if Index is &lt; 0 or &gt; numbero of observations
+	 */
+	public String getOriginalValue(int Index) throws ArrayIndexOutOfBoundsException {
+<span class="nc bnc" id="L37" title="All 4 branches missed.">		if (Index &lt; 0 || Index &gt; obsValue.length) {</span>
+<span class="nc" id="L38">			throw new ArrayIndexOutOfBoundsException();</span>
+		} else {
+<span class="nc" id="L40">			return (String) mapping.getValue(obsValue[Index].getIndex(nVar));</span>
+		}
+	}
+
+	/**
+	 * Returns the index-th value of the var-th variable of the observaion
+	 * @param Index index of variable's value desired
+	 * @param var variable index
+	 * @return index-th value of the var-th variable
+	 * @throws ArrayIndexOutOfBoundsException throws if Index is &lt; 0 or &gt; numbero of observations 
+	 * or var &lt; 0 or &gt; number of variables ( elements of observation )
+	 */
+	public String getOriginalValue(int Index, int var) throws ArrayIndexOutOfBoundsException {
+<span class="nc bnc" id="L53" title="All 4 branches missed.">		if (Index &lt; 0 || Index &gt; obsValue.length) {</span>
+<span class="nc" id="L54">			throw new ArrayIndexOutOfBoundsException();</span>
+		} else {
+<span class="nc" id="L56">			return (String) mapping.getValue(obsValue[Index].getIndex(var));</span>
+		}
+	}
+
+	//UPDATE 28/10/2006: + funzione to obtain lists with matchable values
+        public int[] getListOfMatching(String s) {
+<span class="nc" id="L62">		return ((StringMapping) mapping).getMatchingStringList(s);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

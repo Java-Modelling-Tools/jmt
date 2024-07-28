@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AMVAPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">AMVAPanel.java</span></div><h1>AMVAPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.gui.panels;
+
+import jmt.framework.gui.help.HoverHelp;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+import jmt.jmva.analytical.solvers.SolverMultiClosedAMVA;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
+import jmt.jmva.gui.JMVAWizard;
+import jmt.jmva.gui.utilities.AlgorithmListNameCreator;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+/**
+ * Panel representing the combo box on ExactWizard (GUI of JMVA)
+ *
+ * @author Abhimanyu Chugh, Marco Bertoli
+ */
+public final class AMVAPanel extends JPanel {
+
+    private static final long serialVersionUID = 1L;
+    private static final String LABEL_ALGORITHM = &quot;Algorithm:&quot;;
+    private static final String LABEL_ALGORITHM_OPEN = LABEL_ALGORITHM + &quot; QN&quot;;
+    private static final String LABEL_ALGORITHM_MIXED = LABEL_ALGORITHM + &quot; MVA&quot;;
+    private static final String LABEL_ALGORITHM_WHATIF = LABEL_ALGORITHM + &quot; (what-if)&quot;;
+
+<span class="nc" id="L48">    private static enum PanelStatus {</span>
+<span class="nc" id="L49">        ENABLED(LABEL_ALGORITHM, true, false, false),</span>
+<span class="nc" id="L50">        ENABLED_TOL(LABEL_ALGORITHM, true, true, false),</span>
+        //ENABLED_MAX_SAMPLES(LABEL_ALGORITHM, true, true, true),
+<span class="nc" id="L52">        ENABLED_MAX_SAMPLES(LABEL_ALGORITHM, true, false, true),</span>
+<span class="nc" id="L53">        DISABLED_WHATIF(LABEL_ALGORITHM_WHATIF, false, false, false);</span>
+
+        private String algorithmLabel;
+        private boolean toleranceVisible;
+        private boolean selectorVisible;
+        private boolean maxSamplesVisible;
+
+<span class="nc" id="L60">        private PanelStatus(String algorithmLabel, boolean selectorVisible, boolean toleranceVisible, boolean maxSamplesVisible) {</span>
+<span class="nc" id="L61">            this.algorithmLabel = algorithmLabel;</span>
+<span class="nc" id="L62">            this.selectorVisible = selectorVisible;</span>
+<span class="nc" id="L63">            this.toleranceVisible = toleranceVisible;</span>
+<span class="nc" id="L64">            this.maxSamplesVisible = maxSamplesVisible;</span>
+<span class="nc" id="L65">        }</span>
+    }
+
+    ;
+
+    private HoverHelp help;
+<span class="nc" id="L71">    private NumberFormat numFormat = new DecimalFormat(&quot;#.###############&quot;);</span>
+
+    private JMVAWizard ew;
+
+    private JLabel tolLabel;
+    private JLabel algLabel;
+    private JTextField tolerance;
+    private JLabel maxSamplesLabel;
+    private JTextField maxSamples;
+    private JComboBox&lt;String&gt; algorithmList;
+<span class="nc" id="L81">    private PanelStatus status = PanelStatus.ENABLED;</span>
+
+<span class="nc" id="L83">    private boolean lastIsClosed = true;</span>
+<span class="nc" id="L84">    private boolean lastIsOpen = false;</span>
+<span class="nc" id="L85">    private boolean lastIsLD = false;</span>
+<span class="nc" id="L86">    private boolean lastIsPriority = false;</span>
+
+<span class="nc" id="L88">    private int currentAlgorithmIndex = 1;</span>
+<span class="nc" id="L89">    private SolverAlgorithm currentSelectedAlgorithm = null;</span>
+
+<span class="nc" id="L91">    private ActionListener ACTION_CHANGE_ALGORITHM = new ActionListener() {</span>
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L95">            JComboBox&lt;?&gt; algorithmList = (JComboBox&lt;?&gt;) e.getSource();</span>
+<span class="nc" id="L96">            String algorithm = (String) algorithmList.getSelectedItem();</span>
+
+            // check if algorithm or not
+<span class="nc" id="L99">            currentSelectedAlgorithm = SolverAlgorithm.fromString(algorithm);</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">            if (currentSelectedAlgorithm == null) {</span>
+<span class="nc" id="L101">                currentAlgorithmIndex = 1;</span>
+<span class="nc" id="L102">                algorithmList.setSelectedIndex(currentAlgorithmIndex);</span>
+<span class="nc" id="L103">                currentSelectedAlgorithm = SolverAlgorithm.fromString((String) algorithmList.getItemAt(currentAlgorithmIndex));</span>
+            } else {
+<span class="nc" id="L105">                currentAlgorithmIndex = algorithmList.getSelectedIndex();</span>
+            }
+<span class="nc" id="L107">            ew.getData().setAlgorithmType(currentSelectedAlgorithm);</span>
+<span class="nc" id="L108">            updateEnabledStatus(currentSelectedAlgorithm);</span>
+<span class="nc" id="L109">        }</span>
+    };
+
+<span class="nc" id="L112">    private ToleranceInputListener ACTION_CHANGE_TOLERANCE = new ToleranceInputListener();</span>
+
+<span class="nc" id="L114">    private MaxSampleInputListener ACTION_CHANGE_MAX_SAMPLES = new MaxSampleInputListener();</span>
+
+    public AMVAPanel(JMVAWizard ew) {
+<span class="nc" id="L117">        super(new BorderLayout());</span>
+<span class="nc" id="L118">        this.ew = ew;</span>
+<span class="nc" id="L119">        help = ew.getHelp();</span>
+
+<span class="nc" id="L121">        initialize();</span>
+<span class="nc" id="L122">    }</span>
+
+
+    /**
+     * Initialize this panel
+     */
+    private void initialize() {
+<span class="nc" id="L129">        JPanel mainPanel = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L130">        mainPanel.add(algLabel());</span>
+<span class="nc" id="L131">        mainPanel.add(algorithmList());</span>
+<span class="nc" id="L132">        mainPanel.add(tolLabel());</span>
+<span class="nc" id="L133">        mainPanel.add(tolerance());</span>
+<span class="nc" id="L134">        mainPanel.add(maxSampleLabel());</span>
+<span class="nc" id="L135">        mainPanel.add(maxSamples());</span>
+<span class="nc" id="L136">        this.add(mainPanel, BorderLayout.WEST);</span>
+<span class="nc" id="L137">    }</span>
+
+    private JComponent algorithmList() {
+<span class="nc" id="L140">        String[] algoNameList = AlgorithmListNameCreator.createAlgoNameList(lastIsClosed, lastIsOpen, lastIsLD, lastIsPriority);</span>
+<span class="nc" id="L141">        algorithmList = new JComboBox&lt;String&gt;(algoNameList);</span>
+
+<span class="nc" id="L143">        Dimension d = new Dimension(160, 30);</span>
+<span class="nc" id="L144">        algorithmList.setMaximumSize(d);</span>
+<span class="nc" id="L145">        algorithmList.setSelectedIndex(1);</span>
+<span class="nc" id="L146">        algorithmList.addActionListener(ACTION_CHANGE_ALGORITHM);</span>
+<span class="nc" id="L147">        algorithmList.setVisible(status.selectorVisible);</span>
+<span class="nc" id="L148">        algorithmList.setRenderer(new DefaultListCellRenderer() {</span>
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Component getListCellRendererComponent(JList&lt;?&gt; list,
+                                                          Object value, int index, boolean isSelected,
+                                                          boolean cellHasFocus) {
+<span class="nc" id="L156">                Component comp = super.getListCellRendererComponent(list, value, index, isSelected,</span>
+                        cellHasFocus);
+<span class="nc bnc" id="L158" title="All 2 branches missed.">                String str = (value == null) ? &quot;&quot; : value.toString();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">                if (SolverAlgorithm.fromString(str) == null) {</span>
+<span class="nc" id="L160">                    comp.setEnabled(false);</span>
+<span class="nc" id="L161">                    comp.setFocusable(false);</span>
+<span class="nc" id="L162">                    setBackground(list.getBackground());</span>
+<span class="nc" id="L163">                    setForeground(list.getForeground());</span>
+                } else {
+<span class="nc" id="L165">                    comp.setEnabled(true);</span>
+<span class="nc" id="L166">                    comp.setFocusable(true);</span>
+                }
+<span class="nc" id="L168">                return comp;</span>
+            }
+
+        });
+<span class="nc" id="L172">        help.addHelp(algorithmList, &quot;Algorithm for solving model&quot;);</span>
+<span class="nc" id="L173">        return algorithmList;</span>
+    }
+
+    private JComponent tolLabel() {
+<span class="nc" id="L177">        Dimension d = new Dimension(70, 30);</span>
+<span class="nc" id="L178">        tolLabel = new JLabel(&quot;  Tolerance:&quot;);</span>
+<span class="nc" id="L179">        tolLabel.setMaximumSize(d);</span>
+<span class="nc" id="L180">        tolLabel.setFocusable(false);</span>
+<span class="nc" id="L181">        tolLabel.setVisible(status.toleranceVisible);</span>
+<span class="nc" id="L182">        return tolLabel;</span>
+    }
+
+    private JComponent tolerance() {
+<span class="nc" id="L186">        Dimension d = new Dimension(80, 30);</span>
+<span class="nc" id="L187">        tolerance = new JTextField(10);</span>
+<span class="nc" id="L188">        tolerance.setText(numFormat.format(ew.getData().getTolerance()));</span>
+<span class="nc" id="L189">        tolerance.setMaximumSize(d);</span>
+<span class="nc" id="L190">        help.addHelp(tolerance, &quot;Input Tolerance for AMVA Algorithms&quot;);</span>
+<span class="nc" id="L191">        tolerance.setFocusable(true);</span>
+<span class="nc" id="L192">        tolerance.addKeyListener(ACTION_CHANGE_TOLERANCE);</span>
+<span class="nc" id="L193">        tolerance.addFocusListener(ACTION_CHANGE_TOLERANCE);</span>
+<span class="nc" id="L194">        tolerance.setVisible(status.toleranceVisible);</span>
+<span class="nc" id="L195">        return tolerance;</span>
+    }
+
+    private JComponent maxSampleLabel() {
+<span class="nc" id="L199">        Dimension d = new Dimension(70, 30);</span>
+<span class="nc" id="L200">        maxSamplesLabel = new JLabel(&quot;  Max Samples:&quot;);</span>
+<span class="nc" id="L201">        maxSamplesLabel.setMaximumSize(d);</span>
+<span class="nc" id="L202">        maxSamplesLabel.setFocusable(false);</span>
+<span class="nc" id="L203">        maxSamplesLabel.setVisible(status.maxSamplesVisible);</span>
+<span class="nc" id="L204">        return maxSamplesLabel;</span>
+    }
+
+    private JComponent maxSamples() {
+<span class="nc" id="L208">        Dimension d = new Dimension(80, 30);</span>
+<span class="nc" id="L209">        maxSamples = new JTextField(10);</span>
+<span class="nc" id="L210">        maxSamples.setText(numFormat.format(ew.getData().getMaxSamples()));</span>
+<span class="nc" id="L211">        maxSamples.setMaximumSize(d);</span>
+<span class="nc" id="L212">        help.addHelp(maxSamples, &quot;Input max samples for Monte Carlo Algorithm&quot;);</span>
+<span class="nc" id="L213">        maxSamples.setFocusable(true);</span>
+<span class="nc" id="L214">        maxSamples.addKeyListener(ACTION_CHANGE_MAX_SAMPLES);</span>
+<span class="nc" id="L215">        maxSamples.addFocusListener(ACTION_CHANGE_MAX_SAMPLES);</span>
+<span class="nc" id="L216">        maxSamples.setVisible(status.maxSamplesVisible);</span>
+<span class="nc" id="L217">        return maxSamples;</span>
+    }
+
+    /**
+     * Updates the algo panel
+     *
+     * @param isClosed        true if model is closed, false if not, null to read from data structure
+     * @param isOpen          true if model is open, false if not, null to read from data structure
+     * @param isAlgowhatif    true if whatif on algorithm was selected, false if not, null to read from data structure
+     * @param isLoadDependent if model is load dependent or not. null to read from data structure
+     * @param isPriority      if model is priority or not. null to read from data structure
+     */
+    public void update(Boolean isClosed, Boolean isOpen, Boolean isAlgowhatif, Boolean isLoadDependent, Boolean isPriority) {
+<span class="nc" id="L230">        ExactModel data = ew.getData();</span>
+<span class="nc" id="L231">        SolverAlgorithm algorithm = data.getAlgorithmType();</span>
+<span class="nc" id="L232">        tolerance.setText(numFormat.format(data.getTolerance()));</span>
+<span class="nc" id="L233">        maxSamples.setText(numFormat.format(data.getMaxSamples()));</span>
+<span class="nc" id="L234">        algorithmList.setSelectedItem(algorithm.toString());</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">        if (isClosed == null) {</span>
+<span class="nc" id="L236">            isClosed = ew.getData().isClosed();</span>
+        }
+<span class="nc bnc" id="L238" title="All 2 branches missed.">        if (isOpen == null) {</span>
+<span class="nc" id="L239">            isOpen = ew.getData().isOpen();</span>
+        }
+<span class="nc bnc" id="L241" title="All 2 branches missed.">        if (isAlgowhatif == null) {</span>
+<span class="nc" id="L242">            isAlgowhatif = ew.getData().isWhatifAlgorithms();</span>
+        }
+<span class="nc bnc" id="L244" title="All 2 branches missed.">        if (isLoadDependent == null) {</span>
+<span class="nc" id="L245">            isLoadDependent = ew.getData().isLd();</span>
+        }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        if (isPriority == null) {</span>
+<span class="nc" id="L248">            isPriority = ew.getData().isPriority();</span>
+        }
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">        if (isLoadDependent) {</span>
+            //updateStatus(PanelStatus.DISABLED_MIXED);
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        } else if (isAlgowhatif) {</span>
+<span class="nc" id="L254">            updateStatus(PanelStatus.DISABLED_WHATIF);</span>
+        } else {
+<span class="nc" id="L256">            updateAlgorithmListFromOptions(isClosed, isOpen, isLoadDependent, isPriority);</span>
+<span class="nc" id="L257">            updateEnabledStatus(currentSelectedAlgorithm);</span>
+        }
+<span class="nc" id="L259">    }</span>
+
+    /**
+     * Updates the panel status
+     *
+     * @param newStatus the new panel status
+     */
+    private void updateStatus(PanelStatus newStatus) {
+<span class="nc bnc" id="L267" title="All 2 branches missed.">        if (status == newStatus) {</span>
+<span class="nc" id="L268">            return;</span>
+        }
+<span class="nc" id="L270">        algLabel.setText(newStatus.algorithmLabel);</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">        algLabel.setEnabled(newStatus != PanelStatus.DISABLED_WHATIF);</span>
+<span class="nc" id="L272">        algorithmList.setVisible(newStatus.selectorVisible);</span>
+<span class="nc" id="L273">        tolLabel.setVisible(newStatus.toleranceVisible);</span>
+<span class="nc" id="L274">        tolerance.setVisible(newStatus.toleranceVisible);</span>
+<span class="nc" id="L275">        maxSamplesLabel.setVisible(newStatus.maxSamplesVisible);</span>
+<span class="nc" id="L276">        maxSamples.setVisible(newStatus.maxSamplesVisible);</span>
+<span class="nc" id="L277">        status = newStatus;</span>
+<span class="nc" id="L278">    }</span>
+
+    private void updateEnabledStatus(SolverAlgorithm algorithm) {
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (!algorithm.isExact()) {</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">            if (algorithm.equals(SolverAlgorithm.MONTE_CARLO_LOGISTIC)) {</span>
+<span class="nc" id="L283">                updateStatus(PanelStatus.ENABLED_MAX_SAMPLES);</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">            } else if (algorithm.isIterative()) {</span>
+<span class="nc" id="L285">                updateStatus(PanelStatus.ENABLED_TOL);</span>
+            } else {
+<span class="nc" id="L287">                updateStatus(PanelStatus.ENABLED);</span>
+            }
+        } else {
+<span class="nc" id="L290">            updateStatus(PanelStatus.ENABLED);</span>
+        }
+<span class="nc" id="L292">    }</span>
+
+    private boolean needToUpdateAlgorithmList(boolean isClosed, boolean isOpen, boolean isLD, boolean isPriority) {
+<span class="nc bnc" id="L295" title="All 8 branches missed.">        return isClosed != lastIsClosed || isOpen != lastIsOpen || isLD != lastIsLD || isPriority != lastIsPriority;</span>
+    }
+
+    private void updateAlgorithmList(String[] newNames) {
+<span class="nc" id="L299">        algorithmList.removeActionListener(ACTION_CHANGE_ALGORITHM);</span>
+<span class="nc" id="L300">        algorithmList.removeAllItems();</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">        for (String name : newNames) {</span>
+<span class="nc" id="L302">            algorithmList.addItem(name);</span>
+        }
+<span class="nc" id="L304">        algorithmList.addActionListener(ACTION_CHANGE_ALGORITHM);</span>
+<span class="nc" id="L305">    }</span>
+
+    private void updateLastAlgorithmListLastValues(boolean isClosed, boolean isOpen, boolean isLD, boolean isPriority) {
+<span class="nc" id="L308">        this.lastIsClosed = isClosed;</span>
+<span class="nc" id="L309">        this.lastIsOpen = isOpen;</span>
+<span class="nc" id="L310">        this.lastIsLD = isLD;</span>
+<span class="nc" id="L311">        this.lastIsPriority = isPriority;</span>
+<span class="nc" id="L312">    }</span>
+
+    private void updateCurrentSelectedAlgorithm() {
+<span class="nc" id="L315">        algorithmList.setSelectedIndex(currentAlgorithmIndex);</span>
+<span class="nc" id="L316">        String selectedAlgoName = algorithmList.getItemAt(currentAlgorithmIndex);</span>
+<span class="nc" id="L317">        currentSelectedAlgorithm = SolverAlgorithm.fromString(selectedAlgoName);</span>
+<span class="nc" id="L318">        ew.getData().setAlgorithmType(currentSelectedAlgorithm);</span>
+<span class="nc" id="L319">        updateEnabledStatus(currentSelectedAlgorithm);</span>
+<span class="nc" id="L320">    }</span>
+
+    private void updateCurrentAlgorithmIndex() {
+<span class="nc" id="L323">        String selectedAlgoName = algorithmList.getItemAt(currentAlgorithmIndex);</span>
+<span class="nc" id="L324">        SolverAlgorithm selectedAlgo = SolverAlgorithm.fromString(selectedAlgoName);</span>
+
+<span class="nc bnc" id="L326" title="All 2 branches missed.">        if (currentSelectedAlgorithm.equals(selectedAlgo)) {</span>
+<span class="nc" id="L327">            algorithmList.setSelectedIndex(currentAlgorithmIndex);</span>
+<span class="nc" id="L328">            ew.getData().setAlgorithmType(currentSelectedAlgorithm);</span>
+<span class="nc" id="L329">            return;</span>
+        }
+
+<span class="nc" id="L332">        int numAlgos = algorithmList.getItemCount();</span>
+<span class="nc" id="L333">        boolean algorithmInList = false;</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">        for (int i = 0; i &lt; numAlgos; i++) {</span>
+<span class="nc bnc" id="L335" title="All 4 branches missed.">            if (algorithmList.getItemAt(i) != null &amp;&amp; algorithmList.getItemAt(i).equals(currentSelectedAlgorithm.toString())) {</span>
+<span class="nc" id="L336">                currentAlgorithmIndex = i;</span>
+<span class="nc" id="L337">                algorithmInList = true;</span>
+<span class="nc" id="L338">                break;</span>
+            }
+        }
+<span class="nc bnc" id="L341" title="All 2 branches missed.">        if (!algorithmInList) {</span>
+<span class="nc" id="L342">            currentAlgorithmIndex = 1;</span>
+        }
+
+<span class="nc" id="L345">        updateCurrentSelectedAlgorithm();</span>
+<span class="nc" id="L346">    }</span>
+
+    private void updateAlgorithmListFromOptions(boolean isClosed, boolean isOpen, boolean isLD, boolean isPriority) {
+<span class="nc bnc" id="L349" title="All 2 branches missed.">        if (!needToUpdateAlgorithmList(isClosed, isOpen, isLD, isPriority)) {</span>
+<span class="nc" id="L350">            return;</span>
+        }
+<span class="nc" id="L352">        String[] algoNameList = AlgorithmListNameCreator.createAlgoNameList(isClosed, isOpen, isLD, isPriority);</span>
+<span class="nc" id="L353">        updateAlgorithmList(algoNameList);</span>
+<span class="nc" id="L354">        updateCurrentAlgorithmIndex();</span>
+<span class="nc" id="L355">        updateLastAlgorithmListLastValues(isClosed, isOpen, isLD, isPriority);</span>
+<span class="nc" id="L356">    }</span>
+
+
+    private JComponent algLabel() {
+<span class="nc" id="L360">        Dimension d = new Dimension(65, 30);</span>
+<span class="nc" id="L361">        algLabel = new JLabel(status.algorithmLabel);</span>
+<span class="nc" id="L362">        algLabel.setMaximumSize(d);</span>
+<span class="nc" id="L363">        algLabel.setFocusable(false);</span>
+<span class="nc" id="L364">        help.addHelp(algLabel, &quot;Algorithm used to solve the model&quot;);</span>
+<span class="nc" id="L365">        return algLabel;</span>
+    }
+
+    private void updateTolerance() {
+<span class="nc" id="L369">        ExactModel model = ew.getData();</span>
+<span class="nc" id="L370">        Double tol = SolverMultiClosedAMVA.validateTolerance(tolerance.getText());</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (tol != null) {</span>
+<span class="nc" id="L372">            model.setTolerance(tol);</span>
+        } else {
+<span class="nc" id="L374">            tolerance.setText(numFormat.format(model.getTolerance()));</span>
+<span class="nc" id="L375">            JOptionPane.showMessageDialog(ew, &quot;Error: Invalid tolerance value. Using last valid value.&quot;, &quot;Input data error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+        }
+<span class="nc" id="L377">    }</span>
+
+    private void updateMaxSamples() {
+<span class="nc" id="L380">        ExactModel model = ew.getData();</span>
+        //Integer mSamples = SolverMultiClosedMonteCarlo.validateMaxSamples(maxSamples.getText());
+<span class="nc" id="L382">        Integer mSamples = SolverMultiClosedMonteCarloLogistic.validateMaxSamples(maxSamples.getText());</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (mSamples != null) {</span>
+<span class="nc" id="L384">            model.setMaxSamples(mSamples);</span>
+        } else {
+<span class="nc" id="L386">            maxSamples.setText(numFormat.format(model.getMaxSamples()));</span>
+<span class="nc" id="L387">            JOptionPane.showMessageDialog(ew, &quot;Error: Invalid max samples value. Using last valid value.&quot;, &quot;Input data error&quot;, JOptionPane.ERROR_MESSAGE);</span>
+        }
+<span class="nc" id="L389">    }</span>
+
+<span class="nc" id="L391">    private class ToleranceInputListener implements KeyListener, FocusListener {</span>
+        @Override
+        public void focusLost(FocusEvent e) {
+<span class="nc" id="L394">            updateTolerance();</span>
+<span class="nc" id="L395">        }</span>
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+<span class="nc bnc" id="L399" title="All 2 branches missed.">            if (e.getKeyCode() == KeyEvent.VK_ENTER) {</span>
+<span class="nc" id="L400">                updateTolerance();</span>
+            }
+<span class="nc" id="L402">        }</span>
+
+        @Override
+        public void focusGained(FocusEvent e) {
+<span class="nc" id="L406">        }</span>
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+<span class="nc" id="L410">        }</span>
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+<span class="nc" id="L414">        }</span>
+    }
+
+<span class="nc" id="L417">    private class MaxSampleInputListener implements KeyListener, FocusListener {</span>
+        @Override
+        public void focusLost(FocusEvent e) {
+<span class="nc" id="L420">            updateMaxSamples();</span>
+<span class="nc" id="L421">        }</span>
+
+        @Override
+        public void keyPressed(KeyEvent e) {
+<span class="nc bnc" id="L425" title="All 2 branches missed.">            if (e.getKeyCode() == KeyEvent.VK_ENTER) {</span>
+<span class="nc" id="L426">                updateMaxSamples();</span>
+            }
+<span class="nc" id="L428">        }</span>
+
+        @Override
+        public void focusGained(FocusEvent e) {
+<span class="nc" id="L432">        }</span>
+
+        @Override
+        public void keyTyped(KeyEvent e) {
+<span class="nc" id="L436">        }</span>
+
+        @Override
+        public void keyReleased(KeyEvent e) {
+<span class="nc" id="L440">        }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SolverDispatcher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.dispatchers</a> &gt; <span class="el_source">SolverDispatcher.java</span></div><h1>SolverDispatcher.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmva.analytical.solvers.dispatchers;
+
+import jmt.common.exception.InputDataException;
+import jmt.common.exception.SolverException;
+import jmt.common.exception.UnsupportedModelException;
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.xml.XMLUtils;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.ModelFESCApproximator;
+import jmt.jmva.analytical.solvers.*;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dispatchers.wrappers.ClosedMultiToSingleSolverWrapper;
+import jmt.jmva.analytical.solvers.dispatchers.wrappers.IterativeClosedMultiToSingleSolverWrapper;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.*;
+import jmt.jmva.analytical.solvers.singleSolverAlgorithms.SolverSingleClosedMVA;
+import jmt.jmva.analytical.solvers.singleSolverAlgorithms.SolverSingleOpen;
+import jmt.jmva.analytical.solvers.utilities.ConstantConvertors;
+import org.xml.sax.SAXException;
+
+import java.io.File;
+
+/**
+ * Server side of the solver interface.&lt;br&gt;
+ * This object takes a model, instantiates the correct solver, and solves
+ * it.&lt;br&gt;
+ * Should probably be rewritten using a different data structure to hold model
+ * information
+ *
+ * @author unknown, Bertoli Marco (what-if analysis)
+ */
+public class SolverDispatcher {
+
+    private static final boolean PRINTMODEL = false;
+
+<span class="nc" id="L54">    private boolean stopped = false;</span>
+
+    private final XMLUtils xmlUtils;
+    /** Used to notify when a computation ends */
+    private SolverListener listener;
+
+    private final WhatIfAnalysisDispatcher whatIfAnalysisDispatcher;
+
+    private ExactModel model;
+
+<span class="nc" id="L64">    public SolverDispatcher() {</span>
+<span class="nc" id="L65">        xmlUtils = new XMLUtils();</span>
+<span class="nc" id="L66">        whatIfAnalysisDispatcher = new WhatIfAnalysisDispatcher(this);</span>
+<span class="nc" id="L67">    }</span>
+
+    /**
+     * Solves the model in file.
+     * @throws InputDataException if some input data are malformed
+     * @throws SolverException    if something goes wrong during solution
+     */
+    public void solve(File file) throws InputDataException, SolverException {
+<span class="nc" id="L75">        model = new ExactModel();</span>
+        try {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">            if (!model.loadDocument(xmlUtils.loadXML(file))) {</span>
+<span class="nc" id="L78">                DispatcherUtil.fail(&quot;Error loading model from tempfile&quot;, null);</span>
+            }
+<span class="nc" id="L80">        } catch (SAXException e) {</span>
+<span class="nc" id="L81">            DispatcherUtil.fail(&quot;XML parse error in tempfile&quot;, e);</span>
+<span class="nc" id="L82">        } catch (Exception e) {</span>
+<span class="nc" id="L83">            DispatcherUtil.fail(&quot;Error loading model from tempfile&quot;, e);</span>
+<span class="nc" id="L84">        }</span>
+
+        if (PRINTMODEL) {
+            System.out.println(model);
+        }
+
+<span class="nc" id="L90">        solve(model);</span>
+
+        if (PRINTMODEL) {
+            System.out.println(model);
+        }
+
+        try {
+<span class="nc bnc" id="L97" title="All 2 branches missed.">            if (!xmlUtils.saveXML(model.createDocument(), file)) {</span>
+<span class="nc" id="L98">                DispatcherUtil.fail(&quot;Error saving solved model to tempfile&quot;, null);</span>
+            }
+<span class="nc" id="L100">        } catch (SAXException e) {</span>
+<span class="nc" id="L101">            DispatcherUtil.fail(&quot;XML parse error in tempfile&quot;, e);</span>
+<span class="nc" id="L102">        } catch (Exception e) {</span>
+<span class="nc" id="L103">            DispatcherUtil.fail(&quot;Error saving solved model to tempfile&quot;, e);</span>
+<span class="nc" id="L104">        }</span>
+
+<span class="nc" id="L106">    }</span>
+
+    /**
+     * Stops What-if analysis and invalidates results
+     */
+    public void stop() {
+<span class="nc" id="L112">        stopped = true;</span>
+<span class="nc" id="L113">    }</span>
+
+    public boolean hasStopped() {
+<span class="nc" id="L116">        return stopped;</span>
+    }
+
+    /**
+     * Solves input model. This method will look for what-if analysis data and
+     * perform a what-if analysis if requested.&lt;br&gt;
+     * Author: Bertoli Marco
+     * @param model model to be solved
+     * @throws InputDataException if some input data are malformed
+     * @throws SolverException    if something goes wrong during solution
+     */
+    public void solve(ExactModel model) throws InputDataException, SolverException {
+<span class="nc" id="L128">        stopped = false;</span>
+<span class="nc" id="L129">        model.resetResults();</span>
+        // Solves normal models
+<span class="nc bnc" id="L131" title="All 2 branches missed.">        if (!model.isWhatIf()) {</span>
+<span class="nc" id="L132">            finalDispatch(model, 0);</span>
+        }
+        // Now solves what-if models
+        else {
+            // Arrival rates what-if analysis
+<span class="nc bnc" id="L137" title="All 2 branches missed.">            if (model.getWhatIfType().equalsIgnoreCase(ExactConstants.WHAT_IF_ARRIVAL)) {</span>
+<span class="nc" id="L138">                whatIfAnalysisDispatcher.whatIfArrival(model);</span>
+            }
+            // Customers number what-if analysis
+<span class="nc bnc" id="L141" title="All 2 branches missed.">            else if (model.getWhatIfType().equalsIgnoreCase(ExactConstants.WHAT_IF_CUSTOMERS)) {</span>
+<span class="nc" id="L142">                whatIfAnalysisDispatcher.whatIfCustomers(model);</span>
+            }
+            // Service demands what-if analysis
+<span class="nc bnc" id="L145" title="All 2 branches missed.">            else if (model.getWhatIfType().equalsIgnoreCase(ExactConstants.WHAT_IF_DEMANDS)) {</span>
+<span class="nc" id="L146">                whatIfAnalysisDispatcher.whatIfDemands(model);</span>
+            }
+            // Population mix what-if analysis
+<span class="nc bnc" id="L149" title="All 2 branches missed.">            else if (model.getWhatIfType().equalsIgnoreCase(ExactConstants.WHAT_IF_MIX)) {</span>
+<span class="nc" id="L150">                whatIfAnalysisDispatcher.whatIfMix(model);</span>
+            }
+        }
+<span class="nc" id="L153">    }</span>
+
+    public void finalDispatch(ExactModel model, int iteration) throws InputDataException, SolverException {
+        /* disable all change-checking */
+<span class="nc" id="L157">        model.discardChanges();</span>
+<span class="nc" id="L158">        model.setChanged();</span>
+
+<span class="nc" id="L160">        ModelFESCApproximator fesc = new ModelFESCApproximator(model, iteration);</span>
+        try {
+<span class="nc bnc" id="L162" title="All 4 branches missed.">            if (model.isWhatIf() &amp;&amp; model.isWhatifAlgorithms()) {</span>
+<span class="nc" id="L163">                SolverAlgorithm origAlgType = model.getAlgorithmType();</span>
+<span class="nc" id="L164">                double origAlgTolerance = model.getTolerance();</span>
+<span class="nc" id="L165">                int origAlgMaxSamples = model.getMaxSamples();</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">                for (SolverAlgorithm algo : model.getWhatifAlgorithms()) {</span>
+<span class="nc" id="L167">                    model.setAlgorithmType(algo);</span>
+<span class="nc" id="L168">                    model.setTolerance(model.getWhatifAlgorithmTolerance(algo));</span>
+<span class="nc" id="L169">                    model.setMaxSamples(model.getWhatifAlgorithmMaxSamples(algo));</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">                    if (model.isMultiClass()) {</span>
+<span class="nc" id="L171">                        SolverMultiDispatcher.solveMulti(fesc.getModelToBeSolved(), iteration);</span>
+                    } else {
+<span class="nc" id="L173">                        solveSingle(fesc.getModelToBeSolved(), iteration);</span>
+                    }
+<span class="nc" id="L175">                }</span>
+<span class="nc" id="L176">                model.setAlgorithmType(origAlgType);</span>
+<span class="nc" id="L177">                model.setTolerance(origAlgTolerance);</span>
+<span class="nc" id="L178">                model.setMaxSamples(origAlgMaxSamples);</span>
+<span class="nc" id="L179">            } else {</span>
+<span class="nc bnc" id="L180" title="All 4 branches missed.">                if (model.isOpen() || model.isMultiClass()) {</span>
+<span class="nc" id="L181">                    SolverMultiDispatcher.solveMulti(fesc.getModelToBeSolved(), iteration);</span>
+                } else {
+<span class="nc" id="L183">                    solveSingle(fesc.getModelToBeSolved(), iteration);</span>
+                }
+            }
+            // set boolean to notify results have been computed
+<span class="nc" id="L187">            model.setResultsBooleans(true);</span>
+
+            // Notify termination of current model solution
+<span class="nc bnc" id="L190" title="All 2 branches missed.">            if (listener != null) {</span>
+<span class="nc" id="L191">                listener.computationTerminated(iteration);</span>
+            }
+<span class="nc" id="L193">        } catch (InputDataException e) {</span>
+<span class="nc" id="L194">            throw e;</span>
+<span class="nc" id="L195">        } catch (SolverException e) {</span>
+<span class="nc" id="L196">            throw e;</span>
+<span class="nc" id="L197">        } catch (Exception e) {</span>
+<span class="nc" id="L198">            DispatcherUtil.fail(&quot;Unhandled exception&quot;, e);</span>
+<span class="nc" id="L199">        }</span>
+<span class="nc" id="L200">        fesc.processModelAfterSolution();</span>
+<span class="nc" id="L201">    }</span>
+
+    private void solveSingle(ExactModel model, int iteration) throws UnsupportedModelException, InputDataException, SolverException {
+        // TODO: Convert this to use MultiSolver, the methods are really similar
+<span class="nc" id="L205">        int stations = model.getStations();</span>
+<span class="nc" id="L206">        Solver solver = null;</span>
+<span class="nc" id="L207">        SolverAlgorithm algorithmType = model.getAlgorithmType();</span>
+<span class="nc" id="L208">        int algIterations = 0;</span>
+
+        // init
+<span class="nc" id="L211">        String[] names = model.getStationNames();</span>
+<span class="nc" id="L212">        int[] types = ConstantConvertors.mapStationTypes(model.getStationTypes(), false);</span>
+<span class="nc" id="L213">        double[][] serviceTimes = ArrayUtils.extract13(model.getServiceTimes(), 0);</span>
+        // no supplemental copy here since extract13 already copies the first level of
+        // the array
+<span class="nc" id="L216">        adjustLD(serviceTimes, types);</span>
+<span class="nc" id="L217">        double[] visits = ArrayUtils.extract1(model.getVisits(), 0);</span>
+
+<span class="nc" id="L219">        double tolerance = model.getTolerance();</span>
+<span class="nc" id="L220">        int maxSamples = model.getMaxSamples();</span>
+
+<span class="nc" id="L222">        ModelSolverCompatibilityChecker.checkModelAlgorithmCompatability(model, algorithmType);</span>
+
+        try {
+<span class="nc bnc" id="L225" title="All 2 branches missed.">            if (model.isClosed()) {</span>
+                // single closed
+<span class="nc" id="L227">                int pop = (int) model.getClassData()[0];</span>
+                // First of all controls that the closed class has population greater than 0.
+                // Otherwise throws a InputDataException
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                if (pop &lt;= 0) {</span>
+                    // error: population is not greater than 0.0
+<span class="nc" id="L232">                    throw new InputDataException(&quot;Population must be greater than zero&quot;);</span>
+                }
+
+<span class="nc" id="L235">                boolean alreadyInitialised = false;</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">                if (SolverAlgorithm.EXACT.equals(algorithmType)) {</span>
+<span class="nc" id="L237">                    solver = new SolverSingleClosedMVA(pop, stations);</span>
+<span class="nc bnc" id="L238" title="All 2 branches missed.">                } else if (SolverAlgorithm.MONTE_CARLO_LOGISTIC.equals(algorithmType)) {</span>
+<span class="nc" id="L239">                    solver = new SolverSingleClosedMonteCarloLogistic(pop, stations,</span>
+                            maxSamples, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION);
+<span class="nc bnc" id="L241" title="All 2 branches missed.">                } else if (SolverAlgorithm.RECAL.equals(algorithmType)) {</span>
+<span class="nc" id="L242">                    solver = new SolverSingleClosedRECAL(pop, stations);</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">                } else if (SolverAlgorithm.COMOM.equals(algorithmType)) {</span>
+                    // in single-class we run RECAL as COMOM initialization, since it is meant for
+                    // models with few stations
+<span class="nc" id="L246">                    solver = new SolverSingleClosedRECAL(pop, stations);</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                } else if (algorithmType.isIterative()) {</span>
+<span class="nc" id="L248">                    solver = new IterativeClosedMultiToSingleSolverWrapper(algorithmType, model, tolerance);</span>
+<span class="nc" id="L249">                    alreadyInitialised = true;</span>
+                } else {
+<span class="nc" id="L251">                    solver = new ClosedMultiToSingleSolverWrapper(algorithmType, model);</span>
+<span class="nc" id="L252">                    alreadyInitialised = true;</span>
+                }
+
+                // alreadyInitialised short-circuts the if statement so input isn't called twice
+<span class="nc bnc" id="L256" title="All 4 branches missed.">                if (!alreadyInitialised &amp;&amp; !solver.input(names, types, serviceTimes, visits)) {</span>
+<span class="nc" id="L257">                    String algName = algorithmType.toString().replace(&quot; &quot;, &quot;&quot;).replace(&quot;-&quot;, &quot;&quot;);</span>
+<span class="nc" id="L258">                    DispatcherUtil.fail(&quot;Error initializing &quot; + algName + &quot;SingleSolver&quot;, null);</span>
+                    // DispatcherUtil.fail(&quot;Error initializing MVASolver&quot;, null);
+                }
+<span class="nc" id="L261">            } else {</span>
+<span class="nc" id="L262">                algorithmType = SolverAlgorithm.EXACT;</span>
+                // TODO this is not used any more (multi solver is used instead)
+                /* single open */
+<span class="nc" id="L265">                double lambda = model.getClassData()[0];</span>
+                // First of all controls that the open class has rate greater than 0.
+                // Otherwise throws a InputDataException
+<span class="nc bnc" id="L268" title="All 2 branches missed.">                if (lambda &lt;= 0) {</span>
+                    // error: rate is not greater than 0.0
+<span class="nc" id="L270">                    throw new InputDataException(&quot;Arrival rate must be greater than zero&quot;);</span>
+                }
+<span class="nc" id="L272">                solver = new SolverSingleOpen(lambda, stations);</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">                if (!solver.input(names, types, serviceTimes, visits)) {</span>
+<span class="nc" id="L274">                    DispatcherUtil.fail(&quot;Error initializing OpenSolver&quot;, null);</span>
+                }
+            }
+<span class="nc" id="L277">        } catch (Exception e) {</span>
+<span class="nc" id="L278">            DispatcherUtil.fail(&quot;Error initializing SingleClass solver&quot;, e);</span>
+<span class="nc" id="L279">        }</span>
+        // controls processing capacity
+<span class="nc bnc" id="L281" title="All 2 branches missed.">        if (!solver.hasSufficientProcessingCapacity()) {</span>
+<span class="nc" id="L282">            throw new InputDataException(&quot;One or more resources are in saturation. Decrease arrival rates or service demands.&quot;);</span>
+        }
+
+        /* solve */
+<span class="nc" id="L286">        solver.solve();</span>
+
+<span class="nc" id="L288">        double logNC = Double.NaN;</span>
+<span class="nc bnc" id="L289" title="All 2 branches missed.">        if (solver instanceof IterativeClosedMultiToSingleSolverWrapper) {</span>
+<span class="nc" id="L290">            algIterations = ((IterativeClosedMultiToSingleSolverWrapper) solver).getIterations();</span>
+<span class="nc bnc" id="L291" title="All 2 branches missed.">        } else if (solver instanceof SolverSingleClosedRECAL) {</span>
+<span class="nc" id="L292">            BigRational G = ((SolverSingleClosedRECAL) solver).solver.qnm.getNormalisingConstant();</span>
+<span class="nc" id="L293">            logNC = G.log() - 5 * Math.log(10) * ((SolverSingleClosedRECAL) solver).solver.qnm.N.sum();</span>
+<span class="nc bnc" id="L294" title="All 2 branches missed.">        } else if (solver instanceof SolverSingleClosedCoMoM) {</span>
+<span class="nc" id="L295">            BigRational G = ((SolverSingleClosedCoMoM) solver).solver.qnm.getNormalisingConstant();</span>
+<span class="nc" id="L296">            logNC = G.log() - 5 * Math.log(10) * ((SolverSingleClosedCoMoM) solver).solver.qnm.N.sum();</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">        } else if (solver instanceof SolverSingleClosedMonteCarloLogistic) {</span>
+<span class="nc" id="L298">            BigRational G = ((SolverSingleClosedMonteCarloLogistic) solver).solver.qnm.getNormalisingConstant();</span>
+<span class="nc" id="L299">            logNC = G.log();</span>
+        }
+
+        /* solution */
+<span class="nc" id="L303">        double[][] ql = ArrayUtils.makeFilled(stations, 1, -1);</span>
+<span class="nc" id="L304">        ArrayUtils.insert1(ql, solver.getQueueLen(), 0);</span>
+
+<span class="nc" id="L306">        double[][] tp = ArrayUtils.makeFilled(stations, 1, -1);</span>
+<span class="nc" id="L307">        ArrayUtils.insert1(tp, solver.getThroughput(), 0);</span>
+
+<span class="nc" id="L309">        double[][] rt = ArrayUtils.makeFilled(stations, 1, -1);</span>
+<span class="nc" id="L310">        ArrayUtils.insert1(rt, solver.getResTime(), 0);</span>
+
+<span class="nc" id="L312">        double[][] util = ArrayUtils.makeFilled(stations, 1, -1);</span>
+<span class="nc" id="L313">        ArrayUtils.insert1(util, solver.getUtilization(), 0);</span>
+
+<span class="nc" id="L315">        model.setResults(algorithmType, algIterations, ql, tp, rt, util, logNC, iteration);</span>
+<span class="nc" id="L316">    }</span>
+
+    /** HACK: adds an initial zero to all LD stations */
+    private void adjustLD(double[][] st, int[] types) {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">        for (int i = 0; i &lt; st.length; i++) {</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">            if (types[i] == Solver.LD) {</span>
+<span class="nc" id="L322">                st[i] = ArrayUtils.prepend0(st[i]);</span>
+            }
+        }
+<span class="nc" id="L325">    }</span>
+
+    // ------------------------------------------------------------------------------------
+
+    // ---- Callbacks ---------------------------------------------------------------------
+
+    /**
+     * Adds a solver listener to be notified when computation of an iteration
+     * terminates. This is useful for notification of a progress window. Only one
+     * listener is allowed.
+     * @param listener listener to be added or null to remove previous one.
+     */
+    public void addSolverListener(SolverListener listener) {
+<span class="nc" id="L338">        this.listener = listener;</span>
+<span class="nc" id="L339">    }</span>
+
+    /**
+     * Listener used to notify when computation of a model is terminated.
+     */
+    public interface SolverListener {
+        /**
+         * This method is called each time the computation of a model is terminated.
+         * @param num number of computed model (used for iterated solutions).
+         */
+        public void computationTerminated(int num);
+    }
+    // ------------------------------------------------------------------------------------
+
+
+    public ExactModel getModel() {
+<span class="nc" id="L355">        return model;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

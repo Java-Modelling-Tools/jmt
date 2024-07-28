@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DrawSmall.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov.Graphics.constants</a> &gt; <span class="el_source">DrawSmall.java</span></div><h1>DrawSmall.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * Created on 23-mar-2004 by Ernesto
+ *
+ */
+package jmt.jmarkov.Graphics.constants;
+
+import java.awt.BasicStroke;
+import java.awt.Font;
+import java.awt.Stroke;
+
+/**
+ * MMQueues
+ * --------------------------------------
+ * 23-mar-2004 - Graphics.constants/DrawSmall.java
+ * 
+ * @author Ernesto
+ */
+<span class="nc" id="L36">public class DrawSmall implements DrawConstrains {</span>
+
+	private static final double START_GAP = 5.0;
+	private static final double ELEM_HEIGHT = 20.0;
+	private static final double ELEM_WIDTH = 15.0;
+	private static final double ELEMS_GAP = 3.0;
+	private static final double PROC_RAD = 20.0;
+	private static final double STAT_RAD = 10.0;
+	private static final float STROKE_SIZE = 1.0f;
+
+<span class="nc" id="L46">	private static final Font F = new Font(&quot;Monospaced&quot;, Font.BOLD, 10);</span>
+<span class="nc" id="L47">	private static final Font FN = new Font(&quot;Verdana&quot;, Font.BOLD, 10);</span>
+<span class="nc" id="L48">	private static final Font FS = new Font(&quot;Verdana&quot;, Font.BOLD, 8);</span>
+<span class="nc" id="L49">	private static final Font FB = new Font(&quot;Verdana&quot;, Font.BOLD, 12);</span>
+
+<span class="nc" id="L51">	private static final Stroke S = new BasicStroke(STROKE_SIZE, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);</span>
+<span class="nc" id="L52">	private static final Stroke BS = new BasicStroke(STROKE_SIZE + STROKE_SIZE / 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);</span>
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getElementHeight()
+	 */
+	public double getElementHeight() {
+<span class="nc" id="L58">		return ELEM_HEIGHT;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getElementsGap()
+	 */
+	public double getElementsGap() {
+<span class="nc" id="L65">		return ELEMS_GAP;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getElementWidth()
+	 */
+	public double getElementWidth() {
+<span class="nc" id="L72">		return ELEM_WIDTH;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getFont()
+	 */
+	public Font getFont() {
+<span class="nc" id="L79">		return F;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getProcessorRadius()
+	 */
+	public double getProcessorRadius() {
+<span class="nc" id="L86">		return PROC_RAD;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getStartingGap()
+	 */
+	public double getStartingGap() {
+<span class="nc" id="L93">		return START_GAP;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getStatusRadius()
+	 */
+	public double getStatusRadius() {
+<span class="nc" id="L100">		return STAT_RAD;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getDrawStroke()
+	 */
+	public Stroke getDrawStroke() {
+<span class="nc" id="L107">		return S;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getBoldStroke()
+	 */
+	public Stroke getBoldStroke() {
+<span class="nc" id="L114">		return BS;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getNormalGUIFont()
+	 */
+	public Font getNormalGUIFont() {
+<span class="nc" id="L121">		return FN;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getSmallGUIFont()
+	 */
+	public Font getSmallGUIFont() {
+<span class="nc" id="L128">		return FS;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see Graphics.constants.DrawConstrains#getBigGUIFont()
+	 */
+	public Font getBigGUIFont() {
+<span class="nc" id="L135">		return FB;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

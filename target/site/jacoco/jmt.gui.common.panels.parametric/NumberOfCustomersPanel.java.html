@@ -1,0 +1,638 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NumberOfCustomersPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels.parametric</a> &gt; <span class="el_source">NumberOfCustomersPanel.java</span></div><h1>NumberOfCustomersPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.common.panels.parametric;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.text.DecimalFormat;
+import java.util.Vector;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.GuiInterface;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.parametric.NumberOfCustomerParametricAnalysis;
+import jmt.gui.common.definitions.parametric.ParametricAnalysis;
+import jmt.gui.table.ExactTable;
+import jmt.gui.table.ExactTableModel;
+
+/**
+ * &lt;p&gt;Title: NumberOfCustomersPanel&lt;/p&gt;
+ * &lt;p&gt;Description: this is the panel for the parametric analysis where the
+ *  global number of customers is changed. It contains a nested class &lt;code&gt;PopulationVectorTable&lt;/code&gt;
+ *  used to show the population composition&lt;/p&gt;
+ *
+ * @author Francesco D'Aquino
+ *         Date: 9-mar-2006
+ *         Time: 16.17.48
+ */
+public class NumberOfCustomersPanel extends ParameterOptionPanel {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private JRadioButton allClass;
+	private JRadioButton singleClass;
+	private JLabel fromLabel;
+	private JTextField from;
+	private JLabel toLabel;
+	private JSpinner to;
+	private JLabel stepsLabel;
+	private JSpinner steps;
+	private JLabel classChooserLabel;
+	private JComboBox classChooser;
+	private JScrollPane scroll;
+	private JTextArea description;
+	private JScrollPane descrPane;
+	private TitledBorder descriptionTitle;
+	private String DESCRIPTION_SINGLE;
+	private TablePanel tablePanel;
+	private JPanel globalEditPanel;
+
+	private NumberOfCustomerParametricAnalysis NCPA;
+	private GuiInterface gui;
+
+	public NumberOfCustomersPanel(NumberOfCustomerParametricAnalysis ncpa, ClassDefinition classDef, StationDefinition stationDef,
+			SimulationDefinition simDef, GuiInterface guiInterface) {
+<span class="nc" id="L101">		super();</span>
+<span class="nc" id="L102">		super.setOrientation(JSplitPane.HORIZONTAL_SPLIT);</span>
+<span class="nc" id="L103">		super.setDividerSize(3);</span>
+<span class="nc" id="L104">		DESCRIPTION = &quot;Repeat the simulation with different number of jobs in each iteration, &quot;</span>
+				+ &quot;starting from the current number of jobs in the closed class.\n\n&quot; + &quot;The proportion of the number of jobs in the different &quot;
+				+ &quot;classes will be kept constant, so the number of steps that can be practically executed &quot;
+				+ &quot;may be very small (since only integer values are allowed).&quot;;
+<span class="nc" id="L108">		DESCRIPTION_SINGLE = &quot;Repeat the simulation with different number of jobs in each iteration, &quot;</span>
+				+ &quot;starting from the current number of jobs in the closed class, and increasing the number of jobs of&quot; + &quot; selected class only.\n\n&quot;;
+<span class="nc" id="L110">		NCPA = ncpa;</span>
+<span class="nc" id="L111">		cd = classDef;</span>
+<span class="nc" id="L112">		sd = stationDef;</span>
+<span class="nc" id="L113">		simd = simDef;</span>
+<span class="nc" id="L114">		gui = guiInterface;</span>
+<span class="nc" id="L115">		initialize();</span>
+<span class="nc" id="L116">	}</span>
+
+	public void initialize() {
+<span class="nc" id="L119">		JPanel radioButtonsPanel = new JPanel(new GridLayout(2, 1));</span>
+<span class="nc" id="L120">		allClass = new JRadioButton(&quot;Increase number of jobs of all closed classes&quot;);</span>
+<span class="nc" id="L121">		allClass.setToolTipText(&quot;Increase population of all closed classes&quot;);</span>
+<span class="nc" id="L122">		singleClass = new JRadioButton(&quot;Increase number of jobs of one closed class&quot;);</span>
+<span class="nc" id="L123">		singleClass.setToolTipText(&quot;Increase only population of one class&quot;);</span>
+<span class="nc" id="L124">		ButtonGroup group = new ButtonGroup();</span>
+<span class="nc" id="L125">		group.add(allClass);</span>
+<span class="nc" id="L126">		group.add(singleClass);</span>
+<span class="nc" id="L127">		radioButtonsPanel.add(allClass);</span>
+<span class="nc" id="L128">		radioButtonsPanel.add(singleClass);</span>
+<span class="nc" id="L129">		radioButtonsPanel.setBorder(new EmptyBorder(5, 20, 0, 20));</span>
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (cd.getClosedClassKeys().size() == 1) {</span>
+<span class="nc" id="L131">			allClass.setEnabled(false);</span>
+		}
+<span class="nc" id="L133">		JPanel edit = new JPanel(new GridLayout(4, 1, 0, 5));</span>
+<span class="nc" id="L134">		classChooserLabel = new JLabel(&quot;Class: &quot;);</span>
+<span class="nc" id="L135">		classChooser = new JComboBox();</span>
+<span class="nc" id="L136">		classChooser.setToolTipText(&quot;Choose the class whose number of jobs will be incremented&quot;);</span>
+		SpinnerNumberModel toModel;
+		int minTo;
+<span class="nc bnc" id="L139" title="All 2 branches missed.">		if (NCPA.isSingleClass()) {</span>
+<span class="nc" id="L140">			Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L141">			String[] classNames = new String[classes.size()];</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc" id="L143">				classNames[i] = cd.getClassName(classes.get(i));</span>
+			}
+<span class="nc" id="L145">			classChooser.removeAllItems();</span>
+<span class="nc bnc" id="L146" title="All 2 branches missed.">			for (String className : classNames) {</span>
+<span class="nc" id="L147">				classChooser.addItem(className);</span>
+			}
+<span class="nc" id="L149">			classChooser.setEnabled(true);</span>
+<span class="nc" id="L150">			classChooser.setSelectedItem(cd.getClassName(NCPA.getReferenceClass()));</span>
+<span class="nc" id="L151">			singleClass.setSelected(true);</span>
+<span class="nc" id="L152">			allClass.setSelected(false);</span>
+			//set the minimum final value
+<span class="nc" id="L154">			int totalPop = cd.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L155">			minTo = totalPop + 1;</span>
+<span class="nc" id="L156">		} else {</span>
+<span class="nc" id="L157">			classChooser.removeAllItems();</span>
+<span class="nc" id="L158">			classChooser.addItem(&quot;All closed classes&quot;);</span>
+<span class="nc" id="L159">			classChooser.setEnabled(false);</span>
+<span class="nc" id="L160">			singleClass.setSelected(false);</span>
+<span class="nc" id="L161">			allClass.setSelected(true);</span>
+			// set the minimum final value.
+<span class="nc" id="L163">			Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L164">			int popGCD = cd.getClassPopulation(classes.get(0));</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">			for (int i = 1; i &lt; classes.size(); i++) {</span>
+<span class="nc" id="L166">				int classPop = cd.getClassPopulation(classes.get(i));</span>
+<span class="nc" id="L167">				popGCD = findGCD(popGCD, classPop);</span>
+			}
+<span class="nc" id="L169">			int totalPop = cd.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L170">			minTo = totalPop + totalPop / popGCD;</span>
+		}
+<span class="nc" id="L172">		fromLabel = new JLabel(&quot;From N: &quot;);</span>
+<span class="nc" id="L173">		from = new JTextField();</span>
+<span class="nc" id="L174">		from.setEnabled(false);</span>
+<span class="nc" id="L175">		from.setText(Integer.toString((int) NCPA.getInitialValue()));</span>
+<span class="nc" id="L176">		from.setBorder(new TitledBorder(&quot;&quot;));</span>
+<span class="nc" id="L177">		from.setBackground(Color.WHITE);</span>
+<span class="nc" id="L178">		from.setAlignmentX(SwingConstants.EAST);</span>
+<span class="nc" id="L179">		from.setToolTipText(&quot;To change number of jobs double click here&quot;);</span>
+<span class="nc" id="L180">		toLabel = new JLabel(&quot;To N: &quot;);</span>
+<span class="nc" id="L181">		toModel = new SpinnerNumberModel((int) NCPA.getFinalValue(), minTo, Integer.MAX_VALUE, 1);</span>
+<span class="nc" id="L182">		to = new JSpinner(toModel);</span>
+<span class="nc" id="L183">		to.setToolTipText(&quot;Set the final number of jobs&quot;);</span>
+<span class="nc" id="L184">		stepsLabel = new JLabel(&quot;Steps (n. of exec.): &quot;);</span>
+<span class="nc" id="L185">		int maximumSteps = NCPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (maximumSteps &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L187">			maximumSteps = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+		}
+<span class="nc" id="L189">		steps = new JSpinner(new SpinnerNumberModel(NCPA.getNumberOfSteps(), 2, maximumSteps, 1));</span>
+<span class="nc" id="L190">		steps.setToolTipText(&quot;Set the number of steps to be performed&quot;);</span>
+<span class="nc" id="L191">		edit.add(fromLabel);</span>
+<span class="nc" id="L192">		edit.add(from);</span>
+<span class="nc" id="L193">		edit.add(toLabel);</span>
+<span class="nc" id="L194">		edit.add(to);</span>
+<span class="nc" id="L195">		edit.add(stepsLabel);</span>
+<span class="nc" id="L196">		edit.add(steps);</span>
+<span class="nc" id="L197">		edit.add(classChooserLabel);</span>
+<span class="nc" id="L198">		edit.add(classChooser);</span>
+<span class="nc" id="L199">		edit.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L200">		JPanel editLables = new JPanel(new GridLayout(4, 1, 0, 5));</span>
+<span class="nc" id="L201">		editLables.add(fromLabel);</span>
+<span class="nc" id="L202">		editLables.add(toLabel);</span>
+<span class="nc" id="L203">		editLables.add(stepsLabel);</span>
+<span class="nc" id="L204">		editLables.add(classChooserLabel);</span>
+<span class="nc" id="L205">		editLables.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L206">		JPanel editPanel = new JPanel();</span>
+<span class="nc" id="L207">		editPanel.add(editLables);</span>
+<span class="nc" id="L208">		editPanel.add(edit);</span>
+<span class="nc" id="L209">		editPanel.setBorder(new EmptyBorder(10, 0, 0, 10));</span>
+		//Create values table and add to JScrollPane
+<span class="nc" id="L211">		tablePanel = new TablePanel();</span>
+<span class="nc" id="L212">		globalEditPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L213">		globalEditPanel.add(tablePanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L214">		globalEditPanel.add(editPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L215">		JPanel cont = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L216">		cont.add(radioButtonsPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L217">		cont.add(globalEditPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L218">		scroll = new JScrollPane(cont);</span>
+<span class="nc" id="L219">		title = new TitledBorder(&quot;Type of population growth&quot;);</span>
+<span class="nc" id="L220">		scroll.setBorder(title);</span>
+<span class="nc" id="L221">		description = new JTextArea();</span>
+<span class="nc bnc" id="L222" title="All 2 branches missed.">		if (NCPA.isSingleClass()) {</span>
+<span class="nc" id="L223">			description.setText(DESCRIPTION_SINGLE);</span>
+		} else {
+<span class="nc" id="L225">			description.setText(DESCRIPTION);</span>
+		}
+<span class="nc" id="L227">		description.setOpaque(false);</span>
+<span class="nc" id="L228">		description.setEditable(false);</span>
+<span class="nc" id="L229">		description.setLineWrap(true);</span>
+<span class="nc" id="L230">		description.setWrapStyleWord(true);</span>
+<span class="nc" id="L231">		descrPane = new JScrollPane(description);</span>
+<span class="nc" id="L232">		descriptionTitle = new TitledBorder(new EtchedBorder(), &quot;Description&quot;);</span>
+<span class="nc" id="L233">		descrPane.setBorder(descriptionTitle);</span>
+<span class="nc" id="L234">		descrPane.setMinimumSize(new Dimension((int)(80 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L235">		scroll.setMinimumSize(new Dimension((int)(360 * CommonConstants.widthScaling), (int)(0 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L236">		setLeftComponent(scroll);</span>
+<span class="nc" id="L237">		setRightComponent(descrPane);</span>
+<span class="nc" id="L238">		setListeners();</span>
+<span class="nc" id="L239">		this.setBorder(new EmptyBorder(5, 0, 5, 0));</span>
+<span class="nc" id="L240">	}</span>
+
+	@Override
+	public void setEnabled(boolean enabled) {
+<span class="nc bnc" id="L244" title="All 2 branches missed.">		if (cd.getClosedClassKeys().size() == 1) {</span>
+<span class="nc" id="L245">			allClass.setEnabled(false);</span>
+		} else {
+<span class="nc" id="L247">			allClass.setEnabled(enabled);</span>
+		}
+<span class="nc" id="L249">		singleClass.setEnabled(enabled);</span>
+<span class="nc" id="L250">		fromLabel.setEnabled(enabled);</span>
+<span class="nc" id="L251">		from.setEnabled(false);</span>
+<span class="nc" id="L252">		toLabel.setEnabled(enabled);</span>
+<span class="nc" id="L253">		to.setEnabled(enabled);</span>
+<span class="nc" id="L254">		stepsLabel.setEnabled(enabled);</span>
+<span class="nc" id="L255">		steps.setEnabled(enabled);</span>
+<span class="nc" id="L256">		classChooserLabel.setEnabled(enabled);</span>
+<span class="nc" id="L257">		description.setEnabled(enabled);</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L259">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="nc" id="L260">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);</span>
+		} else {
+<span class="nc" id="L262">			scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+<span class="nc" id="L263">			descrPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);</span>
+		}
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L266">			classChooser.setEnabled(enabled);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">		} else if (singleClass.isSelected()) {</span>
+<span class="nc" id="L268">			classChooser.setEnabled(enabled);</span>
+		}
+<span class="nc bnc" id="L270" title="All 2 branches missed.">		if (!enabled) {</span>
+<span class="nc" id="L271">			title.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L272">			descriptionTitle.setTitleColor(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L273">			globalEditPanel.remove(tablePanel);</span>
+<span class="nc" id="L274">			globalEditPanel.doLayout();</span>
+<span class="nc" id="L275">			globalEditPanel.validate();</span>
+		} else {
+<span class="nc" id="L277">			title.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L278">			descriptionTitle.setTitleColor(DEFAULT_TITLE_COLOR);</span>
+<span class="nc" id="L279">			tablePanel = new TablePanel();</span>
+<span class="nc" id="L280">			globalEditPanel.add(tablePanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L281">			globalEditPanel.doLayout();</span>
+<span class="nc" id="L282">			globalEditPanel.validate();</span>
+		}
+<span class="nc" id="L284">	}</span>
+
+	private void setListeners() {
+<span class="nc" id="L287">		singleClass.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L289" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L290">					return;</span>
+				}
+<span class="nc" id="L292">				NCPA.setSingleClass(true);</span>
+<span class="nc" id="L293">				classChooser.setEnabled(true);</span>
+<span class="nc" id="L294">				ItemListener listener = classChooser.getItemListeners()[0];</span>
+<span class="nc" id="L295">				classChooser.removeItemListener(listener);</span>
+<span class="nc" id="L296">				classChooser.removeAllItems();</span>
+<span class="nc" id="L297">				Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L298">				String[] classNames = new String[classes.size()];</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">				for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc" id="L300">					classNames[i] = cd.getClassName(classes.get(i));</span>
+				}
+<span class="nc bnc" id="L302" title="All 2 branches missed.">				for (String className : classNames) {</span>
+<span class="nc" id="L303">					classChooser.addItem(className);</span>
+				}
+<span class="nc" id="L305">				classChooser.addItemListener(listener);</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">				if (!classes.contains(NCPA.getReferenceClass())) {</span>
+<span class="nc" id="L307">					NCPA.setReferenceClass(classes.get(0));</span>
+				}
+<span class="nc" id="L309">				classChooser.setSelectedItem(cd.getClassName(NCPA.getReferenceClass()));</span>
+<span class="nc" id="L310">				int totalPop = cd.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L311">				int minTo = totalPop + 1;</span>
+<span class="nc" id="L312">				ChangeListener cl = to.getChangeListeners()[0];</span>
+<span class="nc" id="L313">				to.removeChangeListener(cl);</span>
+<span class="nc" id="L314">				SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();</span>
+<span class="nc" id="L315">				toModel.setMinimum(new Integer(minTo));</span>
+<span class="nc" id="L316">				to.addChangeListener(cl);</span>
+<span class="nc" id="L317">				int oldStep = ((Integer) steps.getValue()).intValue();</span>
+<span class="nc" id="L318">				int newMaximumStep = NCPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L319" title="All 2 branches missed.">				if (newMaximumStep &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L320">					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+				}
+<span class="nc" id="L322">				SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc bnc" id="L323" title="All 2 branches missed.">				if (oldStep &gt; newMaximumStep) {</span>
+<span class="nc" id="L324">					NCPA.setNumberOfSteps(newMaximumStep);</span>
+<span class="nc" id="L325">					steps.setValue(new Integer(newMaximumStep));</span>
+				}
+<span class="nc" id="L327">				stepModel.setMaximum(new Integer(newMaximumStep));</span>
+<span class="nc" id="L328">				description.setText(DESCRIPTION_SINGLE);</span>
+<span class="nc" id="L329">				tablePanel.repaint();</span>
+<span class="nc" id="L330">				tablePanel.setSelectedClass(NCPA.getReferenceClass());</span>
+<span class="nc" id="L331">			}</span>
+		});
+<span class="nc" id="L333">		allClass.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L335" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L336">					return;</span>
+				}
+<span class="nc" id="L338">				NCPA.setSingleClass(false);</span>
+<span class="nc" id="L339">				Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L340">				int popGCD = cd.getClassPopulation(classes.get(0));</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">				for (int i = 1; i &lt; classes.size(); i++) {</span>
+<span class="nc" id="L342">					int classPop = cd.getClassPopulation(classes.get(i));</span>
+<span class="nc" id="L343">					popGCD = findGCD(popGCD, classPop);</span>
+				}
+<span class="nc" id="L345">				int totalPop = cd.getTotalClosedClassPopulation();</span>
+<span class="nc" id="L346">				int minTo = totalPop + totalPop / popGCD;</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">				if (NCPA.getFinalValue() &lt; minTo) {</span>
+<span class="nc" id="L348">					NCPA.setFinalValue(minTo);</span>
+				}
+<span class="nc" id="L350">				SpinnerNumberModel toModel = (SpinnerNumberModel) to.getModel();</span>
+<span class="nc" id="L351">				toModel.setValue(new Integer((int) NCPA.getFinalValue()));</span>
+<span class="nc" id="L352">				toModel.setMinimum(new Integer(minTo));</span>
+<span class="nc" id="L353">				classChooser.removeAllItems();</span>
+<span class="nc" id="L354">				classChooser.addItem(&quot;All closed classes&quot;);</span>
+<span class="nc" id="L355">				classChooser.setEnabled(false);</span>
+<span class="nc" id="L356">				int newMaximumStep = NCPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">				if (newMaximumStep &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L358">					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+				}
+<span class="nc" id="L360">				int oldStep = ((Integer) steps.getValue()).intValue();</span>
+<span class="nc" id="L361">				SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">				if (oldStep &gt; newMaximumStep) {</span>
+<span class="nc" id="L363">					NCPA.setNumberOfSteps(newMaximumStep);</span>
+<span class="nc" id="L364">					steps.setValue(new Integer(newMaximumStep));</span>
+				}
+<span class="nc" id="L366">				stepModel.setMaximum(new Integer(newMaximumStep));</span>
+<span class="nc" id="L367">				description.setText(DESCRIPTION);</span>
+<span class="nc" id="L368">				tablePanel.repaint();</span>
+<span class="nc" id="L369">				tablePanel.setSelectedClass(null);</span>
+<span class="nc" id="L370">			}</span>
+		});
+<span class="nc" id="L372">		to.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L374" title="All 2 branches missed.">				if (to.getValue() instanceof Integer) {</span>
+<span class="nc" id="L375">					Integer tValue = (Integer) to.getValue();</span>
+<span class="nc" id="L376">					Integer sValue = (Integer) steps.getValue();</span>
+<span class="nc" id="L377">					SpinnerNumberModel snm = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc" id="L378">					int oldValue = (int) NCPA.getFinalValue();</span>
+<span class="nc" id="L379">					NCPA.setFinalValue(tValue.intValue());</span>
+<span class="nc" id="L380">					int newSteps = NCPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">					if (newSteps &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L382">						newSteps = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+					}
+<span class="nc bnc" id="L384" title="All 2 branches missed.">					if (newSteps &gt;= 2) {</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">						if (sValue.intValue() &gt; newSteps) {</span>
+<span class="nc" id="L386">							steps.setValue(new Integer(newSteps));</span>
+<span class="nc" id="L387">							NCPA.setNumberOfSteps(newSteps);</span>
+						}
+<span class="nc" id="L389">						snm.setMaximum(new Integer(newSteps));</span>
+					} else {
+<span class="nc" id="L391">						JOptionPane.showMessageDialog(to,</span>
+								&quot;The inserted number of final jobs is too close to the initial one. The number of steps must be at least 2&quot;,
+								&quot;JMT - Error&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L394">						NCPA.setFinalValue(oldValue); //set the old value</span>
+					}
+				}
+<span class="nc" id="L397">			}</span>
+		});
+<span class="nc" id="L399">		steps.addChangeListener(new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L401" title="All 2 branches missed.">				if (steps.getValue() instanceof Integer) {</span>
+<span class="nc" id="L402">					int sValue = ((Integer) steps.getValue()).intValue();</span>
+<span class="nc" id="L403">					int sMax = ((Integer) ((SpinnerNumberModel) steps.getModel()).getMaximum()).intValue();</span>
+<span class="nc" id="L404">					int sMin = ((Integer) ((SpinnerNumberModel) steps.getModel()).getMinimum()).intValue();</span>
+<span class="nc bnc" id="L405" title="All 4 branches missed.">					if ((sValue &gt;= sMin) &amp;&amp; (sValue &lt;= sMax)) {</span>
+<span class="nc" id="L406">						NCPA.setNumberOfSteps(sValue);</span>
+					}
+				}
+<span class="nc" id="L409">				steps.setValue(new Integer(NCPA.getNumberOfSteps()));</span>
+<span class="nc" id="L410">			}</span>
+		});
+<span class="nc" id="L412">		classChooser.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L414" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L415">					return;</span>
+				}
+<span class="nc" id="L417">				String className = (String) classChooser.getSelectedItem();</span>
+<span class="nc" id="L418">				Object classKey = null;</span>
+<span class="nc" id="L419">				Vector&lt;Object&gt; classes = cd.getClassKeys();</span>
+				//for cycle used to get the key of the selected class
+<span class="nc bnc" id="L421" title="All 2 branches missed.">				for (int i = 0; i &lt; classes.size(); i++) {</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">					if (cd.getClassName(classes.get(i)).equals(className)) {</span>
+<span class="nc" id="L423">						classKey = classes.get(i);</span>
+<span class="nc" id="L424">						break;</span>
+					}
+				}
+<span class="nc" id="L427">				NCPA.setReferenceClass(classKey);</span>
+<span class="nc" id="L428">				int newMaximumStep = NCPA.searchForAvailableSteps();</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">				if (newMaximumStep &gt; ParametricAnalysis.MAX_STEP_NUMBER) {</span>
+<span class="nc" id="L430">					newMaximumStep = ParametricAnalysis.MAX_STEP_NUMBER;</span>
+				}
+<span class="nc" id="L432">				int oldStep = ((Integer) steps.getValue()).intValue();</span>
+<span class="nc" id="L433">				SpinnerNumberModel stepModel = (SpinnerNumberModel) steps.getModel();</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">				if (oldStep &gt; newMaximumStep) {</span>
+<span class="nc" id="L435">					NCPA.setNumberOfSteps(newMaximumStep);</span>
+<span class="nc" id="L436">					steps.setValue(new Integer(newMaximumStep));</span>
+				}
+<span class="nc" id="L438">				stepModel.setMaximum(new Integer(newMaximumStep));</span>
+<span class="nc" id="L439">				tablePanel.repaint();</span>
+<span class="nc" id="L440">				tablePanel.setSelectedClass(NCPA.getReferenceClass());</span>
+<span class="nc" id="L441">			}</span>
+		});
+<span class="nc" id="L443">	}</span>
+
+	private int findGCD(int a, int b) {
+<span class="nc bnc" id="L446" title="All 2 branches missed.">		if (b == 0) {</span>
+<span class="nc" id="L447">			return a;</span>
+		}
+<span class="nc" id="L449">		return findGCD(b, a % b);</span>
+	}
+
+	protected class TablePanel extends JPanel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		PopulationVectorTable table;
+		JScrollPane jsp;
+		JPanel globalPanel;
+		JLabel title;
+		JPanel titlePanel;
+
+<span class="nc" id="L463">		public TablePanel() {</span>
+<span class="nc" id="L464">			table = new PopulationVectorTable();</span>
+<span class="nc" id="L465">			table.setAutoscrolls(true);</span>
+<span class="nc" id="L466">			jsp = new JScrollPane(table);</span>
+<span class="nc" id="L467">			jsp.setBorder(new EmptyBorder(10, 10, 10, 10));</span>
+<span class="nc" id="L468">			jsp.setPreferredSize(new Dimension((int)(202 * CommonConstants.widthScaling), (int)(122 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L469">			title = new JLabel(&quot;&lt;html&gt;&lt;b&gt;Population mix&lt;/b&gt;&quot;);</span>
+<span class="nc" id="L470">			titlePanel = new JPanel(new FlowLayout());</span>
+<span class="nc" id="L471">			titlePanel.add(title);</span>
+<span class="nc" id="L472">			globalPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L473">			globalPanel.add(titlePanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L474">			globalPanel.add(jsp, BorderLayout.CENTER);</span>
+<span class="nc" id="L475">			this.setLayout(new BorderLayout());</span>
+<span class="nc" id="L476">			this.add(globalPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L477">		}</span>
+
+		public void setSelectedClass(Object selectedClass) {
+<span class="nc" id="L480">			int column = 0;</span>
+<span class="nc" id="L481">			Vector&lt;Object&gt; closedClasses = cd.getClosedClassKeys();</span>
+<span class="nc bnc" id="L482" title="All 2 branches missed.">			if (NCPA.isSingleClass()) {</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">				for (int i = 0; i &lt; closedClasses.size(); i++) {</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">					if (closedClasses.get(i) == selectedClass) {</span>
+<span class="nc" id="L485">						column = i;</span>
+<span class="nc" id="L486">						break;</span>
+					}
+				}
+			}
+<span class="nc" id="L490">			double scrollMax = jsp.getHorizontalScrollBar().getMaximum();</span>
+<span class="nc" id="L491">			double thisPos = (((double) column) / (double) closedClasses.size()) * scrollMax;</span>
+<span class="nc" id="L492">			jsp.getHorizontalScrollBar().setValue((int) thisPos);</span>
+<span class="nc" id="L493">		}</span>
+	}
+
+	/**
+	 * Inner class to show jobs composition
+	 */
+	protected class PopulationVectorTable extends ExactTable {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+<span class="nc" id="L504">		DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();</span>
+
+<span class="nc" id="L506">		public PopulationVectorTable() {</span>
+<span class="nc" id="L507">			super(new PopulationVectorTableModel());</span>
+<span class="nc" id="L508">			autoResizeMode = AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L509">			setRowSelectionAllowed(true);</span>
+<span class="nc" id="L510">			setColumnSelectionAllowed(true);</span>
+<span class="nc" id="L511">			setRowHeaderWidth(40);</span>
+<span class="nc" id="L512">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+<span class="nc" id="L513">		}</span>
+
+		/**
+		 * The original getCellRenderer method is overwritten, since the table
+		 * displays in red the values of the selected class
+		 * @param row the row of the cell
+		 * @param column the column of the cell
+		 * @return a the TableCellRenderer for the requested cell (row,column)
+		 */
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc" id="L524">			dtcr.setHorizontalAlignment(SwingConstants.CENTER);</span>
+			Component c;
+<span class="nc bnc" id="L526" title="All 2 branches missed.">			if (column &lt; cd.getClosedClassKeys().size()) {</span>
+<span class="nc" id="L527">				Vector&lt;Object&gt; closedClasses = cd.getClosedClassKeys();</span>
+<span class="nc" id="L528">				Object thisClass = closedClasses.get(column);</span>
+<span class="nc" id="L529">				int thisPop = cd.getClassPopulation(thisClass).intValue();</span>
+<span class="nc" id="L530">				c = dtcr.getTableCellRendererComponent(this, Integer.toString(thisPop), false, false, row, column);</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">				if (NCPA.isSingleClass()) {</span>
+<span class="nc bnc" id="L532" title="All 2 branches missed.">					if (thisClass == NCPA.getReferenceClass()) {</span>
+<span class="nc" id="L533">						c.setForeground(Color.RED);</span>
+					} else {
+<span class="nc" id="L535">						c.setForeground(Color.BLACK);</span>
+					}
+				} else {
+<span class="nc" id="L538">					c.setForeground(Color.RED);</span>
+				}
+<span class="nc" id="L540">			} else {</span>
+<span class="nc" id="L541">				c = dtcr.getTableCellRendererComponent(this, &quot;-&quot;, false, false, row, column);</span>
+<span class="nc" id="L542">				c.setForeground(Color.BLACK);</span>
+			}
+<span class="nc" id="L544">			((JLabel) c).setToolTipText(cd.getClassName(cd.getClosedClassKeys().get(column)));</span>
+<span class="nc" id="L545">			return dtcr;</span>
+		}
+	}
+
+	/**
+	 * Model for PopulationVectorTable
+	 * Columns represent the closed classes names.
+	 */
+	protected class PopulationVectorTableModel extends ExactTableModel {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L559">		public PopulationVectorTableModel() {</span>
+			//prototype = &quot;XXXX.XXX XXX&quot;;
+<span class="nc" id="L561">			rowHeaderPrototype = &quot;XXX&quot;;</span>
+<span class="nc" id="L562">		}</span>
+
+		@Override
+		public Object getPrototype(int i) {
+<span class="nc bnc" id="L566" title="All 2 branches missed.">			if (i == -1) {</span>
+<span class="nc" id="L567">				return rowHeaderPrototype;</span>
+			} else {
+<span class="nc" id="L569">				Vector&lt;Object&gt; classes = cd.getClosedClassKeys();</span>
+<span class="nc" id="L570">				int max = 0;</span>
+<span class="nc" id="L571">				int index = 0;</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">				for (int k = 0; k &lt; classes.size(); k++) {</span>
+<span class="nc" id="L573">					String name = cd.getClassName(classes.get(k));</span>
+<span class="nc" id="L574">					int length = name.length();</span>
+<span class="nc bnc" id="L575" title="All 2 branches missed.">					if (length &gt; max) {</span>
+<span class="nc" id="L576">						max = length;</span>
+<span class="nc" id="L577">						index = k;</span>
+					}
+				}
+<span class="nc" id="L580">				prototype = cd.getClassName(classes.get(index)) + &quot;  &quot;;</span>
+<span class="nc" id="L581">				return prototype;</span>
+			}
+		}
+
+		/**
+		 * @return the object at (rowIndex, columnIndex)
+		 */
+		@Override
+		protected Object getValueAtImpl(int rowIndex, int columnIndex) {
+			String toReturn;
+<span class="nc" id="L591">			Object thisClass = cd.getClosedClassKeys().get(columnIndex);</span>
+<span class="nc" id="L592">			double thisPop = cd.getClassPopulation(thisClass).doubleValue();</span>
+<span class="nc" id="L593">			double totalPop = cd.getTotalClosedClassPopulation();</span>
+<span class="nc bnc" id="L594" title="All 2 branches missed.">			if (rowIndex == 0) {</span>
+<span class="nc" id="L595">				toReturn = Integer.toString((int) thisPop);</span>
+			} else {
+<span class="nc" id="L597">				DecimalFormat twoDec = new DecimalFormat(&quot;0.00&quot;);</span>
+<span class="nc" id="L598">				double beta = 0;</span>
+<span class="nc bnc" id="L599" title="All 2 branches missed.">				if (totalPop &gt; 0) {</span>
+<span class="nc" id="L600">					beta = thisPop / totalPop;</span>
+				}
+<span class="nc" id="L602">				toReturn = twoDec.format(beta);</span>
+			}
+<span class="nc" id="L604">			return toReturn;</span>
+		}
+
+		public int getRowCount() {
+<span class="nc" id="L608">			return 2;</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L612">			return cd.getClosedClassKeys().size();</span>
+		}
+
+		/**
+		 * @return the header for row &lt;code&gt;rowIndex&lt;/code&gt;
+		 */
+		@Override
+		protected Object getRowName(int rowIndex) {
+<span class="nc bnc" id="L620" title="All 2 branches missed.">			if (rowIndex == 0) {</span>
+<span class="nc" id="L621">				return &quot;Ni&quot;;</span>
+			} else {
+<span class="nc" id="L623">				return &quot;ßi&quot;;</span>
+			}
+		}
+
+		/**
+		 * Gets the name of the column, given the column index
+		 * @param index the index of the column to give the name
+		 * @return the column name
+		 */
+		@Override
+		public String getColumnName(int index) {
+<span class="nc" id="L634">			return cd.getClassName(cd.getClosedClassKeys().get(index));</span>
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

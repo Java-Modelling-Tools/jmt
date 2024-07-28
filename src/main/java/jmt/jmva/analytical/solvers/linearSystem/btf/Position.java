@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package jmt.jmva.analytical.solvers.linearSystem.btf;
 
 /**
@@ -23,3 +24,30 @@ public class Position {
 		this.col += offset.col;
 	}
 }
+=======
+package jmt.jmva.analytical.solvers.linearSystem.btf;
+
+/**
+ * This simple class descirbe a position in the matrix (row, column)
+ * @author Jack Bradshaw
+ */
+public class Position {
+	
+	public int row;
+	public int col;
+	
+	public Position(int row, int col) {
+		this.row = row;
+		this.col = col;
+	}
+	
+	public Position copy() {
+		return new Position(row, col);
+	}
+	
+	public void add(Position offset) {
+		this.row += offset.row;
+		this.col += offset.col;
+	}
+}
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)

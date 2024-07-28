@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BatchCircularList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.math</a> &gt; <span class="el_source">BatchCircularList.java</span></div><h1>BatchCircularList.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.math;
+
+/**
+ * &lt;p&gt;Title: Batch Circular List data structure&lt;/p&gt;
+ * &lt;p&gt;Description: This class provides a data structure used to collect
+ * samples with weights in batches. When data structure is full, this is managed
+ * as a circular list. Mean value is calculated and updated when a sample is
+ * inserted or removed from the list. Structure is optimized to provide
+ * O(1) access for insertion of samples, get of batches and mean calculation.&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 17-gen-2006
+ *         Time: 13.59.14
+ */
+public class BatchCircularList {
+	// Current batch size
+	protected int batchSize;
+	// Maximum number of batches
+	protected int maxBatches;
+	// Maximum number of samples
+	protected int maxSamples;
+	// Batches for samples and weights
+	protected double[] samples;
+	protected double[] weights;
+	// Number of stored samples (not batches)
+	protected int count;
+	// Starting point (batch)
+	protected int start;
+	// Number of dicarded samples
+	protected int discarded;
+	// Used to compute mean value
+	protected double samplesSum;
+	protected double weightsSum;
+	protected double mean;
+
+	/**
+	 * Construct a new BatchCircularList.
+	 * @param batchSize batch size, must be &gt; 0
+	 * @param maxBatches maximum number of batches, must be &gt; 0
+	 */
+<span class="nc" id="L59">	public BatchCircularList(int batchSize, int maxBatches) {</span>
+<span class="nc" id="L60">		this.batchSize = batchSize;</span>
+<span class="nc" id="L61">		this.maxBatches = maxBatches + 1;</span>
+<span class="nc" id="L62">		maxSamples = this.maxBatches * batchSize;</span>
+<span class="nc" id="L63">		start = count = discarded = 0;</span>
+<span class="nc" id="L64">		samplesSum = weightsSum = 0.0;</span>
+<span class="nc" id="L65">		samples = new double[this.maxBatches];</span>
+<span class="nc" id="L66">		weights = new double[this.maxBatches];</span>
+<span class="nc" id="L67">	}</span>
+
+	public void add(double sample, double weight) {
+<span class="nc" id="L70">		double tmpSample = sample * weight;</span>
+		// Adds new samples to correct batch
+<span class="nc" id="L72">		samples[count / batchSize] += tmpSample;</span>
+<span class="nc" id="L73">		weights[count / batchSize] += weight;</span>
+		// Manage circular list
+<span class="nc" id="L75">		count++;</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		if (count &gt;= maxSamples) {</span>
+<span class="nc" id="L77">			count = 0;</span>
+		}
+		// Must delete oldest batch
+<span class="nc bnc" id="L80" title="All 4 branches missed.">		if (count / batchSize == start &amp;&amp; count % batchSize == 0) {</span>
+			// Updates mean values
+<span class="nc" id="L82">			samplesSum -= samples[start];</span>
+<span class="nc" id="L83">			weightsSum -= weights[start];</span>
+			// Deletes oldest batch
+<span class="nc" id="L85">			samples[start] = 0;</span>
+<span class="nc" id="L86">			weights[start] = 0;</span>
+<span class="nc" id="L87">			discarded += batchSize;</span>
+<span class="nc" id="L88">			start++;</span>
+<span class="nc bnc" id="L89" title="All 2 branches missed.">			if (start &gt;= maxBatches) {</span>
+<span class="nc" id="L90">				start = 0;</span>
+			}
+		}
+		// Updates mean value
+<span class="nc" id="L94">		samplesSum += tmpSample;</span>
+<span class="nc" id="L95">		weightsSum += weight;</span>
+<span class="nc" id="L96">		mean = samplesSum / weightsSum;</span>
+<span class="nc" id="L97">	}</span>
+
+	/**
+	 * Returns a batch sample
+	 * &lt;br&gt;PRECONDITION: index &lt; getNumBatches()
+	 * @param index position of the sample to be retreived
+	 * @return requested batch sample
+	 * @see this.getNumBatches()
+	 */
+	public double getBatchSample(int index) {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">		if (start + index &lt; maxBatches) {</span>
+<span class="nc" id="L108">			return samples[start + index];</span>
+		} else {
+<span class="nc" id="L110">			return samples[start + index - maxBatches];</span>
+		}
+	}
+
+	/**
+	 * Returns a batch samples' weight
+	 * &lt;br&gt;PRECONDITION: index &lt; getNumBatches()
+	 * @param index  position of the sample to be retreived
+	 * @return requested batch samples' weight
+	 * @see this.getNumBatches()
+	 */
+	public double getBatchWeight(int index) {
+<span class="nc bnc" id="L122" title="All 2 branches missed.">		if (start + index &lt; maxBatches) {</span>
+<span class="nc" id="L123">			return weights[start + index];</span>
+		} else {
+<span class="nc" id="L125">			return weights[start + index - maxBatches];</span>
+		}
+	}
+
+	/**
+	 * Deletes first n batches
+	 * &lt;br&gt;PRECONDITION: index &lt; getNumBatches()
+	 * @param n number of batches to be deleted
+	 * @see this.getNumBatches()
+	 */
+	public void deleteFirstBatches(int n) {
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		if (start + n &lt; maxBatches) {</span>
+			// start does not need to be reset during deletion
+<span class="nc bnc" id="L138" title="All 2 branches missed.">			for (int i = start; i &lt; start + n; i++) {</span>
+<span class="nc" id="L139">				samplesSum -= samples[i];</span>
+<span class="nc" id="L140">				weightsSum -= weights[i];</span>
+<span class="nc" id="L141">				samples[i] = 0;</span>
+<span class="nc" id="L142">				weights[i] = 0;</span>
+			}
+<span class="nc" id="L144">			start += n;</span>
+		} else {
+			// start need to be reset during deletion
+<span class="nc bnc" id="L147" title="All 2 branches missed.">			for (int i = start; i &lt; samples.length; i++) {</span>
+<span class="nc" id="L148">				samplesSum -= samples[i];</span>
+<span class="nc" id="L149">				weightsSum -= weights[i];</span>
+<span class="nc" id="L150">				samples[i] = 0;</span>
+<span class="nc" id="L151">				weights[i] = 0;</span>
+			}
+
+<span class="nc" id="L154">			start = n - (maxBatches - start);</span>
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			for (int i = 0; i &lt; start; i++) {</span>
+<span class="nc" id="L157">				samplesSum -= samples[i];</span>
+<span class="nc" id="L158">				weightsSum -= weights[i];</span>
+<span class="nc" id="L159">				samples[i] = 0;</span>
+<span class="nc" id="L160">				weights[i] = 0;</span>
+			}
+		}
+<span class="nc" id="L163">		discarded += n * batchSize;</span>
+<span class="nc" id="L164">		mean = samplesSum / weightsSum;</span>
+<span class="nc" id="L165">	}</span>
+
+	/**
+	 * Deallocated all objects
+	 */
+	public void clean() {
+<span class="nc" id="L171">		samples = null;</span>
+<span class="nc" id="L172">		weights = null;</span>
+<span class="nc" id="L173">	}</span>
+
+	/**
+	 * Gets total number of batches
+	 * @return total number of stored batches
+	 */
+	public int getNumBatches() {
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		if (start &lt; count / batchSize) {</span>
+<span class="nc" id="L181">			return count / batchSize - start;</span>
+		} else {
+<span class="nc" id="L183">			return count / batchSize + maxBatches - start;</span>
+		}
+	}
+
+	/**
+	 * Gets the size of batches
+	 * @return size of batches
+	 */
+	public int getBatchSize() {
+<span class="nc" id="L192">		return batchSize;</span>
+	}
+
+	/**
+	 * Gets the number of discarded samples (not batches)
+	 * @return number of discarded samples
+	 */
+	public int getDiscarded() {
+<span class="nc" id="L200">		return discarded;</span>
+	}
+
+	/**
+	 * Gets the mean value of samples.
+	 * @return the mean value of the samples in the array
+	 */
+	public double getMeanValue() {
+<span class="nc" id="L208">		return mean;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

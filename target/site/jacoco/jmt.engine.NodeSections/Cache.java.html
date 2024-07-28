@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Cache.java</span></div><h1>Cache.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.CacheStrategies.TTLCache;
+import jmt.engine.NetStrategies.CacheStrategy;
+import jmt.engine.QueueNet.CacheItem;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.GlobalJobInfoList;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.random.discrete.DiscreteDistribution;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * This class implements a class switch.
+ *
+ * @author Sebatiano Spicuglia, Arif Canakoglu
+ */
+public class Cache extends ServiceSection {
+	private int maxItems;
+	private Integer[] cacheCapacity;
+	private Float[][] cacheMatrix;
+	private int numOfJobClasses;
+
+	private ArrayList&lt;CacheItem&gt; items;		// once created, only retrieve and update. all possible items that can be stored in the cache
+	private LinkedList&lt;CacheItem&gt;[] caches;	// since we need to insert or delete it frequently.representing the items currently stored in the cache.
+
+	private CacheStrategy replacePolicy;
+	private DiscreteDistribution[] popularity;
+
+	private JobInfoList nodeJobsList;		// JobInfoList used to calculate the node measurement.
+
+	// also have a field `jobsList` inherited from NodeSection to calculate the section measurement.
+
+	TreeMap&lt;Integer, Integer&gt; count;		// variable used for test
+
+	// Use two HashMaps to store the mappings
+<span class="nc" id="L69">	private Map&lt;JobClass, JobClass&gt; jobClassToHitClass = new HashMap&lt;&gt;();</span>
+<span class="nc" id="L70">	private Map&lt;JobClass, JobClass&gt; jobClassToMissClass = new HashMap&lt;&gt;();</span>
+
+	// Method to add a job class mapping
+	public void addJobClassMapping(JobClass jobClass, JobClass hitClass, JobClass missClass) {
+<span class="nc" id="L74">		jobClassToHitClass.put(jobClass, hitClass);</span>
+<span class="nc" id="L75">		jobClassToMissClass.put(jobClass, missClass);</span>
+<span class="nc" id="L76">	}</span>
+
+	// Method to get the hit class for a given job class
+	public JobClass getHitClass(JobClass jobClass) {
+<span class="nc" id="L80">		return jobClassToHitClass.get(jobClass); // Return null if no mapping found</span>
+	}
+
+	// Method to get the miss class for a given job class
+	public JobClass getMissClass(JobClass jobClass) {
+<span class="nc" id="L85">		return jobClassToMissClass.get(jobClass); // Return null if no mapping found</span>
+	}
+
+	/* 
+	// Define a class to represent the job class mapping
+    private static class JobClassMapping {
+        private JobClass jobClass;
+        private JobClass hitClass;
+        private JobClass missClass;
+
+        public JobClassMapping(JobClass jobClass, JobClass hitClass, JobClass missClass) {
+            this.jobClass = jobClass;
+            this.hitClass = hitClass;
+            this.missClass = missClass;
+        }
+    }
+
+	// Use a HashMap to store the mappings
+	private Map&lt;JobClass, JobClassMapping&gt; jobClassMappings = new HashMap&lt;&gt;();
+
+	// Method to add a job class mapping
+	public void addJobClassMapping(JobClass jobClass, JobClass hitClass, JobClass missClass) {
+		jobClassMappings.put(jobClass, new JobClassMapping(jobClass, hitClass, missClass));
+	}
+
+	// Method to get the hit class for a given job class
+	public JobClass getHitClass(JobClass jobClass) {
+		JobClassMapping mapping = jobClassMappings.get(jobClass);
+		return (mapping != null) ? mapping.hitClass : null; // Return null if no mapping found
+	}
+
+	// Method to get the miss class for a given job class
+	public JobClass getMissClass(JobClass jobClass) {
+		JobClassMapping mapping = jobClassMappings.get(jobClass);
+		return (mapping != null) ? mapping.missClass : null; // Return null if no mapping found
+	}
+	*/
+
+
+
+<span class="nc" id="L125">	public Cache(Integer maxItems, Integer[] cacheCapacity, Object[] matrix, JobClass[] jobClasses, JobClass[] hitClasses, JobClass[] missClasses, CacheStrategy replacePolicy, DiscreteDistribution[] pop) {</span>
+<span class="nc" id="L126">		this.maxItems = maxItems;</span>
+<span class="nc" id="L127">		this.cacheCapacity = cacheCapacity;</span>
+<span class="nc" id="L128">		this.cacheMatrix = new Float[matrix.length][matrix.length];</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		for (int i = 0; i &lt; matrix.length; i++) {</span>
+<span class="nc" id="L130">			Float[] row = (Float[]) matrix[i];</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">			for (int j = 0; j &lt; row.length; j++) {</span>
+<span class="nc" id="L132">				this.cacheMatrix[i][j] = row[j];</span>
+			}
+		}
+<span class="nc" id="L135">		this.replacePolicy = replacePolicy;</span>
+<span class="nc" id="L136">		this.popularity = pop;</span>
+
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		for (int i = 0; i &lt; jobClasses.length; i++) {</span>
+<span class="nc" id="L139">			addJobClassMapping(jobClasses[i], hitClasses[i], missClasses[i]);</span>
+		}
+<span class="nc" id="L141">		this.count = new TreeMap&lt;&gt;();		// variable used for test</span>
+<span class="nc" id="L142">	}</span>
+
+	
+
+	/**
+	 *  when the node section itself is linked to the owner node.
+	 * 	This method should be used to set node section properties depending on
+	 *  the owner node ones.
+	 * @param ownerNode
+	 * @throws NetException
+	 */
+	@Override
+	public void nodeLinked(NetNode ownerNode) throws NetException {
+<span class="nc" id="L155">		this.numOfJobClasses = getJobClasses().size();</span>
+
+<span class="nc" id="L157">		RandomEngine engine = ownerNode.getNetSystem().getEngine();</span>
+<span class="nc" id="L158">		this.replacePolicy.setRandomEngine(engine);</span>
+<span class="nc" id="L159">		this.replacePolicy.setNetSystem(ownerNode.getNetSystem());		// TTL replace policy need to know the system time.</span>
+		//		this.replacePolicy.initilize(cacheCapacity);					// Currently no replace Policy need to initialize
+
+		// initialize the TTL replace policy.
+<span class="nc" id="L163">		double ttl = -1.0;</span>
+<span class="nc bnc" id="L164" title="All 2 branches missed.">		if (replacePolicy instanceof TTLCache) {</span>
+<span class="nc" id="L165">			ttl = ((TTLCache) replacePolicy).getTTL();</span>
+<span class="nc" id="L166">			((TTLCache) replacePolicy).getReplacePolicy().setRandomEngine(engine);</span>
+		}
+
+		// initialize the popularity for different class.
+<span class="nc bnc" id="L170" title="All 2 branches missed.">		for(int i=0; i&lt;numOfJobClasses; i++){</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">			if(popularity[i]!=null){</span>
+<span class="nc" id="L172">				popularity[i].setRandomEngine(engine);</span>
+			}
+		}
+
+<span class="nc" id="L176">		nodeJobsList = ownerNode.getJobInfoList();</span>
+		// System.out.println(replacePolicy.toString());
+
+		// Initialize the cache items lists.
+<span class="nc" id="L180">		items = new ArrayList&lt;CacheItem&gt;(maxItems);</span>
+<span class="nc bnc" id="L181" title="All 2 branches missed.">		for(int i=1; i&lt;=maxItems; i++){</span>
+<span class="nc" id="L182">			CacheItem cacheItem = new CacheItem(i);</span>
+<span class="nc" id="L183">			items.add(cacheItem);</span>
+<span class="nc bnc" id="L184" title="All 2 branches missed.">			if(ttl&gt;0){</span>
+<span class="nc" id="L185">				cacheItem.setTTL(ttl);</span>
+			}
+		}
+
+
+		//this.caches = new LinkedList&lt;CacheItem&gt;[cacheCapacity.length];
+<span class="nc" id="L191">		caches = (LinkedList&lt;CacheItem&gt;[]) new LinkedList&lt;?&gt;[cacheCapacity.length];</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		for (int i = 0; i &lt; cacheCapacity.length; i++) {</span>
+<span class="nc" id="L193">			caches[i] = new LinkedList&lt;CacheItem&gt;();</span>
+		}
+		//TestDistribution(popularity);		// method used for test
+<span class="nc" id="L196">	}</span>
+
+	/**
+	 *  when the node section itself is unlinked to the owner node.
+	 *  This method should be used to reset node section properties depending on
+	 *  the owner node ones.
+	 * @param ownerNode
+	 * @throws NetException
+	 * modified by Yujiao Xiao
+	 */
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc bnc" id="L208" title="All 5 branches missed.">		switch (message.getEvent()) {</span>
+
+			case NetEvent.EVENT_START:
+<span class="nc" id="L211">				break;</span>
+
+			case NetEvent.EVENT_JOB:
+<span class="nc" id="L214">				Job job = message.getJob();</span>
+<span class="nc" id="L215">				JobClass originalClass = job.getJobClass();</span>
+
+				//if(job.getJobClass().getCacheHitClassName() == null &amp;&amp; job.getJobClass().getCacheMissClassName() == null){
+<span class="nc bnc" id="L218" title="All 2 branches missed.">				if(getHitClass(job.getJobClass()) == null &amp;&amp; </span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">						getMissClass(job.getJobClass()) == null){</span>
+<span class="nc" id="L220">					sendForward(NetEvent.EVENT_JOB, job, 0.0);</span>
+<span class="nc" id="L221">					sendBackward(NetEvent.EVENT_ACK, job, 0.0);</span>
+<span class="nc" id="L222">					break;</span>
+				}
+				
+
+				// get the request item that follow the specific popularity.
+<span class="nc" id="L227">				int requsetId = 0;</span>
+<span class="nc" id="L228">				CacheItem targetItem = null;</span>
+
+				// Id from 1 to numberOfItems generated by popularity.
+<span class="nc" id="L231">				DiscreteDistribution pop = popularity[job.getJobClass().getId()];</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">				if(pop == null){</span>
+<span class="nc" id="L233">					throw new AssertionError(&quot;Cannot find the corresponding DiscreteDistribution popularity&quot;);</span>
+				}
+<span class="nc" id="L235">				requsetId = pop.nextRand();</span>
+<span class="nc" id="L236">				targetItem = getItemById(items, requsetId);</span>
+<span class="nc bnc" id="L237" title="All 2 branches missed.">				if(targetItem == null) {</span>
+<span class="nc" id="L238">					throw new AssertionError(&quot;Cannot find the corresponding item in the item list.&quot; +</span>
+							&quot;It may caused by the error popularity parameter: maxItems &lt; numberOfItems of popularity&quot;);
+				}
+				//count = TestNextRand(count, requsetId);		// To test the popularity function.
+
+<span class="nc" id="L243">				Integer[] itemPos = findIteminCache(requsetId);</span>
+				// if the items has already cached.
+<span class="nc bnc" id="L245" title="All 2 branches missed.">				if (itemPos[0] &gt;= 0) {</span>
+
+					// get the new position of the item in the cache.
+<span class="nc" id="L248">					int newItemPos = -1;</span>
+<span class="nc" id="L249">					Float[] newPosProb = cacheMatrix[itemPos[0]];</span>
+<span class="nc" id="L250">					double randomValue = Math.random();</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">					for (int i = 0; i &lt; newPosProb.length; i++) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">						if (randomValue &lt; newPosProb[i]) {</span>
+<span class="nc" id="L253">							newItemPos = i;</span>
+<span class="nc" id="L254">							break;</span>
+						}
+					}
+
+<span class="nc bnc" id="L258" title="All 4 branches missed.">					switch (replacePolicy.getRemoveItemMode()) {</span>
+						case 0:
+<span class="nc bnc" id="L260" title="All 4 branches missed.">							if (newItemPos &gt;= 0 &amp;&amp; newItemPos != itemPos[0]) {  // if the item need to be moved to another cache.</span>
+								// update the cache item position.
+								// execute the replace policy
+<span class="nc bnc" id="L263" title="All 2 branches missed.">								if (caches[newItemPos].size() == cacheCapacity[newItemPos]) {  // if the target cache list is full, remove the item</span>
+									// execute the replace policy
+<span class="nc" id="L265">									CacheItem removedItem = replacePolicy.getRemoveItem(caches[newItemPos]);</span>
+									//removeItem.clear();				// set isCache false and clear the accessTimes list.
+<span class="nc" id="L267">									caches[newItemPos].remove(removedItem);</span>
+<span class="nc" id="L268">									caches[itemPos[0]].set(itemPos[1], removedItem);</span>
+								}
+<span class="nc" id="L270">								caches[newItemPos].add(targetItem);</span>
+							}
+							else{
+								//remove targetItem from the old cache and add it to the new cache
+<span class="nc" id="L274">								caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L275">								caches[newItemPos].add(targetItem);</span>
+								}
+<span class="nc" id="L277">								break;</span>
+						case 1:
+<span class="nc bnc" id="L279" title="All 4 branches missed.">							if (newItemPos &gt;= 0 &amp;&amp; newItemPos != itemPos[0]) {  // if the item need to be moved to another cache.</span>
+								// update the cache item position.
+								// execute the replace policy
+<span class="nc bnc" id="L282" title="All 2 branches missed.">								if (caches[newItemPos].size() == cacheCapacity[newItemPos]) {  // if the target cache list is full, remove the item</span>
+									// execute the replace policy
+<span class="nc" id="L284">									CacheItem removedItem = replacePolicy.getRemoveItem(caches[newItemPos]);</span>
+									//removeItem.clear();				// set isCache false and clear the accessTimes list.
+<span class="nc" id="L286">									caches[newItemPos].remove(removedItem);</span>
+<span class="nc" id="L287">									caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L288">									caches[itemPos[0]].add(removedItem);</span>
+<span class="nc" id="L289">								}</span>
+								else{
+<span class="nc" id="L291">									caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L292">									caches[newItemPos].add(targetItem);</span>
+								}
+<span class="nc" id="L294">								break;</span>
+							}
+							else{
+								//remove targetItem from the old cache and add it to the new cache
+<span class="nc" id="L298">								caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L299">								caches[newItemPos].add(targetItem);</span>
+<span class="nc" id="L300">								break;	</span>
+							}
+						case 2:
+<span class="nc bnc" id="L303" title="All 4 branches missed.">							while (newItemPos &gt;= 0 &amp;&amp; newItemPos != itemPos[0]) {  // if the item need to be moved to another cache.</span>
+								// update the cache item position.
+								// execute the replace policy
+								//if target item is in the new cache list, move it to the first place
+<span class="nc bnc" id="L307" title="All 2 branches missed.">								if (findIteminCacheList(requsetId,newItemPos) &gt;= 0){</span>
+<span class="nc" id="L308">									caches[newItemPos].remove(targetItem);</span>
+<span class="nc" id="L309">									caches[newItemPos].add(targetItem);</span>
+<span class="nc" id="L310">									caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L311">									caches[itemPos[0]].add(targetItem);</span>
+								}
+								else{
+<span class="nc bnc" id="L314" title="All 2 branches missed.">									if (caches[newItemPos].size() == cacheCapacity[newItemPos]) {  // if the target cache list is full, remove the item</span>
+										// execute the replace policy
+<span class="nc" id="L316">										CacheItem removedItem = replacePolicy.getRemoveItem(caches[newItemPos]);</span>
+										//removeItem.clear();				// set isCache false and clear the accessTimes list.
+<span class="nc" id="L318">										caches[newItemPos].remove(removedItem);</span>
+<span class="nc" id="L319">										caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L320">										caches[itemPos[0]].add(targetItem);</span>
+<span class="nc" id="L321">										caches[newItemPos].add(targetItem);</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">										if (findIteminCache(removedItem.getId())[0] &lt; 0){</span>
+<span class="nc" id="L323">											removedItem.clear();	</span>
+										}
+<span class="nc" id="L325">									}</span>
+									else{
+<span class="nc" id="L327">										caches[newItemPos].add(targetItem);</span>
+<span class="nc" id="L328">										caches[itemPos[0]].remove(targetItem);</span>
+<span class="nc" id="L329">										caches[itemPos[0]].add(targetItem);</span>
+									}
+								}
+
+								
+<span class="nc" id="L334">								Float[] PosProb = cacheMatrix[newItemPos];</span>
+<span class="nc" id="L335">								double randValue = Math.random();</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">								for (int i = 0; i &lt; PosProb.length; i++) {</span>
+<span class="nc bnc" id="L337" title="All 2 branches missed.">									if (randValue &lt; PosProb[i]) {</span>
+<span class="nc" id="L338">										newItemPos = i;</span>
+<span class="nc" id="L339">										break;</span>
+									}
+								}
+<span class="nc" id="L342">								itemPos = new Integer[]{newItemPos, findIteminCacheList(requsetId,newItemPos)};</span>
+<span class="nc" id="L343">							}</span>
+					}
+
+
+
+					// update cache item information
+<span class="nc" id="L349">					targetItem.access(job.getNetSystem().getTime());</span>
+					
+
+
+					//JobClass cacheHitClass = job.getJobClass().getCacheHitClass();
+<span class="nc" id="L354">					JobClass cacheHitClass = getHitClass(job.getJobClass());</span>
+
+
+					// record the cache hit count to the jobListInfo and update hitRate measure.
+<span class="nc" id="L358">					jobsList.CacheJob(originalClass, true);</span>
+
+					// switch the class, in section jobs list
+<span class="nc" id="L361">					job.setJobClass(cacheHitClass);</span>
+<span class="nc" id="L362">					JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc" id="L363">					jobsList.getInternalJobInfoList(cacheHitClass).add(jobInfo);</span>
+<span class="nc" id="L364">					jobsList.getInternalJobInfoList(originalClass).remove(jobInfo);</span>
+					// in node jobs list
+<span class="nc" id="L366">					JobInfo nodeJobInfo = nodeJobsList.lookFor(job);</span>
+<span class="nc" id="L367">					nodeJobsList.getInternalJobInfoList(cacheHitClass).add(nodeJobInfo);</span>
+<span class="nc" id="L368">					nodeJobsList.getInternalJobInfoList(originalClass).remove(nodeJobInfo);</span>
+					// in global jobs list
+<span class="nc bnc" id="L370" title="All 2 branches missed.">					if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L371">						GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();</span>
+<span class="nc" id="L372">						global.performJobClassSwitch(originalClass, cacheHitClass);</span>
+					}
+					
+<span class="nc" id="L375">				}</span>
+				// Cache miss
+				else {
+					// get the cache Miss Class
+					//JobClass cacheMissClass = job.getJobClass().getCacheMissClass();
+<span class="nc" id="L380">					JobClass cacheMissClass = getMissClass(job.getJobClass());</span>
+
+					// if it is TTLCache, clean expired items first.
+<span class="nc bnc" id="L383" title="All 2 branches missed.">					if(replacePolicy instanceof  TTLCache){</span>
+<span class="nc" id="L384">						((TTLCache)replacePolicy).cleanExpiredItem(caches[0]);  //TODO</span>
+					}
+
+					// else check if the cache is full, apply the replace policy
+<span class="nc bnc" id="L388" title="All 2 branches missed.">					if (caches[0].size() == cacheCapacity[0]) {</span>
+						// execute the replace policy
+<span class="nc" id="L390">						CacheItem removeItem = replacePolicy.getRemoveItem(caches[0]);</span>
+<span class="nc bnc" id="L391" title="All 2 branches missed.">						if (replacePolicy.getRemoveItemMode() != 2){</span>
+<span class="nc" id="L392">							removeItem.clear();				// set isCache false and clear the accessTimes list.</span>
+						}
+<span class="nc" id="L394">						caches[0].remove(removeItem);</span>
+<span class="nc bnc" id="L395" title="All 4 branches missed.">						if ((replacePolicy.getRemoveItemMode() == 2) &amp;&amp; (findIteminCache(removeItem.getId())[0] &lt; 0)){</span>
+<span class="nc" id="L396">							removeItem.clear();	</span>
+						}
+					}
+					// else cache is not full, directly add this new items to cache.
+					// update cache item information
+<span class="nc" id="L401">					targetItem.access(job.getNetSystem().getTime());</span>
+<span class="nc" id="L402">					caches[0].add(targetItem);</span>
+					// record the cache miss count to the jobListInfo and update hitRate measure.
+<span class="nc" id="L404">					jobsList.CacheJob(originalClass, false);</span>
+
+					// switch the class, in section jobs list
+<span class="nc" id="L407">					job.setJobClass(cacheMissClass);</span>
+<span class="nc" id="L408">					JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc" id="L409">					jobsList.getInternalJobInfoList(cacheMissClass).add(jobInfo);</span>
+<span class="nc" id="L410">					jobsList.getInternalJobInfoList(originalClass).remove(jobInfo);</span>
+					// in node jobs list
+<span class="nc" id="L412">					JobInfo nodeJobInfo = nodeJobsList.lookFor(job);</span>
+<span class="nc" id="L413">					nodeJobsList.getInternalJobInfoList(cacheMissClass).add(nodeJobInfo);</span>
+<span class="nc" id="L414">					nodeJobsList.getInternalJobInfoList(originalClass).remove(nodeJobInfo);</span>
+					// in global jobs list
+<span class="nc bnc" id="L416" title="All 2 branches missed.">					if (!(job instanceof ForkJob)) {</span>
+<span class="nc" id="L417">						GlobalJobInfoList global = getOwnerNode().getQueueNet().getJobInfoList();</span>
+<span class="nc" id="L418">						global.performJobClassSwitch(originalClass, cacheMissClass);</span>
+					}
+				}
+<span class="nc" id="L421">				sendForward(NetEvent.EVENT_JOB, job, 0.0);</span>
+<span class="nc" id="L422">				sendBackward(NetEvent.EVENT_ACK, job, 0.0);</span>
+<span class="nc" id="L423">				break;</span>
+
+			case NetEvent.EVENT_ACK:
+<span class="nc" id="L426">				break;</span>
+
+			case NetEvent.EVENT_STOP:
+<span class="nc" id="L429">				break;</span>
+
+			default:
+<span class="nc" id="L432">				return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L435">		return MSG_PROCESSED;</span>
+	}
+
+
+	private CacheItem getItemById(List&lt;CacheItem&gt; itemsList, int id){
+<span class="nc bnc" id="L440" title="All 2 branches missed.">		for(CacheItem i: itemsList){</span>
+<span class="nc bnc" id="L441" title="All 2 branches missed.">			if(i.getId() == id){</span>
+<span class="nc" id="L442">				return i;</span>
+			}
+<span class="nc" id="L444">		}</span>
+<span class="nc" id="L445">		return null;</span>
+	}
+
+
+	private Integer[] findIteminCache(int id){
+<span class="nc bnc" id="L450" title="All 2 branches missed.">		for(int i = 0; i &lt; cacheCapacity.length; i++){</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">			if (getItemById(this.caches[i], id) != null){</span>
+<span class="nc bnc" id="L452" title="All 2 branches missed.">				for(int j = 0; j &lt; caches[i].size(); j++){</span>
+<span class="nc bnc" id="L453" title="All 2 branches missed.">					if(caches[i].get(j).getId() == id){</span>
+<span class="nc" id="L454">						return new Integer[]{i, j};</span>
+					}
+			}
+		}
+	}
+<span class="nc" id="L459">		return new Integer[]{-1, -1}; </span>
+	}
+
+	private Integer findIteminCacheList(int id, int cacheIndex){
+<span class="nc bnc" id="L463" title="All 2 branches missed.">		if (getItemById(this.caches[cacheIndex], id) != null){</span>
+<span class="nc bnc" id="L464" title="All 2 branches missed.">			for(int j = 0; j &lt; caches[cacheIndex].size(); j++){</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">				if(caches[cacheIndex].get(j).getId() == id){</span>
+<span class="nc" id="L466">					return j;</span>
+				}
+			}
+		}
+<span class="nc" id="L470">		return -1; </span>
+	}
+
+
+	/**********************************************************
+	 *  These are test functions for the popularity module.	  *
+	 ***********************************************************/
+	private TreeMap&lt;Integer, Integer&gt; TestNextRand(TreeMap&lt;Integer, Integer&gt; count, int nextRand){
+<span class="nc" id="L478">		Integer target = count.get(Integer.valueOf(nextRand));</span>
+<span class="nc" id="L479">		System.out.println(&quot;=== Current request Id is &quot;+nextRand+&quot; ===&quot;);</span>
+<span class="nc bnc" id="L480" title="All 2 branches missed.">		if (target == null) {</span>
+<span class="nc" id="L481">			count.put(nextRand, 1);</span>
+		} else {
+<span class="nc" id="L483">			count.put(nextRand, count.get(nextRand) + 1);</span>
+		}
+<span class="nc" id="L485">		Iterator it = count.keySet().iterator();</span>
+<span class="nc bnc" id="L486" title="All 2 branches missed.">		while (it.hasNext()) {</span>
+<span class="nc" id="L487">			Integer key = (Integer) it.next();</span>
+<span class="nc" id="L488">			System.out.println(&quot;Key: &quot; + key + &quot; is: &quot; + count.get(key));</span>
+<span class="nc" id="L489">		}</span>
+<span class="nc" id="L490">		System.out.println(&quot;=== END ===&quot;);</span>
+<span class="nc" id="L491">		return count;</span>
+	}
+
+	private void TestDistribution(DiscreteDistribution ds){
+<span class="nc" id="L495">		int upper = ds.getUpper();</span>
+<span class="nc" id="L496">		int lower = ds.getlower();</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">		for(int i=lower; i&lt;=upper; i++){</span>
+<span class="nc" id="L498">			System.out.println(&quot;CDF: &quot;+ds.cdf(i)+&quot; \tPMF: &quot;+ ds.pmf(i));</span>
+		}
+<span class="nc" id="L500">		System.out.println(&quot;=======&quot;);</span>
+<span class="nc" id="L501">		System.out.println(&quot;Mean: &quot;+ds.theorMean());</span>
+<span class="nc" id="L502">		System.out.println(&quot;Variance: &quot;+ds.theorVariance());</span>
+<span class="nc" id="L503">	}</span>
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

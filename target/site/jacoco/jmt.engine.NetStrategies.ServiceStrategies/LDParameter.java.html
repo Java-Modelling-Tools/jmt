@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LDParameter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.ServiceStrategies</a> &gt; <span class="el_source">LDParameter.java</span></div><h1>LDParameter.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NetStrategies.ServiceStrategies;
+
+import jmt.engine.math.parser.Parser;
+import jmt.engine.random.Distribution;
+import jmt.engine.random.Parameter;
+import jmt.engine.random.engine.RandomEngine;
+
+/**
+ * &lt;p&gt;Title: Load Dependent Service Time Strategy Parameter&lt;/p&gt;
+ * &lt;p&gt;Description: Parameter used to specify a sample for Load Dependent service time strategy.
+ * This is supposed to hold a range of values, a distribution and a function that have to
+ * be evaluated to set mean value for given distribution.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 10-ott-2005
+ *         Time: 14.58.33
+ */
+public class LDParameter implements Comparable&lt;Object&gt; {
+	private int from;
+	private Distribution distribution;
+	private Parameter parameter;
+	private String function;
+	private Parser parser;
+	private RandomEngine randomEngine;
+
+	
+	/**
+	 * Construct a new Load Dependent Service Strategy parameter
+	 * @param from minimum number of jobs for this strategy to apply
+	 * @param distr service time distribution
+	 * @param parameter parameter for the service time distribution
+	 * @param function function to be evaluated to set service time distribution mean value
+	 */
+<span class="nc" id="L52">	public LDParameter(Integer from, Distribution distr, Parameter parameter, String function) {</span>
+<span class="nc" id="L53">		this.from = from.intValue();</span>
+<span class="nc" id="L54">		this.distribution = distr;</span>
+<span class="nc" id="L55">		this.parameter = parameter;</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">		if (function != null) {</span>
+<span class="nc" id="L57">			this.function = function.toLowerCase();</span>
+<span class="nc" id="L58">			parser = new Parser(function, true);</span>
+		}
+
+<span class="nc" id="L61">	}</span>
+
+	/**
+	 * Construct a new Load Dependent Service Strategy parameter
+	 * @param from minimum number of jobs for this strategy to apply
+	 * @param distr service time distribution
+	 * @param parameter parameter for the service time distribution
+	 */
+	public LDParameter(Integer from, Distribution distr, Parameter parameter) {
+<span class="nc" id="L70">		this(from, distr, parameter, null);</span>
+<span class="nc" id="L71">	}</span>
+
+	/**
+	 * Gets minimum number of jobs for this strategy to apply
+	 * @return minimum number of jobs for this strategy to apply
+	 */
+	public int getMinJobs() {
+<span class="nc" id="L78">		return from;</span>
+	}
+
+	/**
+	 * Gets distribution used to evaluate service time
+	 * @return distribution used to evaluate service times
+	 */
+	public Distribution getDistribution() {
+<span class="nc" id="L86">		return distribution;</span>
+	}
+
+	/**
+	 * Gets the parameter of the distribution used to evaluate service time
+	 * @return the parameter of the distribution used to evaluate service times
+	 */
+	public Parameter getDistrParameter() {
+<span class="nc" id="L94">		return parameter;</span>
+	}
+
+	/**
+	 * Gets the function that must be used to evaluate mean value
+	 * @return function to be evaluated to find mean value or null if not present
+	 */
+	public String getFunction() {
+<span class="nc" id="L102">		return function;</span>
+	}
+
+	/**
+	 * Gets the parser that must be used to evaluate mean value
+	 * @return parser to be used to evaluate mean value or null if not present
+	 */
+	public Parser getParser() {
+<span class="nc" id="L110">		return parser;</span>
+	}
+
+	/**
+	 * Compares this object with the specified object for order.  Returns a
+	 * negative integer, zero, or a positive integer as this object is less
+	 * than, equal to, or greater than the specified object.&lt;p&gt;
+	 * @param o the Object to be compared.
+	 * @return a negative integer, zero, or a positive integer as this object
+	 *         is less than, equal to, or greater than the specified object.
+	 * @throws ClassCastException if the specified object's type prevents it
+	 *                            from being compared to this Object.
+	 */
+	public int compareTo(Object o) {
+<span class="nc bnc" id="L124" title="All 2 branches missed.">		if (o instanceof LDParameter) {</span>
+<span class="nc" id="L125">			LDParameter other = (LDParameter) o;</span>
+<span class="nc" id="L126">			return this.from - other.from;</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">		} else if (o instanceof Integer) {</span>
+<span class="nc" id="L128">			Integer other = (Integer) o;</span>
+<span class="nc" id="L129">			return this.from - other.intValue();</span>
+		} else {
+<span class="nc" id="L131">			throw new ClassCastException(&quot;Unsupported object type&quot;);</span>
+		}
+	}
+	
+	public void setRandomEngine(RandomEngine randomEngine) {
+<span class="nc" id="L136">		parser.setEngine(this.randomEngine);</span>
+<span class="nc" id="L137">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

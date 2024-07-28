@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RndInputLoader.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.input</a> &gt; <span class="el_source">RndInputLoader.java</span></div><h1>RndInputLoader.java</h1><pre class="source lang-java linenums">/**
+ * 
+ */
+package jmt.engine.jwat.input;
+
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import jmt.engine.jwat.MatrixObservations;
+import jmt.engine.jwat.Observation;
+import jmt.engine.random.engine.MersenneTwister;
+import jmt.framework.data.MacroReplacer;
+import jmt.gui.jwat.JWATConstants;
+
+import org.apache.oro.text.regex.PatternMatcherInput;
+import org.apache.oro.text.regex.Perl5Compiler;
+import org.apache.oro.text.regex.Perl5Matcher;
+
+/**
+ * @author Maevar
+ *
+ */
+public class RndInputLoader extends InputLoader implements JWATConstants {
+
+	/**
+	 * @param param
+	 * @param fileName
+	 * @param map
+	 * @param prg
+	 */
+	public RndInputLoader(Parameter param, String fileName, VariableMapping[] map, ProgressShow prg) throws FileNotFoundException {
+<span class="nc" id="L33">		super(param, fileName, map, prg);</span>
+<span class="nc" id="L34">	}</span>
+
+	/* (non-Javadoc)
+	 * @see jwat.Input.workerLoader#construct()
+	 */
+	@Override
+	public Object construct() {
+		int i, maxInd, j, k;
+<span class="nc" id="L42">		boolean[] catchVal = new boolean[param.getOptions()[0]];</span>
+<span class="nc" id="L43">		boolean[] sel = param.getVarSelected();</span>
+<span class="nc" id="L44">		FileWriter w = null;</span>
+<span class="nc" id="L45">		PatternMatcherInput input = new PatternMatcherInput(&quot;&quot;);</span>
+<span class="nc" id="L46">		Perl5Compiler myComp = new Perl5Compiler();</span>
+<span class="nc" id="L47">		Perl5Matcher myMatch = new Perl5Matcher();</span>
+<span class="nc" id="L48">		String line = &quot;&quot;;</span>
+<span class="nc" id="L49">		String[] regExp = param.getRegularExp();</span>
+<span class="nc" id="L50">		String[] separator = param.getSeparator();</span>
+<span class="nc" id="L51">		double[] lineValue = new double[param.getNumVarSelected()];</span>
+<span class="nc" id="L52">		String[] lineToken = new String[param.getNumVar()];</span>
+<span class="nc" id="L53">		String parseToken = null;</span>
+<span class="nc" id="L54">		MatrixObservations m = null;</span>
+
+		try {
+<span class="nc" id="L57">			w = new FileWriter(MacroReplacer.replace(LOG_FILE_NAME));</span>
+<span class="nc" id="L58">		} catch (IOException e1) {</span>
+<span class="nc" id="L59">			e1.printStackTrace();</span>
+<span class="nc" id="L60">		}</span>
+
+		try {
+<span class="nc" id="L63">			initShow(param.getOptions()[1] + 1);</span>
+<span class="nc" id="L64">			maxInd = generateRandom(param.getOptions()[0], param.getOptions()[1], catchVal);</span>
+<span class="nc" id="L65">			countObs = 0;</span>
+<span class="nc" id="L66">			totalRaw = 0;</span>
+<span class="nc" id="L67">			line = reader.readLine();</span>
+
+<span class="nc bnc" id="L69" title="All 2 branches missed.">			for (k = 0; k &lt;= maxInd; k++) {</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">				if (isCanceled()) {</span>
+					try {
+<span class="nc" id="L72">						w.close();</span>
+<span class="nc" id="L73">					} catch (IOException e) {</span>
+<span class="nc" id="L74">						e.printStackTrace();</span>
+<span class="nc" id="L75">					}</span>
+<span class="nc" id="L76">					valori = null;</span>
+<span class="nc" id="L77">					msg = INPUT_MSG_ABORT;</span>
+<span class="nc" id="L78">					return null;</span>
+				}
+
+<span class="nc bnc" id="L81" title="All 2 branches missed.">				if (!catchVal[k]) {</span>
+<span class="nc" id="L82">					line = reader.readLine();</span>
+<span class="nc" id="L83">					continue;</span>
+				}
+<span class="nc" id="L85">				input.setInput(line);</span>
+<span class="nc" id="L86">				totalRaw++;</span>
+<span class="nc" id="L87">				countObs++;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">				if (totalRaw % getStep() == 0) {</span>
+<span class="nc" id="L89">					updateInfos(totalRaw, &quot;&lt;HTML&gt;# observations read: &quot; + totalRaw + &quot;&lt;p&gt;# errors: &quot; + (totalRaw - countObs) + &quot;&lt;/HTML&gt;&quot;, false);</span>
+				}
+//Read strings and check their format
+<span class="nc bnc" id="L92" title="All 2 branches missed.">for (i = 0; i &lt; param.getNumVar(); i++) {</span>
+//Read the token with the separators (if defined) whatever is inside
+<span class="nc bnc" id="L94" title="All 2 branches missed.">					if (separator[i] != null) {</span>
+<span class="nc" id="L95">						parseToken = separator[i];</span>
+					} else {
+<span class="nc" id="L97">						parseToken = regExp[i];</span>
+					}
+
+<span class="nc bnc" id="L100" title="All 2 branches missed.">					if (myMatch.contains(input, myComp.compile(parseToken))) {</span>
+<span class="nc bnc" id="L101" title="All 2 branches missed.">						if (sel[i]) {</span>
+//Take the token
+<span class="nc" id="L103">lineToken[i] = myMatch.getMatch().toString();</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">if (separator[i] != null) {</span>
+// If the token had separators, remove them
+<span class="nc" id="L106">lineToken[i] = lineToken[i].substring(1, lineToken[i].length() - 1);</span>
+//And I take what interests me of what remains
+<span class="nc bnc" id="L108" title="All 2 branches missed.">								if (myMatch.contains(lineToken[i], myComp.compile(regExp[i]))) {</span>
+<span class="nc" id="L109">									lineToken[i] = myMatch.getMatch().toString();</span>
+								} else {
+//Wrong line, decrease the number of obs
+<span class="nc" id="L112">									countObs--;</span>
+
+									try {
+<span class="nc" id="L115">										w.write(&quot;Error in row &quot; + k + &quot; : Element &quot; + i + &quot; is wrong\n&quot;);</span>
+<span class="nc" id="L116">									} catch (IOException e) {</span>
+<span class="nc" id="L117">										e.printStackTrace();</span>
+<span class="nc" id="L118">									}</span>
+<span class="nc" id="L119">									break;</span>
+								}
+							}
+						}
+					} else {
+//Wrong line, decrease the number of obs
+<span class="nc" id="L125">						countObs--;</span>
+						try {
+<span class="nc" id="L127">							w.write(&quot;Error in row &quot; + k + &quot; : Line does not match format (element &quot; + i + &quot; not found)\n&quot;);</span>
+<span class="nc" id="L128">						} catch (IOException e) {</span>
+<span class="nc" id="L129">							e.printStackTrace();</span>
+<span class="nc" id="L130">						}</span>
+<span class="nc" id="L131">						break;</span>
+
+					}
+				}
+<span class="nc" id="L135">				j = 0;</span>
+				//Correct line
+<span class="nc bnc" id="L137" title="All 2 branches missed.">				if (i == param.getNumVar()) {</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">					if (input.endOfInput()) {</span>
+//Convert the read (string) values
+<span class="nc bnc" id="L140" title="All 2 branches missed.">						for (i = 0; i &lt; param.getNumVar(); i++) {</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">							if (sel[i]) {</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">								if (map[i] == null) {</span>
+<span class="nc" id="L143">									lineValue[j++] = Double.parseDouble(lineToken[i]);</span>
+								} else {
+<span class="nc" id="L145">									lineValue[j++] = map[i].addNewValue(lineToken[i]);</span>
+								}
+							}
+						}
+<span class="nc" id="L149">						valori.add(new Observation(lineValue, countObs));</span>
+					} else {
+//Wrong line, decrease the number of obs
+<span class="nc" id="L152">						countObs--;</span>
+						try {
+<span class="nc" id="L154">							w.write(&quot;Error in row &quot; + k + &quot; : Too many fields\n&quot;);</span>
+<span class="nc" id="L155">						} catch (IOException e) {</span>
+<span class="nc" id="L156">							e.printStackTrace();</span>
+<span class="nc" id="L157">						}</span>
+					}
+				}
+<span class="nc" id="L160">				line = reader.readLine();</span>
+			}
+			try {
+<span class="nc" id="L163">				w.close();</span>
+<span class="nc" id="L164">			} catch (IOException e) {</span>
+<span class="nc" id="L165">				e.printStackTrace();</span>
+<span class="nc" id="L166">			}</span>
+			//Wrong format, no element loaded
+<span class="nc bnc" id="L168" title="All 2 branches missed.">			if (valori.size() == 0) {</span>
+<span class="nc" id="L169">				closeView();</span>
+<span class="nc" id="L170">				valori = null;</span>
+<span class="nc" id="L171">				msg = INPUT_MSG_ABORT_WRONG_FORMAT;</span>
+<span class="nc" id="L172">				return null;</span>
+			}
+
+<span class="nc" id="L175">			updateInfos(totalRaw, &quot;Calculating Statistics...&quot;, false);</span>
+<span class="nc" id="L176">			m = new MatrixObservations(valori.toArray(new Observation[valori.size()]), param.getSelName(), param.getSelType(), map);</span>
+<span class="nc" id="L177">			updateInfos(totalRaw + 1, &quot;Done&quot;, true);</span>
+<span class="nc" id="L178">			return m;</span>
+
+<span class="nc" id="L180">		} catch (Exception e) {</span>
+<span class="nc" id="L181">			closeView();</span>
+			try {
+<span class="nc" id="L183">				w.close();</span>
+<span class="nc" id="L184">			} catch (IOException e1) {</span>
+<span class="nc" id="L185">				e1.printStackTrace();</span>
+<span class="nc" id="L186">			}</span>
+<span class="nc" id="L187">			valori = null;</span>
+<span class="nc" id="L188">			msg = INPUT_MSG_FAIL;</span>
+<span class="nc" id="L189">			return null;</span>
+<span class="nc" id="L190">		} catch (OutOfMemoryError err) {</span>
+<span class="nc" id="L191">			closeView();</span>
+			try {
+<span class="nc" id="L193">				w.close();</span>
+<span class="nc" id="L194">			} catch (IOException e1) {</span>
+<span class="nc" id="L195">				e1.printStackTrace();</span>
+<span class="nc" id="L196">			}</span>
+<span class="nc" id="L197">			valori = null;</span>
+<span class="nc" id="L198">			msg = &quot;Out of memory. Try with more memory&quot;;</span>
+<span class="nc" id="L199">			return null;</span>
+		}
+	}
+
+	private int generateRandom(int numTotal, int numToRead, boolean[] catchVal) {
+<span class="nc" id="L204">		int[] rndArray = new int[numTotal];</span>
+<span class="nc" id="L205">		int max = 0, i, dimArray, rndNum;</span>
+<span class="nc" id="L206">		MersenneTwister mst = new MersenneTwister();</span>
+
+<span class="nc" id="L208">		dimArray = numTotal;</span>
+<span class="nc bnc" id="L209" title="All 2 branches missed.">		for (i = 0; i &lt; dimArray; i++) {</span>
+<span class="nc" id="L210">			rndArray[i] = i;</span>
+		}
+
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		for (i = 0; i &lt; numToRead; i++) {</span>
+<span class="nc" id="L214">			rndNum = (int) (mst.nextDouble() * dimArray);</span>
+<span class="nc" id="L215">			catchVal[rndArray[rndNum]] = true;</span>
+<span class="nc bnc" id="L216" title="All 2 branches missed.">			if (max &lt; rndArray[rndNum]) {</span>
+<span class="nc" id="L217">				max = rndArray[rndNum];</span>
+			}
+<span class="nc" id="L219">			rndArray[rndNum] = rndArray[--dimArray];</span>
+		}
+
+<span class="nc" id="L222">		return max;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

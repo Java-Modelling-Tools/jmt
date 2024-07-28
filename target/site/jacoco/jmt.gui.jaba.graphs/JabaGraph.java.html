@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JabaGraph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jaba.graphs</a> &gt; <span class="el_source">JabaGraph.java</span></div><h1>JabaGraph.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.gui.jaba.graphs;
+
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
+import jmt.engine.jaba.DPoint;
+
+import org.freehep.graphicsbase.util.export.ExportDialog;
+
+/**
+ * @author Sebastiano Spicuglia
+ */
+public abstract class JabaGraph extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+	private static final float MIN_SCALE = 0.25f;
+	private static final float MAX_SCALE = 5f;
+	// Popup menu
+<span class="nc" id="L45">	protected PlotPopupMenu popup = new PlotPopupMenu();</span>
+	// Value of the current zoom
+<span class="nc" id="L47">	private float currentScale = 1;</span>
+	private int yTranslation;
+	private int xTranslation;
+	protected Point zoomStartPoint;
+
+<span class="nc" id="L52">	public JabaGraph() {</span>
+<span class="nc" id="L53">	}</span>
+
+	public void paint(Graphics g) {
+<span class="nc" id="L56">		super.paint(g);</span>
+
+		Graphics2D g2;
+
+<span class="nc" id="L60">		g2 = (Graphics2D) g;</span>
+<span class="nc" id="L61">		g2.scale(currentScale, currentScale);</span>
+<span class="nc" id="L62">		g2.translate(-xTranslation, -yTranslation);</span>
+<span class="nc" id="L63">	}</span>
+
+	public void rightClick(MouseEvent ev) {
+<span class="nc" id="L66">		popup.show(this, ev.getX(), ev.getY());</span>
+<span class="nc" id="L67">	}</span>
+
+	public void zoom(float perc, boolean restore) {
+
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if (!restore) {</span>
+<span class="nc" id="L72">			currentScale += perc;</span>
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			if (currentScale &lt;= MIN_SCALE) {</span>
+<span class="nc" id="L74">				popup.zoomOut.setEnabled(false);</span>
+<span class="nc" id="L75">				currentScale = MIN_SCALE;</span>
+			} else {
+<span class="nc" id="L77">				popup.zoomOut.setEnabled(true);</span>
+			}
+<span class="nc bnc" id="L79" title="All 2 branches missed.">			if (currentScale &gt;= MAX_SCALE) {</span>
+<span class="nc" id="L80">				popup.zoomIn.setEnabled(false);</span>
+<span class="nc" id="L81">				currentScale = MAX_SCALE;</span>
+			} else {
+<span class="nc" id="L83">				popup.zoomIn.setEnabled(true);</span>
+			}
+		} else {
+<span class="nc" id="L86">			currentScale = 1;</span>
+<span class="nc" id="L87">			popup.zoomOut.setEnabled(true);</span>
+<span class="nc" id="L88">			popup.zoomIn.setEnabled(true);</span>
+		}
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if (this.getParent() instanceof JabaCanvas) {</span>
+<span class="nc" id="L91">			JabaCanvas c = (JabaCanvas) this.getParent();</span>
+<span class="nc" id="L92">			c.notifyNewSize(this.getWidth() * currentScale, this.getHeight()</span>
+					* currentScale);
+		}
+<span class="nc" id="L95">		repaint();</span>
+<span class="nc" id="L96">	}</span>
+
+	public void translateX(int value) {
+<span class="nc" id="L99">		this.xTranslation = value;</span>
+<span class="nc" id="L100">		this.repaint();</span>
+<span class="nc" id="L101">	}</span>
+
+	public void translateY(int value) {
+<span class="nc" id="L104">		this.yTranslation = value;</span>
+<span class="nc" id="L105">		this.repaint();</span>
+<span class="nc" id="L106">	}</span>
+
+	public DPoint adjustMousePoint(int x, int y) {
+<span class="nc" id="L109">		return new DPoint(x / currentScale + xTranslation, y / currentScale</span>
+				+ yTranslation);
+	}
+
+	public Point adjustMousePoint2(int x, int y) {
+<span class="nc" id="L114">		Point res = new Point();</span>
+<span class="nc" id="L115">		res.x = (int) (x / currentScale + xTranslation);</span>
+<span class="nc" id="L116">		res.y = (int) (y / currentScale + yTranslation);</span>
+<span class="nc" id="L117">		return res;</span>
+	}
+
+
+	public Point adjustMousePoint(Point p) {
+<span class="nc" id="L122">		Point res = new Point();</span>
+<span class="nc" id="L123">		res.x = (int) (p.x / currentScale + xTranslation);</span>
+<span class="nc" id="L124">		res.y = (int) (p.y / currentScale + yTranslation);</span>
+<span class="nc" id="L125">		return res;</span>
+	}
+	
+	// --- Methods for popup menu
+	// -------------------------------------------------------------
+	/**
+	 * A simple JPopupMenu used to manage operations on plot. It gives the
+	 * choice to zoom in and out on the plot, restore original view and save
+	 * plot to images (in EPS or PNG format)
+	 */
+	protected class PlotPopupMenu extends JPopupMenu {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		public JMenuItem restore;
+		public JMenuItem zoomIn;
+		public JMenuItem zoomOut;
+		public JMenuItem saveAs;
+
+<span class="nc" id="L145">		public PlotPopupMenu() {</span>
+<span class="nc" id="L146">			restore = new JMenuItem(&quot;Original view&quot;);</span>
+<span class="nc" id="L147">			zoomIn = new JMenuItem(&quot;Zoom in&quot;);</span>
+<span class="nc" id="L148">			zoomOut = new JMenuItem(&quot;Zoom out&quot;);</span>
+<span class="nc" id="L149">			saveAs = new JMenuItem(&quot;Save as...&quot;);</span>
+<span class="nc" id="L150">			this.add(restore);</span>
+<span class="nc" id="L151">			this.add(zoomIn);</span>
+<span class="nc" id="L152">			this.add(zoomOut);</span>
+<span class="nc" id="L153">			this.addSeparator();</span>
+<span class="nc" id="L154">			this.add(saveAs);</span>
+<span class="nc" id="L155">			addListeners();</span>
+<span class="nc" id="L156">		}</span>
+
+		public void addListeners() {
+<span class="nc" id="L159">			restore.addActionListener(new AbstractAction() {</span>
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L163">					zoom(1, true);</span>
+<span class="nc" id="L164">				}</span>
+			});
+
+<span class="nc" id="L167">			zoomIn.addActionListener(new AbstractAction() {</span>
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L171">					zoom(0.25f, false);</span>
+<span class="nc" id="L172">				}</span>
+			});
+
+<span class="nc" id="L175">			zoomOut.addActionListener(new AbstractAction() {</span>
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L179">					zoom(-0.25f, false);</span>
+<span class="nc" id="L180">				}</span>
+			});
+
+<span class="nc" id="L183">			saveAs.addActionListener(new AbstractAction() {</span>
+				private static final long serialVersionUID = 1L;
+
+				public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L187">					ExportDialog export = new ExportDialog();</span>
+<span class="nc" id="L188">					export.showExportDialog((Component) JabaGraph.this,</span>
+							&quot;Export view as ...&quot;, (Component) JabaGraph.this,
+							&quot;Export&quot;);
+<span class="nc" id="L191">				}</span>
+
+			});
+<span class="nc" id="L194">		}</span>
+
+	}
+	}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

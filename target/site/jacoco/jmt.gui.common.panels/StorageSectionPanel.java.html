@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StorageSectionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">StorageSectionPanel.java</span></div><h1>StorageSectionPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Vector;
+
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.GrayCellRenderer;
+import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.table.BooleanCellRenderer;
+import jmt.gui.table.ExactCellEditor;
+import jmt.gui.table.ExactCellRenderer;
+
+/**
+ * &lt;p&gt;Title: Storage Section Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to parametrise the storage section.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 24-06-2016
+ * Time: 16.00.00
+ */
+public class StorageSectionPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L66">	private static final Object[] queuePolicies = { QUEUE_STRATEGY_FCFS, QUEUE_STRATEGY_LCFS, QUEUE_STRATEGY_RAND };</span>
+<span class="nc" id="L67">	private static final Object[] dropRules = { FINITE_DROP, FINITE_BLOCK, FINITE_WAITING };</span>
+
+	private boolean isInitComplete;
+
+	private StationDefinition stationData;
+	private ClassDefinition classData;
+	private Object stationKey;
+
+	private ImagedComboBoxCellEditorFactory classEditor;
+	private JSpinner capacitySpinner;
+	private JCheckBox infiniteCheckBox;
+	private StorageOptionTable optionTable;
+
+<span class="nc" id="L80">	public StorageSectionPanel(StationDefinition sd, ClassDefinition cd, Object sk) {</span>
+<span class="nc" id="L81">		isInitComplete = false;</span>
+<span class="nc" id="L82">		classEditor = new ImagedComboBoxCellEditorFactory(cd);</span>
+<span class="nc" id="L83">		setData(sd, cd, sk);</span>
+<span class="nc" id="L84">		initComponents();</span>
+<span class="nc" id="L85">		addDataManagers();</span>
+<span class="nc" id="L86">		updateCapacity();</span>
+<span class="nc" id="L87">		isInitComplete = true;</span>
+<span class="nc" id="L88">	}</span>
+
+	public void setData(StationDefinition sd, ClassDefinition cd, Object sk) {
+<span class="nc" id="L91">		stationData = sd;</span>
+<span class="nc" id="L92">		classData = cd;</span>
+<span class="nc" id="L93">		stationKey = sk;</span>
+<span class="nc" id="L94">		classEditor.setData(cd);</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		if (isInitComplete) {</span>
+<span class="nc" id="L96">			updateCapacity();</span>
+		}
+<span class="nc" id="L98">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L101">		setLayout(new BorderLayout(5, 5));</span>
+<span class="nc" id="L102">		setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+
+<span class="nc" id="L104">		capacitySpinner = new JSpinner();</span>
+<span class="nc" id="L105">		capacitySpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+<span class="nc" id="L106">		infiniteCheckBox = new JCheckBox(&quot;Infinite&quot;);</span>
+<span class="nc" id="L107">		JPanel capacityPanel = new JPanel();</span>
+<span class="nc" id="L108">		capacityPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Storage Capacity&quot;));</span>
+<span class="nc" id="L109">		capacityPanel.add(new JLabel(&quot;Capacity: &quot;));</span>
+<span class="nc" id="L110">		capacityPanel.add(capacitySpinner);</span>
+<span class="nc" id="L111">		capacityPanel.add(infiniteCheckBox);</span>
+
+<span class="nc" id="L113">		optionTable = new StorageOptionTable();</span>
+<span class="nc" id="L114">		JPanel optionPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L115">		optionPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Storage Options&quot;));</span>
+<span class="nc" id="L116">		optionPanel.add(new WarningScrollTable(optionTable, WARNING_CLASS));</span>
+
+<span class="nc" id="L118">		add(capacityPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L119">		add(optionPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L120">	}</span>
+
+	private void addDataManagers() {
+<span class="nc" id="L123">		capacitySpinner.addChangeListener(new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent e) {
+<span class="nc" id="L126">				Object value = capacitySpinner.getValue();</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">				if (value instanceof Integer) {</span>
+<span class="nc bnc" id="L128" title="All 2 branches missed.">					if (((Integer) value).intValue() &lt; 1) {</span>
+<span class="nc" id="L129">						value = Integer.valueOf(1);</span>
+<span class="nc" id="L130">						capacitySpinner.setValue(value);</span>
+<span class="nc" id="L131">						return;</span>
+					}
+<span class="nc" id="L133">					stationData.setStationQueueCapacity(stationKey, (Integer) value);</span>
+				} else {
+<span class="nc" id="L135">					stationData.setStationQueueCapacity(stationKey, Integer.valueOf(-1));</span>
+				}
+<span class="nc" id="L137">			}</span>
+		});
+
+<span class="nc" id="L140">		infiniteCheckBox.addActionListener(new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L143">				TableCellEditor editor = optionTable.getCellEditor();</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">				if (editor != null) {</span>
+<span class="nc" id="L145">					editor.stopCellEditing();</span>
+				}
+<span class="nc bnc" id="L147" title="All 2 branches missed.">				if (infiniteCheckBox.isSelected()) {</span>
+<span class="nc" id="L148">					capacitySpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L149">					capacitySpinner.setEnabled(false);</span>
+<span class="nc" id="L150">					Vector&lt;Object&gt; classKeys = classData.getClassKeys();</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">					for (Object classKey : classKeys) {</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">						if (stationData.getQueueCapacity(stationKey, classKey).intValue() &lt; 1) {</span>
+<span class="nc" id="L153">							stationData.setDropRule(stationKey, classKey, Defaults.get(&quot;placeDropRule&quot;));</span>
+						}
+<span class="nc" id="L155">					}</span>
+<span class="nc" id="L156">				} else {</span>
+<span class="nc" id="L157">					capacitySpinner.setValue(Defaults.getAsInteger(&quot;placeCapacity&quot;));</span>
+<span class="nc" id="L158">					capacitySpinner.setEnabled(true);</span>
+				}
+<span class="nc" id="L160">				optionTable.repaint();</span>
+<span class="nc" id="L161">			}</span>
+		});
+<span class="nc" id="L163">	}</span>
+
+	private void updateCapacity() {
+<span class="nc" id="L166">		Integer capacity = stationData.getStationQueueCapacity(stationKey);</span>
+<span class="nc bnc" id="L167" title="All 2 branches missed.">		if (capacity.intValue() &lt; 1) {</span>
+<span class="nc" id="L168">			infiniteCheckBox.setSelected(true);</span>
+<span class="nc" id="L169">			capacitySpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L170">			capacitySpinner.setEnabled(false);</span>
+		} else {
+<span class="nc" id="L172">			infiniteCheckBox.setSelected(false);</span>
+<span class="nc" id="L173">			capacitySpinner.setValue(capacity);</span>
+<span class="nc" id="L174">			capacitySpinner.setEnabled(true);</span>
+		}
+<span class="nc" id="L176">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L183">		return &quot;Storage Section&quot;;</span>
+	}
+
+	/**
+	 * called by the Wizard before when switching to another panel
+	 */
+	@Override
+	public void lostFocus() {
+<span class="nc" id="L191">		TableCellEditor editor = optionTable.getCellEditor();</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L193">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L195">	}</span>
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L202">		classEditor.clearCache();</span>
+<span class="nc" id="L203">	}</span>
+
+	protected class StorageOptionTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		private ExactCellRenderer capacityRenderer;
+		private DisabledComboBoxCellRenderer dropRuleRenderer;
+
+<span class="nc" id="L212">		public StorageOptionTable() {</span>
+<span class="nc" id="L213">			capacityRenderer = new GrayCellRenderer();</span>
+<span class="nc" id="L214">			dropRuleRenderer = new DisabledComboBoxCellRenderer(INFINITE_CAPACITY);</span>
+<span class="nc" id="L215">			setModel(new StorageOptionTableModel());</span>
+<span class="nc" id="L216">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L217">			sizeColumns();</span>
+<span class="nc" id="L218">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L219">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L220">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L221">		}</span>
+
+		private void sizeColumns() {
+<span class="nc bnc" id="L224" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L225">				getColumnModel().getColumn(i).setPreferredWidth(((StorageOptionTableModel) getModel()).getColumnSize(i));</span>
+			}
+<span class="nc" id="L227">		}</span>
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L231" title="All 2 branches missed.">			if (column == 3) {</span>
+<span class="nc" id="L232">				return ComboBoxCellEditor.getEditorInstance(queuePolicies);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			} else if (column == 4) {</span>
+<span class="nc" id="L234">				return ComboBoxCellEditor.getEditorInstance(dropRules);</span>
+			} else {
+<span class="nc" id="L236">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L242" title="All 2 branches missed.">			if (column == 0) {</span>
+<span class="nc" id="L243">				return classEditor.getRenderer();</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">			} else if (column == 1) {</span>
+<span class="nc" id="L245">				return capacityRenderer;</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">			} else if (column == 2) {</span>
+<span class="nc" id="L247">				return new BooleanCellRenderer();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">			} else if (column == 3) {</span>
+<span class="nc" id="L249">				return ComboBoxCellEditor.getRendererInstance();</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">			} else if (column == 4) {</span>
+<span class="nc" id="L251">				return dropRuleRenderer;</span>
+			} else {
+<span class="nc" id="L253">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+	}
+
+<span class="nc" id="L258">	private class StorageOptionTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L262">		private String[] columnNames = new String[] { &quot;Class&quot;, &quot;Capacity&quot;, &quot;\u221e&quot;, &quot;Queue Policy&quot;, &quot;Drop Rule&quot; };</span>
+<span class="nc" id="L263">		private Class&lt;?&gt;[] columnClasses = new Class[] { String.class, String.class, Boolean.class, String.class, String.class };</span>
+<span class="nc" id="L264">		private int[] columnSizes = new int[] { 125, 80, 20, 125, 125 };</span>
+
+		@Override
+		public int getRowCount() {
+<span class="nc" id="L268">			return classData.getClassKeys().size();</span>
+		}
+
+		@Override
+		public int getColumnCount() {
+<span class="nc" id="L273">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc" id="L278">			return columnNames[columnIndex];</span>
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L283">			return columnClasses[columnIndex];</span>
+		}
+
+		public int getColumnSize(int columnIndex) {
+<span class="nc" id="L287">			return columnSizes[columnIndex];</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc" id="L292">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L294">				return false;</span>
+<span class="nc bnc" id="L295" title="All 4 branches missed.">			} else if (columnIndex == 1 &amp;&amp; stationData.getQueueCapacity(stationKey, classKey).intValue() &lt; 1) {</span>
+<span class="nc" id="L296">				return false;</span>
+<span class="nc bnc" id="L297" title="All 4 branches missed.">			} else if (columnIndex == 4 &amp;&amp; stationData.getStationQueueCapacity(stationKey).intValue() &lt; 1</span>
+<span class="nc bnc" id="L298" title="All 2 branches missed.">					&amp;&amp; stationData.getQueueCapacity(stationKey, classKey).intValue() &lt; 1) {</span>
+<span class="nc" id="L299">				return false;</span>
+			} else {
+<span class="nc" id="L301">				return true;</span>
+			}
+		}
+
+		@Override
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L307">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L309">				return classKey;</span>
+<span class="nc bnc" id="L310" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L311">				Integer capacity = stationData.getQueueCapacity(stationKey, classKey);</span>
+<span class="nc bnc" id="L312" title="All 2 branches missed.">				return (capacity.intValue() &gt; 0) ? capacity : &quot;\u221e&quot;;</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">			} else if (columnIndex == 2) {</span>
+<span class="nc" id="L314">				Integer capacity = stationData.getQueueCapacity(stationKey, classKey);</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">				return Boolean.valueOf(capacity.intValue() &lt; 1);</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">			} else if (columnIndex == 3) {</span>
+<span class="nc" id="L317">				return stationData.getQueueStrategy(stationKey, classKey);</span>
+<span class="nc bnc" id="L318" title="All 2 branches missed.">			} else if (columnIndex == 4) {</span>
+<span class="nc" id="L319">				return stationData.getDropRule(stationKey, classKey);</span>
+			} else {
+<span class="nc" id="L321">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L327">			Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">			if (columnIndex == 1) {</span>
+				try {
+<span class="nc" id="L330">					Integer capacity = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L331" title="All 2 branches missed.">					if (capacity.intValue() &lt; 1) {</span>
+<span class="nc" id="L332">						capacity = Integer.valueOf(1);</span>
+					}
+<span class="nc" id="L334">					stationData.setQueueCapacity(stationKey, classKey, capacity);</span>
+<span class="nc" id="L335">				} catch (NumberFormatException e) {</span>
+					// Aborts modification if String is invalid
+<span class="nc" id="L337">				}</span>
+<span class="nc bnc" id="L338" title="All 2 branches missed.">			} else if (columnIndex == 2) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">				if (((Boolean) aValue).booleanValue()) {</span>
+<span class="nc" id="L340">					stationData.setQueueCapacity(stationKey, classKey, Integer.valueOf(-1));</span>
+<span class="nc bnc" id="L341" title="All 2 branches missed.">					if (stationData.getStationQueueCapacity(stationKey).intValue() &lt; 1) {</span>
+<span class="nc" id="L342">						stationData.setDropRule(stationKey, classKey, Defaults.get(&quot;placeDropRule&quot;));</span>
+					}
+				} else {
+<span class="nc" id="L345">					Integer capacity = Defaults.getAsInteger(&quot;placeQueueCapacity&quot;);</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">					if (capacity.intValue() &lt; 1) {</span>
+<span class="nc" id="L347">						capacity = Integer.valueOf(1);</span>
+					}
+<span class="nc" id="L349">					stationData.setQueueCapacity(stationKey, classKey, capacity);</span>
+				}
+<span class="nc" id="L351">				repaint();</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">			} else if (columnIndex == 3) {</span>
+<span class="nc" id="L353">				stationData.setQueueStrategy(stationKey, classKey, (String) aValue);</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">			} else if (columnIndex == 4) {</span>
+<span class="nc" id="L355">				stationData.setDropRule(stationKey, classKey, (String) aValue);</span>
+			}
+<span class="nc" id="L357">		}</span>
+
+	}
+
+	private class DisabledComboBoxCellRenderer extends ComboBoxCellEditor {
+
+		private static final long serialVersionUID = 1L;
+
+		private JLabel label;
+
+<span class="nc" id="L367">		public DisabledComboBoxCellRenderer(String text) {</span>
+<span class="nc" id="L368">			label = new JLabel(text);</span>
+<span class="nc" id="L369">			label.setEnabled(false);</span>
+<span class="nc" id="L370">		}</span>
+
+		@Override
+		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc bnc" id="L374" title="All 2 branches missed.">			if (!table.isCellEditable(row, column)) {</span>
+<span class="nc" id="L375">				return label;</span>
+			}
+<span class="nc" id="L377">			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+		}
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

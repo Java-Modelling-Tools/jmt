@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FittingPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jwat.fitting.panels</a> &gt; <span class="el_source">FittingPanel.java</span></div><h1>FittingPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jwat.fitting.panels;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.text.DecimalFormat;
+
+import javax.swing.Box;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import jmt.engine.jwat.fitting.ExponentialFitting;
+import jmt.engine.jwat.fitting.FittingAlgorithm;
+import jmt.engine.jwat.fitting.FittingSession;
+import jmt.engine.jwat.fitting.ParetoFitting;
+import jmt.engine.jwat.fitting.utils.ModelFitting;
+import jmt.engine.jwat.workloadAnalysis.utils.SetMatrixListener;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.jwat.JWATConstants;
+import jmt.gui.jwat.MainJwatWizard;
+import jmt.gui.jwat.fitting.charts.SmallCDF;
+import jmt.gui.jwat.fitting.charts.SmallPDF;
+import jmt.gui.jwat.fitting.charts.SmallQQPlot;
+
+public class FittingPanel extends WizardPanel implements CommonConstants, JWATConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private MainJwatWizard parentwizard;
+<span class="nc" id="L53">	private ModelFitting model = null;</span>
+<span class="nc" id="L54">	private FittingSession session = null;</span>
+	private FittingAlgorithm engfitting;
+<span class="nc" id="L56">	private boolean canGoOn = false;</span>
+	private double[] obslist;
+
+	// Variables declaration - do not modify
+	private JScrollPane resultfittingScrollPane;
+	private JTextArea resultfittingTextArea;
+	// Variables declaration - do not modify
+	private JPanel panelqqplot;
+	private JPanel panelcdf;
+	private JPanel panelpdf;
+	private JPanel graphicspanel;
+	private SmallQQPlot qqplot;
+	private SmallCDF cdfplot;
+	private SmallPDF pdfplot;
+	// End of variables declaration
+
+<span class="nc" id="L72">	public static int PARETO = 0;</span>
+<span class="nc" id="L73">	public static int EXPO = 1;</span>
+	private int distribution;
+
+	//structures for the approximation of double
+<span class="nc" id="L77">	private String pattern = &quot;#.######&quot;;</span>
+	private DecimalFormat myFormatter;
+
+	public FittingPanel(MainJwatWizard parentwizard, int distr) {
+<span class="nc" id="L81">		super();</span>
+<span class="nc" id="L82">		this.parentwizard = parentwizard;</span>
+<span class="nc" id="L83">		model = (ModelFitting) parentwizard.getModel();</span>
+<span class="nc" id="L84">		session = (FittingSession) parentwizard.getSession();</span>
+<span class="nc" id="L85">		this.distribution = distr;</span>
+<span class="nc" id="L86">		myFormatter = new DecimalFormat(pattern);</span>
+
+<span class="nc" id="L88">		model.addOnSetMatrixObservationListener(new SetMatrixListener() {</span>
+
+			public void onSetMatrixObservation() {
+<span class="nc" id="L91">				obslist = model.getListObservations();</span>
+<span class="nc bnc" id="L92" title="All 2 branches missed.">				if (distribution == EXPO) {</span>
+<span class="nc" id="L93">					engfitting = new ExponentialFitting(obslist, 0.05d);</span>
+<span class="nc" id="L94">					initComponents();</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">					if (engfitting.isFitted()) {</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">						if (obslist.length &gt; 20) {</span>
+<span class="nc" id="L97">							resultfittingTextArea.setText(&quot;The analyzed data fits the exponential distribution with significativity 0.05&quot; + &quot;\n&quot; +</span>
+									&quot;(the significativity is the probability of rejecting the Exponential hypothesis when it is true)&quot; + &quot;\n&quot; + 
+<span class="nc" id="L99">									&quot;Lambda: &quot; + myFormatter.format(engfitting.getEstimatedParameters()[0]) + &quot;\n\n&quot; +</span>
+									&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L101">									&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n&quot; +</span>
+<span class="nc" id="L102">									&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L103">									&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()));</span>
+						} else {
+<span class="nc" id="L105">							resultfittingTextArea.setText(&quot;The analyzed data fits the exponential distribution with significativity 0.05&quot; + &quot;\n&quot; +</span>
+									&quot;(the significativity is the probability of rejecting the Exponential hypothesis when it is true)&quot; + &quot;\n&quot; +   
+<span class="nc" id="L107">									&quot;Lambda: &quot; + myFormatter.format(engfitting.getEstimatedParameters()[0]) + &quot;\n\n&quot; +</span>
+									&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L109">									&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n&quot; +</span>
+<span class="nc" id="L110">									&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L111">									&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()) + &quot;\n\n&quot;+</span>
+									&quot;Warning! Since the number of observations is too small the test may not be reliable!&quot;);
+						}
+					} else {
+<span class="nc" id="L115">						resultfittingTextArea.setText(&quot;According to the test your data do not follow the exponential distribution&quot; + &quot;\n\n&quot; +</span>
+								&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L117">								&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n&quot; +</span>
+<span class="nc" id="L118">								&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L119">								&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()));</span>
+					}
+				} else {
+<span class="nc" id="L122">					engfitting = new ParetoFitting(obslist, 0.05d);</span>
+<span class="nc" id="L123">					initComponents();</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">					if (engfitting.isFitted()) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">						if (obslist.length &gt; 20) {</span>
+<span class="nc" id="L126">							resultfittingTextArea.setText(&quot;The analyzed data fits the Pareto distribution with significativity 0.05&quot; + &quot;\n&quot; +</span>
+									&quot;(the significativity is the probability of rejecting the Pareto hypothesis when it is true)&quot; + &quot;\n&quot; +   
+<span class="nc" id="L128">									&quot;Alpha (Shape parameter): &quot; + myFormatter.format(engfitting.getEstimatedParameters()[1]) + &quot;\n&quot; +</span>
+<span class="nc" id="L129">									&quot;k (Scale parameter): &quot; + myFormatter.format(engfitting.getEstimatedParameters()[0]) + &quot;\n\n&quot; +</span>
+									&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L131">									&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n&quot; +</span>
+<span class="nc" id="L132">									&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L133">									&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()));</span>
+						} else {
+<span class="nc" id="L135">							resultfittingTextArea.setText(&quot;The analyzed data fits the Pareto distribution with significativity 0.05&quot; + &quot;\n&quot; +</span>
+									&quot;(the significativity is the probability of rejecting the Pareto hypothesis when it is true)&quot; + &quot;\n&quot; + 
+<span class="nc" id="L137">									&quot;Alpha (Shape parameter): &quot; + myFormatter.format(engfitting.getEstimatedParameters()[1]) + &quot;\n&quot; +</span>
+<span class="nc" id="L138">									&quot;k (Scale parameter): &quot; + myFormatter.format(engfitting.getEstimatedParameters()[0]) + &quot;\n&quot; +</span>
+<span class="nc" id="L139">									&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n\n&quot; +</span>
+									&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L141">									&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L142">									&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()) + &quot;\n\n&quot;+</span>
+									&quot;Warning! Since the number of observations is too small the test may not be reliable!&quot;);
+						}
+					} else {
+<span class="nc" id="L146">						resultfittingTextArea.setText(&quot;According to the test your data do not follow the Pareto distribution&quot; + &quot;\n\n&quot; +</span>
+								&quot;The following statistical indices are obtained from the analyzed data&quot; + &quot;\n&quot; +
+<span class="nc" id="L148">								&quot;Mean: &quot; + myFormatter.format(model.getMean()) + &quot;\n&quot; +</span>
+<span class="nc" id="L149">								&quot;Variance: &quot; + myFormatter.format(model.getVariance()) + &quot;\n&quot; +</span>
+<span class="nc" id="L150">								&quot;Coefficient of variation: &quot; + myFormatter.format(model.getCoeffVariation()));</span>
+					}
+				}
+<span class="nc" id="L153">			}</span>
+
+			public void onResetMatrixObservation() {
+<span class="nc" id="L156">				FittingPanel.this.removeAll();</span>
+<span class="nc" id="L157">			}</span>
+
+		});
+<span class="nc" id="L160">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L163">		Box mainBox = Box.createVerticalBox();</span>
+<span class="nc" id="L164">		Box centralBox = Box.createHorizontalBox();</span>
+		// Pannello dei componenti univariate statistics panel
+<span class="nc" id="L166">		JPanel componentsPanel = new JPanel(new BorderLayout(0, 5));</span>
+
+<span class="nc" id="L168">		setLayout(new GridLayout(1, 1));</span>
+
+<span class="nc" id="L170">		mainBox.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L171">		mainBox.add(centralBox);</span>
+<span class="nc" id="L172">		mainBox.add(Box.createVerticalStrut(10));</span>
+<span class="nc" id="L173">		add(mainBox);</span>
+
+		// components univariate statistics panel
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		if (distribution == EXPO) {</span>
+<span class="nc" id="L177">			componentsPanel.add(new JLabel(&quot;Results of fitting of exponential distribution&quot;), BorderLayout.NORTH);</span>
+		} else {
+<span class="nc" id="L179">			componentsPanel.add(new JLabel(&quot;Results of fitting of Pareto distribution&quot;), BorderLayout.NORTH);</span>
+		}
+
+<span class="nc" id="L182">		resultfittingScrollPane = new JScrollPane();</span>
+<span class="nc" id="L183">		resultfittingTextArea = new JTextArea();</span>
+<span class="nc" id="L184">		resultfittingTextArea.setColumns(20);</span>
+<span class="nc" id="L185">		resultfittingTextArea.setRows(5);</span>
+<span class="nc" id="L186">		resultfittingScrollPane.setViewportView(resultfittingTextArea);</span>
+
+<span class="nc" id="L188">		componentsPanel.add(resultfittingScrollPane, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L190">		graphicspanel = new JPanel(new GridLayout(1,3));</span>
+<span class="nc" id="L191">		graphicspanel.setSize(new Dimension((int)(200 * CommonConstants.widthScaling), (int)(100 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L193">		panelqqplot = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L194">		panelqqplot.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;QQ-plot&quot;));</span>
+
+<span class="nc" id="L196">		panelcdf = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L197">		panelcdf.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;CDF&quot;));</span>
+
+<span class="nc" id="L199">		panelpdf = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L200">		panelpdf.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), &quot;pdf&quot;));</span>
+
+<span class="nc" id="L202">		qqplot = new SmallQQPlot(model,engfitting);</span>
+<span class="nc" id="L203">		qqplot.setDistribution(distribution); </span>
+<span class="nc" id="L204">		cdfplot = new SmallCDF(model, engfitting);</span>
+<span class="nc" id="L205">		cdfplot.setDistribution(distribution);</span>
+<span class="nc" id="L206">		pdfplot = new SmallPDF(model, engfitting);</span>
+		//just to try
+<span class="nc" id="L208">		panelqqplot.add(qqplot);</span>
+<span class="nc" id="L209">		panelcdf.add(cdfplot);</span>
+<span class="nc" id="L210">		panelpdf.add(pdfplot);</span>
+
+<span class="nc" id="L212">		graphicspanel.add(panelqqplot);</span>
+<span class="nc" id="L213">		graphicspanel.add(panelcdf);</span>
+<span class="nc" id="L214">		graphicspanel.add(panelpdf);</span>
+<span class="nc" id="L215">		graphicspanel.setPreferredSize(new Dimension((int)(300 * CommonConstants.widthScaling), (int)(240 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L217">		componentsPanel.add(graphicspanel, BorderLayout.SOUTH);</span>
+<span class="nc" id="L218">		centralBox.add(componentsPanel);</span>
+<span class="nc" id="L219">	}// &lt;/editor-fold&gt;</span>
+
+	public String getName() {
+<span class="nc bnc" id="L222" title="All 2 branches missed.">		if (distribution == EXPO) {</span>
+<span class="nc" id="L223">			return &quot;Exponential&quot;;</span>
+		} else {
+<span class="nc" id="L225">			return &quot;Pareto&quot;;</span>
+		}
+	}
+
+	public void gotFocus() {
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		if (distribution == EXPO) {</span>
+<span class="nc" id="L231">			parentwizard.setCurrentPanel(FITTING_EXPO_PANEL);</span>
+		} else {
+<span class="nc" id="L233">			parentwizard.setCurrentPanel(FITTING_PARETO_PANEL);</span>
+		}
+<span class="nc" id="L235">	}</span>
+
+	public void lostFocus() {
+<span class="nc bnc" id="L238" title="All 2 branches missed.">		if (distribution == EXPO) {</span>
+<span class="nc" id="L239">			parentwizard.setLastPanel(FITTING_EXPO_PANEL);</span>
+		} else {
+<span class="nc" id="L241">			parentwizard.setLastPanel(FITTING_PARETO_PANEL);</span>
+		}
+<span class="nc" id="L243">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

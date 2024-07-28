@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JMCHWizard.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.wizard</a> &gt; <span class="el_source">JMCHWizard.java</span></div><h1>JMCHWizard.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmch.wizard;
+
+import java.awt.BorderLayout;
+
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+
+
+import jmt.framework.gui.help.HoverHelp;
+import jmt.framework.gui.wizard.Wizard;
+
+/**
+ * SuperClass of the MainWizard. It contains some methods of Wizard that are Overrided to fit the needs of this type of Wizard
+ *
+ * @author Lorenzo Torri
+ * Date: 31-mar-2024
+ * Time: 16.22
+ */
+<span class="nc" id="L43">public class JMCHWizard extends Wizard{</span>
+
+    private static final long serialVersionUID = 1L;
+	private HoverHelp help;
+	private JLabel helpLabel;
+	private JButton[] btnList;
+
+	protected JMenuBar menuBar;
+    protected JToolBar toolBar;
+
+
+    /**
+     * Method of Wizard of creating the Button Panel.
+     * Ovveride it to add also the helpLabel.
+     */
+	@Override
+	protected JComponent makeButtons() {
+<span class="nc" id="L60">		help = new HoverHelp();</span>
+<span class="nc" id="L61">		helpLabel = help.getHelpLabel();</span>
+
+<span class="nc" id="L63">		helpLabel.setBorder(BorderFactory.createEtchedBorder());</span>
+
+		//ACTION_FINISH.putValue(Action.NAME, &quot;Solve&quot;);
+<span class="nc" id="L66">		ACTION_CANCEL.putValue(Action.NAME, &quot;Exit&quot;);</span>
+
+<span class="nc" id="L68">		JPanel buttons = new JPanel();</span>
+<span class="nc" id="L69">		btnList = new JButton[3];</span>
+
+		/* Added first pane of all */
+
+		//JButton button_finish = new JButton(ACTION_FINISH);
+		//help.addHelp(button_finish, &quot;Validates choices and solve&quot;);
+<span class="nc" id="L75">		JButton button_cancel = new JButton(ACTION_CANCEL);</span>
+<span class="nc" id="L76">		help.addHelp(button_cancel, &quot;Exits the wizard discarding all changes&quot;);</span>
+<span class="nc" id="L77">		JButton button_next = new JButton(ACTION_NEXT);</span>
+<span class="nc" id="L78">		help.addHelp(button_next, &quot;Moves on to the next step&quot;);</span>
+<span class="nc" id="L79">		JButton button_previous = new JButton(ACTION_PREV);</span>
+<span class="nc" id="L80">		help.addHelp(button_previous, &quot;Goes back to the previous step&quot;);</span>
+<span class="nc" id="L81">		buttons.add(button_previous);</span>
+<span class="nc" id="L82">		btnList[0] = button_previous;</span>
+<span class="nc" id="L83">		buttons.add(button_next);</span>
+<span class="nc" id="L84">		btnList[1] = button_next;</span>
+		//buttons.add(button_finish);
+		//btnList[2] = button_finish;
+<span class="nc" id="L87">		buttons.add(button_cancel);</span>
+<span class="nc" id="L88">		btnList[2] = button_cancel;</span>
+		
+<span class="nc" id="L90">		JPanel labelbox = new JPanel();</span>
+<span class="nc" id="L91">		labelbox.setLayout(new BorderLayout());</span>
+<span class="nc" id="L92">		labelbox.add(Box.createVerticalStrut(30), BorderLayout.WEST);</span>
+<span class="nc" id="L93">		labelbox.add(helpLabel, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L95">		Box buttonBox = Box.createVerticalBox();</span>
+<span class="nc" id="L96">		buttonBox.add(buttons);</span>
+<span class="nc" id="L97">		buttonBox.add(labelbox);</span>
+<span class="nc" id="L98">		return buttonBox;</span>
+	}
+
+	/**
+	 * Set a button working or not based on the value or enabled
+	 * @param button the string that represents the button
+	 * @param enabled true or false
+	 */
+    public void setEnableButton(String button, boolean enabled) {
+<span class="nc bnc" id="L107" title="All 2 branches missed.">		for (JButton element : btnList) {</span>
+<span class="nc bnc" id="L108" title="All 2 branches missed.">			if (element.getText().equals(button)) {</span>
+<span class="nc" id="L109">				element.setEnabled(enabled);</span>
+<span class="nc" id="L110">				break;</span>
+			}
+		}
+<span class="nc" id="L113">    }</span>
+
+	/** Return the HoverHelp of this Wizard */
+    public HoverHelp getHoverHelp(){
+<span class="nc" id="L117">        return help;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

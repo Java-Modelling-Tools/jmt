@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeTraverser.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms</a> &gt; <span class="el_source">TreeTraverser.java</span></div><h1>TreeTraverser.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
+
+import java.util.Stack;
+
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+
+/**
+ * Tree traverser abstract class which implements generic single-threaded tree traversal, leaving the 
+ * actual node computations to the extending class.
+ * @author Ben Homer, 2014.
+ */
+<span class="nc" id="L12">public abstract class TreeTraverser {</span>
+	
+	/**
+	 * Recursively traverses a tree from the specified node in a post-order
+	 * fashion, performing computations at each node.
+	 * @param node The node the traversal starts from.
+	 * @param pv The population vector to use for node computations.
+	 */
+	public void recursiveTraverse(Node node, PopulationVector pv) {
+<span class="nc bnc" id="L21" title="All 2 branches missed.">		if (node.leftChild() != null) {</span>
+<span class="nc" id="L22">			recursiveTraverse(node.leftChild(), pv);</span>
+		}
+<span class="nc bnc" id="L24" title="All 2 branches missed.">		if (node.rightChild() != null) {</span>
+<span class="nc" id="L25">			recursiveTraverse(node.rightChild(), pv);</span>
+		}
+
+<span class="nc bnc" id="L28" title="All 2 branches missed.">		if (node.isLeaf()) {</span>
+<span class="nc" id="L29">			initLeafNode(node, pv);</span>
+		} else {
+<span class="nc" id="L31">			computeSubnetNode(node, pv);</span>
+		}
+<span class="nc" id="L33">	}</span>
+	
+	/**
+	 * Iteratively traverses a tree from the specified node in a post-order
+	 * fashion, performing computations at each node.
+	 * @param node The node the traversal starts from.
+	 * @param pv The population vector to use for node computations.
+	 */
+	public void iterativeTraverse(Node root, PopulationVector pv) {
+<span class="nc" id="L42">		Stack&lt;Node&gt; s = new Stack&lt;Node&gt;();</span>
+<span class="nc" id="L43">		s.push(root);</span>
+<span class="nc" id="L44">		Node prev = null;</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		while (!s.empty()) {</span>
+<span class="nc" id="L46">			Node curr = s.peek();</span>
+<span class="nc bnc" id="L47" title="All 6 branches missed.">			if (prev == null || prev.leftChild() == curr || prev.rightChild() == curr) {</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">				if (curr.leftChild() != null)</span>
+<span class="nc" id="L49">					s.push(curr.leftChild());</span>
+<span class="nc bnc" id="L50" title="All 2 branches missed.">				else if (curr.rightChild() != null)</span>
+<span class="nc" id="L51">					s.push(curr.rightChild());</span>
+		    // If traversing up tree from left, traverse to right child if available.
+<span class="nc bnc" id="L53" title="All 4 branches missed.">			} else if (curr.leftChild() == prev &amp;&amp; curr.rightChild() != null) {</span>
+<span class="nc" id="L54">				s.push(curr.rightChild());</span>
+			}
+			// Otherwise traversing up tree from right, compute g arrays and pop.
+			else {
+<span class="nc bnc" id="L58" title="All 2 branches missed.">				if (curr.isLeaf()) {</span>
+<span class="nc" id="L59">					initLeafNode(curr, pv);</span>
+				} else {
+<span class="nc" id="L61">					computeSubnetNode(curr, pv);</span>
+				}
+<span class="nc" id="L63">				s.pop();</span>
+			}
+<span class="nc" id="L65">			prev = curr;</span>
+<span class="nc" id="L66">		}</span>
+<span class="nc" id="L67">	}</span>
+	
+	/**
+	 * Abstract method which an extending class will override to define leaf node computations.
+	 * @param node The leaf node.
+	 * @param pv The population vector to use for the computation.
+	 */
+	public abstract void initLeafNode(Node node, PopulationVector pv);
+	
+	/**
+	 * Abstract method which an extending class will override to define subnetwork node computations.
+	 * @param node The subnetwork node.
+	 * @param pv The population vector to use for the computation.
+	 */
+	public abstract void computeSubnetNode(Node node, PopulationVector pv);
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

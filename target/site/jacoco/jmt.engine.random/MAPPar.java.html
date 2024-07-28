@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MAPPar.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.random</a> &gt; <span class="el_source">MAPPar.java</span></div><h1>MAPPar.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.random;
+
+import Jama.Matrix;
+import jmt.common.exception.IncorrectDistributionParameterException;
+
+/**
+ * 
+ * This is the parameter that should be passed to the MAP
+ * distribution.
+ * 
+ * &lt;br&gt;&lt;br&gt;Copyright (c) 2017
+ * &lt;br&gt;Imperial College London - Department of Computing
+ * @author Lulai Zhu
+ * 
+ */
+public class MAPPar extends AbstractParameter implements Parameter {
+
+	private double[][] D0;
+	private double[][] D1;
+	private double mean;
+	private double var;
+	private double[] pi;
+	private double[] lambda;
+	private double[][] P0;
+	private double[][] P1;
+
+	/**
+	 * It creates a new MAP parameter based on the data provided by the user.
+	 *
+	 * @param D0 2D array of Object containing the hidden transition rate matrix.
+	 * @param D1 2D array of Object containing the observable transition rate matrix.
+	 * @throws IncorrectDistributionParameterException if D0 or D1 is incorrect
+	 * or if D0 and D1 are inconsistent or if D0 + D1 is incorrect.
+	 *
+	 */
+<span class="nc" id="L54">	public MAPPar(Object[] D0, Object[] D1) throws IncorrectDistributionParameterException {</span>
+<span class="nc" id="L55">		this.D0 = new double[D0.length][];</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">		for (int i = 0; i &lt; D0.length; i++) {</span>
+<span class="nc" id="L57">			this.D0[i] = new double[((Object[]) D0[i]).length];</span>
+<span class="nc bnc" id="L58" title="All 2 branches missed.">			for (int j = 0; j &lt; ((Object[]) D0[i]).length; j++) {</span>
+<span class="nc" id="L59">				Double d = (Double) ((Object[]) D0[i])[j];</span>
+<span class="nc" id="L60">				this.D0[i][j] = d.doubleValue();</span>
+			}
+		}
+<span class="nc" id="L63">		this.D1 = new double[D1.length][];</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">		for (int i = 0; i &lt; D1.length; i++) {</span>
+<span class="nc" id="L65">			this.D1[i] = new double[((Object[]) D1[i]).length];</span>
+<span class="nc bnc" id="L66" title="All 2 branches missed.">			for (int j = 0; j &lt; ((Object[]) D1[i]).length; j++) {</span>
+<span class="nc" id="L67">				Double d = (Double) ((Object[]) D1[i])[j];</span>
+<span class="nc" id="L68">				this.D1[i][j] = d.doubleValue();</span>
+			}
+		}
+<span class="nc" id="L71">		testParameters();</span>
+
+<span class="nc" id="L73">		int order = this.D0.length;</span>
+<span class="nc" id="L74">		Matrix M = new Matrix(this.D0).inverse().uminus();</span>
+<span class="nc" id="L75">		Matrix P = M.times(new Matrix(this.D1));</span>
+<span class="nc" id="L76">		Matrix L = P.minus(Matrix.identity(order, order));</span>
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		for (int i = 0; i &lt; order; i++) {</span>
+<span class="nc" id="L78">			L.set(i, order - 1, 1.0);</span>
+		}
+<span class="nc" id="L80">		Matrix r = new Matrix(1, order, 0.0);</span>
+<span class="nc" id="L81">		r.set(0, order - 1, 1.0);</span>
+<span class="nc" id="L82">		Matrix pi = L.solveTranspose(r).transpose();</span>
+<span class="nc" id="L83">		Matrix one = new Matrix(order, 1, 1.0);</span>
+<span class="nc" id="L84">		double moment1 = pi.times(M).times(one).get(0, 0);</span>
+<span class="nc" id="L85">		double moment2 = 2 * pi.times(M).times(M).times(one).get(0, 0);</span>
+<span class="nc" id="L86">		mean = moment1;</span>
+<span class="nc" id="L87">		var = moment2 - moment1 * moment1;</span>
+
+<span class="nc" id="L89">		this.pi = pi.getArrayCopy()[0];</span>
+<span class="nc" id="L90">		lambda = new double[order];</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		for (int i = 0; i &lt; order; i++) {</span>
+<span class="nc" id="L92">			lambda[i] = -this.D0[i][i];</span>
+		}
+<span class="nc" id="L94">		P0 = new double[order][order];</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">		for (int i = 0; i &lt; order; i++) {</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">			for (int j = 0; j &lt; order; j++) {</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">				if (i == j) {</span>
+<span class="nc" id="L98">					P0[i][j] = 0.0;</span>
+				} else {
+<span class="nc" id="L100">					P0[i][j] = this.D0[i][j] / lambda[i];</span>
+				}
+			}
+		}
+<span class="nc" id="L104">		P1 = new double[order][order];</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int i = 0; i &lt; order; i++) {</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">			for (int j = 0; j &lt; order; j++) {</span>
+<span class="nc" id="L107">				P1[i][j] = this.D1[i][j] / lambda[i];</span>
+			}
+		}
+<span class="nc" id="L110">	}</span>
+
+	/**
+	 * Tests the parameters for the constructor requiring D0 and D1.
+	 *
+	 * @throws IncorrectDistributionParameterException if D0 or D1 is incorrect
+	 * or if D0 and D1 are inconsistent or if D0 + D1 is incorrect.
+	 *
+	 */
+	private void testParameters() throws IncorrectDistributionParameterException {
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		if (!checkD0()) {</span>
+<span class="nc" id="L121">			throw new IncorrectDistributionParameterException(&quot;Error: D0 is incorrect&quot;);</span>
+		}
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if (!checkD1()) {</span>
+<span class="nc" id="L124">			throw new IncorrectDistributionParameterException(&quot;Error: D1 is incorrect&quot;);</span>
+		}
+<span class="nc bnc" id="L126" title="All 2 branches missed.">		if (D0.length != D1.length) {</span>
+<span class="nc" id="L127">			throw new IncorrectDistributionParameterException(&quot;Error: D0 and D1 are inconsistent&quot;);</span>
+		}
+<span class="nc bnc" id="L129" title="All 2 branches missed.">		if (!checkD0D1()) {</span>
+<span class="nc" id="L130">			throw new IncorrectDistributionParameterException(&quot;Error: D0 + D1 is incorrect&quot;);</span>
+		}
+<span class="nc" id="L132">	}</span>
+
+	/**
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if D0 is a square matrix such that the diagonal
+	 * entries are less than zero, the non-diagonal entries are greater than or
+	 * equal to zero and the entries in each row sum up to a non-positive value.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	private boolean checkD0() {
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		for (int i = 0; i &lt; D0.length; i++) {</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">			if (D0.length != D0[i].length) {</span>
+<span class="nc" id="L146">				return false;</span>
+			}
+<span class="nc" id="L148">			double sum = 0.0;</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">			for (int j = 0; j &lt; D0[i].length; j++) {</span>
+<span class="nc bnc" id="L150" title="All 4 branches missed.">				if (i == j &amp;&amp; D0[i][j] &gt;= 0.0) {</span>
+<span class="nc" id="L151">					return false;</span>
+				}
+<span class="nc bnc" id="L153" title="All 4 branches missed.">				if (i != j &amp;&amp; D0[i][j] &lt; 0.0) {</span>
+<span class="nc" id="L154">					return false;</span>
+				}
+<span class="nc" id="L156">				sum += D0[i][j];</span>
+			}
+<span class="nc bnc" id="L158" title="All 2 branches missed.">			if (sum &gt; 1e-6) {</span>
+<span class="nc" id="L159">				return false;</span>
+			}
+		}
+<span class="nc" id="L162">		return true;</span>
+	}
+
+	/**
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if D1 is a square matrix such that the entries
+	 * are greater than or equal to zero.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	private boolean checkD1() {
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		for (int i = 0; i &lt; D1.length; i++) {</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">			if (D1.length != D1[i].length) {</span>
+<span class="nc" id="L176">				return false;</span>
+			}
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			for (int j = 0; j &lt; D1[i].length; j++) {</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">				if (D1[i][j] &lt; 0.0) {</span>
+<span class="nc" id="L180">					return false;</span>
+				}
+			}
+		}
+<span class="nc" id="L184">		return true;</span>
+	}
+
+	/**
+	 * It verifies if the parameter is correct. For the MAP distribution,
+	 * the parameter is right if the entries in each row of D0 + D1 sum up to
+	 * zero.
+	 *
+	 * @return boolean indicating if the parameter is correct or not.
+	 *
+	 */
+	private boolean checkD0D1() {
+<span class="nc bnc" id="L196" title="All 2 branches missed.">		for (int i = 0; i &lt; D0.length; i++) {</span>
+<span class="nc" id="L197">			double sum = 0.0;</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">			for (int j = 0; j &lt; D0[i].length; j++) {</span>
+<span class="nc" id="L199">				sum += (D0[i][j] + D1[i][j]);</span>
+			}
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (Math.abs(sum) &gt; 1e-6) {</span>
+<span class="nc" id="L202">				return false;</span>
+			}
+		}
+<span class="nc" id="L205">		return true;</span>
+	}
+
+	/**
+	 * It returns the value of the mean of the MAP distribution which
+	 * is provided by the user or evaluated according to other data.
+	 *
+	 * @return double with the mean of the phase-type distribution.
+	 *
+	 */
+	public double getMean() {
+<span class="nc" id="L216">		return mean;</span>
+	}
+
+	/**
+	 * It returns the value of the variance of the MAP distribution which
+	 * is provided by the user or evaluated according to other data.
+	 *
+	 * @return double with the variance of the phase-type distribution.
+	 *
+	 */
+	public double getVar() {
+<span class="nc" id="L227">		return var;</span>
+	}
+
+	/**
+	 * It returns the value of the parameter pi, the stationary probability vector
+	 * of the MAP distribution.
+	 *
+	 * @return array of double with pi the stationary probability vector of the
+	 * MAP distribution.
+	 *
+	 */
+	public double[] getPi() {
+<span class="nc" id="L239">		return pi;</span>
+	}
+
+	/**
+	 * It returns the value of the parameter lambda, the completion rate vector
+	 * of the MAP distribution.
+	 *
+	 * @return array of double with lambda the completion rate vector of the
+	 * MAP distribution.
+	 *
+	 */
+	public double[] getLambda() {
+<span class="nc" id="L251">		return lambda;</span>
+	}
+
+	/**
+	 * It returns the value of the parameter P0, the hidden transition probability matrix
+	 * of the MAP distribution.
+	 *
+	 * @return 2D array of double with P0 the hidden transition probability matrix of the
+	 * phase-type distribution.
+	 *
+	 */
+	public double[][] getP0() {
+<span class="nc" id="L263">		return P0;</span>
+	}
+
+	/**
+	 * It returns the value of the parameter P1, the observable transition probability matrix
+	 * of the MAP distribution.
+	 *
+	 * @return 2D array of double with P1 the observable transition probability matrix of the
+	 * MAP distribution.
+	 *
+	 */
+	public double[][] getP1() {
+<span class="nc" id="L275">		return P1;</span>
+	}
+
+} // end MAPPar
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

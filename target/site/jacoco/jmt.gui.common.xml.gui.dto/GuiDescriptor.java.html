@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GuiDescriptor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.gui.dto</a> &gt; <span class="el_source">GuiDescriptor.java</span></div><h1>GuiDescriptor.java</h1><pre class="source lang-java linenums">/**
+ * Root Data Transfer Object for the GUI XML document ({@code JModelGUI.xsd}).
+ * Aggregates all graphical metadata associated with a simulation model: class colours,
+ * station positions, connection shapes, and the optional parametric analysis configuration.
+ *
+ * This DTO is populated by {@link jmt.gui.common.xml.parsers.GuiParser} during the
+ * reading phase and consumed by
+ * {@link jmt.gui.common.xml.serializer.GuiSerializer} during the writing phase.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.gui.dto;
+
+import java.util.ArrayList;
+import java.util.List;
+
+<span class="fc" id="L18">public class GuiDescriptor {</span>
+
+<span class="fc" id="L20">    private final List&lt;ClassColorDescriptor&gt; classColors             = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L21">    private final List&lt;StationPositionDescriptor&gt; stationPositions   = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L22">    private final List&lt;ConnectionShapeDescriptor&gt; connectionShapes   = new ArrayList&lt;&gt;();</span>
+
+    /** Null when parametric analysis is absent or disabled. */
+    private ParametricAnalysisDescriptor parametricAnalysis;
+
+    // --- Class colors ---
+
+<span class="fc" id="L29">    public List&lt;ClassColorDescriptor&gt; getClassColors() { return classColors; }</span>
+
+    public void addClassColor(ClassColorDescriptor desc) {
+<span class="pc bpc" id="L32" title="1 of 2 branches missed.">        if (desc != null) classColors.add(desc);</span>
+<span class="fc" id="L33">    }</span>
+
+    // --- Station positions ---
+
+<span class="fc" id="L37">    public List&lt;StationPositionDescriptor&gt; getStationPositions() { return stationPositions; }</span>
+
+    public void addStationPosition(StationPositionDescriptor desc) {
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (desc != null) stationPositions.add(desc);</span>
+<span class="fc" id="L41">    }</span>
+
+    // --- Connection shapes ---
+
+<span class="fc" id="L45">    public List&lt;ConnectionShapeDescriptor&gt; getConnectionShapes() { return connectionShapes; }</span>
+
+    public void addConnectionShape(ConnectionShapeDescriptor desc) {
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">        if (desc != null) connectionShapes.add(desc);</span>
+<span class="fc" id="L49">    }</span>
+
+    // --- Parametric analysis ---
+
+<span class="fc" id="L53">    public ParametricAnalysisDescriptor getParametricAnalysis() { return parametricAnalysis; }</span>
+
+    public void setParametricAnalysis(ParametricAnalysisDescriptor parametricAnalysis) {
+<span class="fc" id="L56">        this.parametricAnalysis = parametricAnalysis;</span>
+<span class="fc" id="L57">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

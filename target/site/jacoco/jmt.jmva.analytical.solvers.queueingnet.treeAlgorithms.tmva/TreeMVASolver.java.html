@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeMVASolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva</a> &gt; <span class="el_source">TreeMVASolver.java</span></div><h1>TreeMVASolver.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ComplexityEvaluator;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePrinter;
+
+/**
+ * Tree MVA implementation based on Hoyme and Tucci papers from 1985.
+ * @author Ben Homer, 2014.
+ */
+public class TreeMVASolver extends QNSolver {
+
+	/** The number of threads to use when running the solver. */
+	private int numThreads;
+	
+	/** The tree planter instance. */
+	private TreePlanter treePlanter;
+
+	/** The instantiated solver (may be a sequential MVA solver,
+	 * a single-threaded TMVA solver, or a multi-threaded TMVA solver depending on settings). */
+	private IThreadedTMVASolver solver;
+	
+	/** If true then sequential MVA used instead of TMVA. */
+	boolean useJMTsequentialMVA;
+	
+	/**
+	 * Constructor.
+	 * @param qnm The model to solve.
+	 * @param numThreads The number of threads to use.
+	 * @param useSequentialMVA Whether to use sequential MVA.
+	 * @throws InternalErrorException
+	 */
+	public TreeMVASolver(QNModel qnm, int numThreads, boolean useJMTsequentialMVA) throws InternalErrorException {
+<span class="nc" id="L42">		super(qnm);</span>
+<span class="nc" id="L43">		this.numThreads = numThreads;</span>
+<span class="nc" id="L44">		this.useJMTsequentialMVA = useJMTsequentialMVA;</span>
+<span class="nc" id="L45">		Printer.create();</span>
+<span class="nc" id="L46">		TreePrinter treePrinter = new TreePrinter();</span>
+<span class="nc" id="L47">		ClassCoverageUtils ccu = ClassCoverageUtils.create(qnm);</span>
+<span class="nc" id="L48">		ComplexityEvaluator cm = new TMVAComplexityEvaluator(qnm, ccu);</span>
+<span class="nc" id="L49">		treePlanter = new TreePlanter(qnm, ccu, cm, treePrinter);</span>
+<span class="nc" id="L50">		TMVACore tmvaCore = new TMVACore(qnm, ccu);</span>
+		
+<span class="nc bnc" id="L52" title="All 2 branches missed.">		if (useJMTsequentialMVA) {</span>
+<span class="nc" id="L53">			solver = new StandardMVASolver(qnm, ccu, true);</span>
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		} else if (numThreads &gt; 1) {</span>
+<span class="nc" id="L55">			solver = new MultiThreadTMVASolver(tmvaCore, numThreads);</span>
+		} else {
+<span class="nc" id="L57">			solver = new SingleThreadTMVASolver(tmvaCore);</span>
+		}
+<span class="nc" id="L59">	}</span>
+	
+    /** 
+     * Prints a short welcome message that says which solver is used. 
+     */
+    @Override
+    public void printWelcome() {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        System.out.println(&quot;Using Tree MVA. Multi-core=&quot; + (numThreads &gt; 1));</span>
+<span class="nc" id="L67">    }</span>
+	
+    /**
+     * Computes and stores the performance measures (mean throughputs and mean
+     * queue lengths for the current model.
+     * @throws InternalErrorException Thrown when any computation fails
+     */
+	public void computePerformanceMeasures() throws InternalErrorException {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">		if (!treePlanter.runTreePlantingPhase()) {</span>
+<span class="nc" id="L76">			throw new InternalErrorException(</span>
+					&quot;Early termination, suitable tree could not be planted. A sequential algorithm may be better for this network.&quot;);
+		}
+		
+<span class="nc" id="L80">		totalTimer.start();</span>
+<span class="nc" id="L81">		Node root = treePlanter.treeRoot();</span>
+<span class="nc" id="L82">		MVAResults res = solver.solve(root, qnm.N);</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">		if (res == null) {</span>
+<span class="nc" id="L84">			throw new InternalErrorException(&quot;Error computing MVA results.&quot;);</span>
+		}
+		
+<span class="nc" id="L87">		BigRational[] X = new BigRational[qnm.R];</span>
+<span class="nc" id="L88">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+<span class="nc" id="L89">		int ri = 0;</span>
+<span class="nc" id="L90">		int ki = 0;</span>
+<span class="nc bnc" id="L91" title="All 2 branches missed.">		for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc" id="L92">			boolean rResult = root.getAllCoveredClasses().contains(r);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			X[r] = rResult ? new BigRational(res.X[ri]) : BigRational.ZERO;</span>
+<span class="nc" id="L94">			ki = 0;</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">			for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc" id="L96">				boolean kResult = root.stations.contains(k);</span>
+<span class="nc bnc" id="L97" title="All 4 branches missed.">				Q[k][r] = rResult &amp;&amp; kResult ? new BigRational(res.Q[ki][ri]) : BigRational.ZERO;</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">				if (kResult) ki++;</span>
+			}
+<span class="nc bnc" id="L100" title="All 2 branches missed.">			if (rResult) ri++;</span>
+		}
+		
+<span class="nc" id="L103">		totalTimer.pause();</span>
+<span class="nc" id="L104">		qnm.setPerformanceMeasures(Q, X);</span>
+<span class="nc" id="L105">		printSummary();</span>
+<span class="nc" id="L106">	}</span>
+	
+	/**
+	 * Prints a summary of the tree MVA solution, including the model
+	 * solved and the time splits for various parts of the algorithm.
+	 */
+	private void printSummary() {
+		if (Config.VERBOSE) {
+<span class="nc" id="L114">			System.out.println(&quot;\n --- Tree MVA Summary ---&quot;);</span>
+<span class="nc" id="L115">			qnm.prettyPrint();</span>
+<span class="nc" id="L116">			System.out.println(&quot;\n --- Time splits ---&quot;);</span>
+<span class="nc" id="L117">			System.out.println(&quot;Plant mode: &quot; + treePlanter.getPlantModeUsed());</span>
+<span class="nc" id="L118">			System.out.println(&quot;No. threads: &quot; + numThreads);</span>
+<span class="nc" id="L119">			System.out.println(&quot;Sequential MVA: &quot; + useJMTsequentialMVA);</span>
+<span class="nc" id="L120">			System.out.println(&quot;Tree Planting: &quot; + treePlanter.treePlantTimer.getPrettyInterval());</span>
+<span class="nc" id="L121">			System.out.println(&quot;Performance Measures: &quot; + totalTimer.getPrettyInterval());</span>
+<span class="nc" id="L122">			long total = </span>
+<span class="nc" id="L123">					treePlanter.treePlantTimer.getInterval() + </span>
+<span class="nc" id="L124">					totalTimer.getInterval();</span>
+<span class="nc" id="L125">			System.out.println(&quot;Total Time: &quot; + total + &quot; msec&quot;);</span>
+<span class="nc" id="L126">			System.out.println(&quot;\n --- END Tree MVA Summary ---\n&quot;);</span>
+		}
+<span class="nc" id="L128">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

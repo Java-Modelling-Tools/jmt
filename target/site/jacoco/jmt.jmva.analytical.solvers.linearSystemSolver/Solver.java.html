@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Solver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystemSolver</a> &gt; <span class="el_source">Solver.java</span></div><h1>Solver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.linearSystemSolver;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+import jmt.jmva.analytical.solvers.utilities.Timer;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import javax.naming.OperationNotSupportedException;
+
+/**
+ * Class which defines several methods every Solver object must
+ * support.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class Solver implements SolverInterface {
+
+    /**
+     * The Timer object corresponding to this Solver is responsible for storing
+     * and providing the total runtime.
+     */
+<span class="nc" id="L46">    protected Timer t = new Timer();</span>
+    /**
+     * The matrix A of the linear system Ax = b.
+     */
+    /**
+     * Holds the initial version of A, as calling solve(..) destroys
+     * A's contents (the calculations are performed in-place).
+     */
+    protected BigRational[][] A, cleanA;
+    /**
+     * The vector b of the linear system Ax = b.
+     */
+    protected BigRational[] b;
+    /**
+     * Represents how many times the elements in the positions list UList have
+     * been increased by 1.
+     */
+    protected int curULevel;
+    /**
+     * The positions of elements of A that may need to be increased between
+     * successive invocations of solve(..). This is a requirement of the MoM
+     * algorithm, which was embedded in the Solver for performance reasons.
+     */
+    protected List&lt;Tuple&lt;Integer, Integer&gt;&gt; UList;
+    /**
+     * The set of indices of possible zero-columns of A.
+     */
+    protected Set&lt;Integer&gt; uncomputables;
+    /**
+     * The number of unknowns.
+     */
+    protected int N;
+    /**
+     * It is used to determine wheter the matrix A is singular.
+     */
+<span class="nc" id="L81">    protected static final BigRational EPSILON = new BigRational(1e10).reciprocal();</span>
+
+    /**
+     * Constructs a Solver object.
+     */
+    public Solver() {
+<span class="nc" id="L87">        super();</span>
+<span class="nc" id="L88">    }</span>
+
+    /**
+     * Initialises the solver object.
+     * @param A The matrix A of the linear system Ax = b
+     * @throws OperationNotSupportedException Thrown when the matrix A is not square
+     */
+    @Override
+    public void initialise(BigRational[][] A) throws OperationNotSupportedException {
+<span class="nc" id="L97">        t.start();</span>
+<span class="nc" id="L98">        List&lt;Tuple&lt;Integer, Integer&gt;&gt; l = new ArrayList&lt;Tuple&lt;Integer, Integer&gt;&gt;();</span>
+<span class="nc" id="L99">        Set&lt;Integer&gt; emptyUncomputables = new HashSet&lt;Integer&gt;();</span>
+<span class="nc" id="L100">        t.pause();</span>
+<span class="nc" id="L101">        this.initialise(A, l, emptyUncomputables);</span>
+<span class="nc" id="L102">    }</span>
+
+    /**
+     * Initialises the solver object, taking into account a list of positions of
+     * A that may need to be updated when requested. This is needed by the MoM 
+     * algorithm. 
+     * @param A The matrix A of the linear system Ax = b
+     * @param UList The list containing these positions as Tuple objects
+     * @throws OperationNotSupportedException Thrown when the matrix A is not square
+     */
+    @Override
+    public void initialise(BigRational[][] A, List&lt;Tuple&lt;Integer, Integer&gt;&gt; UList, Set&lt;Integer&gt; uncomputables) throws OperationNotSupportedException {
+<span class="nc" id="L114">        t.start();</span>
+<span class="nc" id="L115">        this.A = A;</span>
+<span class="nc" id="L116">        N = A.length;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">        if (A[0].length != N) {</span>
+<span class="nc" id="L118">            throw new OperationNotSupportedException(&quot;Matrix A of linear system is not square.&quot;);</span>
+        }
+<span class="nc" id="L120">        this.UList = UList;</span>
+<span class="nc" id="L121">        this.uncomputables = uncomputables;</span>
+<span class="nc" id="L122">        curULevel = 0;</span>
+
+<span class="nc" id="L124">        cleanA = new BigRational[N][N];</span>
+<span class="nc" id="L125">        MiscMathsFunctions.arrayCopy(A, cleanA);</span>
+<span class="nc" id="L126">        t.pause();</span>
+<span class="nc" id="L127">    }</span>
+
+    /**
+     * Initialises the solver object, taking into account a list of positions of
+     * A that may need to be updated when requested. This is needed by the MoM
+     * algorithm. Furthermore, some bounds of the maximum elements contained
+     * in the linear systems (max A, max B, max Solution = max G) are given.
+     * @param A The matrix A of the linear system Ax = b
+     * @param UList The list containing these positions as Tuple objects
+     * @param uncomputables The set of indices of possible zero-columns of A
+     * @param maxA The maximum possible element in matrix A
+     * @param maxb The maximum possible element of vector b
+     * @param maxG The maximum possible legal solution value
+     * @throws OperationNotSupportedException Thrown when the matrix A is not square
+     * @throws InternalErrorException Thrown when any unrecoverable internal error is encountered during initialisation
+     */
+    public void initialise(BigRational[][] A, List&lt;Tuple&lt;Integer, Integer&gt;&gt; UList, Set&lt;Integer&gt; uncomputables, int maxA, BigInteger maxb, BigRational maxG) throws OperationNotSupportedException, InternalErrorException {
+<span class="nc" id="L144">        initialise(A, UList, uncomputables);</span>
+<span class="nc" id="L145">    }</span>
+
+    /**
+     * Sets matrices A and cleanA equal to the original A used during
+     * initialisation plus &quot;level&quot; increments in the positions needed. See how
+     * the MoM algorithm updates A during the iterations.
+     * @param level The number of applications with regard to the original A
+     */
+    @Override
+    public void goToULevel(int level) {
+        int i, j;
+<span class="nc" id="L156">        BigRational delta = new BigRational(level - curULevel);</span>
+
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if (!delta.isZero()) {</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">            for (Tuple&lt;Integer, Integer&gt; tuple : UList) {</span>
+<span class="nc" id="L160">                i = tuple.getX();</span>
+<span class="nc" id="L161">                j = tuple.getY();</span>
+<span class="nc" id="L162">                A[i][j] = A[i][j].add(delta);</span>
+<span class="nc" id="L163">                cleanA[i][j] = A[i][j];//.copy(); // Copy seems to be unnecessary</span>
+<span class="nc" id="L164">            }</span>
+<span class="nc" id="L165">            curULevel = level;</span>
+        }
+<span class="nc" id="L167">    }</span>
+
+    /**
+     * Solves the linear system.
+     * @param b The vector b of the linear system Ax = b
+     * @return A vector containing the solutions of the linear system
+     * @throws OperationNotSupportedException Thrown always, as this Solver does not support actual solution of the system
+     * @throws InconsistentLinearSystemException Thrown when the algorithm should return an undeterminable, from the initial linear system, value.
+     * @throws InternalErrorException Thrown when an unrecoverable internal error has been detected by the solver.
+     */
+    @Override
+    public BigRational[] solve(BigRational[] b) throws OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException {
+<span class="nc" id="L179">        throw new OperationNotSupportedException();</span>
+    }
+
+    /**
+     * Returns the Timer object corresponding to this particular Solver.
+     * @return The Timer object
+     */
+    @Override
+    public Timer getTimer() {
+<span class="nc" id="L188">        return t;</span>
+    }
+
+    /**
+     * Shutsdown the solver, terminating all pools of threads and child processes
+     * if any exist.
+     */
+    public void shutdown() {
+<span class="nc" id="L196">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

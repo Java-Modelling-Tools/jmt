@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Arrivals.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov.Queues</a> &gt; <span class="el_source">Arrivals.java</span></div><h1>Arrivals.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+/*
+ * Created on 11-mar-2004
+ *
+ * To change the template for this generated file go to
+ * Window&amp;gt;Preferences&amp;gt;Java&amp;gt;Code Generation&amp;gt;Code and Comments
+ */
+package jmt.jmarkov.Queues;
+
+import jmt.jmarkov.Job;
+import jmt.jmarkov.Simulator;
+import jmt.jmarkov.Graphics.Notifier;
+import jmt.jmarkov.Queues.Exceptions.InfiniteBufferException;
+import jmt.jmarkov.Queues.Exceptions.NoJobsException;
+
+/**
+ * 
+ * Representing the arrival of the job. 
+ * it generates the job and enqueue to the queue
+ * 
+ */
+public final class Arrivals {
+
+	//if the arrival is limited then jobsToDo must be greater than zero
+<span class="nc" id="L42">	private boolean limited = false;</span>
+<span class="nc" id="L43">	private int jobsToDo = 0;</span>
+
+	private QueueLogic ql;
+
+	public Simulator sim;
+
+	//	private boolean noJobs = true;	
+
+	private Notifier n[];
+
+	private JobQueue q;
+
+	//	private double at;	
+
+	private int jobIdCounter;
+
+	public void createJob(double currentTime) {
+		double interarrivalTime;
+<span class="nc bnc" id="L61" title="All 4 branches missed.">		if ((jobsToDo &gt; 0) || (!limited)) {</span>
+			try {
+<span class="nc" id="L63">				interarrivalTime = getInterarrivalTime();</span>
+<span class="nc" id="L64">			} catch (NoJobsException e) {</span>
+				// lambda is zero
+<span class="nc" id="L66">				sim.setLambdaZero(true);</span>
+<span class="nc" id="L67">				return;</span>
+<span class="nc" id="L68">			}</span>
+<span class="nc" id="L69">			jobIdCounter++;</span>
+<span class="nc" id="L70">			Job job = new Job(jobIdCounter, currentTime);</span>
+<span class="nc" id="L71">			job.setEnteringQueueTime(interarrivalTime + currentTime);</span>
+<span class="nc" id="L72">			sim.enqueueJob(job);</span>
+		}
+<span class="nc" id="L74">	}</span>
+
+	public void addQ(Job job, double time) {
+		try {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">			if (limited) {</span>
+<span class="nc" id="L79">				jobsToDo--;</span>
+			}
+<span class="nc bnc" id="L81" title="All 4 branches missed.">			if (ql.getMaxStates() == 0 || q.size() &lt; ql.getMaxStates()) {</span>
+<span class="nc" id="L82">				q.addToQueueVoid(job);</span>
+
+<span class="nc" id="L84">				job.setStateEnterQueue();</span>
+<span class="nc" id="L85">				notifyGraphics(&quot;addQ&quot;, job.getJobId(), time);</span>
+			} else {
+<span class="nc" id="L87">				notifyGraphics(&quot;lostJob&quot;, job.getJobId(), time);</span>
+			}
+<span class="nc" id="L89">		} catch (InfiniteBufferException e) {</span>
+<span class="nc" id="L90">			e.printStackTrace();</span>
+<span class="nc" id="L91">		}</span>
+<span class="nc" id="L92">	}</span>
+
+	public void animate(Job job, double time) {
+<span class="nc" id="L95">		notifyGraphics(&quot;animate&quot;, job.getJobId(), time);</span>
+<span class="nc" id="L96">	}</span>
+
+<span class="nc" id="L98">	public Arrivals(QueueLogic ql, JobQueue q) {</span>
+<span class="nc" id="L99">		setParameters(ql, q);</span>
+<span class="nc" id="L100">	}</span>
+
+<span class="nc" id="L102">	public Arrivals(QueueLogic ql, JobQueue q, Notifier n[], int jobsToDo) {</span>
+<span class="nc" id="L103">		setParameters(ql, q, n, jobsToDo);</span>
+<span class="nc" id="L104">	}</span>
+
+	private void setParameters(QueueLogic ql, JobQueue q) {
+<span class="nc" id="L107">		this.ql = ql;</span>
+<span class="nc" id="L108">		this.q = q;</span>
+<span class="nc" id="L109">		this.jobsToDo = 0;</span>
+<span class="nc" id="L110">		this.limited = false;</span>
+<span class="nc" id="L111">		jobIdCounter = 0;</span>
+<span class="nc" id="L112">	}</span>
+
+	private void setParameters(QueueLogic ql, JobQueue q, Notifier n[], int jobsToDo) {
+<span class="nc" id="L115">		setParameters(ql, q);</span>
+<span class="nc" id="L116">		this.n = n;</span>
+<span class="nc bnc" id="L117" title="All 2 branches missed.">		if (jobsToDo &gt; 0) {</span>
+<span class="nc" id="L118">			this.limited = true;</span>
+<span class="nc" id="L119">			this.jobsToDo = jobsToDo;</span>
+		}
+<span class="nc" id="L121">	}</span>
+
+	/**
+	 * Notify the changes to the user interface
+	 * 
+	 */
+	private void notifyGraphics(String gi, int jobId, double time) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		if (gi == &quot;addQ&quot;) {</span>
+<span class="nc bnc" id="L129" title="All 2 branches missed.">			for (Notifier element : n) {</span>
+<span class="nc" id="L130">				element.enterQueue(jobId, time);</span>
+			}
+<span class="nc bnc" id="L132" title="All 2 branches missed.">		} else if (gi == &quot;lostJob&quot;) {</span>
+<span class="nc bnc" id="L133" title="All 2 branches missed.">			for (Notifier element : n) {</span>
+<span class="nc" id="L134">				element.jobLost(jobId, time);</span>
+			}
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		} else if (gi == &quot;animate&quot;) {</span>
+<span class="nc bnc" id="L137" title="All 2 branches missed.">			for (Notifier element : n) {</span>
+<span class="nc" id="L138">				element.updateQueue(jobId, time);</span>
+			}
+		}
+<span class="nc" id="L141">	}</span>
+
+	/**
+	 * Get the interarrival time from queue logic
+	 * 
+	 */
+	private double getInterarrivalTime() throws NoJobsException {
+<span class="nc" id="L148">		return ql.getArrivalTime();</span>
+	}
+
+	/**
+	 * returns if there are more jobs to create
+	 * 
+	 */
+	public boolean moreJobToDo() {
+<span class="nc bnc" id="L156" title="All 4 branches missed.">		return ((jobsToDo &gt; 0) || (!limited));</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

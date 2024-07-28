@@ -1,0 +1,527 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>BlockingRegion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">BlockingRegion.java</span></div><h1>BlockingRegion.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.simEngine.Simulation;
+
+/**
+ * This class represents a blocking region, that is a region with a finite capacity.
+ * &lt;br&gt;
+ * The constraint can be global (the constraint is shared, i.e. relative to the total
+ * occupation of jobs, without considering their own job class)
+ * or relative to each class (in this case it may happen that the
+ * jobs of one class are blocked, while the job of another one are not blocked).
+ * &lt;br&gt;
+ * If other jobs arrive when the region has already reached one or more constraints,
+ * the jobs may be blocked or dropped. Each class can decide its own drop strategy,
+ * which will be used when a constraint (global or class) is violated.
+ * &lt;br&gt;
+ * Each class can have a different weight, i.e. jobs of different class may require
+ * different capacity.
+ *
+ *
+ * @author Stefano Omini
+ *
+ */
+public class BlockingRegion {
+
+	/** The name of the blocking region */
+	protected String name;
+
+	/** the simulation */
+	protected Simulation sim;
+	
+	/** the queue network the region belongs to */
+	protected QueueNetwork network;
+
+	/** the name of the nodes contained in the blocking region */
+	protected String[] regionNodeNames;
+	
+	/** the nodes contained in the blocking region */
+	protected NetNode[] regionNodes;
+
+	/** reference to the fictitious station which controls arrivals to the blocking region */
+	protected NetNode inputStation;
+
+	/** the maximum number of jobs that can be accommodated */
+	protected double maxCapacity;
+
+	/** the maximum size of memory that can be allocated */
+	protected double maxMemory;
+
+	/** the maximum number of jobs that can be accommodated for each class */
+	protected double[] maxCapacityPerClass;
+
+	/** the maximum size of memory that can be allocated for each class */
+	protected double[] maxMemoryPerClass;
+
+	/** the number of jobs that are currently accommodated */
+	protected double actualOccupation;
+
+	/** the size of memory that are currently allocated */
+	protected double actualMemoryOccupation;
+
+	/** the number of jobs that are currently accommodated for each class */
+	protected double[] actualOccupationPerClass;
+
+	/** the size of memory that are currently allocated for each class */
+	protected double[] actualMemoryOccupationPerClass;
+
+	/** true if the specified class in excess must be dropped */
+	protected boolean[] dropClass;
+
+	/** true if there is a global constraint */
+	protected boolean globalConstraintDefined;
+
+	/** true if there is a global memory constraint */
+	protected boolean globalMemoryConstraintDefined;
+
+	/** true if the specified class has a constraint */
+	protected boolean classConstraintDefined[];
+
+	/** true if the specified class has a memory constraint */
+	protected boolean classMemoryConstraintDefined[];
+
+	protected double[] classWeights;
+	protected double[] classSizes;
+	protected double[] classSoftDeadlines;
+
+	private Measure weightMeasure, sizeMeasure;
+	private double lastTimeModified;
+	private double lastWeightOccupation, lastSizeOccupation;
+
+	protected List&lt;GroupInfo&gt; groupInfo;
+
+	/**
+	 * Creates a blocking region with global, class and group constraints
+	 */
+	public BlockingRegion(String regionName, double maxCapacity, double maxMemory, double[] maxCapacityPerClass, double[] maxMemoryPerClass, boolean[] drop, double[] classWeights, double[] classSizes,
+<span class="nc" id="L119">			double[] classSoftDeadlines, String[] groupNames, double[] maxCapacityPerGroup, double[] maxMemoryPerGroup, List&lt;List&lt;Integer&gt;&gt; groupClassIndexLists, Simulation sim, String[] regionNodeNames) {</span>
+		//No control on input dimensions.
+
+		//-----------------REGION PROPERTIES----------------------//
+		//region name
+<span class="nc" id="L124">		this.name = regionName;</span>
+		//sets owner simulation
+<span class="nc" id="L126">		this.sim = sim;</span>
+		//before sim.initialize() method, network has not been set yet
+<span class="nc" id="L128">		this.network = null;</span>
+		//before sim.initialize() method, net nodes has not been set yet
+<span class="nc" id="L130">		this.regionNodeNames = regionNodeNames;</span>
+<span class="nc" id="L131">		this.regionNodes = null;</span>
+
+		//------------------GLOBAL CONSTRAINT--------------------//
+<span class="nc" id="L134">		this.maxCapacity = maxCapacity;</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">		if (maxCapacity &lt; 0) {</span>
+			//no global constraint
+<span class="nc" id="L137">			this.globalConstraintDefined = false;</span>
+		} else {
+			//global constraint
+<span class="nc" id="L140">			this.globalConstraintDefined = true;</span>
+		}
+
+<span class="nc" id="L143">		this.maxMemory = maxMemory;</span>
+<span class="nc bnc" id="L144" title="All 2 branches missed.">		if (maxMemory &lt; 0) {</span>
+			//no global memory constraint
+<span class="nc" id="L146">			this.globalMemoryConstraintDefined = false;</span>
+		} else {
+			//global memory constraint
+<span class="nc" id="L149">			this.globalMemoryConstraintDefined = true;</span>
+		}
+
+		//init actual occupation
+<span class="nc" id="L153">		this.actualOccupation = 0;</span>
+		//init actual memory occupation
+<span class="nc" id="L155">		this.actualMemoryOccupation = 0;</span>
+
+		//------------------CLASS CONSTRAINT--------------------//
+<span class="nc" id="L158">		int classNumber = sim.getClasses().length;</span>
+<span class="nc" id="L159">		classConstraintDefined = new boolean[classNumber];</span>
+		//class constraint defined
+<span class="nc" id="L161">		this.maxCapacityPerClass = maxCapacityPerClass;</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">		for (int c = 0; c &lt; classNumber; c++) {</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">			if (maxCapacityPerClass[c] &lt; 0) {</span>
+				//no constraint on this class
+<span class="nc" id="L165">				classConstraintDefined[c] = false;</span>
+			} else {
+				//constraint on this class
+<span class="nc" id="L168">				classConstraintDefined[c] = true;</span>
+			}
+		}
+
+<span class="nc" id="L172">		classMemoryConstraintDefined = new boolean[classNumber];</span>
+		//class memory constraint defined
+<span class="nc" id="L174">		this.maxMemoryPerClass = maxMemoryPerClass;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		for (int c = 0; c &lt; classNumber; c++) {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			if (maxMemoryPerClass[c] &lt; 0) {</span>
+				//no memory constraint on this class
+<span class="nc" id="L178">				classMemoryConstraintDefined[c] = false;</span>
+			} else {
+				//memory constraint on this class
+<span class="nc" id="L181">				classMemoryConstraintDefined[c] = true;</span>
+			}
+		}
+
+		//init actual occupation per class
+<span class="nc" id="L186">		this.actualOccupationPerClass = new double[classNumber];</span>
+<span class="nc bnc" id="L187" title="All 2 branches missed.">		for (int c = 0; c &lt; classNumber; c++) {</span>
+			//init actual occupation
+<span class="nc" id="L189">			this.actualOccupationPerClass[c] = 0;</span>
+		}
+
+		//init actual occupation per class
+<span class="nc" id="L193">		this.actualMemoryOccupationPerClass = new double[classNumber];</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">		for (int c = 0; c &lt; classNumber; c++) {</span>
+			//init actual memory occupation
+<span class="nc" id="L196">			this.actualMemoryOccupationPerClass[c] = 0;</span>
+		}
+
+		//------------------DROP RULE-----------------------//
+<span class="nc" id="L200">		this.dropClass = drop;</span>
+
+		//------------------CLASS WEIGHT--------------------//
+<span class="nc" id="L203">		this.classWeights = classWeights;</span>
+
+		//------------------CLASS SIZE---------------------//
+<span class="nc" id="L206">		this.classSizes = classSizes;</span>
+
+		//-----------------CLASS DUE DATE------------------//
+<span class="nc" id="L209">		this.classSoftDeadlines = classSoftDeadlines;</span>
+
+		//------------------GROUP CONSTRAINT----------------------//
+<span class="nc" id="L212">		groupInfo = new ArrayList&lt;GroupInfo&gt;();</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		for (int i = 0; i &lt; groupNames.length; i++) {</span>
+<span class="nc" id="L214">			groupInfo.add(new GroupInfo(groupNames[i], maxCapacityPerGroup[i], maxMemoryPerGroup[i], groupClassIndexLists.get(i)));</span>
+		}
+<span class="nc" id="L216">	}</span>
+
+	//-----------------------CONSTRAINTS METHODS---------------------------\\
+
+	/** True if there is a global constraint */
+	public boolean hasGlobalConstraint() {
+<span class="nc" id="L222">		return globalConstraintDefined;</span>
+	}
+
+	/** Gets the number of jobs currently inside the blocking region */
+	public double getActualOccupation() {
+<span class="nc" id="L227">		return actualOccupation;</span>
+	}
+
+	/** Gets the number of jobs of the specified class currently inside the blocking region
+	 * @param jobClass the specified class
+	 */
+	public double getActualOccupation(JobClass jobClass) {
+<span class="nc bnc" id="L234" title="All 2 branches missed.">		if (jobClass != null) {</span>
+<span class="nc" id="L235">			return actualOccupationPerClass[jobClass.getId()];</span>
+		} else {
+<span class="nc" id="L237">			return 0;</span>
+		}
+	}
+
+	/** Increases both the number of total jobs currently inside the region
+	 * and also the number of jobs of the specified class currently inside
+	 * the region.
+	 */
+	public void increaseOccupation(JobClass jobClass) {
+<span class="nc" id="L246">		int c = jobClass.getId();</span>
+<span class="nc" id="L247">		actualOccupation += classWeights[c];</span>
+<span class="nc" id="L248">		actualMemoryOccupation += classSizes[c];</span>
+<span class="nc" id="L249">		actualOccupationPerClass[c] += classWeights[c];</span>
+<span class="nc" id="L250">		actualMemoryOccupationPerClass[c] += classSizes[c];</span>
+<span class="nc bnc" id="L251" title="All 2 branches missed.">		for (int i = 0; i &lt; groupInfo.size(); i++) {</span>
+<span class="nc bnc" id="L252" title="All 2 branches missed.">			if (groupInfo.get(i).classIndexList.contains(c)) {</span>
+<span class="nc" id="L253">				groupInfo.get(i).actualOccupation += classWeights[c];</span>
+<span class="nc" id="L254">				groupInfo.get(i).actualMemoryOccupation += classSizes[c];</span>
+<span class="nc" id="L255">				break;</span>
+			}
+		}
+
+<span class="nc" id="L259">		double currentTime = network.getNetSystem().getTime();</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">		if (weightMeasure != null) {</span>
+<span class="nc" id="L261">			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);</span>
+<span class="nc" id="L262">			lastWeightOccupation = actualOccupation;</span>
+		}
+<span class="nc bnc" id="L264" title="All 2 branches missed.">		if (sizeMeasure != null) {</span>
+<span class="nc" id="L265">			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);</span>
+<span class="nc" id="L266">			lastSizeOccupation = actualMemoryOccupation;</span>
+		}
+<span class="nc" id="L268">		lastTimeModified = currentTime;</span>
+<span class="nc" id="L269">		return;</span>
+	}
+
+	/** Decreases the number of jobs currently inside the region. */
+	public void decreaseOccupation(JobClass jobClass) {
+<span class="nc" id="L274">		int c = jobClass.getId();</span>
+<span class="nc" id="L275">		actualOccupation -= classWeights[c];</span>
+<span class="nc" id="L276">		actualMemoryOccupation -= classSizes[c];</span>
+<span class="nc" id="L277">		actualOccupationPerClass[c] -= classWeights[c];</span>
+<span class="nc" id="L278">		actualMemoryOccupationPerClass[c] -= classSizes[c];</span>
+<span class="nc bnc" id="L279" title="All 2 branches missed.">		for (int i = 0; i &lt; groupInfo.size(); i++) {</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			if (groupInfo.get(i).classIndexList.contains(c)) {</span>
+<span class="nc" id="L281">				groupInfo.get(i).actualOccupation -= classWeights[c];</span>
+<span class="nc" id="L282">				groupInfo.get(i).actualMemoryOccupation -= classSizes[c];</span>
+<span class="nc" id="L283">				break;</span>
+			}
+		}
+
+<span class="nc" id="L287">		double currentTime = network.getNetSystem().getTime();</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">		if (weightMeasure != null) {</span>
+<span class="nc" id="L289">			weightMeasure.update(lastWeightOccupation, currentTime - lastTimeModified);</span>
+<span class="nc" id="L290">			lastWeightOccupation = actualOccupation;</span>
+		}
+<span class="nc bnc" id="L292" title="All 2 branches missed.">		if (sizeMeasure != null) {</span>
+<span class="nc" id="L293">			sizeMeasure.update(lastSizeOccupation, currentTime - lastTimeModified);</span>
+<span class="nc" id="L294">			lastSizeOccupation = actualMemoryOccupation;</span>
+		}
+<span class="nc" id="L296">		lastTimeModified = currentTime;</span>
+<span class="nc" id="L297">		return;</span>
+	}
+
+	/** Gets the drop property relative to a class constraint: if
+	 * true, jobs in excess of this class will be dropped */
+	public boolean getClassDrop(JobClass jobClass) {
+<span class="nc" id="L303">		return dropClass[jobClass.getId()];</span>
+	}
+
+	/** Gets the drop property relative to a class constraint: if
+	 * true, jobs in excess of this class will be dropped */
+	public boolean getClassDrop(int classIndex) {
+<span class="nc" id="L309">		return dropClass[classIndex];</span>
+	}
+
+	/**
+	 * Tells whether the region is blocked for this class or
+	 * has enough place for a job of this class.
+	 * @return true if blocked, false if other capacity is available
+	 */
+	public boolean isBlocked(JobClass jobClass) {
+<span class="nc" id="L318">		int id = jobClass.getId();</span>
+
+<span class="nc bnc" id="L320" title="All 2 branches missed.">		if (globalConstraintDefined) {</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">			if (actualOccupation + classWeights[id] &gt; maxCapacity) {</span>
+<span class="nc" id="L322">				return true;</span>
+			}
+		}
+
+<span class="nc bnc" id="L326" title="All 2 branches missed.">		if (globalMemoryConstraintDefined) {</span>
+<span class="nc bnc" id="L327" title="All 2 branches missed.">			if (actualMemoryOccupation + classSizes[id] &gt; maxMemory) {</span>
+<span class="nc" id="L328">				return true;</span>
+			}
+		}
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		if (classConstraintDefined[jobClass.getId()]) {</span>
+<span class="nc bnc" id="L333" title="All 2 branches missed.">			if (actualOccupationPerClass[id] + classWeights[id] &gt; maxCapacityPerClass[id]) {</span>
+<span class="nc" id="L334">				return true;</span>
+			}
+		}
+
+<span class="nc bnc" id="L338" title="All 2 branches missed.">		if (classMemoryConstraintDefined[jobClass.getId()]) {</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">			if (actualMemoryOccupationPerClass[id] + classSizes[id] &gt; maxMemoryPerClass[id]) {</span>
+<span class="nc" id="L340">				return true;</span>
+			}
+		}
+
+<span class="nc bnc" id="L344" title="All 2 branches missed.">		for (int i = 0; i &lt; groupInfo.size(); i++) {</span>
+<span class="nc bnc" id="L345" title="All 2 branches missed.">			if (groupInfo.get(i).classIndexList.contains(id)) {</span>
+<span class="nc bnc" id="L346" title="All 2 branches missed.">				if (groupInfo.get(i).constraintDefined) {</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">					if (groupInfo.get(i).actualOccupation + classWeights[id] &gt; groupInfo.get(i).maxCapacity) {</span>
+<span class="nc" id="L348">						return true;</span>
+					}
+				}
+<span class="nc bnc" id="L351" title="All 2 branches missed.">				if (groupInfo.get(i).memoryConstraintDefined) {</span>
+<span class="nc bnc" id="L352" title="All 2 branches missed.">					if (groupInfo.get(i).actualMemoryOccupation + classSizes[id] &gt; groupInfo.get(i).maxMemory) {</span>
+<span class="nc" id="L353">						return true;</span>
+					}
+				}
+				break;
+			}
+		}
+
+<span class="nc" id="L360">		return false;</span>
+	}
+
+	//-------------------- end  CONSTRAINTS METHODS---------------------------\\
+
+	/** Gets the name of the blocking region */
+	public String getName() {
+<span class="nc" id="L367">		return name;</span>
+	}
+
+	/**Gets the names of the region nodes */
+	public String[] getRegionNodeNames() {
+<span class="nc" id="L372">		return regionNodeNames;</span>
+	}
+
+	/**
+	 * Finds and sets the netNode objects using the node names
+	 */
+	private void findRegionNodes() {
+		//nodes of the region must be found, using their names
+<span class="nc" id="L380">		network = sim.getNetwork();</span>
+<span class="nc" id="L381">		regionNodes = new NetNode[regionNodeNames.length];</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">		for (int i = 0; i &lt; regionNodeNames.length; i++) {</span>
+			//TODO: check wrong names...?
+<span class="nc" id="L384">			regionNodes[i] = network.getNode(regionNodeNames[i]);</span>
+		}
+<span class="nc" id="L386">	}</span>
+
+	/**
+	 * Tells whether a node is contained in the blocking region
+	 * @param nodeName the name of the node
+	 * @return true if the specified node is contained in the region
+	 */
+	public boolean belongsToRegion(String nodeName) {
+<span class="nc bnc" id="L394" title="All 2 branches missed.">		for (String regionNodeName : regionNodeNames) {</span>
+<span class="nc bnc" id="L395" title="All 2 branches missed.">			if (regionNodeName.equals(nodeName)) {</span>
+				//the specified node is contained in the blocking region
+<span class="nc" id="L397">				return true;</span>
+			}
+		}
+		//the specified node is not contained in the blocking region
+<span class="nc" id="L401">		return false;</span>
+	}
+
+	/**
+	 * Tells whether a node is contained in the blocking region
+	 * @param node the NetNode object
+	 * @return true if the specified node is contained in the region
+	 */
+	public boolean belongsToRegion(NetNode node) {
+<span class="nc bnc" id="L410" title="All 2 branches missed.">		if (network == null) {</span>
+			//if network has not been set
+			//nodes of the region must be found, using their names
+<span class="nc" id="L413">			findRegionNodes();</span>
+		}
+<span class="nc bnc" id="L415" title="All 2 branches missed.">		for (NetNode regionNode : regionNodes) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">			if (regionNode == node) {</span>
+				//the specified node is contained in the blocking region
+<span class="nc" id="L418">				return true;</span>
+			}
+		}
+		//the specified node is not contained in the blocking region
+<span class="nc" id="L422">		return false;</span>
+	}
+
+	/**
+	 * Returns a node, if contained in the blocking region
+	 * @param nodeName the name of the node
+	 * @return the NetNode object if the specified node is contained in the region,
+	 * null otherwise
+	 */
+	public NetNode getRegionNode(String nodeName) {
+<span class="nc bnc" id="L432" title="All 2 branches missed.">		if (network == null) {</span>
+			//before searching a particular node for the first time,
+			//nodes of the region must be found, using their names
+<span class="nc" id="L435">			findRegionNodes();</span>
+		}
+
+<span class="nc bnc" id="L438" title="All 2 branches missed.">		for (int i = 0; i &lt; regionNodeNames.length; i++) {</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">			if (regionNodeNames[i].equals(nodeName)) {</span>
+				//the specified node is contained in the blocking region
+				//returns the corresponding NetNode object
+<span class="nc" id="L442">				return regionNodes[i];</span>
+			}
+		}
+		//the specified node is not contained in the blocking region
+		//returns null
+<span class="nc" id="L447">		return null;</span>
+	}
+
+	/**
+	 * Gets the fictitious station that controls arrivals to the blocking region
+	 * @return the fictitious station that controls arrivals to the blocking region
+	 */
+	public NetNode getInputStation() {
+<span class="nc" id="L455">		return inputStation;</span>
+	}
+
+	/**
+	 * Sets the input station of the blocking region
+	 * @param inputStation the input station of the blocking region
+	 */
+	public void setInputStation(NetNode inputStation) {
+<span class="nc" id="L463">		this.inputStation = inputStation;</span>
+<span class="nc" id="L464">	}</span>
+
+	/**
+	 * @return Returns the classWeights.
+	 */
+	public double[] getClassWeights() {
+<span class="nc" id="L470">		return classWeights;</span>
+	}
+
+	/**
+	 * @return Returns classSoftDeadlines.
+	 */
+	public double[] getClassSoftDeadlines() {
+<span class="nc" id="L477">		return classSoftDeadlines;</span>
+	}
+
+	/**
+	 * @return Returns the maxCapacity.
+	 */
+	public double getMaxCapacity() {
+<span class="nc" id="L484">		return maxCapacity;</span>
+	}
+
+	public void setWeightMeasure(Measure wm) {
+<span class="nc" id="L488">		this.weightMeasure = wm;</span>
+<span class="nc" id="L489">	}</span>
+	public void setSizeMeasure(Measure sm) {
+<span class="nc" id="L491">		this.sizeMeasure = sm;</span>
+<span class="nc" id="L492">	}</span>
+
+	protected class GroupInfo {
+
+		public String name;
+		public double maxCapacity;
+		public double maxMemory;
+		public boolean constraintDefined;
+		public boolean memoryConstraintDefined;
+		public List&lt;Integer&gt; classIndexList;
+		public double actualOccupation;
+		public double actualMemoryOccupation;
+
+<span class="nc" id="L505">		public GroupInfo(String name, double maxCapacity, double maxMemory, List&lt;Integer&gt; classIndexList) {</span>
+<span class="nc" id="L506">			this.name = name;</span>
+<span class="nc" id="L507">			this.maxCapacity = maxCapacity;</span>
+<span class="nc bnc" id="L508" title="All 2 branches missed.">			if (maxCapacity &lt; 0) {</span>
+<span class="nc" id="L509">				constraintDefined = false;</span>
+			} else {
+<span class="nc" id="L511">				constraintDefined = true;</span>
+			}
+<span class="nc" id="L513">			this.maxMemory = maxMemory;</span>
+<span class="nc bnc" id="L514" title="All 2 branches missed.">			if (maxMemory &lt; 0) {</span>
+<span class="nc" id="L515">				memoryConstraintDefined = false;</span>
+			} else {
+<span class="nc" id="L517">				memoryConstraintDefined = true;</span>
+			}
+<span class="nc" id="L519">			this.classIndexList = classIndexList;</span>
+<span class="nc" id="L520">			this.actualOccupation = 0;</span>
+<span class="nc" id="L521">			this.actualMemoryOccupation = 0;</span>
+<span class="nc" id="L522">		}</span>
+
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

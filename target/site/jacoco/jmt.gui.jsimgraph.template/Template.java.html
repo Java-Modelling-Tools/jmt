@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Template.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.template</a> &gt; <span class="el_source">Template.java</span></div><h1>Template.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.template;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.panels.CustomizableDialogFactory;
+import jmt.gui.jsimgraph.JGraphMod.CellFactory;
+import jmt.gui.jsimgraph.JGraphMod.JmtCell;
+import jmt.gui.jsimgraph.controller.JmtClipboard;
+import jmt.gui.jsimgraph.controller.Mediator;
+import jmt.gui.jsimgraph.definitions.JMTPoint;
+import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
+import jmt.gui.jsimgraph.template.ITemplate;
+
+/**
+ * @author S Jiang
+ * 
+ */
+public class Template extends WizardPanel implements ITemplate, CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private Mediator mediator;
+
+	JSpinner number;
+
+	private JmtCell fork;
+	private JmtCell join;
+	private JmtCell server;
+
+	private JPanel parent;
+
+<span class="nc" id="L71">	public Template(Mediator m) {</span>
+<span class="nc" id="L72">		mediator = m;</span>
+<span class="nc" id="L73">		parent = this;</span>
+<span class="nc" id="L74">		this.initComponents();</span>
+<span class="nc" id="L75">	}</span>
+
+	public void initComponents() {
+		//------------------build the GUI components of your template here------------------//
+
+<span class="nc" id="L80">		initCells();</span>
+<span class="nc" id="L81">		JPanel picPane = new JPanel();</span>
+<span class="nc" id="L82">		picPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Illustration&quot;));</span>
+		try {
+<span class="nc" id="L84">			BufferedImage img = ImageIO.read(new File(&quot;/home/js/JMT-Refactory/template-sample-code/pictures/TemplateIllustration.png&quot;));</span>
+<span class="nc" id="L85">			Image resizedImage = </span>
+<span class="nc" id="L86">					img.getScaledInstance(300, 200, Image.SCALE_SMOOTH);</span>
+<span class="nc" id="L87">			ImageIcon icon = new ImageIcon(resizedImage);</span>
+
+<span class="nc" id="L89">			JLabel pLabel = new JLabel(icon);</span>
+<span class="nc" id="L90">			picPane.add(pLabel);</span>
+<span class="nc" id="L91">		} catch (Exception e) {</span>
+
+<span class="nc" id="L93">		}</span>
+<span class="nc" id="L94">		JLabel label = new JLabel(&quot;Number of service center: &quot;);</span>
+<span class="nc" id="L95">		number = new JSpinner(new SpinnerNumberModel(1, 1, 99, 1));</span>
+<span class="nc" id="L96">		label.setLabelFor(number);</span>
+
+<span class="nc" id="L98">		JPanel structurePane = new JPanel();</span>
+<span class="nc" id="L99">		structurePane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Structure&quot;));</span>
+<span class="nc" id="L100">		structurePane.add(label);</span>
+<span class="nc" id="L101">		structurePane.add(number);</span>
+
+<span class="nc" id="L103">		JButton editFork = new JButton(&quot;Edit Fork&quot;);</span>
+<span class="nc" id="L104">		JButton editServer = new JButton(&quot;Edit Service Center&quot;);</span>
+<span class="nc" id="L105">		JButton editJoin = new JButton(&quot;Edit Join&quot;);</span>
+
+<span class="nc" id="L107">		editFork.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L108">		editServer.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L109">		editJoin.setPreferredSize(new Dimension((int)(150 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L111">		editFork.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L113">				mediator.startEditingAtAbstractCell(fork);</span>
+<span class="nc" id="L114">			}</span>
+		});
+
+<span class="nc" id="L117">		editServer.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L119">				mediator.startEditingAtAbstractCell(server);</span>
+<span class="nc" id="L120">			}</span>
+		});
+
+<span class="nc" id="L123">		editJoin.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L125">				mediator.startEditingAtAbstractCell(join);</span>
+<span class="nc" id="L126">			}</span>
+		});
+
+<span class="nc" id="L129">		JPanel parameterPane = new JPanel();</span>
+<span class="nc" id="L130">		parameterPane.setBorder(new TitledBorder(new EtchedBorder(), &quot;Parameter&quot;));</span>
+<span class="nc" id="L131">		parameterPane.add(editFork);</span>
+<span class="nc" id="L132">		parameterPane.add(editServer);</span>
+<span class="nc" id="L133">		parameterPane.add(editJoin);</span>
+
+<span class="nc" id="L135">		JPanel centerPane = new JPanel(new GridLayout(2,1));</span>
+<span class="nc" id="L136">		centerPane.add(structurePane);</span>
+<span class="nc" id="L137">		centerPane.add(parameterPane);</span>
+
+<span class="nc" id="L139">		JButton create = new JButton(&quot;Insert&quot;);</span>
+
+<span class="nc" id="L141">		create.setPreferredSize(new Dimension((int)(100 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling)));</span>
+
+<span class="nc" id="L143">		create.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent arg0) {
+<span class="nc" id="L145">				createModel();</span>
+<span class="nc" id="L146">				SwingUtilities.getWindowAncestor(parent).setVisible(false);</span>
+<span class="nc" id="L147">			}</span>
+		});
+
+<span class="nc" id="L150">		JPanel bottoms = new JPanel();</span>
+<span class="nc" id="L151">		bottoms.add(create);</span>
+<span class="nc" id="L152">		this.setLayout(new BorderLayout());</span>
+<span class="nc" id="L153">		this.add(picPane, BorderLayout.NORTH);</span>
+<span class="nc" id="L154">		this.add(centerPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L155">		this.add(bottoms, BorderLayout.SOUTH);</span>
+
+		//------------------------------------END------------------------------------------//
+<span class="nc" id="L158">	}</span>
+
+	public void initCells() {
+<span class="nc" id="L161">		CellFactory cf = new CellFactory(mediator);</span>
+<span class="nc" id="L162">		fork = cf.createCell(&quot;ForkCell&quot;);</span>
+<span class="nc" id="L163">		server = cf.createCell(&quot;ServerCell&quot;);</span>
+<span class="nc" id="L164">		join = cf.createCell(&quot;JoinCell&quot;);</span>
+<span class="nc" id="L165">	}</span>
+
+	@Override
+	public CommonModel createModel() {
+<span class="nc" id="L169">		mediator.setSelectState();</span>
+<span class="nc" id="L170">		double YBound = mediator.getBound();</span>
+<span class="nc" id="L171">		int num = (Integer)number.getValue();</span>
+
+		//-----------------Adding cells to mediator----------------------//
+<span class="nc" id="L174">		mediator.InsertCell(new JMTPoint(50, YBound + 50 * num, false), fork);</span>
+<span class="nc" id="L175">		mediator.InsertCell(new JMTPoint(300, YBound + 50 * num, false), join);</span>
+<span class="nc" id="L176">		mediator.InsertCell(new JMTPoint(150, YBound + 50, false), server);</span>
+
+<span class="nc" id="L178">		mediator.connect(fork, server);</span>
+<span class="nc" id="L179">		mediator.connect(server, join);</span>
+
+<span class="nc" id="L181">		JmtClipboard clipboard = new JmtClipboard(mediator);</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		for (int i = 1; i &lt; num; i++) {</span>
+<span class="nc" id="L184">			clipboard.copyCell(server);</span>
+<span class="nc" id="L185">			JmtCell sub = clipboard.pasteCell(new JMTPoint(150, YBound + 50 + 100 * i, false));</span>
+
+<span class="nc" id="L187">			mediator.connect(fork, sub);</span>
+<span class="nc" id="L188">			mediator.connect(sub, join);</span>
+		}
+
+<span class="nc" id="L191">		CommonModel cm = mediator.getModel();</span>
+<span class="nc" id="L192">		return cm;</span>
+	}
+
+	@Override
+	public void showDialog(JSIMGraphMain mainWindow) {
+<span class="nc" id="L197">		CustomizableDialogFactory templateDialogFactory = new CustomizableDialogFactory(mainWindow);</span>
+		//change size/name of your template dialog here
+		//width, height, ..., title
+<span class="nc" id="L200">		templateDialogFactory.getDialog(500, 420, this, &quot;Parallel Model Template&quot;);</span>
+<span class="nc" id="L201">	}</span>
+
+	//change the name of your template
+	@Override
+	public String getName() {
+<span class="nc" id="L206">		return &quot;Parallel Model Template&quot;;</span>
+	}
+
+	public static void main(String[] args) {
+<span class="nc" id="L210">		return;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MonteCarloLogisticSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver</a> &gt; <span class="el_source">MonteCarloLogisticSolver.java</span></div><h1>MonteCarloLogisticSolver.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.augmentDemandsAtServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.augmentSeverCountAtServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.pprod;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.removeServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.removeSeverCountAtServer;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.utilities.Timer;
+
+public class MonteCarloLogisticSolver extends QNSolver {
+
+	//solver parameters
+	private LogisticCore lcore;
+	private double epsilon;
+	private int max_samples;
+	private MathContext MC;
+	private int nthread;
+	//model parameters
+	private double[][] demands;
+	private double[] delays;
+	private int[] pop;
+	private int[] serv;
+	//miscellaneous
+	private boolean is_nc_computed; //flag to mark if NC is computed
+	private boolean is_ld; //flag to mark if multiserver case - QL calculations are different
+	private Timer nc_timer, perf_timer;
+
+	public MonteCarloLogisticSolver(QNModel qnm, double epsilon, int max_samples, int precision, int nthread) throws InternalErrorException {
+<span class="nc" id="L40">		super(qnm);</span>
+<span class="nc" id="L41">		this.epsilon = epsilon;</span>
+<span class="nc" id="L42">		this.max_samples = max_samples;</span>
+<span class="nc" id="L43">		this.MC = new MathContext(precision);</span>
+<span class="nc" id="L44">		this.is_nc_computed = false;</span>
+<span class="nc" id="L45">		initialize(qnm);</span>
+<span class="nc" id="L46">		this.nthread = nthread;</span>
+		// LogisticCore for NC calculation.
+<span class="nc" id="L48">		this.lcore = new LogisticCoreAdd(demands, serv, delays, pop, epsilon, max_samples, nthread, MC);</span>
+<span class="nc" id="L49">		nc_timer = new Timer();</span>
+<span class="nc" id="L50">		perf_timer = new Timer();</span>
+<span class="nc" id="L51">	}</span>
+
+	public MonteCarloLogisticSolver(QNModel qnm) throws InternalErrorException {
+<span class="nc" id="L54">		this(qnm, 0.0, SolverMultiClosedMonteCarloLogistic.DEFAULT_MAX_SAMPLES, SolverMultiClosedMonteCarloLogistic.DEFAULT_PRECISION, 1);</span>
+<span class="nc" id="L55">	}</span>
+
+	private void initialize(QNModel qnm) {
+		/**
+		 * Initialize the solver by extracting model parameters from QNModel
+		 */
+<span class="nc" id="L61">		demands = new double[qnm.M][qnm.R];</span>
+
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		for (int k=0; k&lt;qnm.M; k++) {</span>
+<span class="nc bnc" id="L64" title="All 2 branches missed.">			for (int r=0; r&lt;qnm.R; r++) {</span>
+<span class="nc" id="L65">				demands[k][r] = qnm.getDemand(k,r);</span>
+			}
+		}
+
+<span class="nc" id="L69">		delays = new double[qnm.R];</span>
+<span class="nc bnc" id="L70" title="All 2 branches missed.">		for (int r=0; r&lt;qnm.R; r++)</span>
+<span class="nc" id="L71">			delays[r] = qnm.getDelay(r);</span>
+
+<span class="nc" id="L73">		pop = new int[qnm.R];</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">		for (int r=0; r&lt;qnm.R; r++)</span>
+<span class="nc" id="L75">			pop[r] = qnm.N.get(r);</span>
+
+<span class="nc" id="L77">		is_ld = false;</span>
+<span class="nc" id="L78">		serv = new int[qnm.M];</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">		for (int i=0; i&lt;qnm.M; i++) {</span>
+<span class="nc" id="L80">			serv[i] = qnm.getNumberOfServers(i);</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">			if (serv[i]&gt;1)</span>
+<span class="nc" id="L82">				is_ld = true;</span>
+		}
+<span class="nc" id="L84">	}</span>
+
+	@Override
+	public void printWelcome() {
+<span class="nc" id="L88">		System.out.println(&quot;Using Monte Carlo Logistic Solver&quot;);</span>
+<span class="nc" id="L89">	}</span>
+
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException {
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		if (!is_nc_computed) {</span>
+<span class="nc" id="L94">			nc_timer.start();</span>
+<span class="nc" id="L95">			this.G = new BigRational(this.lcore.calculateNC());</span>
+<span class="nc" id="L96">			this.qnm.setNormalisingConstant(this.G);</span>
+<span class="nc" id="L97">			is_nc_computed = true;</span>
+<span class="nc" id="L98">			nc_timer.pause();</span>
+		}
+<span class="nc" id="L100">	}</span>
+
+	public BigDecimal getNormalisingConstantAsBigDecimal() throws InternalErrorException {
+<span class="nc bnc" id="L103" title="All 2 branches missed.">		if (lcore.is_invalid_model())</span>
+<span class="nc" id="L104">			throw new InternalErrorException(&quot;Invalid model!&quot;);</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (!is_nc_computed)</span>
+<span class="nc" id="L106">			throw new InternalErrorException(&quot;Normalising constant not yet computed!&quot;);</span>
+<span class="nc" id="L107">		return this.G.asBigDecimal();</span>
+	}
+
+	@Override
+	public void computePerformanceMeasures() throws InternalErrorException {
+<span class="nc" id="L112">		perf_timer.start();</span>
+		//Array of Mean Throughputs per class
+<span class="nc" id="L114">		BigRational[] X = new BigRational[qnm.R];</span>
+
+		//Array of Mean Queue Lengths
+<span class="nc" id="L117">		BigRational[][] Q = new BigRational[qnm.M][qnm.R];</span>
+
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		if (!is_nc_computed)</span>
+<span class="nc" id="L120">			computeNormalisingConstant();</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">		if (lcore.is_invalid_model())</span>
+<span class="nc" id="L122">			throw new InternalErrorException(&quot;Invalid model!&quot;);</span>
+
+		// Throughput calculations
+<span class="nc bnc" id="L125" title="All 2 branches missed.">		for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc bnc" id="L126" title="All 2 branches missed.">			if (pop[r] == 0) {</span>
+<span class="nc" id="L127">				X[r] = BigRational.ZERO;</span>
+<span class="nc" id="L128">				continue;</span>
+			}
+
+<span class="nc" id="L131">			int[] pop_minus = pop.clone();</span>
+<span class="nc" id="L132">			pop_minus[r]--;</span>
+
+<span class="nc" id="L134">			LogisticCore NCS_minus = new LogisticCoreAdd(demands, serv, delays, pop_minus, epsilon, max_samples, nthread, MC);</span>
+<span class="nc" id="L135">			BigDecimal NC_minus = NCS_minus.calculateNC();</span>
+<span class="nc" id="L136">			X[r] = new BigRational(NC_minus.divide(qnm.getNormalisingConstant().asBigDecimal(), MC));</span>
+		}
+
+		// Queue-length calculations
+<span class="nc bnc" id="L140" title="All 2 branches missed.">		if (is_ld) {</span>
+			// Calculation of mean QL for LD servers involve computing the marginal probs
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">				for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc" id="L144">					double qkr = 0;</span>
+<span class="nc bnc" id="L145" title="All 2 branches missed.">					for (int n=1; n&lt;=pop[r]; n++) {</span>
+<span class="nc" id="L146">						double p = marginal_prob(k,r,n);</span>
+<span class="nc" id="L147">						qkr += n*p;</span>
+					}
+<span class="nc" id="L149">					Q[k][r] = new BigRational(qkr);</span>
+				}
+			}
+		} else {
+			// Mean QL for Single server and Delay models, QL_{kr} = D_{kr}*G^(+k)/G
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">				for (int k = 0; k &lt; qnm.M; k++) {</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">					if (pop[r] == 0) {</span>
+<span class="nc" id="L157">						Q[k][r] = BigRational.ZERO;</span>
+<span class="nc" id="L158">						continue;</span>
+					}
+
+<span class="nc" id="L161">					int[] pop_minus = pop.clone();</span>
+<span class="nc" id="L162">					pop_minus[r]--;</span>
+
+					double[][] demands_plus;
+					int[] serv_plus;
+
+<span class="nc" id="L167">					demands_plus = augmentDemandsAtServer(qnm.M, qnm.R, demands, k);</span>
+<span class="nc" id="L168">					serv_plus = augmentSeverCountAtServer(qnm.M, qnm.R, serv, k);</span>
+<span class="nc" id="L169">					LogisticCore NCS_plus = new LogisticCoreAdd(demands_plus, serv_plus, delays, pop_minus, epsilon, max_samples, nthread, MC);</span>
+
+<span class="nc" id="L171">					BigDecimal NC_plus = NCS_plus.calculateNC();</span>
+
+<span class="nc" id="L173">					NC_plus = NC_plus.multiply(new BigDecimal(demands[k][r]));</span>
+<span class="nc" id="L174">					Q[k][r] = new BigRational(NC_plus.divide(qnm.getNormalisingConstant().asBigDecimal(), MC));</span>
+				}
+			}
+		}
+
+<span class="nc" id="L179">		qnm.setPerformanceMeasures(Q,X);</span>
+<span class="nc" id="L180">		perf_timer.pause();</span>
+<span class="nc" id="L181">	}</span>
+
+	private double marginal_prob(int k, int r, int nr) throws InternalErrorException {
+		/**
+		 * Marginal probability of server k having class r population = nr
+		 * for multiserver models, P(n_{kr} = nr | model)
+		 * ref: Casale 2009, CoMoM: Efficient Class-Oriented Evaluation of
+		 * Multiclass Performance Models
+		 */
+
+		// single queue system
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		if (qnm.M==1) {</span>
+<span class="nc bnc" id="L193" title="All 2 branches missed.">			if (nr == pop[r])</span>
+<span class="nc" id="L194">				return 1;</span>
+<span class="nc" id="L195">			return 0;</span>
+		}
+
+		// Get the population vector for all classes other than r
+<span class="nc" id="L199">		int[] Popnotr = new int[qnm.R-1];</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">		for (int i=0, j=0; i&lt;qnm.R; i++) {</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">			if (i!=r) {</span>
+<span class="nc" id="L202">				Popnotr[j] = pop[i];</span>
+<span class="nc" id="L203">				j++;</span>
+			}
+		}
+
+		// Enumerate all possible states of server k, with specified population of
+		// class r.
+<span class="nc" id="L209">		BigDecimal P = BigDecimal.ZERO;</span>
+<span class="nc" id="L210">		int[] nknotr = pprod(Popnotr);</span>
+		do {
+<span class="nc" id="L212">			int[] nk = new int[qnm.R];</span>
+<span class="nc" id="L213">			int nk_sum = 0;</span>
+<span class="nc" id="L214">			double logF = 0;</span>
+
+<span class="nc" id="L216">			int[] pop_minus = pop.clone();</span>
+<span class="nc bnc" id="L217" title="All 2 branches missed.">			for (int i=0, j=0; i&lt;qnm.R; i++) {</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">				if (i==r)</span>
+<span class="nc" id="L219">					nk[i] = nr;</span>
+				else {
+<span class="nc" id="L221">					nk[i] = nknotr[j];</span>
+<span class="nc" id="L222">					j++;</span>
+				}
+<span class="nc" id="L224">				nk_sum += nk[i];</span>
+
+<span class="nc" id="L226">				logF += nk[i]*Math.log(demands[k][i]);</span>
+<span class="nc" id="L227">				logF -= lnGamma(nk[i]+1);</span>
+<span class="nc" id="L228">				pop_minus[i] -= nk[i];</span>
+			}
+
+<span class="nc" id="L231">			logF += lnGamma(nk_sum+1) - logbeta(nk_sum, serv[k]);</span>
+
+<span class="nc" id="L233">			BigDecimal F = exp(logF, MC);</span>
+
+<span class="nc" id="L235">			double[][] demands_minus = removeServer(qnm.M, qnm.R, demands, k);</span>
+<span class="nc" id="L236">			int[] serv_minus = removeSeverCountAtServer(qnm.M, qnm.R, serv, k);</span>
+<span class="nc" id="L237">			LogisticCore NCS_minus = new LogisticCoreAdd(demands_minus, serv_minus, delays, pop_minus, epsilon, max_samples, nthread, MC);</span>
+<span class="nc" id="L238">			BigDecimal NC_minus = NCS_minus.calculateNC();</span>
+
+			// P(n_{kr} = nr) = F_k(n_k)*G(-1_k, N - n_k)/G
+<span class="nc" id="L241">			BigDecimal G = F;</span>
+<span class="nc" id="L242">			G = G.multiply(NC_minus, MC);</span>
+<span class="nc" id="L243">			P = P.add(G, MC);</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">		} while (pprod(nknotr, Popnotr));</span>
+
+<span class="nc" id="L246">		P = P.divide(qnm.getNormalisingConstant().asBigDecimal(), MC);</span>
+<span class="nc" id="L247">		return P.doubleValue();</span>
+	}
+
+	private double logbeta(int n, int m) {
+<span class="nc bnc" id="L251" title="All 2 branches missed.">		if (n&gt;m)</span>
+<span class="nc" id="L252">			return lnGamma(m+1) + (n-m)*Math.log(m);</span>
+<span class="nc" id="L253">		return lnGamma(n+1);</span>
+	}
+
+	public double[] getStatPoint() {
+<span class="nc" id="L257">		return this.lcore.getStationaryPointSimplex();</span>
+	}
+
+	@Override
+	public void printTimeStatistics() {
+<span class="nc" id="L262">		long selfTime = nc_timer.getInterval() + perf_timer.getInterval();</span>
+
+<span class="nc" id="L264">		Timer selfTimer = new Timer(selfTime);</span>
+
+<span class="nc" id="L266">		System.out.println(&quot;NC time: &quot; + nc_timer.getPrettyInterval());</span>
+<span class="nc" id="L267">		System.out.println(&quot;Performance Indices time: &quot; + perf_timer.getPrettyInterval());</span>
+<span class="nc" id="L268">		System.out.println(&quot;Total time: &quot; + selfTimer.getPrettyInterval());</span>
+<span class="nc" id="L269">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Weibull.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.distributions</a> &gt; <span class="el_source">Weibull.java</span></div><h1>Weibull.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.distributions;
+
+import javax.swing.ImageIcon;
+
+import jmt.engine.math.Gamma;
+import jmt.gui.common.JMTImageLoader;
+
+/**
+ * &lt;p&gt;Title: Weibull distribution&lt;/p&gt;
+ * &lt;p&gt;Description: Weibull distribution data structure&lt;/p&gt;
+ * 
+ * @author Giuliano Casale
+ *         Date: 7-Aug-2021
+ */
+public class Weibull extends Distribution {
+
+	/**
+	 * Constructs a new Erlang Distribution
+	 */
+	public Weibull() {
+<span class="fc" id="L39">		super(&quot;Weibull&quot;, &quot;jmt.engine.random.Weibull&quot;, &quot;jmt.engine.random.WeibullPar&quot;, &quot;Weibull distribution&quot;);</span>
+<span class="fc" id="L40">		hasMean = true;</span>
+<span class="fc" id="L41">		hasC = true;</span>
+<span class="fc" id="L42">		isNestable = true;</span>
+<span class="fc" id="L43">	}</span>
+
+	/**
+	 * Used to set parameters of this distribution
+	 * @return distribution parameters
+	 */
+	@Override
+	protected Parameter[] setParameters() {
+		// Creates parameter array
+<span class="fc" id="L52">		Parameter[] parameters = new Parameter[2];</span>
+
+		// Sets parameter lambda
+		//ARIF: Left parameters name as alpha and r in order to have back-compatibility of the XML files.
+<span class="fc" id="L56">		parameters[0] = new Parameter(&quot;alpha&quot;, &quot;\u03BB&quot;, Double.class, new Double(0.445106618845));</span>
+		// Checks value of lambda must greater than 0
+<span class="fc" id="L58">		parameters[0].setValueChecker(new ValueChecker() {</span>
+			public boolean checkValue(Object value) {
+<span class="nc" id="L60">				Double d = (Double) value;</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">				if (d.doubleValue() &gt; 0.0) {</span>
+<span class="nc" id="L62">					return true;</span>
+				} else {
+<span class="nc" id="L64">					return false;</span>
+				}
+			}
+		});
+
+		// Sets parameter k
+<span class="fc" id="L70">		parameters[1] = new Parameter(&quot;r&quot;, &quot;k&quot;, Double.class, new Double(0.471065636952));</span>
+		// Checks value of k must be greater than 0
+<span class="fc" id="L72">		parameters[1].setValueChecker(new ValueChecker() {</span>
+			public boolean checkValue(Object value) {
+<span class="nc" id="L74">				Double d = (Double) value;</span>
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				if (d.doubleValue() &gt; 0) {</span>
+<span class="nc" id="L76">					return true;</span>
+				} else {
+<span class="nc" id="L78">					return false;</span>
+				}
+			}
+		});
+
+<span class="fc" id="L83">		return parameters;</span>
+	}
+
+	/**
+	 * Sets illustrating figure in distribution panel
+	 * @return illustrating figure
+	 */
+	@Override
+	protected ImageIcon setImage() {
+<span class="fc" id="L92">		return JMTImageLoader.loadImage(&quot;Weibull&quot;);</span>
+	}
+
+	/**
+	 * Returns this distribution's short description
+	 * @return distribution's short description
+	 */
+	@Override
+	public String toString() {
+<span class="nc" id="L101">		return &quot;weibull(&quot; + formatNumber(((Double) parameters[0].getValue()).doubleValue()) + &quot;,&quot;</span>
+<span class="nc" id="L102">				+ formatNumber(((Double) parameters[1].getValue()).doubleValue()) + &quot;)&quot;;</span>
+	}
+
+	/**
+	 * Sets the mean for this distribution
+	 * @param value mean value
+	 */
+	@Override
+	public void setMean(double value) {
+		
+<span class="nc bnc" id="L112" title="All 2 branches missed.">		if (Math.abs(value - mean)&gt;1e-12) {</span>
+<span class="nc" id="L113">			setCM(value, c);</span>
+		}
+<span class="nc" id="L115">	}</span>
+
+	/**
+	 * Sets the variation coefficient C for this distribution
+	 * @param value variation coefficient C value
+	 */
+	@Override
+	public void setC(double value) {
+<span class="nc bnc" id="L123" title="All 2 branches missed.">		if (Math.abs(value - c)&gt;1e-12) {</span>
+<span class="nc" id="L124">			setCM(mean, value);</span>
+		}
+<span class="nc" id="L126">	}</span>
+
+	/**
+	 * Sets Mean and C values
+	 * @param mean mean value
+	 * @param c c value
+	 */
+	protected void setCM(double mean, double c) {
+		// k = 1 / (c*c) &amp;&amp; lambda = 1 / (mean*c*c)
+		// Backups old parameters to restore them upon a false result
+<span class="nc" id="L136">		Object oldr = getParameter(&quot;r&quot;).getValue();</span>
+<span class="nc" id="L137">		Object olda = getParameter(&quot;alpha&quot;).getValue();</span>
+
+<span class="nc" id="L139">		Double r = 0.0;</span>
+<span class="nc" id="L140">		Double alpha = 0.0;</span>
+<span class="nc" id="L141">		r= Math.pow(c, -1.086); // Justus approximation 1976</span>
+<span class="nc" id="L142">		alpha = mean / Gamma.gamma(1+1/r);</span>
+		
+<span class="nc bnc" id="L144" title="All 4 branches missed.">		if (getParameter(&quot;r&quot;).setValue(r) &amp;&amp; getParameter(&quot;alpha&quot;).setValue(alpha)) {</span>
+<span class="nc" id="L145">			this.mean = mean;</span>
+<span class="nc" id="L146">			this.c = c;</span>
+		} else {
+<span class="nc" id="L148">			getParameter(&quot;r&quot;).setValue(oldr);</span>
+<span class="nc" id="L149">			getParameter(&quot;alpha&quot;).setValue(olda);</span>
+		}
+<span class="nc" id="L151">	}</span>
+
+	/**
+	 * This method is called whenever a parameter changes and &lt;code&gt;hasMean&lt;/code&gt; or
+	 * &lt;code&gt;hasC&lt;/code&gt; is true
+	 */
+	@Override
+	public void updateCM() {
+<span class="fc" id="L159">		double alpha = ((Double) getParameter(&quot;alpha&quot;).getValue()).doubleValue();</span>
+<span class="fc" id="L160">		double r = ((Double) getParameter(&quot;r&quot;).getValue()).doubleValue();</span>
+<span class="fc" id="L161">		mean = alpha * Gamma.gamma(1+1/r);</span>
+<span class="fc" id="L162">		c = Math.sqrt(Math.pow(alpha,2)*(Gamma.gamma(1+2/r)-Math.pow(Gamma.gamma(1+1/r),2)))/mean;</span>
+<span class="fc" id="L163">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

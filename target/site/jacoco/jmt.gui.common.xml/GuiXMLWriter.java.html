@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GuiXMLWriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml</a> &gt; <span class="el_source">GuiXMLWriter.java</span></div><h1>GuiXMLWriter.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.xml;
+
+import java.io.File;
+import java.io.OutputStream;
+import java.util.*;
+
+import javax.swing.JOptionPane;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisChecker;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisModelFactory;
+import jmt.gui.jsimgraph.definitions.JSimGraphModel;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+/**
+ * &lt;p&gt;Title: Gui XML Writer&lt;/p&gt;
+ * &lt;p&gt;Description: Writes JModel GUI specific information to an XML file. This
+ * class provides methods for model save.&lt;/p&gt;
+ * 
+ * @author Bertoli Marco
+ *         Date: 22-lug-2005
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
+ */
+@Deprecated
+<span class="nc" id="L60">public class GuiXMLWriter implements GuiXMLConstants {</span>
+
+	/**
+	 * Writes gui model informations into an XML file
+	 * @param fileName name of the file to be created
+	 * @param model data structure
+	 */
+	public static void writeXML(String fileName, CommonModel model) {
+<span class="nc" id="L68">		writeToResult(new StreamResult(new File(fileName)), model);</span>
+<span class="nc" id="L69">	}</span>
+
+	/**
+	 * Writes gui model informations into an XML file
+	 * @param xmlFile handler to the file to be created
+	 * @param model data structure
+	 */
+	public static void writeXML(File xmlFile, CommonModel model) {
+<span class="nc" id="L77">		writeToResult(new StreamResult(xmlFile), model);</span>
+<span class="nc" id="L78">	}</span>
+
+	/**
+	 * Writes gui model informations into an XML file
+	 * @param out stream where XML should be written
+	 * @param model data structure
+	 */
+	public static void writeXML(OutputStream out, CommonModel model) {
+<span class="nc" id="L86">		writeToResult(new StreamResult(out), model);</span>
+<span class="nc" id="L87">	}</span>
+
+	/**
+	 * Helper method used to call transformer to build up an XML file from a Document
+	 * @param result result where created xml should be put
+	 * @param model data structure
+	 */
+	private static void writeToResult(Result result, CommonModel model) {
+<span class="nc" id="L95">		Document modelDoc = getDocument(model);</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if (modelDoc == null) {</span>
+<span class="nc" id="L97">			return;</span>
+		}
+		try {
+<span class="nc" id="L100">			Transformer transformer = TransformerFactory.newInstance().newTransformer();</span>
+<span class="nc" id="L101">			transformer.setOutputProperty(OutputKeys.ENCODING, &quot;ISO-8859-1&quot;);</span>
+<span class="nc" id="L102">			transformer.setOutputProperty(OutputKeys.INDENT, &quot;yes&quot;);</span>
+<span class="nc" id="L103">			transformer.transform(new DOMSource(modelDoc), result);</span>
+<span class="nc" id="L104">		} catch (TransformerConfigurationException e) {</span>
+<span class="nc" id="L105">			e.printStackTrace();</span>
+<span class="nc" id="L106">		} catch (TransformerFactoryConfigurationError e) {</span>
+<span class="nc" id="L107">			e.printStackTrace();</span>
+<span class="nc" id="L108">		} catch (TransformerException e) {</span>
+<span class="nc" id="L109">			e.printStackTrace();</span>
+<span class="nc" id="L110">		}</span>
+<span class="nc" id="L111">	}</span>
+
+	/**
+	 * Returns the entire Document representing GUI data structure.
+	 * @param model data structure
+	 * @return complete GUI data structure in Document format
+	 */
+	public static Document getDocument(CommonModel model) {
+<span class="fc" id="L119">		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();</span>
+<span class="fc" id="L120">		DocumentBuilder docBuilder = null;</span>
+		try {
+<span class="fc" id="L122">			docBuilder = dbf.newDocumentBuilder();</span>
+<span class="nc" id="L123">		} catch (ParserConfigurationException e) {</span>
+<span class="nc" id="L124">			e.printStackTrace();</span>
+<span class="nc" id="L125">			return null;</span>
+<span class="fc" id="L126">		}</span>
+<span class="fc" id="L127">		Document modelDoc = docBuilder.newDocument();</span>
+		// Writes all elements on Document
+<span class="fc" id="L129">		writeGuiInfos(modelDoc, model);</span>
+<span class="fc" id="L130">		return modelDoc;</span>
+	}
+
+	/**
+	 * Creates root element and adds schema informations to it
+	 * @param guiDoc document root
+	 * @param model data structure
+	 */
+	static protected void writeGuiInfos(Document guiDoc, CommonModel model) {
+<span class="fc" id="L139">		Element elem = guiDoc.createElement(XML_DOCUMENT_ROOT);</span>
+<span class="fc" id="L140">		guiDoc.appendChild(elem);</span>
+<span class="fc" id="L141">		elem.setAttribute(&quot;xsi:noNamespaceSchemaLocation&quot;, XML_DOCUMENT_XSD);</span>
+<span class="fc" id="L142">		elem.setAttribute(&quot;xmlns:xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">		if (model instanceof JSimGraphModel) {</span>
+<span class="nc" id="L144">			writeClasses(guiDoc, elem, (JSimGraphModel) model);</span>
+<span class="nc" id="L145">			writeStations(guiDoc, elem, (JSimGraphModel) model);</span>
+<span class="nc" id="L146">			writeConnectionShapes(guiDoc, elem, (JSimGraphModel) model);</span>
+		}
+<span class="fc" id="L148">		writeParametricAnalysisInfos(guiDoc, elem, model);</span>
+<span class="fc" id="L149">	}</span>
+
+	/**
+	 * Write informations for user Classes (name and color)
+	 * @param doc document root
+	 * @param guiNode parent node where class informations should be added
+	 * @param model data structure
+	 */
+	static protected void writeClasses(Document doc, Node guiNode, JSimGraphModel model) {
+<span class="nc bnc" id="L158" title="All 2 branches missed.">		for (Object classKey : model.getClassKeys()) {</span>
+			// Now transforms Class color in hexadecimal (Web like) representation
+<span class="nc" id="L160">			String classColor = &quot;#&quot; + Integer.toHexString(model.getClassColor(classKey).getRGB()).toUpperCase();</span>
+<span class="nc" id="L161">			Element userClass = doc.createElement(XML_E_CLASS);</span>
+<span class="nc" id="L162">			userClass.setAttribute(XML_A_CLASS_NAME, model.getClassName(classKey));</span>
+<span class="nc" id="L163">			userClass.setAttribute(XML_A_CLASS_COLOR, classColor);</span>
+<span class="nc" id="L164">			guiNode.appendChild(userClass);</span>
+<span class="nc" id="L165">		}</span>
+<span class="nc" id="L166">	}</span>
+
+	/**
+	 * Write informations for stations (name and position)
+	 * @param doc document root
+	 * @param guiNode parent node where station informations should be added
+	 * @param model data structure
+	 */
+	static protected void writeStations(Document doc, Node guiNode, JSimGraphModel model) {
+<span class="nc" id="L175">		Vector&lt;Object&gt; stations = model.getStationKeys();</span>
+		Element station, position;
+<span class="nc bnc" id="L177" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc" id="L178">			Object stationKey = stations.get(i);</span>
+<span class="nc" id="L179">			station = doc.createElement(XML_E_STATION);</span>
+<span class="nc" id="L180">			station.setAttribute(XML_A_STATION_NAME, model.getStationName(stations.get(i)));</span>
+<span class="nc" id="L181">			position = doc.createElement(XML_E_POSITION);</span>
+<span class="nc" id="L182">			position.setAttribute(XML_A_POSITION_X, String.valueOf(model.getStationPosition(stationKey).getX()));</span>
+<span class="nc" id="L183">			position.setAttribute(XML_A_POSITION_Y, String.valueOf(model.getStationPosition(stationKey).getY()));</span>
+<span class="nc" id="L184">			position.setAttribute(XML_A_POSITION_ROTATE, String.valueOf(model.getStationPosition(stationKey).isRotate()));</span>
+<span class="nc" id="L185">			position.setAttribute(XML_A_POSITION_ANGLE, String.valueOf(model.getStationPosition(stationKey).getAngle()));</span>
+<span class="nc" id="L186">			station.appendChild(position);</span>
+<span class="nc" id="L187">			guiNode.appendChild(station);</span>
+		}
+<span class="nc" id="L189">	}</span>
+
+	/**
+	 * Write informations for connection shapes
+	 * @param doc document root
+	 * @param guiNode parent node where station informations should be added
+	 * @param model data structure
+	 */
+	static protected void writeConnectionShapes(Document doc, Node guiNode, JSimGraphModel model) {
+<span class="nc" id="L198">		Vector&lt;Object&gt; stations = model.getStationKeys();</span>
+		Element connectionshape, arc, sourceArc, targetArc, controlPointSource, controlPointTarget;
+		Integer arcsNb;
+		// For each pair of station, we test if a connection shape has been defined
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		for (int i = 0; i &lt; stations.size(); i++) {</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			for (int j = 0; j &lt; stations.size(); j++) {</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">				if (model.hasConnectionShape(stations.get(i), stations.get(j))) {</span>
+					//if a connection shape has been defined for the pair of stations, we insert the connection shape
+					//in the document
+<span class="nc" id="L207">					connectionshape = doc.createElement(XML_E_CONNECTION_SHAPE);</span>
+<span class="nc" id="L208">					connectionshape.setAttribute(XML_A_CONNECTION_SOURCE, model.getStationName(stations.get(i)));</span>
+<span class="nc" id="L209">					connectionshape.setAttribute(XML_A_CONNECTION_TARGET, model.getStationName(stations.get(j)));</span>
+
+					//Then we get the number of arcs
+<span class="nc" id="L212">					arcsNb = model.getConnectionShape(stations.get(i), stations.get(j)).getArcsNb();</span>
+<span class="nc bnc" id="L213" title="All 2 branches missed.">					for (int k = 0; k &lt; arcsNb; k++) {</span>
+<span class="nc" id="L214">						arc = doc.createElement(XML_E_ARC);</span>
+<span class="nc" id="L215">						sourceArc = doc.createElement(XML_E_SOURCE);</span>
+<span class="nc" id="L216">						controlPointSource = doc.createElement(XML_E_POINT);</span>
+<span class="nc" id="L217">						controlPointTarget = doc.createElement(XML_E_POINT);</span>
+<span class="nc" id="L218">						targetArc = doc.createElement(XML_E_TARGET);</span>
+
+<span class="nc" id="L220">						sourceArc.setAttribute(XML_A_SOURCE_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getSource().getX()));</span>
+<span class="nc" id="L221">						sourceArc.setAttribute(XML_A_SOURCE_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getSource().getY()));</span>
+<span class="nc" id="L222">						controlPointSource.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(0).getX()));</span>
+<span class="nc" id="L223">						controlPointSource.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(0).getY()));</span>
+<span class="nc" id="L224">						controlPointTarget.setAttribute(XML_A_POINT_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(1).getX()));</span>
+<span class="nc" id="L225">						controlPointTarget.setAttribute(XML_A_POINT_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getArcPoints().get(1).getY()));</span>
+<span class="nc" id="L226">						targetArc.setAttribute(XML_A_TARGET_X, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getTarget().getX()));</span>
+<span class="nc" id="L227">						targetArc.setAttribute(XML_A_TARGET_Y, String.valueOf(model.getConnectionShape(stations.get(i), stations.get(j)).getArc(k).getTarget().getY()));</span>
+
+<span class="nc" id="L229">						connectionshape.appendChild(arc);</span>
+<span class="nc" id="L230">						arc.appendChild(sourceArc);</span>
+<span class="nc" id="L231">						arc.appendChild(controlPointSource);</span>
+<span class="nc" id="L232">						arc.appendChild(controlPointTarget);</span>
+<span class="nc" id="L233">						arc.appendChild(targetArc);</span>
+					}
+<span class="nc" id="L235">					guiNode.appendChild(connectionshape);</span>
+				}
+			}
+		}
+<span class="nc" id="L239">	}</span>
+
+	/**
+	 *  Write informations about parametric analysis. If the parametric analysis model
+	 *  is no more consistent with the simulation model the user will be asked to choose
+	 *  about trying to automatically correct it
+	 * @param doc document root
+	 * @param guiNode parent node where station informations should be added
+	 * @param model data structure
+	 */
+	static void writeParametricAnalysisInfos(Document doc, Node guiNode, CommonModel model) {
+		Element parametric;
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">		if (model.isParametricAnalysisEnabled()) {</span>
+<span class="nc" id="L252">			ParametricAnalysisDefinition pad = model.getParametricAnalysisModel();</span>
+<span class="nc" id="L253">			int result = pad.checkCorrectness(false);</span>
+			//if the parametric analysis model is not consistent with the model..
+<span class="nc bnc" id="L255" title="All 2 branches missed.">			if (result != 0) {</span>
+<span class="nc" id="L256">				int choice = JOptionPane.showConfirmDialog(null,</span>
+						&quot;The parametric analysis model is not consistent with the simulation model, try to change it?&quot;, &quot;JMT - Warning&quot;,
+						JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+				//if user chooses ok..
+<span class="nc bnc" id="L260" title="All 2 branches missed.">				if (choice == 0) {</span>
+					//if the old PAModel could not be corrected..
+<span class="nc bnc" id="L262" title="All 2 branches missed.">					if (result == 2) {</span>
+<span class="nc" id="L263">						ParametricAnalysisChecker checker = new ParametricAnalysisChecker(model, model, model);</span>
+						//if there are no PA simulation available, disable parametric analysis
+						//and return
+<span class="nc bnc" id="L266" title="All 2 branches missed.">						if (!checker.canBeEnabled()) {</span>
+<span class="nc" id="L267">							parametric = doc.createElement(XML_E_PARAMETRIC);</span>
+<span class="nc" id="L268">							parametric.setAttribute(XML_A_PARAMETRIC_ENABLED, &quot;false&quot;);</span>
+<span class="nc" id="L269">							return;</span>
+						}
+						//else set the first available
+						else {
+<span class="nc" id="L273">							String availableModel = checker.getRunnableParametricAnalysis()[0];</span>
+<span class="nc" id="L274">							pad = ParametricAnalysisModelFactory.createParametricAnalysisModel(availableModel, model, model, model);</span>
+						}
+<span class="nc" id="L276">					}</span>
+					//else the PAModel can be corrected, so correct it
+					else {
+<span class="nc" id="L279">						pad.checkCorrectness(true);</span>
+					}
+				}
+			}
+			//save parametric analysis configuration
+<span class="nc" id="L284">			Map&lt;String, String&gt; properties = pad.getProperties();</span>
+<span class="nc" id="L285">			Set&lt;String&gt; keys = properties.keySet();</span>
+<span class="nc" id="L286">			parametric = doc.createElement(XML_E_PARAMETRIC);</span>
+<span class="nc" id="L287">			parametric.setAttribute(XML_A_PARAMETRIC_ENABLED, Boolean.toString(model.isParametricAnalysisEnabled()));</span>
+<span class="nc" id="L288">			parametric.setAttribute(XML_A_PARAMETRIC_CLASSPATH, pad.getClass().toString().replaceFirst(&quot;class &quot;, &quot;&quot;));</span>
+<span class="nc" id="L289">			Iterator&lt;String&gt; it = keys.iterator();</span>
+<span class="nc bnc" id="L290" title="All 2 branches missed.">			while (it.hasNext()) {</span>
+<span class="nc" id="L291">				Object thisParam = it.next();</span>
+<span class="nc" id="L292">				Element field = doc.createElement(XML_E_FIELD);</span>
+<span class="nc" id="L293">				field.setAttribute(XML_A_FIELD_NAME, thisParam.toString());</span>
+<span class="nc" id="L294">				field.setAttribute(XML_A_FIELD_VALUE, properties.get(thisParam).toString());</span>
+<span class="nc" id="L295">				parametric.appendChild(field);</span>
+<span class="nc" id="L296">			}</span>
+<span class="nc" id="L297">			guiNode.appendChild(parametric);</span>
+<span class="nc" id="L298">		}</span>
+		//parametric analysis is not available, set it
+		else {
+<span class="fc" id="L301">			parametric = doc.createElement(XML_E_PARAMETRIC);</span>
+<span class="fc" id="L302">			parametric.setAttribute(XML_A_PARAMETRIC_ENABLED, &quot;false&quot;);</span>
+		}
+<span class="fc" id="L304">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

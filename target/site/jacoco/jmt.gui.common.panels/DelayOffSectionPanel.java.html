@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DelayOffSectionPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">DelayOffSectionPanel.java</span></div><h1>DelayOffSectionPanel.java</h1><pre class="source lang-java linenums">package jmt.gui.common.panels;
+
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Exponential;
+import jmt.gui.common.editors.DistributionsEditor;
+import jmt.gui.common.editors.LDStrategyEditor;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ServiceStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import java.awt.*;
+import java.awt.event.*;
+
+public class DelayOffSectionPanel extends WizardPanel implements CommonConstants {
+
+    private JCheckBox enableDelayOff;
+    protected StationDefinition data;
+    protected ClassDefinition classData;
+    protected Object stationKey;
+    private JPanel delayOffConfigPanel;
+    private JTable delayOffTable;
+    private DelayOffTableModel delayOffTableModel;
+    private JRootPane tablePane;
+
+<span class="nc" id="L38">    private final String[] serviceType = new String[]{SERVICE_LOAD_INDEPENDENT, SERVICE_LOAD_DEPENDENT, SERVICE_ZERO, SERVICE_DISABLED};</span>
+
+<span class="nc" id="L40">    public DelayOffSectionPanel(StationDefinition sd, ClassDefinition cd, final Object stationKey) {</span>
+<span class="nc" id="L41">        this.data = sd;</span>
+<span class="nc" id="L42">        this.classData = cd;</span>
+<span class="nc" id="L43">        this.stationKey = stationKey;</span>
+
+<span class="nc" id="L45">        setLayout(new BorderLayout(5, 5));</span>
+
+        // Description Panel
+<span class="nc" id="L48">        JPanel descriptionPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L49">        descriptionPanel.setBorder(new TitledBorder(&quot;Description&quot;));</span>
+<span class="nc" id="L50">        JTextArea descriptionText = new JTextArea(&quot;Delay off times are used to model scenarios where, if a queue remains &quot; +</span>
+                &quot;idle for a specified duration, it will automatically shutdown.&quot; +
+                &quot;Setup times model the time a queue requires to restart when a new job arrives after a shutdown.&quot;);
+<span class="nc" id="L53">        descriptionText.setEditable(false);</span>
+<span class="nc" id="L54">        descriptionText.setLineWrap(true);</span>
+<span class="nc" id="L55">        descriptionText.setWrapStyleWord(true);</span>
+<span class="nc" id="L56">        descriptionPanel.add(descriptionText, BorderLayout.CENTER);</span>
+<span class="nc" id="L57">        descriptionPanel.setPreferredSize(new Dimension(400, 70));</span>
+<span class="nc" id="L58">        add(descriptionPanel, BorderLayout.NORTH);</span>
+
+        // Enable Delay Off Checkbox
+<span class="nc" id="L61">        enableDelayOff = new JCheckBox(&quot;Enable Setup and Delay Off Times&quot;);</span>
+<span class="nc" id="L62">        JPanel enableDelayOffPanel = new JPanel();</span>
+<span class="nc" id="L63">        enableDelayOffPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Setup and Delay Off Times&quot;));</span>
+<span class="nc" id="L64">        enableDelayOffPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L65">        enableDelayOffPanel.add(enableDelayOff, BorderLayout.NORTH);</span>
+<span class="nc" id="L66">        Boolean isEnabled = data.getDelayOffTimesEnabled(stationKey);</span>
+<span class="nc" id="L67">        enableDelayOff.setSelected(isEnabled);</span>
+
+        // Delay Off Configuration Panel
+<span class="nc" id="L70">        delayOffConfigPanel = new JPanel(new BorderLayout(5, 5));</span>
+<span class="nc" id="L71">        delayOffConfigPanel.setBorder(new TitledBorder(&quot;Edit&quot;));</span>
+
+<span class="nc" id="L73">        delayOffTableModel = new DelayOffTableModel();</span>
+<span class="nc" id="L74">        delayOffTable = new JTable(delayOffTableModel) {</span>
+            @Override
+            public boolean isCellEditable(int row, int column) {
+<span class="nc bnc" id="L77" title="All 6 branches missed.">                if (column == 1 || column == 4 || column == 5) {</span>
+<span class="nc" id="L78">                    return true;</span>
+                }
+<span class="nc" id="L80">                return false;</span>
+            }
+
+            @Override
+            public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L85" title="All 2 branches missed.">                if (column == 1) {</span>
+<span class="nc" id="L86">                    return new DefaultCellEditor(new JComboBox&lt;&gt;(serviceType));</span>
+                }
+<span class="nc bnc" id="L88" title="All 4 branches missed.">                if (column == 4 || column == 5) {</span>
+<span class="nc" id="L89">                    return new ButtonCellEditor(new JButton(editDistribution));</span>
+                }
+<span class="nc" id="L91">                return super.getCellEditor(row, column);</span>
+            }
+
+            @Override
+            public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">                if (column == 1) {</span>
+<span class="nc" id="L97">                    return new DefaultTableCellRenderer() {</span>
+                        @Override
+                        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc" id="L100">                            JComboBox&lt;String&gt; comboBox = new JComboBox&lt;&gt;(serviceType);</span>
+<span class="nc" id="L101">                            comboBox.setSelectedItem(value);</span>
+<span class="nc bnc" id="L102" title="All 2 branches missed.">                            if (isSelected) {</span>
+<span class="nc" id="L103">                                comboBox.setBackground(table.getSelectionBackground());</span>
+                            } else {
+<span class="nc" id="L105">                                comboBox.setBackground(table.getBackground());</span>
+                            }
+<span class="nc" id="L107">                            return comboBox;</span>
+                        }
+                    };
+                }
+<span class="nc bnc" id="L111" title="All 4 branches missed.">                if (column == 4 || column == 5) {</span>
+<span class="nc" id="L112">                    return new DisabledButtonCellRenderer(new JButton(editDistribution));</span>
+                }
+<span class="nc" id="L114">                return super.getCellRenderer(row, column);</span>
+            }
+        };
+<span class="nc" id="L117">        delayOffTable.setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L118">        delayOffTable.addMouseListener(new MouseAdapter() {</span>
+            @Override
+            public void mouseClicked(MouseEvent e) {
+<span class="nc" id="L121">                int row = delayOffTable.rowAtPoint(e.getPoint());</span>
+<span class="nc" id="L122">                int col = delayOffTable.columnAtPoint(e.getPoint());</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                if (e.getClickCount() == 2) {</span>
+<span class="nc bnc" id="L124" title="All 4 branches missed.">                    if (col == 4 || col == 5) {</span>
+<span class="nc bnc" id="L125" title="All 2 branches missed.">                        delayOffTableModel.editDistribution(row, col == 4);</span>
+                    }
+                }
+<span class="nc" id="L128">            }</span>
+        });
+
+<span class="nc" id="L131">        JScrollPane scrollPane = new JScrollPane(delayOffTable);</span>
+<span class="nc" id="L132">        scrollPane.setPreferredSize(new Dimension(400, 290));</span>
+<span class="nc" id="L133">        delayOffConfigPanel.add(scrollPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L134">        WarningScrollTable serviceSectionTable = new WarningScrollTable(delayOffTable, WARNING_CLASS);</span>
+
+<span class="nc" id="L136">        tablePane = new JRootPane();</span>
+<span class="nc" id="L137">        tablePane.getContentPane().setLayout(new BorderLayout());</span>
+<span class="nc" id="L138">        tablePane.getContentPane().add(delayOffConfigPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L139">        tablePane.getContentPane().add(serviceSectionTable, BorderLayout.CENTER);</span>
+<span class="nc" id="L140">        GlassPane glassPane = new GlassPane();</span>
+<span class="nc" id="L141">        tablePane.setGlassPane(glassPane);</span>
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        glassPane.setVisible(!enableDelayOff.isSelected());</span>
+
+<span class="nc" id="L144">        enableDelayOffPanel.add(tablePane, BorderLayout.CENTER);</span>
+<span class="nc" id="L145">        add(enableDelayOffPanel, BorderLayout.CENTER);</span>
+
+        // Set initial state
+<span class="nc" id="L148">        setPanelEnabled(delayOffConfigPanel, enableDelayOff.isSelected());</span>
+
+        // Add listener to checkbox
+<span class="nc" id="L151">        enableDelayOff.addActionListener(new ActionListener() {</span>
+            @Override
+            public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L154">                boolean enabled = enableDelayOff.isSelected();</span>
+<span class="nc" id="L155">                DelayOffSectionPanel.this.setPanelEnabled(delayOffConfigPanel, enabled);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">                tablePane.getGlassPane().setVisible(!enabled);</span>
+<span class="nc" id="L157">            }</span>
+        });
+<span class="nc" id="L159">        initializeDefaultStrategies();</span>
+<span class="nc" id="L160">        repaint();</span>
+<span class="nc" id="L161">    }</span>
+
+    private void initializeDefaultStrategies() {
+<span class="nc bnc" id="L164" title="All 4 branches missed.">        if (classData.getClassKeys().size()&gt;0 &amp;&amp; data.getDelayOffTimeDistribution(stationKey, classData.getClassKeys().get(0)) == null) {</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">            for (Object classKey : classData.getClassKeys()) {</span>
+<span class="nc" id="L166">                ZeroStrategy zeroStrategy = new ZeroStrategy();</span>
+<span class="nc" id="L167">                data.setDelayOffTimeDistribution(stationKey, classKey, zeroStrategy);</span>
+<span class="nc" id="L168">                data.setSetupTimeDistribution(stationKey, classKey, zeroStrategy);</span>
+<span class="nc" id="L169">            }</span>
+        }
+<span class="nc" id="L171">    }</span>
+
+    private void setPanelEnabled(JPanel panel, boolean enabled) {
+<span class="nc" id="L174">        panel.setEnabled(enabled);</span>
+<span class="nc" id="L175">        Component[] components = panel.getComponents();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">        for (Component component : components) {</span>
+<span class="nc" id="L177">            component.setEnabled(enabled);</span>
+        }
+<span class="nc" id="L179">        data.setDelayOffTimesEnabled(stationKey, enabled);</span>
+<span class="nc" id="L180">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L184">        return &quot;Setup Times&quot;;</span>
+    }
+
+<span class="nc" id="L187">    private class DelayOffTableModel extends AbstractTableModel {</span>
+<span class="nc" id="L188">        private final String[] columnNames = {&quot;Class&quot;, &quot;Strategy&quot;, &quot;Setup Time&quot;, &quot;Delay Off Time&quot;, &quot;Edit Setup Time&quot;, &quot;Edit Delay Off Time&quot;};</span>
+<span class="nc" id="L189">        private final Class&lt;?&gt;[] columnClasses = {String.class, String.class, String.class, String.class, Object.class, Object.class};</span>
+
+        @Override
+        public int getRowCount() {
+<span class="nc" id="L193">            return classData.getClassKeys().size();</span>
+        }
+
+        @Override
+        public int getColumnCount() {
+<span class="nc" id="L198">            return columnNames.length;</span>
+        }
+
+        @Override
+        public String getColumnName(int columnIndex) {
+<span class="nc" id="L203">            return columnNames[columnIndex];</span>
+        }
+
+        @Override
+        public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L208">            return columnClasses[columnIndex];</span>
+        }
+
+        @Override
+        public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L213" title="All 6 branches missed.">            if (columnIndex == 1 || columnIndex == 4 || columnIndex == 5) {</span>
+<span class="nc" id="L214">                return true;</span>
+            }
+<span class="nc" id="L216">            return false;</span>
+        }
+
+        @Override
+        public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L221">            Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L222" title="All 5 branches missed.">            switch (columnIndex) {</span>
+                case 0:
+<span class="nc" id="L224">                    return classData.getClassName(classKey);</span>
+                case 1:
+<span class="nc" id="L226">                    Object strategy = data.getDelayOffTimeDistribution(stationKey, classKey);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">                    if (strategy instanceof LDStrategy) {</span>
+<span class="nc" id="L228">                        return SERVICE_LOAD_DEPENDENT;</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">                    } else if (strategy instanceof ZeroStrategy) {</span>
+<span class="nc" id="L230">                        return SERVICE_ZERO;</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                    } else if (strategy instanceof DisabledStrategy) {</span>
+<span class="nc" id="L232">                        return SERVICE_DISABLED;</span>
+                    } else {
+<span class="nc" id="L234">                        return SERVICE_LOAD_INDEPENDENT;</span>
+                    }
+                case 2:
+<span class="nc" id="L237">                    return data.getSetupTimeDistribution(stationKey, classKey);</span>
+                case 3:
+<span class="nc" id="L239">                    return data.getDelayOffTimeDistribution(stationKey, classKey);</span>
+                default:
+<span class="nc" id="L241">                    return &quot;Edit&quot;;</span>
+            }
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L247">            Object classKey = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            switch (columnIndex) {</span>
+                case 1: // Strategy column
+                    ServiceStrategy strategy;
+<span class="nc bnc" id="L251" title="All 2 branches missed.">                    if (SERVICE_LOAD_DEPENDENT.equals(aValue)) {</span>
+<span class="nc" id="L252">                        strategy = new LDStrategy();</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">                    } else if (SERVICE_ZERO.equals(aValue)) {</span>
+<span class="nc" id="L254">                        strategy = new ZeroStrategy();</span>
+<span class="nc bnc" id="L255" title="All 2 branches missed.">                    } else if (SERVICE_DISABLED.equals(aValue)) {</span>
+<span class="nc" id="L256">                        strategy = new DisabledStrategy();</span>
+                    } else {
+<span class="nc" id="L258">                        strategy = new Exponential(); // Default to Exponential if not specified</span>
+                    }
+<span class="nc" id="L260">                    data.setDelayOffTimeDistribution(stationKey, classKey, strategy);</span>
+<span class="nc" id="L261">                    data.setSetupTimeDistribution(stationKey, classKey, strategy);</span>
+<span class="nc" id="L262">                    repaint();</span>
+<span class="nc" id="L263">                    break;</span>
+                default:
+<span class="nc bnc" id="L265" title="All 2 branches missed.">                    if (columnIndex == 2) {</span>
+<span class="nc" id="L266">                        Distribution setupDist = (Distribution) data.getSetupTimeDistribution(stationKey, classKey);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">                        if (setupDist == null) {</span>
+<span class="nc" id="L268">                            setupDist = new Exponential();</span>
+                        }
+<span class="nc" id="L270">                        setupDist.getParameter(0).setValue(aValue.toString());</span>
+<span class="nc" id="L271">                        data.setSetupTimeDistribution(stationKey, classKey, setupDist);</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    } else if (columnIndex == 3) {</span>
+<span class="nc" id="L273">                        Distribution delayOffDist = (Distribution) data.getDelayOffTimeDistribution(stationKey, classKey);</span>
+<span class="nc bnc" id="L274" title="All 2 branches missed.">                        if (delayOffDist == null) {</span>
+<span class="nc" id="L275">                            delayOffDist = new Exponential();</span>
+                        }
+<span class="nc" id="L277">                        delayOffDist.getParameter(0).setValue(aValue.toString());</span>
+<span class="nc" id="L278">                        data.setDelayOffTimeDistribution(stationKey, classKey, delayOffDist);</span>
+                    }
+<span class="nc" id="L280">                    repaint();</span>
+                    break;
+            }
+<span class="nc" id="L283">        }</span>
+
+        public void editDistribution(int row, boolean isSetupTime) {
+<span class="nc" id="L286">            Object classKey = classData.getClassKeys().get(row);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">            Object strategy = isSetupTime ? data.getSetupTimeDistribution(stationKey, classKey) : data.getDelayOffTimeDistribution(stationKey, classKey);</span>
+<span class="nc bnc" id="L288" title="All 2 branches missed.">            if (strategy instanceof Distribution) {</span>
+<span class="nc" id="L289">                DistributionsEditor editor = DistributionsEditor.getInstance(DelayOffSectionPanel.this, (Distribution) strategy);</span>
+<span class="nc" id="L290">                editor.setVisible(true);</span>
+<span class="nc" id="L291">                Distribution result = editor.getResult();</span>
+<span class="nc bnc" id="L292" title="All 2 branches missed.">                if (result != null) {</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">                    if (isSetupTime) {</span>
+<span class="nc" id="L294">                        data.setSetupTimeDistribution(stationKey, classKey, result);</span>
+                    } else {
+<span class="nc" id="L296">                        data.setDelayOffTimeDistribution(stationKey, classKey, result);</span>
+                    }
+<span class="nc" id="L298">                    repaint();</span>
+                }
+<span class="nc bnc" id="L300" title="All 2 branches missed.">            } else if (strategy instanceof LDStrategy) {</span>
+<span class="nc" id="L301">                LDStrategyEditor editor = LDStrategyEditor.getInstance(DelayOffSectionPanel.this, (LDStrategy) strategy);</span>
+<span class="nc" id="L302">                editor.setTitle(&quot;Editing &quot; + classData.getClassName(classKey) + &quot; Load Dependent Service Strategy...&quot;);</span>
+                // Shows editor window
+<span class="nc" id="L304">                editor.show();</span>
+<span class="nc" id="L305">                repaint();</span>
+            }
+<span class="nc" id="L307">        }</span>
+    }
+
+<span class="nc" id="L310">    protected AbstractAction editDistribution = new AbstractAction(&quot;Edit&quot;) {</span>
+
+        private static final long serialVersionUID = 1L;
+
+        {
+<span class="nc" id="L315">            putValue(Action.SHORT_DESCRIPTION, &quot;Edits Distribution&quot;);</span>
+        }
+
+        public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L319">            DelayOffTableModel model = (DelayOffTableModel) delayOffTable.getModel();</span>
+<span class="nc" id="L320">            int row = delayOffTable.getSelectedRow();</span>
+<span class="nc" id="L321">            int col = delayOffTable.getSelectedColumn();</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">            model.editDistribution(row, col == 4);</span>
+<span class="nc" id="L323">        }</span>
+    };
+
+    protected class DisabledButtonCellRenderer extends ButtonCellEditor {
+
+        private static final long serialVersionUID = 1L;
+
+        private JButton button;
+
+<span class="nc" id="L332">        public DisabledButtonCellRenderer(JButton jbutt) {</span>
+<span class="nc" id="L333">            super(jbutt);</span>
+<span class="nc" id="L334">            button = jbutt;</span>
+<span class="nc" id="L335">        }</span>
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc" id="L339">            Object classKey = classData.getClassKeys().get(row);</span>
+<span class="nc" id="L340">            Object strategy = data.getDelayOffTimeDistribution(stationKey, classKey);</span>
+<span class="nc bnc" id="L341" title="All 4 branches missed.">            if (strategy instanceof ZeroStrategy || strategy instanceof DisabledStrategy) {</span>
+<span class="nc" id="L342">                button.setEnabled(false);</span>
+            } else {
+<span class="nc" id="L344">                button.setEnabled(true);</span>
+            }
+<span class="nc" id="L346">            return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+        }
+    }
+
+    private static class GlassPane extends JComponent {
+        private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L353">        public GlassPane() {</span>
+<span class="nc" id="L354">            setOpaque(false);</span>
+<span class="nc" id="L355">            setVisible(false);</span>
+<span class="nc" id="L356">            Color base = UIManager.getColor(&quot;inactiveCaptionBorder&quot;);</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">            base = (base == null) ? Color.LIGHT_GRAY : base;</span>
+<span class="nc" id="L358">            Color background = new Color(base.getRed(), base.getGreen(), base.getBlue(), 128);</span>
+<span class="nc" id="L359">            setBackground(background);</span>
+
+            // Disable Mouse events for the panel
+<span class="nc" id="L362">            addMouseListener(new MouseAdapter() {});</span>
+<span class="nc" id="L363">            addMouseMotionListener(new MouseMotionAdapter() {});</span>
+<span class="nc" id="L364">        }</span>
+
+        @Override
+        protected void paintComponent(Graphics g) {
+<span class="nc" id="L368">            g.setColor(getBackground());</span>
+<span class="nc" id="L369">            g.fillRect(0, 0, getSize().width, getSize().height);</span>
+<span class="nc" id="L370">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

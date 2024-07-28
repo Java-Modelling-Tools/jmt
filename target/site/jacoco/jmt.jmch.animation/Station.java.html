@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Station.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmch.animation</a> &gt; <span class="el_source">Station.java</span></div><h1>Station.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmch.animation;
+
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.text.DecimalFormat;
+import java.util.Comparator;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.jmch.Constants;
+import jmt.jmch.animation.customQueue.CustomCollection;
+import jmt.jmch.animation.customQueue.FIFOQueue;
+import jmt.jmch.animation.customQueue.LIFOQueue;
+import jmt.jmch.animation.customQueue.PRIOQueue;
+import jmt.jmch.simulation.Simulation;
+
+/**
+ * Class for a station in the animation
+ *
+ * @author Lorenzo Torri
+ * Date: 11-mar-2024
+ * Time: 16.29
+ */
+public class Station extends JComponent implements JobContainer, GraphicComponent{
+	private JPanel parent; //panel in which the Station is drawn
+	private AnimationClass animation;
+	
+	//general information about the station
+	private Point pos;
+	private boolean xcentered;
+	private boolean ycentered;
+<span class="nc" id="L55">	private int height = 60;</span>
+<span class="nc" id="L56">	private int length = 120;</span>
+	private Simulation simulation;
+	private int nServers;
+<span class="nc" id="L59">	private boolean paintQueueSize = false; //this parameter is used to know if it is needed to paint the size of the queue above the station (useful for polices like JSQ</span>
+<span class="nc" id="L60">	private int droppedJobs = 0; //count the number of jobs dropped</span>
+	private int index;
+
+	//for PS
+<span class="nc" id="L64">	private double processorSpeed = 0.0;</span>
+	
+	//this is the queue of Jobs, see CustomCollection to understand why this and not a general Collection
+	private CustomCollection&lt;Job&gt; jobQueue; 
+<span class="nc" id="L68">	private int arrivingJobs = 0; //jobs on the edge from the router to the station</span>
+<span class="nc" id="L69">	private int currentSizeQueue = 0;</span>
+	private JobContainer next;
+	
+	//-- subcomponents of the station, the BoxStation, and the Circle
+	private BoxStation[] boxes;
+<span class="nc" id="L74">	private final int sizeQueue = 5;	</span>
+	private CircleStation[] circles;
+
+	//for the Step simulation
+<span class="nc" id="L78">	private boolean nextEvent = false;</span>
+	
+	/**
+	 * Constructor
+	 * @param animation, AnimationClass which the edge is part of
+	 * @param parent, JPanel that contains this station
+	 * @param xcentered, if the station is x centered with respect to the parent
+	 * @param ycentered, if the station is y centered with respect to the parent
+	 * @param pos, position of the station, if it is x-y centered then the respective coordinates are not considered
+	 * @param next, Jobcontainer connected to this station
+	 * @param sim, information about the simulation
+	 * @param servers, number of servers
+	 * @param index, index in the array of stations, 0 if the station is in a single queue animation
+	 */
+<span class="nc" id="L92">	public Station(AnimationClass anim, JPanel parent, boolean xcentered, boolean ycentered, Point pos, JobContainer next, Simulation sim, int servers, int index) {</span>
+<span class="nc" id="L93">		this.animation = anim;</span>
+<span class="nc" id="L94">		this.parent = parent;</span>
+<span class="nc" id="L95">		this.pos = pos; </span>
+<span class="nc" id="L96">		this.xcentered = xcentered;</span>
+<span class="nc" id="L97">		this.ycentered = ycentered;</span>
+<span class="nc" id="L98">		this.simulation = sim;</span>
+<span class="nc" id="L99">		this.nServers = servers;</span>
+<span class="nc" id="L100">		this.next = next;</span>
+<span class="nc" id="L101">		this.index = index;		</span>
+		
+<span class="nc" id="L103">		boxes = new BoxStation[sizeQueue];</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		for(int i = 0; i &lt; sizeQueue; i++) {</span>
+<span class="nc" id="L105">        	boxes[i] = new BoxStation(this, i);</span>
+        }
+		
+<span class="nc" id="L108">		float position = 0.0f;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		if(nServers == 2) {</span>
+<span class="nc" id="L110">			position = -height/2;</span>
+		}
+<span class="nc" id="L112">		circles = new CircleStation[nServers];</span>
+<span class="nc bnc" id="L113" title="All 2 branches missed.">		for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc" id="L114">			circles[i] = new CircleStation(this, position);</span>
+<span class="nc" id="L115">			position *= -1;</span>
+		}
+				
+<span class="nc" id="L118">		typeOfQueue(simulation);</span>
+<span class="nc" id="L119">	}</span>
+	
+	/**
+	 * Create the CustomCollection instance, based on the simulation information
+	 * @param sim 
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	protected void typeOfQueue(Simulation sim) {
+<span class="nc bnc" id="L127" title="All 5 branches missed.">		switch(sim.getName()) {</span>
+			case &quot;FCFS&quot;:
+<span class="nc" id="L129">				jobQueue = new FIFOQueue&lt;Job&gt;();</span>
+<span class="nc" id="L130">				break;</span>
+			case &quot;LCFS&quot;:
+<span class="nc" id="L132">				jobQueue = new LIFOQueue&lt;Job&gt;();</span>
+<span class="nc" id="L133">				break;</span>
+			case &quot;SJF&quot;:
+<span class="nc" id="L135">				jobQueue = new PRIOQueue&lt;Job&gt;(new Comparator&lt;Job&gt;() {</span>
+					@Override
+					public int compare(Job o1, Job o2) {
+<span class="nc" id="L138">						return Double.compare(o1.getDuration(), o2.getDuration());</span>
+					}
+					
+				});
+<span class="nc" id="L142">				break;</span>
+			case &quot;LJF&quot;:
+<span class="nc" id="L144">				jobQueue = new PRIOQueue&lt;Job&gt;(new Comparator&lt;Job&gt;() {</span>
+					@Override
+					public int compare(Job o1, Job o2) {
+<span class="nc" id="L147">						return Double.compare(o2.getDuration(), o1.getDuration());</span>
+					}
+					
+				});
+<span class="nc" id="L151">				break;</span>
+			default: //default since the sim.getName could be also something like RR, so in this case we opt for a station with FIFO policy 
+<span class="nc" id="L153">				jobQueue = new FIFOQueue&lt;Job&gt;();</span>
+				break;
+		}
+<span class="nc" id="L156">	}</span>
+	
+	@Override
+	public void paint(Graphics g) {
+<span class="nc" id="L160">		super.paint(g);</span>
+ 
+		//----paint all sub-components below the station
+<span class="nc bnc" id="L163" title="All 2 branches missed.">        for(int i = 0; i &lt; boxes.length; i++) {</span>
+<span class="nc" id="L164">			boxes[i].paint(g);</span>
+		}   
+<span class="nc bnc" id="L166" title="All 2 branches missed.">        for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc" id="L167">        	circles[i].paint(g);</span>
+        }
+		
+		//get the correct position for centering the station in the panel
+<span class="nc bnc" id="L171" title="All 2 branches missed.">		if(xcentered) {</span>
+<span class="nc" id="L172">			int widthPanel = parent.getWidth();	</span>
+<span class="nc" id="L173">			pos.x = parent.getX()  + (widthPanel - length - height)/2;;		</span>
+		}
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if(ycentered) {</span>
+<span class="nc" id="L176">			int heightPanel = parent.getHeight();</span>
+<span class="nc" id="L177">			pos.y = parent.getY() +(heightPanel- height)/2;</span>
+		}
+		
+<span class="nc bnc" id="L180" title="All 2 branches missed.">		for(BoxStation box: boxes) {</span>
+<span class="nc" id="L181">			box.setPosition(pos);</span>
+		}
+<span class="nc bnc" id="L183" title="All 2 branches missed.">		for(CircleStation circle: circles){</span>
+<span class="nc" id="L184">			circle.setPosition(pos);</span>
+		}
+		
+<span class="nc" id="L187">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L188">        g.drawRect(pos.x, pos.y, length, height); //create the box of the station centered in the panel</span>
+        
+        //for creating the lines between in the station
+<span class="nc" id="L191">        int size = length/sizeQueue;</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">        for(int i = 1; i &lt; sizeQueue; i++) {</span>
+<span class="nc" id="L193">        	g.drawLine(pos.x + i*size, pos.y, pos.x + i*size, pos.y + height);</span>
+        }
+        
+<span class="nc" id="L196">        g.setColor(Color.BLACK);</span>
+<span class="nc bnc" id="L197" title="All 2 branches missed.">        if(nServers == 1) {</span>
+<span class="nc" id="L198">        	g.drawOval(pos.x + length + 1, pos.y, height, height); //create the circle of the station</span>
+        }
+        else {
+<span class="nc" id="L201">        	g.drawOval(pos.x + length + 1, pos.y - height/2, height, height);</span>
+<span class="nc" id="L202">        	g.drawOval(pos.x + length + 1, pos.y + height/2, height, height);</span>
+        }
+        
+       
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if(paintQueueSize) {</span>
+<span class="nc" id="L207">        	g.setColor(Color.BLACK);</span>
+<span class="nc" id="L208">        	g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 10));</span>
+<span class="nc" id="L209">        	g.drawString(&quot;Queue Size: &quot;+String.valueOf(jobQueue.size() + arrivingJobs), pos.x,  pos.y-10);</span>
+        }
+
+<span class="nc bnc" id="L212" title="All 2 branches missed.">		if(simulation.getName() == Constants.PS){ //if processor sharing, then print the processorSpeed</span>
+<span class="nc" id="L213">			g.setColor(Color.BLACK);</span>
+<span class="nc" id="L214">        	g.setFont(new Font(&quot;Arial&quot;, Font.PLAIN, 10));</span>
+<span class="nc bnc" id="L215" title="All 2 branches missed.">        	processorSpeed = jobQueue.size() &gt; 0 ? (double)nServers/(jobQueue.size() + nServers): 1;</span>
+<span class="nc" id="L216">        	DecimalFormat df = new DecimalFormat(&quot;#.##&quot;);</span>
+<span class="nc" id="L217">			int percentage = (int) (processorSpeed * 100);</span>
+<span class="nc" id="L218">        	g.drawString(&quot;Processor Speed: &quot;+df.format(processorSpeed) + &quot;  (&quot;+ percentage +&quot;%)&quot;, pos.x,  pos.y-25);</span>
+		}
+
+<span class="nc" id="L221">		g.setColor(Color.BLACK);</span>
+<span class="nc" id="L222">        g.setFont(new Font(&quot;Arial&quot;, Font.BOLD, 10));</span>
+<span class="nc" id="L223">        g.drawString(&quot;Dropped Jobs: &quot;+String.valueOf(droppedJobs), pos.x + length,  pos.y-10);</span>
+<span class="nc" id="L224">	}</span>
+	
+	@Override
+	public void refresh() {		
+<span class="nc" id="L228">		boolean somethingHasChanged = false;</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">		somethingHasChanged = currentSizeQueue != jobQueue.size(); //in case a new job is added to the station</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">		if(jobQueue.size() &gt;= 1) { //some jobs are waiting to enter inside the circles</span>
+<span class="nc bnc" id="L232" title="All 2 branches missed.">			for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">				if(!circles[i].isWorking()) { //if the circle is not working than the head of the queue can go inside the circle</span>
+<span class="nc" id="L234">					somethingHasChanged = true;</span>
+<span class="nc" id="L235">					Job jobToServe =  (Job) jobQueue.first();</span>
+<span class="nc" id="L236">					jobToServe.setIdServer(i);</span>
+<span class="nc" id="L237">					circles[i].addJob(this, jobToServe);</span>
+<span class="nc" id="L238">					jobQueue.removeHead();</span>
+					
+<span class="nc bnc" id="L240" title="All 2 branches missed.">					if(jobQueue.size() == 0) {</span>
+<span class="nc" id="L241">						break;</span>
+					}
+				}				
+			}
+		}
+
+<span class="nc bnc" id="L247" title="All 2 branches missed.">		processorSpeed = jobQueue.size() &gt; 0 ? (double)nServers/(jobQueue.size() + nServers): 1; //this is needed only for processorSharing</span>
+		
+<span class="nc bnc" id="L249" title="All 2 branches missed.">		for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">			if(simulation.getName() == Constants.PS) {</span>
+<span class="nc" id="L251">				circles[i].setProcessorSpeed(processorSpeed);</span>
+			}
+<span class="nc" id="L253">			circles[i].refresh();</span>
+		}
+				
+		//for all the jobs in the queue, we need to update the correspondent boxStation
+<span class="nc" id="L257">		int index = 0;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		for(Job j: jobQueue) {</span>
+<span class="nc" id="L259">			boxes[index].addJob(this, j);</span>
+<span class="nc" id="L260">			index++;</span>
+<span class="nc" id="L261">		}</span>
+		
+		//if other boxStations are free, then clear them
+<span class="nc bnc" id="L264" title="All 2 branches missed.">		for(int i = index; i &lt; sizeQueue; i++) {</span>
+<span class="nc" id="L265">			boxes[i].clear();</span>
+		}
+
+<span class="nc bnc" id="L268" title="All 2 branches missed.">		if(simulation.getName() == Constants.PS){</span>
+<span class="nc bnc" id="L269" title="All 2 branches missed.">			for(BoxStation b: boxes) {</span>
+<span class="nc" id="L270">				b.setProcessorSpeed(processorSpeed);</span>
+<span class="nc" id="L271">				b.refresh();</span>
+			}
+		}
+
+<span class="nc" id="L275">		currentSizeQueue = jobQueue.size();</span>
+
+<span class="nc bnc" id="L277" title="All 4 branches missed.">		if(somethingHasChanged &amp;&amp; nextEvent){ //stop the simulation if the jobs inside the station moved</span>
+<span class="nc" id="L278">			animation.pause();</span>
+<span class="nc" id="L279">			animation.resetNextEvent();</span>
+		}
+<span class="nc" id="L281">	}</span>
+	
+	/**
+	 * Update all the subComponents of Station that are affected by a Pause in the Animator.
+	 * @param pause value for which the animator was paused
+	 */
+	public void updatePause(long pause) {
+<span class="nc bnc" id="L288" title="All 2 branches missed.">		for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc" id="L289">			circles[i].setPauseTime(pause);</span>
+		}	
+<span class="nc bnc" id="L291" title="All 2 branches missed.">		for(int i = 0; i &lt; boxes.length; i++) {</span>
+<span class="nc" id="L292">			boxes[i].setPauseTime(pause);</span>
+		}
+<span class="nc" id="L294">	}</span>
+
+	/**
+	 * Once the job is processed, then it must be routed to the next JobContainer. Can be called both by a CircleStation, but also by a BoxStation if processor sharing is active
+	 * @param job the job to be routed
+	 */
+	public void routeJob(Job job) {
+<span class="nc" id="L301">		animation.getSolverAnimation().jobExit(job, index);</span>
+<span class="nc" id="L302">		job.setDuration(); //set the duration = 0 since the job is completely processed</span>
+		//then if the next element is an edge, the job must be painted as a green circle, otherwise do not paint it
+<span class="nc bnc" id="L304" title="All 2 branches missed.">		if(getNextContainer() instanceof Edge) {</span>
+<span class="nc" id="L305">			job.setOnEdge();</span>
+		}
+		else {
+<span class="nc" id="L308">			job.unsetOnEdge();</span>
+		}	
+<span class="nc" id="L310">		getNextContainer().addJob(this, job);</span>
+<span class="nc" id="L311">	}</span>
+	
+	@Override
+	public void addJob(JobContainer prec, Job newJob) {
+<span class="nc" id="L315">		arrivingJobs--;</span>
+
+		//ystem.out.println(&quot;Entering job &quot;+ newJob.id);
+<span class="nc" id="L318">		double arrivalTime = animation.getSolverAnimation().jobEntrance(newJob.getInterArrivalTime()); </span>
+<span class="nc" id="L319">		newJob.setArrivalTime(arrivalTime);</span>
+		
+		//try to add the job inside the queue, if the queue is full, then drop the job
+<span class="nc bnc" id="L322" title="All 2 branches missed.">		if(jobQueue.size() != sizeQueue) {</span>
+<span class="nc" id="L323">			jobQueue.addNew(newJob);</span>
+		}	
+		else{
+<span class="nc" id="L326">			animation.removeJob(newJob);</span>
+<span class="nc" id="L327">			droppedJobs++;</span>
+		}
+
+<span class="nc bnc" id="L330" title="All 2 branches missed.">		if(nextEvent) { //refresh the component to stop the simulation, the stopping politic is then handled in the refresh method</span>
+<span class="nc" id="L331">			refresh();</span>
+		}
+<span class="nc" id="L333">	}</span>
+
+	/** Remove the job from the collection, called by the BoxStation */
+	public void removeJob(Job job) {
+<span class="nc" id="L337">		jobQueue.removeObject(job);</span>
+<span class="nc" id="L338">	}</span>
+
+	public void addArrivingJob(){
+<span class="nc" id="L341">		arrivingJobs++;</span>
+<span class="nc" id="L342">	}</span>
+
+	public Point getPosition() {
+<span class="nc" id="L345">		return pos;</span>
+	}
+	
+	public int getHeight() {
+<span class="nc" id="L349">		return height;</span>
+	}
+	
+	public int getLength() {
+<span class="nc" id="L353">		return length;</span>
+	}
+	
+	public int getsizeQueue() {
+<span class="nc" id="L357">		return sizeQueue;</span>
+	}
+	
+	public int getNumberWaitingJobs() {
+<span class="nc" id="L361">		return jobQueue.size() + arrivingJobs;</span>
+	}
+	
+	public Simulation getSimulation() {
+<span class="nc" id="L365">		return simulation;</span>
+	}
+	
+	public JobContainer getNextContainer() {
+<span class="nc" id="L369">		return next;</span>
+	}
+	
+	public void paintQueueSize() {
+<span class="nc" id="L373">		paintQueueSize = true;</span>
+<span class="nc" id="L374">	}</span>
+
+	public AnimationClass getAnimationClass(){
+<span class="nc" id="L377">		return animation;</span>
+	}
+
+	public void updateNServers(int nservers){
+<span class="nc" id="L381">		this.nServers = nservers;</span>
+<span class="nc" id="L382">		float position = 0.0f;</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">		if(nServers == 2) {</span>
+<span class="nc" id="L384">			position = -height/2;</span>
+		}
+<span class="nc" id="L386">		circles = new CircleStation[nServers];</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">		for(int i = 0; i &lt; nServers; i++) {</span>
+<span class="nc" id="L388">			circles[i] = new CircleStation(this, position);</span>
+<span class="nc" id="L389">			position *= -1;</span>
+		}
+<span class="nc" id="L391">	}</span>
+
+	/** Set the Step simulation on */
+	public void nextEvent() {
+<span class="nc" id="L395">		nextEvent = true;</span>
+<span class="nc" id="L396">	}</span>
+
+	/** Set the Step simulation off */
+	public void resetNextEvent() {
+<span class="nc" id="L400">		nextEvent = false;</span>
+<span class="nc" id="L401">	}</span>
+
+	public boolean isProcessorSharing() {
+<span class="nc bnc" id="L404" title="All 2 branches missed.">		return simulation.getName() == Constants.PS;</span>
+	}
+
+	public double getProcessorSharingSpeed(){
+<span class="nc" id="L408">		return processorSpeed;</span>
+	}
+
+	
+	//------- Graphic Component Methods
+	@Override
+	public int getXPos() {
+<span class="nc" id="L415">		return pos.x;</span>
+	}
+
+	@Override
+	public int getYPos(){
+<span class="nc" id="L420">		return pos.y;</span>
+	}
+	
+	@Override
+	public int getTotalLenght() {
+<span class="nc" id="L425">		return length + length/2;</span>
+	}
+
+	@Override
+	public void setYPos(int yPos){
+<span class="nc" id="L430">		pos.y = yPos;</span>
+<span class="nc" id="L431">	}</span>
+	@Override
+	public void setXPos(int xPos){
+<span class="nc" id="L434">		pos.x = xPos;</span>
+<span class="nc" id="L435">	}</span>
+
+	/**
+	 * This method is called by the PSSolver. With Processor Sharing we need to keep track of the cumulative Service of all the jobs in the queue and in the circleStation
+	 * @param interArrivalTime
+	 */
+	public void updateCumulativeService(double interArrivalTime){
+<span class="nc bnc" id="L442" title="All 2 branches missed.">		for(CircleStation c: circles){</span>
+<span class="nc" id="L443">			c.updateCumulativeService(processorSpeed, interArrivalTime);</span>
+		}
+
+<span class="nc bnc" id="L446" title="All 2 branches missed.">		for(BoxStation bs: boxes){</span>
+<span class="nc" id="L447">			bs.updateCumulativeService(processorSpeed, interArrivalTime);</span>
+		}
+<span class="nc" id="L449">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

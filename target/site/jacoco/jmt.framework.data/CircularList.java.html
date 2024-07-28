@@ -1,0 +1,488 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CircularList.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.framework.data</a> &gt; <span class="el_source">CircularList.java</span></div><h1>CircularList.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.framework.data;
+
+import java.io.Serializable;
+import java.util.AbstractList;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.RandomAccess;
+
+/**
+ * &lt;p&gt;&lt;b&gt;Name:&lt;/b&gt; CircularList&lt;/p&gt; 
+ * &lt;p&gt;&lt;b&gt;Description:&lt;/b&gt; 
+ * A random access circular list based on an array, optimized for speed in append and remove 
+ * operations in the head or tail of the list.
+ * The array is able to grow when internal capacity is finished, with an O(n) complexity.
+ * &lt;br&gt;
+ * CircularQueue is optimized to have O(1) complexity on each get operation and in add and remove operations
+ * at the beginning and at the end of the list. Other operations are O(n). This implementation is good for
+ * unordered, unbounded LIFO/FIFO queues.
+ * &lt;/p&gt;
+ * &lt;p&gt;&lt;b&gt;Date:&lt;/b&gt; 10/giu/2009
+ * &lt;b&gt;Time:&lt;/b&gt; 19:22:03&lt;/p&gt;
+ * @author Bertoli Marco
+ * @version 1.0
+ */
+public class CircularList&lt;E&gt; extends AbstractList&lt;E&gt; implements List&lt;E&gt;, RandomAccess, Cloneable, Serializable {
+	private static final long serialVersionUID = 1L;
+	private static final int DEFAULT_SIZE = 10;
+
+	private transient E[] elements;
+	private transient int head;
+	private transient int tail;
+	private int size;
+
+	/**
+	 * Builds a new Circual list, using the default size
+	 */
+	public CircularList() {
+<span class="nc" id="L57">		this(DEFAULT_SIZE);</span>
+<span class="nc" id="L58">	}</span>
+
+	/**
+	 * Builds a new CircularList with the given initial size
+	 * @param initialSize the initial size
+	 */
+<span class="nc" id="L64">	public CircularList(int initialSize) {</span>
+<span class="nc" id="L65">		init(initialSize);</span>
+<span class="nc" id="L66">	}</span>
+
+	/**
+	 * Initializes the internal array with the given size
+	 * @param size the size for the inner array
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	private void init(int size) {
+<span class="nc" id="L74">		elements = (E[]) new Object[size];</span>
+<span class="nc" id="L75">		head = 0;</span>
+<span class="nc" id="L76">		tail = -1;</span>
+<span class="nc" id="L77">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractCollection#size()
+	 */
+	@Override
+	public int size() {
+<span class="nc" id="L84">		return size;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.Collection#add(java.lang.Object)
+	 */
+	@Override
+	public boolean add(final E o) {
+<span class="nc" id="L92">		ensureCapacity(size + 1);</span>
+<span class="nc" id="L93">		tail = increment(tail, 1);</span>
+<span class="nc" id="L94">		elements[tail] = o;</span>
+<span class="nc" id="L95">		size++;</span>
+<span class="nc" id="L96">		modCount++;</span>
+<span class="nc" id="L97">		return true;</span>
+	}
+
+	/**
+	 * Adds an object at the beginning of the list
+	 * @param o the object to add
+	 */
+	public void addFirst(final E o) {
+<span class="nc" id="L105">		ensureCapacity(size + 1);</span>
+<span class="nc" id="L106">		head = increment(head, -1);</span>
+<span class="nc" id="L107">		elements[head] = o;</span>
+<span class="nc" id="L108">		size++;</span>
+<span class="nc" id="L109">		modCount++;</span>
+<span class="nc" id="L110">	}</span>
+
+	/**
+	 * Adds an object to the end of the list. it is a copy of add method.
+	 * @param o the object to add
+	 * @see #add(Object)
+	 */
+	public void addLast(final E o) {
+<span class="nc" id="L118">		add(o);</span>
+<span class="nc" id="L119">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#addAll(int, java.util.Collection)
+	 */
+	@Override
+	public boolean addAll(int index, final Collection&lt;? extends E&gt; c) {
+<span class="nc" id="L126">		ensureCapacity(size + c.size());</span>
+
+<span class="nc bnc" id="L128" title="All 2 branches missed.">		for (Iterator&lt;? extends E&gt; it = c.iterator(); it.hasNext();) {</span>
+<span class="nc" id="L129">			tail = increment(tail, 1);</span>
+<span class="nc" id="L130">			elements[tail] = it.next();</span>
+<span class="nc" id="L131">			size++;</span>
+		}
+
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (c.size() &gt; 0) {</span>
+<span class="nc" id="L135">			modCount++;</span>
+<span class="nc" id="L136">			return true;</span>
+		} else {
+<span class="nc" id="L138">			return false;</span>
+		}
+	}
+
+	/**
+	 * Ensures capacity for the internal buffer. If capacity is not enough, doubles it.
+	 * @param capacity the capacity to ensure
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	private void ensureCapacity(int capacity) {
+<span class="nc bnc" id="L148" title="All 2 branches missed.">		if (capacity &gt; elements.length) {</span>
+<span class="nc" id="L149">			E[] tmp = (E[]) new Object[(elements.length * 2)];</span>
+
+<span class="nc" id="L151">			int j = 0, i = head;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">			while (j &lt; size) {</span>
+				// We copy and null the reference to avoid out of memory problems.
+<span class="nc" id="L154">				tmp[j] = elements[i];</span>
+<span class="nc" id="L155">				elements[i] = null;</span>
+
+<span class="nc" id="L157">				j++;</span>
+<span class="nc" id="L158">				i++;</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">				if (i == elements.length) {</span>
+<span class="nc" id="L160">					i = 0;</span>
+				}
+			}
+
+<span class="nc" id="L164">			head = 0;</span>
+<span class="nc" id="L165">			tail = j - 1;</span>
+<span class="nc" id="L166">			elements = tmp;</span>
+		}
+<span class="nc" id="L168">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.util.Collection#clear()
+	 */
+	@Override
+	public void clear() {
+<span class="nc" id="L175">		init(elements.length);</span>
+<span class="nc" id="L176">		modCount++;</span>
+<span class="nc" id="L177">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#clone()
+	 */
+	@Override
+	public Object clone() {
+<span class="nc" id="L184">		CircularList&lt;E&gt; clone = new CircularList&lt;E&gt;(elements.length);</span>
+<span class="nc" id="L185">		clone.addAll(this);</span>
+<span class="nc" id="L186">		return clone;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#get(int)
+	 */
+	@Override
+	public E get(int index) {
+<span class="nc" id="L194">		return elements[translateIndex(index)];</span>
+	}
+
+	/**
+	 * @return the first element of the list
+	 * @throws IllegalArgumentException if the list is empty
+	 */
+	public E getFirst() {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		if (size == 0) {</span>
+<span class="nc" id="L203">			throw new IndexOutOfBoundsException(&quot;Size is 0&quot;);</span>
+		}
+<span class="nc" id="L205">		return elements[head];</span>
+	}
+
+	/**
+	 * @return the last element of the list
+	 * @throws IllegalArgumentException if the list is empty
+	 */
+	public E getLast() {
+<span class="nc bnc" id="L213" title="All 2 branches missed.">		if (size == 0) {</span>
+<span class="nc" id="L214">			throw new IndexOutOfBoundsException(&quot;Size is 0&quot;);</span>
+		}
+<span class="nc" id="L216">		return elements[tail];</span>
+	}
+
+	/**
+	 * Translates an index from external to internal one
+	 * @param externalIndex the external index
+	 * @param the size used for the IndexOutOfBoundsException check
+	 * @return translated index
+	 */
+	private int translateIndex(int externalIndex, int size) {
+<span class="nc bnc" id="L226" title="All 4 branches missed.">		if (externalIndex &lt; 0 || externalIndex &gt;= size) {</span>
+<span class="nc" id="L227">			throw new IndexOutOfBoundsException(&quot;size: &quot; + size() + &quot;, requested index: &quot; + externalIndex);</span>
+		}
+<span class="nc" id="L229">		return doTranslateIndex(externalIndex);</span>
+	}
+
+	/**
+	 * Translates an index from external to internal one
+	 * @param externalIndex the external index
+	 * @return translated index
+	 */
+	private int translateIndex(int externalIndex) {
+<span class="nc" id="L238">		return translateIndex(externalIndex, size);</span>
+	}
+
+	/**
+	 * Translates an index from external to internal one. Do not perform boundary checks.
+	 * @param externalIndex the external index
+	 * @return translated index
+	 */
+	private int doTranslateIndex(int externalIndex) {
+<span class="nc" id="L247">		return increment(head, externalIndex);</span>
+	}
+
+	/**
+	 * Module increment (or decrement) given number using internal buffer size as a module
+	 * @param what what should be incremented
+	 * @param how increment/decrement factor
+	 * @return the result
+	 */
+	private int increment(int what, int how) {
+<span class="nc" id="L257">		int ret = what + how;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">		if (ret &gt;= elements.length) {</span>
+<span class="nc" id="L259">			return ret - elements.length;</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">		} else if (ret &lt; 0) {</span>
+<span class="nc" id="L261">			return elements.length + ret;</span>
+		} else {
+<span class="nc" id="L263">			return ret;</span>
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#add(int, java.lang.Object)
+	 */
+	@Override
+	public void add(int index, final E element) {
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (index == size) {</span>
+<span class="nc" id="L273">			add(element);</span>
+<span class="nc" id="L274">			return;</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		} else if (index == 0) {</span>
+<span class="nc" id="L276">			addFirst(element);</span>
+<span class="nc" id="L277">			return;</span>
+		}
+
+<span class="nc" id="L280">		int pos = translateIndex(index, size + 1);</span>
+
+<span class="nc" id="L282">		ensureCapacity(size + 1);</span>
+
+		// Shifts forwards all elements
+<span class="nc bnc" id="L285" title="All 2 branches missed.">		for (int i = size; i &gt; index; i--) {</span>
+<span class="nc" id="L286">			elements[doTranslateIndex(i)] = elements[doTranslateIndex(i - 1)];</span>
+		}
+<span class="nc" id="L288">		elements[pos] = element;</span>
+<span class="nc" id="L289">		tail = increment(tail, 1);</span>
+<span class="nc" id="L290">		size++;</span>
+<span class="nc" id="L291">		modCount++;</span>
+<span class="nc" id="L292">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#indexOf(java.lang.Object)
+	 */
+	@Override
+	public int indexOf(final Object o) {
+<span class="nc bnc" id="L299" title="All 2 branches missed.">		if (o == null) {</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">			for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">				if (elements[doTranslateIndex(i)] == null) {</span>
+<span class="nc" id="L302">					return i;</span>
+				}
+			}
+		} else {
+<span class="nc bnc" id="L306" title="All 2 branches missed.">			for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">				if (elements[doTranslateIndex(i)].equals(o)) {</span>
+<span class="nc" id="L308">					return i;</span>
+				}
+			}
+		}
+<span class="nc" id="L312">		return -1;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#lastIndexOf(java.lang.Object)
+	 */
+	@Override
+	public int lastIndexOf(final Object o) {
+<span class="nc bnc" id="L320" title="All 2 branches missed.">		if (o == null) {</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">			for (int i = size - 1; i &gt;= 0; i--) {</span>
+<span class="nc bnc" id="L322" title="All 2 branches missed.">				if (elements[doTranslateIndex(i)] == null) {</span>
+<span class="nc" id="L323">					return i;</span>
+				}
+			}
+		} else {
+<span class="nc bnc" id="L327" title="All 2 branches missed.">			for (int i = size - 1; i &gt;= 0; i--) {</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">				if (elements[doTranslateIndex(i)].equals(o)) {</span>
+<span class="nc" id="L329">					return i;</span>
+				}
+			}
+		}
+<span class="nc" id="L333">		return -1;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#remove(int)
+	 */
+	@Override
+	public E remove(int index) {
+<span class="nc bnc" id="L341" title="All 2 branches missed.">		if (index == 0) {</span>
+<span class="nc" id="L342">			return removeFirst();</span>
+<span class="nc bnc" id="L343" title="All 2 branches missed.">		} else if (index == size - 1) {</span>
+<span class="nc" id="L344">			return removeLast();</span>
+<span class="nc bnc" id="L345" title="All 4 branches missed.">		} else if (index &lt; 0 || index &gt;= size) {</span>
+<span class="nc" id="L346">			throw new IndexOutOfBoundsException(&quot;size: &quot; + size() + &quot;, requested index: &quot; + index);</span>
+		}
+<span class="nc" id="L348">		E obj = elements[doTranslateIndex(index)];</span>
+		// Shifts backwards elements
+<span class="nc bnc" id="L350" title="All 2 branches missed.">		for (int i = index; i &lt; size - 1; i++) {</span>
+<span class="nc" id="L351">			elements[doTranslateIndex(i)] = elements[doTranslateIndex(i + 1)];</span>
+		}
+<span class="nc" id="L353">		elements[tail] = null;</span>
+<span class="nc" id="L354">		tail = increment(tail, -1);</span>
+<span class="nc" id="L355">		size--;</span>
+<span class="nc" id="L356">		modCount++;</span>
+<span class="nc" id="L357">		return obj;</span>
+	}
+
+	/**
+	 * Removes the first element of the list and returns it.
+	 * @return the first element of the list
+	 * @throws IndexOutOfBoundsException if size is zero
+	 */
+	public E removeFirst() {
+<span class="nc bnc" id="L366" title="All 2 branches missed.">		if (size == 0) {</span>
+<span class="nc" id="L367">			throw new IndexOutOfBoundsException(&quot;Size is 0&quot;);</span>
+		}
+<span class="nc" id="L369">		E obj = elements[head];</span>
+<span class="nc" id="L370">		elements[head] = null;</span>
+<span class="nc" id="L371">		head = increment(head, 1);</span>
+<span class="nc" id="L372">		size--;</span>
+<span class="nc" id="L373">		modCount++;</span>
+<span class="nc" id="L374">		return obj;</span>
+	}
+
+	/**
+	 * Removes the last element of the list and returns it
+	 * @return the last element of the list
+	 * @throws IndexOutOfBoundsException if size is zero
+	 */
+	public E removeLast() {
+<span class="nc bnc" id="L383" title="All 2 branches missed.">		if (size == 0) {</span>
+<span class="nc" id="L384">			throw new IndexOutOfBoundsException(&quot;Size is 0&quot;);</span>
+		}
+<span class="nc" id="L386">		E obj = elements[tail];</span>
+<span class="nc" id="L387">		elements[tail] = null;</span>
+<span class="nc" id="L388">		tail = increment(tail, -1);</span>
+<span class="nc" id="L389">		size--;</span>
+<span class="nc" id="L390">		modCount++;</span>
+<span class="nc" id="L391">		return obj;</span>
+	}
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#removeRange(int, int)
+	 */
+	@Override
+	protected void removeRange(int fromIndex, int toIndex) {
+<span class="nc bnc" id="L399" title="All 2 branches missed.">		if (fromIndex == toIndex) {</span>
+<span class="nc" id="L400">			return;</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">		} else if (fromIndex == toIndex + 1) {</span>
+<span class="nc" id="L402">			remove(fromIndex);</span>
+		}
+<span class="nc" id="L404">		modCount++;</span>
+
+<span class="nc" id="L406">		int num = toIndex - fromIndex;</span>
+
+<span class="nc bnc" id="L408" title="All 2 branches missed.">		if (fromIndex == 0) {</span>
+			// Removes from the head of the list
+<span class="nc bnc" id="L410" title="All 2 branches missed.">			for (int i = fromIndex; i &lt; toIndex; i++) {</span>
+<span class="nc" id="L411">				elements[doTranslateIndex(i)] = null;</span>
+			}
+
+<span class="nc" id="L414">			head = increment(head, num);</span>
+		} else {
+			// Removes from the tail of the list
+<span class="nc bnc" id="L417" title="All 2 branches missed.">			for (int i = fromIndex; i &lt; size - 1; i++) {</span>
+<span class="nc bnc" id="L418" title="All 2 branches missed.">				if (num + i &lt; size) {</span>
+<span class="nc" id="L419">					elements[doTranslateIndex(i)] = elements[doTranslateIndex(i + num)];</span>
+<span class="nc" id="L420">					elements[doTranslateIndex(i + num)] = null;</span>
+				} else {
+<span class="nc" id="L422">					elements[doTranslateIndex(i)] = null;</span>
+				}
+			}
+
+<span class="nc" id="L426">			tail = increment(tail, -num);</span>
+		}
+<span class="nc" id="L428">		size -= num;</span>
+<span class="nc" id="L429">	}</span>
+
+	/* (non-Javadoc)
+	 * @see java.util.AbstractList#set(int, java.lang.Object)
+	 */
+	@Override
+	public E set(int index, final E element) {
+<span class="nc" id="L436">		int pos = translateIndex(index);</span>
+<span class="nc" id="L437">		E ret = elements[pos];</span>
+<span class="nc" id="L438">		elements[pos] = element;</span>
+<span class="nc" id="L439">		modCount++;</span>
+<span class="nc" id="L440">		return ret;</span>
+	}
+
+	/**
+	 * Serializes this list
+	 * @param s
+	 * @throws java.io.IOException
+	 */
+	private void writeObject(final java.io.ObjectOutputStream s) throws java.io.IOException {
+<span class="nc" id="L449">		int expectedModCount = modCount;</span>
+		// Write size
+<span class="nc" id="L451">		s.defaultWriteObject();</span>
+
+		// Write inner array size
+<span class="nc" id="L454">		s.writeInt(elements.length);</span>
+		// Writes all elements
+<span class="nc bnc" id="L456" title="All 2 branches missed.">		for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L457">			s.writeObject(elements[doTranslateIndex(i)]);</span>
+		}
+
+<span class="nc bnc" id="L460" title="All 2 branches missed.">		if (modCount != expectedModCount) {</span>
+<span class="nc" id="L461">			throw new ConcurrentModificationException();</span>
+		}
+
+<span class="nc" id="L464">	}</span>
+
+	/**
+	 * Reads serialized list
+	 * @param s
+	 * @throws java.io.IOException
+	 * @throws ClassNotFoundException
+	 */
+	@SuppressWarnings(&quot;unchecked&quot;)
+	private void readObject(final java.io.ObjectInputStream s) throws java.io.IOException, ClassNotFoundException {
+		// Read size
+<span class="nc" id="L475">		s.defaultReadObject();</span>
+
+		// Allocates array
+<span class="nc" id="L478">		int arraySize = s.readInt();</span>
+<span class="nc" id="L479">		head = 0;</span>
+<span class="nc" id="L480">		tail = -1;</span>
+<span class="nc" id="L481">		elements = (E[]) new Object[arraySize];</span>
+
+<span class="nc bnc" id="L483" title="All 2 branches missed.">		for (int i = 0; i &lt; size; i++) {</span>
+<span class="nc" id="L484">			elements[++tail] = (E) s.readObject();</span>
+		}
+<span class="nc" id="L486">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

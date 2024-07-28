@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Faces3D.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jaba</a> &gt; <span class="el_source">Faces3D.java</span></div><h1>Faces3D.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.jaba;
+
+import java.util.Vector;
+
+import jmt.engine.jaba.Hull.ConvexHull;
+import jmt.engine.jaba.Hull.ConvexHullException;
+import jmt.engine.jaba.Hull.Polygon;
+import jmt.engine.jaba.Hull.Vertex;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Andrea
+ * Date: 15-giu-2005
+ * Time: 17.55.46
+ * To change this template use File | Settings | File Templates.
+ */
+
+<span class="nc" id="L36">public class Faces3D {</span>
+
+	/**
+	 * Questo metodo restituisce una vettore con i 3 vertici della faccia e il &quot;colore&quot;
+	 * @param vertices
+	 * @return
+	 * @throws ConvexHullException
+	 */
+	public Vector&lt;newFace&gt; Hull3D(Vector&lt;Vertex&gt; vertices) throws ConvexHullException {
+<span class="nc" id="L45">		Vector&lt;newFace&gt; newfaces = new Vector&lt;newFace&gt;();</span>
+
+// Run Convex Hull method 
+<span class="nc" id="L48">		ConvexHull hull = new ConvexHull(vertices); </span>
+// Retrieve information
+<span class="nc" id="L50">		Vector&lt;Polygon&gt; faces = new Vector&lt;Polygon&gt;(hull.getFaces());</span>
+<span class="nc" id="L51">		Vector vertoffaces = new Vector();</span>
+<span class="nc" id="L52">		Vector&lt;Vertex&gt; vertof0 = new Vector&lt;Vertex&gt;(vertoffaces);</span>
+
+<span class="nc bnc" id="L54" title="All 2 branches missed.">		for (int k = 0; k &lt; faces.size(); k++) {</span>
+<span class="nc" id="L55">			vertof0 = faces.get(k).getVertices();</span>
+<span class="nc" id="L56">			newFace sect0 = new newFace(vertof0.get(0), vertof0.get(1), vertof0.get(2), k);</span>
+<span class="nc" id="L57">			newfaces.addElement(sect0);</span>
+		}
+
+<span class="nc" id="L60">		int NSettori = newfaces.size();</span>
+
+// Control of coplanarity and assignment of colors
+<span class="nc bnc" id="L63" title="All 2 branches missed.">		for (int i = 0; i &lt; NSettori; i++) {</span>
+//TODO Better to put j=i or j=0???
+<span class="nc bnc" id="L65" title="All 2 branches missed.">			for (int j = i; j &lt; NSettori; j++) {</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">				if (newfaces.get(i).Complanar(newfaces.get(i), newfaces.get(j)) &amp;&amp; i != j</span>
+<span class="nc bnc" id="L67" title="All 2 branches missed.">						&amp;&amp; newfaces.get(i).confSect(newfaces.get(i), newfaces.get(j))) {</span>
+<span class="nc" id="L68">					newfaces.get(j).setContr(newfaces.get(i).getContr());</span>
+				}
+			}
+		}
+
+// At this point we have the vector newfaces available (which is a vector of newFace),
+// containing the vertices of the faces and finally the associated &quot;color&quot;.
+
+<span class="nc" id="L76">		return newfaces;</span>
+	}
+
+	/**
+* The method &quot;explodes&quot; a vector of 3D vertices (vertex) by adding the projections on
+* axes of all points.
+*
+* @param lin The passed vertex vector
+* @return A vertex vector containing also the projections on the axes
+	 */
+	public Vector&lt;Vertex&gt; LExplode3D(Vector&lt;Vertex&gt; lin) {
+// I create a vector L containing the coordinates and their projections on the axes
+<span class="nc" id="L88">		Vector&lt;Vertex&gt; lout = new Vector&lt;Vertex&gt;();</span>
+
+// I look up the coordinates of each passed vertex and create the projections
+<span class="nc" id="L91">		int[] coord = {};</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">		for (int i = 0; i &lt; lin.size(); i++) {</span>
+
+<span class="nc" id="L95">			coord = lin.get(i).getCoords();</span>
+
+<span class="nc" id="L97">			lout.addElement(new Vertex(coord[0], coord[1], coord[2])); //x,y,z</span>
+<span class="nc" id="L98">			lout.addElement(new Vertex(coord[0], 0, 0)); //x,0,0</span>
+<span class="nc" id="L99">			lout.addElement(new Vertex(coord[0], coord[1], 0)); //x,y,0</span>
+<span class="nc" id="L100">			lout.addElement(new Vertex(coord[0], 0, coord[2])); //x,0,z</span>
+<span class="nc" id="L101">			lout.addElement(new Vertex(0, coord[1], 0)); //0,y,0</span>
+<span class="nc" id="L102">			lout.addElement(new Vertex(0, coord[1], coord[2])); //0,y,z</span>
+<span class="nc" id="L103">			lout.addElement(new Vertex(0, 0, coord[2])); //0,0,z</span>
+
+		}
+
+<span class="nc" id="L107">		return lout;</span>
+	}
+
+	/**
+* The method removes the projections from a 3D vertex vector (vertex) by comparing it
+* with the vector of the original vertices
+	 * @param lin
+	 * @param ori
+	 * @return
+	 */
+	public Vector LImplode3D(Vector lin, Vector ori) {
+<span class="nc" id="L118">		Vector out = new Vector();</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		for (int i = 0; i &lt; lin.size(); i++) {</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">			for (int j = 0; j &lt; ori.size(); j++) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">				if (lin.get(i).equals(ori.get(j))) {</span>
+<span class="nc" id="L122">					out.addElement(lin.get(i));</span>
+				}
+			}
+		}
+<span class="nc" id="L126">		return out;</span>
+	}
+
+	/**
+* Check if the two vertices v1 and v2 are equal
+*
+* @param v1
+* @param v2
+* @return true if they are equal
+	 */
+	public boolean SameVertex(Vertex v1, Vertex v2) {
+<span class="nc" id="L137">		boolean out = false;</span>
+<span class="nc" id="L138">		int[] v1c = v1.getCoords();</span>
+<span class="nc" id="L139">		int[] v2c = v2.getCoords();</span>
+<span class="nc bnc" id="L140" title="All 6 branches missed.">		if (v1c[0] == v2c[0] &amp;&amp; v1c[1] == v2c[1] &amp;&amp; v1c[2] == v2c[2]) {</span>
+<span class="nc" id="L141">			out = true;</span>
+		}
+<span class="nc" id="L143">		return out;</span>
+	}
+
+	/**
+* Check if the vertex v is present in the vertex vector vertices
+*
+* @param v
+* @param vertices
+* @return true if v occurs in vertices
+	 */
+	public boolean HasVertex(Vertex v, Vector&lt;Vertex&gt; vertices) {
+<span class="nc" id="L154">		boolean out = false;</span>
+<span class="nc bnc" id="L155" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices.size(); i++) {</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			if (SameVertex(v, vertices.get(i))) {</span>
+<span class="nc" id="L157">				out = true;</span>
+<span class="nc" id="L158">				break;</span>
+			}
+		}
+<span class="nc" id="L161">		return out;</span>
+	}
+
+	/**
+* Removes from the array of newFace faces faces that are not composed only of
+* points contained in the ori vertex vector.
+*
+* Used to remove faces containing projections.
+*
+* @param faces
+* @param ori
+* @return a vector with faces left
+	 */
+	public Vector&lt;newFace&gt; RemoveP(Vector&lt;newFace&gt; faces, Vector&lt;Vertex&gt; ori) {
+<span class="nc" id="L175">		Vector&lt;newFace&gt; out2 = new Vector&lt;newFace&gt;();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">		for (int i = 0; i &lt; faces.size(); i++) {</span>
+<span class="nc bnc" id="L177" title="All 6 branches missed.">			if ((HasVertex((faces.get(i).getV0()), ori)) &amp;&amp; HasVertex((faces.get(i).getV1()), ori) &amp;&amp; HasVertex((faces.get(i).getV2()), ori)) {</span>
+<span class="nc" id="L178">				out2.addElement(faces.get(i));</span>
+			}
+
+		}
+<span class="nc" id="L182">		return out2;</span>
+	}
+
+	/**
+* Transform a 2D vertex vector into a 2D point vector by discarding the z-coord
+* @param vertices
+* @return
+	 */
+	public Vector&lt;newPoint&gt; VertexRemoveZ(Vector&lt;Vertex&gt; vertices) {
+<span class="nc" id="L191">		Vector&lt;newPoint&gt; out = new Vector&lt;newPoint&gt;();</span>
+
+<span class="nc bnc" id="L193" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices.size(); i++) {</span>
+<span class="nc" id="L194">			int[] coord = vertices.get(i).getCoords();</span>
+<span class="nc" id="L195">			newPoint p = new newPoint(coord[0], coord[1]);</span>
+<span class="nc" id="L196">			out.addElement(p);</span>
+		}
+<span class="nc" id="L198">		return out;</span>
+	}
+
+	public Vector&lt;newPoint&gt; VertexRemoveY(Vector&lt;Vertex&gt; vertices) {
+<span class="nc" id="L202">		Vector&lt;newPoint&gt; out = new Vector&lt;newPoint&gt;();</span>
+
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices.size(); i++) {</span>
+<span class="nc" id="L205">			int[] coord = vertices.get(i).getCoords();</span>
+<span class="nc" id="L206">			newPoint p = new newPoint(coord[0], coord[2]);</span>
+<span class="nc" id="L207">			out.addElement(p);</span>
+		}
+<span class="nc" id="L209">		return out;</span>
+	}
+
+	public Vector&lt;newPoint&gt; VertexRemoveX(Vector&lt;Vertex&gt; vertices) {
+<span class="nc" id="L213">		Vector&lt;newPoint&gt; out = new Vector&lt;newPoint&gt;();</span>
+
+<span class="nc bnc" id="L215" title="All 2 branches missed.">		for (int i = 0; i &lt; vertices.size(); i++) {</span>
+<span class="nc" id="L216">			int[] coord = vertices.get(i).getCoords();</span>
+<span class="nc" id="L217">			newPoint p = new newPoint(coord[1], coord[2]);</span>
+<span class="nc" id="L218">			out.addElement(p);</span>
+		}
+<span class="nc" id="L220">		return out;</span>
+	}
+
+	/**
+* Check if there are any faces lying in the same plane.
+* @param s
+* @return
+	 */
+	public boolean ExistsComplanar(Vector&lt;newFace&gt; s) {
+<span class="nc" id="L229">		boolean out = false;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		if (s.size() &lt; 2) {</span>
+<span class="nc" id="L231">			return false;</span>
+		} else {
+<span class="nc bnc" id="L233" title="All 2 branches missed.">			for (int i = 0; i &lt; s.size(); i++) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">				for (int j = i + 1; j &lt; s.size(); j++) {</span>
+					{
+<span class="nc bnc" id="L236" title="All 2 branches missed.">						if (s.get(i).getContr() == s.get(j).getContr()) {</span>
+<span class="nc" id="L237">							out = true;</span>
+						}
+					}
+				}
+			}
+		}
+<span class="nc" id="L243">		return out;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

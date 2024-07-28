@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConvolutionSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet</a> &gt; <span class="el_source">ConvolutionSolver.java</span></div><h1>ConvolutionSolver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+
+/**
+ * This class implements the ConvolutionSolver object, which computes the
+ * normalising constant for a network using the Convolution algorithm.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class ConvolutionSolver extends RecursiveSolver {
+
+	/**
+	 * Creates and initialises a RECALSolver object.
+	 *
+	 * @param qnm The QNModel object that we are working on
+	 * @throws InternalErrorException Thrown when the solver cannot be initialised
+	 */
+	public ConvolutionSolver(QNModel qnm) throws InternalErrorException {
+<span class="nc" id="L42">		super(qnm);</span>
+<span class="nc" id="L43">	}</span>
+
+	// TODO change back to private
+	/**
+	 * Computes any normalising constant using a simple recursion and taking
+	 * advantage of any already computed and stored value.
+	 *
+	 * @param m The MultiplicitiesVector
+	 * @param p The PopulationVector
+	 * @return The normalising constant as a BigRational object
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
+	 */
+	@Override
+	public BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
+		// First we try to find if this value of G has been already computed and stored
+		// previously
+<span class="nc" id="L60">		BigRational toRet = recallG(m, p);</span>
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (toRet == null) {</span>
+			// This is the first time we computeNormalisingConstant this value
+<span class="nc bnc" id="L63" title="All 2 branches missed.">			if (m.isZeroVector()) {</span>
+<span class="nc" id="L64">				toRet = initialConditionFor(p);</span>
+			} else {
+				// computeNormalisingConstant this G
+<span class="nc" id="L67">				int k = m.findFirstNonZeroElement();</span>
+
+				// Create
+<span class="nc" id="L70">				m.minusOne(k + 1);</span>
+<span class="nc" id="L71">				toRet = compute(m, p);</span>
+				// Restore
+<span class="nc" id="L73">				m.restore();</span>
+
+<span class="nc bnc" id="L75" title="All 2 branches missed.">				for (int r = 0; r &lt; qnm.R; r++) {</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">					if (p.get(r) &gt; 0) { // This is the point that differs when a MoM instantiation is performed.</span>
+						// Create
+<span class="nc" id="L78">						p.minusOne(r + 1);</span>
+<span class="nc" id="L79">						BigRational toAdd = compute(m, p);</span>
+						// Restore
+<span class="nc" id="L81">						p.restore();</span>
+<span class="nc" id="L82">						toAdd = toAdd.multiply(qnm.getDemandAsBigRational(k, r));</span>
+<span class="nc" id="L83">						toRet = toRet.add(toAdd);</span>
+					}
+				}
+			}
+			// Store for future use (add to Gmap)
+<span class="nc" id="L88">			storeG(m, p, toRet);</span>
+		}
+<span class="nc" id="L90">		return toRet;</span>
+	}
+
+	/**
+	 * Prints a short welcome message that says which solver is used.
+	 */
+	@Override
+	public void printWelcome() {
+<span class="nc" id="L98">		System.out.println(&quot;Using Convolution.&quot;);</span>
+<span class="nc" id="L99">	}</span>
+
+	/**
+	 * Computes the normalising constant for the specified QNModel.
+	 *
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
+	 */
+	@Override
+	public void computeNormalisingConstant() throws InternalErrorException {
+<span class="nc" id="L109">		totalTimer.start();</span>
+<span class="nc" id="L110">		MultiplicitiesVector m = qnm.getMultiplicitiesVector();</span>
+<span class="nc" id="L111">		PopulationVector p = qnm.getPopulationVector();</span>
+
+<span class="nc" id="L113">		G = compute(m, p);</span>
+<span class="nc" id="L114">		totalTimer.pause();</span>
+<span class="nc" id="L115">		memUsage = MemoryUsageUtils.memoryUsage();</span>
+<span class="nc" id="L116">		qnm.setNormalisingConstant(G);</span>
+<span class="nc" id="L117">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

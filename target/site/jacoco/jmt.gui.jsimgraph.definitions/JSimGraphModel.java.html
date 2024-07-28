@@ -1,0 +1,827 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JSimGraphModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimgraph.definitions</a> &gt; <span class="el_source">JSimGraphModel.java</span></div><h1>JSimGraphModel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimgraph.definitions;
+
+import java.awt.Color;
+import java.awt.geom.Point2D;
+import java.util.*;
+
+import org.jgraph.graph.GraphConstants;
+
+import jmt.engine.log.LoggerParameters;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.ServerType;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.forkStrategies.ClassSwitchFork;
+import jmt.gui.common.forkStrategies.CombFork;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.forkStrategies.MultiBranchClassSwitchFork;
+import jmt.gui.common.forkStrategies.OutPath;
+import jmt.gui.common.forkStrategies.ProbabilitiesFork;
+import jmt.gui.common.joinStrategies.GuardJoin;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.common.routingStrategies.ProbabilityRouting;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.serviceStrategies.ServiceStrategy;
+import jmt.gui.jsimgraph.JSimGraphConstants;
+import jmt.gui.jsimgraph.JGraphMod.JmtCell;
+import jmt.gui.jsimgraph.JGraphMod.JmtEdge;
+import jmt.gui.jsimgraph.JGraphMod.TransitionCell;
+import jmt.gui.jsimgraph.controller.Mediator;
+
+/**
+ * &lt;p&gt;Title: JMODEL-Model &lt;/p&gt;
+ * &lt;p&gt;Description: Main data structure used to store model definition data,
+ * to save and load model and to compile xml files for the simulator and
+ * as a bridge to connect JMODEL with JSIM and JMVA&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ * Date: 2-giu-2005
+ * Time: 10.27.54
+ *
+ *
+ * Modified by Francesco D'Aquino 11/11/2005
+ */
+//todo MMM JMVA bridge, undo/redo
+public class JSimGraphModel extends CommonModel implements JmodelClassDefinition, JmodelStationDefinition, JmodelBlockingRegionDefinition, JSimGraphConstants {
+
+	protected Mediator mediator;
+
+	// ----- Variables -------------------------------------------------------------
+<span class="fc" id="L70">	protected HashMap&lt;String, Integer&gt; objectNumber = new HashMap&lt;String, Integer&gt;(); // Used to generate progressive unique default names</span>
+<span class="fc" id="L71">	protected HashMap&lt;Object, Color&gt; classColor = new HashMap&lt;Object, Color&gt;(); // Used to store classes color</span>
+<span class="fc" id="L72">	protected HashMap&lt;Object, JMTPoint&gt; stationPositions = new HashMap&lt;Object, JMTPoint&gt;(); // Used to store station positions</span>
+<span class="fc" id="L73">	protected HashMap&lt;Object, HashMap&lt;Object,JMTPath&gt;&gt; connectionShapes = new HashMap&lt;Object, HashMap&lt;Object,JMTPath&gt;&gt;(); // Used to store connection shapes</span>
+<span class="fc" id="L74">	protected HashMap&lt;Object, HashMap&lt;Object, ArrayList&lt;Point2D&gt;&gt;&gt; absoluteControlPoints = new HashMap&lt;Object, HashMap&lt;Object,ArrayList&lt;Point2D&gt;&gt;&gt;(); // Used to store absolute values of displayed bezier shapes</span>
+<span class="fc" id="L75">	protected Color[] defaultColor = new Color[] { Color.BLUE, Color.RED, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.CYAN, Color.YELLOW }; // Defaults color prompted when inserting new class (next ones are generated random)</span>
+
+<span class="fc" id="L77">	protected boolean animationEnabled = Defaults.getAsBoolean(&quot;isWithAnimation&quot;).booleanValue();</span>
+
+	// ----- Methods----------------------------------------------------------------
+	/**
+	 * Default constructor, creates a new instance of &lt;code&gt;JMODELModel&lt;/code&gt;.
+	 * @param mediator reference to mediator.
+	 */
+<span class="fc" id="L84">	public JSimGraphModel(Mediator mediator) {</span>
+<span class="fc" id="L85">		this.mediator = mediator;</span>
+<span class="fc" id="L86">	}</span>
+
+	// ----- Class Definition Methods ---------------------------------------------------------------------
+	/**
+	 * Adds a new class to the model and sets all the parameters by default.
+	 * @return search key for the new class.
+	 */
+	@Override
+	public Object addClass() {
+<span class="nc" id="L95">		int num = 0;</span>
+<span class="nc bnc" id="L96" title="All 2 branches missed.">		if (!objectNumber.containsKey(Defaults.get(&quot;className&quot;))) {</span>
+<span class="nc" id="L97">			num = classesKeyset.size();</span>
+		} else {
+<span class="nc" id="L99">			num = objectNumber.get(Defaults.get(&quot;className&quot;)).intValue();</span>
+		}
+<span class="nc" id="L101">		objectNumber.put(Defaults.get(&quot;className&quot;), new Integer(++num));</span>
+<span class="nc" id="L102">		return addClass(Defaults.get(&quot;className&quot;) + num,</span>
+<span class="nc" id="L103">				Defaults.getAsInteger(&quot;classType&quot;).intValue(), Defaults.getAsInteger(&quot;classPriority&quot;),</span>
+<span class="nc" id="L104">				Defaults.getAsDouble(&quot;classSoftDeadline&quot;),</span>
+<span class="nc" id="L105">				Defaults.getAsInteger(&quot;classPopulation&quot;), Defaults.getAsNewInstance(&quot;classDistribution&quot;));</span>
+	}
+
+	/**
+	 * Adds a new class to the model and sets all the parameters at once.
+	 * @param name name of the new class.
+	 * @param type type of the new class.
+	 * @param softDeadline soft deadline of the new class.
+	 * @param priority priority of the new class.
+	 * @param population population of the new class.
+	 * @param distribution inter-arrival time distribution of the new class.
+	 * @return search key for the new class.
+	 */
+	@Override
+	public Object addClass(String name, int type, Integer priority, Double softDeadline, Integer population, Object distribution) {
+<span class="fc" id="L120">		Object key = super.addClass(name, type, priority, softDeadline, population, distribution);</span>
+<span class="fc" id="L121">		setClassColor(key, getNewColor());</span>
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">		if (type == CLASS_TYPE_OPEN &amp;&amp; !sourcesKeyset.isEmpty()) {</span>
+<span class="nc" id="L123">			setClassRefStation(key, sourcesKeyset.get(0));</span>
+		}
+<span class="fc" id="L125">		return key;</span>
+	}
+
+	/**
+	 * Deletes a class from the model, given the search key.
+	 */
+	@Override
+	public void deleteClass(Object key) {
+<span class="nc" id="L133">		super.deleteClass(key);</span>
+<span class="nc" id="L134">		classColor.remove(key);</span>
+<span class="nc" id="L135">	}</span>
+
+	/**
+	 * Sets type of the class, given the search key.
+	 */
+	@Override
+	public void setClassType(Object key, int type) {
+<span class="nc bnc" id="L142" title="All 2 branches missed.">		if (getClassType(key) == type) {</span>
+<span class="nc" id="L143">			return;</span>
+		}
+<span class="nc" id="L145">		super.setClassType(key, type);</span>
+<span class="nc bnc" id="L146" title="All 4 branches missed.">		if (type == CLASS_TYPE_OPEN &amp;&amp; !sourcesKeyset.isEmpty()) {</span>
+<span class="nc" id="L147">			setClassRefStation(key, sourcesKeyset.get(0));</span>
+		}
+<span class="nc" id="L149">	}</span>
+
+	/**
+	 * Returns color of the class, given the search key.
+	 */
+	@Override
+	public Color getClassColor(Object key) {
+<span class="fc" id="L156">		return classColor.get(key);</span>
+	}
+
+	/**
+	 * Sets color of the class, given the search key.
+	 */
+	@Override
+	public void setClassColor(Object key, Color color) {
+<span class="fc" id="L164">		classColor.put(key, color);</span>
+<span class="fc" id="L165">	}</span>
+
+	/**
+	 * Returns a new color.
+	 */
+	public Color getNewColor() {
+<span class="fc" id="L171">		int num = 0;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">		if (objectNumber.containsKey(COLOR_NAME)) {</span>
+<span class="fc" id="L173">			num = objectNumber.get(COLOR_NAME).intValue();</span>
+		}
+<span class="fc" id="L175">		objectNumber.put(COLOR_NAME, new Integer(++num));</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">		if (num &lt;= defaultColor.length) {</span>
+<span class="fc" id="L177">			return defaultColor[num - 1];</span>
+		} else {
+<span class="fc" id="L179">			return new Color((int) Math.floor(Math.random() * 256),</span>
+<span class="fc" id="L180">					(int) Math.floor(Math.random() * 256),</span>
+<span class="fc" id="L181">					(int) Math.floor(Math.random() * 256));</span>
+		}
+	}
+
+	/**
+	 * Returns serialized form of a class.
+	 * @param key search key for the class.
+	 * @return serialized form of the class.
+	 */
+	@Override
+	public Object serializeClass(Object key) {
+<span class="nc" id="L192">		return new SerializedClass(key);</span>
+	}
+
+	/**
+	 * Inserts a new class according to its serialized form.
+	 * @param Class serialized form of the new class.
+	 * @return search key for the new class.
+	 */
+	@Override
+	public Object deserializeClass(Object Class) {
+<span class="nc" id="L202">		SerializedClass sc = (SerializedClass) Class;</span>
+<span class="nc" id="L203">		Object key = addClass(sc.data.name, sc.data.type, sc.data.priority, sc.data.softDeadline, sc.data.population, null);</span>
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		if (sc.data.distribution != null) {</span>
+<span class="nc" id="L205">			setClassDistribution(key, ((Distribution) sc.data.distribution).clone());</span>
+		}
+<span class="nc bnc" id="L207" title="All 2 branches missed.">		if (stationsKeyset.contains(sc.data.refStation)) {</span>
+<span class="nc" id="L208">			setClassRefStation(key, sc.data.refStation);</span>
+		}
+<span class="nc" id="L210">		return key;</span>
+	}
+
+	/**
+	 * Object returned when asking for SerializedClass.
+	 */
+	public class SerializedClass {
+		public Object key;
+		public ClassData data;
+
+		/**
+		 * Constructs a new serialized form of specified class.
+		 * @param key search key for specified class.
+		 */
+<span class="nc" id="L224">		public SerializedClass(Object key) {</span>
+<span class="nc bnc" id="L225" title="All 2 branches missed.">			if (!classesKeyset.contains(key)) {</span>
+<span class="nc" id="L226">				return;</span>
+			}
+<span class="nc" id="L228">			this.key = key;</span>
+<span class="nc" id="L229">			data = (ClassData) ((ClassData) classDataHM.get(key)).clone();</span>
+<span class="nc" id="L230">		}</span>
+	}
+	// ----------------------------------------------------------------------------------------------------
+
+	// ----- Station Definition Methods -------------------------------------------------------------------
+	/**
+	 * Adds a new station to the model, given the station type.
+	 * @param type type of the new station.
+	 * @return search key for the new station.
+	 */
+	@Override
+	public Object addStation(String type) {
+<span class="nc" id="L242">		int num = 0;</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">		if (!objectNumber.containsKey(type)) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">			for (Object stationKey : stationsKeyset) {</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">				if (getStationType(stationKey).equals(type)) {</span>
+<span class="nc" id="L246">					num++;</span>
+				}
+<span class="nc" id="L248">			}</span>
+		} else {
+<span class="nc" id="L250">			num = objectNumber.get(type).intValue();</span>
+		}
+<span class="nc" id="L252">		objectNumber.put(type, new Integer(++num));</span>
+<span class="nc" id="L253">		return super.addStation(STATION_NAMES.get(type) + &quot; &quot; + num, type, 1, new ArrayList&lt;ServerType&gt;());</span>
+	}
+
+	/**
+	 * Deletes a station from the model, given the search key.
+	 */
+	@Override
+	public void deleteStation(Object key) {
+<span class="nc" id="L261">		super.deleteStation(key);</span>
+<span class="nc" id="L262">		stationPositions.remove(key);</span>
+<span class="nc" id="L263">	}</span>
+
+	/**
+	 * Returns name of the next station, given the station type.
+	 */
+	@Override
+	public String previewStationName(String type) {
+<span class="nc" id="L270">		int num = 0;</span>
+<span class="nc bnc" id="L271" title="All 2 branches missed.">		if (!objectNumber.containsKey(type)) {</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">			for (Object stationKey : stationsKeyset) {</span>
+<span class="nc bnc" id="L273" title="All 2 branches missed.">				if (getStationType(stationKey).equals(type)) {</span>
+<span class="nc" id="L274">					num++;</span>
+				}
+<span class="nc" id="L276">			}</span>
+		} else {
+<span class="nc" id="L278">			num = objectNumber.get(type).intValue();</span>
+		}
+<span class="nc" id="L280">		return getUniqueStationName(STATION_NAMES.get(type) + &quot; &quot; + (++num));</span>
+	}
+
+	/**
+	 * Sets position of the station, given the search key.
+	 */
+	@Override
+	public void setStationPosition(Object key, JMTPoint position) {
+<span class="fc" id="L288">		stationPositions.put(key, position);</span>
+<span class="fc" id="L289">	}</span>
+
+	/**
+	 * Returns position of the station, given the search key.
+	 */
+	@Override
+	public JMTPoint getStationPosition(Object key) {
+<span class="fc" id="L296">		return stationPositions.get(key);</span>
+	}
+
+	/**
+	 * Sets shape of a connection, given the source and target keys.
+	 */
+	public void setConnectionShape(Object sourceKey, Object targetKey, JMTPath path) {
+<span class="fc bfc" id="L303" title="All 2 branches covered.">		if(connectionShapes.containsKey(sourceKey)) {</span>
+<span class="fc" id="L304">			connectionShapes.get(sourceKey).put(targetKey, path);</span>
+		} else {
+<span class="fc" id="L306">			connectionShapes.put(sourceKey, new HashMap&lt;Object, JMTPath&gt;());</span>
+<span class="fc" id="L307">			connectionShapes.get(sourceKey).put(targetKey, path);</span>
+		}
+<span class="fc" id="L309">	}</span>
+
+	/**
+	 * Delete shape of a connection, given the source and target keys.
+	 */
+	public void deleteConnectionShape(Object sourceKey, Object targetKey) {
+<span class="nc bnc" id="L315" title="All 2 branches missed.">		if(connectionShapes.containsKey(sourceKey)) {</span>
+<span class="nc" id="L316">			connectionShapes.get(sourceKey).remove(targetKey);</span>
+		}
+<span class="nc" id="L318">	}</span>
+
+	/**
+	 * Returns shape of a connection, given the source and target keys.
+	 */
+	public JMTPath getConnectionShape(Object sourceKey, Object targetKey) {
+<span class="fc" id="L324">		return connectionShapes.get(sourceKey).get(targetKey);</span>
+	}
+
+	/**
+	 * Returns shapes of connections, given the source key.
+	 */
+	public HashMap&lt;Object, JMTPath&gt; getConnectionShapesFromSource(Object sourceKey) {
+<span class="nc" id="L331">		return connectionShapes.get(sourceKey);</span>
+	}
+
+	/**
+	 * Returns shapes of connections, given the target key.
+	 */
+	public HashMap&lt;Object, JMTPath&gt; getConnectionShapesFromTarget(Object targetKey) {
+<span class="nc" id="L338">		HashMap&lt;Object, JMTPath&gt; res = new HashMap&lt;&gt;();</span>
+<span class="nc bnc" id="L339" title="All 2 branches missed.">		for (Object key : connectionShapes.keySet()) {</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">			if(connectionShapes.get(key).containsKey(targetKey)) {</span>
+<span class="nc" id="L341">				res.put(targetKey, connectionShapes.get(key).get(targetKey));</span>
+			}
+<span class="nc" id="L343">		}</span>
+<span class="nc" id="L344">		return res;</span>
+	}
+
+	/**
+	 * Returns true if a connection shape exists, given the source and target keys.
+	 */
+	public boolean hasConnectionShape(Object sourceKey, Object targetKey) {
+<span class="fc bfc" id="L351" title="All 2 branches covered.">		if(connectionShapes.containsKey(sourceKey)) {</span>
+<span class="fc" id="L352">			return connectionShapes.get(sourceKey).containsKey(targetKey);</span>
+		} else {
+<span class="fc" id="L354">			return false;</span>
+		}
+	}
+
+	/**
+	 * Returns true if a connection shape is defined in the model.
+	 */
+	public boolean hasConnectionShape() {
+<span class="nc" id="L362">		boolean res = false;</span>
+<span class="nc bnc" id="L363" title="All 2 branches missed.">		for (Object key : connectionShapes.keySet()) {</span>
+<span class="nc bnc" id="L364" title="All 2 branches missed.">			res = !(connectionShapes.get(key).isEmpty());</span>
+<span class="nc" id="L365">		}</span>
+<span class="nc" id="L366">		return res;</span>
+	}
+
+	/**
+	 * Gets the icon of a station, given the search key.
+	 */
+	public String getStationIcon(Object key) {
+<span class="nc" id="L373">		StationData sd = (StationData) stationDataHM.get(key);</span>
+<span class="nc bnc" id="L374" title="All 2 branches missed.">		if (sd.type.equals(STATION_TYPE_TRANSITION)) {</span>
+<span class="nc" id="L375">			boolean hasTimedModes = false;</span>
+<span class="nc" id="L376">			boolean hasImmediateModes = false;</span>
+<span class="nc bnc" id="L377" title="All 2 branches missed.">			for (TransitionModeData tmd : sd.transitionModeList) {</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">				if (tmd.firingTimeDistribution instanceof Distribution) {</span>
+<span class="nc" id="L379">					hasTimedModes = true;</span>
+				} else {
+<span class="nc" id="L381">					hasImmediateModes = true;</span>
+				}
+<span class="nc bnc" id="L383" title="All 4 branches missed.">				if (hasTimedModes &amp;&amp; hasImmediateModes) {</span>
+<span class="nc" id="L384">					break;</span>
+				}
+<span class="nc" id="L386">			}</span>
+<span class="nc bnc" id="L387" title="All 4 branches missed.">			if (hasTimedModes &amp;&amp; hasImmediateModes) {</span>
+<span class="nc" id="L388">				return TransitionCell.HYBRID_TRANSITION_ICON;</span>
+<span class="nc bnc" id="L389" title="All 4 branches missed.">			} else if (hasTimedModes &amp;&amp; !hasImmediateModes) {</span>
+<span class="nc" id="L390">				return TransitionCell.TIMED_TRANSITION_ICON;</span>
+<span class="nc bnc" id="L391" title="All 4 branches missed.">			} else if (!hasTimedModes &amp;&amp; hasImmediateModes) {</span>
+<span class="nc" id="L392">				return TransitionCell.IMMEDIATE_TRANSITION_ICON;</span>
+			} else {
+<span class="nc" id="L394">				return TransitionCell.ICON;</span>
+			}
+		} else {
+<span class="nc" id="L397">			String path = &quot;jmt.gui.jsimgraph.JGraphMod.&quot;;</span>
+<span class="nc" id="L398">			String className = sd.type + &quot;Cell&quot;;</span>
+			// Uses reflection to access to public ICON field on given class
+			try {
+<span class="nc" id="L401">				return (String) (Class.forName(path + className)).getField(&quot;ICON&quot;).get(null);</span>
+<span class="nc" id="L402">			} catch (Exception e) {</span>
+<span class="nc" id="L403">				e.printStackTrace();</span>
+<span class="nc" id="L404">				return null;</span>
+			}
+		}
+	}
+
+	/**
+	 * Sets the icon of a transition, given the search key.
+	 */
+	public void setStationIcon(Object key, String icon) {
+<span class="nc" id="L413">		JmtCell jcell = mediator.getStationCell(key);</span>
+<span class="nc" id="L414">		jcell.setIcon(icon);</span>
+<span class="nc" id="L415">		mediator.loadImage(jcell);</span>
+<span class="nc" id="L416">	}</span>
+
+	/**
+	 * Gets the end of a connection, given the source and target keys.
+	 */
+	public int getConnectionEnd(Object sourceKey, Object targetKey) {
+<span class="nc" id="L422">		StationData sd = (StationData) stationDataHM.get(targetKey);</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">		if (sd.type.equals(STATION_TYPE_TRANSITION)) {</span>
+<span class="nc" id="L424">			boolean hasEnablingValues = false;</span>
+<span class="nc" id="L425">			boolean hasInhibitingValues = false;</span>
+			OUTER_LOOP:
+<span class="nc bnc" id="L427" title="All 2 branches missed.">			for (TransitionModeData tmd : sd.transitionModeList) {</span>
+<span class="nc bnc" id="L428" title="All 2 branches missed.">				for (Object classKey : classesKeyset) {</span>
+<span class="nc" id="L429">					int enablingValue = tmd.enablingCondition.getEntry(sourceKey, classKey).intValue();</span>
+<span class="nc bnc" id="L430" title="All 2 branches missed.">					if (enablingValue &gt; 0) {</span>
+<span class="nc" id="L431">						hasEnablingValues = true;</span>
+					}
+<span class="nc" id="L433">					int inhibitingValue = tmd.inhibitingCondition.getEntry(sourceKey, classKey).intValue();</span>
+<span class="nc bnc" id="L434" title="All 2 branches missed.">					if (inhibitingValue &gt; 0) {</span>
+<span class="nc" id="L435">						hasInhibitingValues = true;</span>
+					}
+<span class="nc bnc" id="L437" title="All 4 branches missed.">					if (hasEnablingValues &amp;&amp; hasInhibitingValues) {</span>
+<span class="nc" id="L438">						break OUTER_LOOP;</span>
+					}
+<span class="nc" id="L440">				}</span>
+<span class="nc" id="L441">			}</span>
+<span class="nc bnc" id="L442" title="All 4 branches missed.">			if (hasEnablingValues &amp;&amp; hasInhibitingValues) {</span>
+<span class="nc" id="L443">				return GraphConstants.ARROW_TECHNICAL;</span>
+<span class="nc bnc" id="L444" title="All 4 branches missed.">			} else if (hasEnablingValues &amp;&amp; !hasInhibitingValues) {</span>
+<span class="nc" id="L445">				return GraphConstants.ARROW_CLASSIC;</span>
+<span class="nc bnc" id="L446" title="All 4 branches missed.">			} else if (!hasEnablingValues &amp;&amp; hasInhibitingValues) {</span>
+<span class="nc" id="L447">				return GraphConstants.ARROW_CIRCLE;</span>
+			} else {
+<span class="nc" id="L449">				return GraphConstants.ARROW_SIMPLE;</span>
+			}
+		} else {
+<span class="nc" id="L452">			return GraphConstants.ARROW_CLASSIC;</span>
+		}
+	}
+
+	/**
+	 * Sets the end of a connection, given the source and target keys.
+	 */
+	public void setConnectionEnd(Object sourceKey, Object targetKey, int end) {
+<span class="nc" id="L460">		JmtEdge jedge = mediator.getConnectionEdge(sourceKey, targetKey);</span>
+<span class="nc bnc" id="L461" title="All 2 branches missed.">		if (jedge.getIsBezier()) {</span>
+<span class="nc" id="L462">			GraphConstants.setLineEnd(jedge.getAttributes(), end);</span>
+		}
+<span class="nc" id="L464">	}</span>
+
+	/**
+	 * Refreshes the graph component.
+	 */
+	public void refreshGraph() {
+<span class="nc" id="L470">		mediator.graphRepaint();</span>
+<span class="nc" id="L471">		mediator.getGraph().getGraphLayoutCache().reload();</span>
+<span class="nc" id="L472">	}</span>
+
+	/**
+	 * Returns serialized form of a station.
+	 * @param key search key for the station.
+	 * @return serialized form of the station.
+	 */
+	@Override
+	public Object serializeStation(Object key) {
+<span class="nc" id="L481">		return new SerializedStation(key);</span>
+	}
+
+	/**
+	 * Adds a new station with name and type from its serialized form.
+	 * @param station serialized form of the new station.
+	 * @return search key for the new station.
+	 */
+	@Override
+	public Object addStation(Object station) {
+<span class="nc" id="L491">		SerializedStation ss = (SerializedStation) station;</span>
+<span class="nc" id="L492">		return addStation(ss.data.name, ss.data.type, ss.data.nextServerNum, ss.data.serverTypes);</span>
+	}
+
+	/**
+	 * Loads parameters of a station from its serialized form.
+	 * @param station serialized form of the station.
+	 * @param key search key for the station.
+	 * @param classes map of serialized forms of classes.
+	 * @param stationKeyMap map of search keys for stations.
+	 */
+	@Override
+	public void LoadStation(Object station, Object key, Map&lt;Object, Object&gt; classes, Map&lt;Object, Object&gt; stationKeyMap) {
+<span class="nc" id="L504">		SerializedStation ss = (SerializedStation) station;</span>
+<span class="nc" id="L505">		setStationQueueCapacity(key, ss.data.queueCapacity);</span>
+<span class="nc" id="L506">		setStationQueueStrategy(key, ss.data.queueStrategy);</span>
+<span class="nc" id="L507">		setStationNumberOfServers(key, ss.data.numberOfServers);</span>
+<span class="nc" id="L508">		setStationMaxRunningJobs(key, ss.data.maxRunningJobs);</span>
+<span class="nc" id="L509">		setForkBlock(key, ss.data.forkBlock);</span>
+<span class="nc" id="L510">		setIsSimplifiedFork(key, ss.data.isSimplifiedFork);</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">		if (ss.data.loggerParameters != null) {</span>
+<span class="nc" id="L512">			setLoggingParameters(key, (LoggerParameters) ss.data.loggerParameters.clone());</span>
+		}
+<span class="nc" id="L514">		Vector&lt;Object&gt; oldClassKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L515" title="All 2 branches missed.">		for (Object classKey : classesKeyset) {</span>
+<span class="nc bnc" id="L516" title="All 4 branches missed.">			if (classes.containsKey(classKey) &amp;&amp; ((SerializedClass) classes.get(classKey)).data.type == getClassType(classKey)) {</span>
+<span class="nc" id="L517">				oldClassKeys.add(classKey);</span>
+			}
+<span class="nc" id="L519">		}</span>
+<span class="nc bnc" id="L520" title="All 2 branches missed.">		if (ss.data.transitionModeList != null) {</span>
+<span class="nc" id="L521">			deleteTransitionMode(key, 0);</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">			for (int i = 0; i &lt; ss.data.transitionModeList.size(); i++) {</span>
+<span class="nc" id="L523">				TransitionModeData oldTmd = ss.data.transitionModeList.get(i);</span>
+<span class="nc" id="L524">				addTransitionMode(key, oldTmd.name);</span>
+<span class="nc bnc" id="L525" title="All 2 branches missed.">				for (Object newStationInKey : getBackwardConnections(key)) {</span>
+<span class="nc" id="L526">					Object oldStationInKey = stationKeyMap.get(newStationInKey);</span>
+<span class="nc bnc" id="L527" title="All 2 branches missed.">					for (Object oldClassKey : oldClassKeys) {</span>
+<span class="nc" id="L528">						setEnablingCondition(key, i, newStationInKey, oldClassKey, oldTmd.enablingCondition.getEntry(oldStationInKey, oldClassKey));</span>
+<span class="nc" id="L529">						setInhibitingCondition(key, i, newStationInKey, oldClassKey, oldTmd.inhibitingCondition.getEntry(oldStationInKey, oldClassKey));</span>
+<span class="nc" id="L530">						setResourceCondition(key, i, newStationInKey, oldClassKey, oldTmd.resourceCondition.getEntry(oldStationInKey, oldClassKey));</span>
+<span class="nc" id="L531">					}</span>
+<span class="nc" id="L532">				}</span>
+<span class="nc" id="L533">				setNumberOfServers(key, i, oldTmd.numberOfServers);</span>
+<span class="nc" id="L534">				setFiringTimeDistribution(key, i, ((ServiceStrategy) oldTmd.firingTimeDistribution).clone());</span>
+<span class="nc" id="L535">				setFiringPriority(key, i, oldTmd.firingPriority);</span>
+<span class="nc" id="L536">				setFiringWeight(key, i, oldTmd.firingWeight);</span>
+<span class="nc bnc" id="L537" title="All 2 branches missed.">				for (Object newStationOutKey : getForwardConnections(key)) {</span>
+<span class="nc" id="L538">					Object oldStationOutKey = stationKeyMap.get(newStationOutKey);</span>
+<span class="nc bnc" id="L539" title="All 2 branches missed.">					for (Object oldClassKey : oldClassKeys) {</span>
+<span class="nc" id="L540">						setFiringOutcome(key, i, newStationOutKey, oldClassKey, oldTmd.firingOutcome.getEntry(oldStationOutKey, oldClassKey));</span>
+<span class="nc" id="L541">					}</span>
+<span class="nc" id="L542">				}</span>
+			}
+		}
+<span class="nc bnc" id="L545" title="All 2 branches missed.">		for (Object oldClassKey : oldClassKeys) {</span>
+<span class="nc" id="L546">			StationClassData scd = ss.classData.get(oldClassKey);</span>
+<span class="nc" id="L547">			setQueueCapacity(key, oldClassKey, scd.queueCapacity);</span>
+<span class="nc" id="L548">			setQueueStrategy(key, oldClassKey, scd.queueStrategy);</span>
+<span class="nc" id="L549">			setDropRule(key, oldClassKey, scd.dropRule);</span>
+<span class="nc" id="L550">			setServiceWeight(key, oldClassKey, scd.serviceWeight);</span>
+<span class="nc" id="L551">			setServerNumRequired(key, oldClassKey, scd.serverNumRequired);</span>
+<span class="nc bnc" id="L552" title="All 2 branches missed.">			if (scd.serviceDistribution != null) {</span>
+<span class="nc" id="L553">				setServiceTimeDistribution(key, oldClassKey, ((ServiceStrategy) scd.serviceDistribution).clone());</span>
+			}
+<span class="nc bnc" id="L555" title="All 2 branches missed.">			if (scd.routingStrategy != null) {</span>
+<span class="nc bnc" id="L556" title="All 2 branches missed.">				if (scd.routingStrategy instanceof ProbabilityRouting) {</span>
+<span class="nc" id="L557">					setRoutingStrategy(key, oldClassKey, new ProbabilityRouting());</span>
+<span class="nc" id="L558">					Map&lt;Object, Double&gt; oldValues = ((ProbabilityRouting) scd.routingStrategy).getValues();</span>
+<span class="nc" id="L559">					Map&lt;Object, Double&gt; newValues = ((ProbabilityRouting) getRoutingStrategy(key, oldClassKey)).getValues();</span>
+<span class="nc bnc" id="L560" title="All 2 branches missed.">					for (Object newStationOutKey : getForwardConnections(key)) {</span>
+<span class="nc" id="L561">						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);</span>
+<span class="nc" id="L562">						newValues.put(newStationOutKey, oldValues.get(oldStationOutKey));</span>
+<span class="nc" id="L563">					}</span>
+<span class="nc bnc" id="L564" title="All 2 branches missed.">				} else if (scd.routingStrategy instanceof LoadDependentRouting) {</span>
+<span class="nc" id="L565">					setRoutingStrategy(key, oldClassKey, new LoadDependentRouting());</span>
+<span class="nc" id="L566">					Map&lt;Integer, Map&lt;Object, Double&gt;&gt; oldAllEntries = ((LoadDependentRouting) scd.routingStrategy).getAllEmpiricalEntries();</span>
+<span class="nc" id="L567">					Map&lt;Integer, Map&lt;Object, Double&gt;&gt; newAllEntries = ((LoadDependentRouting) getRoutingStrategy(key, oldClassKey)).getAllEmpiricalEntries();</span>
+<span class="nc bnc" id="L568" title="All 2 branches missed.">					for (Integer from : oldAllEntries.keySet()) {</span>
+<span class="nc" id="L569">						newAllEntries.put(from, new HashMap&lt;Object, Double&gt;());</span>
+<span class="nc" id="L570">						Map&lt;Object, Double&gt; oldEntries = oldAllEntries.get(from);</span>
+<span class="nc" id="L571">						Map&lt;Object, Double&gt; newEntries = newAllEntries.get(from);</span>
+<span class="nc bnc" id="L572" title="All 2 branches missed.">						for (Object newStationOutKey : getForwardConnections(key)) {</span>
+<span class="nc" id="L573">							Object oldStationOutKey = stationKeyMap.get(newStationOutKey);</span>
+<span class="nc" id="L574">							newEntries.put(newStationOutKey, oldEntries.get(oldStationOutKey));</span>
+<span class="nc" id="L575">						}</span>
+<span class="nc" id="L576">					}</span>
+<span class="nc" id="L577">				} else {</span>
+<span class="nc" id="L578">					setRoutingStrategy(key, oldClassKey, ((RoutingStrategy) scd.routingStrategy).clone());</span>
+				}
+			}
+<span class="nc bnc" id="L581" title="All 2 branches missed.">			if (scd.joinStrategy != null) {</span>
+<span class="nc bnc" id="L582" title="All 2 branches missed.">				if (scd.joinStrategy instanceof GuardJoin) {</span>
+<span class="nc" id="L583">					setJoinStrategy(key, oldClassKey, new GuardJoin());</span>
+<span class="nc" id="L584">					Map&lt;Object, Integer&gt; oldGuard = ((GuardJoin) scd.joinStrategy).getGuard();</span>
+<span class="nc" id="L585">					Map&lt;Object, Integer&gt; newGuard = ((GuardJoin) getJoinStrategy(key, oldClassKey)).getGuard();</span>
+<span class="nc bnc" id="L586" title="All 2 branches missed.">					for (Object classKey : classesKeyset) {</span>
+<span class="nc bnc" id="L587" title="All 2 branches missed.">						if (oldClassKeys.contains(classKey)) {</span>
+<span class="nc" id="L588">							newGuard.put(classKey, oldGuard.get(classKey));</span>
+						} else {
+<span class="nc" id="L590">							newGuard.put(classKey, Integer.valueOf(0));</span>
+						}
+<span class="nc" id="L592">					}</span>
+<span class="nc" id="L593">				} else {</span>
+<span class="nc" id="L594">					setJoinStrategy(key, oldClassKey, ((JoinStrategy) scd.joinStrategy).clone());</span>
+				}
+			}
+<span class="nc bnc" id="L597" title="All 2 branches missed.">			if (scd.forkStrategy != null) {</span>
+<span class="nc bnc" id="L598" title="All 2 branches missed.">				if (scd.forkStrategy instanceof ProbabilitiesFork) {</span>
+<span class="nc" id="L599">					setForkStrategy(key, oldClassKey, new ProbabilitiesFork());</span>
+<span class="nc" id="L600">					Map&lt;Object, OutPath&gt; oldOutDetails = ((ProbabilitiesFork) scd.forkStrategy).getOutDetails();</span>
+<span class="nc" id="L601">					Map&lt;Object, OutPath&gt; newOutDetails = ((ProbabilitiesFork) getForkStrategy(key, oldClassKey)).getOutDetails();</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">					for (Object newStationOutKey : getForwardConnections(key)) {</span>
+<span class="nc" id="L603">						newOutDetails.put(newStationOutKey, new OutPath());</span>
+<span class="nc" id="L604">						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);</span>
+<span class="nc" id="L605">						OutPath oldOutPath = oldOutDetails.get(oldStationOutKey);</span>
+<span class="nc" id="L606">						OutPath newOutPath = newOutDetails.get(newStationOutKey);</span>
+<span class="nc" id="L607">						newOutPath.setProbability(oldOutPath.getProbability());</span>
+<span class="nc" id="L608">						Map&lt;Object, Object&gt; oldOutParams = oldOutPath.getOutParameters();</span>
+<span class="nc" id="L609">						Map&lt;Object, Object&gt; newOutParams = newOutPath.getOutParameters();</span>
+<span class="nc bnc" id="L610" title="All 2 branches missed.">						for (Object numberOfTasks : oldOutParams.keySet()) {</span>
+<span class="nc" id="L611">							newOutParams.put(numberOfTasks, oldOutParams.get(numberOfTasks));</span>
+<span class="nc" id="L612">						}</span>
+<span class="nc" id="L613">					}</span>
+<span class="nc bnc" id="L614" title="All 2 branches missed.">				} else if (scd.forkStrategy instanceof CombFork) {</span>
+<span class="nc" id="L615">					setForkStrategy(key, oldClassKey, new CombFork());</span>
+<span class="nc" id="L616">					Map&lt;Object, Double&gt; oldOutDetails = ((CombFork) scd.forkStrategy).getOutDetails();</span>
+<span class="nc" id="L617">					Map&lt;Object, Double&gt; newOutDetails = ((CombFork) getForkStrategy(key, oldClassKey)).getOutDetails();</span>
+<span class="nc" id="L618">					int totalNumberOfBranches = getForwardConnections(key).size();</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">					for (int i = 0; i &lt; totalNumberOfBranches; i++) {</span>
+<span class="nc" id="L620">						newOutDetails.put(Integer.toString(i + 1), oldOutDetails.get(Integer.toString(i + 1)));</span>
+					}
+<span class="nc bnc" id="L622" title="All 4 branches missed.">				} else if (scd.forkStrategy instanceof ClassSwitchFork || scd.forkStrategy instanceof MultiBranchClassSwitchFork) {</span>
+					try {
+<span class="nc" id="L624">						setForkStrategy(key, oldClassKey, scd.forkStrategy.getClass().newInstance());</span>
+<span class="nc" id="L625">					} catch (Exception e) {</span>
+<span class="nc" id="L626">					}</span>
+<span class="nc" id="L627">					Map&lt;Object, OutPath&gt; oldOutDetails = (Map&lt;Object, OutPath&gt;) ((ForkStrategy) scd.forkStrategy).getOutDetails();</span>
+<span class="nc" id="L628">					Map&lt;Object, OutPath&gt; newOutDetails = (Map&lt;Object, OutPath&gt;) ((ForkStrategy) getForkStrategy(key, oldClassKey)).getOutDetails();</span>
+<span class="nc bnc" id="L629" title="All 2 branches missed.">					for (Object newStationOutKey : getForwardConnections(key)) {</span>
+<span class="nc" id="L630">						newOutDetails.put(newStationOutKey, new OutPath());</span>
+<span class="nc" id="L631">						Object oldStationOutKey = stationKeyMap.get(newStationOutKey);</span>
+<span class="nc" id="L632">						OutPath oldOutPath = oldOutDetails.get(oldStationOutKey);</span>
+<span class="nc" id="L633">						OutPath newOutPath = newOutDetails.get(newStationOutKey);</span>
+<span class="nc" id="L634">						Map&lt;Object, Object&gt; oldOutParams = oldOutPath.getOutParameters();</span>
+<span class="nc" id="L635">						Map&lt;Object, Object&gt; newOutParams = newOutPath.getOutParameters();</span>
+<span class="nc bnc" id="L636" title="All 2 branches missed.">						for (Object classKey : classesKeyset) {</span>
+<span class="nc bnc" id="L637" title="All 2 branches missed.">							if (oldClassKeys.contains(classKey)) {</span>
+<span class="nc" id="L638">								newOutParams.put(classKey, oldOutParams.get(classKey));</span>
+							} else {
+<span class="nc" id="L640">								newOutParams.put(classKey, Integer.valueOf(0));</span>
+							}
+<span class="nc" id="L642">						}</span>
+<span class="nc" id="L643">					}</span>
+<span class="nc" id="L644">				} else {</span>
+<span class="nc" id="L645">					setForkStrategy(key, oldClassKey, ((ForkStrategy) scd.forkStrategy).clone());</span>
+				}
+			}
+<span class="nc bnc" id="L648" title="All 2 branches missed.">			if (scd.semaphoreStrategy != null) {</span>
+<span class="nc" id="L649">				setSemaphoreStrategy(key, oldClassKey, ((SemaphoreStrategy) scd.semaphoreStrategy).clone());</span>
+			}
+<span class="nc bnc" id="L651" title="All 2 branches missed.">			if (scd.classSwitchProb != null) {</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">				for (Object oldClassOutKey : oldClassKeys) {</span>
+<span class="nc" id="L653">					setClassSwitchMatrix(key, oldClassKey, oldClassOutKey, scd.classSwitchProb.getValue(oldClassKey, oldClassOutKey));</span>
+<span class="nc" id="L654">				}</span>
+			}
+<span class="nc" id="L656">		}</span>
+<span class="nc" id="L657">	}</span>
+
+	/**
+	 * Object returned when asking for SerializedStation.
+	 */
+	public class SerializedStation {
+		public Object key;
+		public StationData data;
+		public Map&lt;Object, StationClassData&gt; classData;
+
+		/**
+		 * Constructs a new serialized form of specified station.
+		 * @param key search key for specified station.
+		 */
+<span class="nc" id="L671">		public SerializedStation(Object key) {</span>
+<span class="nc bnc" id="L672" title="All 2 branches missed.">			if (!stationsKeyset.contains(key)) {</span>
+<span class="nc" id="L673">				return;</span>
+			}
+<span class="nc" id="L675">			this.key = key;</span>
+<span class="nc" id="L676">			data = (StationData) ((StationData) stationDataHM.get(key)).clone();</span>
+<span class="nc" id="L677">			classData = new HashMap&lt;Object, StationClassData&gt;();</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">			for (Object classKey : classesKeyset) {</span>
+<span class="nc" id="L679">				classData.put(classKey, (StationClassData) ((StationClassData) stationDetailsBDM.get(classKey, key)).clone());</span>
+<span class="nc" id="L680">			}</span>
+<span class="nc" id="L681">		}</span>
+	}
+	// ----------------------------------------------------------------------------------------------------
+
+	// ----- Blocking Region Definition Methods -----------------------------------------------------------
+	/**
+	 * Adds a new blocking region to the model.
+	 * @return search key for the new region.
+	 */
+	@Override
+	public Object addBlockingRegion() {
+<span class="nc" id="L692">		int num = 0;</span>
+<span class="nc bnc" id="L693" title="All 2 branches missed.">		if (!objectNumber.containsKey(Defaults.get(&quot;blockingRegionName&quot;))) {</span>
+<span class="nc" id="L694">			num = blockingRegionsKeyset.size();</span>
+		} else {
+<span class="nc" id="L696">			num = objectNumber.get(Defaults.get(&quot;blockingRegionName&quot;)).intValue();</span>
+		}
+<span class="nc" id="L698">		objectNumber.put(Defaults.get(&quot;blockingRegionName&quot;), new Integer(++num));</span>
+<span class="nc" id="L699">		return addBlockingRegion(Defaults.get(&quot;blockingRegionName&quot;) + num, Defaults.get(&quot;blockingRegionType&quot;));</span>
+	}
+
+	/**
+	 * Returns serialized form of a blocking region.
+	 * @param key search key for the region.
+	 * @return serialized form of the region.
+	 */
+	@Override
+	public Object serializeBlockingRegion(Object key) {
+<span class="nc" id="L709">		return new SerializedBlockingRegion(key);</span>
+	}
+
+	/**
+	 * Inserts a new blocking region according to its serialized form.
+	 * @param region serialized form of the new region.
+	 * @param classes map of serialized forms of classes.
+	 * @return search key for the new region.
+	 */
+	@Override
+	public Object deserializeBlockingRegion(Object region, Map&lt;Object, Object&gt; classes) {
+<span class="nc" id="L720">		SerializedBlockingRegion sbr = (SerializedBlockingRegion) region;</span>
+<span class="nc" id="L721">		Object key = addBlockingRegion(sbr.data.name, sbr.data.type);</span>
+<span class="nc" id="L722">		Vector&lt;Object&gt; oldClassKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L723" title="All 2 branches missed.">		for (Object classKey : classesKeyset) {</span>
+<span class="nc bnc" id="L724" title="All 4 branches missed.">			if (classes.containsKey(classKey) &amp;&amp; ((SerializedClass) classes.get(classKey)).data.type == getClassType(classKey)) {</span>
+<span class="nc" id="L725">				oldClassKeys.add(classKey);</span>
+			}
+<span class="nc" id="L727">		}</span>
+<span class="nc" id="L728">		setRegionCustomerConstraint(key, sbr.data.maxJobs);</span>
+<span class="nc" id="L729">		setRegionMemorySize(key, sbr.data.maxMemory);</span>
+<span class="nc bnc" id="L730" title="All 2 branches missed.">		for (int i = 0; i &lt; sbr.data.groupList.size(); i++) {</span>
+<span class="nc" id="L731">			BlockingGroupData bgd = sbr.data.groupList.get(i);</span>
+<span class="nc" id="L732">			addRegionGroup(key, bgd.name);</span>
+<span class="nc" id="L733">			setRegionGroupCustomerConstraint(key, i, bgd.maxJobs);</span>
+<span class="nc" id="L734">			setRegionGroupMemorySize(key, i, bgd.maxMemory);</span>
+<span class="nc bnc" id="L735" title="All 2 branches missed.">			for (Object classKey : bgd.classList) {</span>
+<span class="nc bnc" id="L736" title="All 2 branches missed.">				if (oldClassKeys.contains(classKey)) {</span>
+<span class="nc" id="L737">					addClassIntoRegionGroup(key, i, classKey);</span>
+				}
+<span class="nc" id="L739">			}</span>
+		}
+<span class="nc bnc" id="L741" title="All 2 branches missed.">		for (Object oldClassKey : oldClassKeys) {</span>
+<span class="nc" id="L742">			BlockingClassData bcd = sbr.classData.get(oldClassKey);</span>
+<span class="nc" id="L743">			setRegionClassCustomerConstraint(key, oldClassKey, bcd.maxJobs);</span>
+<span class="nc" id="L744">			setRegionClassMemorySize(key, oldClassKey, bcd.maxMemory);</span>
+<span class="nc" id="L745">			setRegionClassDropRule(key, oldClassKey, bcd.drop);</span>
+<span class="nc" id="L746">			setRegionClassWeight(key, oldClassKey, bcd.weight);</span>
+<span class="nc" id="L747">			setRegionClassSize(key, oldClassKey, bcd.size);</span>
+<span class="nc" id="L748">		}</span>
+<span class="nc" id="L749">		return key;</span>
+	}
+
+	/**
+	 * Object returned when asking for SerializedBlockingRegion.
+	 */
+	public class SerializedBlockingRegion {
+		public Object key;
+		public BlockingRegionData data;
+		public Map&lt;Object, BlockingClassData&gt; classData;
+
+		/**
+		 * Constructs a new serialized form of specified blocking region.
+		 * @param key search key for specified blocking region.
+		 */
+<span class="nc" id="L764">		public SerializedBlockingRegion(Object key) {</span>
+<span class="nc bnc" id="L765" title="All 2 branches missed.">			if (!blockingRegionsKeyset.contains(key)) {</span>
+<span class="nc" id="L766">				return;</span>
+			}
+<span class="nc" id="L768">			this.key = key;</span>
+<span class="nc" id="L769">			data = (BlockingRegionData) ((BlockingRegionData) blockingDataHM.get(key)).clone();</span>
+<span class="nc" id="L770">			classData = new HashMap&lt;Object, BlockingClassData&gt;();</span>
+<span class="nc bnc" id="L771" title="All 2 branches missed.">			for (Object classKey : classesKeyset) {</span>
+<span class="nc" id="L772">				classData.put(classKey, (BlockingClassData) ((BlockingClassData) blockingDetailsBDM.get(classKey, key)).clone());</span>
+<span class="nc" id="L773">			}</span>
+<span class="nc" id="L774">		}</span>
+	}
+	// ----------------------------------------------------------------------------------------------------
+
+	/**
+	 * Tells if queue animation is enabled
+	 * @return true if the animation is enabled
+	 */
+	@Override
+	public boolean isAnimationEnabled() {
+<span class="nc" id="L784">		return animationEnabled;</span>
+	}
+
+	/**
+	 * Enable / disable queue animation
+	 * @param enabled - set it to true to enable queue animation
+	 */
+	@Override
+	public void setAnimationEnabled(boolean enabled) {
+<span class="nc" id="L793">		animationEnabled = enabled;</span>
+<span class="nc" id="L794">	}</span>
+
+
+	/**
+	 * Sets absolute value of a connection, given the search key.
+	 */
+	public void setAbsoluteControlPoints(Object sourceKey,Object targetKey, ArrayList&lt;Point2D&gt; points) {
+<span class="nc bnc" id="L801" title="All 2 branches missed.">		if(absoluteControlPoints.containsKey(sourceKey)){</span>
+<span class="nc" id="L802">			absoluteControlPoints.get(sourceKey).put(targetKey, points);</span>
+		}
+		else {
+<span class="nc" id="L805">			absoluteControlPoints.put(sourceKey, new HashMap&lt;Object, ArrayList&lt;Point2D&gt;&gt;());</span>
+<span class="nc" id="L806">			absoluteControlPoints.get(sourceKey).put(targetKey, points);</span>
+		}
+<span class="nc" id="L808">	}</span>
+
+	/**
+	 * Delete  absolute value of a connection, given the search key.
+	 */
+	public void deleteAbsoluteControlPoints(Object sourceKey,Object targetKey) {
+<span class="nc bnc" id="L814" title="All 2 branches missed.">		if(absoluteControlPoints.containsKey(sourceKey)){</span>
+<span class="nc" id="L815">			absoluteControlPoints.get(sourceKey).remove(targetKey);</span>
+		}
+<span class="nc" id="L817">	}</span>
+
+	/**
+	 * Returns shape of a connection, given the search key.
+	 */
+	public List getAbsoluteControlPoints(Object sourceKey,Object targetKey) {
+<span class="nc" id="L823">		return absoluteControlPoints.get(sourceKey).get(targetKey);</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

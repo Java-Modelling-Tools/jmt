@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CombFork.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NetStrategies.ForkStrategies</a> &gt; <span class="el_source">CombFork.java</span></div><h1>CombFork.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NetStrategies.ForkStrategies;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.common.exception.LoadException;
+import jmt.engine.NetStrategies.ForkStrategy;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NodeListWithJobNum;
+import jmt.engine.random.Empirical;
+import jmt.engine.random.EmpiricalEntry;
+import jmt.engine.random.EmpiricalPar;
+import jmt.engine.random.engine.RandomEngine;
+
+public class CombFork extends ForkStrategy {
+
+	private String[] nodeNums;
+	private Empirical distribution;
+	private EmpiricalPar param;
+	private NetNode[] nodes;
+
+<span class="nc" id="L42">	public CombFork(EmpiricalEntry[] entries) throws LoadException, IncorrectDistributionParameterException {</span>
+<span class="nc" id="L43">		nodeNums = new String[entries.length];</span>
+<span class="nc" id="L44">		double[] probabilities = new double[entries.length];</span>
+<span class="nc bnc" id="L45" title="All 2 branches missed.">		for (int i = 0; i &lt; entries.length; i++) {</span>
+<span class="nc" id="L46">			EmpiricalEntry entry = entries[i];</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">			if (entry.getValue() instanceof String) {</span>
+<span class="nc" id="L48">				nodeNums[i] = (String) entry.getValue();</span>
+<span class="nc" id="L49">				probabilities[i] = entry.getProbability();</span>
+			} else {
+<span class="nc" id="L51">				throw new LoadException(&quot;Name of the node is not a String&quot;);</span>
+			}
+		}
+<span class="nc" id="L54">		distribution = new Empirical();</span>
+<span class="nc" id="L55">		param = new EmpiricalPar(probabilities);</span>
+<span class="nc" id="L56">	}</span>
+
+	@Override
+	public void setRandomEngine(RandomEngine randomEngine) {
+<span class="nc" id="L60">		distribution.setRandomEngine(randomEngine); </span>
+<span class="nc" id="L61">	}</span>
+
+	@Override
+	public NodeListWithJobNum getOutNodes(NetNode ownerNode, JobClass jobClass) {
+<span class="nc" id="L65">		RandomEngine engine = ownerNode.getNetSystem().getEngine();</span>
+<span class="nc" id="L66">		NodeListWithJobNum nl = new NodeListWithJobNum();</span>
+
+<span class="nc bnc" id="L68" title="All 2 branches missed.">		if (nodes == null) {</span>
+			//it is the first execution of this method: find the NetNode objects
+<span class="nc" id="L70">			nodes = ownerNode.getOutputNodes().toArray();</span>
+		}
+
+		try {
+<span class="nc" id="L74">			int numPos = (int) Math.round(distribution.nextRand(param));</span>
+<span class="nc" id="L75">			Integer num = Integer.parseInt(nodeNums[numPos]);</span>
+
+			// Reservoir Sampling
+<span class="nc" id="L78">			int[] indices = new int[num];</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">			for (int i = 0; i &lt; num; i++) {</span>
+<span class="nc" id="L80">				indices[i] = i;</span>
+			}
+<span class="nc bnc" id="L82" title="All 2 branches missed.">			for (int i = num; i &lt; nodes.length; i++) {</span>
+<span class="nc" id="L83">				int j = (int) Math.floor(engine.raw() * (i + 1));</span>
+<span class="nc bnc" id="L84" title="All 2 branches missed.">				if (j &lt; num) {</span>
+<span class="nc" id="L85">					indices[j] = i;</span>
+				}
+			}
+
+<span class="nc bnc" id="L89" title="All 2 branches missed.">			for (int i = 0; i &lt; indices.length; i++) {</span>
+<span class="nc" id="L90">				Map&lt;JobClass, Integer&gt; map = new HashMap&lt;JobClass, Integer&gt;();</span>
+<span class="nc" id="L91">				map.put(jobClass, Integer.valueOf(1));</span>
+<span class="nc" id="L92">				nl.add(nodes[indices[i]], map);</span>
+			}
+<span class="nc" id="L94">			return nl;</span>
+<span class="nc" id="L95">		} catch (IncorrectDistributionParameterException e) {</span>
+<span class="nc" id="L96">			e.printStackTrace();</span>
+		}
+<span class="nc" id="L98">		return null;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

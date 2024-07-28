@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomDialogMethod.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmarkov</a> &gt; <span class="el_source">CustomDialogMethod.java</span></div><h1>CustomDialogMethod.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.jmarkov;
+
+import java.awt.Color;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+
+/* 1.4 example used by DialogDemo.java. */
+class CustomDialogMethod extends JDialog implements ActionListener, PropertyChangeListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int typedValue;
+<span class="nc" id="L51">	private String selectedMethod = null;</span>
+	private JPanel selectionP;
+	private GridBagConstraints c;
+	private JTextField textField;
+	private JRadioButton mm1RB;
+	private JRadioButton mm1kRB;
+	private JRadioButton mmnRB;
+	private JRadioButton mmnkRB;
+	private JOptionPane optionPane;
+	private Label numberLabel;
+
+<span class="nc" id="L62">	private String btnString1 = &quot;Enter&quot;;</span>
+
+	// maximum number of server (c) 
+<span class="nc" id="L65">	private int maximumServer = 30;</span>
+
+	/**
+	 * Returns null if the typed string was invalid;
+	 * otherwise, returns the string as the user entered it.
+	 */
+	public String getSelectedMethod() {
+<span class="nc" id="L72">		return selectedMethod;</span>
+	}
+
+	public int getValidatedValue() {
+<span class="nc" id="L76">		return typedValue;</span>
+	}
+
+	/** Creates the reusable dialog. */
+	public CustomDialogMethod(Frame aFrame) {
+<span class="nc" id="L81">		super(aFrame, true);</span>
+<span class="nc" id="L82">		setTitle(&quot;Select The Station Type&quot;);</span>
+<span class="nc" id="L83">		textField = new JTextField(10);</span>
+<span class="nc" id="L84">		textField.setEnabled(false);</span>
+<span class="nc" id="L85">		textField.addKeyListener(new KeyAdapter() {</span>
+			@Override
+			public void keyTyped(KeyEvent e) {
+<span class="nc" id="L88">				char c = e.getKeyChar();</span>
+<span class="nc bnc" id="L89" title="All 8 branches missed.">				if (!((c &gt;= '0') &amp;&amp; (c &lt;= '9') || (c == KeyEvent.VK_BACK_SPACE) || (c == KeyEvent.VK_DELETE))) {</span>
+<span class="nc" id="L90">					getToolkit().beep();</span>
+<span class="nc" id="L91">					e.consume();</span>
+				}
+<span class="nc" id="L93">			}</span>
+		});
+<span class="nc" id="L95">		textField.setBackground(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L96">		mm1RB = new JRadioButton(&quot;M/M/1 Station, 1 Server&quot;, true);</span>
+<span class="nc" id="L97">		mm1RB.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L99">				mm1RB.setSelected(true);</span>
+<span class="nc" id="L100">				mm1kRB.setSelected(false);</span>
+<span class="nc" id="L101">				mmnRB.setSelected(false);</span>
+<span class="nc" id="L102">				mmnkRB.setSelected(false);</span>
+<span class="nc" id="L103">				textField.setEnabled(false);</span>
+<span class="nc" id="L104">				textField.setText(&quot;&quot;);</span>
+<span class="nc" id="L105">				textField.setBackground(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L106">				numberLabel.setEnabled(false);</span>
+
+<span class="nc" id="L108">			}</span>
+		});
+<span class="nc" id="L110">		mm1kRB = new JRadioButton(&quot;M/M/1/k Finite Capacity Station, 1 Server&quot;, false);</span>
+<span class="nc" id="L111">		mm1kRB.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L113">				mm1RB.setSelected(false);</span>
+<span class="nc" id="L114">				mm1kRB.setSelected(true);</span>
+<span class="nc" id="L115">				mmnRB.setSelected(false);</span>
+<span class="nc" id="L116">				mmnkRB.setSelected(false);</span>
+<span class="nc" id="L117">				textField.setEnabled(false);</span>
+<span class="nc" id="L118">				textField.setText(&quot;&quot;);</span>
+<span class="nc" id="L119">				textField.setBackground(Color.LIGHT_GRAY);</span>
+<span class="nc" id="L120">				numberLabel.setEnabled(false);</span>
+<span class="nc" id="L121">			}</span>
+		});
+
+<span class="nc" id="L124">		mmnRB = new JRadioButton(&quot;M/M/c Station, c Servers&quot;, false);</span>
+<span class="nc" id="L125">		mmnRB.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L127">				mm1RB.setSelected(false);</span>
+<span class="nc" id="L128">				mm1kRB.setSelected(false);</span>
+<span class="nc" id="L129">				mmnRB.setSelected(true);</span>
+<span class="nc" id="L130">				mmnkRB.setSelected(false);</span>
+<span class="nc" id="L131">				textField.setEnabled(true);</span>
+<span class="nc" id="L132">				textField.setBackground(Color.WHITE);</span>
+<span class="nc" id="L133">				numberLabel.setEnabled(true);</span>
+<span class="nc" id="L134">			}</span>
+		});
+
+<span class="nc" id="L137">		mmnkRB = new JRadioButton(&quot;M/M/c/k Finite Capacity Station, c Servers&quot;, false);</span>
+<span class="nc" id="L138">		mmnkRB.addActionListener(new ActionListener() {</span>
+			public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L140">				mm1RB.setSelected(false);</span>
+<span class="nc" id="L141">				mm1kRB.setSelected(false);</span>
+<span class="nc" id="L142">				mmnRB.setSelected(false);</span>
+<span class="nc" id="L143">				mmnkRB.setSelected(true);</span>
+<span class="nc" id="L144">				textField.setEnabled(true);</span>
+<span class="nc" id="L145">				textField.setBackground(Color.WHITE);</span>
+<span class="nc" id="L146">				numberLabel.setEnabled(true);</span>
+
+<span class="nc" id="L148">			}</span>
+		});
+
+		//adding to panel
+<span class="nc" id="L152">		selectionP = new JPanel(new GridBagLayout());</span>
+<span class="nc" id="L153">		c = new GridBagConstraints();</span>
+<span class="nc" id="L154">		c.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L155">		c.anchor = GridBagConstraints.LINE_START;</span>
+<span class="nc" id="L156">		c.gridx = 0;</span>
+<span class="nc" id="L157">		c.gridy = 0;</span>
+<span class="nc" id="L158">		selectionP.add(mm1RB, c);</span>
+<span class="nc" id="L159">		c.gridy = 1;</span>
+<span class="nc" id="L160">		selectionP.add(mm1kRB, c);</span>
+<span class="nc" id="L161">		c.gridy = 2;</span>
+<span class="nc" id="L162">		selectionP.add(mmnRB, c);</span>
+<span class="nc" id="L163">		c.gridy = 3;</span>
+<span class="nc" id="L164">		selectionP.add(mmnkRB, c);</span>
+
+<span class="nc" id="L166">		JPanel numberOfStationPanel = new JPanel(new GridBagLayout());</span>
+
+<span class="nc" id="L168">		c.gridy = 0;</span>
+<span class="nc" id="L169">		numberLabel = new Label(&quot;     Number of servers c =&quot;);</span>
+<span class="nc" id="L170">		numberOfStationPanel.add(numberLabel, c);</span>
+<span class="nc" id="L171">		c.gridx = 1;</span>
+<span class="nc" id="L172">		numberOfStationPanel.add(textField, c);</span>
+
+<span class="nc" id="L174">		c.gridy = 4;</span>
+<span class="nc" id="L175">		c.gridx = 0;</span>
+<span class="nc" id="L176">		selectionP.add(numberOfStationPanel, c);</span>
+<span class="nc" id="L177">		numberLabel.setEnabled(false);</span>
+
+		//Create an array of the text and components to be displayed.
+<span class="nc" id="L180">		String msgString1 = &quot;&quot;;</span>
+		//String msgString2 = &quot;&quot;;
+<span class="nc" id="L182">		Object[] array = { msgString1, selectionP };</span>
+
+		//Create an array specifying the number of dialog buttons
+		//and their text.
+<span class="nc" id="L186">		Object[] options = { btnString1 };</span>
+
+		//Create the JOptionPane.
+<span class="nc" id="L189">		optionPane = new JOptionPane(array, JOptionPane.DEFAULT_OPTION, JOptionPane.OK_OPTION, null, options, options[0]);</span>
+<span class="nc" id="L190">		InputMap im = optionPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);</span>
+<span class="nc" id="L191">		im.put(KeyStroke.getKeyStroke(&quot;pressed ESCAPE&quot;), &quot;none&quot;);</span>
+
+		//Make this dialog display it.
+<span class="nc" id="L194">		setContentPane(optionPane);</span>
+
+		//Handle window closing correctly.
+<span class="nc" id="L197">		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);</span>
+
+		//Ensure the text field always gets the first focus.
+<span class="nc" id="L200">		addComponentListener(new ComponentAdapter() {</span>
+			@Override
+			public void componentShown(ComponentEvent ce) {
+<span class="nc" id="L203">				textField.requestFocusInWindow();</span>
+<span class="nc" id="L204">			}</span>
+		});
+
+		//Register an event handler that puts the text into the option pane.
+<span class="nc" id="L208">		textField.addActionListener(this);</span>
+
+		//Register an event handler that reacts to option pane state changes.
+<span class="nc" id="L211">		optionPane.addPropertyChangeListener(this);</span>
+<span class="nc" id="L212">	}</span>
+
+	/** This method handles events for the text field. */
+	public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L216">		optionPane.setValue(btnString1);</span>
+<span class="nc" id="L217">	}</span>
+
+	/** This method reacts to state changes in the option pane. */
+	public void propertyChange(PropertyChangeEvent e) {
+<span class="nc" id="L221">		String prop = e.getPropertyName();</span>
+
+<span class="nc bnc" id="L223" title="All 4 branches missed.">		if (isVisible() &amp;&amp; (e.getSource() == optionPane)</span>
+<span class="nc bnc" id="L224" title="All 4 branches missed.">				&amp;&amp; (JOptionPane.VALUE_PROPERTY.equals(prop) || JOptionPane.INPUT_VALUE_PROPERTY.equals(prop))) {</span>
+<span class="nc" id="L225">			Object value = optionPane.getValue();</span>
+
+<span class="nc bnc" id="L227" title="All 2 branches missed.">			if (value == JOptionPane.UNINITIALIZED_VALUE) {</span>
+				//ignore reset
+<span class="nc" id="L229">				return;</span>
+			}
+
+			//Reset the JOptionPane's value.
+			//If you do not do this, then if the user
+			//presses the same button next time, no
+			//property change event will be fired.
+<span class="nc" id="L236">			optionPane.setValue(JOptionPane.UNINITIALIZED_VALUE);</span>
+
+<span class="nc bnc" id="L238" title="All 2 branches missed.">			if (btnString1.equals(value)) {</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">				if (mm1RB.isSelected()) {</span>
+<span class="nc" id="L240">					selectedMethod = &quot;mm1&quot;;</span>
+<span class="nc" id="L241">					typedValue = 0;</span>
+<span class="nc" id="L242">					clearAndHide();</span>
+<span class="nc bnc" id="L243" title="All 2 branches missed.">				} else if (mm1kRB.isSelected()) {</span>
+<span class="nc" id="L244">					selectedMethod = &quot;mm1k&quot;;</span>
+<span class="nc" id="L245">					typedValue = 0;</span>
+<span class="nc" id="L246">					clearAndHide();</span>
+				}
+
+				else {
+
+<span class="nc bnc" id="L251" title="All 2 branches missed.">					if (mmnRB.isSelected()) {</span>
+<span class="nc" id="L252">						selectedMethod = &quot;mmn&quot;;</span>
+<span class="nc bnc" id="L253" title="All 2 branches missed.">					} else if (mmnkRB.isSelected()) {</span>
+<span class="nc" id="L254">						selectedMethod = &quot;mmnk&quot;;</span>
+					}
+
+					try {
+<span class="nc" id="L258">						typedValue = Integer.parseInt(textField.getText());</span>
+<span class="nc" id="L259">					} catch (NumberFormatException nfe) {</span>
+<span class="nc" id="L260">						typedValue = 0;</span>
+<span class="nc" id="L261">					}</span>
+<span class="nc bnc" id="L262" title="All 4 branches missed.">					if ((typedValue &gt; maximumServer) || (typedValue &lt; 1)) {</span>
+						//text was invalid
+<span class="nc" id="L264">						textField.selectAll();</span>
+<span class="nc" id="L265">						JOptionPane.showMessageDialog(CustomDialogMethod.this, &quot;Sorry, '&quot; + typedValue + &quot;' &quot; + &quot;is not a valid response.\n&quot;</span>
+								+ &quot;Please enter a number between 2 and &quot; + maximumServer + &quot;.&quot;, &quot;Please try again&quot;, JOptionPane.ERROR_MESSAGE);
+<span class="nc" id="L267">						selectedMethod = null;</span>
+<span class="nc" id="L268">						typedValue = 0;</span>
+<span class="nc" id="L269">						textField.requestFocusInWindow();</span>
+					} else {
+<span class="nc" id="L271">						clearAndHide();</span>
+					}
+				}
+			} else { //user closed dialog or clicked cancel
+<span class="nc" id="L275">				typedValue = 0;</span>
+<span class="nc" id="L276">				selectedMethod = null;</span>
+<span class="nc" id="L277">				clearAndHide();</span>
+			}
+		}
+<span class="nc" id="L280">	}</span>
+
+	/** This method clears the dialog and hides it. */
+	public void clearAndHide() {
+<span class="nc" id="L284">		textField.setText(null);</span>
+<span class="nc" id="L285">		setVisible(false);</span>
+<span class="nc" id="L286">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

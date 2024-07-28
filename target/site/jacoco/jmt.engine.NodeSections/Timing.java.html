@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Timing.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">Timing.java</span></div><h1>Timing.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NetStrategies.ServiceStrategy;
+import jmt.engine.NetStrategies.TransitionUtilities.EnablingPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.FiringPacket;
+import jmt.engine.NetStrategies.TransitionUtilities.TimingPacket;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+import jmt.engine.QueueNet.NetSystem;
+import jmt.engine.QueueNet.SimConstants;
+import jmt.engine.dataAnalysis.InverseMeasure;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.random.engine.RandomEngine;
+import jmt.engine.simEngine.RemoveToken;
+
+/**
+ * &lt;p&gt;Title: Timing&lt;/p&gt;
+ * &lt;p&gt;Description: This class implements the timing section.&lt;/p&gt;
+ *
+ * @author Lulai Zhu
+ * Date: 15-07-2016
+ * Time: 21.00.00
+ */
+public class Timing extends ServiceSection {
+
+	private String[] modeNames;
+	private int[] numbersOfServers;
+	private ServiceStrategy[] timingStrategies;
+	private int[] firingPriorities;
+	private double[] firingWeights;
+
+	private List&lt;RemoveToken&gt;[] timingTokenLists;
+	private int[] extraEnablingDegrees;
+	private InverseMeasure firingThroughput;
+	private InverseMeasure[] firingThroughputs;
+	private double lastFiringTime;
+	private double[] lastFiringTimes;
+
+	/**
+	 * Creates a new instance of the timing section.
+	 */
+	public Timing(String[] modeNames, Integer[] numbersOfServers, ServiceStrategy[] timingStrategies,
+			Integer[] firingPriorities, Double[] firingWeights) {
+<span class="nc" id="L68">		super(true);</span>
+<span class="nc" id="L69">		this.modeNames = modeNames;</span>
+<span class="nc" id="L70">		this.numbersOfServers = new int[numbersOfServers.length];</span>
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		for (int i = 0; i &lt; numbersOfServers.length; i++) {</span>
+<span class="nc" id="L72">			this.numbersOfServers[i] = numbersOfServers[i].intValue();</span>
+		}
+<span class="nc" id="L74">		this.timingStrategies = timingStrategies;</span>
+<span class="nc" id="L75">		this.firingPriorities = new int[firingPriorities.length];</span>
+<span class="nc bnc" id="L76" title="All 2 branches missed.">		for (int i = 0; i &lt; firingPriorities.length; i++) {</span>
+<span class="nc" id="L77">			this.firingPriorities[i] = firingPriorities[i].intValue();</span>
+		}
+<span class="nc" id="L79">		this.firingWeights = new double[firingWeights.length];</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		for (int i = 0; i &lt; firingWeights.length; i++) {</span>
+<span class="nc" id="L81">			this.firingWeights[i] = firingWeights[i].doubleValue();</span>
+		}
+<span class="nc" id="L83">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L87">		timingTokenLists = new List[modeNames.length];</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">		for (int i = 0; i &lt; timingTokenLists.length; i++) {</span>
+<span class="nc" id="L89">			timingTokenLists[i] = new LinkedList&lt;RemoveToken&gt;();</span>
+		}
+<span class="nc" id="L91">		extraEnablingDegrees = new int[modeNames.length];</span>
+<span class="nc" id="L92">		Arrays.fill(extraEnablingDegrees, 0);</span>
+<span class="nc" id="L93">		lastFiringTime = 0.0;</span>
+<span class="nc" id="L94">		lastFiringTimes = new double[modeNames.length];</span>
+<span class="nc" id="L95">		Arrays.fill(lastFiringTimes, 0.0);</span>
+<span class="nc" id="L96">	}</span>
+
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc" id="L100">		Object data = message.getData();</span>
+<span class="nc" id="L101">		NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc" id="L102">		RandomEngine randomEngine = netSystem.getEngine();</span>
+
+<span class="nc bnc" id="L104" title="All 8 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+<span class="nc" id="L107">			break;</span>
+
+		case NetEvent.EVENT_JOB:
+<span class="nc" id="L110">			return MSG_NOT_PROCESSED;</span>
+
+		case NetEvent.EVENT_ACK:
+<span class="nc" id="L113">			return MSG_NOT_PROCESSED;</span>
+
+		case NetEvent.EVENT_ENABLING:
+		{
+<span class="nc" id="L117">			int modeIndex = ((EnablingPacket) data).getModeIndex();</span>
+<span class="nc" id="L118">			int enablingDegree = ((EnablingPacket) data).getEnablingDegree();</span>
+<span class="nc" id="L119">			int timingEvents = timingTokenLists[modeIndex].size();</span>
+<span class="nc" id="L120">			int deltaTimingEvents = 0;</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">			if (enablingDegree &lt; 0) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">				if (numbersOfServers[modeIndex] &lt; 0) {</span>
+<span class="nc" id="L123">					return MSG_NOT_PROCESSED;</span>
+				} else {
+<span class="nc" id="L125">					deltaTimingEvents = numbersOfServers[modeIndex] - timingEvents;</span>
+<span class="nc" id="L126">					extraEnablingDegrees[modeIndex] = -1;</span>
+				}
+			} else {
+<span class="nc bnc" id="L129" title="All 2 branches missed.">				if (numbersOfServers[modeIndex] &lt; 0) {</span>
+<span class="nc" id="L130">					deltaTimingEvents = enablingDegree - timingEvents;</span>
+				} else {
+<span class="nc bnc" id="L132" title="All 2 branches missed.">					if (enablingDegree &lt;= numbersOfServers[modeIndex]) {</span>
+<span class="nc" id="L133">						deltaTimingEvents = enablingDegree - timingEvents;</span>
+<span class="nc" id="L134">						extraEnablingDegrees[modeIndex] = 0;</span>
+					} else {
+<span class="nc" id="L136">						deltaTimingEvents = numbersOfServers[modeIndex] - timingEvents;</span>
+<span class="nc" id="L137">						extraEnablingDegrees[modeIndex] = enablingDegree - numbersOfServers[modeIndex];</span>
+					}
+				}
+			}
+
+<span class="nc bnc" id="L142" title="All 2 branches missed.">			if (deltaTimingEvents &gt;= 0) {</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">				for (int i = 0; i &lt; deltaTimingEvents; i++) {</span>
+<span class="nc" id="L144">					double firingDelay = timingStrategies[modeIndex].wait(this, null);</span>
+<span class="nc" id="L145">					TimingPacket packet = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],</span>
+							firingWeights[modeIndex]);
+<span class="nc" id="L147">					RemoveToken token = sendMe(NetEvent.EVENT_TIMING, packet, firingDelay);</span>
+<span class="nc" id="L148">					packet.setTimingToken(token);</span>
+<span class="nc" id="L149">					int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));</span>
+<span class="nc" id="L150">					timingTokenLists[modeIndex].add(index, token);</span>
+				}
+			} else {
+<span class="nc bnc" id="L153" title="All 2 branches missed.">				for (int i = 0; i &gt; deltaTimingEvents; i--) {</span>
+<span class="nc" id="L154">					RemoveToken token = timingTokenLists[modeIndex].remove(0);</span>
+<span class="nc" id="L155">					removeMessage(token);</span>
+				}
+			}
+<span class="nc" id="L158">			break;</span>
+		}
+
+		case NetEvent.EVENT_TIMING:
+		{
+<span class="nc" id="L163">			int modeIndex = ((TimingPacket) data).getModeIndex();</span>
+<span class="nc" id="L164">			RemoveToken token = ((TimingPacket) data).getTimingToken();</span>
+<span class="nc" id="L165">			timingTokenLists[modeIndex].remove(token);</span>
+<span class="nc" id="L166">			FiringPacket firingPacket = new FiringPacket(modeIndex, modeNames[modeIndex], null, null);</span>
+<span class="nc" id="L167">			sendBackward(NetEvent.EVENT_FIRING, firingPacket, 0.0);</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">			if (extraEnablingDegrees[modeIndex] != 0) {</span>
+<span class="nc" id="L169">				double firingDelay = timingStrategies[modeIndex].wait(this, null);</span>
+<span class="nc" id="L170">				TimingPacket timingPacket = new TimingPacket(modeIndex, firingDelay, firingPriorities[modeIndex],</span>
+						firingWeights[modeIndex]);
+<span class="nc" id="L172">				token = sendMe(NetEvent.EVENT_TIMING, timingPacket, firingDelay);</span>
+<span class="nc" id="L173">				timingPacket.setTimingToken(token);</span>
+<span class="nc" id="L174">				int index = (int) (randomEngine.raw() * (timingTokenLists[modeIndex].size() + 1));</span>
+<span class="nc" id="L175">				timingTokenLists[modeIndex].add(index, token);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">				if (extraEnablingDegrees[modeIndex] &gt; 0) {</span>
+<span class="nc" id="L177">					extraEnablingDegrees[modeIndex]--;</span>
+				}
+<span class="nc" id="L179">			}</span>
+			break;
+		}
+
+		case NetEvent.EVENT_FIRING:
+		{
+<span class="nc" id="L185">			int modeIndex = ((FiringPacket) data).getModeIndex();</span>
+<span class="nc" id="L186">			sendForward(NetEvent.EVENT_FIRING, data, 0.0);</span>
+<span class="nc" id="L187">			updateFiringThroughput(modeIndex);</span>
+<span class="nc" id="L188">			lastFiringTime = netSystem.getTime();</span>
+<span class="nc" id="L189">			lastFiringTimes[modeIndex] = netSystem.getTime();</span>
+<span class="nc" id="L190">			break;</span>
+		}
+
+		case NetEvent.EVENT_STOP:
+<span class="nc" id="L194">			break;</span>
+
+		default:
+<span class="nc" id="L197">			return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L200">		return MSG_PROCESSED;</span>
+	}
+
+	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
+<span class="nc bnc" id="L204" title="All 2 branches missed.">		switch (name) {</span>
+		case SimConstants.FIRING_THROUGHPUT:
+<span class="nc bnc" id="L206" title="All 2 branches missed.">			if (!analyzeFiringThroughput(modeName, (InverseMeasure) measurement)) {</span>
+<span class="nc" id="L207">				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+			}
+			break;
+		default:
+<span class="nc" id="L211">			throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+		}
+<span class="nc" id="L213">	}</span>
+
+	private boolean analyzeFiringThroughput(String modeName, InverseMeasure measurement) {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">		if (modeName != &quot;&quot;) {</span>
+<span class="nc" id="L217">			int modeIndex = getModeIndexByName(modeName);</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">			if (modeIndex &lt; 0) {</span>
+<span class="nc" id="L219">				return false;</span>
+			}
+<span class="nc bnc" id="L221" title="All 2 branches missed.">			if (firingThroughputs == null) {</span>
+<span class="nc" id="L222">				firingThroughputs = new InverseMeasure[modeNames.length];</span>
+			}
+<span class="nc" id="L224">			firingThroughputs[modeIndex] = measurement;</span>
+<span class="nc" id="L225">		} else {</span>
+<span class="nc" id="L226">			firingThroughput = measurement;</span>
+		}
+<span class="nc" id="L228">		return true;</span>
+	}
+
+	private void updateFiringThroughput(int modeIndex) {
+<span class="nc" id="L232">		NetSystem netSystem = getOwnerNode().getNetSystem();</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">		if (firingThroughputs != null) {</span>
+<span class="nc" id="L234">			Measure m = firingThroughputs[modeIndex];</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">			if (m != null) {</span>
+<span class="nc" id="L236">				m.update(netSystem.getTime() - lastFiringTimes[modeIndex], 1.0);</span>
+			}
+		}
+<span class="nc bnc" id="L239" title="All 2 branches missed.">		if (firingThroughput != null) {</span>
+<span class="nc" id="L240">			firingThroughput.update(netSystem.getTime() - lastFiringTime, 1.0);</span>
+		}
+<span class="nc" id="L242">	}</span>
+
+	private int getModeIndexByName(String modeName) {
+<span class="nc bnc" id="L245" title="All 2 branches missed.">		for (int i = 0; i &lt; modeNames.length; i++) {</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">			if (modeNames[i].equals(modeName)) {</span>
+<span class="nc" id="L247">				return i;</span>
+			}
+		}
+<span class="nc" id="L250">		return -1;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

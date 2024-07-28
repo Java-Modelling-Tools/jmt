@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RefSourcesPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.jsimwiz.panels</a> &gt; <span class="el_source">RefSourcesPanel.java</span></div><h1>RefSourcesPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.jsimwiz.panels;
+
+import java.awt.BorderLayout;
+
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.editors.ImagedComboBoxCellEditorFactory;
+import jmt.gui.common.panels.WarningScrollTable;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: orsotronIII
+ * Date: 29-lug-2005
+ * Time: 11.28.50
+ * Modified by Bertoli Marco 9-oct-2005
+ */
+public class RefSourcesPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	protected ClassDefinition classData;
+	protected StationDefinition stationData;
+	protected SimulationDefinition simData;
+	protected WarningScrollTable warning;
+	private RefSourceTable refSourceTable;
+	protected ImagedComboBoxCellEditorFactory combos;
+
+<span class="nc" id="L56">	public RefSourcesPanel(ClassDefinition classes, StationDefinition stations, SimulationDefinition sim) {</span>
+<span class="nc" id="L57">		combos = new ImagedComboBoxCellEditorFactory(stations);</span>
+<span class="nc" id="L58">		setData(classes, stations, sim);</span>
+<span class="nc" id="L59">		initComponents();</span>
+<span class="nc" id="L60">		refreshComponents();</span>
+<span class="nc" id="L61">	}</span>
+
+	private void initComponents() {
+<span class="nc" id="L64">		refSourceTable = new RefSourceTable();</span>
+<span class="nc" id="L65">		setLayout(new BorderLayout());</span>
+<span class="nc" id="L66">		warning = new WarningScrollTable(refSourceTable, WARNING_CLASS_STATION);</span>
+<span class="nc" id="L67">		warning.addCheckVector(classData.getClassKeys());</span>
+<span class="nc" id="L68">		warning.addCheckVector(stationData.getStationKeys());</span>
+<span class="nc" id="L69">		add(warning, BorderLayout.CENTER);</span>
+<span class="nc" id="L70">	}</span>
+
+	public void setData(ClassDefinition classes, StationDefinition stations, SimulationDefinition sim) {
+<span class="nc" id="L73">		classData = classes;</span>
+<span class="nc" id="L74">		stationData = stations;</span>
+<span class="nc" id="L75">		simData = sim;</span>
+<span class="nc" id="L76">		combos.setData(stations);</span>
+<span class="nc" id="L77">		refreshComponents();</span>
+<span class="nc" id="L78">	}</span>
+
+	@Override
+	public void repaint() {
+<span class="nc" id="L82">		refreshComponents();</span>
+<span class="nc" id="L83">		super.repaint();</span>
+<span class="nc" id="L84">	}</span>
+
+	private void refreshComponents() {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">		if (refSourceTable != null) {</span>
+<span class="nc" id="L88">			refSourceTable.tableChanged(new TableModelEvent(refSourceTable.getModel()));</span>
+		}
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		if (warning != null) {</span>
+<span class="nc" id="L91">			warning.clearCheckVectors();</span>
+<span class="nc" id="L92">			warning.addCheckVector(classData.getClassKeys());</span>
+<span class="nc" id="L93">			warning.addCheckVector(stationData.getStationKeys());</span>
+		}
+<span class="nc" id="L95">	}</span>
+
+	protected class RefSourceTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L101">		int[] columnWidths = new int[] { 80, 100 };</span>
+
+<span class="nc" id="L103">		public RefSourceTable() {</span>
+<span class="nc" id="L104">			super(new RefSourceTableModel());</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">			for (int i = 0; i &lt; getColumnCount(); i++) {</span>
+<span class="nc" id="L106">				getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);</span>
+			}
+<span class="nc" id="L108">			setRowHeight(ROW_HEIGHT);</span>
+<span class="nc" id="L109">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L110">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L111">		}</span>
+
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">				if (classData.getClassType(classData.getClassKeys().get(row)) == CLASS_TYPE_OPEN) {</span>
+<span class="nc" id="L117">					return combos.getEditor(stationData.getStationKeysRefStation());</span>
+				} else {
+<span class="nc" id="L119">					return combos.getEditor(stationData.getStationKeysNoSourceSink());</span>
+				}
+			} else {
+<span class="nc" id="L122">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L128" title="All 2 branches missed.">			if (column == 1) {</span>
+<span class="nc" id="L129">				return combos.getRenderer();</span>
+			} else {
+<span class="nc" id="L131">				return super.getCellRenderer(row, column);</span>
+			}
+		}
+
+	}
+
+<span class="nc" id="L137">	protected class RefSourceTableModel extends AbstractTableModel {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		public int getRowCount() {
+<span class="nc" id="L142">			return classData.getClassKeys().size();</span>
+		}
+
+		public int getColumnCount() {
+<span class="nc" id="L146">			return 2;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L152">				return &quot;Class&quot;;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L154">				return &quot;Reference Station&quot;;</span>
+			} else {
+<span class="nc" id="L156">				return null;</span>
+			}
+		}
+
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc" id="L162">			return String.class;</span>
+		}
+
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L167" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L168">				return false;</span>
+			} else {
+<span class="nc" id="L170">				return true;</span>
+			}
+		}
+
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L175">			Object key = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+<span class="nc" id="L177">				return classData.getClassName(key);</span>
+<span class="nc bnc" id="L178" title="All 2 branches missed.">			} else if (columnIndex == 1) {</span>
+<span class="nc" id="L179">				return classData.getClassRefStation(key);</span>
+			} else {
+<span class="nc" id="L181">				return null;</span>
+			}
+		}
+
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L187">			Object key = classData.getClassKeys().get(rowIndex);</span>
+<span class="nc bnc" id="L188" title="All 4 branches missed.">			if (columnIndex == 1 &amp;&amp; aValue != null) {</span>
+<span class="nc" id="L189">				classData.setClassRefStation(key, aValue);</span>
+			}
+<span class="nc" id="L191">		}</span>
+
+	}
+
+	/**
+	 * called by the Wizard when the panel becomes active
+	 */
+	@Override
+	public void gotFocus() {
+<span class="nc" id="L200">		combos.clearCache();</span>
+<span class="nc" id="L201">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L208">		return &quot;Reference station&quot;;</span>
+	}
+
+	/**
+	 * called by the Wizard before when switching to another panel
+	 */
+	@Override
+	public void lostFocus() {
+		// Aborts editing of table
+<span class="nc" id="L217">		TableCellEditor editor = refSourceTable.getCellEditor();</span>
+<span class="nc bnc" id="L218" title="All 2 branches missed.">		if (editor != null) {</span>
+<span class="nc" id="L219">			editor.stopCellEditing();</span>
+		}
+<span class="nc" id="L221">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

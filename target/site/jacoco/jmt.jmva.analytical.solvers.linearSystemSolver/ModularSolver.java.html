@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ModularSolver.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystemSolver</a> &gt; <span class="el_source">ModularSolver.java</span></div><h1>ModularSolver.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.linearSystemSolver;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+import jmt.jmva.analytical.solvers.utilities.Timer;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.naming.OperationNotSupportedException;
+
+/**
+ * Class which defines a ModularSolver object, which solves the
+ * linear system using residual systems solved by Gaussian elimination.
+ *
+ * @author Michail Makaronidis, 2010
+ */
+public class ModularSolver extends ParallelSolver {
+
+<span class="nc" id="L48">    private int invocation = 0;</span>
+    private List&lt;BigInteger&gt; moduli;
+<span class="nc" id="L50">    private BigInteger M = BigInteger.ONE, maxA, minModulo;</span>
+    private BigRational maxG;
+    //private boolean previousInvocationSwapped;
+    private Set&lt;Integer&gt; rowsToSkip, columnsToSkip;
+    private List&lt;ModularSolverParallelTask&gt; taskList;
+    private int ra, rb;
+<span class="nc" id="L56">    private Timer moduliSelectionTimer = new Timer();</span>
+
+    /**
+     * Constructs a ModularSolver object.
+     *
+     * @param nThreads Specifies the number of threads that the ModularSolver must use
+     */
+    public ModularSolver(int nThreads) {
+<span class="nc" id="L64">        super(nThreads);</span>
+<span class="nc" id="L65">        System.out.println(&quot;Using parallel modular solver (&quot; + this.nThreads + &quot; threads)&quot;);</span>
+<span class="nc" id="L66">    }</span>
+
+    @Override
+    public void initialise(BigRational[][] A, List&lt;Tuple&lt;Integer, Integer&gt;&gt; UList, Set&lt;Integer&gt; uncomputables, int maxA, BigInteger maxb, BigRational maxG) throws OperationNotSupportedException, InternalErrorException {
+<span class="nc" id="L70">        t.start();</span>
+<span class="nc" id="L71">        super.initialise(A, UList, uncomputables);</span>
+        //this.previousInvocationSwapped = false;
+<span class="nc" id="L73">        this.maxA = new BigInteger((new Integer(maxA).toString()));</span>
+        //this.maxOfAColumns = maxOfAColumns;
+<span class="nc" id="L75">        this.maxG = maxG;</span>
+<span class="nc" id="L76">        int bitlength = lowerLimitForMMorhac(this.maxA, maxb);</span>
+        //int bitlength = lowerLimitForMG(this.maxG.asBigDecimal().toBigIntegerExact());
+<span class="nc bnc" id="L78" title="All 2 branches missed.">        if (bitlength &gt; M.bitLength()) {</span>
+<span class="nc" id="L79">            System.out.println(&quot;Selecting moduli. Total bitlength: &quot; + bitlength);</span>
+<span class="nc" id="L80">            moduliSelectionTimer.start();</span>
+<span class="nc" id="L81">            moduli = new ArrayList&lt;BigInteger&gt;(nThreads);</span>
+<span class="nc" id="L82">            M = BigInteger.ONE;</span>
+<span class="nc bnc" id="L83" title="All 2 branches missed.">            for (BigInteger m : moduli) {</span>
+<span class="nc" id="L84">                M = M.multiply(m);</span>
+<span class="nc" id="L85">            }</span>
+
+            //selectModuli(bitlength);
+            // Report linear system only
+            /*BigInteger m = new BigInteger(&quot;775239&quot;);
+            moduli.add(m);
+            M = M.multiply(moduli.get(moduli.size()-1));
+            minModulo = m;
+            moduli.add(new BigInteger(&quot;1942111&quot;));
+            M = M.multiply(moduli.get(moduli.size()-1));*/
+<span class="nc" id="L95">            selectModuliInParallel(bitlength);</span>
+<span class="nc bnc" id="L96" title="All 4 branches missed.">            if (M.bitLength() &lt; bitlength || minModulo.compareTo(this.maxA) &lt;= 0) {</span>
+<span class="nc" id="L97">                throw new InternalErrorException(&quot;Cannot select moduli&quot;);</span>
+            }
+<span class="nc" id="L99">            moduliSelectionTimer.pause();</span>
+<span class="nc" id="L100">            System.out.println(&quot;Moduli selection took &quot; + moduliSelectionTimer.getPrettyInterval() + &quot;.\nWill now solve &quot; + moduli.size() + &quot; residue systems.&quot;);</span>
+        }
+<span class="nc" id="L102">        taskList = new ArrayList&lt;ModularSolverParallelTask&gt;(moduli.size());</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">        for (int i = 0; i &lt; moduli.size(); i++) {</span>
+<span class="nc" id="L104">            taskList.add(new ModularSolverParallelTask(moduli.get(i), M));</span>
+        }
+<span class="nc" id="L106">        t.pause();</span>
+<span class="nc" id="L107">    }</span>
+
+    private void selectModuliInParallel(int totalBitLength) throws InternalErrorException {
+        try {
+            // SUPER SOS EVERY MODULO &gt; MaxA
+<span class="nc" id="L112">            int numberOfModuli = nThreads;</span>
+<span class="nc" id="L113">            int size = totalBitLength / numberOfModuli + 1;</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">            while (size &gt; 2500) {</span>
+<span class="nc" id="L115">                size = (int) Math.round((double) size / 2);</span>
+<span class="nc" id="L116">                numberOfModuli *= 2;</span>
+            }
+<span class="nc bnc" id="L118" title="All 2 branches missed.">            size = (size &lt; this.maxA.bitLength()) ? (this.maxA.bitLength() + 1) : size;</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            size = (size &lt; 2) ? 2 : size;</span>
+<span class="nc" id="L120">            List&lt;ModuloSelectionTask&gt; tasks = new ArrayList&lt;ModuloSelectionTask&gt;(numberOfModuli);</span>
+<span class="nc" id="L121">            int attempt = 0;</span>
+<span class="nc bnc" id="L122" title="All 4 branches missed.">            while (moduli.size() &lt; numberOfModuli &amp;&amp; attempt &lt; 5) {</span>
+<span class="nc bnc" id="L123" title="All 2 branches missed.">                for (int i = 0; i &lt; numberOfModuli - moduli.size(); i++) {</span>
+<span class="nc bnc" id="L124" title="All 2 branches missed.">                    tasks.add(new ModuloSelectionTask((i % 2 == 0) ? size : size + 1));</span>
+                }
+<span class="nc" id="L126">                List&lt;Future&lt;BigInteger&gt;&gt; results = pool.invokeAll(tasks);</span>
+<span class="nc bnc" id="L127" title="All 2 branches missed.">                for (Future&lt;BigInteger&gt; f : results) {</span>
+<span class="nc" id="L128">                    BigInteger nextModulo = f.get();</span>
+<span class="nc" id="L129">                    moduli.add(nextModulo);</span>
+<span class="nc" id="L130">                    M = M.multiply(nextModulo);</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">                    if (minModulo == null) {</span>
+<span class="nc" id="L132">                        minModulo = nextModulo;</span>
+                    } else {
+<span class="nc bnc" id="L134" title="All 2 branches missed.">                        minModulo = (minModulo.compareTo(nextModulo) &lt; 0) ? minModulo : nextModulo;</span>
+                    }
+                    //System.out.println(&quot;Modulo #&quot; + moduli.size() + &quot;: &quot; /*+ nextModulo*/ + &quot; bitSize = &quot; + nextModulo.bitLength());
+<span class="nc" id="L137">                }</span>
+<span class="nc" id="L138">                attempt++;</span>
+<span class="nc" id="L139">            }</span>
+<span class="nc" id="L140">        } catch (InterruptedException ex) {</span>
+<span class="nc" id="L141">            Logger.getLogger(ModularSolver.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L142">            throw new InternalErrorException(&quot;Cannot select moduli&quot;);</span>
+<span class="nc" id="L143">        } catch (ExecutionException ex) {</span>
+<span class="nc" id="L144">            Logger.getLogger(ModularSolver.class.getName()).log(Level.SEVERE, null, ex);</span>
+<span class="nc" id="L145">            throw new InternalErrorException(&quot;Cannot select moduli&quot;);</span>
+<span class="nc" id="L146">        }</span>
+<span class="nc" id="L147">    }</span>
+
+    private void selectModuli(int totalBitLength) throws InternalErrorException {
+        // SUPER SOS EVERY MODULO &gt; MaxA
+        do {
+<span class="nc" id="L152">            int optimalModuloSize = 200;</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            optimalModuloSize = (optimalModuloSize &lt; this.maxA.bitLength()) ? (this.maxA.bitLength() + 1) : optimalModuloSize;</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">            int size = (totalBitLength - M.bitLength() &gt;= optimalModuloSize) ? optimalModuloSize : totalBitLength - M.bitLength();</span>
+            //int size = (moduli.size() &lt; nThreads) ? (totalBitLength - M.bitLength()) / (nThreads - moduli.size()) : (totalBitLength - M.bitLength());
+
+<span class="nc bnc" id="L157" title="All 2 branches missed.">            size = (size &lt; this.maxA.bitLength()) ? (this.maxA.bitLength() + 1) : size;</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">            size = (size &lt; 2) ? 2 : size;</span>
+            //size = (moduli.size() % 2 == 1) ? size + 1 : size;
+            boolean repetitionNecessary;
+            BigInteger nextModulo;
+            do {
+<span class="nc" id="L163">                repetitionNecessary = false;</span>
+<span class="nc" id="L164">                nextModulo = getPrimeLessThan(size, moduli);</span>
+
+                //check if we must increase the current prime bitlength to produce exactly as many moduli as the number of threads.
+                /*if ((totalBitLength - M.bitLength() &lt;= optimalModuloSize) &amp;&amp; (M.multiply(nextModulo).bitLength() &lt; totalBitLength)) {
+                size++;
+                repetitionNecessary = true;
+                }*/
+<span class="nc bnc" id="L171" title="All 2 branches missed.">            } while (repetitionNecessary);</span>
+<span class="nc" id="L172">            M = M.multiply(nextModulo);</span>
+<span class="nc" id="L173">            moduli.add(nextModulo);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">            if (minModulo == null) {</span>
+<span class="nc" id="L175">                minModulo = nextModulo;</span>
+            } else {
+<span class="nc bnc" id="L177" title="All 2 branches missed.">                minModulo = (minModulo.compareTo(nextModulo) &lt; 0) ? minModulo : nextModulo;</span>
+            }
+            //System.out.println(&quot;Modulo #&quot; + moduli.size() + &quot;: &quot;/* + nextModulo*/ + &quot; bitSize = &quot; + nextModulo.bitLength());
+<span class="nc bnc" id="L180" title="All 2 branches missed.">        } while (M.bitLength() &lt; totalBitLength);</span>
+<span class="nc" id="L181">    }</span>
+
+    /**
+     * Solves the linear system using residual systems solved by Gaussian elimination
+     * @param bInput The vector b of the linear system Ax = b
+     * @return A vector containing the solutions of the linear system
+     * @throws OperationNotSupportedException Thrown when the system cannot be solved due to bad vector b size
+     */
+    @Override
+    public BigRational[] solve(BigRational[] bInput) throws OperationNotSupportedException, InconsistentLinearSystemException, InternalErrorException {
+        try {
+<span class="nc" id="L192">            t.start();</span>
+<span class="nc" id="L193">            invocation++;</span>
+<span class="nc" id="L194">            b = bInput;</span>
+
+<span class="nc" id="L196">            boolean existsDefinedOrNonZero = false;/*, swappedSomeTwoRows = false, check = false;*/</span>
+
+            // Check if matrix sizes match
+<span class="nc bnc" id="L199" title="All 2 branches missed.">            if (N != b.length) {</span>
+<span class="nc" id="L200">                throw new OperationNotSupportedException(&quot;Wrong size of vector b.&quot;);</span>
+            }
+            // Check if all b vector is &quot;undefined&quot;. In such a case the system cannot be solved.
+            //rowsToDiscard = new HashSet&lt;Integer&gt;();
+<span class="nc bnc" id="L204" title="All 2 branches missed.">            for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">                if (!b[i].isUndefined()) {</span>
+<span class="nc bnc" id="L206" title="All 2 branches missed.">                    if (!b[i].isZero()) {</span>
+<span class="nc" id="L207">                        existsDefinedOrNonZero = true;</span>
+<span class="nc" id="L208">                        break;</span>
+                    }
+                }
+            }
+            /*System.out.println(&quot;Matrix A:&quot;);
+            MiscMathsFunctions.printMatrix(A);
+            System.out.println(&quot;Matrix b:&quot;);
+            MiscMathsFunctions.printMatrix(b);*/
+
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            if (!existsDefinedOrNonZero) {</span>
+<span class="nc" id="L218">                throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+            }
+<span class="nc bnc" id="L220" title="All 2 branches missed.">            if (N &gt; 100) {</span>
+<span class="nc" id="L221">                System.out.print(&quot;Solving LinSys.&quot;);</span>
+            }
+
+<span class="nc" id="L224">            SystemSanitisation();</span>
+            //System.out.println(&quot;Skipping rows: &quot; + rowsToSkip + &quot;\nSKipping columns: &quot; + columnsToSkip);
+            // Compute rows that can be swapped
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">                if (!rowsToSkip.contains(i)) {</span>
+<span class="nc" id="L229">                    ra = i;</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">                    for (int j = i + 1; j &lt; N; j++) {</span>
+<span class="nc bnc" id="L231" title="All 2 branches missed.">                        if (!rowsToSkip.contains(j)) {</span>
+<span class="nc" id="L232">                            rb = j;</span>
+<span class="nc" id="L233">                            break;</span>
+                        }
+                    }
+<span class="nc" id="L236">                    break;</span>
+                }
+            }
+
+<span class="nc" id="L240">            BigRational det = BigRational.ZERO;</span>
+<span class="nc" id="L241">            BigRational[] x = new BigRational[N];</span>
+
+            // ****** SOLVER STARTS HERE ******
+<span class="nc" id="L244">            BigInteger mod = moduli.get(0); // We can use any modulo when computing the common between</span>
+<span class="nc" id="L245">            BigRational[][] Amod = mod(A, mod); //all residue systems Amod, as every modulo is bigger than Amax.</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">            for (int modIndex = 0; modIndex &lt; moduli.size(); modIndex++) {</span>
+<span class="nc" id="L247">                taskList.get(modIndex).prepare(Amod, b, rowsToSkip, columnsToSkip);</span>
+            }
+<span class="nc" id="L249">            pool.invokeAll(taskList);</span>
+<span class="nc bnc" id="L250" title="All 2 branches missed.">            for (int modIndex = 0; modIndex &lt; moduli.size(); modIndex++) {</span>
+<span class="nc" id="L251">                det = det.add(taskList.get(modIndex).getDetRes());</span>
+            }
+<span class="nc" id="L253">            det = det.mod(M);</span>
+
+<span class="nc" id="L255">            int indexAtResidueSol = 0;</span>
+<span class="nc bnc" id="L256" title="All 2 branches missed.">            for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc" id="L257">                x[i] = BigRational.ZERO;</span>
+<span class="nc bnc" id="L258" title="All 2 branches missed.">                if (!columnsToSkip.contains(i)) {</span>
+<span class="nc bnc" id="L259" title="All 2 branches missed.">                    for (ModularSolverParallelTask task : taskList) {</span>
+<span class="nc" id="L260">                        x[i] = x[i].add(task.getyRes()[indexAtResidueSol]);</span>
+<span class="nc" id="L261">                    }</span>
+<span class="nc" id="L262">                    indexAtResidueSol++;</span>
+                } else {
+<span class="nc" id="L264">                    x[i] = new BigRational(-1);</span>
+<span class="nc" id="L265">                    x[i].makeUndefined();</span>
+                }
+            }
+
+<span class="nc bnc" id="L269" title="All 2 branches missed.">            for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L270" title="All 4 branches missed.">                if ((!columnsToSkip.contains(i)) &amp;&amp; (!x[i].isUndefined())) {</span>
+<span class="nc" id="L271">                    x[i] = x[i].modNormal(M);</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    if (!det.isZero()) {</span>
+<span class="nc" id="L273">                        x[i] = x[i].divide(det);</span>
+                    }
+                } else {
+<span class="nc" id="L276">                    x[i] = new BigRational(-1);</span>
+<span class="nc" id="L277">                    x[i].makeUndefined();</span>
+                }
+            }
+            // ****** SOLVER ENDS HERE ******
+
+
+<span class="nc bnc" id="L283" title="All 2 branches missed.">            if (N &gt; 100) {</span>
+<span class="nc" id="L284">                System.out.print(&quot;.&quot;);</span>
+            }
+
+            // Restore original matrices
+            //MiscMathsFunctions.arrayCopy(cleanA, A);
+
+<span class="nc bnc" id="L290" title="All 2 branches missed.">            if (N &gt; 100) {</span>
+<span class="nc" id="L291">                System.out.println(&quot;.OK!&quot;);</span>
+            }
+
+            /*System.out.println(&quot;Solution: (det = &quot; + det.toString() + &quot;)&quot;);*/
+            /*MiscMathsFunctions.printMatrix(x);
+            System.out.println();*/
+
+            //System.out.println(&quot;x[0] = &quot; + x[0]);
+            //checkIfAllSolutionsLegal(x);
+
+<span class="nc" id="L301">            t.pause();</span>
+<span class="nc" id="L302">            return x;</span>
+<span class="nc" id="L303">        } catch (NullPointerException ex) {</span>
+<span class="nc" id="L304">            throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+<span class="nc" id="L305">        } catch (InterruptedException ex) {</span>
+<span class="nc" id="L306">            throw new InternalErrorException(ex.getMessage());</span>
+<span class="nc" id="L307">        } catch (Exception ex) {</span>
+            //ex.printStackTrace();
+<span class="nc" id="L309">            throw new InternalErrorException(ex.getMessage());</span>
+        }
+    }
+
+    private void checkIfAllSolutionsLegal(BigRational[] x) throws InternalErrorException {
+<span class="nc bnc" id="L314" title="All 2 branches missed.">        for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if ((!x[i].isUndefined())) {</span>
+<span class="nc bnc" id="L316" title="All 2 branches missed.">                if (x[i].greaterThan(maxG)) {</span>
+<span class="nc" id="L317">                    System.out.println(&quot;Solution:&quot;);</span>
+<span class="nc" id="L318">                    MiscMathsFunctions.printMatrix(x);</span>
+<span class="nc" id="L319">                    System.out.println();</span>
+<span class="nc" id="L320">                    throw new InternalErrorException(&quot;Arrived at a solution greater than maxG!&quot;);</span>
+                }
+            }
+        }
+<span class="nc" id="L324">    }</span>
+
+    private int lowerLimitForMMorhac(BigInteger maxA, BigInteger maxb) {
+        // Per Morhac
+<span class="nc" id="L328">        int logN = (int) Math.ceil(Math.log(N) / Math.log(2));</span>
+<span class="nc" id="L329">        int bitlength = 1 + Math.max(N / 2 * logN + maxA.bitLength() * N, logN + ((N - 1) / 2 + 1) * logN + maxA.bitLength() + maxb.bitLength());</span>
+<span class="nc" id="L330">        return bitlength;</span>
+    }
+    /*
+    private int lowerLimitForMKoc(BigInteger maxA, BigInteger maxb) {
+    // Per Koc
+    int bitlength = 1 + Math.max(N * maxA.bitLength(), 0);
+    return bitlength;
+    }
+    private int lowerLimitForMG(BigInteger maxG) {
+    // Per Koc
+    int bitlength = 1 + maxG.bitLength();
+    return bitlength;
+    }*/
+
+    private BigInteger max(BigInteger a, BigInteger b) {
+<span class="nc bnc" id="L345" title="All 2 branches missed.">        if (a.compareTo(b) == 1) {</span>
+<span class="nc" id="L346">            return a;</span>
+        } else {
+<span class="nc" id="L348">            return b;</span>
+        }
+    }
+
+    private BigInteger getPrimeLessThan(int b, List&lt;BigInteger&gt; banned) throws InternalErrorException {
+<span class="nc" id="L353">        int bitLength = b;</span>
+<span class="nc" id="L354">        Random rnd = new Random();</span>
+        BigInteger probPrime;
+<span class="nc" id="L356">        int attempt = 0;</span>
+        do {
+<span class="nc" id="L358">            probPrime = BigInteger.probablePrime(bitLength, rnd);</span>
+<span class="nc" id="L359">            attempt++;</span>
+<span class="nc bnc" id="L360" title="All 4 branches missed.">        } while ((banned.contains(probPrime)) &amp;&amp; (attempt &lt; 10));</span>
+
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        if (attempt &gt;= 10) {</span>
+<span class="nc" id="L363">            throw new InternalErrorException(&quot;Cannot select moduli.&quot;);</span>
+        }
+<span class="nc" id="L365">        return probPrime;</span>
+    }
+    /*
+    private BigRational hadamardLimit() {
+    BigRational maxDet = BigRational.ONE;
+    for (int j = 0; j &lt; N; j++) {
+    if ((!columnsToSkip.contains(j)) &amp;&amp; !maxOfAColumns[j].isZero()) {
+    maxDet = maxDet.multiply(maxOfAColumns[j]);
+    }
+    }
+    return maxDet;
+    }*/
+
+    private void SystemSanitisation() throws InconsistentLinearSystemException {
+<span class="nc" id="L379">        rowsToSkip = new HashSet&lt;Integer&gt;();</span>
+<span class="nc" id="L380">        columnsToSkip = new HashSet&lt;Integer&gt;();</span>
+
+<span class="nc bnc" id="L382" title="All 2 branches missed.">        for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">            if (b[i].isUndefined()) {</span>
+<span class="nc" id="L384">                rowsToSkip.add(i);</span>
+            }
+        }
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        for (Integer i : rowsToSkip) {</span>
+<span class="nc bnc" id="L388" title="All 2 branches missed.">            for (int j = 0; j &lt; N; j++) {</span>
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                if (!columnsToSkip.contains(j)) {</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">                    if (!A[i][j].isZero()) {</span>
+<span class="nc" id="L391">                        BigRational sum = BigRational.ZERO;</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                        for (int k = 0; k &lt; N; k++) {</span>
+<span class="nc bnc" id="L393" title="All 4 branches missed.">                            if (!rowsToSkip.contains(k) &amp;&amp; k != j) {</span>
+<span class="nc" id="L394">                                sum = sum.add(A[k][j].abs());</span>
+                            }
+                        }
+<span class="nc bnc" id="L397" title="All 2 branches missed.">                        if (sum.isZero()) {</span>
+<span class="nc" id="L398">                            columnsToSkip.add(j);</span>
+                        }
+                    }
+                }
+            }
+<span class="nc" id="L403">        }</span>
+
+<span class="nc" id="L405">        columnsToSkip.addAll(uncomputables);</span>
+<span class="nc bnc" id="L406" title="All 2 branches missed.">        if (rowsToSkip.size() &gt; columnsToSkip.size()) {</span>
+<span class="nc" id="L407">            throw new InconsistentLinearSystemException(&quot;Singular system. Cannot proceed.&quot;);</span>
+        }
+<span class="nc" id="L409">    }</span>
+
+    private BigRational[][] mod(BigRational[][] A, BigInteger mod) {
+<span class="nc" id="L412">        BigRational[][] newA = new BigRational[N - rowsToSkip.size()][N - columnsToSkip.size()];</span>
+<span class="nc" id="L413">        int indexI = 0, indexJ = 0;</span>
+<span class="nc bnc" id="L414" title="All 2 branches missed.">        for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc bnc" id="L415" title="All 2 branches missed.">            if (!rowsToSkip.contains(i)) {</span>
+<span class="nc bnc" id="L416" title="All 2 branches missed.">                if (this.ra == i) {</span>
+<span class="nc" id="L417">                    this.ra = indexI;</span>
+                }
+<span class="nc bnc" id="L419" title="All 2 branches missed.">                if (this.rb == i) {</span>
+<span class="nc" id="L420">                    this.rb = indexI;</span>
+                }
+<span class="nc" id="L422">                indexJ = 0;</span>
+<span class="nc bnc" id="L423" title="All 2 branches missed.">                for (int j = 0; j &lt; N; j++) {</span>
+<span class="nc bnc" id="L424" title="All 2 branches missed.">                    if (!columnsToSkip.contains(j)) {</span>
+<span class="nc bnc" id="L425" title="All 2 branches missed.">                        if (A[i][j].isZero()) {</span>
+<span class="nc" id="L426">                            newA[indexI][indexJ] = BigRational.ZERO;</span>
+                        } else {
+<span class="nc" id="L428">                            newA[indexI][indexJ] = A[i][j].mod(mod);</span>
+                        }
+<span class="nc" id="L430">                        indexJ++;</span>
+                    }
+                }
+<span class="nc" id="L433">                indexI++;</span>
+            }
+        }
+<span class="nc" id="L436">        return newA;</span>
+    }
+
+    @Override
+    public void shutdown() {
+<span class="nc" id="L441">        pool.shutdown();</span>
+<span class="nc" id="L442">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

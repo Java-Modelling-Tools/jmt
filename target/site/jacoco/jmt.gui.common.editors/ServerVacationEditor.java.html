@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ServerVacationEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">ServerVacationEditor.java</span></div><h1>ServerVacationEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+ * &lt;p&gt;
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * &lt;p&gt;
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * &lt;p&gt;
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import jmt.framework.gui.listeners.KeyFocusAdapter;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.definitions.VacationParameters;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.distributions.Exponential;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ComponentEvent;
+
+
+public class ServerVacationEditor extends WizardPanel implements CommonConstants {
+
+    private static final long serialVersionUID = 1L;
+
+    //Interfaces for model data exchange
+    protected ClassDefinition classData;
+
+    protected StationDefinition stationData;
+
+    private Object stationKey;
+
+    private JComboBox vacationPolicyCombo;
+    private JPanel policyComboPanel;
+    private JCheckBox enablingCheckBox;
+
+<span class="nc" id="L55">    protected static final String[] vacationPolicies =</span>
+            {
+                    STATION_VACATION_POLICY_SINGLE,
+                    STATION_VACATION_POLICY_MULTIPLE,
+                    STATION_VACATION_POLICY_BERNOULLI
+            };
+
+    protected VacationParametersPanel vacationParameterPanel;
+
+<span class="nc" id="L64">    public ServerVacationEditor(StationDefinition stations, ClassDefinition classes, Object stationKey) {</span>
+<span class="nc" id="L65">        setData(classes, stations, stationKey);</span>
+<span class="nc" id="L66">        initComponents();</span>
+<span class="nc" id="L67">    }</span>
+
+    private void initComponents() {
+
+<span class="nc" id="L71">        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));</span>
+<span class="nc" id="L72">        this.setBorder(new EmptyBorder(5, 5, 5, 5));</span>
+
+<span class="nc" id="L74">        JPanel descriptionPanel = new JPanel();</span>
+<span class="nc" id="L75">        descriptionPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L76">        descriptionPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Description&quot;));</span>
+<span class="nc" id="L77">        JLabel serverTypesText = new JLabel(SERVER_VACATION_DESCRIPTION);</span>
+<span class="nc" id="L78">        descriptionPanel.add(serverTypesText, BorderLayout.CENTER);</span>
+<span class="nc" id="L79">        descriptionPanel.setMaximumSize(descriptionPanel.getPreferredSize());</span>
+
+        //build vacation policy panel
+<span class="nc" id="L82">        JPanel vacationPolicyPanel = new JPanel();</span>
+<span class="nc" id="L83">        vacationPolicyPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Server Vacation Policy&quot;));</span>
+<span class="nc" id="L84">        vacationPolicyPanel.setLayout(new GridBagLayout());</span>
+<span class="nc" id="L85">        GridBagConstraints gbc = new GridBagConstraints();</span>
+<span class="nc" id="L86">        gbc.fill = GridBagConstraints.BOTH;</span>
+<span class="nc" id="L87">        gbc.weightx = 1.0;</span>
+<span class="nc" id="L88">        gbc.gridy = 0;</span>
+<span class="nc" id="L89">        gbc.weighty = 0;</span>
+<span class="nc" id="L90">        vacationPolicyPanel.add(enablingCheckBox, gbc);</span>
+
+<span class="nc" id="L92">        policyComboPanel = new JPanel();</span>
+<span class="nc" id="L93">        policyComboPanel.add(Box.createRigidArea(new Dimension((int) (5 * CommonConstants.widthScaling), (int) (0 * CommonConstants.heightScaling))));</span>
+<span class="nc" id="L94">        policyComboPanel.add(new JLabel(&quot;Vacation Policy:&quot;));</span>
+<span class="nc" id="L95">        policyComboPanel.add(vacationPolicyCombo);</span>
+<span class="nc" id="L96">        ++gbc.gridy;</span>
+<span class="nc" id="L97">        vacationPolicyPanel.add(policyComboPanel, gbc);</span>
+
+        //build vacation parameters panel
+<span class="nc" id="L100">        VacationParametersPanel vacationParameterPanel = new VacationParametersPanel();</span>
+<span class="nc" id="L101">        this.vacationParameterPanel = vacationParameterPanel;</span>
+<span class="nc" id="L102">        String currentVacationPolicy = (String) vacationPolicyCombo.getSelectedItem();</span>
+<span class="nc" id="L103">        vacationParameterPanel.updatePolicy(currentVacationPolicy);</span>
+<span class="nc" id="L104">        ++gbc.gridy;</span>
+<span class="nc" id="L105">        gbc.weighty = 1.0;</span>
+<span class="nc" id="L106">        vacationPolicyPanel.add(vacationParameterPanel, gbc);</span>
+
+<span class="nc bnc" id="L108" title="All 2 branches missed.">        if (!enablingCheckBox.isSelected()) {</span>
+<span class="nc" id="L109">            setAllEnabled(policyComboPanel, false);</span>
+<span class="nc" id="L110">            setAllEnabled(vacationParameterPanel, false);</span>
+        }
+
+<span class="nc" id="L113">        this.add(descriptionPanel);</span>
+<span class="nc" id="L114">        this.add(vacationPolicyPanel);</span>
+<span class="nc" id="L115">    }</span>
+
+    private void setAllEnabled(Container container, boolean isEnabled) {
+<span class="nc bnc" id="L118" title="All 2 branches missed.">        if (container == null) {</span>
+<span class="nc" id="L119">            return;</span>
+        }
+<span class="nc bnc" id="L121" title="All 2 branches missed.">        for (Component component : container.getComponents()) {</span>
+<span class="nc bnc" id="L122" title="All 2 branches missed.">            if (component instanceof Container) {</span>
+<span class="nc" id="L123">                setAllEnabled((Container) component, isEnabled);</span>
+            } else {
+<span class="nc" id="L125">                component.setEnabled(isEnabled);</span>
+            }
+        }
+<span class="nc" id="L128">        container.setEnabled(isEnabled);</span>
+<span class="nc" id="L129">    }</span>
+
+
+    /**
+     * Updates data contained in this panel's components
+     */
+    public void setData(ClassDefinition classes, StationDefinition stations, Object stKey) {
+<span class="nc" id="L136">        classData = classes;</span>
+<span class="nc" id="L137">        stationData = stations;</span>
+<span class="nc" id="L138">        stationKey = stKey;</span>
+<span class="nc" id="L139">        vacationPolicyCombo = new JComboBox();</span>
+<span class="nc" id="L140">        vacationPolicyCombo.setModel(new DefaultComboBoxModel(vacationPolicies));</span>
+<span class="nc" id="L141">        enablingCheckBox = new JCheckBox(&quot;Enable server vacation&quot;);</span>
+
+<span class="nc" id="L143">        addDataManagers();</span>
+<span class="nc" id="L144">        updateServerPreferences();</span>
+<span class="nc" id="L145">        refreshComponents();</span>
+<span class="nc" id="L146">    }</span>
+
+    private void updateServerPreferences() {
+<span class="nc" id="L149">        String vacationPolicy = stationData.getStationVacationPolicy(stationKey);</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">        enablingCheckBox.setSelected(!vacationPolicy.equals(STATION_VACATION_POLICY_NONE));</span>
+<span class="nc" id="L151">        int index = 0;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        for (int i = 0; i &lt; vacationPolicies.length; i++) {</span>
+<span class="nc bnc" id="L153" title="All 2 branches missed.">            if (vacationPolicies[i].equals(vacationPolicy)) {</span>
+<span class="nc" id="L154">                index = i;</span>
+<span class="nc" id="L155">                break;</span>
+
+            }
+        }
+<span class="nc" id="L159">        vacationPolicyCombo.setSelectedIndex(index);</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">        if (vacationPolicies[index].equals(STATION_VACATION_POLICY_BERNOULLI) &amp;&amp; stationData.getStationNumberOfServers(stationKey) != 1) {</span>
+            // Bernoulli vacation is currently only supported when the server number is 1
+<span class="nc" id="L162">            stationData.setStationVacationPolicy(stationKey, STATION_VACATION_POLICY_NONE);</span>
+<span class="nc" id="L163">            enablingCheckBox.setSelected(false);</span>
+        }
+<span class="nc" id="L165">    }</span>
+
+    private void addDataManagers() {
+<span class="nc" id="L168">        vacationPolicyCombo.addActionListener(e -&gt; {</span>
+<span class="nc" id="L169">            updateVacationPolicy();</span>
+<span class="nc" id="L170">        });</span>
+
+<span class="nc" id="L172">        enablingCheckBox.addItemListener(e -&gt; {</span>
+<span class="nc" id="L173">            boolean selected = enablingCheckBox.isSelected();</span>
+<span class="nc" id="L174">            setAllEnabled(policyComboPanel, selected);</span>
+<span class="nc" id="L175">            setAllEnabled(vacationParameterPanel, selected);</span>
+
+<span class="nc bnc" id="L177" title="All 2 branches missed.">            if (!selected) {</span>
+<span class="nc" id="L178">                stationData.setStationVacationPolicy(stationKey, STATION_VACATION_POLICY_NONE);</span>
+            } else {
+<span class="nc" id="L180">                updateVacationPolicy();</span>
+            }
+<span class="nc" id="L182">        });</span>
+<span class="nc" id="L183">    }</span>
+
+    private void updateVacationPolicy() {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (!enablingCheckBox.isSelected()) {</span>
+<span class="nc" id="L187">            return;</span>
+        }
+<span class="nc" id="L189">        String vacationPolicy = (String) vacationPolicyCombo.getSelectedItem();</span>
+<span class="nc bnc" id="L190" title="All 2 branches missed.">        if (vacationPolicy == null) {</span>
+<span class="nc" id="L191">            vacationPolicy = STATION_VACATION_POLICY_SINGLE;</span>
+        }
+<span class="nc bnc" id="L193" title="All 4 branches missed.">        if (vacationPolicy.equals(STATION_VACATION_POLICY_BERNOULLI) &amp;&amp; stationData.getStationNumberOfServers(stationKey) != 1) {</span>
+            // Bernoulli policy is currently only supported when server number is 1
+<span class="nc bnc" id="L195" title="All 2 branches missed.">            if (vacationParameterPanel != null) {</span>
+<span class="nc" id="L196">                vacationParameterPanel.updatePolicy(vacationPolicy);</span>
+            }
+<span class="nc" id="L198">            return;</span>
+        }
+<span class="nc" id="L200">        stationData.setStationVacationPolicy(stationKey, vacationPolicy);</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">        if (vacationParameterPanel != null) {</span>
+<span class="nc" id="L202">            vacationParameterPanel.updatePolicy(vacationPolicy);</span>
+        }
+<span class="nc" id="L204">    }</span>
+
+    /**
+     * called by the Wizard when the panel becomes active
+     */
+    @Override
+    public void gotFocus() {
+<span class="nc" id="L211">        refreshComponents();</span>
+<span class="nc" id="L212">    }</span>
+
+    /**
+     * called by the Wizard before when switching to another panel
+     */
+    @Override
+    public void lostFocus() {
+<span class="nc" id="L219">    }</span>
+
+    @Override
+    public void repaint() {
+<span class="nc" id="L223">        refreshComponents();</span>
+<span class="nc" id="L224">        super.repaint();</span>
+<span class="nc" id="L225">    }</span>
+
+    private void refreshComponents() {
+<span class="nc" id="L228">    }</span>
+
+
+    @Override
+    public String getName() {
+<span class="nc" id="L233">        return &quot;Server Vacation&quot;;</span>
+    }
+
+    protected class VacationParametersPanel extends JPanel {
+        private static final long serialVersionUID = 1L;
+
+        private final JLabel warningNote;
+        private final JPanel bernoulliPPanel;
+        private final JPanel vacationLengthPanel;
+
+<span class="nc" id="L243">        public VacationParametersPanel() {</span>
+<span class="nc" id="L244">            setLayout(new GridBagLayout());</span>
+<span class="nc" id="L245">            setBorder(new TitledBorder(new EtchedBorder(), &quot;Vacation Parameters&quot;));</span>
+
+<span class="nc" id="L247">            ImageIcon warningIcon = JMTImageLoader.loadImage(&quot;triangle&quot;);</span>
+<span class="nc" id="L248">            warningNote = new JLabel(&quot;Note: Bernoulli Vacation Strategy is currently only supported when &quot; +</span>
+                    &quot;the 'Number of Servers' option in the 'Server Configuration' section is set to 1.&quot;,
+                    warningIcon, JLabel.LEFT);
+
+<span class="nc" id="L252">            bernoulliPPanel = new JPanel();</span>
+<span class="nc" id="L253">            bernoulliPPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L254">            JLabel pLabel = new JLabel(&quot;p:&quot;);</span>
+<span class="nc" id="L255">            pLabel.setPreferredSize(new Dimension((int) (65 * CommonConstants.widthScaling), (int) (24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L256">            bernoulliPPanel.add(pLabel, BorderLayout.WEST);</span>
+<span class="nc" id="L257">            JTextField batchSizeField = new JTextField(10);</span>
+<span class="nc" id="L258">            bernoulliPPanel.add(batchSizeField, BorderLayout.CENTER);</span>
+<span class="nc" id="L259">            DoubleValueAdaptor pAdaptor = new DoubleValueAdaptor() {</span>
+                @Override
+                boolean checkValue(double value) throws IllegalArgumentException {
+<span class="nc bnc" id="L262" title="All 4 branches missed.">                    if (value &lt; 0.0 || value &gt; 1.0) {</span>
+<span class="nc" id="L263">                        throw new IllegalArgumentException(&quot;p must be in the range [0,1]&quot;);</span>
+                    }
+<span class="nc" id="L265">                    return true;</span>
+                }
+
+                @Override
+                void updateValue(double value) {
+<span class="nc" id="L270">                    stationData.getStationVacationParameters(stationKey).setBernoulliP(value);</span>
+<span class="nc" id="L271">                }</span>
+            };
+<span class="nc" id="L273">            batchSizeField.addFocusListener(pAdaptor);</span>
+<span class="nc" id="L274">            batchSizeField.addKeyListener(pAdaptor);</span>
+
+<span class="nc" id="L276">            vacationLengthPanel = new JPanel();</span>
+<span class="nc" id="L277">            vacationLengthPanel.setLayout(new BorderLayout());</span>
+<span class="nc" id="L278">            JLabel vacationLengthLabel = new JLabel(&quot;Vacation Length:&quot;);</span>
+<span class="nc" id="L279">            JPanel paddedLabel = new JPanel();</span>
+<span class="nc" id="L280">            paddedLabel.setLayout(new BoxLayout(paddedLabel, BoxLayout.Y_AXIS));</span>
+<span class="nc" id="L281">            paddedLabel.add(vacationLengthLabel);</span>
+<span class="nc" id="L282">            paddedLabel.add(Box.createVerticalStrut(5)); // Padding</span>
+<span class="nc" id="L283">            vacationLengthPanel.add(paddedLabel, BorderLayout.NORTH);</span>
+<span class="nc" id="L284">            JButton editButton = getEditButton();</span>
+<span class="nc" id="L285">            vacationLengthPanel.add(editButton, BorderLayout.WEST);</span>
+<span class="nc" id="L286">            JTextField distributionValueTextField = new JTextField();</span>
+<span class="nc" id="L287">            distributionValueTextField.setEditable(false);</span>
+<span class="nc" id="L288">            vacationLengthPanel.add(distributionValueTextField, BorderLayout.CENTER);</span>
+<span class="nc" id="L289">        }</span>
+
+        private JButton getEditButton() {
+<span class="nc" id="L292">            JButton but = new JButton(&quot;Edit&quot;);</span>
+<span class="nc" id="L293">            but.setAction(new AbstractAction() {</span>
+                @Override
+                public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L296">                    Distribution distribution = stationData.getStationVacationParameters(stationKey).getVacationTimeDistribution();</span>
+<span class="nc" id="L297">                    DistributionsEditor editor = DistributionsEditor.getInstance(getParent(), distribution, false);</span>
+<span class="nc" id="L298">                    editor.setTitle(&quot;Editing Vacation Length&quot;);</span>
+<span class="nc" id="L299">                    editor.show();</span>
+<span class="nc" id="L300">                    Distribution result = editor.getResult();</span>
+<span class="nc" id="L301">                    stationData.getStationVacationParameters(stationKey).setVacationTimeDistribution(result);</span>
+<span class="nc" id="L302">                    refreshValues();</span>
+<span class="nc" id="L303">                }</span>
+            });
+<span class="nc" id="L305">            but.setText(&quot;Edit&quot;);</span>
+<span class="nc" id="L306">            but.setPreferredSize(new Dimension((int) (65 * CommonConstants.widthScaling), (int) (24 * CommonConstants.heightScaling)));</span>
+<span class="nc" id="L307">            return but;</span>
+        }
+
+        public void updatePolicy(String currentVacationPolicy) {
+<span class="nc" id="L311">            removeAll();</span>
+<span class="nc" id="L312">            GridBagConstraints gbc = new GridBagConstraints();</span>
+<span class="nc" id="L313">            gbc.gridx = 0;</span>
+<span class="nc" id="L314">            gbc.gridy = 0;</span>
+<span class="nc" id="L315">            gbc.anchor = GridBagConstraints.NORTHWEST;</span>
+<span class="nc" id="L316">            gbc.fill = GridBagConstraints.HORIZONTAL;</span>
+<span class="nc" id="L317">            gbc.gridwidth = GridBagConstraints.REMAINDER;</span>
+<span class="nc" id="L318">            gbc.weightx = 1.0;</span>
+<span class="nc" id="L319">            gbc.weighty = 0.0;</span>
+<span class="nc" id="L320">            gbc.insets = new Insets(10, 10, 10, 10);</span>
+
+<span class="nc bnc" id="L322" title="All 3 branches missed.">            switch (currentVacationPolicy) {</span>
+                case STATION_VACATION_POLICY_SINGLE:
+                case STATION_VACATION_POLICY_MULTIPLE:
+<span class="nc" id="L325">                    add(vacationLengthPanel, gbc);</span>
+<span class="nc" id="L326">                    ++gbc.gridy;</span>
+<span class="nc" id="L327">                    gbc.weighty = 1.0;</span>
+<span class="nc" id="L328">                    add(Box.createVerticalGlue(), gbc);</span>
+<span class="nc" id="L329">                    break;</span>
+                case STATION_VACATION_POLICY_BERNOULLI:
+<span class="nc bnc" id="L331" title="All 2 branches missed.">                    if (stationData.getStationNumberOfServers(stationKey) != 1) {</span>
+<span class="nc" id="L332">                        gbc.fill = GridBagConstraints.NONE;</span>
+<span class="nc" id="L333">                        add(warningNote, gbc);</span>
+                    } else {
+<span class="nc" id="L335">                        add(bernoulliPPanel, gbc);</span>
+<span class="nc" id="L336">                        ++gbc.gridy;</span>
+<span class="nc" id="L337">                        add(vacationLengthPanel, gbc);</span>
+<span class="nc" id="L338">                        ++gbc.gridy;</span>
+<span class="nc" id="L339">                        gbc.weighty = 1.0;</span>
+<span class="nc" id="L340">                        add(Box.createVerticalGlue(), gbc);</span>
+                    }
+<span class="nc" id="L342">                    break;</span>
+                default:
+<span class="nc" id="L344">                    add(warningNote);</span>
+            }
+<span class="nc" id="L346">            refreshValues();</span>
+<span class="nc" id="L347">        }</span>
+
+        public void refreshValues() {
+<span class="nc" id="L350">            VacationParameters parameters = stationData.getStationVacationParameters(stationKey);</span>
+
+<span class="nc bnc" id="L352" title="All 2 branches missed.">            for (Component component : bernoulliPPanel.getComponents()) {</span>
+<span class="nc bnc" id="L353" title="All 2 branches missed.">                if (component instanceof JTextField) {</span>
+<span class="nc" id="L354">                    JTextField textField = (JTextField) component;</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">                    if (parameters.getBernoulliP() != null) {</span>
+<span class="nc" id="L356">                        textField.setText(String.valueOf(parameters.getBernoulliP()));</span>
+                    } else {
+<span class="nc" id="L358">                        double defaultP = 1.0;</span>
+<span class="nc" id="L359">                        parameters.setBernoulliP(defaultP);</span>
+<span class="nc" id="L360">                        textField.setText(Double.toString(defaultP));</span>
+                    }
+                }
+            }
+
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            for (Component component : vacationLengthPanel.getComponents()) {</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">                if (component instanceof JTextField) {</span>
+<span class="nc" id="L367">                    JTextField textField = (JTextField) component;</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">                    if (parameters.getVacationTimeDistribution() != null) {</span>
+<span class="nc" id="L369">                        textField.setText(parameters.getVacationTimeDistribution().toString());</span>
+                    } else {
+<span class="nc" id="L371">                        Distribution defaultDistribution = new Exponential();</span>
+<span class="nc" id="L372">                        parameters.setVacationTimeDistribution(defaultDistribution);</span>
+<span class="nc" id="L373">                        textField.setText(defaultDistribution.toString());</span>
+                    }
+                }
+            }
+
+<span class="nc" id="L378">            revalidate();</span>
+<span class="nc" id="L379">            repaint();</span>
+<span class="nc" id="L380">        }</span>
+
+
+<span class="nc" id="L383">        abstract class DoubleValueAdaptor extends KeyFocusAdapter {</span>
+            @Override
+            protected void updateValues(ComponentEvent e) {
+                // Get the textfield
+<span class="nc" id="L387">                JTextField sourcefield = (JTextField) e.getSource();</span>
+                try {
+<span class="nc bnc" id="L389" title="All 2 branches missed.">                    if (sourcefield.getText().isEmpty()) {</span>
+<span class="nc" id="L390">                        sourcefield.setText(&quot;0&quot;);</span>
+                    }
+                    // Get the value entered in the textfield
+<span class="nc" id="L393">                    Double value = Double.parseDouble(sourcefield.getText());</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                    if (checkValue(value)) {</span>
+<span class="nc" id="L395">                        updateValue(value);</span>
+                    }
+<span class="nc" id="L397">                } catch (NumberFormatException ex) {</span>
+                    // If user enters a value that is not a number -&gt; pop up a warning and reset
+                    // back to the value before
+<span class="nc" id="L400">                    JOptionPane.showMessageDialog(null, &quot;Please enter a valid double value.&quot;, &quot;Invalid Input&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L401">                } catch (IllegalArgumentException ex) {</span>
+                    // If user enters an invalid value -&gt; pop up a warning and reset
+                    // back to the value before
+<span class="nc" id="L404">                    JOptionPane.showMessageDialog(null, ex.getMessage(), &quot;Invalid Input&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L405">                }</span>
+
+<span class="nc" id="L407">                refreshValues();</span>
+<span class="nc" id="L408">            }</span>
+
+            abstract boolean checkValue(double value) throws IllegalArgumentException;
+
+            abstract void updateValue(double value);
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

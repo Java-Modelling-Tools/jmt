@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VariableMapping.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.jwat.input</a> &gt; <span class="el_source">VariableMapping.java</span></div><h1>VariableMapping.java</h1><pre class="source lang-java linenums">package jmt.engine.jwat.input;
+
+import java.util.ArrayList;
+
+<span class="nc" id="L5">public abstract class VariableMapping {</span>
+	public abstract double convertToDouble(String val);
+
+	public Object getValue(double number) {
+<span class="nc" id="L9">		return new Integer(valMap.indexOf(new Mapping(number, null)));</span>
+	}
+
+	public double addNewValue(String value) {
+		//Check if value is already inserted in the mapping.
+<span class="nc bnc" id="L14" title="All 2 branches missed.">		for (int i = 0; i &lt; valMap.size(); i++) {</span>
+<span class="nc bnc" id="L15" title="All 2 branches missed.">			if (valMap.get(i).getValue().equals(value)) {</span>
+<span class="nc" id="L16">				return valMap.get(i).getConversion();</span>
+			}
+		}
+
+<span class="nc" id="L20">		double trad = convertToDouble(value);</span>
+<span class="nc" id="L21">		valMap.add(new Mapping(trad, value));</span>
+<span class="nc" id="L22">		return trad;</span>
+	}
+
+	public Mapping[] getMappingValue() {
+<span class="nc" id="L26">		Mapping[] map = new Mapping[valMap.size()];</span>
+<span class="nc" id="L27">		valMap.toArray(map);</span>
+<span class="nc" id="L28">		return map;</span>
+	}
+
+	public void addNewMapping(double val, String str) {
+<span class="nc" id="L32">		valMap.add(new Mapping(val, str));</span>
+<span class="nc" id="L33">	}</span>
+
+<span class="nc" id="L35">	ArrayList&lt;Mapping&gt; valMap = new ArrayList&lt;Mapping&gt;();</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

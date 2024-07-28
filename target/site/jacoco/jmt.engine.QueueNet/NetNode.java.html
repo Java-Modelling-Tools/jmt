@@ -1,0 +1,1042 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NetNode.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">NetNode.java</span></div><h1>NetNode.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+
+import jmt.common.exception.NetException;
+import jmt.engine.NodeSections.Linkage;
+import jmt.engine.NodeSections.Queue;
+import jmt.engine.NodeSections.Server;
+import jmt.engine.NodeSections.Storage;
+import jmt.engine.dataAnalysis.InverseMeasure;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.SimParameters;
+import jmt.engine.log.JSimLogger;
+import jmt.engine.log.LoggerStateManager;
+import jmt.engine.simEngine.*;
+
+/**
+ * This class implements a generic QueueNetwork node.
+ * @author Francesco Radaelli, Stefano Omini, Marco Bertoli
+ *
+ * Modified by Ashanka (May 2010):
+ * Patch: Multi-Sink Perf. Index
+ * Description: Added new Performance index for capturing
+ * 				1. global response time (ResponseTime per Sink)
+ *              2. global throughput (Throughput per Sink)
+ *              each sink per class.
+ */
+public class NetNode extends SimEntity {
+
+	//these constants are used in exception messages
+
+	/** Unable to broadcast a message */
+	public static final int EXCEPTION_UNABLE_TO_BROADCAST = 0x0001;
+	/** Required measure does not exist */
+	public static final int EXCEPTION_MEASURE_DOES_NOT_EXIST = 0x0002;
+	/** Input section has been already defined. */
+	public static final int EXCEPTION_INPUT_SECTION_ALREADY_DEFINED = 0x0003;
+	/** Service section has been already defined.  */
+	public static final int EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED = 0x0004;
+	/** Output section has been already defined. */
+	public static final int EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED = 0x0005;
+	/** Enabling section has been already defined*/
+	public static final int EXCEPTION_ENABLING_SECTION_ALREADY_DEFINED = 0x0007;
+	/** Required property is not available */
+	public static final int EXCEPTION_PROPERTY_NOT_AVAILABLE = 0x0006;
+
+	//ID of properties
+
+	/** Property ID: number of jobs arriving at this node */
+	public static final int PROPERTY_ID_ARRIVING_JOBS = 0x0001;
+	/** Property ID: number of jobs departing from this node */
+	public static final int PROPERTY_ID_DEPARTING_JOBS = 0x0002;
+	/** Property ID: number of jobs inside this node */
+	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
+	/** Property ID: residence time */
+	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
+
+	private BlockingRegion region; // This is set only if this station is input station of a blocking region
+
+	/** A logger */
+<span class="nc" id="L82">	protected JSimLogger logger = JSimLogger.getLogger(this.getClass());</span>
+
+	/**
+	 * The QueueNetwork which this NetNode belong to.
+	 */
+	protected QueueNetwork network;
+
+	private JobInfoList jobsList;
+
+	/**
+	 * Input section of the NetNode.
+	 */
+	protected NodeSection inputSection;
+
+	/**
+	 * Service section of the NetNode.
+	 */
+	protected NodeSection serviceSection;
+
+	/**
+	 * Output section of the NetNode.
+	 */
+	protected NodeSection outputSection;
+
+	private SimEvent receiveBuffer;
+
+	//temp variables to contain message and message event type
+	private NetMessage message;
+	private int eventType;
+
+	private boolean stopped;
+
+	private NodeList InputNodes;
+
+	private NodeList OutputNodes;
+
+	private SimParameters simParameters;
+
+	//Michalis
+
+	private Server server;
+
+	/**
+	 * Creates a new instance of NetNode.
+	 * @param name Name of the NetNode.
+	 */
+	public NetNode(String name) {
+<span class="nc" id="L129">		super(name);</span>
+<span class="nc" id="L130">		InputNodes = new NodeList();</span>
+<span class="nc" id="L131">		OutputNodes = new NodeList();</span>
+<span class="nc" id="L132">		inputSection = serviceSection = outputSection = null;</span>
+<span class="nc" id="L133">		receiveBuffer = new SimEvent();</span>
+<span class="nc" id="L134">		stopped = false;</span>
+<span class="nc" id="L135">	}</span>
+
+	//Michalis
+
+	public void setServer(Server server){
+<span class="nc" id="L140">		this.server = server;</span>
+<span class="nc" id="L141">	}</span>
+
+	public Server getServer() {
+<span class="nc" id="L144">		return server;</span>
+	}
+
+	//
+
+	/***************************************************
+	 *		 Methods about initialize the NetNode	   *
+	 ***************************************************/
+	/**
+	 * Adds a section to the node.
+	 * @param section Reference to the section to be added.
+	 * @throws NetException if the section has already been defined.
+	 */
+	public void addSection(NodeSection section) throws NetException {
+<span class="nc bnc" id="L158" title="All 4 branches missed.">		switch (section.getSectionID()) {</span>
+			case NodeSection.INPUT:
+<span class="nc bnc" id="L160" title="All 2 branches missed.">				if (inputSection == null) {</span>
+<span class="nc" id="L161">					this.inputSection = section;</span>
+				} else {
+<span class="nc" id="L163">					throw new NetException(this, EXCEPTION_INPUT_SECTION_ALREADY_DEFINED,</span>
+							&quot;input section has been already defined&quot;);
+				}
+				break;
+			case NodeSection.SERVICE:
+<span class="nc bnc" id="L168" title="All 2 branches missed.">				if (serviceSection == null) {</span>
+<span class="nc" id="L169">					this.serviceSection = section;</span>
+				} else {
+<span class="nc" id="L171">					throw new NetException(this, EXCEPTION_SERVICE_SECTION_ALREADY_DEFINED,</span>
+							&quot;service section has been already defined&quot;);
+				}
+				break;
+			case NodeSection.OUTPUT:
+<span class="nc bnc" id="L176" title="All 2 branches missed.">				if (outputSection == null) {</span>
+<span class="nc" id="L177">					this.outputSection = section;</span>
+				} else {
+<span class="nc" id="L179">					throw new NetException(this, EXCEPTION_OUTPUT_SECTION_ALREADY_DEFINED,</span>
+							&quot;output section has been already defined&quot;);
+				}
+				break;
+		}
+<span class="nc" id="L184">	}</span>
+
+	/**
+	 * Connects the output of this netNode to the input of an another
+	 * netNode.
+	 * @param netNode netNode to be linked.
+	 */
+	public void connect(NetNode netNode) {
+<span class="nc" id="L192">		OutputNodes.add(netNode);</span>
+<span class="nc" id="L193">		netNode.InputNodes.add(this);</span>
+<span class="nc" id="L194">	}</span>
+
+	/**
+	 * Gets the JobInfoList of this node.
+	 */
+	public JobInfoList getJobInfoList() {
+<span class="nc" id="L200">		return jobsList;</span>
+	}
+
+	/**
+	 * Gets input nodes.
+	 * @return Input nodes linked to this node.
+	 */
+	public NodeList getInputNodes() {
+<span class="nc" id="L208">		return InputNodes;</span>
+	}
+
+	/**
+	 * Gets output nodes.
+	 * @return Output nodes linked to this node.
+	 */
+	public NodeList getOutputNodes() {
+<span class="nc" id="L216">		return OutputNodes;</span>
+	}
+
+	/***************************************************
+	 *		 Methods about get jobsList property	   *
+	 ***************************************************/
+	/**
+	 * Gets an integer type property related to this node.
+	 * @param Id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public int getIntNodeProperty(int Id) throws NetException {
+<span class="nc bnc" id="L229" title="All 4 branches missed.">		switch (Id) {</span>
+			case PROPERTY_ID_ARRIVING_JOBS:
+<span class="nc" id="L231">				return jobsList.getJobsIn();</span>
+			case PROPERTY_ID_DEPARTING_JOBS:
+<span class="nc" id="L233">				return jobsList.getJobsOut();</span>
+			case PROPERTY_ID_RESIDENT_JOBS:
+<span class="nc" id="L235">				return jobsList.size();</span>
+			default:
+<span class="nc" id="L237">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets an integer type property of this node related to a specified
+	 * job class.
+	 * @param Id Property identifier.
+	 * @param JobClass JobClass.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public int getIntNodeProperty(int Id, JobClass JobClass) throws NetException {
+<span class="nc bnc" id="L250" title="All 4 branches missed.">		switch (Id) {</span>
+			case PROPERTY_ID_ARRIVING_JOBS:
+<span class="nc" id="L252">				return jobsList.getJobsInPerClass(JobClass);</span>
+			case PROPERTY_ID_DEPARTING_JOBS:
+<span class="nc" id="L254">				return jobsList.getJobsOutPerClass(JobClass);</span>
+			case PROPERTY_ID_RESIDENT_JOBS:
+<span class="nc" id="L256">				return jobsList.size(JobClass);</span>
+			default:
+<span class="nc" id="L258">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a double type property of this node.
+	 * @param Id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public double getDoubleNodeProperty(int Id) throws NetException {
+<span class="nc bnc" id="L269" title="All 2 branches missed.">		switch (Id) {</span>
+			case PROPERTY_ID_RESIDENCE_TIME:
+<span class="nc" id="L271">				return jobsList.getLastJobSojournTime();</span>
+			default:
+<span class="nc" id="L273">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a double type property of this node related to a specified
+	 * job class.
+	 * @param Id Property identifier.
+	 * @param JobClass JobClass.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public double getDoubleNodeProperty(int Id, JobClass JobClass) throws NetException {
+<span class="nc bnc" id="L286" title="All 2 branches missed.">		switch (Id) {</span>
+			case PROPERTY_ID_RESIDENCE_TIME:
+<span class="nc" id="L288">				return jobsList.getLastJobSojournTimePerClass(JobClass);</span>
+			default:
+<span class="nc" id="L290">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a generic object type property of this node.
+	 * @param Id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public Object getObjectNodeProperty(int Id) throws NetException {
+<span class="nc" id="L301">		switch (Id) {</span>
+			default:
+<span class="nc" id="L303">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a generic object type property of this node related to a
+	 * specified job class.
+	 * @param Id Property identifier.
+	 * @param JobClass JobClass.
+	 * @return Property value.
+	 * @throws NetException if the property is not available.
+	 */
+	public Object getObjectNodeProperty(int Id, JobClass JobClass) throws NetException {
+<span class="nc" id="L316">		switch (Id) {</span>
+			default:
+<span class="nc" id="L318">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a section of the node.
+	 * @param Id Section identifier (constants defined in NodeSection).
+	 * @return Node section.
+	 * @throws NetException
+	 */
+	public NodeSection getSection(int Id) throws NetException {
+<span class="nc bnc" id="L329" title="All 4 branches missed.">		switch (Id) {</span>
+			case NodeSection.INPUT:
+<span class="nc" id="L331">				return inputSection;</span>
+			case NodeSection.SERVICE:
+<span class="nc" id="L333">				return serviceSection;</span>
+			case NodeSection.OUTPUT:
+<span class="nc" id="L335">				return outputSection;</span>
+			default:
+<span class="nc" id="L337">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required section is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets the Network owner of this node.
+	 * @return Value of property Network.
+	 */
+	public QueueNetwork getQueueNet() {
+<span class="nc" id="L346">		return network;</span>
+	}
+
+	public GlobalJobInfoList getGlobalJobInfoList() {
+<span class="nc" id="L350">		return network.getJobInfoList();</span>
+	}
+
+	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws NetException {
+<span class="nc" id="L354">		String name = measurement.getName();</span>
+<span class="nc" id="L355">		boolean isServerType = false;</span>
+<span class="nc" id="L356">		int serverTypeId = 0;</span>
+<span class="nc bnc" id="L357" title="All 2 branches missed.">		if (getServerTypes() != null) {</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">			for (Server.ServerType serverType : getServerTypes()) {</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">				if (name.startsWith(serverType.getName())) {</span>
+<span class="nc" id="L360">					isServerType = true;</span>
+<span class="nc" id="L361">					serverTypeId = serverType.getId();</span>
+<span class="nc" id="L362">					break;</span>
+				}
+<span class="nc" id="L364">			}</span>
+		}
+<span class="nc" id="L366">		analyze(measureName,jobClass,measurement,isServerType,serverTypeId);</span>
+<span class="nc" id="L367">	}</span>
+
+	/**
+	 * Analyzes a measure in the node.
+	 * @param measureName name of the measure to be activated.
+	 * @param jobClass Job class to be analyzed.
+	 * @param measurement measure to be activated.
+	 * @throws NetException
+	 */
+	public void analyze(int measureName, JobClass jobClass, Measure measurement,
+											boolean isServerType, int serverTypeId) throws NetException {
+<span class="nc bnc" id="L378" title="All 17 branches missed.">		switch (measureName) {</span>
+			case SimConstants.LIST_NUMBER_OF_JOBS: ;
+<span class="nc" id="L380">				jobsList.analyzeQueueLength(jobClass, measurement,isServerType, serverTypeId);</span>
+<span class="nc" id="L381">				break;</span>
+			case SimConstants.LIST_RESPONSE_TIME:
+<span class="nc" id="L383">				jobsList.analyzeResponseTime(jobClass, measurement,isServerType, serverTypeId);</span>
+<span class="nc" id="L384">				break;</span>
+			case SimConstants.LIST_RESIDENCE_TIME:
+<span class="nc" id="L386">				jobsList.analyzeResidenceTime(jobClass, measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L387">				break;</span>
+			case SimConstants.LIST_ARRIVAL_RATE:
+<span class="nc" id="L389">				jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);</span>
+<span class="nc" id="L390">				break;</span>
+			case SimConstants.THROUGHPUT:
+<span class="nc" id="L392">				jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L393">				break;</span>
+			case SimConstants.LIST_DROP_RATE:
+<span class="nc" id="L395">				jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L396">				break;</span>
+			case SimConstants.LIST_BALKING_RATE:
+<span class="nc" id="L398">				jobsList.analyzeBalkingRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L399">				break;</span>
+			case SimConstants.LIST_RENEGING_RATE:
+<span class="nc" id="L401">				jobsList.analyzeRenegingRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L402">				break;</span>
+			case SimConstants.LIST_RETRIAL_RATE:
+<span class="nc" id="L404">				jobsList.analyzeRetrialAttemptsRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L405">				break;</span>
+			case SimConstants.LIST_RETRIAL_ORBIT_SIZE:
+<span class="nc" id="L407">				jobsList.analyzeRetrialOrbitSize(jobClass, measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L408">				break;</span>
+			case SimConstants.LIST_RETRIAL_ORBIT_TIME:
+<span class="nc" id="L410">				jobsList.analyzeRetrialOrbitTime(jobClass, measurement);</span>
+<span class="nc" id="L411">				break;</span>
+			case SimConstants.RESPONSE_TIME_PER_SINK:
+<span class="nc" id="L413">				jobsList.analyzeResponseTimePerSink(jobClass, measurement);</span>
+<span class="nc" id="L414">				break;</span>
+			case SimConstants.THROUGHPUT_PER_SINK:
+<span class="nc" id="L416">				jobsList.analyzeThroughputPerSink(jobClass, (InverseMeasure) measurement);</span>
+<span class="nc" id="L417">				break;</span>
+			case SimConstants.TARDINESS:
+<span class="nc" id="L419">				jobsList.analyzeTardiness(jobClass, measurement);</span>
+<span class="nc" id="L420">				break;</span>
+			case SimConstants.EARLINESS:
+<span class="nc" id="L422">				jobsList.analyzeEarliness(jobClass, measurement);</span>
+<span class="nc" id="L423">				break;</span>
+			case SimConstants.LATENESS:
+<span class="nc" id="L425">				jobsList.analyzeLateness(jobClass, measurement);</span>
+<span class="nc" id="L426">				break;</span>
+			default:
+<span class="nc" id="L428">				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+		}
+<span class="nc" id="L430">	}</span>
+
+	public boolean isRunning() {
+<span class="nc bnc" id="L433" title="All 2 branches missed.">		return (state != SimEntity.FINISHED);</span>
+	}
+
+/***************************************************
+ *	   Methods about msg and jobinfo processing	   *
+ ***************************************************/
+
+	/**
+	 * Gets the list of the job classes of the owner queue network.
+	 * @return Queue network job classes.
+	 */
+	public JobClassList getJobClasses() {
+<span class="nc" id="L445">		return network.getJobClasses();</span>
+	}
+
+	/** Returns class compatibilities for specific node
+	 */
+	public Boolean[][] getClassCompatibilities(){
+<span class="nc bnc" id="L451" title="All 4 branches missed.">		if (serviceSection != null &amp;&amp; Server.class.isAssignableFrom(serviceSection.getClass())) {</span>
+<span class="nc" id="L452">			return serviceSection.getClassCompatibilities();</span>
+		}
+<span class="nc" id="L454">		return null;</span>
+	}
+
+	/** Returns server types for specific node
+	 */
+	public List&lt;Server.ServerType&gt; getServerTypes() {
+<span class="nc bnc" id="L460" title="All 4 branches missed.">		if (serviceSection != null &amp;&amp; Server.class.isAssignableFrom(serviceSection.getClass())) {</span>
+<span class="nc" id="L461">			return serviceSection.getServerTypes();</span>
+		}
+<span class="nc" id="L463">		return null;</span>
+	}
+
+	/**
+	 * Gets the first NetMessage in the queue which validates a specific
+	 * predicate.
+	 * @param message Reference to a NetMessage buffer to be filled with
+	 * the message information.
+	 */
+	protected void receive(NetMessage message) {
+		//We want to set some properties of NetMessage parameter using the
+		//information contained in a tag of the received SimEvent
+		//Remember that:
+		//a &gt;&gt; b means to &quot;right-shift&quot; of &quot;b&quot; positions the bits of &quot;a&quot;
+		//a &lt;&lt; b means to &quot;left-shift&quot; of &quot;b&quot; positions the bits of &quot;a&quot;
+		//
+		//int type is made of 32 bit (= 4 Bytes = 8 words)
+		//
+		//
+		//EVENT_MASK        = 0x0000FFFF;    (as defined in NetEvent)
+		//SOURCE_MASK       = 0xFF000000;    (as defined in NodeSection)
+		//DESTINATION_MASK  = 0x00FF0000;    (as defined in NodeSection)
+		//
+		//SOURCE_SHIFT      = 24;            (as defined in NodeSection)
+		//DESTINATION_SHIFT = 16;            (as defined in NodeSection)
+
+		//receiveBuffer, that is the received SimEvent, has a tag with this structure:
+		//      0xSSDDEEEE
+		// where    SS -&gt; 1 byte (=2 words) referring to source
+		//          DD -&gt; 1 byte (=2 words) referring to destination
+		//          EEEE -&gt; 2 bytes (=4 words) referring to event
+		//This tag contains some useful informations.
+
+		//To set event, sourceSection and destinationSection of the parameter NetMessage
+		//some binary shifts have to be realized (corresponding bits must be recognized
+		//in simEvent tag using the correct mask and then they must be shifted as required by the
+		//definitions of these properties)
+
+		//set event (int)
+		int section;
+<span class="nc" id="L503">		message.setEvent(receiveBuffer.getTag() &amp; NetEvent.EVENT_MASK);</span>
+
+		//set sourceSection and destinationSection (byte)
+<span class="nc" id="L506">		section = receiveBuffer.getTag() &amp; NodeSection.SOURCE_MASK;</span>
+<span class="nc" id="L507">		section &gt;&gt;= NodeSection.SOURCE_SHIFT;</span>
+<span class="nc" id="L508">		message.setSourceSection((byte) section);</span>
+
+<span class="nc" id="L510">		section = receiveBuffer.getTag() &amp; NodeSection.DESTINATION_MASK;</span>
+<span class="nc" id="L511">		section &gt;&gt;= NodeSection.DESTINATION_SHIFT;</span>
+<span class="nc" id="L512">		message.setDestinationSection((byte) section);</span>
+
+		//set other properties
+<span class="nc" id="L515">		message.setData(receiveBuffer.getData());</span>
+<span class="nc" id="L516">		message.setTime(receiveBuffer.eventTime());</span>
+<span class="nc" id="L517">		message.setSource(getNetSystem().getNode(receiveBuffer.getSrc()));</span>
+<span class="nc" id="L518">		message.setDestination(getNetSystem().getNode(receiveBuffer.getDest()));</span>
+
+<span class="nc" id="L520">		boolean isJobFromPlaceToServerOrDelay = isJobFromPlaceToServerOrDelay(message);</span>
+
+		//Look if message is a job message and if job is arriving at this node (from the node
+		//itself or from another node)
+<span class="nc" id="L524">		int event = message.getEvent();</span>
+<span class="nc" id="L525">		Job job = message.getJob();</span>
+<span class="nc bnc" id="L526" title="All 4 branches missed.">		switch(event) {</span>
+			case NetEvent.EVENT_JOB:
+<span class="nc bnc" id="L528" title="All 4 branches missed.">				if (((message.getSource() != this) || ((message.getSource() == this)</span>
+<span class="nc bnc" id="L529" title="All 6 branches missed.">						&amp;&amp; (message.getSourceSection() == NodeSection.OUTPUT &amp;&amp; message.getDestinationSection() == NodeSection.INPUT)))</span>
+						&amp;&amp; !isJobFromPlaceToServerOrDelay
+				) {
+<span class="nc" id="L532">					inputSection.updateVisitPath(job);</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">					if (inputSection.automaticUpdateNodeJobinfolist()) {</span>
+<span class="nc" id="L534">						jobsList.add(new JobInfo(job));</span>
+					}
+				}
+				break;
+			case NetEvent.EVENT_RETRIAL:
+<span class="nc" id="L539">				inputSection.updateVisitPath(job);</span>
+<span class="nc" id="L540">				break;</span>
+			case NetEvent.EVENT_RETRIAL_JOB:
+<span class="nc" id="L542">				jobsList.add(new JobInfo(job));</span>
+				break;
+		}
+<span class="nc" id="L545">	}</span>
+
+	/**
+	 * This method implements the body of a NetNode.
+	 */
+	@Override
+	public final void body() {
+<span class="nc" id="L552">		message = new NetMessage();</span>
+		try {
+<span class="nc" id="L554">			receiveBuffer = getEvbuf();</span>
+
+			//receive a new message
+<span class="nc" id="L557">			receive(message);</span>
+<span class="nc" id="L558">			eventType = message.getEvent();</span>
+
+			//if the deferred queue (where we put messages when the node is busy)
+			//contains an abort event then poison the node.
+<span class="nc bnc" id="L562" title="All 2 branches missed.">			if (simWaiting(new SimTypeP(NetEvent.EVENT_ABORT)) &gt; 0) {</span>
+<span class="nc" id="L563">				poison();</span>
+			}
+
+			//process last event
+<span class="nc bnc" id="L567" title="All 2 branches missed.">			if (eventType == NetEvent.EVENT_KEEP_AWAKE) {</span>
+<span class="nc" id="L568">				poison();</span>
+			}
+
+			//receive a stop event
+<span class="nc bnc" id="L572" title="All 2 branches missed.">			if (eventType == NetEvent.EVENT_STOP) {</span>
+<span class="nc" id="L573">				handleStopMessages();</span>
+			}
+
+			// if this node has been stopped sends automatically acks
+			// to the node which sent job to this one.
+<span class="nc bnc" id="L578" title="All 2 branches missed.">			if (stopped) {</span>
+<span class="nc bnc" id="L579" title="All 2 branches missed.">				if (eventType == NetEvent.EVENT_JOB) {</span>
+<span class="nc" id="L580">					send(NetEvent.EVENT_ACK, message.getJob(), 0.0, NodeSection.NO_ADDRESS, message.getSourceSection(), message.getSource());</span>
+				}
+			} else {
+<span class="nc" id="L583">				dispatch(message);</span>
+			}
+
+<span class="nc" id="L586">			simGetNext(SimSystem.SIM_ANY);</span>
+<span class="nc" id="L587">		} catch (NetException ex) {</span>
+<span class="nc" id="L588">			ex.printStackTrace();</span>
+<span class="nc" id="L589">		}</span>
+<span class="nc" id="L590">	}</span>
+
+	private void handleStopMessages() throws NetException {
+<span class="nc bnc" id="L593" title="All 2 branches missed.">		if (!stopped) {</span>
+<span class="nc" id="L594">			stopped = true;</span>
+<span class="nc" id="L595">			NetMessage msg = new NetMessage();</span>
+<span class="nc" id="L596">			msg.setEvent(NetEvent.EVENT_STOP);</span>
+<span class="nc" id="L597">			msg.setDestination(this);</span>
+<span class="nc" id="L598">			msg.setSource(this);</span>
+<span class="nc" id="L599">			msg.setSourceSection(NodeSection.NO_ADDRESS);</span>
+<span class="nc" id="L600">			msg.setTime(getNetSystem().getTime());</span>
+<span class="nc" id="L601">			msg.setDestinationSection(NodeSection.INPUT);</span>
+<span class="nc" id="L602">			dispatch(msg);</span>
+<span class="nc" id="L603">			msg = (NetMessage) message.clone();</span>
+<span class="nc" id="L604">			msg.setDestinationSection(NodeSection.SERVICE);</span>
+<span class="nc" id="L605">			dispatch(msg);</span>
+<span class="nc" id="L606">			msg = (NetMessage) message.clone();</span>
+<span class="nc" id="L607">			msg.setDestinationSection(NodeSection.OUTPUT);</span>
+<span class="nc" id="L608">			dispatch(msg);</span>
+		}
+<span class="nc" id="L610">	}</span>
+
+	/**
+	 * This method should be overridden to implement an own dispatch.
+	 * This method implements the events dispacther of the NetNode; it
+	 * &lt;b&gt;&lt;u&gt;should never&lt;/u&gt;&lt;/b&gt; remains busy for a long time.
+	 * Remember to call the superclass dispatch method if you want to
+	 * inherit all the superclass handled events.
+	 */
+	protected void dispatch(NetMessage message) throws NetException {
+<span class="nc" id="L620">		int processed = NodeSection.MSG_NOT_PROCESSED;</span>
+<span class="nc" id="L621">		NetNode source = message.getSource();</span>
+<span class="nc" id="L622">		byte sourceSection = message.getSourceSection();</span>
+<span class="nc" id="L623">		byte destinationSection = message.getDestinationSection();</span>
+<span class="nc" id="L624">		int temp = 0;</span>
+
+<span class="nc bnc" id="L626" title="All 4 branches missed.">		if(message.getEvent() == NetEvent.EVENT_JOB_FINISH &amp;&amp; message.getSourceSection() == 3){</span>
+<span class="nc" id="L627">			temp = 1;</span>
+		}
+<span class="nc bnc" id="L629" title="All 2 branches missed.">		if (logger.isLogCalenderOn()) {</span>
+<span class="nc" id="L630">			String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();</span>
+<span class="nc bnc" id="L631" title="All 2 branches missed.">			if (allowedEvents.length &gt; 0) {</span>
+<span class="nc bnc" id="L632" title="All 2 branches missed.">				for (String allowedEvent : allowedEvents) {</span>
+<span class="nc bnc" id="L633" title="All 2 branches missed.">					if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {</span>
+<span class="nc" id="L634">						String sender = String.valueOf(message.getSource().getName());</span>
+<span class="nc" id="L635">						String eventName = NetEvent.getEventName(message.getEvent());</span>
+<span class="nc" id="L636">						String receiver = message.getDestination().getName();</span>
+<span class="nc" id="L637">						String timestamp = String.valueOf(getNetSystem().getTime())</span>
+<span class="nc" id="L638">								.replace(&quot;.&quot;, JSimLogger.getDecimalSeparator());</span>
+<span class="nc" id="L639">						JSimLogger.logCustomDebug(&quot;dispatch&quot;, sender, eventName, receiver, timestamp);</span>
+					}
+				}
+			}
+		}
+		//message goes through this switch depending on the destination section
+		//if the message is correctly processed by the appropriate node section
+		//then the processed variable contains a value different from the initial
+		//MSG_NOT_PROCESSED.
+<span class="nc bnc" id="L648" title="All 4 branches missed.">		switch (destinationSection) {</span>
+			case NodeSection.INPUT:
+				// checks jobs routing
+<span class="nc bnc" id="L651" title="All 2 branches missed.">				if (message.getEvent() == NetEvent.EVENT_JOB) {</span>
+<span class="nc bnc" id="L652" title="All 2 branches missed.">					if (source != this) {</span>
+<span class="nc bnc" id="L653" title="All 2 branches missed.">						if (sourceSection != NodeSection.OUTPUT) {</span>
+							//the exterior source section can be the input section only
+							//in case of redirecting queue
+<span class="nc" id="L656">							NodeSection sourceSect = source.getSection(sourceSection);</span>
+
+							//check if this job has been redirected, otherwise the message
+							//cannot be dispatched
+<span class="nc bnc" id="L660" title="All 4 branches missed.">							boolean redirectedByQueue = (sourceSect instanceof Queue) &amp;&amp; (((Queue) sourceSect).isRedirectionON());</span>
+<span class="nc bnc" id="L661" title="All 4 branches missed.">							boolean redirectedByStorage = (sourceSect instanceof Storage) &amp;&amp; (((Storage) sourceSect).isRedirectionON());</span>
+<span class="nc bnc" id="L662" title="All 4 branches missed.">							if (!redirectedByQueue &amp;&amp; !redirectedByStorage) {</span>
+<span class="nc" id="L663">								break;</span>
+							}
+						}
+					}
+				}
+
+				// If this message is JOB and we are reference node for that job, signals it
+				// This is needed for global measures - Bertoli Marco
+<span class="nc bnc" id="L671" title="All 4 branches missed.">				if (sourceSection == NodeSection.OUTPUT &amp;&amp; message.getEvent() == NetEvent.EVENT_JOB) {</span>
+<span class="nc" id="L672">					Job job = message.getJob();</span>
+<span class="nc bnc" id="L673" title="All 4 branches missed.">					if (job.getJobClass().getReferenceNodeName().equals(getName()) &amp;&amp; !(job instanceof ForkJob)) {</span>
+<span class="nc" id="L674">						getQueueNet().getJobInfoList().recycleJob(job);</span>
+					}
+				}
+
+<span class="nc bnc" id="L678" title="All 2 branches missed.">				if (inputSection != null) {</span>
+<span class="nc" id="L679">					processed = inputSection.receive(message);</span>
+<span class="nc bnc" id="L680" title="All 2 branches missed.">				} else if (sourceSection == NodeSection.NO_ADDRESS) {</span>
+<span class="nc" id="L681">					processed = NodeSection.MSG_PROCESSED;</span>
+				}
+				break;
+
+			case NodeSection.SERVICE:
+				// checks jobs routing
+<span class="nc bnc" id="L687" title="All 2 branches missed.">				if (message.getEvent() == NetEvent.EVENT_JOB) {</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">					if (source != this) {</span>
+<span class="nc" id="L689">						break;</span>
+					}
+				}
+<span class="nc bnc" id="L692" title="All 2 branches missed.">				if (serviceSection != null) {</span>
+<span class="nc" id="L693">					processed = serviceSection.receive(message);</span>
+<span class="nc bnc" id="L694" title="All 2 branches missed.">				} else if (sourceSection == NodeSection.NO_ADDRESS) {</span>
+<span class="nc" id="L695">					processed = NodeSection.MSG_PROCESSED;</span>
+				}
+				break;
+
+			case NodeSection.OUTPUT:
+				// checks jobs routing
+<span class="nc bnc" id="L701" title="All 2 branches missed.">				if (message.getEvent() == NetEvent.EVENT_JOB) {</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">					if (source != this) {</span>
+<span class="nc" id="L703">						break;</span>
+<span class="nc bnc" id="L704" title="All 2 branches missed.">					} else if (sourceSection == NodeSection.INPUT) {</span>
+<span class="nc" id="L705">						break;</span>
+					}
+				}
+<span class="nc bnc" id="L708" title="All 2 branches missed.">				if (outputSection != null) {</span>
+<span class="nc" id="L709">					processed = outputSection.receive(message);</span>
+<span class="nc bnc" id="L710" title="All 2 branches missed.">				} else if (sourceSection == NodeSection.NO_ADDRESS) {</span>
+<span class="nc" id="L711">					processed = NodeSection.MSG_PROCESSED;</span>
+				}
+				break;
+		}
+
+		// This situation should be avoided as it is probably an error.
+<span class="nc bnc" id="L717" title="All 2 branches missed.">		if (processed == NodeSection.MSG_NOT_PROCESSED) {</span>
+<span class="nc" id="L718">			String src = message.getSource().getName() + &quot;:&quot; + message.getSourceSection();</span>
+<span class="nc" id="L719">			String dst = message.getDestination().getName() + &quot;:&quot; + message.getDestinationSection();</span>
+<span class="nc" id="L720">			String job = &quot;&quot;;</span>
+<span class="nc bnc" id="L721" title="All 2 branches missed.">			if (message.getJob() != null) {</span>
+<span class="nc" id="L722">				job = &quot; Attached job with id: &quot; + message.getJob().getId() + &quot; class: &quot; + message.getJob().getJobClass().getName();</span>
+			}
+<span class="nc" id="L724">			logger.warn(getNetSystem().getTime() + &quot; - Message &quot; + message.getEvent() + &quot; from &quot; + src + &quot; to &quot; + dst + &quot; not processed.&quot; + job);</span>
+<span class="nc bnc" id="L725" title="All 2 branches missed.">			if (logger.isLogCalenderOn()) {</span>
+<span class="nc" id="L726">				String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();</span>
+<span class="nc bnc" id="L727" title="All 2 branches missed.">				if (allowedEvents.length &gt; 0) {</span>
+<span class="nc bnc" id="L728" title="All 2 branches missed.">					for (String allowedEvent : allowedEvents) {</span>
+<span class="nc bnc" id="L729" title="All 2 branches missed.">						if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {</span>
+<span class="nc" id="L730">							String sender = String.valueOf(message.getSource().getName());</span>
+<span class="nc" id="L731">							String eventName = NetEvent.getEventName(message.getEvent());</span>
+<span class="nc" id="L732">							String receiver = message.getDestination().getName();</span>
+<span class="nc" id="L733">							String timestamp = String.valueOf(message.getDestination().getNetSystem().getTime())</span>
+<span class="nc" id="L734">									.replace(&quot;.&quot;, JSimLogger.getDecimalSeparator());</span>
+<span class="nc" id="L735">							JSimLogger.logCustomDebug(&quot;NOT_PROCESSED&quot;,sender, eventName, receiver, timestamp);</span>
+<span class="nc" id="L736">							break;</span>
+						}
+					}
+				}
+			}
+		}
+<span class="nc" id="L742">	}</span>
+
+	/**
+	 * Sends a message to a NetNode.
+	 * @param event Event tag.
+	 * @param data  Data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param destination The destination node.
+	 * @return a token to remove sent event.
+	 */
+	RemoveToken send(int event, Object data, double delay, byte sourceSection, byte destinationSection, NetNode destination) {
+		//Look if message is a job message and if job is leaving this node
+<span class="nc bnc" id="L756" title="All 2 branches missed.">		if (event == NetEvent.EVENT_JOB) {</span>
+<span class="nc bnc" id="L757" title="All 8 branches missed.">			if ((destination != this) || ((destination == this)</span>
+					&amp;&amp; (sourceSection == NodeSection.OUTPUT &amp;&amp; destinationSection == NodeSection.INPUT))) {
+<span class="nc bnc" id="L759" title="All 2 branches missed.">				if (outputSection.automaticUpdateNodeJobinfolist()) {</span>
+<span class="nc" id="L760">					removeJobFromNodeJobsList((Job) data);</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L764" title="All 2 branches missed.">		if (event == NetEvent.EVENT_RETRIAL) {</span>
+<span class="nc" id="L765">			removeJobFromNodeJobsListOnly((Job) data);</span>
+		}
+
+		//
+		//EVENT_MASK        = 0x0000FFFF;
+		//SOURCE_MASK       = 0xFF000000;
+		//DESTINATION_MASK  = 0x00FF0000;
+		//
+		//SOURCE_SHIFT = 24;
+		//DESTINATION_SHIFT = 16;
+		//it is the opposite than receive(...): in this case we have event, source
+		//and destination sections and we have to summarize them into a single tag
+		//of a simEvent which will be scheduled by the simulator
+		int tag;
+<span class="nc" id="L779">		tag = event &amp; NetEvent.EVENT_MASK;</span>
+<span class="nc" id="L780">		tag += sourceSection &lt;&lt; NodeSection.SOURCE_SHIFT;</span>
+<span class="nc" id="L781">		tag += destinationSection &lt;&lt; NodeSection.DESTINATION_SHIFT;</span>
+<span class="nc" id="L782">		return simSchedule(destination.getId(), delay, tag, data);</span>
+	}
+
+	/**
+	 * Helper function to remove job from the NodeJobsList
+	 * @param data the jobInfo data looking to be removed.
+	 */
+	public boolean removeJobFromNodeJobsList(Job data) {
+<span class="nc" id="L790">		Job job = data;</span>
+<span class="nc" id="L791">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L792" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L793">			jobsList.remove(jobInfo);</span>
+<span class="nc" id="L794">			return true;</span>
+		}
+<span class="nc" id="L796">		return false;</span>
+	}
+
+	/**
+	 * Helper function to remove job from the NodeJobsList
+	 * @param data the jobInfo data looking to be removed.
+	 */
+	public boolean removeJobFromNodeJobsListOnly(Job data) {
+<span class="nc" id="L804">		Job job = data;</span>
+<span class="nc" id="L805">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L806" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L807">			jobsList.removeOnly(jobInfo);</span>
+<span class="nc" id="L808">			return true;</span>
+		}
+<span class="nc" id="L810">		return false;</span>
+	}
+
+	/**
+	 * Unschedules a message given a remove token.
+	 * @param token the token to remove the message.
+	 * @return true if unschedule was successful, false otherwise.
+	 */
+	boolean removeMessage(RemoveToken token) {
+<span class="nc" id="L819">		return simUnschedule(token);</span>
+	}
+
+	//TODO: not used
+	/**
+	 * Sends a message to a section of all the NetNodes of the QueueNetwork.
+	 * @param event Event tag.
+	 * @param data  Data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param nodeType Type of the node (reference or not: see constants in QueueNetwork).
+	 * @throws NetException
+	 */
+	void sendBroadcast(int event, Object data, double delay, byte sourceSection, byte destinationSection, int nodeType)
+			throws NetException {
+		int tag;
+		ListIterator&lt;NetNode&gt; iterator;
+<span class="nc bnc" id="L837" title="All 4 branches missed.">		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_ACK) {</span>
+<span class="nc" id="L838">			throw new NetException(this, EXCEPTION_UNABLE_TO_BROADCAST, &quot;message could not be broadcasted.&quot;);</span>
+		}
+<span class="nc" id="L840">		tag = event &amp; NetEvent.EVENT_MASK;</span>
+<span class="nc" id="L841">		tag += sourceSection &lt;&lt; NodeSection.SOURCE_SHIFT;</span>
+<span class="nc" id="L842">		tag += destinationSection &lt;&lt; NodeSection.DESTINATION_SHIFT;</span>
+
+<span class="nc bnc" id="L844" title="All 3 branches missed.">		switch (nodeType) {</span>
+			case QueueNetwork.REFERENCE_NODE:
+<span class="nc" id="L846">				iterator = network.getReferenceNodes().listIterator();</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">				while (iterator.hasNext()) {</span>
+<span class="nc" id="L848">					simSchedule(iterator.next().getId(), delay, tag, data);</span>
+				}
+				break;
+			case QueueNetwork.NODE:
+<span class="nc" id="L852">				iterator = network.getNodes().listIterator();</span>
+<span class="nc bnc" id="L853" title="All 2 branches missed.">				while (iterator.hasNext()) {</span>
+<span class="nc" id="L854">					simSchedule(iterator.next().getId(), delay, tag, data);</span>
+				}
+				break;
+		}
+<span class="nc" id="L858">	}</span>
+
+	void setNetwork(QueueNetwork network) {
+		// Sets in this method queue network dependent properties
+<span class="nc" id="L862">		this.network = network;</span>
+		// When a node is linked to a network, connections between nodes must
+		// have been already done!!!
+<span class="nc" id="L865">	}</span>
+
+	@Override
+	public void start() {
+<span class="nc" id="L869">		simSchedule(getId(), Double.MAX_VALUE, NetEvent.EVENT_KEEP_AWAKE, null);</span>
+<span class="nc" id="L870">		simGetNext(SimSystem.SIM_ANY);</span>
+<span class="nc" id="L871">	}</span>
+
+	/**
+	 * Restarts the entity after an hold period: implements the method restart() of SimEntity.
+	 */
+	@Override
+	public void restart() {
+		//TODO: it correct that this method does nothing?
+<span class="nc" id="L879">	}</span>
+
+	@Override
+	public void poison() {
+<span class="nc" id="L883">		state = SimEntity.FINISHED;</span>
+		try {
+<span class="nc" id="L885">			handleStopMessages();</span>
+<span class="nc" id="L886">		} catch (NetException ex) {</span>
+<span class="nc" id="L887">			logger.error(&quot;Unexpected error: &quot; + ex.getMessage());</span>
+<span class="nc" id="L888">			logger.error(ex);</span>
+<span class="nc" id="L889">		}</span>
+<span class="nc" id="L890">	}</span>
+
+	/**
+	 * Redirects a job to a NetNode without updating measures.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param destination The destination node.
+	 * @return a token to remove sent event.
+	 * @throws NetException
+	 */
+	RemoveToken redirect(Job job, double delay, byte sourceSection, byte destinationSection, NetNode destination)
+			throws NetException {
+<span class="nc" id="L904">		NodeSection section = getSection(sourceSection);</span>
+<span class="nc bnc" id="L905" title="All 2 branches missed.">		if (section.automaticUpdateNodeJobinfolist()) {</span>
+<span class="nc" id="L906">			JobInfo JobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L907" title="All 2 branches missed.">			if (JobInfo != null) {</span>
+<span class="nc" id="L908">				jobsList.redirectJob(JobInfo);</span>
+			}
+		}
+
+<span class="nc" id="L912">		int tag = NetEvent.EVENT_JOB &amp; NetEvent.EVENT_MASK;</span>
+<span class="nc" id="L913">		tag += sourceSection &lt;&lt; NodeSection.SOURCE_SHIFT;</span>
+<span class="nc" id="L914">		tag += destinationSection &lt;&lt; NodeSection.DESTINATION_SHIFT;</span>
+<span class="nc" id="L915">		return simSchedule(destination.getId(), delay, tag, job);</span>
+	}
+
+	/**
+	 * Sends an &quot;ack&quot; message to a NetNode to inform it that
+	 * the job previously sent has been dropped.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param sourceSection The source section.
+	 * @param destinationSection The destination section.
+	 * @param destination The destination node.
+	 * @return a token to remove sent event.
+	 * @throws NetException
+	 */
+	RemoveToken sendAckAfterDrop(Job job, double delay, byte sourceSection, byte destinationSection, NetNode destination)
+			throws NetException {
+<span class="nc" id="L931">		NodeSection section = getSection(sourceSection);</span>
+<span class="nc bnc" id="L932" title="All 2 branches missed.">		if (section.automaticUpdateNodeJobinfolist()) {</span>
+<span class="nc" id="L933">			JobInfo JobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L934" title="All 2 branches missed.">			if (JobInfo != null) {</span>
+<span class="nc" id="L935">				jobsList.dropJob(JobInfo);</span>
+			}
+		}
+
+<span class="nc" id="L939">		int tag = NetEvent.EVENT_ACK &amp; NetEvent.EVENT_MASK;</span>
+<span class="nc" id="L940">		tag += sourceSection &lt;&lt; NodeSection.SOURCE_SHIFT;</span>
+<span class="nc" id="L941">		tag += destinationSection &lt;&lt; NodeSection.DESTINATION_SHIFT;</span>
+<span class="nc" id="L942">		return simSchedule(destination.getId(), delay, tag, job);</span>
+	}
+
+	/**
+	 * Returns true if this NetNode is a sink. This is extremely useful as sinks does not have
+	 * service section and output section, causing a lot of null pointer exception in routing
+	 * strategies if not treated correctly.
+	 * Author: Bertoli Marco
+	 * @return true if this node does not have service section and output section.
+	 */
+	public boolean isSink() {
+		// WARNING: to avoid circular dependency and to speed up this method,
+		// input section instanceof JobSink is not checked
+<span class="nc bnc" id="L955" title="All 4 branches missed.">		return (serviceSection == null &amp;&amp; outputSection == null);</span>
+	}
+
+	/**
+	 * @return true if this is a blocking region input station.
+	 */
+	public boolean isBlockingRegionInputStation() {
+<span class="nc bnc" id="L962" title="All 2 branches missed.">		return region != null;</span>
+	}
+
+	/**
+	 * @param region The blocking region input station.
+	 */
+	public void setBlockingRegionInputStation(BlockingRegion region) {
+<span class="nc" id="L969">		this.region = region;</span>
+<span class="nc" id="L970">	}</span>
+
+	/**
+	 * @return blocking region, only if this is a region input station.
+	 */
+	public BlockingRegion getBlockingRegionInputStation() {
+<span class="nc" id="L976">		return region;</span>
+	}
+
+	/**
+	 * @return the simulation parameters.
+	 */
+	public SimParameters getSimParameters() {
+<span class="nc" id="L983">		return simParameters;</span>
+	}
+
+	/**
+	 * @param simParameters reads the simulation parameters.
+	 */
+	public void setSimParameters(SimParameters simParameters) {
+<span class="nc" id="L990">		this.simParameters = simParameters;</span>
+<span class="nc" id="L991">	}</span>
+
+	/**
+	 * This method is called after all the sections are added.
+	 * @throws NetException
+	 */
+	public void initializeSections() throws NetException {
+<span class="nc" id="L998">		jobsList = new LinkedJobInfoList(getJobClasses(), getClassCompatibilities(), getName(), getServerTypes());</span>
+<span class="nc bnc" id="L999" title="All 2 branches missed.">		if (isBlockingRegionInputStation()) {</span>
+<span class="nc" id="L1000">			jobsList.setRegionSoftDeadlinesByClass(getBlockingRegionInputStation().getClassSoftDeadlines());</span>
+		}
+<span class="nc" id="L1002">		jobsList.setNetSystem(network.getNetSystem());</span>
+
+<span class="nc bnc" id="L1004" title="All 2 branches missed.">		if (inputSection != null) {</span>
+<span class="nc" id="L1005">			inputSection.setOwnerNode(this);</span>
+		}
+<span class="nc bnc" id="L1007" title="All 2 branches missed.">		if (serviceSection != null) {</span>
+<span class="nc" id="L1008">			serviceSection.setOwnerNode(this);</span>
+		}
+<span class="nc bnc" id="L1010" title="All 2 branches missed.">		if (outputSection != null) {</span>
+<span class="nc" id="L1011">			outputSection.setOwnerNode(this);</span>
+		}
+<span class="nc" id="L1013">	}</span>
+
+	public NetSystem getNetSystem() {
+<span class="nc" id="L1016">		return network.getNetSystem();</span>
+	}
+
+	private boolean isJobFromPlaceToServerOrDelay(NetMessage message){
+<span class="nc" id="L1020">		NetNode sourceNode = message.getSource();</span>
+<span class="nc" id="L1021">		NetNode destinationNode = message.getDestination();</span>
+<span class="nc" id="L1022">		int sourceSection = message.getSourceSection();</span>
+<span class="nc" id="L1023">		int destinationSection = message.getDestinationSection();</span>
+<span class="nc" id="L1024">		boolean result = false;</span>
+		try
+		{
+<span class="nc bnc" id="L1027" title="All 4 branches missed.">			result = sourceNode != null &amp;&amp; destinationNode != null</span>
+<span class="nc bnc" id="L1028" title="All 4 branches missed.">					&amp;&amp; message.getEvent() == NetEvent.EVENT_JOB</span>
+					&amp;&amp; sourceSection &gt; 0
+<span class="nc bnc" id="L1030" title="All 4 branches missed.">					&amp;&amp; sourceNode.getSection(sourceSection) instanceof Linkage</span>
+					&amp;&amp; destinationSection == 1
+<span class="nc bnc" id="L1032" title="All 2 branches missed.">					&amp;&amp; destinationNode.getSection(destinationSection) instanceof Queue</span>
+			;
+		}
+<span class="nc" id="L1035">		catch(NetException e)</span>
+		{
+<span class="nc" id="L1037">		}</span>
+
+<span class="nc" id="L1039">		return result;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

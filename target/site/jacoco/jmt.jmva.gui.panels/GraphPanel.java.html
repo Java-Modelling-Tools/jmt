@@ -1,0 +1,951 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GraphPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.gui.panels</a> &gt; <span class="el_source">GraphPanel.java</span></div><h1>GraphPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+package jmt.jmva.gui.panels;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.framework.gui.graph.WhatIfPlot;
+import jmt.framework.gui.table.editors.ColorCellEditor;
+import jmt.framework.gui.table.editors.ComboBoxCellEditor;
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.jmva.analytical.ExactConstants;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.analytical.solvers.SolverAlgorithm;
+
+import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.List;
+import java.util.*;
+
+/**
+ * &lt;p&gt;Title: Graph Panel&lt;/p&gt;
+ * &lt;p&gt;Description: This panel is used to display JMVA what-if analysis
+ * results in a graph. Number of allowed lines in graph is determined
+ * by &lt;code&gt;graph.getColors().length&lt;/code&gt;. Modify it to allow more lines.&lt;/p&gt;
+ *
+ * @author Bertoli Marco
+ *         Date: 1-giu-2006
+ *         Time: 11.01.29
+ *         
+ * @author Cerotti
+ *  		Fixed results retrieval according to reference station
+ * @version Date: JAN-2015
+ */
+public class GraphPanel extends WizardPanel implements ExactConstants {
+	private static final long serialVersionUID = 1L;
+	// Data structure
+	private ExactModel model;
+	// Plot
+	private WhatIfPlot graph;
+	// Performance index selector
+	private JComboBox&lt;String&gt; index;
+	// Bounds for graph
+	private JSpinner Xmin;
+	private JSpinner Xmax;
+	private JSpinner Ymin;
+	private JSpinner Ymax;
+	// Tells if spinner update is forced. This is needed to avoid that updates made by
+	// code will be interpreted as updated made by user.
+<span class="nc" id="L73">	private boolean forcedUpdate = false;</span>
+	// Table used to select performance indices to be plotted
+	private LinesTable table;
+	// Dimension of bounds spinners
+<span class="nc" id="L77">	static final Dimension DIM_SPINNER = new Dimension((int)(60 * CommonConstants.widthScaling), (int)(20 * CommonConstants.heightScaling));</span>
+	// Current performance index
+<span class="nc" id="L79">	private String currentIndex = &quot;none&quot;;</span>
+	// Selected performance indices
+	private int[] classes;
+	private int[] stations;
+	// Selected solver algorithm
+	private SolverAlgorithm[] algorithms;
+	private List&lt;SolverAlgorithm&gt; executedAlgorithms;
+	// Aggregate special value
+	private static final String AGGREGATE = &quot;&lt;html&gt;&lt;b&gt;&lt;i&gt;Aggregate&lt;/i&gt;&lt;/b&gt;&lt;/html&gt;&quot;;
+
+	/**
+	 * Builds a new GraphPanel, given an exact model data structure
+	 * @param model reference to data structure
+	 */
+<span class="nc" id="L93">	public GraphPanel(ExactModel model) {</span>
+<span class="nc" id="L94">		this.model = model;</span>
+<span class="nc" id="L95">		initGraphics();</span>
+<span class="nc" id="L96">	}</span>
+
+	/**
+	 * Initialize GUI of this panel
+	 */
+	private void initGraphics() {
+<span class="nc" id="L102">		setLayout(new BorderLayout(10, 10));</span>
+<span class="nc" id="L103">		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));</span>
+<span class="nc" id="L104">		JPanel mainPanel = new JPanel(new BorderLayout(5, 5));</span>
+<span class="nc" id="L105">		mainPanel.setBorder(BorderFactory.createEtchedBorder());</span>
+
+		// Adds description label
+<span class="nc" id="L108">		JLabel descrLabel = new JLabel(DESCRIPTION_GRAPH);</span>
+<span class="nc" id="L109">		add(descrLabel, BorderLayout.NORTH);</span>
+<span class="nc" id="L110">		add(mainPanel, BorderLayout.CENTER);</span>
+
+		// Creates left panel with options
+<span class="nc" id="L113">		JPanel left = new JPanel(new BorderLayout(3, 3));</span>
+		// Adds performance index selection
+<span class="nc" id="L115">		JPanel indexPanel = new JPanel();</span>
+<span class="nc" id="L116">		JLabel pIndex = new JLabel(&quot;Performance index: &quot;);</span>
+<span class="nc" id="L117">		index = new JComboBox&lt;String&gt;(ExactConstants.INDICES_TYPES);</span>
+		// Adds aggregate types
+<span class="nc bnc" id="L119" title="All 2 branches missed.">		for (String element : AGGREGATE_TYPES) {</span>
+<span class="nc" id="L120">			index.addItem(element);</span>
+		}
+<span class="nc" id="L122">		pIndex.setLabelFor(index);</span>
+<span class="nc" id="L123">		indexPanel.add(pIndex);</span>
+<span class="nc" id="L124">		indexPanel.add(index);</span>
+<span class="nc" id="L125">		left.add(indexPanel, BorderLayout.NORTH);</span>
+
+		// Adds panel for bounds selection
+<span class="nc" id="L128">		JPanel boundsPanel = new JPanel(new GridLayout(2, 4, 1, 1));</span>
+<span class="nc" id="L129">		boundsPanel.add(new JLabel(&quot;Xmin: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L130">		Xmin = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L131">		Xmin.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L132">		boundsPanel.add(Xmin);</span>
+<span class="nc" id="L133">		boundsPanel.add(new JLabel(&quot;Xmax: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L134">		Xmax = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L135">		Xmax.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L136">		boundsPanel.add(Xmax);</span>
+<span class="nc" id="L137">		boundsPanel.add(new JLabel(&quot;Ymin: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L138">		Ymin = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L139">		Ymin.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L140">		boundsPanel.add(Ymin);</span>
+<span class="nc" id="L141">		boundsPanel.add(new JLabel(&quot;Ymax: &quot;, SwingConstants.RIGHT));</span>
+<span class="nc" id="L142">		Ymax = new JSpinner(new SpinnerNumberModel(0.0, 0.0, 1e10, 0.01));</span>
+<span class="nc" id="L143">		Ymax.setPreferredSize(DIM_SPINNER);</span>
+<span class="nc" id="L144">		boundsPanel.add(Ymax);</span>
+<span class="nc" id="L145">		left.add(boundsPanel, BorderLayout.SOUTH);</span>
+
+<span class="nc" id="L147">		mainPanel.add(left, BorderLayout.WEST);</span>
+
+		// Puts graph in the right panel
+		// Creates label for X-axis
+<span class="nc" id="L151">		String xLabel = &quot;&quot;;</span>
+<span class="nc bnc" id="L152" title="All 2 branches missed.">		if (model.getWhatIfClass() &gt;= 0) {</span>
+<span class="nc" id="L153">			graph = new WhatIfPlot(model.getWhatIfValues());</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">			if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_ARRIVAL)) {</span>
+<span class="nc" id="L155">				xLabel = &quot;Arrival rate \u03bbi for &quot; + model.getClassNames()[model.getWhatIfClass()] + &quot; [job/s]&quot;;</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">			} else if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_CUSTOMERS)) {</span>
+<span class="nc" id="L157">				xLabel = &quot;Number of customers Ni for &quot; + model.getClassNames()[model.getWhatIfClass()];</span>
+<span class="nc bnc" id="L158" title="All 2 branches missed.">			} else if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_DEMANDS)) {</span>
+<span class="nc" id="L159">				xLabel = &quot;Service demand Di for &quot; + model.getClassNames()[model.getWhatIfClass()] + &quot; at &quot;</span>
+<span class="nc" id="L160">						+ model.getStationNames()[model.getWhatIfStation()] + &quot; [s]&quot;;</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			} else if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_MIX)) {</span>
+<span class="nc" id="L162">				xLabel = &quot;Population mix \u03b2i for &quot; + model.getClassNames()[model.getWhatIfClass()];</span>
+			}
+		} else {
+<span class="nc" id="L165">			graph = new WhatIfPlot(ArrayUtils.multiply(model.getWhatIfValues(), 100.0));</span>
+<span class="nc bnc" id="L166" title="All 2 branches missed.">			if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_ARRIVAL)) {</span>
+<span class="nc" id="L167">				xLabel = &quot;% of arrival rates \u03bbi w.r.t. initial values&quot;;</span>
+<span class="nc bnc" id="L168" title="All 2 branches missed.">			} else if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_CUSTOMERS)) {</span>
+<span class="nc" id="L169">				xLabel = &quot;% of customers Ni w.r.t. initial values&quot;;</span>
+<span class="nc bnc" id="L170" title="All 2 branches missed.">			} else if (model.getWhatIfType().equals(ExactConstants.WHAT_IF_DEMANDS)) {</span>
+<span class="nc" id="L171">				xLabel = &quot;% of Service demands Di at &quot; + model.getStationNames()[model.getWhatIfStation()] + &quot; w.r.t. initial values&quot;;</span>
+			}
+		}
+<span class="nc" id="L174">		graph.setXLabel(xLabel);</span>
+<span class="nc" id="L175">		mainPanel.add(graph, BorderLayout.CENTER);</span>
+
+		// Adds table and inits data structure for it.
+<span class="nc" id="L178">		classes = new int[graph.getColors().length];</span>
+<span class="nc bnc" id="L179" title="All 2 branches missed.">		if (model.isMultiClass()) {</span>
+<span class="nc" id="L180">			Arrays.fill(classes, -10);</span>
+		}
+<span class="nc" id="L182">		stations = new int[graph.getColors().length];</span>
+<span class="nc" id="L183">		Arrays.fill(stations, -10);</span>
+
+<span class="nc" id="L185">		algorithms = new SolverAlgorithm[graph.getColors().length];</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">		if (model.isWhatifAlgorithms()) {</span>
+<span class="nc" id="L187">			Arrays.fill(algorithms, model.getWhatifAlgorithms().iterator().next());</span>
+<span class="nc" id="L188">			executedAlgorithms = new ArrayList&lt;SolverAlgorithm&gt;(model.getWhatifAlgorithms());</span>
+		} else {
+<span class="nc" id="L190">			Arrays.fill(algorithms, model.getAlgorithmType());</span>
+<span class="nc" id="L191">			executedAlgorithms = Arrays.asList(model.getAlgorithmType());</span>
+		}
+
+<span class="nc" id="L194">		table = new LinesTable();</span>
+<span class="nc" id="L195">		JScrollPane tableScrollPane = new JScrollPane(table);</span>
+<span class="nc" id="L196">		tableScrollPane.setPreferredSize(new Dimension(160, tableScrollPane.getPreferredSize().height));</span>
+<span class="nc" id="L197">		left.add(tableScrollPane, BorderLayout.CENTER);</span>
+<span class="nc" id="L198">		graph.setLegendPanel(mainPanel);</span>
+
+
+<span class="nc" id="L201">		updateSpinners();</span>
+<span class="nc" id="L202">		addActions();</span>
+<span class="nc" id="L203">		updateIndex();</span>
+<span class="nc" id="L204">	}</span>
+
+	/**
+	 * Updates values in spinners used to select ranges to be shown in graph
+	 */
+	private void updateSpinners() {
+		// Check for special value used if graph is empty
+<span class="nc bnc" id="L211" title="All 2 branches missed.">		if (graph.getXRange()[0] != Double.MAX_VALUE) {</span>
+<span class="nc" id="L212">			Xmin.setValue(new Double(graph.getXRange()[0]));</span>
+<span class="nc" id="L213">			Xmax.setValue(new Double(graph.getXRange()[1]));</span>
+<span class="nc" id="L214">			Ymin.setValue(new Double(graph.getYRange()[0]));</span>
+<span class="nc" id="L215">			Ymax.setValue(new Double(graph.getYRange()[1]));</span>
+		} else {
+<span class="nc" id="L217">			Xmin.setValue(new Double(0.0));</span>
+<span class="nc" id="L218">			Xmax.setValue(new Double(0.0));</span>
+<span class="nc" id="L219">			Ymin.setValue(new Double(0.0));</span>
+<span class="nc" id="L220">			Ymax.setValue(new Double(0.0));</span>
+		}
+<span class="nc" id="L222">	}</span>
+
+	/**
+	 * Used when a spinner value is updated
+	 */
+	private void setBounds() {
+		double xmin, xmax, ymin, ymax;
+<span class="nc" id="L229">		Object val = Xmin.getValue();</span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L231">			xmin = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L233">			xmin = graph.getXRange()[0];</span>
+		}
+<span class="nc" id="L235">		val = Xmax.getValue();</span>
+<span class="nc bnc" id="L236" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L237">			xmax = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L239">			xmax = graph.getXRange()[1];</span>
+		}
+<span class="nc" id="L241">		val = Ymin.getValue();</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L243">			ymin = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L245">			ymin = graph.getYRange()[0];</span>
+		}
+<span class="nc" id="L247">		val = Ymax.getValue();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">		if (val instanceof Number) {</span>
+<span class="nc" id="L249">			ymax = ((Number) val).doubleValue();</span>
+		} else {
+<span class="nc" id="L251">			ymax = graph.getYRange()[1];</span>
+		}
+		// Sets bounds
+<span class="nc" id="L254">		graph.setXRange(xmin, xmax);</span>
+<span class="nc" id="L255">		graph.setYRange(ymin, ymax);</span>
+<span class="nc" id="L256">		graph.repaint();</span>
+<span class="nc" id="L257">	}</span>
+
+	/**
+	 * This function must be called each time selected performance
+	 * index changes
+	 */
+	private void updateIndex() {
+<span class="nc" id="L264">		String current = (String) index.getSelectedItem();</span>
+<span class="nc bnc" id="L265" title="All 2 branches missed.">		if (!current.equals(currentIndex)) {</span>
+			// Removes incorrect utilization measures
+<span class="nc bnc" id="L267" title="All 2 branches missed.">			if (table.getCellEditor() != null) {</span>
+<span class="nc" id="L268">				table.getCellEditor().stopCellEditing();</span>
+			}
+
+<span class="nc" id="L271">			currentIndex = current;</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">			if (currentIndex.equals(ExactConstants.INDICES_TYPES[5])) {</span>
+				// If System Power is selected, removes the station column
+<span class="nc" id="L274">				table.showColumn(LinesTableColumn.CLASS);</span>
+<span class="nc" id="L275">				table.hideColumn(LinesTableColumn.STATION);</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">			} else if (AGGREGATE_TYPES_SET.contains(currentIndex)) {</span>
+<span class="nc" id="L277">				table.hideColumn(LinesTableColumn.STATION);</span>
+<span class="nc" id="L278">				table.hideColumn(LinesTableColumn.CLASS);</span>
+			} else  {
+<span class="nc" id="L280">				table.showColumn(LinesTableColumn.CLASS);</span>
+<span class="nc" id="L281">				table.showColumn(LinesTableColumn.STATION);</span>
+			}
+			// This is an aggregated set
+<span class="nc bnc" id="L284" title="All 2 branches missed.">			if (AGGREGATE_TYPES_SET.contains(currentIndex)) {</span>
+<span class="nc" id="L285">				graph.clear(false);</span>
+<span class="nc" id="L286">				int i=0;</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">				for (SolverAlgorithm algo : executedAlgorithms) {</span>
+					// System response time
+<span class="nc bnc" id="L289" title="All 2 branches missed.">					if (currentIndex.equals(AGGREGATE_TYPES[0])) {</span>
+<span class="nc" id="L290">						graph.draw(i++, model.getGlobalR(algo, true));</span>
+					}
+					// System response time
+<span class="nc bnc" id="L293" title="All 2 branches missed.">					if (currentIndex.equals(AGGREGATE_TYPES[1])) {</span>
+<span class="nc" id="L294">						graph.draw(i++, model.getGlobalR(algo, false));</span>
+					}
+					// System throughput
+<span class="nc bnc" id="L297" title="All 2 branches missed.">					else if (currentIndex.equals(AGGREGATE_TYPES[2])) {</span>
+<span class="nc" id="L298">						graph.draw(i++, model.getGlobalX(algo));</span>
+					}
+					// Number of customers
+<span class="nc bnc" id="L301" title="All 2 branches missed.">					else if (currentIndex.equals(AGGREGATE_TYPES[3])) {</span>
+<span class="nc" id="L302">						graph.draw(i++, model.getGlobalQ(algo));</span>
+					}
+<span class="nc" id="L304">				}</span>
+<span class="nc" id="L305">				autosizeGraph();</span>
+<span class="nc" id="L306">			} else {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {</span>
+<span class="nc bnc" id="L308" title="All 2 branches missed.">					for (int i = 0; i &lt; stations.length; i++) {</span>
+<span class="nc bnc" id="L309" title="All 2 branches missed.">						if (stations[i] == -1) {</span>
+<span class="nc" id="L310">							stations[i] = -2;</span>
+						}
+					}
+				}
+<span class="nc" id="L314">				table.repaint();</span>
+<span class="nc" id="L315">				paintAllIndices();</span>
+			}
+
+			// Updates graph
+<span class="nc" id="L319">			graph.setYLabel(current);</span>
+<span class="nc" id="L320">			graph.repaint();</span>
+		}
+<span class="nc" id="L322">	}</span>
+
+	/**
+	 * Adds action listeners to GUI components
+	 */
+	private void addActions() {
+		// Listener used for bounds spinners
+<span class="nc" id="L329">		ChangeListener boundsListener = new ChangeListener() {</span>
+			public void stateChanged(ChangeEvent e) {
+<span class="nc bnc" id="L331" title="All 2 branches missed.">				if (!forcedUpdate) {</span>
+<span class="nc" id="L332">					setBounds();</span>
+<span class="nc" id="L333">					updateSpinners();</span>
+				}
+<span class="nc" id="L335">			}</span>
+		};
+<span class="nc" id="L337">		Xmin.addChangeListener(boundsListener);</span>
+<span class="nc" id="L338">		Xmax.addChangeListener(boundsListener);</span>
+<span class="nc" id="L339">		Ymin.addChangeListener(boundsListener);</span>
+<span class="nc" id="L340">		Ymax.addChangeListener(boundsListener);</span>
+		// Listener for index selection comboBox
+<span class="nc" id="L342">		index.addItemListener(new ItemListener() {</span>
+			public void itemStateChanged(ItemEvent e) {
+<span class="nc bnc" id="L344" title="All 2 branches missed.">				if (e.getStateChange() == ItemEvent.DESELECTED) {</span>
+<span class="nc" id="L345">					return;</span>
+				}
+<span class="nc" id="L347">				updateIndex();</span>
+<span class="nc" id="L348">			}</span>
+		});
+
+		// Adds a listener to the graph to detect zoom events
+<span class="nc" id="L352">		graph.addRescaleListener(new WhatIfPlot.RescaleListener() {</span>
+			public void Rescaled() {
+<span class="nc" id="L354">				forcedUpdate = true;</span>
+<span class="nc" id="L355">				updateSpinners();</span>
+<span class="nc" id="L356">				forcedUpdate = false;</span>
+<span class="nc" id="L357">			}</span>
+		});
+<span class="nc" id="L359">	}</span>
+
+	/**
+	 * Paints performance index at specified row
+	 * @param rowNum row number of index to be painted
+	 */
+	private void paintIndexAtRow(int rowNum) {
+		// Clears previous graph
+<span class="nc" id="L367">		graph.clear(rowNum);</span>
+<span class="nc" id="L368">		int classNum = classes[rowNum];</span>
+<span class="nc" id="L369">		int statNum = stations[rowNum];</span>
+<span class="nc" id="L370">		SolverAlgorithm alg = algorithms[rowNum];</span>
+
+		// There is no station column for System Power
+		//if (classNum &lt; -1 || statNum &lt; -1) {
+<span class="nc bnc" id="L374" title="All 6 branches missed.">		if (classNum &lt; -1 || (statNum &lt; -1 &amp;&amp; !currentIndex.equals(ExactConstants.INDICES_TYPES[5]))) {</span>
+			// Resets view
+<span class="nc" id="L376">			autosizeGraph();</span>
+<span class="nc" id="L377">			return;</span>
+		}
+
+		// Throughput
+<span class="nc bnc" id="L381" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[0])) {</span>
+<span class="nc bnc" id="L382" title="All 4 branches missed.">			if (classNum &gt;= 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L383">				graph.draw(rowNum, model.getThroughput(alg)[statNum][classNum]);</span>
+<span class="nc bnc" id="L384" title="All 4 branches missed.">			} else if (classNum &lt; 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L385">				graph.draw(rowNum, model.getPerStationX(alg)[statNum]);</span>
+<span class="nc bnc" id="L386" title="All 4 branches missed.">			} else if (classNum &gt;= 0 &amp;&amp; statNum &lt; 0) {</span>
+<span class="nc" id="L387">				graph.draw(rowNum, model.getPerClassX(alg)[classNum]);</span>
+			} else {
+<span class="nc" id="L389">				graph.draw(rowNum, model.getGlobalX(alg));</span>
+			}
+		}
+		// Queue length
+<span class="nc bnc" id="L393" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[1])) {</span>
+<span class="nc bnc" id="L394" title="All 4 branches missed.">			if (classNum &gt;= 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L395">				graph.draw(rowNum, model.getQueueLen(alg)[statNum][classNum]);</span>
+<span class="nc bnc" id="L396" title="All 4 branches missed.">			} else if (classNum &lt; 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L397">				graph.draw(rowNum, model.getPerStationQ(alg)[statNum]);</span>
+<span class="nc bnc" id="L398" title="All 4 branches missed.">			} else if (classNum &gt;= 0 &amp;&amp; statNum &lt; 0) {</span>
+<span class="nc" id="L399">				graph.draw(rowNum, model.getPerClassQ(alg)[classNum]);</span>
+			} else {
+<span class="nc" id="L401">				graph.draw(rowNum, model.getGlobalQ(alg));</span>
+			}
+		}
+		// Response time
+<span class="nc bnc" id="L405" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[2])) {</span>
+<span class="nc bnc" id="L406" title="All 4 branches missed.">			if (classNum &gt;= 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L407">				graph.draw(rowNum, model.getRespTimes(alg)[statNum][classNum]);</span>
+<span class="nc bnc" id="L408" title="All 4 branches missed.">			} else if (classNum &lt; 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L409">				graph.draw(rowNum, model.getPerStationRespT(alg)[statNum]);</span>
+<span class="nc bnc" id="L410" title="All 4 branches missed.">			} else if (classNum &gt;= 0 &amp;&amp; statNum &lt; 0) {</span>
+<span class="nc" id="L411">				graph.draw(rowNum, model.getPerClassR(alg, true)[classNum]);</span>
+			} else {
+<span class="nc" id="L413">				graph.draw(rowNum, model.getGlobalR(alg, true));</span>
+			}
+		}
+		// Residence time
+<span class="nc bnc" id="L417" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[3])) {</span>
+<span class="nc bnc" id="L418" title="All 4 branches missed.">			if (classNum &gt;= 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L419">				graph.draw(rowNum, model.getResidTimes(alg)[statNum][classNum]);</span>
+<span class="nc bnc" id="L420" title="All 4 branches missed.">			} else if (classNum &lt; 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L421">				graph.draw(rowNum, model.getPerStationResidT(alg)[statNum]);</span>
+<span class="nc bnc" id="L422" title="All 4 branches missed.">			} else if (classNum &gt;= 0 &amp;&amp; statNum &lt; 0) {</span>
+<span class="nc" id="L423">				graph.draw(rowNum, model.getPerClassR(alg, true)[classNum]);</span>
+			} else {
+<span class="nc" id="L425">				graph.draw(rowNum, model.getGlobalR(alg, true));</span>
+			}
+		}
+		// Utilization
+<span class="nc bnc" id="L429" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {</span>
+<span class="nc bnc" id="L430" title="All 4 branches missed.">			if (classNum &gt;= 0 &amp;&amp; statNum &gt;= 0) {</span>
+<span class="nc" id="L431">				graph.draw(rowNum, model.getUtilization(alg)[statNum][classNum]);</span>
+			} else {
+<span class="nc" id="L433">				graph.draw(rowNum, model.getPerStationU(alg)[statNum]);</span>
+			}
+		}
+		// System power
+<span class="nc bnc" id="L437" title="All 2 branches missed.">		if (currentIndex.equals(ExactConstants.INDICES_TYPES[5])) {</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">			if (classNum &gt;= 0) {</span>
+<span class="nc" id="L439">				graph.draw(rowNum, model.getPerClassSP(alg, true)[classNum]);</span>
+<span class="nc bnc" id="L440" title="All 2 branches missed.">			} else if (classNum == -1) {</span>
+<span class="nc" id="L441">				graph.draw(rowNum, model.getGlobalSP(alg, true));</span>
+			}
+		}
+
+		// Resets view
+<span class="nc" id="L446">		autosizeGraph();</span>
+<span class="nc" id="L447">	}</span>
+
+	/**
+	 * Paints all performance indices of current table
+	 */
+	private void paintAllIndices() {
+<span class="nc bnc" id="L453" title="All 2 branches missed.">		for (int i = 0; i &lt; classes.length; i++) {</span>
+<span class="nc" id="L454">			paintIndexAtRow(i);</span>
+		}
+<span class="nc" id="L456">	}</span>
+
+	/**
+	 * AutoResizes graph window
+	 */
+	private void autosizeGraph() {
+<span class="nc" id="L462">		graph.fillPlot();</span>
+<span class="nc" id="L463">	}</span>
+
+	/**
+	 * @return the panel's name
+	 */
+	@Override
+	public String getName() {
+<span class="nc" id="L470">		return &quot;Graphical Results&quot;;</span>
+	}
+
+<span class="nc" id="L473">	private enum LinesTableColumn {</span>
+<span class="nc" id="L474">		COLOR(&quot;&quot;), </span>
+<span class="nc" id="L475">		CLASS(&quot;Class&quot;), </span>
+<span class="nc" id="L476">		STATION(&quot;Station&quot;), </span>
+<span class="nc" id="L477">		ALGORITHM(&quot;Algorithm&quot;),</span>
+<span class="nc" id="L478">		HIDDEN(&quot;&quot;);</span>
+
+<span class="nc" id="L480">		private LinesTableColumn(String name) {</span>
+<span class="nc" id="L481">			this.name = name;</span>
+<span class="nc" id="L482">		}</span>
+
+		private String name;
+
+		public String getName() {
+<span class="nc" id="L487">			return name;</span>
+		}
+	}
+
+	/**
+	 * Table used to select performance indices to be drawn
+	 */
+	protected class LinesTable extends JTable {
+		private static final long serialVersionUID = 1L;
+		/** ComboBoxes used as cell editors */
+		private ComboEditor classEditor;
+		/** ComboBoxes used as cell editors */
+		private ComboEditor stationsEditor;
+		/** ComboBoxes used as cell editors */
+		private ComboEditor uStationsEditor;
+
+		/** Edited by Georgios Poullaides **/
+		private ComboAlgoEditor algorithmEditor;
+		/** End **/
+
+		/**
+		 * Builds a new LinesTable
+		 */
+<span class="nc" id="L510">		public LinesTable() {</span>
+<span class="nc" id="L511">			super(new LinesTableModel());</span>
+<span class="nc" id="L512">			setDefaultRenderer(Color.class, new ColorCellEditor());</span>
+<span class="nc" id="L513">			setDefaultRenderer(String.class, ComboBoxCellEditor.getRendererInstance());</span>
+<span class="nc" id="L514">			setRowHeight(CommonConstants.ROW_HEIGHT);</span>
+
+			// Creates class editors (one is for utilizations)
+<span class="nc" id="L517">			JComboBox&lt;String&gt; classCombo = new JComboBox&lt;String&gt;();</span>
+			// Null elements
+<span class="nc" id="L519">			classCombo.addItem(&quot;&quot;);</span>
+			// Aggregate measures
+<span class="nc" id="L521">			classCombo.addItem(AGGREGATE);</span>
+<span class="nc bnc" id="L522" title="All 2 branches missed.">			for (int i = 0; i &lt; model.getClasses(); i++) {</span>
+<span class="nc" id="L523">				classCombo.addItem(model.getClassNames()[i]);</span>
+			}
+
+			// Creates station editor
+<span class="nc" id="L527">			JComboBox&lt;String&gt; stationsCombo = new JComboBox&lt;String&gt;();</span>
+<span class="nc" id="L528">			JComboBox&lt;String&gt; uStationsCombo = new JComboBox&lt;String&gt;();</span>
+<span class="nc" id="L529">			stationsCombo.addItem(&quot;&quot;);</span>
+<span class="nc" id="L530">			uStationsCombo.addItem(&quot;&quot;);</span>
+<span class="nc" id="L531">			stationsCombo.addItem(AGGREGATE);</span>
+<span class="nc" id="L532">			uStationsCombo.addItem(ExactConstants.GRAY_S + AGGREGATE + ExactConstants.GRAY_E);</span>
+<span class="nc bnc" id="L533" title="All 2 branches missed.">			for (int i = 0; i &lt; model.getStations(); i++) {</span>
+<span class="nc" id="L534">				stationsCombo.addItem(model.getStationNames()[i]);</span>
+<span class="nc" id="L535">				uStationsCombo.addItem(model.getStationNames()[i]);</span>
+			}
+
+			//Creates algorithm editor
+<span class="nc" id="L539">			JComboBox&lt;SolverAlgorithm&gt; algorithmCombo = new JComboBox&lt;SolverAlgorithm&gt;();</span>
+<span class="nc bnc" id="L540" title="All 2 branches missed.">			for (SolverAlgorithm algo : model.getWhatifAlgorithms()) {</span>
+<span class="nc" id="L541">				algorithmCombo.addItem(algo);</span>
+<span class="nc" id="L542">			}</span>
+<span class="nc" id="L543">			algorithmEditor = new ComboAlgoEditor(algorithmCombo);</span>
+
+			// Creates editors
+<span class="nc" id="L546">			classEditor = new ComboEditor(classCombo);</span>
+<span class="nc" id="L547">			uStationsEditor = new ComboEditor(uStationsCombo);</span>
+<span class="nc" id="L548">			stationsEditor = new ComboEditor(stationsCombo);</span>
+<span class="nc" id="L549">		}</span>
+
+		@Override
+		public void columnAdded(TableColumnModelEvent e) {
+<span class="nc" id="L553">			LinesTableColumn type = getColumnType(e.getToIndex());</span>
+<span class="nc" id="L554">			TableColumn column = getColumnModel().getColumn(e.getToIndex());</span>
+<span class="nc bnc" id="L555" title="All 5 branches missed.">			switch (type) {</span>
+			case COLOR:
+<span class="nc" id="L557">				column.setMaxWidth(25);</span>
+<span class="nc" id="L558">				break;</span>
+			case CLASS:
+<span class="nc" id="L560">				column.setPreferredWidth(90);</span>
+<span class="nc" id="L561">				break;</span>
+			case STATION:
+<span class="nc" id="L563">				column.setPreferredWidth(90);</span>
+<span class="nc" id="L564">				break;</span>
+			case ALGORITHM:
+<span class="nc" id="L566">				column.setPreferredWidth(100);</span>
+<span class="nc" id="L567">				break;</span>
+			default:
+				break;
+			}
+<span class="nc" id="L571">			super.columnAdded(e);</span>
+<span class="nc" id="L572">		}</span>
+
+		/**
+		 * Returns an appropriate editor for the cell specified by
+		 * &lt;code&gt;row&lt;/code&gt; and &lt;code&gt;column&lt;/code&gt;. If the
+		 * &lt;code&gt;TableColumn&lt;/code&gt; for this column has a non-null editor,
+		 * returns that.  If not, finds the class of the data in this
+		 * column (using &lt;code&gt;getColumnClass&lt;/code&gt;)
+		 * and returns the default editor for this type of data.
+		 * &lt;p/&gt;
+		 *
+		 * @param row    the row of the cell to edit, where 0 is the first row
+		 * @param column the column of the cell to edit,
+		 *               where 0 is the first column
+		 * @return the editor for this cell;
+		 *         if &lt;code&gt;null&lt;/code&gt; return the default editor for
+		 *         this type of cell
+		 * @see javax.swing.DefaultCellEditor
+		 */
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc" id="L593">			LinesTableColumn columnType = getColumnType(column);</span>
+<span class="nc bnc" id="L594" title="All 4 branches missed.">			switch (columnType) {</span>
+			case CLASS:
+<span class="nc" id="L596">				return classEditor;</span>
+			case STATION:
+<span class="nc bnc" id="L598" title="All 2 branches missed.">				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4])) {</span>
+<span class="nc" id="L599">					return uStationsEditor;</span>
+				} else {
+<span class="nc" id="L601">					return stationsEditor;</span>
+				}
+			case ALGORITHM:
+<span class="nc" id="L604">				return algorithmEditor;</span>
+			default:
+<span class="nc" id="L606">				return null;</span>
+			}
+		}
+
+		/**
+		 * Returns an appropriate renderer for the cell specified by this row and
+		 * column. If the &lt;code&gt;TableColumn&lt;/code&gt; for this column has a non-null
+		 * renderer, returns that.  If not, finds the class of the data in
+		 * this column (using &lt;code&gt;getColumnClass&lt;/code&gt;)
+		 * and returns the default renderer for this type of data.
+		 * &lt;p/&gt;
+		 * &lt;b&gt;Note:&lt;/b&gt;
+		 * Throughout the table package, the internal implementations always
+		 * use this method to provide renderers so that this default behavior
+		 * can be safely overridden by a subclass.
+		 *
+		 * @param row    the row of the cell to render, where 0 is the first row
+		 * @param column the column of the cell to render,
+		 *               where 0 is the first column
+		 * @return the assigned renderer; if &lt;code&gt;null&lt;/code&gt;
+		 *         returns the default renderer
+		 *         for this type of object
+		 * @see javax.swing.table.DefaultTableCellRenderer
+		 * @see javax.swing.table.TableColumn#setCellRenderer
+		 * @see #setDefaultRenderer
+		 */
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc bnc" id="L634" title="All 4 branches missed.">			if (getModel().isCellEditable(row, column) || getColumnType(column) == LinesTableColumn.COLOR) {</span>
+<span class="nc" id="L635">				return super.getCellRenderer(row, column);</span>
+			} else {
+<span class="nc" id="L637">				return super.getDefaultRenderer(Object.class);</span>
+			}
+		}
+
+		/* (non-Javadoc)
+		 * @see javax.swing.JTable#getModel()
+		 */
+		@Override
+		public LinesTableModel getModel() {
+<span class="nc" id="L646">			return (LinesTableModel) super.getModel();</span>
+		}
+
+		/**
+		 * Return the type of column
+		 * @param columnIndex the column index
+		 * @return the type of column
+		 */
+		protected LinesTableColumn getColumnType(int columnIndex) {
+<span class="nc" id="L655">			return getModel().getColumn(columnIndex);</span>
+		}
+
+		/**
+		 * Shows the given column
+		 * @param column the column to show
+		 */
+		public void showColumn(LinesTableColumn column) {
+<span class="nc" id="L663">			getModel().showColumn(column);</span>
+<span class="nc" id="L664">		}</span>
+
+		/**
+		 * Hides the given column
+		 * @param column the column to hide
+		 */
+		public void hideColumn(LinesTableColumn column) {
+<span class="nc" id="L671">			getModel().hideColumn(column);</span>
+<span class="nc" id="L672">		}</span>
+
+		/**
+		 * Inner class used as a comboBox editor
+		 */
+		protected class ComboEditor extends DefaultCellEditor {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+			protected JComboBox&lt;?&gt; combo;
+
+			/**
+			 * Constructs a &lt;code&gt;DefaultCellEditor&lt;/code&gt; object that uses a
+			 * combo box.
+			 *
+			 * @param comboBox a &lt;code&gt;JComboBox&lt;/code&gt; object
+			 */
+<span class="nc" id="L690">			public ComboEditor(JComboBox&lt;?&gt; comboBox) {</span>
+<span class="nc" id="L691">				super(comboBox);</span>
+<span class="nc" id="L692">				combo = comboBox;</span>
+<span class="nc" id="L693">			}</span>
+
+			/**
+			 * Returns selected index - 2 (so -1 means all classes and -2 or -3
+			 * means no selection)
+			 */
+			@Override
+			public Object getCellEditorValue() {
+<span class="nc" id="L701">				int val = combo.getSelectedIndex();</span>
+<span class="nc" id="L702">				return new Integer(val - 2);</span>
+			}
+		}
+
+		/**
+		 * Inner class used as a comboBox editor
+		 */
+		protected class ComboAlgoEditor extends ComboEditor {
+			private static final long serialVersionUID = 1L;
+
+			/**
+			 * Constructs a &lt;code&gt;DefaultCellEditor&lt;/code&gt; object that uses a
+			 * combo box.
+			 *
+			 * @param comboBox a &lt;code&gt;JComboBox&lt;/code&gt; object
+			 */
+<span class="nc" id="L718">			public ComboAlgoEditor(JComboBox&lt;?&gt; comboBox) {</span>
+<span class="nc" id="L719">				super(comboBox);</span>
+<span class="nc" id="L720">			}</span>
+
+			/**
+			 * Returns selected algorithm
+			 */
+			@Override
+			public Object getCellEditorValue() {
+<span class="nc" id="L727">				return combo.getSelectedItem();</span>
+			}
+		}
+	}
+
+	/**
+	 * Table model for LinesTable
+	 */
+	private class LinesTableModel extends AbstractTableModel {
+		private static final long serialVersionUID = 1L;
+
+		private Set&lt;LinesTableColumn&gt; columns;
+		private List&lt;LinesTableColumn&gt; columnsList;
+
+<span class="nc" id="L741">		public LinesTableModel() {</span>
+<span class="nc" id="L742">			columns = EnumSet.allOf(LinesTableColumn.class);</span>
+<span class="nc" id="L743">			columns.remove(LinesTableColumn.HIDDEN);</span>
+<span class="nc" id="L744">			columnsList = new ArrayList&lt;GraphPanel.LinesTableColumn&gt;(columns);</span>
+<span class="nc" id="L745">		}</span>
+
+		public LinesTableColumn getColumn(int index) {
+<span class="nc bnc" id="L748" title="All 2 branches missed.">			if (columnsList.size() &gt; index) {</span>
+<span class="nc" id="L749">				return columnsList.get(index);</span>
+			} else {
+<span class="nc" id="L751">				return LinesTableColumn.HIDDEN;</span>
+			}
+		}
+
+		/**
+		 * Shows the given column
+		 * @param column the column to show
+		 */
+		public void showColumn(LinesTableColumn column) {
+<span class="nc" id="L760">			columns.add(column);</span>
+<span class="nc" id="L761">			columnsList = new ArrayList&lt;GraphPanel.LinesTableColumn&gt;(columns);</span>
+<span class="nc" id="L762">			super.fireTableStructureChanged();</span>
+<span class="nc" id="L763">		}</span>
+
+		/**
+		 * Hides the given column
+		 * @param column the column to hide
+		 */
+		public void hideColumn(LinesTableColumn column) {
+<span class="nc" id="L770">			columns.remove(column);</span>
+<span class="nc" id="L771">			columnsList = new ArrayList&lt;GraphPanel.LinesTableColumn&gt;(columns);</span>
+<span class="nc" id="L772">			super.fireTableStructureChanged();</span>
+<span class="nc" id="L773">		}</span>
+
+		/**
+		 * Returns &lt;code&gt;Object.class&lt;/code&gt; regardless of &lt;code&gt;columnIndex&lt;/code&gt;.
+		 *
+		 * @param columnIndex the column being queried
+		 * @return the Object.class
+		 */
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc bnc" id="L783" title="All 2 branches missed.">			return getColumn(columnIndex) == LinesTableColumn.COLOR ? Color.class : String.class;</span>
+		}
+
+		/**
+		 * Returns the number of columns in the model. A
+		 * &lt;code&gt;JTable&lt;/code&gt; uses this method to determine how many columns it
+		 * should create and display by default.
+		 *
+		 * @return the number of columns in the model
+		 * @see #getRowCount
+		 */
+		public int getColumnCount() {
+<span class="nc" id="L795">			return columnsList.size();</span>
+		}
+
+		/**
+		 * Returns a default name for the column using spreadsheet conventions:
+		 * A, B, C, ... Z, AA, AB, etc.  If &lt;code&gt;column&lt;/code&gt; cannot be found,
+		 * returns an empty string.
+		 *
+		 * @param column the column being queried
+		 * @return a string containing the default name of &lt;code&gt;column&lt;/code&gt;
+		 */
+		@Override
+		public String getColumnName(int column) {
+<span class="nc" id="L808">			return getColumn(column).getName();</span>
+		}
+
+		/**
+		 * Returns the number of rows in the model. A
+		 * &lt;code&gt;JTable&lt;/code&gt; uses this method to determine how many rows it
+		 * should display.  This method should be quick, as it
+		 * is called frequently during rendering.
+		 *
+		 * @return the number of rows in the model
+		 * @see #getColumnCount
+		 */
+		public int getRowCount() {
+<span class="nc" id="L821">			return graph.getColors().length;</span>
+		}
+
+		/**
+		 * Returns the value for the cell at &lt;code&gt;columnIndex&lt;/code&gt; and
+		 * &lt;code&gt;rowIndex&lt;/code&gt;.
+		 *
+		 * @param    rowIndex    the row whose value is to be queried
+		 * @param    columnIndex the column whose value is to be queried
+		 * @return the value Object at the specified cell
+		 */
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L833">			int stationNum = stations[rowIndex];</span>
+<span class="nc" id="L834">			int classNum = classes[rowIndex];</span>
+<span class="nc" id="L835">			int algoNum = 1;</span>
+<span class="nc bnc" id="L836" title="All 2 branches missed.">			if (model.isWhatifAlgorithms()) {</span>
+<span class="nc" id="L837">				algoNum = model.getWhatifAlgorithms().size();</span>
+			}
+
+<span class="nc" id="L840">			LinesTableColumn column = getColumn(columnIndex);</span>
+<span class="nc" id="L841">			boolean aggregate = AGGREGATE_TYPES_SET.contains(currentIndex);</span>
+
+<span class="nc bnc" id="L843" title="All 5 branches missed.">			switch (column) {</span>
+			case COLOR:
+<span class="nc" id="L845">				return graph.getColors()[rowIndex];</span>
+			case CLASS:
+<span class="nc bnc" id="L847" title="All 2 branches missed.">				if (aggregate) {</span>
+<span class="nc bnc" id="L848" title="All 2 branches missed.">					if (rowIndex &lt; algoNum) {</span>
+<span class="nc" id="L849">						return AGGREGATE;</span>
+					} else {
+<span class="nc" id="L851">						return null;</span>
+					}
+<span class="nc bnc" id="L853" title="All 2 branches missed.">				} else if (classNum &gt;= 0) {</span>
+<span class="nc" id="L854">					return model.getClassNames()[classNum];</span>
+<span class="nc bnc" id="L855" title="All 2 branches missed.">				} else if (classNum == -1) {</span>
+<span class="nc" id="L856">					return AGGREGATE;</span>
+				} else {
+<span class="nc" id="L858">					return null;</span>
+				}
+			case STATION:
+<span class="nc bnc" id="L861" title="All 2 branches missed.">				if (aggregate) {</span>
+<span class="nc bnc" id="L862" title="All 2 branches missed.">					if (rowIndex &lt; algoNum) {</span>
+<span class="nc" id="L863">						return AGGREGATE;</span>
+					} else {
+<span class="nc" id="L865">						return null;</span>
+					}
+<span class="nc bnc" id="L867" title="All 2 branches missed.">				} else if (stationNum &gt;= 0) {</span>
+<span class="nc" id="L868">					return model.getStationNames()[stationNum];</span>
+<span class="nc bnc" id="L869" title="All 2 branches missed.">				} else if (stationNum == -1) {</span>
+<span class="nc" id="L870">					return AGGREGATE;</span>
+				} else {
+<span class="nc" id="L872">					return null;</span>
+				}
+			case ALGORITHM:
+<span class="nc bnc" id="L875" title="All 2 branches missed.">				if (aggregate) {</span>
+<span class="nc bnc" id="L876" title="All 2 branches missed.">					if (rowIndex &lt; algoNum) {</span>
+<span class="nc" id="L877">						return executedAlgorithms.get(rowIndex);</span>
+					} else {
+<span class="nc" id="L879">						return null;</span>
+					}
+				} else {
+<span class="nc" id="L882">					return algorithms[rowIndex];</span>
+				}
+			default:
+<span class="nc" id="L885">				return null;</span>
+			}
+		}
+
+		/**
+		 * This empty implementation is provided so users do not have to implement
+		 * this method if their data model is not editable.
+		 *
+		 * @param aValue      value to assign to cell
+		 * @param rowIndex    row of cell
+		 * @param columnIndex column of cell
+		 */
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L899">			LinesTableColumn column = getColumn(columnIndex);</span>
+
+<span class="nc bnc" id="L901" title="All 4 branches missed.">			switch (column) {</span>
+			case CLASS:
+<span class="nc" id="L903">				classes[rowIndex] = ((Integer) aValue).intValue();</span>
+<span class="nc" id="L904">				break;</span>
+			case STATION:
+<span class="nc bnc" id="L906" title="All 4 branches missed.">				if (currentIndex.equals(ExactConstants.INDICES_TYPES[4]) &amp;&amp; ((Integer) aValue).intValue() &lt; 0) {</span>
+<span class="nc" id="L907">					stations[rowIndex] = -2;</span>
+				} else {
+<span class="nc" id="L909">					stations[rowIndex] = ((Integer) aValue).intValue();</span>
+				}
+<span class="nc" id="L911">				break;</span>
+			case ALGORITHM:
+<span class="nc" id="L913">				algorithms[rowIndex] = (SolverAlgorithm) aValue;</span>
+<span class="nc" id="L914">				break;</span>
+			default:
+				break;
+			}
+
+			// Paints new index
+<span class="nc" id="L920">			paintIndexAtRow(rowIndex);</span>
+<span class="nc" id="L921">		}</span>
+
+		/**
+		 * Class and stations are editable
+		 *
+		 * @param rowIndex    the row being queried
+		 * @param columnIndex the column being queried
+		 * @return false
+		 */
+		@Override
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+			// Nothing is editable for aggregate indices
+<span class="nc bnc" id="L933" title="All 2 branches missed.">			if (AGGREGATE_TYPES_SET.contains(currentIndex)) {</span>
+<span class="nc" id="L934">				return false;</span>
+			}
+<span class="nc" id="L936">			LinesTableColumn column = getColumn(columnIndex);</span>
+
+<span class="nc bnc" id="L938" title="All 4 branches missed.">			switch (column) {</span>
+			case CLASS:
+<span class="nc" id="L940">				return model.isMultiClass();</span>
+			case STATION:
+<span class="nc" id="L942">				return true;</span>
+			case ALGORITHM:
+<span class="nc" id="L944">				return model.isWhatifAlgorithms();</span>
+			default:
+<span class="nc" id="L946">				return false;</span>
+			}
+		}
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

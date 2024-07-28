@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JobSink.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.NodeSections</a> &gt; <span class="el_source">JobSink.java</span></div><h1>JobSink.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.NodeSections;
+
+import java.util.Arrays;
+
+import javax.swing.JOptionPane;
+
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.ForkJob;
+import jmt.engine.QueueNet.Job;
+import jmt.engine.QueueNet.JobClass;
+import jmt.engine.QueueNet.JobClassList;
+import jmt.engine.QueueNet.JobInfo;
+import jmt.engine.QueueNet.JobInfoList;
+import jmt.engine.QueueNet.NetEvent;
+import jmt.engine.QueueNet.NetMessage;
+import jmt.engine.QueueNet.NetNode;
+
+/**
+ *	This class implements a sink: every incoming job is destroyed.
+ * 	@author Francesco Radaelli
+ */
+public class JobSink extends InputSection {
+
+	private JobInfoList jobsList_node;
+
+	private boolean[] isForkJobExitWarningShown;
+
+	/**
+	 * Default Constructor creates the JobSink that can be used only as Input Section.
+	 */
+	// JobSink section do not need extra parameter [in Jsim file]
+<span class="nc" id="L50">	public JobSink() {</span>
+<span class="nc" id="L51">	}</span>
+
+	@Override
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L55">		jobsList_node = node.getJobInfoList();</span>
+<span class="nc" id="L56">		JobClassList jobClasses = getJobClasses();</span>
+<span class="nc" id="L57">		isForkJobExitWarningShown = new boolean[jobClasses.size()];</span>
+<span class="nc" id="L58">		Arrays.fill(isForkJobExitWarningShown, false);</span>
+<span class="nc" id="L59">	}</span>
+
+	/**
+	 * This method implements a sink.
+	 * It eats all incoming jobs.
+	 * @param message message to be processed.
+	 * @throws NetException
+	 */
+	@Override
+	protected int process(NetMessage message) throws NetException {
+<span class="nc bnc" id="L69" title="All 7 branches missed.">		switch (message.getEvent()) {</span>
+
+		case NetEvent.EVENT_START:
+<span class="nc" id="L72">			break;</span>
+
+		case NetEvent.EVENT_JOB:
+
+			//case EVENT_JOB
+			//an ack message is sent to the source of the received message.
+			//then the job is killed
+
+<span class="nc" id="L80">			Job job = message.getJob();</span>
+
+			// Send the `NetEvent.EVENT_ACK`:  section.send() -&gt; netNode.send() -&gt;
+			// simEntity.simSchedule() -&gt; simSystem.send() -&gt; add to the timing/future event queue.
+<span class="nc" id="L84">			send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());</span>
+
+<span class="nc" id="L86">			JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">			if (jobInfo != null) {</span>
+				//removes job from the jobInfoList of the section
+<span class="nc" id="L89">				jobsList.removeJob(jobInfo);</span>
+			}
+
+<span class="nc" id="L92">			JobInfo jobInfo_node = jobsList_node.lookFor(job);</span>
+<span class="nc bnc" id="L93" title="All 2 branches missed.">			if (jobInfo_node != null) {</span>
+				//removes job from the jobInfoList of the node
+<span class="nc" id="L95">				jobsList_node.removeJob(jobInfo_node);</span>
+			}
+
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			if (job instanceof ForkJob) {</span>
+				//shows the fork job exit warning
+<span class="nc" id="L100">				showForkJobExitWarning(job.getJobClass());</span>
+			} else {
+				//signals to global jobInfoList removed job - Bertoli Marco
+<span class="nc" id="L103">				getOwnerNode().getQueueNet().getJobInfoList().removeJob(job);</span>
+			}
+<span class="nc" id="L105">			break;</span>
+
+		case NetEvent.EVENT_ACK:
+<span class="nc" id="L108">			return MSG_NOT_PROCESSED;</span>
+
+		case NetEvent.EVENT_JOB_RELEASE:
+<span class="nc" id="L111">			break;</span>
+
+		case NetEvent.EVENT_JOB_FINISH:
+<span class="nc" id="L114">			break;</span>
+
+		case NetEvent.EVENT_STOP:
+<span class="nc" id="L117">			break;</span>
+
+		default:
+<span class="nc" id="L120">			return MSG_NOT_PROCESSED;</span>
+		}
+
+<span class="nc" id="L123">		return MSG_PROCESSED;</span>
+	}
+
+	/**
+	 * Shows the fork job exit warning.
+	 */
+	public void showForkJobExitWarning(final JobClass jobClass) {
+<span class="nc bnc" id="L130" title="All 2 branches missed.">		if (!isForkJobExitWarningShown[jobClass.getId()]) {</span>
+<span class="nc bnc" id="L131" title="All 2 branches missed.">			if (getOwnerNode().getQueueNet().isTerminalSimulation()) {</span>
+<span class="nc" id="L132">				System.out.println(&quot;JSIMengine - Warning: A &quot; + jobClass.getName()</span>
+						+ &quot; task generated by a fork or scaler reached &quot;
+<span class="nc" id="L134">						+ getOwnerNode().getName() + &quot; before merging at a join.&quot;);</span>
+			} else {
+<span class="nc" id="L136">				new Thread(new Runnable() {</span>
+					@Override
+					public void run() {
+						try {
+<span class="nc" id="L140">							Thread.sleep(800);</span>
+<span class="nc" id="L141">						} catch (InterruptedException e) {</span>
+<span class="nc" id="L142">						}</span>
+<span class="nc" id="L143">						JOptionPane.showMessageDialog(null, &quot;A &quot; + jobClass.getName()</span>
+								+ &quot; task generated by a fork or scaler reached &quot;
+<span class="nc" id="L145">								+ getOwnerNode().getName() + &quot; before merging at a join.&quot;,</span>
+								&quot;JSIMengine - Warning&quot;, JOptionPane.WARNING_MESSAGE);
+<span class="nc" id="L147">					}</span>
+<span class="nc" id="L148">				}).start();</span>
+			}
+<span class="nc" id="L150">			isForkJobExitWarningShown[jobClass.getId()] = true;</span>
+		}
+<span class="nc" id="L152">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

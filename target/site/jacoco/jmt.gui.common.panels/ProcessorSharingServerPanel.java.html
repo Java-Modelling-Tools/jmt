@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ProcessorSharingServerPanel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.panels</a> &gt; <span class="el_source">ProcessorSharingServerPanel.java</span></div><h1>ProcessorSharingServerPanel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.panels;
+
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.StationDefinition;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Menu for editing processor sharing server properties
+ * @author Andrei Roman
+ */
+public class ProcessorSharingServerPanel extends WizardPanel implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	// Dialog box border dimensions
+	public static final int BORDER_TOP = 3;
+	public static final int BORDER_BOTTOM = 3;
+	public static final int BORDER_LEFT = 3;
+	public static final int BORDER_RIGHT = 3;
+	public static final int BORDER_HGAP = 5;
+	public static final int BORDER_VGAP = 5;
+
+	// Processor Sharing Data
+	private final StationDefinition stationData;
+	private final Object stationKey;
+
+	// Front-End components
+	private JPanel processorLimitPanel;
+	private JSpinner processorLimitSpinner;
+	private JRadioButton processorLimitInfiniteSelector;
+	private JRadioButton processorLimitFiniteSelector;
+	private ButtonGroup processorLimitSelectors;
+	private JPanel processorLimitWarningPanel;
+	private JPanel quantumSizePanel;
+	private JSpinner quantumSizeSpinner;
+
+	private JSpinner switchoverTimeSpinner;
+
+<span class="nc" id="L68">	public ProcessorSharingServerPanel(StationDefinition stationData, Object stationKey) {</span>
+<span class="nc" id="L69">		this.stationData = stationData;</span>
+<span class="nc" id="L70">		this.stationKey = stationKey;</span>
+<span class="nc" id="L71">		initGuiComponents();</span>
+<span class="nc" id="L72">		registerPanelListeners();</span>
+<span class="nc" id="L73">		updateMaxRunningJobs();</span>
+<span class="nc" id="L74">	}</span>
+
+	/**
+	 * Wrapper of all front-end components initializers
+	 */
+	private void initGuiComponents() {
+<span class="nc" id="L80">		initDialogBox();</span>
+<span class="nc" id="L81">		initProcessorLimitPanel();</span>
+<span class="nc" id="L82">		initProcessorLimitSelectors();</span>
+<span class="nc" id="L83">		initProcessorLimitSpinner();</span>
+<span class="nc" id="L84">		initProcessorLimitWarningPanel();</span>
+<span class="nc" id="L85">		initQuantaSizePanel();</span>
+
+		// Add the processor limit panel at the top
+<span class="nc" id="L88">		this.add(processorLimitPanel, BorderLayout.NORTH);</span>
+<span class="nc" id="L89">		this.add(quantumSizePanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L90">	}</span>
+
+	/**
+	 * Initialises the dialog box dimensions
+	 */
+	private void initDialogBox() {
+<span class="nc" id="L96">		this.setBorder(new EmptyBorder(BORDER_TOP, BORDER_LEFT, BORDER_BOTTOM, BORDER_RIGHT));</span>
+<span class="nc" id="L97">		this.setLayout(new BorderLayout(BORDER_HGAP, BORDER_VGAP));</span>
+<span class="nc" id="L98">	}</span>
+
+	/**
+	 * Initialises the Processor Limit Panel
+	 */
+	private void initProcessorLimitPanel() {
+<span class="nc" id="L104">		processorLimitPanel = new JPanel();</span>
+<span class="nc" id="L105">		processorLimitPanel.setLayout(new BoxLayout(processorLimitPanel, BoxLayout.Y_AXIS));</span>
+<span class="nc" id="L106">		processorLimitPanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Processor Sharing Limit&quot;));</span>
+<span class="nc" id="L107">	}</span>
+
+	/**
+	 * Initialises the Processor Limit Selectors sub-panel
+	 */
+	private void initProcessorLimitSelectors() {
+<span class="nc" id="L113">		JPanel processorLimitSelectorsPanel = new JPanel();</span>
+
+<span class="nc" id="L115">		processorLimitSelectors = new ButtonGroup();</span>
+<span class="nc" id="L116">		processorLimitInfiniteSelector = new JRadioButton(&quot;&lt;html&gt; Infinite &lt;br&gt; &lt;/html&gt;&quot;);</span>
+<span class="nc" id="L117">		processorLimitFiniteSelector = new JRadioButton(&quot;&lt;html&gt; Finite &lt;br&gt; &lt;/html&gt;&quot;);</span>
+<span class="nc" id="L118">		processorLimitSelectors.add(processorLimitInfiniteSelector);</span>
+<span class="nc" id="L119">		processorLimitSelectors.add(processorLimitFiniteSelector);</span>
+
+<span class="nc" id="L121">		processorLimitSelectorsPanel.add(processorLimitInfiniteSelector);</span>
+<span class="nc" id="L122">		processorLimitSelectorsPanel.add(processorLimitFiniteSelector);</span>
+
+<span class="nc" id="L124">		processorLimitPanel.add(processorLimitSelectorsPanel);</span>
+<span class="nc" id="L125">	}</span>
+
+	/**
+	 * Initialises the Processor Limit Spinner sub-panel
+	 */
+	private void initProcessorLimitSpinner() {
+<span class="nc" id="L131">		JPanel processorSpinnerPanel = new JPanel();</span>
+
+<span class="nc" id="L133">		processorLimitSpinner = new JSpinner();</span>
+<span class="nc" id="L134">		processorLimitSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+
+<span class="nc" id="L136">		JLabel processorSpinnerLabel = new JLabel(&quot;&lt;html&gt; &lt;b&gt;Maximum&lt;/b&gt; number of jobs that can share&quot; +</span>
+				&quot; the servers at any time: &amp;nbsp&amp;nbsp&lt;/html&gt;&quot;);
+<span class="nc" id="L138">		processorSpinnerPanel.add(processorSpinnerLabel);</span>
+<span class="nc" id="L139">		processorSpinnerPanel.add(processorLimitSpinner);</span>
+
+<span class="nc" id="L141">		processorLimitPanel.add(processorSpinnerPanel);</span>
+<span class="nc" id="L142">	}</span>
+
+	/**
+	 * Initialises the Warning Panel
+	 * Warning appears at the bottom of the Processor Limit Panel if the processor sharing limit is
+	 * less than the number of servers at the station
+	 */
+	private void initProcessorLimitWarningPanel() {
+<span class="nc" id="L150">		this.processorLimitWarningPanel = new JPanel();</span>
+
+<span class="nc" id="L152">		JLabel processorLimitWarning = new JLabel(&quot;&lt;html&gt; &lt;p style=\&quot;color: red;\&quot;&gt;&lt;b&gt;Warning!&lt;/b&gt; &quot; +</span>
+				&quot;The processor sharing limit is smaller than the &quot; +
+				&quot;number of servers at this station &lt;/p&gt;&lt;/html&gt;&quot;);
+<span class="nc" id="L155">		processorLimitWarningPanel.add(processorLimitWarning);</span>
+<span class="nc" id="L156">		processorLimitPanel.add(Box.createVerticalStrut(10));</span>
+
+<span class="nc" id="L158">		Integer spinnerValue = (Integer) processorLimitSpinner.getValue();</span>
+<span class="nc bnc" id="L159" title="All 4 branches missed.">		boolean isVisibleInitially = spinnerValue != -1 &amp;&amp; spinnerValue &lt; stationData.getStationNumberOfServers(stationKey);</span>
+<span class="nc" id="L160">		processorLimitWarningPanel.setVisible(isVisibleInitially);</span>
+
+<span class="nc" id="L162">		processorLimitPanel.add(processorLimitWarningPanel);</span>
+<span class="nc" id="L163">	}</span>
+
+	/**
+	 * Initialises the Quanta Size Panel
+	 */
+	private void initQuantaSizePanel() {
+<span class="nc" id="L169">		quantumSizePanel = new JPanel();</span>
+<span class="nc" id="L170">		quantumSizePanel.setLayout(new BoxLayout(quantumSizePanel, BoxLayout.X_AXIS));</span>
+<span class="nc" id="L171">		quantumSizePanel.setBorder(new TitledBorder(new EtchedBorder(), &quot;Quantum-Based Processor Sharing (QBPS)&quot;));</span>
+
+<span class="nc" id="L173">		JPanel quantumSpinnerPanel = new JPanel();</span>
+<span class="nc" id="L174">		quantumSizeSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, Double.MAX_VALUE, 0.1));</span>
+<span class="nc" id="L175">		quantumSizeSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+
+<span class="nc" id="L177">		JLabel quantaSpinnerLabel = new JLabel(&quot;&lt;html&gt; &lt;b&gt;Quantum size&lt;/b&gt;:&lt;/html&gt;&quot;);</span>
+<span class="nc" id="L178">		quantumSpinnerPanel.add(quantaSpinnerLabel);</span>
+<span class="nc" id="L179">		quantumSpinnerPanel.add(quantumSizeSpinner);</span>
+
+<span class="nc" id="L181">		quantumSizePanel.add(quantumSpinnerPanel);</span>
+
+		// Switchover time spinner panel
+<span class="nc" id="L184">		JPanel switchoverSpinnerPanel = new JPanel();</span>
+<span class="nc" id="L185">		switchoverTimeSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, Double.MAX_VALUE, 0.01));</span>
+<span class="nc" id="L186">		switchoverTimeSpinner.setPreferredSize(DIM_BUTTON_XS);</span>
+
+<span class="nc" id="L188">		JLabel switchoverSpinnerLabel = new JLabel(&quot;&lt;html&gt; &lt;b&gt;Preemption overhead&lt;/b&gt;:&lt;/html&gt;&quot;);</span>
+<span class="nc" id="L189">		switchoverSpinnerPanel.add(switchoverSpinnerLabel);</span>
+<span class="nc" id="L190">		switchoverSpinnerPanel.add(switchoverTimeSpinner);</span>
+
+		// Add switchover time panel to the main panel
+<span class="nc" id="L193">		quantumSizePanel.add(switchoverSpinnerPanel);</span>
+<span class="nc" id="L194">	}</span>
+
+	/**
+	 * Registers front-end component listeners for triggering station data updates
+	 */
+	private void registerPanelListeners() {
+		// Change Listener for the processor sharing limit spinner
+		// Includes validation of the spinner value - minimum is 1
+		// maxRunningJobs set to -1 in the back-end if spinner value is Double.POSITIVE_INFINITY
+<span class="nc" id="L203">		ChangeListener processorLimitSpinnerChangeListener = new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent changeEvent) {
+<span class="nc" id="L206">				Object value = processorLimitSpinner.getValue();</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">				if (value instanceof Integer) {</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">					if (((Integer) value).intValue() &lt; 1) {</span>
+<span class="nc" id="L209">						value = Integer.valueOf(1);</span>
+<span class="nc" id="L210">						processorLimitSpinner.setValue(value);</span>
+<span class="nc" id="L211">						return;</span>
+					}
+<span class="nc" id="L213">					stationData.setStationMaxRunningJobs(stationKey, (Integer) value);</span>
+<span class="nc bnc" id="L214" title="All 2 branches missed.">					processorLimitWarningPanel.setVisible((Integer) value &lt; stationData.getStationNumberOfServers(stationKey));</span>
+				} else {
+<span class="nc" id="L216">					stationData.setStationMaxRunningJobs(stationKey, Integer.valueOf(-1));</span>
+<span class="nc" id="L217">					processorLimitWarningPanel.setVisible(false);</span>
+				}
+<span class="nc" id="L219">			}</span>
+		};
+
+<span class="nc" id="L222">		processorLimitSpinner.addChangeListener(processorLimitSpinnerChangeListener);</span>
+
+		// Action Listener for the infinite radio button
+<span class="nc" id="L225">		ActionListener processorLimitInfiniteSelectorListener = new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+<span class="nc bnc" id="L228" title="All 2 branches missed.">				if (processorLimitInfiniteSelector.isSelected()) {</span>
+<span class="nc" id="L229">					processorLimitSpinner.setEnabled(false);</span>
+<span class="nc" id="L230">					processorLimitSpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L231">					processorLimitFiniteSelector.setSelected(false);</span>
+				}
+<span class="nc" id="L233">			}</span>
+		};
+
+		// Action Listener for the finite radio button
+<span class="nc" id="L237">		ActionListener processorLimitFiniteSelectorListener = new ActionListener() {</span>
+			@Override
+			public void actionPerformed(ActionEvent actionEvent) {
+<span class="nc bnc" id="L240" title="All 2 branches missed.">				if (processorLimitFiniteSelector.isSelected()) {</span>
+<span class="nc" id="L241">					processorLimitSpinner.setEnabled(true);</span>
+<span class="nc" id="L242">					processorLimitSpinner.setValue(Defaults.getAsInteger(&quot;stationRunningJobs&quot;));</span>
+<span class="nc" id="L243">					processorLimitInfiniteSelector.setSelected(false);</span>
+				}
+<span class="nc" id="L245">			}</span>
+		};
+
+<span class="nc" id="L248">		processorLimitInfiniteSelector.addActionListener(processorLimitInfiniteSelectorListener);</span>
+<span class="nc" id="L249">		processorLimitFiniteSelector.addActionListener(processorLimitFiniteSelectorListener);</span>
+
+		// Change Listener for the quantum size spinner
+<span class="nc" id="L252">		quantumSizeSpinner.addChangeListener(new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent changeEvent) {
+<span class="nc" id="L255">				Double quantumSize = (Double) quantumSizeSpinner.getValue();</span>
+<span class="nc" id="L256">				stationData.setQuantumSize(stationKey, quantumSize);</span>
+<span class="nc" id="L257">			}</span>
+		});
+
+		// Change Listener for the switchover time spinner
+<span class="nc" id="L261">		switchoverTimeSpinner.addChangeListener(new ChangeListener() {</span>
+			@Override
+			public void stateChanged(ChangeEvent changeEvent) {
+<span class="nc" id="L264">				Double switchoverTime = (Double) switchoverTimeSpinner.getValue();</span>
+<span class="nc" id="L265">				stationData.setQuantumSwitchoverTime(stationKey, switchoverTime);</span>
+<span class="nc" id="L266">			}</span>
+		});
+<span class="nc" id="L268">	}</span>
+
+	/**
+	 * Updates the processor limit front-end components on panel initialisation and on any engine (back-end) update
+	 */
+	private void updateMaxRunningJobs() {
+<span class="nc" id="L274">		Integer maxRunningJobs = stationData.getStationMaxRunningJobs(stationKey);</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">		if (maxRunningJobs &lt; 1) {</span>
+<span class="nc" id="L276">			processorLimitSelectors.setSelected(processorLimitInfiniteSelector.getModel(), true);</span>
+<span class="nc" id="L277">			processorLimitSpinner.setValue(Double.POSITIVE_INFINITY);</span>
+<span class="nc" id="L278">			processorLimitSpinner.setEnabled(false);</span>
+		} else {
+<span class="nc" id="L280">			processorLimitSelectors.setSelected(processorLimitFiniteSelector.getModel(), true);</span>
+<span class="nc" id="L281">			processorLimitSpinner.setValue(maxRunningJobs);</span>
+<span class="nc" id="L282">			processorLimitSpinner.setEnabled(true);</span>
+		}
+
+		// Update quanta size spinner with the current value from stationData
+<span class="nc" id="L286">		Double quantumSize = stationData.getQuantumSize(stationKey);</span>
+<span class="nc bnc" id="L287" title="All 2 branches missed.">		if (quantumSize != null) {</span>
+<span class="nc" id="L288">			quantumSizeSpinner.setValue(quantumSize);</span>
+		}
+
+		// Update switchover time spinner with the current value from stationData
+<span class="nc" id="L292">		Double switchoverTime = stationData.getQuantumSwitchoverTime(stationKey);</span>
+<span class="nc bnc" id="L293" title="All 2 branches missed.">		if (switchoverTime != null) {</span>
+<span class="nc" id="L294">			switchoverTimeSpinner.setValue(switchoverTime);</span>
+		}
+<span class="nc" id="L296">	}</span>
+
+	@Override
+	public String getName() {
+<span class="nc" id="L300">		return &quot;Processor Sharing Server Properties Editor&quot;;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

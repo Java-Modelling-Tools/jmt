@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ResultsTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.table</a> &gt; <span class="el_source">ResultsTable.java</span></div><h1>ResultsTable.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.table;
+
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.help.HoverHelp;
+
+/**
+
+ * @author alyf (Andrea Conti)
+ * Date: 20-set-2003
+ * Time: 13.10.36
+
+ */
+
+/**
+ * A &quot;reduced&quot; ExactTable for showing unmodifiable results
+ */
+public class ResultsTable extends ExactTable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	protected HoverHelp help;
+
+	public ResultsTable(ExactTableModel dm, HoverHelp help) {
+<span class="nc" id="L52">		super(dm);</span>
+<span class="nc" id="L53">		autoResizeMode = AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L54">		this.help = help;</span>
+
+<span class="nc" id="L56">		setDisplaysScrollLabels(true);</span>
+
+<span class="nc" id="L58">		tableHeader.setToolTipText(null);</span>
+<span class="nc" id="L59">		rowHeader.setToolTipText(null);</span>
+
+<span class="nc bnc" id="L61" title="All 2 branches missed.">		if (help != null) {</span>
+<span class="nc" id="L62">			help.addHelp(this, &quot;Click or drag to select cells; Right-click for a list of available operations&quot;);</span>
+<span class="nc" id="L63">			help.addHelp(moreColumnsLabel, &quot;There are more classes: scroll right to see them&quot;);</span>
+<span class="nc" id="L64">			help.addHelp(moreRowsLabel, &quot;There are more stations: scroll down to see them&quot;);</span>
+<span class="nc" id="L65">			help.addHelp(selectAllButton, &quot;Click to select all cells&quot;);</span>
+<span class="nc" id="L66">			help.addHelp(tableHeader, &quot;Click, SHIFT-click or drag to select columns&quot;);</span>
+<span class="nc" id="L67">			help.addHelp(rowHeader, &quot;Click, SHIFT-click or drag to select rows&quot;);</span>
+		}
+
+<span class="nc" id="L70">		setRowSelectionAllowed(true);</span>
+<span class="nc" id="L71">		setColumnSelectionAllowed(true);</span>
+
+<span class="nc" id="L73">		setDefaultRenderer(Object.class, new DisabledCellRenderer());</span>
+<span class="nc" id="L74">	}</span>
+
+	@Override
+	public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc" id="L78">		final TableCellRenderer cellRenderer = super.getCellRenderer(row, column);</span>
+<span class="nc" id="L79">		return new TableCellRenderer() {</span>
+			public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+<span class="nc" id="L81">				Component label = cellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);</span>
+<span class="nc" id="L82">				Color col = Color.WHITE;</span>
+<span class="nc bnc" id="L83" title="All 4 branches missed.">				if (row == 0 || column == 0) {</span>
+<span class="nc" id="L84">					col = new Color(255, 255, 210);</span>
+				}
+<span class="nc bnc" id="L86" title="All 4 branches missed.">				if (!isSelected &amp;&amp; !hasFocus) {</span>
+<span class="nc" id="L87">					label.setBackground(col);</span>
+				}
+<span class="nc" id="L89">				return label;</span>
+			}
+		};
+	}
+
+	@Override
+	protected void installKeyboard() {
+<span class="nc" id="L96">		InputMap im = getInputMap();</span>
+<span class="nc" id="L97">		ActionMap am = getActionMap();</span>
+<span class="nc" id="L98">		installKeyboardAction(im, am, COPY_ACTION);</span>
+<span class="nc" id="L99">	}</span>
+
+	@Override
+	protected JPopupMenu makeMouseMenu() {
+<span class="nc" id="L103">		JPopupMenu menu = new JPopupMenu();</span>
+<span class="nc" id="L104">		menu.add(COPY_ACTION);</span>
+<span class="nc" id="L105">		return menu;</span>
+	}
+
+	/**
+	 * @return false
+	 */
+	@Override
+	public boolean isCellEditable(int row, int column) {
+<span class="nc" id="L113">		return false;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

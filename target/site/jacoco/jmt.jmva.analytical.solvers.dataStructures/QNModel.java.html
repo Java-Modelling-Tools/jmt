@@ -1,0 +1,737 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>QNModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.dataStructures</a> &gt; <span class="el_source">QNModel.java</span></div><h1>QNModel.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.dataStructures;
+
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StreamTokenizer;
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Arrays;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.framework.data.ArrayUtils;
+import jmt.jmva.analytical.solvers.exceptions.IllegalValueInInputFileException;
+import jmt.jmva.analytical.solvers.exceptions.InputFileParserException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+/**
+ * This class contains an implementation of the input file reader and parser,
+ * as well as a storage data structure for the model and performance evaluation 
+ * values. It also implements some useful operations using the model, such as
+ * various estimations.
+ * 
+ * @author Michail Makaronidis, 2010
+ */
+public class QNModel {
+
+	/**
+	 * The possible queue types.
+	 * DELAY stations are a special form of LD (load dependent)
+	 * stations where the service rate function u_m(i) = i.
+	 * N.B. Maintain this order to match JMT implementation.
+	 * @author Ben Homer
+	 */
+<span class="nc" id="L56">	public enum QueueType { LD, LI, DELAY };</span>
+
+	/**
+	 * Number of classes R
+	 */
+	public int R;
+	/**
+	 * Number of queues M
+	 */
+	public int M;
+	/**
+	 * Contains total number of jobs for each class
+	 */
+	public PopulationVector N;
+	/**
+	 * Contains the mean delays (think time) for each class
+	 */
+	public double Z[];
+	/**
+	 * Contains the multiplicities for each queue
+	 */
+	public MultiplicitiesVector multiplicities;
+	/**
+	 * Contains the service demands for each class at each queue
+	 */
+	private double[][] D;
+	/**
+	 * Contains the type of each station.
+	 * Added by Ben Homer for Tree Convolution.
+	 */
+	private QueueType[] T;
+	/**
+	 * Contains the number of servers of each station.
+	 * Added by Ong Wai Hong for Logistic Sampling.
+	 */
+	private int[] C;
+	private BigRational[] X;
+	private BigRational[][] Q;
+	private BigRational G;
+<span class="nc" id="L95">	private boolean isNormalisingCOnstantComputed = false;</span>
+<span class="nc" id="L96">	private boolean arePerformanceMeasuresComputed = false;</span>
+
+	public static final String TempFileName = &quot;tempModel.qn&quot;;
+
+	/**
+	 * Creates a new QNModel object and initialises it according to an input file.
+	 *
+	 * @param filename The path to the input file
+	 * @throws InputFileParserException An exception is thrown if any error is encountered during input file parsing
+	 *
+	 */
+	public QNModel(String filename) throws InputFileParserException {
+<span class="nc" id="L108">		super();</span>
+<span class="nc" id="L109">		R = M = 0;</span>
+<span class="nc" id="L110">		N = new PopulationVector();</span>
+		//Z = new EnhancedVector();
+<span class="nc" id="L112">		multiplicities = new MultiplicitiesVector();</span>
+<span class="nc" id="L113">		readModel(filename);</span>
+
+<span class="nc" id="L115">		T = new QueueType[M];</span>
+<span class="nc bnc" id="L116" title="All 2 branches missed.">		for (int i = 0; i &lt; M; i++) {</span>
+<span class="nc" id="L117">			T[i] = QueueType.LI;</span>
+		}
+<span class="nc" id="L119">		C = new int[M];</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">		for (int i = 0; i &lt; M; i++) {</span>
+<span class="nc" id="L121">			C[i] = 1;</span>
+		}
+<span class="nc" id="L123">	}</span>
+
+	/**
+	 * Creates a new QNModel object and initialises in according to the given
+	 * arguments.
+	 * @param R The number of classes
+	 * @param M The number of queues
+	 * @param T The type of each queue
+	 * @param N The array containing the population per class
+	 * @param Z The array containing the total delay per class
+	 * @param multiplicities The array containing the queue multiplicities
+	 * @param D The array containing the service demands
+	 * @throws InternalErrorException Thrown if the arguments' sizes do not match.
+	 */
+<span class="nc" id="L137">	public QNModel(int R, int M, int[] T, Integer[] N, double[] Z, Integer[] multiplicities, double[][] D) throws InternalErrorException {</span>
+<span class="nc" id="L138">		this.R = R;</span>
+<span class="nc" id="L139">		this.M = M;</span>
+<span class="nc bnc" id="L140" title="All 10 branches missed.">		if ((N.length != R) || (Z.length != R) || (multiplicities.length != M) || (D.length != M) || (D[0].length != R)) {</span>
+<span class="nc" id="L141">			throw new InternalErrorException(&quot;Model sizes do not match&quot;);</span>
+		}
+
+<span class="nc" id="L144">		this.N = new PopulationVector(N);</span>
+<span class="nc" id="L145">		this.Z = Z;</span>
+<span class="nc" id="L146">		this.multiplicities = new MultiplicitiesVector(multiplicities);</span>
+<span class="nc" id="L147">		this.D = D;</span>
+<span class="nc" id="L148">		this.T = new QueueType[T.length];</span>
+<span class="nc" id="L149">		QueueType[] qtVals = QueueType.values();</span>
+<span class="nc bnc" id="L150" title="All 2 branches missed.">		for (int i = 0; i &lt; T.length; i++) {</span>
+<span class="nc" id="L151">			this.T[i] = qtVals[T[i]];</span>
+		}
+<span class="nc" id="L153">		C = new int[M];</span>
+<span class="nc bnc" id="L154" title="All 2 branches missed.">		for (int i = 0; i &lt; M; i++) {</span>
+<span class="nc" id="L155">			C[i] = 1;</span>
+		}
+<span class="nc" id="L157">	}</span>
+
+	/**
+	 * Creates a new QNModel object and initialises in according to the given
+	 * arguments.
+	 * @param R The number of classes
+	 * @param M The number of queues
+	 * @param T The type of each queue
+	 * @param N The array containing the population per class
+	 * @param Z The array containing the total delay per class
+	 * @param multiplicities The array containing the queue multiplicities
+	 * @param D The array containing the service demands
+	 * @param C The number of servers of each queue
+	 * @throws InternalErrorException Thrown if the arguments' sizes do not match.
+	 */
+	public QNModel(int R, int M, int[] T, Integer[] N, double[] Z, Integer[] multiplicities, double[][] D, int[] C) throws InternalErrorException {
+<span class="nc" id="L173">		this(R, M, T, N, Z, multiplicities, D);</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		if (C.length != M) {</span>
+<span class="nc" id="L175">			throw new InternalErrorException(&quot;Model sizes do not match&quot;);</span>
+		}
+<span class="nc" id="L177">		this.C = C;</span>
+<span class="nc" id="L178">	}</span>
+
+	/**
+	 * Copy constructor which creates a new QNModel object and initialises it according to an existing QNModel.
+	 *
+	 * @param qnm The QNModel to copy from.
+	 *
+	 */
+<span class="nc" id="L186">	public QNModel(QNModel qnm) {</span>
+<span class="nc" id="L187">		this.R = qnm.R;</span>
+<span class="nc" id="L188">		this.M = qnm.M;</span>
+<span class="nc" id="L189">		this.N = qnm.N.copy();</span>
+<span class="nc" id="L190">		this.Z = ArrayUtils.copy(qnm.Z);</span>
+<span class="nc" id="L191">		this.multiplicities = qnm.multiplicities.copy();</span>
+<span class="nc" id="L192">		this.D = ArrayUtils.copy2(qnm.D);</span>
+<span class="nc" id="L193">		this.T = Arrays.copyOf(qnm.T, qnm.T.length);</span>
+<span class="nc" id="L194">		this.C = ArrayUtils.copy(qnm.C);</span>
+<span class="nc" id="L195">	}</span>
+
+	/**
+	 * Returns the service demand of a class at a queue. Indices start from 0.
+	 * @param k Queue index
+	 * @param r Class index
+	 * @return The corresponding service demand
+	 */
+	public double getDemand(int k, int r) {
+<span class="nc" id="L204">		return D[k][r];</span>
+	}
+
+	/**
+	 * Returns the service demand of a class at a queue as a BigDecimal object.
+	 * Indices start from 0.
+	 *
+	 * @param k Queue index
+	 * @param r Class index
+	 * @return The corresponding service demand
+	 */
+	public BigDecimal getDemandAsBigDecimal(int k, int r) {
+<span class="nc" id="L216">		return new BigDecimal(getDemand(k, r));</span>
+	}
+
+	/**
+	 * Returns the service demand of a class at a queue as a BigInteger object.
+	 * Indices start from 0.
+	 *
+	 * @param k Queue index
+	 * @param r Class index
+	 * @return The corresponding service demand
+	 */
+	public BigInteger getDemandAsBigInteger(int k, int r) {
+<span class="nc" id="L228">		return new BigInteger(Integer.toString((int)getDemand(k, r)));</span>
+	}
+
+	/**
+	 * Returns the service demand of a class at a queue as a BigRational object.
+	 * Indices start from 0.
+	 *
+	 * @param k Queue index
+	 * @param r Class index
+	 * @return The corresponding service demand
+	 */
+	public BigRational getDemandAsBigRational(int k, int r) {
+<span class="nc" id="L240">		return new BigRational(getDemand(k, r));</span>
+	}
+
+	/**
+	 * Returns the delay (think time) of a class. Indices start from 0.
+	 *
+	 * @param r Class index
+	 * @return The corresponding delay (think time)
+	 */
+	public double getDelay(int r) {
+<span class="nc" id="L250">		return Z[r];</span>
+	}
+
+	/**
+	 * Returns the delay (think time) of a class as a BigDecimal object .
+	 * Indices start from 0.
+	 *
+	 * @param r Class index
+	 * @return The corresponding delay (think time)
+	 */
+	public BigDecimal getDelayAsBigDecimal(int r) {
+<span class="nc" id="L261">		return new BigDecimal(getDelay(r));</span>
+	}
+
+	/**
+	 * Returns the delay (think time) of a class as a BigInteger object .
+	 * Indices start from 0.
+	 *
+	 * @param r Class index
+	 * @return The corresponding delay (think time)
+	 */
+	public BigInteger getDelayAsBigInteger(int r) {
+<span class="nc" id="L272">		return new BigInteger(Integer.toString((int)getDelay(r)));</span>
+	}
+
+	/**
+	 * Returns the delay (think time) of a class as a BigRational object .
+	 * Indices start from 0.
+	 *
+	 * @param r Class index
+	 * @return The corresponding delay (think time)
+	 */
+	public BigRational getDelayAsBigRational(int r) {
+<span class="nc" id="L283">		return new BigRational(getDelay(r));</span>
+	}
+
+	/**
+	 * Returns the type of the station/queue indexed by m.
+	 * 
+	 * @param m The index of the station/queue to get the type for.
+	 * @return The type of the station/queue m.
+	 */
+	public QueueType getQueueType(int m) {
+<span class="nc" id="L293">		return T[m];</span>
+	}
+
+	/**
+	 * Returns the number of servers of the station/queue indexed by m.
+	 * 
+	 * @param m The index of the station/queue to get the number of servers for.
+	 * @return The number of servers of the station/queue m.
+	 */
+	public int getNumberOfServers(int m) {
+<span class="nc" id="L303">		return C[m];</span>
+	}
+
+	/**
+	 * Initialises the current QNModel object according to an input file.
+	 * Decimal numbers are approximated as integers.
+	 *
+	 * @param filename The path to the input file
+	 */
+	private void readModel(String filename) throws InputFileParserException {
+<span class="nc" id="L313">		FileReader fr = null;</span>
+		try {
+<span class="nc" id="L315">			fr = new FileReader(filename);</span>
+<span class="nc" id="L316">			BufferedReader br = new BufferedReader(fr);</span>
+<span class="nc" id="L317">			StreamTokenizer stok = new StreamTokenizer(br);</span>
+<span class="nc" id="L318">			stok.parseNumbers();</span>
+			// Begin reading file
+			// The first line stores the number of classes (R)
+<span class="nc" id="L321">			stok.nextToken();</span>
+<span class="nc bnc" id="L322" title="All 4 branches missed.">			if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L323">				Double readR = stok.nval;</span>
+<span class="nc bnc" id="L324" title="All 2 branches missed.">				if (hasNoFractionalPart(readR)) {</span>
+<span class="nc" id="L325">					this.R = readR.intValue();</span>
+				} else {
+<span class="nc" id="L327">					throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as number of classes (R).&quot;);</span>
+				}
+<span class="nc" id="L329">			} else {</span>
+<span class="nc" id="L330">				throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+			}
+
+<span class="nc" id="L333">			this.Z = new double[R];</span>
+
+			// The second line stores the number of jobs of each class circulating (N)
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			for (int i = 0; i &lt; this.R; i++) {</span>
+<span class="nc" id="L337">				stok.nextToken();</span>
+<span class="nc bnc" id="L338" title="All 4 branches missed.">				if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L339">					Double readN = stok.nval;</span>
+<span class="nc bnc" id="L340" title="All 2 branches missed.">					if (hasNoFractionalPart(readN)) {</span>
+<span class="nc" id="L341">						N.add(readN.intValue());</span>
+					} else {
+<span class="nc" id="L343">						throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as number of jobs for a class (N).&quot;);</span>
+					}
+<span class="nc" id="L345">				} else {</span>
+<span class="nc" id="L346">					throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+				}
+			}
+			// The third line stores the delay (think time) for each class (Z)
+<span class="nc bnc" id="L350" title="All 2 branches missed.">			for (int i = 0; i &lt; this.R; i++) {</span>
+<span class="nc" id="L351">				stok.nextToken();</span>
+<span class="nc bnc" id="L352" title="All 4 branches missed.">				if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L353">					Double readZ = stok.nval;</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">					if (hasNoFractionalPart(readZ)) {</span>
+<span class="nc" id="L355">						Z[i] = readZ.intValue();</span>
+					} else {
+<span class="nc" id="L357">						throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as delay time (Z).&quot;);</span>
+					}
+<span class="nc" id="L359">				} else {</span>
+<span class="nc" id="L360">					throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+				}
+			}
+			// The fourth line contains the number of queues (M)
+<span class="nc" id="L364">			stok.nextToken();</span>
+<span class="nc bnc" id="L365" title="All 4 branches missed.">			if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L366">				Double readM = stok.nval;</span>
+<span class="nc bnc" id="L367" title="All 2 branches missed.">				if (readM == 0) {</span>
+<span class="nc" id="L368">					throw new IllegalValueInInputFileException(&quot;Cannot have zero as number of queues (M).&quot;);</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">				} else if (hasNoFractionalPart(readM)) {</span>
+<span class="nc" id="L370">					this.M = readM.intValue();</span>
+				} else {
+<span class="nc" id="L372">					throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as number of queues (M).&quot;);</span>
+				}
+<span class="nc" id="L374">			} else {</span>
+<span class="nc" id="L375">				throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+			}
+<span class="nc" id="L377">			D = new double[M][R];</span>
+			// And lastly there is a (noOfQueues)x(1+noOfClasses) matrix containing the &quot;multiplicities&quot;
+			// on the first column and the service demands (D) on the next ones
+<span class="nc bnc" id="L380" title="All 2 branches missed.">			for (int i = 0; i &lt; this.M; i++) {</span>
+<span class="nc" id="L381">				stok.nextToken();</span>
+<span class="nc bnc" id="L382" title="All 4 branches missed.">				if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L383">					Double readMultiplicity = stok.nval;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">					if (hasNoFractionalPart(readMultiplicity)) {</span>
+<span class="nc" id="L385">						multiplicities.add(readMultiplicity.intValue());</span>
+					} else {
+<span class="nc" id="L387">						throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as multiplicity.&quot;);</span>
+					}
+<span class="nc" id="L389">				} else {</span>
+<span class="nc" id="L390">					throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+				}
+<span class="nc bnc" id="L392" title="All 2 branches missed.">				for (int j = 0; j &lt; this.R; j++) {</span>
+<span class="nc" id="L393">					stok.nextToken();</span>
+<span class="nc bnc" id="L394" title="All 4 branches missed.">					if ((stok.ttype != StreamTokenizer.TT_EOF) &amp;&amp; (stok.ttype == StreamTokenizer.TT_NUMBER)) {</span>
+<span class="nc" id="L395">						Double readD = stok.nval;</span>
+						//if (hasNoFractionalPart(readD)) {
+<span class="nc" id="L397">						D[i][j] = readD.intValue();</span>
+						//} else {
+						// throw new IllegalValueInInputFileException(&quot;Cannot have a decimal value as demand.&quot;);
+						//}
+<span class="nc" id="L401">					} else {</span>
+<span class="nc" id="L402">						throw new InputFileParserException(&quot;Bad format of input file.&quot;);</span>
+					}
+				}
+			}
+<span class="nc" id="L406">		} catch (FileNotFoundException ex) {</span>
+<span class="nc" id="L407">			throw new InputFileParserException(&quot;File not found.&quot;);</span>
+<span class="nc" id="L408">		} catch (IOException ex) {</span>
+<span class="nc" id="L409">			throw new InputFileParserException(&quot;I/O exception&quot;);</span>
+		} finally {
+			try {
+<span class="nc" id="L412">				fr.close();</span>
+<span class="nc" id="L413">			} catch (IOException ex) {</span>
+<span class="nc" id="L414">				throw new InputFileParserException(&quot;I/O exception&quot;);</span>
+<span class="nc" id="L415">			}</span>
+		}
+<span class="nc" id="L417">	}</span>
+
+	/**
+	 * Writes the current QNModel to a file so it can be reused in the future.
+	 */
+	public void writeToFile() {
+		PrintWriter writer;
+		try {
+			//String path = System.getProperty(&quot;user.dir&quot;);
+<span class="nc" id="L426">			writer = new PrintWriter(TempFileName, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L427">			writer.println(R);</span>
+<span class="nc" id="L428">			StringBuilder sb = new StringBuilder();</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">			for (int n : N) {</span>
+<span class="nc" id="L430">				sb.append(n + &quot; &quot;);</span>
+<span class="nc" id="L431">			}</span>
+<span class="nc" id="L432">			writer.println(sb.toString());</span>
+
+<span class="nc" id="L434">			sb.setLength(0);</span>
+<span class="nc bnc" id="L435" title="All 2 branches missed.">			for (double z : Z) {</span>
+<span class="nc" id="L436">				sb.append(z + &quot; &quot;);</span>
+			}
+<span class="nc" id="L438">			writer.println(sb.toString());</span>
+<span class="nc" id="L439">			writer.println(M);</span>
+
+<span class="nc bnc" id="L441" title="All 2 branches missed.">			for (int m = 0; m &lt; M; m++) {</span>
+<span class="nc" id="L442">				sb.setLength(0);</span>
+<span class="nc" id="L443">				sb.append(this.multiplicities.get(m) + &quot; &quot;);</span>
+<span class="nc bnc" id="L444" title="All 2 branches missed.">				for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L445">					sb.append(D[m][r] + &quot; &quot;);</span>
+				}
+
+<span class="nc" id="L448">				writer.println(sb.toString());</span>
+			}
+
+<span class="nc" id="L451">			writer.close();</span>
+<span class="nc" id="L452">		} catch (FileNotFoundException | UnsupportedEncodingException e) {</span>
+<span class="nc" id="L453">			e.printStackTrace();</span>
+<span class="nc" id="L454">		}</span>
+<span class="nc" id="L455">	}</span>
+
+	/**
+	 * Prints the parsed data of the current QNModel object.
+	 */
+	public void printModel() {
+<span class="nc" id="L461">		System.out.println(this.R);</span>
+<span class="nc" id="L462">		System.out.println(this.N.toString());</span>
+<span class="nc" id="L463">		System.out.println(this.Z.toString());</span>
+<span class="nc" id="L464">		System.out.println(this.M);</span>
+<span class="nc bnc" id="L465" title="All 2 branches missed.">		for (int i = 0; i &lt; this.M; i++) {</span>
+<span class="nc" id="L466">			System.out.print(this.multiplicities.get(i) + &quot;\t&quot;);</span>
+<span class="nc bnc" id="L467" title="All 2 branches missed.">			for (int j = 0; j &lt; this.R; j++) {</span>
+<span class="nc" id="L468">				System.out.print(this.getDemand(i, j) + &quot; &quot;);</span>
+			}
+<span class="nc" id="L470">			System.out.println();</span>
+		}
+<span class="nc" id="L472">	}</span>
+
+	/**
+	 * Prints out model and model solutions in easily readable format.
+	 */
+	public void prettyPrint() {
+<span class="nc" id="L478">		System.out.println(&quot;\n --- Model ---&quot;);</span>
+<span class="nc" id="L479">		System.out.println(&quot;Stations = &quot; + M + &quot; Classes = &quot; + R);</span>
+<span class="nc" id="L480">		System.out.print(&quot;Class populations: &quot;); N.print();</span>
+<span class="nc" id="L481">		System.out.print(&quot;Class delays     : &quot; + Arrays.toString(Z));</span>
+
+<span class="nc" id="L483">		System.out.println(&quot;Demands:&quot;);</span>
+<span class="nc bnc" id="L484" title="All 2 branches missed.">		for (int m = 0; m &lt; M; m++) {</span>
+<span class="nc bnc" id="L485" title="All 2 branches missed.">			for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L486">				System.out.print(D[m][r] + &quot; &quot;);</span>
+			}
+<span class="nc" id="L488">			System.out.println();</span>
+		}
+
+<span class="nc bnc" id="L491" title="All 2 branches missed.">		if (arePerformanceMeasuresComputed) {</span>
+<span class="nc" id="L492">			System.out.println(&quot;\n --- Computed Performance Measures ---&quot;);</span>
+
+<span class="nc" id="L494">			System.out.println(&quot;Normalisation Constant G:&quot;);</span>
+<span class="nc" id="L495">			System.out.println(G);</span>
+<span class="nc" id="L496">			System.out.println();</span>
+
+<span class="nc" id="L498">			System.out.println(&quot;Throughputs:&quot;);</span>
+<span class="nc bnc" id="L499" title="All 2 branches missed.">			for (BigRational x : X) {</span>
+<span class="nc" id="L500">				System.out.print(x.approximateAsDouble()*1000000 + &quot; &quot;);</span>
+			}
+<span class="nc" id="L502">			System.out.println(&quot;\n&quot;);</span>
+
+<span class="nc" id="L504">			System.out.println(&quot;Mean queue lengths:&quot;);</span>
+<span class="nc bnc" id="L505" title="All 2 branches missed.">			for (int m = 0; m &lt; M; m++) {</span>
+<span class="nc bnc" id="L506" title="All 2 branches missed.">				for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L507">					System.out.print(Q[m][r].approximateAsDouble() + &quot; &quot;);</span>
+				}
+<span class="nc" id="L509">				System.out.println(&quot;&quot;);</span>
+			}
+		}
+<span class="nc" id="L512">	}</span>
+
+	/**
+	 * Stores the performance measures (mean throughputs X and mean queue
+	 * lengths Q) in the model description object (QNModel). The function can
+	 * only be used once.
+	 * @param Q Mean queue lengths matrix
+	 * @param X Mean throughputs matrix
+	 * @throws InternalErrorException Thrown on attempt to re-assign performance measures
+	 */
+	public void setPerformanceMeasures(BigRational[][] Q, BigRational[] X) throws InternalErrorException {
+<span class="nc bnc" id="L523" title="All 2 branches missed.">		if (!arePerformanceMeasuresComputed) {</span>
+<span class="nc" id="L524">			this.X = X;</span>
+<span class="nc" id="L525">			this.Q = Q;</span>
+<span class="nc" id="L526">			arePerformanceMeasuresComputed = true;</span>
+		} else {
+<span class="nc" id="L528">			throw new InternalErrorException(&quot;Performance Measures have already been computed.&quot;);</span>
+		}
+<span class="nc" id="L530">	}</span>
+
+	/**
+	 * Stores the normalising constant (G) in the model description object
+	 * (QNModel). The function can only be used once.
+	 * @param G The normalising constant
+	 * @throws InternalErrorException Thrown on attempt to re-assign performance measures
+	 */
+	public void setNormalisingConstant(BigRational G) throws InternalErrorException {
+<span class="nc bnc" id="L539" title="All 2 branches missed.">		if (!isNormalisingCOnstantComputed) {</span>
+<span class="nc" id="L540">			this.G = G;</span>
+<span class="nc" id="L541">			isNormalisingCOnstantComputed = true;</span>
+		} else {
+<span class="nc" id="L543">			throw new InternalErrorException(&quot;Normalising Constant has already been computed.&quot;);</span>
+		}
+<span class="nc" id="L545">	}</span>
+
+	/**
+	 * Returns a string containing the computed normalising constant G.
+	 * @return A string containing the computed normalising constant G
+	 */
+	public String getPrettyNormalisingConstant() {
+<span class="nc bnc" id="L552" title="All 2 branches missed.">		if (isNormalisingCOnstantComputed) {</span>
+<span class="nc bnc" id="L553" title="All 2 branches missed.">			if (G.isBigDecimal()) {</span>
+<span class="nc" id="L554">				return G.asBigDecimal().toString();</span>
+			} else {
+<span class="nc" id="L556">				return G.toString();</span>
+			}
+		} else {
+<span class="nc" id="L559">			throw new UnsupportedOperationException(&quot;Normalising Constant has not been computed yet.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Returns the computed normalising constant G.
+	 * @return The computed normalising constant G
+	 */
+	public BigRational getNormalisingConstant() {
+<span class="nc bnc" id="L568" title="All 2 branches missed.">		if (isNormalisingCOnstantComputed) {</span>
+<span class="nc" id="L569">			return G;</span>
+		} else {
+<span class="nc" id="L571">			throw new UnsupportedOperationException(&quot;Normalising Constant has not been computed yet.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Returns the computed mean throughputs X of the current model.
+	 * @return The computed mean throughputs X
+	 */
+	public BigRational[] getMeanThroughputs() {
+<span class="nc bnc" id="L580" title="All 2 branches missed.">		if (arePerformanceMeasuresComputed) {</span>
+<span class="nc" id="L581">			return X;</span>
+		} else {
+<span class="nc" id="L583">			throw new UnsupportedOperationException(&quot;Performance Measures have not been computed yet.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Returns the computed mean queue lengths Q of the current model.
+	 * @return The computed mean queue lengths Q
+	 */
+	public BigRational[][] getMeanQueueLengths() {
+<span class="nc bnc" id="L592" title="All 2 branches missed.">		if (arePerformanceMeasuresComputed) {</span>
+<span class="nc" id="L593">			return Q;</span>
+		} else {
+<span class="nc" id="L595">			throw new UnsupportedOperationException(&quot;Performance Measures have not been computed yet.&quot;);</span>
+		}
+	}
+
+	private double getMaxDemand() {
+<span class="nc" id="L600">		double max = 0;</span>
+<span class="nc bnc" id="L601" title="All 2 branches missed.">		for (int k = 0; k &lt; this.M; k++) {</span>
+<span class="nc bnc" id="L602" title="All 2 branches missed.">			for (int r = 0; r &lt; this.R; r++) {</span>
+<span class="nc bnc" id="L603" title="All 2 branches missed.">				if (D[k][r] &gt; max) {</span>
+<span class="nc" id="L604">					max = D[k][r];</span>
+				}
+			}
+		}
+<span class="nc" id="L608">		return max;</span>
+	}
+
+	/**
+	 * Returns the maximum possible normalising constant of the queueing network.
+	 * @return The maximum value as a BigInteger object
+	 * @throws OperationNotSupportedException Thrown if the maximum normalising constant cannot be computed
+	 */
+	public BigInteger getMaxG() throws OperationNotSupportedException {
+<span class="nc" id="L617">		double Dmax = MiscMathsFunctions.max(Z);</span>
+<span class="nc bnc" id="L618" title="All 2 branches missed.">		for (int k = 0; k &lt; this.M; k++) {</span>
+<span class="nc bnc" id="L619" title="All 2 branches missed.">			for (int r = 0; r &lt; this.R; r++) {</span>
+<span class="nc bnc" id="L620" title="All 2 branches missed.">				if (D[k][r] &gt; Dmax) {</span>
+<span class="nc" id="L621">					Dmax = D[k][r];</span>
+				}
+			}
+		}
+<span class="nc" id="L625">		int Ntot = N.sum();</span>
+<span class="nc" id="L626">		int nmax = (int) (Math.round(Math.ceil(Math.log10(Dmax * (Ntot + M + R)))) * Ntot);</span>
+<span class="nc" id="L627">		return BigInteger.TEN.pow(nmax + 1);</span>
+	}
+
+	/**
+	 * Returns the maximum value of the queueing network model.
+	 * @return The maximum value
+	 * @throws OperationNotSupportedException Thrown if the maximum value cannot be computed
+	 */
+	public double getMaxModelValue() throws OperationNotSupportedException {
+<span class="nc" id="L636">		double max = N.max();</span>
+<span class="nc" id="L637">		double Zmax = MiscMathsFunctions.max(Z);</span>
+<span class="nc bnc" id="L638" title="All 2 branches missed.">		max = (max &lt; Zmax) ? Zmax : max;</span>
+<span class="nc bnc" id="L639" title="All 2 branches missed.">		max = (max &lt; getMaxDemand()) ? getMaxDemand() : max;</span>
+<span class="nc" id="L640">		return max;</span>
+	}
+
+	/**
+	 * Checks whether a double has a zero fractional part, i.e. it represents an
+	 * integer number.
+	 *
+	 * @param d The number to check
+	 * @return True if it is an integer, false otherwise
+	 */
+	public boolean hasNoFractionalPart(double d) {
+<span class="nc bnc" id="L651" title="All 2 branches missed.">		if (d == (int) d) {</span>
+<span class="nc" id="L652">			return true;</span>
+		} else {
+<span class="nc" id="L654">			return false;</span>
+		}
+	}
+
+	/**
+	 * This method returns a copy of the current MultiplicitiesVector with the values
+	 * contained in this QNModel object (quening network model).
+	 *
+	 * @return The MultiplicitiesVector object
+	 */
+	public MultiplicitiesVector getMultiplicitiesVector() {
+<span class="nc" id="L665">		return this.multiplicities.copy();</span>
+	}
+
+	/**
+	 * This method returns a copy of the current PopulationVector with the values
+	 * contained in this QNModel object (quening network model).
+	 *
+	 * @return The PopulationVector object
+	 */
+	public PopulationVector getPopulationVector() {
+<span class="nc" id="L675">		PopulationVector to_return = new PopulationVector();</span>
+<span class="nc bnc" id="L676" title="All 2 branches missed.">		for (int i = 0; i &lt; R; i++) {</span>
+<span class="nc" id="L677">			to_return.add(this.N.get(i));</span>
+		}
+<span class="nc" id="L679">		return to_return;</span>
+	}
+
+	/**
+	 * Returns the mean queue lengths as an MxR array of doubles.
+	 * @return The double[M][R] array.
+	 */
+	public double[][] getMeanQueueLengthsAsDoubles() {
+<span class="nc" id="L687">		double[][] toReturn = new double[M][R];</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">		for (int k = 0; k &lt; M; k++) {</span>
+<span class="nc bnc" id="L689" title="All 2 branches missed.">			for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L690">				toReturn[k][r] = Q[k][r].approximateAsDouble();</span>
+			}
+		}
+<span class="nc" id="L693">		return toReturn;</span>
+	}
+
+	/**
+	 * Returns the mean throughputs as an array of R doubles.
+	 * @return The double[R] array.
+	 */
+	public double[] getMeanThroughputsAsDoubles() {
+<span class="nc" id="L701">		double[] toReturn = new double[R];</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">		for (int r = 0; r &lt; R; r++) {</span>
+<span class="nc" id="L703">			toReturn[r] = X[r].approximateAsDouble();</span>
+		}
+<span class="nc" id="L705">		return toReturn;</span>
+	}
+
+	/**
+	 * Added by Jack Bradshaw
+	 * Prints the preformance measures computed for the model.
+	 */
+	public void printPerformanceMeasures() {
+<span class="nc" id="L713">		System.out.println(&quot;\nMean Throughputs:&quot;);</span>
+<span class="nc" id="L714">		MiscMathsFunctions.printMatrix(X);</span>
+
+<span class="nc" id="L716">		System.out.println(&quot;Mean Queue Lengths:&quot;);</span>
+<span class="nc" id="L717">		MiscMathsFunctions.printMatrix(Q);</span>
+<span class="nc" id="L718">	}</span>
+
+	/*
+	 * The Following functions allow the mannual setting of model parameters for testing purposes
+	 * @author Jack Bradshaw
+	 */
+	public void setM(int m) {
+<span class="nc" id="L725">		this.M = m;</span>
+<span class="nc" id="L726">	}</span>
+
+	public void setR(int r) {
+<span class="nc" id="L729">		this.R = r;</span>
+<span class="nc" id="L730">	}    </span>
+
+	public void setN(int n2) {
+<span class="nc" id="L733">		N = new PopulationVector(n2/R,R);		</span>
+<span class="nc" id="L734">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

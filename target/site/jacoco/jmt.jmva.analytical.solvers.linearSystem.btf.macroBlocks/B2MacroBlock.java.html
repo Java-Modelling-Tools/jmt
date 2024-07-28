@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>B2MacroBlock.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks</a> &gt; <span class="el_source">B2MacroBlock.java</span></div><h1>B2MacroBlock.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.linearSystem.btf.macroBlocks;
+
+import jmt.jmva.analytical.solvers.basis.CoMoMBasis;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.linearSystem.btf.Position;
+import jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks.B2MicroBlock;
+import jmt.jmva.analytical.solvers.linearSystem.btf.microBlocks.MicroBlock;
+
+/**
+ * This class implements the Macro Blocks of the B2 Block of the B matrix.
+ * 
+ * The Factory Methods newMicroBlock and subBlockCopy are implemented to return the correct 
+ * block type in the parallel hierarchy.
+ * 
+ * Type 1 Micro Blocks are selected for lower class linear systems
+ * 
+ * @author Jack Bradshaw
+ */
+public class B2MacroBlock extends MacroBlock {
+
+	public B2MacroBlock(QNModel qnm, CoMoMBasis basis, Position position, int h) throws InternalErrorException, InconsistentLinearSystemException {
+<span class="nc" id="L24">		super(qnm, basis, position, h);	</span>
+<span class="nc" id="L25">		selection_policy = new TypeOneBlocks(qnm, this); </span>
+<span class="nc" id="L26">	}</span>
+
+	public B2MacroBlock(MacroBlock full_block, int current_class) {
+<span class="nc" id="L29">		super(full_block, current_class);</span>
+<span class="nc" id="L30">	}</span>
+	
+	@Override
+	protected MacroBlock subBlockCopy(int current_class) {
+<span class="nc" id="L34">		return new B2MacroBlock(this, current_class);</span>
+	}
+
+	@Override
+	protected MicroBlock newMicroBlock(Position block_position, int h) {
+<span class="nc" id="L39">		return new B2MicroBlock(qnm, basis, block_position, h);</span>
+	}
+
+	public void update(int current_class_population) {
+<span class="nc bnc" id="L43" title="All 2 branches missed.">		for (int i = 0; i &lt; micro_blocks.length; i++) {</span>
+<span class="nc" id="L44">			((B2MicroBlock) micro_blocks[i]).update(current_class_population);</span>
+		}		
+<span class="nc" id="L46">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

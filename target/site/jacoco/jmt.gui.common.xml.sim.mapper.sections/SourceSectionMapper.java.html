@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SourceSectionMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper.sections</a> &gt; <span class="el_source">SourceSectionMapper.java</span></div><h1>SourceSectionMapper.java</h1><pre class="source lang-java linenums">/**
+ * Maps source section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * handling open-class arrival distributions and reference source assignments.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper.sections;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.XMLConstantNames;
+import jmt.gui.common.xml.sim.dto.NodeDescriptor;
+import jmt.gui.common.xml.sim.dto.ParameterDescriptor;
+import jmt.gui.common.xml.sim.dto.SectionDescriptor;
+import jmt.gui.common.xml.sim.mapper.MappingContext;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+<span class="fc" id="L19">public class SourceSectionMapper extends AbstractSectionMapper {</span>
+
+    @Override
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+<span class="fc" id="L23">        ParameterDescriptor serviceStrategyParam = getParam(sec, XMLConstantNames.PARAM_SERVICE_STRATEGY);</span>
+<span class="pc bpc" id="L24" title="1 of 2 branches missed.">        if (serviceStrategyParam == null) return;</span>
+
+<span class="fc" id="L26">        getRefClassMap(serviceStrategyParam).forEach((className, p) -&gt; {</span>
+<span class="fc" id="L27">            Object classKey = ctx.classes.get(className);</span>
+
+<span class="pc bpc" id="L29" title="3 of 6 branches missed.">            if (classKey != null &amp;&amp; node.getName().equals(ctx.refStations.get(classKey)) &amp;&amp; model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {</span>
+<span class="fc" id="L30">                Object distributionStrategy = parseServiceStrategy(p, ctx);</span>
+<span class="fc" id="L31">                model.setClassDistribution(classKey, distributionStrategy);</span>
+<span class="fc" id="L32">                model.setClassRefStation(classKey, key);</span>
+<span class="fc" id="L33">                ctx.refStations.remove(classKey);</span>
+            }
+<span class="fc" id="L35">        });</span>
+<span class="fc" id="L36">    }</span>
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext ctx) {
+<span class="fc" id="L40">        ParameterDescriptor serviceStrategy = new ParameterDescriptor();</span>
+<span class="fc" id="L41">        serviceStrategy.setName(XMLConstantNames.PARAM_SERVICE_STRATEGY);</span>
+<span class="fc" id="L42">        serviceStrategy.setClassPath(&quot;jmt.engine.NetStrategies.ServiceStrategy&quot;);</span>
+<span class="fc" id="L43">        serviceStrategy.setArray(true);</span>
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (Object classKey : model.getClassKeys()) {</span>
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">                    &amp;&amp; key.equals(model.getClassRefStation(classKey))) {</span>
+
+<span class="fc" id="L49">                Object distribution = model.getClassDistribution(classKey);</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">                if (distribution != null) {</span>
+<span class="fc" id="L51">                    ParameterDescriptor stStrategy = getDistributionParameter(</span>
+                            distribution, model, classKey, &quot;ServiceTimeStrategy&quot;,
+                            &quot;jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy&quot;, ctx);
+<span class="fc" id="L54">                    serviceStrategy.addSubParameter(stStrategy);</span>
+                }
+            }
+<span class="fc" id="L57">        }</span>
+
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (!serviceStrategy.getSubParameters().isEmpty()) {</span>
+<span class="fc" id="L60">            sec.addParameter(serviceStrategy);</span>
+        }
+<span class="fc" id="L62">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

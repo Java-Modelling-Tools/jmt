@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 org.freehep.graphicsio.cgm.CGMExportFileType
 org.freehep.graphicsio.exportchooser.ImageIOExportFileType
 org.freehep.graphicsio.emf.EMFExportFileType
@@ -8,3 +9,15 @@ org.freehep.graphicsio.ps.EPSExportFileType
 org.freehep.graphicsio.ps.PSExportFileType
 org.freehep.graphicsio.svg.SVGExportFileType
 org.freehep.graphicsio.swf.SWFExportFileType
+=======
+org.freehep.graphicsio.cgm.CGMExportFileType
+org.freehep.graphicsio.exportchooser.ImageIOExportFileType
+org.freehep.graphicsio.emf.EMFExportFileType
+org.freehep.graphicsio.java.JAVAExportFileType
+org.freehep.graphicsio.pdf.PDFExportFileType
+org.freehep.graphicsio.ppm.PPMExportFileType
+org.freehep.graphicsio.ps.EPSExportFileType
+org.freehep.graphicsio.ps.PSExportFileType
+org.freehep.graphicsio.svg.SVGExportFileType
+org.freehep.graphicsio.swf.SWFExportFileType
+>>>>>>> b0a37c45 (Initial commit at SVN r1153.)

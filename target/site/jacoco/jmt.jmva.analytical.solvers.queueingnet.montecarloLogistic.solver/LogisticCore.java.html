@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LogisticCore.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver</a> &gt; <span class="el_source">LogisticCore.java</span></div><h1>LogisticCore.java</h1><pre class="source lang-java linenums">package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import cern.colt.list.DoubleArrayList;
+import cern.colt.list.IntArrayList;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions.MultiVariateStudentT;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.MCIntegrator;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions.MultiVariateStudentT;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.MCIntegrator;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.isInvalidModel;
+
+/**
+ * Implements the core Logistic Sampling algorithm by calling the required
+ * stationary point calculations, Hessian calculations, and the correct
+ * integration scheme for solution of the model, to calculate the NC.
+ * See Ong 2018.
+ * Subclassed by the additive and multiplicative core, which are responsible
+ * for choosing the correct logistic functions for use by the core algorithm
+ */
+public abstract class LogisticCore {
+
+	/* model input */
+	protected DoubleMatrix2D demands;
+	protected DoubleMatrix1D delays;
+	protected boolean has_delay;
+	protected boolean has_multi; //is multi server
+	protected double sigma; //sum of delays
+	protected DoubleMatrix1D pop;
+	protected DoubleMatrix1D serv;
+	protected int N;
+	protected int K;
+	protected int R;
+
+	/* solver specific input */
+	protected double epsilon;
+
+	/* derived properties */
+	protected DoubleMatrix1D x_stat;
+	protected DoubleMatrix2D hess;
+	protected DoubleMatrix2D cov;
+
+	/* others */
+	protected boolean invalid_model;
+	protected boolean zero_population;
+	protected Algebra A;
+	protected MCIntegrator MCI;
+	protected LogisticFunctionBase F;
+	protected MathContext MC;
+
+<span class="nc" id="L63">	public LogisticCore(double[][] demands, int[] serv, double[] delays, int[] population, double epsilon, int max_samples, MathContext mc, int nthreads) throws InternalErrorException {</span>
+<span class="nc" id="L64">		this.MC = mc;</span>
+<span class="nc" id="L65">		this.initialize(demands, serv, delays, population, epsilon);</span>
+
+<span class="nc bnc" id="L67" title="All 4 branches missed.">		if (this.invalid_model || this.zero_population)</span>
+<span class="nc" id="L68">			return;</span>
+
+		/* decide what the required computations are */
+<span class="nc bnc" id="L71" title="All 2 branches missed.">		if (this.sigma &gt; 0) {</span>
+			/* non-zero delay */
+<span class="nc bnc" id="L73" title="All 2 branches missed.">			if (this.serv.zSum() &gt; K) /* no support for both delay and multi-server */</span>
+<span class="nc" id="L74">				throw new InternalErrorException(&quot;Cannot support delays and multiservers! Use an N-server station instead!&quot;);</span>
+<span class="nc" id="L75">			this.has_delay = true;</span>
+		} else {
+<span class="nc bnc" id="L77" title="All 2 branches missed.">			if (this.serv.zSum() &gt; K)</span>
+<span class="nc" id="L78">				this.has_multi = true;</span>
+<span class="nc" id="L79">			this.has_delay = false;</span>
+		}
+
+		// Fetch the correct logistic function, and calculate stationary points and Hessians
+<span class="nc" id="L83">		F = this.initialize_logistic_function();</span>
+<span class="nc" id="L84">		F.calculate_stationary_point();</span>
+<span class="nc" id="L85">		F.calculate_hessian();</span>
+		//fetch the results
+<span class="nc" id="L87">		this.x_stat = F.getX_stat();</span>
+<span class="nc" id="L88">		this.hess = F.getHess_stat();</span>
+		//calculate covariance
+<span class="nc" id="L90">		this.cov = this.hess.copy();</span>
+<span class="nc" id="L91">		this.cov = this.A.inverse(this.cov.copy());</span>
+		// &quot;symmetrize&quot; the covariance
+<span class="nc" id="L93">		this.cov.assign(this.A.transpose(this.cov.copy()), Functions.plus);</span>
+<span class="nc" id="L94">		this.cov.assign(Functions.div(2.));</span>
+
+<span class="nc" id="L96">		check_transformed_matrices();</span>
+
+		// initialize the Integrator stationary point and calculated covariance
+<span class="nc" id="L99">		this.MCI = new MCIntegrator(</span>
+				F,
+<span class="nc" id="L101">				new MultiVariateStudentT(this.x_stat.toArray(), cov.toArray(), 4),</span>
+				max_samples,
+				MC,
+				nthreads
+				);
+<span class="nc" id="L106">	}</span>
+
+	private void initialize(double[][] demands, int[] serv, double[] delays, int[] population, double epsilon) throws InternalErrorException {
+		// convert all model parameters into DoubleMatrix format, perform checks
+<span class="nc" id="L110">		this.A = new Algebra();</span>
+
+		try {
+<span class="nc" id="L113">			this.pop = new DenseDoubleMatrix1D(population.length);</span>
+<span class="nc bnc" id="L114" title="All 2 branches missed.">			for (int i=0; i&lt;population.length; i++)</span>
+<span class="nc" id="L115">				this.pop.set(i, (double)population[i]);</span>
+<span class="nc" id="L116">			this.delays = new DenseDoubleMatrix1D(delays);</span>
+<span class="nc" id="L117">			this.demands = new DenseDoubleMatrix2D(demands);</span>
+<span class="nc" id="L118">			this.serv = new DenseDoubleMatrix1D(demands.length);</span>
+<span class="nc" id="L119">			this.serv.assign(1);</span>
+<span class="nc bnc" id="L120" title="All 2 branches missed.">			for (int i=0; i&lt;serv.length; i++)</span>
+<span class="nc" id="L121">				this.serv.set(i, (double)serv[i]);</span>
+<span class="nc" id="L122">		} catch (IllegalArgumentException e) {</span>
+<span class="nc" id="L123">			throw new InternalErrorException(&quot;Demands needs to be a rectangular 2D array!&quot;);</span>
+<span class="nc" id="L124">		}</span>
+
+<span class="nc" id="L126">		this.N = (int)this.pop.zSum();</span>
+<span class="nc" id="L127">		this.K = this.demands.rows();</span>
+<span class="nc" id="L128">		this.R = this.demands.columns();</span>
+
+<span class="nc" id="L130">		this.sigma = this.delays.zSum();</span>
+
+<span class="nc" id="L132">		this.epsilon = epsilon;</span>
+
+<span class="nc" id="L134">		check_inputs(this.pop, this.demands, this.serv, this.delays, this.epsilon);</span>
+<span class="nc bnc" id="L135" title="All 2 branches missed.">		if (isInvalidModel(this.demands, this.delays)) {</span>
+<span class="nc" id="L136">			this.invalid_model = true;</span>
+<span class="nc" id="L137">			return;</span>
+		}
+
+<span class="nc" id="L140">		sanitize_model();</span>
+<span class="nc bnc" id="L141" title="All 2 branches missed.">		if (N==0)</span>
+<span class="nc" id="L142">			this.zero_population = true;</span>
+<span class="nc" id="L143">	}</span>
+
+	/*=========== abstract functions to be implemented by subclass =============*/
+	protected abstract LogisticFunctionBase initialize_logistic_function () throws InternalErrorException;
+
+	/*================ sanity checks after applying transforms =================*/
+	private void check_transformed_matrices() throws InternalErrorException {
+		int D;
+<span class="nc bnc" id="L151" title="All 2 branches missed.">		if (has_delay)</span>
+<span class="nc" id="L152">			D = K;</span>
+		else
+<span class="nc" id="L154">			D = K-1;</span>
+<span class="nc bnc" id="L155" title="All 6 branches missed.">		if ((x_stat.size() != D) || (hess.rows() != D) || (hess.columns() != D))</span>
+<span class="nc" id="L156">			throw new InternalErrorException(&quot;Transformed matrices not corect dimensions!&quot;);</span>
+<span class="nc" id="L157">	}</span>
+
+	private void sanitize_model() {
+		//perform sanitization, and update number of servers, as this could have changed
+		//this.demands = sanitize_demands(this.demands);
+		//this.K = this.demands.rows(); //number of servers may have changed
+
+		// perform population sanitization
+<span class="nc" id="L165">		IntArrayList indexList = new IntArrayList();</span>
+<span class="nc" id="L166">		DoubleArrayList valueList = new DoubleArrayList();</span>
+<span class="nc" id="L167">		pop.getNonZeros(indexList, valueList);</span>
+<span class="nc" id="L168">		DoubleMatrix1D pop_s = new DenseDoubleMatrix1D(indexList.size());</span>
+<span class="nc" id="L169">		DoubleMatrix2D demands_s = new DenseDoubleMatrix2D(K, indexList.size());</span>
+<span class="nc" id="L170">		DoubleMatrix1D delays_s = new DenseDoubleMatrix1D(indexList.size());</span>
+
+<span class="nc" id="L172">		int i = 0;</span>
+
+<span class="nc bnc" id="L174" title="All 2 branches missed.">		for (int r=0; r&lt;R; r++) {</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">			if (pop.get(r) == 0)</span>
+<span class="nc" id="L176">				continue;</span>
+
+<span class="nc" id="L178">			pop_s.set(i, pop.get(r));</span>
+<span class="nc" id="L179">			delays_s.set(i, delays.get(r));</span>
+<span class="nc bnc" id="L180" title="All 2 branches missed.">			for (int k=0; k&lt;K; k++) {</span>
+<span class="nc" id="L181">				demands_s.set(k,i, demands.get(k,r));</span>
+			}
+<span class="nc" id="L183">			i++;</span>
+		}
+
+		/* replace with sanitized */
+<span class="nc" id="L187">		pop = pop_s;</span>
+<span class="nc" id="L188">		demands = demands_s;</span>
+<span class="nc" id="L189">		delays = delays_s;</span>
+<span class="nc" id="L190">		N = (int)pop.zSum();</span>
+<span class="nc" id="L191">		R = pop.size();</span>
+<span class="nc" id="L192">	}</span>
+
+	/*================ result calculations =================*/
+
+	/**
+	 * Calculate the NC, and multiply by the appropriate coefficients. Details see Casale 2017 and Ong 2018
+	 * @return The Normalising constant in BigDecimal form
+	 * @throws InternalErrorException
+	 */
+	public BigDecimal calculateNC() throws InternalErrorException {
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		if (this.invalid_model)</span>
+<span class="nc" id="L203">			return BigDecimal.ZERO;</span>
+
+<span class="nc bnc" id="L205" title="All 2 branches missed.">		if (this.zero_population)</span>
+<span class="nc" id="L206">			return BigDecimal.ONE;</span>
+
+<span class="nc" id="L208">		double logC = 0;</span>
+<span class="nc bnc" id="L209" title="All 4 branches missed.">		if (!has_multi &amp;&amp; !has_delay) {</span>
+<span class="nc" id="L210">			double eta = (double) this.N + this.K * (1 + this.epsilon * (double) this.N);</span>
+<span class="nc" id="L211">			logC = lnGamma(eta);</span>
+		}
+
+<span class="nc bnc" id="L214" title="All 2 branches missed.">		if (!has_multi)</span>
+<span class="nc" id="L215">			logC -= this.K*lnGamma(1. + this.epsilon*this.N);</span>
+
+<span class="nc bnc" id="L217" title="All 2 branches missed.">		for (int i=0; i&lt;this.pop.size(); i++)</span>
+<span class="nc" id="L218">			logC -= lnGamma(this.pop.get(i) + 1);</span>
+
+<span class="nc" id="L220">		BigDecimal I = this.MCI.compute();</span>
+
+<span class="nc" id="L222">		return I.multiply(MiscMathsFunctions.exp(logC, MC));</span>
+	}
+
+	/**
+	 * Get Hessian
+	 * @return
+	 */
+	public double[][] getHessian() {
+<span class="nc" id="L230">		return this.hess.toArray();</span>
+	}
+
+	public double[][] getCovariance() {
+<span class="nc" id="L234">		return this.cov.toArray();</span>
+	}
+
+	public double[] getStationaryPoint() {
+<span class="nc" id="L238">		return this.x_stat.toArray();</span>
+	}
+
+<span class="nc" id="L241">	public double[] getStationaryPointSimplex() { return F.getU_stat().toArray(); }</span>
+
+	public boolean is_invalid_model() {
+<span class="nc" id="L244">		return invalid_model;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

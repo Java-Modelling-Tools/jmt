@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DefaultIcons.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.animation</a> &gt; <span class="el_source">DefaultIcons.java</span></div><h1>DefaultIcons.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.animation;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: OrsotronIII
+ * Date: 17-feb-2005
+ * Time: 16.25.59
+ * This class provides constants for rendering of queue net elements.
+ */
+<span class="nc" id="L35">public abstract class DefaultIcons {</span>
+
+	public static Image getJobIcon(Rectangle bounds) {
+<span class="nc" id="L38">		BufferedImage bi = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);</span>
+<span class="nc" id="L39">		Graphics g = bi.getGraphics();</span>
+<span class="nc" id="L40">		g.setColor(new Color(0, 0, 0, 50));</span>
+<span class="nc" id="L41">		g.fillOval(0, 0, bounds.width, bounds.height);</span>
+<span class="nc bnc" id="L42" title="All 2 branches missed.">		for (int i = 0, monoChannel = 120; i &lt; 5; i++, monoChannel = (int) ((1 - Math.exp(-i)) * 120 + 135)) {</span>
+<span class="nc" id="L43">			g.setColor(new Color(monoChannel, monoChannel, monoChannel, 255));</span>
+<span class="nc" id="L44">			g.fillOval(i, i, bounds.width - i * 3, bounds.height - i * 3);</span>
+		}
+<span class="nc" id="L46">		return bi;</span>
+	}
+
+	public static Image getStationIcon(String type, Rectangle bounds) {
+<span class="nc" id="L50">		BufferedImage bi = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);</span>
+<span class="nc" id="L51">		Graphics g = bi.getGraphics();</span>
+<span class="nc" id="L52">		int qLength = bounds.width * 3 / 5, height = bounds.height, width = bounds.width;</span>
+<span class="nc bnc" id="L53" title="All 2 branches missed.">		for (int i = 0, monoChannel = 0; i &lt; 5; i++, monoChannel = (int) ((1 - Math.exp(-i)) * 50)) {</span>
+<span class="nc" id="L54">			g.setColor(new Color(230 - monoChannel, 230 - monoChannel, 230 - monoChannel, 255));</span>
+<span class="nc" id="L55">			g.drawPolyline(new int[] { i, i, qLength - i }, new int[] { height - i, i, i }, 3);</span>
+<span class="nc" id="L56">			g.fillArc(width - height + i, i, height - 2 * i, height - 2 * i, 45, 180);</span>
+<span class="nc" id="L57">			g.setColor(new Color(130 + monoChannel, 130 + monoChannel, 130 + monoChannel, 255));</span>
+<span class="nc" id="L58">			g.drawPolyline(new int[] { i, qLength - i, qLength - i }, new int[] { height - i, height - i, i }, 3);</span>
+<span class="nc" id="L59">			g.fillArc(width - height + i, i, height - 2 * i, height - 2 * i, 225, 180);</span>
+		}
+<span class="nc" id="L61">		g.fillRect(5, 5, qLength - 9, height - 9);</span>
+<span class="nc" id="L62">		g.fillOval(width - height + 5, 5, height - 10, height - 10);</span>
+<span class="nc" id="L63">		return bi;</span>
+	}
+
+	public static Image getEdgeIcon(Rectangle bounds, Point[] anglePoints) {
+		/*creates background image.*/
+<span class="nc" id="L68">		BufferedImage bgImage = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);</span>
+<span class="nc" id="L69">		Graphics bgGr = bgImage.getGraphics();</span>
+<span class="nc" id="L70">		bgGr.setColor(new Color(0, 0, 0, 0));</span>
+<span class="nc" id="L71">		bgGr.fillRect(0, 0, bounds.width, bounds.height);</span>
+<span class="nc bnc" id="L72" title="All 2 branches missed.">		for (int i = 0; i &lt; anglePoints.length - 1; i++) {</span>
+			//Must convert absolute coords to local coords
+<span class="nc" id="L74">			int x0 = anglePoints[i].x - bounds.x, y0 = anglePoints[i].y - bounds.y, x1 = anglePoints[i + 1].x - bounds.x, y1 = anglePoints[i + 1].y</span>
+					- bounds.y;
+<span class="nc" id="L76">			bgGr.setColor(Color.BLACK);</span>
+<span class="nc" id="L77">			bgGr.drawLine(x0, y0, x1, y1);</span>
+<span class="nc" id="L78">			bgGr.setColor(new Color(0, 0, 0, 50));</span>
+<span class="nc" id="L79">			bgGr.fillRect(Math.min(x0, x1) - 1, Math.min(y0, y1) - 1, Math.abs(x1 - x0) + 2, Math.abs(y1 - y0) + 2);</span>
+		}
+<span class="nc" id="L81">		return bgImage;</span>
+	}
+
+	public static Image getBGTileIcon(Rectangle bounds) {
+<span class="nc" id="L85">		BufferedImage bi = new BufferedImage(bounds.width, bounds.height, BufferedImage.TYPE_4BYTE_ABGR);</span>
+<span class="nc" id="L86">		Graphics g = bi.getGraphics();</span>
+<span class="nc" id="L87">		g.setColor(Color.WHITE);</span>
+<span class="nc" id="L88">		g.fillRect(0, 0, bounds.width, bounds.height);</span>
+<span class="nc" id="L89">		g.setColor(Color.GRAY);</span>
+<span class="nc" id="L90">		g.fillRect(0, 0, 2, 2);</span>
+<span class="nc" id="L91">		return bi;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

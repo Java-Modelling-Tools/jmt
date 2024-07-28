@@ -1,0 +1,497 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoadDependentRoutingEditor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.editors</a> &gt; <span class="el_source">LoadDependentRoutingEditor.java</span></div><h1>LoadDependentRoutingEditor.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.gui.common.editors;
+
+import java.awt.BorderLayout;
+import java.awt.Dialog;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Vector;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
+
+import jmt.framework.gui.components.JMTDialog;
+import jmt.framework.gui.table.editors.ButtonCellEditor;
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.definitions.ClassDefinition;
+import jmt.gui.common.definitions.StationDefinition;
+import jmt.gui.common.routingStrategies.LoadDependentRouting;
+import jmt.gui.table.ExactCellEditor;
+
+/**
+ * Created by IntelliJ IDEA.
+ * User: Ashanka
+ * Date: 6/15/12
+ * Time: 12:22 AM
+ * To change this template use File | Settings | File Templates.
+ */
+public class LoadDependentRoutingEditor extends JMTDialog implements CommonConstants {
+
+	private static final long serialVersionUID = 1L;
+
+	private Object stationKey;
+	private Object classKey;
+	private StationDefinition stations;
+	private ClassDefinition classes;
+
+	private LoadDependentRouting routingStrategy;
+	private Vector&lt;Object&gt; forwardStationKeys;
+	private Vector&lt;Object&gt; validForwardStationKeys;
+	private HashMap&lt;Integer, Integer&gt; mapRowIndexAndFrom;
+	protected JTable rangesTable;
+
+	public LoadDependentRoutingEditor(Frame parent, HashMap&lt;String, Object&gt; params) {
+<span class="nc" id="L80">		super(parent, true);</span>
+<span class="nc" id="L81">		init(params);</span>
+<span class="nc" id="L82">	}</span>
+
+	public LoadDependentRoutingEditor(Dialog parent, HashMap&lt;String, Object&gt; params) {
+<span class="nc" id="L85">		super(parent, true);</span>
+<span class="nc" id="L86">		init(params);</span>
+<span class="nc" id="L87">	}</span>
+
+	private void init(HashMap&lt;String, Object&gt; params) {
+<span class="nc" id="L90">		stations = (StationDefinition) params.get(&quot;StationDefinition&quot;);</span>
+<span class="nc" id="L91">		classes = (ClassDefinition) params.get(&quot;ClassDefinition&quot;);</span>
+<span class="nc" id="L92">		stationKey = params.get(&quot;stationKey&quot;);</span>
+<span class="nc" id="L93">		classKey = params.get(&quot;classKey&quot;);</span>
+<span class="nc" id="L94">		routingStrategy = (LoadDependentRouting) stations.getRoutingStrategy(stationKey, classKey);</span>
+<span class="nc" id="L95">		forwardStationKeys = stations.getForwardConnections(stationKey);</span>
+<span class="nc" id="L96">		validForwardStationKeys = new Vector&lt;Object&gt;();</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		for (Object stationKey : forwardStationKeys) {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">			if (classes.getClassType(classKey) != CLASS_TYPE_CLOSED</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">					|| !stations.getStationType(stationKey).equals(STATION_TYPE_SINK)) {</span>
+<span class="nc" id="L100">				validForwardStationKeys.add(stationKey);</span>
+			}
+<span class="nc" id="L102">		}</span>
+<span class="nc" id="L103">		routingStrategy.refreshRouting(forwardStationKeys, validForwardStationKeys);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">		if (mapRowIndexAndFrom == null) {</span>
+<span class="nc" id="L105">			mapRowIndexAndFrom = new HashMap&lt;Integer, Integer&gt;();</span>
+		}
+<span class="nc" id="L107">		int range = 0;</span>
+<span class="nc" id="L108">		List&lt;Integer&gt; fromAsList = new ArrayList&lt;Integer&gt;();</span>
+<span class="nc" id="L109">		fromAsList.addAll(routingStrategy.getAllEmpiricalEntries().keySet());</span>
+<span class="nc" id="L110">		Collections.sort(fromAsList);</span>
+<span class="nc bnc" id="L111" title="All 2 branches missed.">		for (Integer from : fromAsList) {</span>
+<span class="nc" id="L112">			mapRowIndexAndFrom.put(range, from);</span>
+<span class="nc" id="L113">			range++;</span>
+<span class="nc" id="L114">		}</span>
+<span class="nc" id="L115">		initGUI((String) params.get(&quot;title&quot;));</span>
+<span class="nc" id="L116">	}</span>
+
+	private void initGUI(String title) {
+<span class="nc" id="L119">		centerWindow(CommonConstants.MAX_GUI_WIDTH_LDROUTING, CommonConstants.MAX_GUI_HEIGHT_LDROUTING);</span>
+<span class="nc" id="L120">		setTitle(title);</span>
+		// Adds &quot;Add Range&quot; Button
+<span class="nc" id="L122">		JPanel topPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L123">		JPanel rightTopPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L124">		JButton addRange = new JButton(addRangeAction);</span>
+<span class="nc" id="L125">		addRange.setMinimumSize(DIM_BUTTON_S);</span>
+<span class="nc" id="L126">		rightTopPanel.add(addRange, BorderLayout.EAST);</span>
+<span class="nc" id="L127">		topPanel.add(rightTopPanel, BorderLayout.NORTH);</span>
+
+<span class="nc" id="L129">		JPanel LDPanel = new JPanel(new BorderLayout());</span>
+<span class="nc" id="L130">		LDPanel.add(topPanel, BorderLayout.NORTH);</span>
+		// Adds StrategyTable
+<span class="nc" id="L132">		rangesTable = new LoadDependentRoutingStrategyTable();</span>
+<span class="nc" id="L133">		JScrollPane scrollPane = new JScrollPane(rangesTable);</span>
+<span class="nc" id="L134">		LDPanel.add(scrollPane, BorderLayout.CENTER);</span>
+
+<span class="nc" id="L136">		JTabbedPane mainPanel = new JTabbedPane();</span>
+<span class="nc" id="L137">		JPanel bottomPanel = new JPanel(new FlowLayout());</span>
+		// Adds Okay button to bottom_panel
+<span class="nc" id="L139">		JButton okayButton = new JButton(okayAction);</span>
+<span class="nc" id="L140">		bottomPanel.add(okayButton);</span>
+
+<span class="nc" id="L142">		mainPanel.addTab(&quot;Edit&quot;, LDPanel);</span>
+
+<span class="nc" id="L144">		getContentPane().setLayout(new BorderLayout());</span>
+<span class="nc" id="L145">		getContentPane().add(mainPanel, BorderLayout.CENTER);</span>
+<span class="nc" id="L146">		getContentPane().add((bottomPanel), BorderLayout.SOUTH);</span>
+<span class="nc" id="L147">		refreshComponents();</span>
+<span class="nc" id="L148">	}</span>
+
+<span class="nc" id="L150">	protected AbstractAction okayAction = new AbstractAction(&quot;OK&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L155">			putValue(Action.SHORT_DESCRIPTION, &quot;Accepts changes and closes this window&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L159">			List&lt;String&gt; errors = routingStrategy.validate();</span>
+<span class="nc" id="L160">			StringBuilder msg = new StringBuilder();</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">			if (errors.size() &gt; 0) {</span>
+<span class="nc bnc" id="L162" title="All 2 branches missed.">				for (Map&lt;Object, Double&gt; routingProbs : routingStrategy.getAllEmpiricalEntries().values()) {</span>
+<span class="nc" id="L163">					stations.normalizeRoutingProbabilities(stationKey, classKey, routingProbs);</span>
+<span class="nc" id="L164">				}</span>
+<span class="nc bnc" id="L165" title="All 2 branches missed.">				for (String error : errors) {</span>
+<span class="nc" id="L166">					msg.append(error).append(&quot;\n&quot;);</span>
+<span class="nc" id="L167">				}</span>
+<span class="nc" id="L168">				showErrorMessageToUser(msg.toString());</span>
+<span class="nc" id="L169">				refreshComponents();</span>
+			} else {
+<span class="nc" id="L171">				LoadDependentRoutingEditor.this.setVisible(false);</span>
+			}
+<span class="nc" id="L173">		}</span>
+
+	};
+
+	// When Add Range button is pressed
+<span class="nc" id="L178">	protected AbstractAction addRangeAction = new AbstractAction(&quot;Add Range&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L183">			putValue(Action.SHORT_DESCRIPTION, &quot;Adds a new range into this service time strategy&quot;);</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L187">			addRange();</span>
+<span class="nc" id="L188">		}</span>
+
+	};
+
+	protected void addRange() {
+<span class="nc bnc" id="L193" title="All 2 branches missed.">		if (routingStrategy.getAllEmpiricalEntries().size() &gt;= 100) {</span>
+<span class="nc" id="L194">			return;</span>
+		}
+<span class="nc bnc" id="L196" title="All 2 branches missed.">		if (mapRowIndexAndFrom == null) {</span>
+<span class="nc" id="L197">			mapRowIndexAndFrom = new HashMap&lt;Integer, Integer&gt;();</span>
+		}
+<span class="nc" id="L199">		Integer newRowIndex = mapRowIndexAndFrom.size();</span>
+<span class="nc" id="L200">		int newFrom = 1;</span>
+<span class="nc bnc" id="L201" title="All 2 branches missed.">		if (newRowIndex != 0) {</span>
+<span class="nc" id="L202">			int lastRowIndex = newRowIndex - 1;</span>
+<span class="nc" id="L203">			int lastFrom = mapRowIndexAndFrom.get(lastRowIndex);</span>
+<span class="nc" id="L204">			newFrom = lastFrom + 1;</span>
+		}
+<span class="nc bnc" id="L206" title="All 2 branches missed.">		for (Object stationKey : forwardStationKeys)  {</span>
+<span class="nc" id="L207">			routingStrategy.addEmpiricalEntry(newFrom, stationKey, Double.valueOf(0.0));</span>
+<span class="nc" id="L208">		}</span>
+<span class="nc" id="L209">		mapRowIndexAndFrom.put(newRowIndex, newFrom);</span>
+<span class="nc" id="L210">		refreshComponents();</span>
+<span class="nc" id="L211">	}</span>
+
+	// deletion of one range
+<span class="nc" id="L214">	protected AbstractAction deleteRange = new AbstractAction(&quot;&quot;) {</span>
+
+		private static final long serialVersionUID = 1L;
+
+		{
+<span class="nc" id="L219">			putValue(Action.SHORT_DESCRIPTION, &quot;Deletes this range from current service section&quot;);</span>
+<span class="nc" id="L220">			putValue(Action.SMALL_ICON, JMTImageLoader.loadImage(&quot;Delete&quot;));</span>
+		}
+
+		public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L224">			int index = rangesTable.getSelectedRow();</span>
+<span class="nc bnc" id="L225" title="All 4 branches missed.">			if (index &gt;= 0 &amp;&amp; index &lt; rangesTable.getRowCount()) {</span>
+<span class="nc" id="L226">				deleteRange(index);</span>
+			}
+<span class="nc" id="L228">		}</span>
+
+	};
+
+	protected void refreshComponents() {
+<span class="nc" id="L233">		rangesTable.tableChanged(new TableModelEvent(rangesTable.getModel()));</span>
+<span class="nc" id="L234">	}</span>
+
+	/**
+	 * delete a range from strategy given the index the range to be deleted is displayed at
+	 * inside the table.
+	 * @param index
+	 * corresponding row index where delete will be performed
+	 */
+	protected void deleteRange(int index) {
+<span class="nc" id="L243">		Integer from = mapRowIndexAndFrom.get(index);</span>
+<span class="nc" id="L244">		int nextRowIndex = index + 1;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">		while (mapRowIndexAndFrom.get(nextRowIndex) != null) {</span>
+<span class="nc" id="L246">			mapRowIndexAndFrom.put(index, mapRowIndexAndFrom.get(nextRowIndex));</span>
+<span class="nc" id="L247">			nextRowIndex++;</span>
+<span class="nc" id="L248">			index++;</span>
+		}
+<span class="nc" id="L250">		mapRowIndexAndFrom.remove(index);</span>
+<span class="nc" id="L251">		routingStrategy.removeEmpiricalEntriesForFrom(from);</span>
+<span class="nc" id="L252">		refreshComponents();</span>
+<span class="nc" id="L253">	}</span>
+
+	protected class LoadDependentRoutingStrategyTable extends JTable {
+
+		private static final long serialVersionUID = 1L;
+
+		/*This button allow a single range to be deleted directly from the table.
+		Corresponding value contained into cell must be zero.*/
+<span class="nc" id="L261">		public JButton deleteButton = new JButton() {</span>
+
+			private static final long serialVersionUID = 1L;
+
+			{
+<span class="nc" id="L266">				setAction(deleteRange);</span>
+<span class="nc" id="L267">				setFocusable(false);</span>
+			}
+
+		};
+
+<span class="nc" id="L272">		protected int[] columnSizes = null;</span>
+
+<span class="nc" id="L274">		public LoadDependentRoutingStrategyTable() {</span>
+<span class="nc" id="L275">			setModel(new LoadDependentRoutingStrategyTableModel());</span>
+<span class="nc" id="L276">			setDefaultEditor(Object.class, new ExactCellEditor());</span>
+<span class="nc" id="L277">			setDefaultRenderer(String.class, new GrayCellRenderer());</span>
+<span class="nc" id="L278">			setAutoResizeMode(JTable.AUTO_RESIZE_OFF);</span>
+<span class="nc" id="L279">			columnSizes = new int[getModel().getColumnCount()];</span>
+<span class="nc" id="L280">			columnSizes[0] = 20;</span>
+<span class="nc" id="L281">			columnSizes[1] = 20;</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">			for (int index = 2; index &lt; columnSizes.length; index++) {</span>
+<span class="nc" id="L283">				columnSizes[index] = 50;</span>
+<span class="nc bnc" id="L284" title="All 2 branches missed.">				if (index == columnSizes.length - 1) {</span>
+<span class="nc" id="L285">					columnSizes[index] = 20;</span>
+				}
+			}
+<span class="nc" id="L288">			sizeColumnsAndRows();</span>
+<span class="nc" id="L289">			setSelectionMode(ListSelectionModel.SINGLE_SELECTION);</span>
+<span class="nc" id="L290">			getTableHeader().setReorderingAllowed(false);</span>
+<span class="nc" id="L291">		}</span>
+
+		//returns a component to be contained inside a table column(or cell)
+		@Override
+		public TableCellRenderer getCellRenderer(int row, int column) {
+<span class="nc" id="L296">			int deleteButtonPosition = validForwardStationKeys.size() + 2;</span>
+<span class="nc bnc" id="L297" title="All 4 branches missed.">			if (column == deleteButtonPosition &amp;&amp; row &gt; 0) {</span>
+<span class="nc" id="L298">				return new ButtonCellEditor(deleteButton);</span>
+<span class="nc bnc" id="L299" title="All 4 branches missed.">			} else if (column == deleteButtonPosition &amp;&amp; row == 0) {</span>
+<span class="nc" id="L300">				return getDefaultRenderer(String.class);</span>
+			} else {
+<span class="nc" id="L302">				return getDefaultRenderer(getModel().getColumnClass(column));</span>
+			}
+		}
+
+		/*returns customized editor for table cells.*/
+		@Override
+		public TableCellEditor getCellEditor(int row, int column) {
+<span class="nc" id="L309">			int deleteButtonPosition = validForwardStationKeys.size() + 2;</span>
+<span class="nc bnc" id="L310" title="All 4 branches missed.">			if (column == deleteButtonPosition &amp;&amp; row &gt; 0) {</span>
+<span class="nc" id="L311">				return new ButtonCellEditor(new JButton(deleteRange));</span>
+			} else {
+<span class="nc" id="L313">				return super.getCellEditor(row, column);</span>
+			}
+		}
+
+		//set sizes for columns and rows of this table.
+		protected void sizeColumnsAndRows() {
+<span class="nc bnc" id="L319" title="All 2 branches missed.">			for (int i = 0; i &lt; columnSizes.length; i++) {</span>
+<span class="nc" id="L320">				getColumnModel().getColumn(i).setMinWidth(columnSizes[i]);</span>
+<span class="nc bnc" id="L321" title="All 2 branches missed.">				if (i == columnSizes.length - 1) {</span>
+<span class="nc" id="L322">					getColumnModel().getColumn(i).setMaxWidth(columnSizes[i]);</span>
+				}
+			}
+<span class="nc" id="L325">		}</span>
+
+	}
+
+	protected class LoadDependentRoutingStrategyTableModel extends AbstractTableModel {
+
+		private static final long serialVersionUID = 1L;
+
+<span class="nc" id="L333">		protected String[] columnNames = null;</span>
+<span class="nc" id="L334">		protected Class&lt;?&gt;[] colClasses = null;</span>
+
+<span class="nc" id="L336">		public LoadDependentRoutingStrategyTableModel() {</span>
+<span class="nc" id="L337">			columnNames = new String[validForwardStationKeys.size() + 3];</span>
+<span class="nc" id="L338">			colClasses = new Class[validForwardStationKeys.size() + 3];</span>
+<span class="nc" id="L339">			columnNames[0] = &quot;From&quot;;</span>
+<span class="nc" id="L340">			colClasses[0] = String.class;</span>
+<span class="nc" id="L341">			columnNames[1] = &quot;To&quot;;</span>
+<span class="nc" id="L342">			colClasses[1] = String.class;</span>
+<span class="nc" id="L343">			int columnIndex = 2;</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">			for (Object stationKey : validForwardStationKeys) {</span>
+<span class="nc" id="L345">				columnNames[columnIndex] = stations.getStationName(stationKey);</span>
+<span class="nc" id="L346">				colClasses[columnIndex] = String.class;</span>
+<span class="nc" id="L347">				columnIndex++;</span>
+<span class="nc" id="L348">			}</span>
+<span class="nc" id="L349">			columnNames[columnIndex] = &quot;&quot;;</span>
+<span class="nc" id="L350">			colClasses[columnIndex] = JButton.class;</span>
+<span class="nc" id="L351">		}</span>
+
+		/**
+		 * Returns the number of rows in the model. A
+		 * &lt;code&gt;JTable&lt;/code&gt; uses this method to determine how many rows it
+		 * should display.  This method should be quick, as it
+		 * is called frequently during rendering.
+		 *
+		 * @return the number of rows in the model
+		 * @see #getColumnCount
+		 */
+		public int getRowCount() {
+<span class="nc" id="L363">			return routingStrategy.getAllEmpiricalEntries().size();</span>
+		}
+
+		/**
+		 * Returns the number of columns in the model. A
+		 * &lt;code&gt;JTable&lt;/code&gt; uses this method to determine how many columns it
+		 * should create and display by default.
+		 *
+		 * @return the number of columns in the model
+		 * @see #getRowCount
+		 */
+		public int getColumnCount() {
+<span class="nc" id="L375">			return columnNames.length;</span>
+		}
+
+		@Override
+		public String getColumnName(int columnIndex) {
+<span class="nc bnc" id="L380" title="All 2 branches missed.">			if (columnIndex &lt; columnNames.length) {</span>
+<span class="nc" id="L381">				return columnNames[columnIndex];</span>
+			} else {
+<span class="nc" id="L383">				return null;</span>
+			}
+		}
+
+		/**Returns class describing data contained in specific column.*/
+		@Override
+		public Class&lt;?&gt; getColumnClass(int columnIndex) {
+<span class="nc bnc" id="L390" title="All 2 branches missed.">			if (columnIndex &lt; colClasses.length) {</span>
+<span class="nc" id="L391">				return colClasses[columnIndex];</span>
+			} else {
+<span class="nc" id="L393">				return Object.class;</span>
+			}
+		}
+
+		/**
+		 * Returns the value for the cell at &lt;code&gt;columnIndex&lt;/code&gt; and
+		 * &lt;code&gt;rowIndex&lt;/code&gt;.
+		 *
+		 * @param    rowIndex    the row whose value is to be queried
+		 * @param    columnIndex the column whose value is to be queried
+		 * @return the value Object at the specified cell
+		 */
+		public Object getValueAt(int rowIndex, int columnIndex) {
+<span class="nc" id="L406">			Integer from = mapRowIndexAndFrom.get(rowIndex);</span>
+<span class="nc" id="L407">			Object to = &quot;\u221e&quot;;</span>
+<span class="nc" id="L408">			int nextRowIndex = rowIndex + 1;</span>
+<span class="nc bnc" id="L409" title="All 2 branches missed.">			if (mapRowIndexAndFrom.get(nextRowIndex) != null) {</span>
+<span class="nc" id="L410">				Integer nextRowFrom = mapRowIndexAndFrom.get(nextRowIndex);</span>
+<span class="nc" id="L411">				to = nextRowFrom - 1;</span>
+			}
+<span class="nc bnc" id="L413" title="All 3 branches missed.">			switch (columnIndex) {</span>
+			case (0): {
+<span class="nc" id="L415">				return from;</span>
+			}
+			case (1): {
+<span class="nc" id="L418">				return to;</span>
+			}
+			default: {
+<span class="nc" id="L421">				Map&lt;Object, Double&gt; columnEntries = routingStrategy.getEmpiricalEntriesForFrom(from);</span>
+<span class="nc bnc" id="L422" title="All 2 branches missed.">				if (columnIndex &lt; validForwardStationKeys.size() + 2) {</span>
+<span class="nc" id="L423">					Object stationKey = validForwardStationKeys.get(columnIndex - 2);</span>
+<span class="nc" id="L424">					return columnEntries.get(stationKey);</span>
+				} else {
+<span class="nc" id="L426">					return null;</span>
+				}
+			}
+			}
+		}
+
+		/**Tells whether data contained in a specific cell(given row and column index)
+		 * is editable or not. In this case distribution column is not editable, as
+		 * editing functionality is implemented via edit button*/
+		public boolean isCellEditable(int rowIndex, int columnIndex) {
+<span class="nc bnc" id="L436" title="All 8 branches missed.">			return !(rowIndex == 0 &amp;&amp; (columnIndex == 0 || columnIndex == validForwardStationKeys.size() + 2)) &amp;&amp; columnIndex != 1;</span>
+		}
+
+		/**Puts edited values to the underlying data structure for model implementation*/
+		@Override
+		public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+<span class="nc" id="L442">			Integer from = mapRowIndexAndFrom.get(rowIndex);</span>
+<span class="nc bnc" id="L443" title="All 3 branches missed.">			switch (columnIndex) {</span>
+			case (0): {
+				try {
+<span class="nc" id="L446">					Integer value = Integer.valueOf((String) aValue);</span>
+<span class="nc bnc" id="L447" title="All 2 branches missed.">					if (value.intValue() &lt; 2) {</span>
+<span class="nc" id="L448">						return;</span>
+					}
+<span class="nc bnc" id="L450" title="All 2 branches missed.">					if (mapRowIndexAndFrom.values().contains(value)) {</span>
+<span class="nc" id="L451">						return;</span>
+					}
+<span class="nc" id="L453">					Map&lt;Object, Double&gt; columnEntries = routingStrategy.getEmpiricalEntriesForFrom(from);</span>
+<span class="nc bnc" id="L454" title="All 2 branches missed.">					for (Entry&lt;Object, Double&gt; entry : columnEntries.entrySet()) {</span>
+<span class="nc" id="L455">						routingStrategy.addEmpiricalEntry(value, entry.getKey(), entry.getValue());</span>
+<span class="nc" id="L456">					}</span>
+<span class="nc" id="L457">					routingStrategy.removeEmpiricalEntriesForFrom(from);</span>
+<span class="nc" id="L458">					mapRowIndexAndFrom.put(rowIndex, value);</span>
+<span class="nc" id="L459">				} catch (NumberFormatException ignored) {</span>
+<span class="nc" id="L460">				}</span>
+<span class="nc" id="L461">				break;</span>
+			}
+			case (1): {
+<span class="nc" id="L464">				break;</span>
+			}
+			default: {
+<span class="nc" id="L467">				Map&lt;Object, Double&gt; columnEntries = routingStrategy.getEmpiricalEntriesForFrom(from);</span>
+<span class="nc bnc" id="L468" title="All 2 branches missed.">				if (columnIndex &lt; validForwardStationKeys.size() + 2) {</span>
+<span class="nc" id="L469">					Object stationKey = validForwardStationKeys.get(columnIndex - 2);</span>
+<span class="nc" id="L470">					columnEntries.put(stationKey, Double.valueOf((String) aValue));</span>
+<span class="nc" id="L471">				}</span>
+				break;
+			}
+			}
+
+			// If from has changed, need to repaint the table
+<span class="nc bnc" id="L477" title="All 2 branches missed.">			if (columnIndex == 0) {</span>
+				//repaint();
+<span class="nc" id="L479">				List&lt;Integer&gt; fromAsList = new ArrayList&lt;Integer&gt;();</span>
+<span class="nc" id="L480">				fromAsList.addAll(mapRowIndexAndFrom.values());</span>
+<span class="nc" id="L481">				Collections.sort(fromAsList);</span>
+<span class="nc" id="L482">				mapRowIndexAndFrom.clear();</span>
+<span class="nc bnc" id="L483" title="All 2 branches missed.">				for (int row = 0; row &lt; fromAsList.size(); row++) {</span>
+<span class="nc" id="L484">					mapRowIndexAndFrom.put(row, fromAsList.get(row));</span>
+				}
+<span class="nc" id="L486">				refreshComponents();</span>
+			}
+<span class="nc" id="L488">		}</span>
+
+	}
+
+	private void showErrorMessageToUser(String arg) {
+<span class="nc" id="L493">		JOptionPane.showMessageDialog(LoadDependentRoutingEditor.this, arg, &quot;Stop! Verify&quot;, JOptionPane.WARNING_MESSAGE);</span>
+<span class="nc" id="L494">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

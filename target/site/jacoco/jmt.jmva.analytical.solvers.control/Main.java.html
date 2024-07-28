@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Main.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.jmva.analytical.solvers.control</a> &gt; <span class="el_source">Main.java</span></div><h1>Main.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2010, Michail Makaronidis
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+
+package jmt.jmva.analytical.solvers.control;
+
+import javax.naming.OperationNotSupportedException;
+
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
+import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.CoMoMBTFSolver;
+import jmt.jmva.analytical.solvers.queueingnet.CoMoMSimpleSolver;
+import jmt.jmva.analytical.solvers.queueingnet.ConvolutionSolver;
+import jmt.jmva.analytical.solvers.queueingnet.MoMSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RECALNonRecursiveSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RECALSolver;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.MonteCarloLogisticSolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva.TreeMVASolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution.TreeConvolutionSolver;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+import jmt.jmva.analytical.solvers.utilities.RandomNetworkGenerator;
+import jmt.jmva.analytical.solvers.utilities.Timer;
+
+/**
+ * This is the main class of the program. It reads the input arguments and
+ * calls the respective solvers. If the MoM method using the auto-select argument,
+ * the prefferable between the serial and the parallel MoM is used.
+ *
+ * @author Michail Makaronidis, 2010
+ * @author Jack Bradshaw, 2012
+ * @author Ben Homer, 2014
+ * @author Ong Wai Hong, 2018
+ */
+public class Main {
+	/**
+	 * Global field to indicate whether or no to print matrices
+	 */
+<span class="nc" id="L54">	public static boolean verbose = false;</span>
+
+	/**
+	 * Used to test the provided API.
+	 * @throws BTFMatrixErrorException 
+	 * @throws InconsistentLinearSystemException 
+	 * @throws OperationNotSupportedException 
+	 */
+	private static void interfaceTest() throws OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
+<span class="nc" id="L63">		int R = 2, M = 4;</span>
+
+<span class="nc" id="L65">		int[] type = {MoMSolverDispatcher.LI, MoMSolverDispatcher.LI, MoMSolverDispatcher.LD, MoMSolverDispatcher.LD, MoMSolverDispatcher.LD};</span>
+<span class="nc" id="L66">		int E = type.length;</span>
+<span class="nc" id="L67">		double[][] servt = new double[E][R];</span>
+
+<span class="nc" id="L69">		int[] pop = new int[R];</span>
+<span class="nc" id="L70">		pop[0] = 10;</span>
+<span class="nc" id="L71">		pop[1] = 10;</span>
+
+<span class="nc" id="L73">		MoMSolverDispatcher mClosed = new MoMSolverDispatcher(R, E, pop);</span>
+
+		//station 1
+<span class="nc" id="L76">		servt[0][0] = 10;</span>
+<span class="nc" id="L77">		servt[1][0] = 5;</span>
+<span class="nc" id="L78">		servt[2][0] = 91;</span>
+<span class="nc" id="L79">		servt[3][0] = 4;</span>
+<span class="nc" id="L80">		servt[4][0] = 10;</span>
+
+		//station 2
+<span class="nc" id="L83">		servt[0][1] = 5;</span>
+<span class="nc" id="L84">		servt[1][1] = 9;</span>
+<span class="nc" id="L85">		servt[2][1] = 0;</span>
+<span class="nc" id="L86">		servt[3][1] = 8;</span>
+<span class="nc" id="L87">		servt[4][1] = 10;</span>
+
+<span class="nc" id="L89">		double[][] visits = new double[E][R];</span>
+
+		//station 1
+<span class="nc" id="L92">		visits[0][0] = 1;</span>
+<span class="nc" id="L93">		visits[1][0] = 1;</span>
+<span class="nc" id="L94">		visits[2][0] = 0;</span>
+<span class="nc" id="L95">		visits[3][0] = 0;</span>
+<span class="nc" id="L96">		visits[4][0] = 0;</span>
+
+		//station 2
+<span class="nc" id="L99">		visits[0][1] = 1;</span>
+<span class="nc" id="L100">		visits[1][1] = 1;</span>
+<span class="nc" id="L101">		visits[2][1] = 0;</span>
+<span class="nc" id="L102">		visits[3][1] = 0;</span>
+<span class="nc" id="L103">		visits[4][1] = 0;</span>
+
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		if (mClosed.input(type, servt, visits, Runtime.getRuntime().availableProcessors())) {</span>
+			try {
+<span class="nc" id="L107">				mClosed.solve();</span>
+<span class="nc" id="L108">			} catch (InternalErrorException ex) {</span>
+<span class="nc" id="L109">				System.err.println(&quot;Evaluation Failed!&quot;);</span>
+<span class="nc" id="L110">				ex.printStackTrace();</span>
+<span class="nc" id="L111">			}</span>
+		} else {
+<span class="nc" id="L113">			System.out.println(&quot;Wrong input!&quot;);</span>
+		}
+<span class="nc" id="L115">	}</span>
+
+	// This method prints a help message regarding the command line arguments.
+	private static void printHelp() {
+<span class="nc" id="L119">		System.out.println(&quot;Usage: java -jar MoM.jar &lt;Algorithm&gt; &lt;Output Performance Indices&gt; &lt;Input File&gt; [&lt;Number of Threads&gt;]&quot;);</span>
+<span class="nc" id="L120">		System.out.println(&quot;Output Performance Indices: 0 for no, 1 for yes&quot;);</span>
+<span class="nc" id="L121">		System.out.println(&quot;To generate a random network, type 'Random' for the Input File argument.&quot;);</span>
+<span class="nc" id="L122">		System.out.println(&quot;Available algorithms:&quot;);</span>
+<span class="nc" id="L123">		System.out.println(&quot;0: Convolution&quot;);</span>
+<span class="nc" id="L124">		System.out.println(&quot;1: RECAL (recursive)&quot;);</span>
+<span class="nc" id="L125">		System.out.println(&quot;2: RECAL (non-recursive)&quot;);</span>
+<span class="nc" id="L126">		System.out.println(&quot;3: MoM (parallel)&quot;);</span>
+<span class="nc" id="L127">		System.out.println(&quot;4: MoM (serial)&quot;);</span>
+<span class="nc" id="L128">		System.out.println(&quot;5: MoM (auto-select)&quot;);</span>
+<span class="nc" id="L129">		System.out.println(&quot;6: CoMoM (serial)&quot;);</span>
+<span class="nc" id="L130">		System.out.println(&quot;7: CoMoM (BTF)&quot;);</span>
+<span class="nc" id="L131">		System.out.println(&quot;8: Tree Convolution&quot;);</span>
+<span class="nc" id="L132">		System.out.println(&quot;9: Tree MVA&quot;);</span>
+<span class="nc" id="L133">		System.out.println(&quot;10: Logistic Sampling&quot;);</span>
+
+		//System.out.println(&quot;999: Interface test mode&quot;);
+<span class="nc" id="L136">	}</span>
+
+	/**
+	 * The main function parses the command line arguments and initiates the
+	 * respective procedures.
+	 * @param args The command line arguments
+	 * @throws Exception 
+	 */
+	public static void main(String[] args) throws Exception {
+<span class="nc bnc" id="L145" title="All 2 branches missed.">		if (args.length &lt; 3) {</span>
+<span class="nc" id="L146">			printHelp();</span>
+<span class="nc" id="L147">			return;</span>
+		} else {
+<span class="nc" id="L149">			Timer total_time = new Timer();</span>
+<span class="nc" id="L150">			total_time.start();</span>
+
+<span class="nc" id="L152">			boolean failed = false;</span>
+			try {
+<span class="nc" id="L154">				String filename = args[2];</span>
+<span class="nc" id="L155">				int algorithm = Integer.parseInt(args[0]);</span>
+<span class="nc bnc" id="L156" title="All 2 branches missed.">				if (algorithm == 999) {</span>
+<span class="nc" id="L157">					interfaceTest();</span>
+<span class="nc" id="L158">					return;</span>
+				}
+<span class="nc" id="L160">				int performanceMeasures = Integer.parseInt(args[1]);</span>
+<span class="nc bnc" id="L161" title="All 2 branches missed.">				if (performanceMeasures == 2) {</span>
+<span class="nc" id="L162">					verbose = true;</span>
+				}
+<span class="nc bnc" id="L164" title="All 6 branches missed.">				if (performanceMeasures != 0 &amp;&amp; performanceMeasures != 1 &amp;&amp;  performanceMeasures != 2) {</span>
+<span class="nc" id="L165">					printHelp();</span>
+<span class="nc" id="L166">					return;</span>
+				}
+				int nThreads;
+<span class="nc bnc" id="L169" title="All 2 branches missed.">				if (args.length &gt;= 4) {</span>
+<span class="nc" id="L170">					nThreads = Integer.parseInt(args[3]);</span>
+				} else {
+<span class="nc" id="L172">					nThreads = Runtime.getRuntime().availableProcessors();</span>
+				}
+
+				/** Added by Ben Homer */
+				QNModel qnm;
+<span class="nc bnc" id="L177" title="All 2 branches missed.">				if (filename.toLowerCase().equals(&quot;random&quot;)) {</span>
+<span class="nc" id="L178">					RandomNetworkGenerator rng = new RandomNetworkGenerator(true, 3);</span>
+<span class="nc" id="L179">					int M = 4;</span>
+<span class="nc" id="L180">					int R = 4;</span>
+<span class="nc" id="L181">					double sparcity = 0.5;</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">					if (args.length &gt;= 5) {</span>
+						//Manual setting M and R
+<span class="nc" id="L184">						M = Integer.parseInt(args[4]);</span>
+<span class="nc" id="L185">						R = Integer.parseInt(args[5]);</span>
+<span class="nc bnc" id="L186" title="All 2 branches missed.">						if (args.length &gt;= 7) {  </span>
+<span class="nc" id="L187">							sparcity = Double.parseDouble(args[6]);</span>
+						}
+					}
+<span class="nc" id="L190">					qnm = rng.generateSparseNetwork(M, R, sparcity, false, false); </span>
+<span class="nc" id="L191">				} else {</span>
+<span class="nc" id="L192">					qnm = new QNModel(filename);</span>
+				}
+				/* End */
+
+<span class="nc bnc" id="L196" title="All 2 branches missed.">				if (args.length &gt;= 5) {</span>
+					//Manual setting M and R
+<span class="nc" id="L198">					int M = Integer.parseInt(args[4]);</span>
+<span class="nc" id="L199">					int R = Integer.parseInt(args[5]);</span>
+<span class="nc" id="L200">					qnm.setM(M);</span>
+<span class="nc" id="L201">					qnm.setR(R);</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">					if (args.length &gt;= 7) {   </span>
+<span class="nc" id="L203">						int N = Integer.parseInt(args[6]);</span>
+<span class="nc" id="L204">						qnm.setN(N);</span>
+					}
+				}
+
+				QNSolver c;
+<span class="nc bnc" id="L209" title="All 2 branches missed.">				if (algorithm == 5) {</span>
+<span class="nc" id="L210">					int matrixSize = MoMMatrixSize(qnm);</span>
+<span class="nc bnc" id="L211" title="All 2 branches missed.">					if (matrixSize &gt;= 120) {</span>
+<span class="nc" id="L212">						algorithm = 3;</span>
+					} else {
+<span class="nc" id="L214">						algorithm = 4;</span>
+					}
+				}
+<span class="nc bnc" id="L217" title="All 11 branches missed.">				switch (algorithm) {</span>
+				case 0:
+<span class="nc" id="L219">					c = new ConvolutionSolver(qnm);</span>
+<span class="nc" id="L220">					break;</span>
+				case 1:
+<span class="nc" id="L222">					c = new RECALSolver(qnm);</span>
+<span class="nc" id="L223">					break;</span>
+				case 2:
+<span class="nc" id="L225">					c = new RECALNonRecursiveSolver(qnm);</span>
+<span class="nc" id="L226">					break;</span>
+				case 3:
+<span class="nc bnc" id="L228" title="All 2 branches missed.">					if (nThreads &gt; 1) {</span>
+<span class="nc" id="L229">						c = new MoMSolver(qnm, nThreads);</span>
+<span class="nc" id="L230">						break;</span>
+					} else {
+<span class="nc" id="L232">						printHelp();</span>
+<span class="nc" id="L233">						return;</span>
+					}
+				case 4:
+<span class="nc" id="L236">					c = new MoMSolver(qnm, 1);</span>
+<span class="nc" id="L237">					break;</span>
+				case 6:
+<span class="nc" id="L239">					c = new CoMoMSimpleSolver(qnm, 1);</span>
+<span class="nc" id="L240">					break;</span>
+				case 7:
+<span class="nc" id="L242">					c = new CoMoMBTFSolver(qnm);</span>
+<span class="nc" id="L243">					break;</span>
+				case 8:
+<span class="nc" id="L245">					c = new TreeConvolutionSolver(qnm, nThreads);</span>
+<span class="nc" id="L246">					break;</span>
+				case 9:
+<span class="nc" id="L248">					c = new TreeMVASolver(qnm, nThreads, false);</span>
+<span class="nc" id="L249">					break;</span>
+				case 10:
+<span class="nc" id="L251">					c = new MonteCarloLogisticSolver(qnm);</span>
+<span class="nc" id="L252">					break;</span>
+				default:
+<span class="nc" id="L254">					printHelp();</span>
+<span class="nc" id="L255">					return;</span>
+				}
+<span class="nc" id="L257">				System.out.println(&quot;Will read &quot; + filename);</span>
+<span class="nc" id="L258">				qnm.printModel();</span>
+<span class="nc" id="L259">				c.printWelcome();</span>
+<span class="nc bnc" id="L260" title="All 2 branches missed.">				if (!(c instanceof TreeMVASolver)) {</span>
+<span class="nc" id="L261">					c.computeNormalisingConstant();</span>
+<span class="nc" id="L262">					System.out.println(&quot;G = &quot; + qnm.getNormalisingConstant());</span>
+<span class="nc" id="L263">					System.out.println(&quot;G = &quot; + qnm.getPrettyNormalisingConstant());</span>
+<span class="nc" id="L264">					c.printTimeStatistics();</span>
+<span class="nc" id="L265">					c.printMemUsage();</span>
+				}
+<span class="nc bnc" id="L267" title="All 2 branches missed.">				if (performanceMeasures == 1) {</span>
+<span class="nc" id="L268">					c.computePerformanceMeasures();</span>
+<span class="nc" id="L269">					System.out.println(&quot;\nX = &quot;);</span>
+<span class="nc" id="L270">					MiscMathsFunctions.printPrettyMatrix(qnm.getMeanThroughputs());</span>
+<span class="nc" id="L271">					System.out.println(&quot;\nQ = &quot;);</span>
+<span class="nc" id="L272">					MiscMathsFunctions.printPrettyMatrix(qnm.getMeanQueueLengths());</span>
+<span class="nc" id="L273">					System.out.println();</span>
+<span class="nc" id="L274">					c.printTimeStatistics();</span>
+				}
+<span class="nc" id="L276">			} catch (NumberFormatException ex) {</span>
+<span class="nc" id="L277">				System.err.println(&quot;\nIllegal argument &quot; + ex.getMessage());</span>
+<span class="nc" id="L278">				failed = true;</span>
+				/*System.out.println(&quot;\n======= DEBUGGING INFO =======&quot;);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);*/
+<span class="nc" id="L281">			} catch (Throwable ex) {</span>
+<span class="nc" id="L282">				System.err.println(&quot;\n&quot; + ex.getMessage());</span>
+<span class="nc" id="L283">				ex.printStackTrace();</span>
+<span class="nc" id="L284">				failed = true;</span>
+				/*
+                System.out.println(&quot;\n======= DEBUGGING INFO =======&quot;);
+                Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);*/
+			} finally {
+<span class="nc" id="L289">				total_time.pause();</span>
+<span class="nc" id="L290">				System.out.println(total_time.getInterval());</span>
+
+<span class="nc bnc" id="L292" title="All 2 branches missed.">				if (failed) {</span>
+<span class="nc" id="L293">					System.exit(1);</span>
+				}
+				//System.err.println(&quot;exited&quot;);
+<span class="nc" id="L296">				System.exit(0);</span>
+			}
+		}
+<span class="nc" id="L299">	}</span>
+
+	private static int MoMMatrixSize(QNModel qnm) {
+<span class="nc" id="L302">		return MiscMathsFunctions.binomialCoefficient(qnm.M + qnm.R, qnm.R) * qnm.R;</span>
+	}
+
+	private Main() {
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

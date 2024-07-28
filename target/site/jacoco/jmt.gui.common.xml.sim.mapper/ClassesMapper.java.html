@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ClassesMapper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.gui.common.xml.sim.mapper</a> &gt; <span class="el_source">ClassesMapper.java</span></div><h1>ClassesMapper.java</h1><pre class="source lang-java linenums">/**
+ * This class is responsible for mapping {@link UserClassDescriptor} objects from the DTO to the {@link CommonModel}
+ * and vice-versa. It iterates through the user classes defined in the {@link SimDescriptor} and adds them to the model,
+ * or retrieves them from the model to build the DTO.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
+package jmt.gui.common.xml.sim.mapper;
+
+import jmt.gui.common.CommonConstants;
+import jmt.gui.common.Defaults;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.sim.dto.SimDescriptor;
+import jmt.gui.common.xml.sim.dto.UserClassDescriptor;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
+
+import java.util.List;
+
+<span class="fc" id="L20">public class ClassesMapper implements ModelElementMapper {</span>
+
+    // --- READING PHASE (XML -&gt; DTO -&gt; Model) ---
+
+    @Override
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
+<span class="pc bpc" id="L26" title="1 of 2 branches missed.">        if (dto.getUserClasses() == null) {</span>
+<span class="nc" id="L27">            return;</span>
+        }
+
+<span class="fc bfc" id="L30" title="All 2 branches covered.">        for (UserClassDescriptor currclass : dto.getUserClasses()) {</span>
+<span class="fc" id="L31">            mapUserClass(currclass, context);</span>
+<span class="fc" id="L32">        }</span>
+<span class="fc" id="L33">    }</span>
+
+    private void mapUserClass(UserClassDescriptor currclass, MappingContext context) {
+<span class="fc" id="L36">        CommonModel model = context.getModel();</span>
+<span class="fc" id="L37">        String name = currclass.getName();</span>
+
+        // Determines the class type: &quot;open&quot; or &quot;closed&quot;
+<span class="fc bfc" id="L40" title="All 2 branches covered.">        int type = XML_A_CLASS_TYPE_OPEN.equals(currclass.getType()) ?</span>
+<span class="fc" id="L41">                CommonConstants.CLASS_TYPE_OPEN : CommonConstants.CLASS_TYPE_CLOSED;</span>
+
+        // Try parsing the actual attributes (if present and not empty), otherwise use defaults
+<span class="fc" id="L44">        Integer priority = getInt(currclass.getPriority(), Defaults.getAsInteger(&quot;classPriority&quot;));</span>
+<span class="fc" id="L45">        Double softDeadline = getDouble(currclass.getSoftDeadline(), Defaults.getAsDouble(&quot;classSoftDeadline&quot;));</span>
+<span class="fc" id="L46">        Integer customers = getInt(currclass.getCustomers(), Defaults.getAsInteger(&quot;classPopulation&quot;));</span>
+
+        // Adds the User Class to the CommonModel.
+        // Note: the distribution will be set later.
+<span class="fc" id="L50">        Object key = model.addClass(name, type, priority, softDeadline, customers,</span>
+<span class="fc" id="L51">                Defaults.getAsNewInstance(&quot;classDistribution&quot;));</span>
+
+        // Stores the reference source in the context, it will be used in Post-Processing
+<span class="fc" id="L54">        context.refStations.put(key, currclass.getReferenceSource());</span>
+
+        // Populates the map that associates the class name with its generated key
+<span class="fc" id="L57">        context.classes.put(name, key);</span>
+<span class="fc" id="L58">    }</span>
+
+    // --- WRITING PHASE (Model -&gt; DTO -&gt; XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+<span class="fc" id="L64">        CommonModel model = context.model;</span>
+<span class="fc" id="L65">        List&lt;Object&gt; classKeys = model.getClassKeys();</span>
+
+<span class="pc bpc" id="L67" title="2 of 4 branches missed.">        if (classKeys == null || classKeys.isEmpty()) {</span>
+<span class="nc" id="L68">            return;</span>
+        }
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        for (Object classKey : classKeys) {</span>
+<span class="fc" id="L72">            UserClassDescriptor classDto = new UserClassDescriptor();</span>
+<span class="fc" id="L73">            mapModelClassToDto(model, classKey, classDto);</span>
+<span class="fc" id="L74">            dto.addUserClass(classDto);</span>
+<span class="fc" id="L75">        }</span>
+<span class="fc" id="L76">    }</span>
+
+    private void mapModelClassToDto(CommonModel model, Object classKey, UserClassDescriptor classDto) {
+        // Name
+<span class="fc" id="L80">        classDto.setName(model.getClassName(classKey));</span>
+
+        // Type &amp; Customers (Population)
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {</span>
+<span class="fc" id="L84">            classDto.setType(XML_A_CLASS_TYPE_OPEN);</span>
+        } else {
+<span class="fc" id="L86">            classDto.setType(XML_A_CLASS_TYPE_CLOSED);</span>
+<span class="fc" id="L87">            Integer population = model.getClassPopulation(classKey);</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">            if (population != null) {</span>
+<span class="fc" id="L89">                classDto.setCustomers(population.toString());</span>
+            }
+        }
+
+        // Priority
+<span class="fc" id="L94">        Integer priority = model.getClassPriority(classKey);</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if (priority != null) {</span>
+<span class="fc" id="L96">            classDto.setPriority(priority.toString());</span>
+        }
+
+        // Soft Deadline
+<span class="fc" id="L100">        Double softDeadline = model.getClassSoftDeadline(classKey);</span>
+<span class="pc bpc" id="L101" title="1 of 2 branches missed.">        if (softDeadline != null) {</span>
+<span class="fc" id="L102">            classDto.setSoftDeadline(softDeadline.toString());</span>
+        }
+
+        // Reference Source
+<span class="fc" id="L106">        Object refStationKey = model.getClassRefStation(classKey);</span>
+<span class="fc" id="L107">        String referenceSource = resolveReferenceSourceForClass(model, refStationKey);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">        if (referenceSource != null) {</span>
+<span class="fc" id="L109">            classDto.setReferenceSource(referenceSource);</span>
+        }
+<span class="fc" id="L111">    }</span>
+
+    private String resolveReferenceSourceForClass(CommonModel model, Object refStationKey) {
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if (refStationKey == null) {</span>
+<span class="nc" id="L115">            return null;</span>
+        }
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">        if (CommonConstants.STATION_TYPE_FORK.equals(refStationKey)</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">                || CommonConstants.STATION_TYPE_CLASSSWITCH.equals(refStationKey)</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">                || CommonConstants.STATION_TYPE_SCALER.equals(refStationKey)</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                || CommonConstants.STATION_TYPE_TRANSITION.equals(refStationKey)) {</span>
+<span class="nc" id="L121">            return (String) refStationKey;</span>
+        }
+<span class="fc" id="L123">        return model.getStationName(refStationKey);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

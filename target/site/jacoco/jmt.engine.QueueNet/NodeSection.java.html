@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NodeSection.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.QueueNet</a> &gt; <span class="el_source">NodeSection.java</span></div><h1>NodeSection.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.QueueNet;
+
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.NodeSections.Server;
+import jmt.engine.log.LoggerStateManager;
+import jmt.engine.simEngine.Simulation;
+import jmt.engine.NodeSections.Linkage;
+import jmt.engine.NodeSections.Queue;
+import org.apache.commons.math3.util.Pair;
+
+import jmt.common.exception.NetException;
+import jmt.engine.dataAnalysis.InverseMeasure;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.log.JSimLogger;
+import jmt.engine.random.Parameter;
+import jmt.engine.simEngine.RemoveToken;
+
+import java.util.List;
+
+/**
+ * This class implements a generic section of a NetNode.
+ * @author Francesco Radaelli, Stefano Omini
+ */
+public abstract class NodeSection {
+
+	/*------------------------------ADDRESSES---------------------------------*/
+
+	/** Section without address.*/
+	public static final byte NO_ADDRESS = 0x00;
+	/** Input section address */
+	public static final byte INPUT = 0x01;
+	/** Service section address. */
+	public static final byte SERVICE = 0x02;
+	/** Output section address.*/
+	public static final byte OUTPUT = 0x03;
+
+	/*-----------------------NODE SECTION RETURNED VALUES---------------------*/
+
+	/** Message passed has not been processed (general event). */
+	public static final int MSG_NOT_PROCESSED = 0x0000;
+
+	/** Message passed has been processed (all events). */
+	public static final int MSG_PROCESSED = 0x0001;
+
+	/*------------------------------BIT MASK----------------------------------*/
+
+	static final int SOURCE_MASK = 0xFF000000;
+
+	static final int DESTINATION_MASK = 0x00FF0000;
+
+	static final int SOURCE_SHIFT = 24;
+
+	static final int DESTINATION_SHIFT = 16;
+
+	/*------------------------------------------------------------------------*/
+
+	/** Exception ID: Required measure does not exist. */
+	public static final int EXCEPTION_MEASURE_DOES_NOT_EXIST = 0x0001;
+	/** Exception ID: Required property is not available. */
+	public static final int EXCEPTION_PROPERTY_NOT_AVAILABLE = 0x0002;
+
+	//TODO: warning, not all properties make sense for all section types
+
+	/** Property ID: number of jobs arriving at this section */
+	public static final int PROPERTY_ID_ARRIVING_JOBS = 0x0001;
+	/** Property ID: number of jobs departing from this section */
+	public static final int PROPERTY_ID_DEPARTING_JOBS = 0x0002;
+	/** Property ID: number of jobs inside this section */
+	public static final int PROPERTY_ID_RESIDENT_JOBS = 0x0003;
+	/** Property ID: residence time */
+	public static final int PROPERTY_ID_RESIDENCE_TIME = 0x0004;
+	/** Property ID: utilization */
+	public static final int PROPERTY_ID_UTILIZATION = 0x0005;
+	/** Property ID: average utilization */
+	public static final int PROPERTY_ID_AVERAGE_UTILIZATION = 0x0006;
+
+	//TODO: make more efficient the mechanism to determine the ownerNode (to avoid too many getNode)
+	/** Owner of this NodeSection. */
+	private NetNode ownerNode;
+
+	/** Identifier of this NodeSection. */
+	private byte sectionID;
+
+	protected JobInfoList jobsList;
+
+<span class="nc" id="L104">	protected JSimLogger logger = JSimLogger.getLogger(this.getClass());</span>
+
+	private boolean auto; //auto refresh of the jobsList attribute.
+	private boolean nodeAuto; // auto refresh the joblist attribute at node level.
+
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the &quot;nodeLiked(...)&quot; protected method should be used.
+	 * @param id NodeSection identifier.
+	 */
+<span class="nc" id="L116">	public NodeSection(byte id) {</span>
+<span class="nc" id="L117">		this.sectionID = id;</span>
+<span class="nc" id="L118">		this.auto = true;</span>
+<span class="nc" id="L119">		this.nodeAuto = true;</span>
+<span class="nc" id="L120">	}</span>
+
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the &quot;nodeLiked(...)&quot; protected method should be used.
+	 * @param id NodeSection identifier.
+	 * @param auto Auto refresh of the jobsList attribute.
+	 */
+<span class="nc" id="L130">	public NodeSection(byte id, boolean auto) {</span>
+<span class="nc" id="L131">		this.sectionID = id;</span>
+<span class="nc" id="L132">		this.auto = auto;</span>
+<span class="nc" id="L133">		this.nodeAuto = true;</span>
+<span class="nc" id="L134">	}</span>
+
+	/**
+	 * Creates a new instance of this NodeSection.
+	 * Note that, while building a new node section, node owner informations are
+	 * not available. To set node section properties depending on the owner node
+	 * ones, the &quot;nodeLiked(...)&quot; protected method should be used.
+	 * @param id NodeSection identifier.
+	 * @param auto Auto refresh of the jobsList attribute.
+	 * @param nodeAuto Auto refresh the jobsList attribute at node level
+	 */
+<span class="nc" id="L145">	public NodeSection(byte id, boolean auto, boolean nodeAuto) {</span>
+<span class="nc" id="L146">		this.sectionID = id;</span>
+<span class="nc" id="L147">		this.auto = auto;</span>
+<span class="nc" id="L148">		this.nodeAuto = nodeAuto;</span>
+<span class="nc" id="L149">	}</span>
+
+	/**
+	 * This method should be overridden to implement a specific behaviour of the
+	 * node section when the node section itself is linked to the owner node.
+	 * This method should be used to set node section properties depending on
+	 * the owner node ones.
+	 * @param node Owner node.
+	 * @throws NetException
+	 */
+	protected void nodeLinked(NetNode node) throws NetException {
+<span class="nc" id="L160">	}</span>
+
+	/**
+	 * Gets the id of the node section.
+	 * @return node section identifier.
+	 */
+	public byte getSectionID() {
+<span class="nc" id="L167">		return sectionID;</span>
+	}
+
+	//TODO: alternatively one can override particular components
+	public void analyze(int measureName, JobClass jobClass, Measure measurement) throws NetException{
+<span class="nc" id="L172">		String name = measurement.getName();</span>
+<span class="nc" id="L173">		boolean isServerType = false;</span>
+<span class="nc" id="L174">		int serverTypeId = 0;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if (getServerTypes() != null) {</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">			for (Server.ServerType serverType : getServerTypes()) {</span>
+<span class="nc bnc" id="L177" title="All 2 branches missed.">				if (name.startsWith(serverType.getName())) {</span>
+<span class="nc" id="L178">					isServerType = true;</span>
+<span class="nc" id="L179">					serverTypeId = serverType.getId();</span>
+<span class="nc" id="L180">					break;</span>
+				}
+<span class="nc" id="L182">			}</span>
+		}
+<span class="nc" id="L184">		analyze(measureName, jobClass, measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L185">	}</span>
+
+	/**
+	 * Analyzes a measure in the node section. Override this method to analyze a
+	 * measure depending on the node section implementation. Note that the first
+	 * 256 identifiers are reserved by NodeSection class.
+	 * @param name name of the measure to be activated (see measures constants).
+	 * @param jobClass Job class to be analyzed.
+	 * @param measurement Set of measure to be activated.
+	 * @throws NetException
+	 */
+	public void analyze(int name, JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId) throws NetException {
+<span class="nc bnc" id="L197" title="All 9 branches missed.">		switch (name) {</span>
+			case SimConstants.LIST_NUMBER_OF_JOBS:
+<span class="nc" id="L199">				jobsList.analyzeUtilization(jobClass, measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L200">				break;</span>
+			case SimConstants.LIST_NUMBER_OF_JOBS_IN_SERVICE:
+<span class="nc" id="L202">				jobsList.analyzeEffectiveUtilization(jobClass, measurement);</span>
+<span class="nc" id="L203">				break;</span>
+			case SimConstants.LIST_RESIDENCE_TIME:
+<span class="nc" id="L205">				jobsList.analyzeResidenceTime(jobClass, measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L206">				break;</span>
+			case SimConstants.LIST_ARRIVAL_RATE:
+<span class="nc" id="L208">				jobsList.analyzeArrivalRate(jobClass, (InverseMeasure) measurement);</span>
+<span class="nc" id="L209">				break;</span>
+			case SimConstants.LIST_THROUGHPUT:
+<span class="nc" id="L211">				jobsList.analyzeThroughput(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L212">				break;</span>
+			case SimConstants.LIST_DROP_RATE:
+<span class="nc" id="L214">				jobsList.analyzeDropRate(jobClass, (InverseMeasure) measurement, isServerType, serverTypeId);</span>
+<span class="nc" id="L215">				break;</span>
+			case SimConstants.CACHE_HIT_RATE:
+<span class="nc" id="L217">				jobsList.analyzeCacheHitRate(jobClass, measurement);</span>
+<span class="nc" id="L218">				break;</span>
+			case SimConstants.NUMBER_OF_ACTIVE_SERVERS:
+<span class="nc" id="L220">				jobsList.analyzeNumberOfServers(measurement);</span>
+<span class="nc" id="L221">				break;</span>
+			default:
+<span class="nc" id="L223">				throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+		}
+<span class="nc" id="L225">	}</span>
+
+	/**
+	 * Sets the owner node of this section.
+	 * @param ownerNode owner node.
+	 */
+	void setOwnerNode(NetNode ownerNode) throws NetException {
+<span class="nc" id="L232">		this.ownerNode = ownerNode;</span>
+<span class="nc" id="L233">		jobsList = new LinkedJobInfoList(getJobClasses(), getClassCompatibilities(), getOwnerNode().getName(), getServerTypes());</span>
+<span class="nc" id="L234">		jobsList.setNetSystem(ownerNode.getNetSystem());</span>
+<span class="nc" id="L235">		nodeLinked(ownerNode);</span>
+<span class="nc" id="L236">	}</span>
+
+	/**
+	 * Gets the owner node of this section.
+	 * @return Owner node.
+	 */
+	public NetNode getOwnerNode() {
+<span class="nc" id="L243">		return ownerNode;</span>
+	}
+
+	/**
+	 * Checks if the specified node is the owner node of this section. Note that
+	 * this method could be called &lt;b&gt;only after&lt;/b&gt; that the owner node has
+	 * been linked to this section.
+	 * @param node node to be checked.
+	 * @return True if the node is the owner node, false otherwise.
+	 */
+	public boolean isMyOwnerNode(NetNode node) {
+<span class="nc bnc" id="L254" title="All 2 branches missed.">		return node == this.ownerNode;</span>
+	}
+
+	/**
+	 * Gets the list of the job classes of the owner queue network.
+	 * @return Queue network job classes.
+	 */
+	public JobClassList getJobClasses() {
+<span class="nc" id="L262">		return ownerNode.getJobClasses();</span>
+	}
+
+	/** Returns class compatibilities for specific node
+	 */
+	public Boolean[][] getClassCompatibilities(){
+<span class="nc" id="L268">		return ownerNode.getClassCompatibilities();</span>
+	}
+
+	/** Returns server types for specific node
+	 */
+	public List&lt;Server.ServerType&gt; getServerTypes(){
+<span class="nc" id="L274">		return ownerNode.getServerTypes();</span>
+	}
+
+	/**
+	 * Gets the job info list of this section.
+	 * @return Job info list.
+	 */
+	public JobInfoList getJobInfoList() {
+<span class="nc" id="L282">		return jobsList;</span>
+	}
+
+	/**
+	 * Gets an integer type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier (see properties constants).
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public int getIntSectionProperty(int id) throws NetException {
+<span class="nc bnc" id="L293" title="All 4 branches missed.">		switch (id) {</span>
+			case PROPERTY_ID_ARRIVING_JOBS:
+<span class="nc" id="L295">				return jobsList.getJobsIn();</span>
+			case PROPERTY_ID_DEPARTING_JOBS:
+<span class="nc" id="L297">				return jobsList.getJobsOut();</span>
+			case PROPERTY_ID_RESIDENT_JOBS:
+<span class="nc" id="L299">				return jobsList.size();</span>
+			default:
+<span class="nc" id="L301">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets an integer type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier (see properties constants).
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public int getIntSectionProperty(int id, JobClass jobClass) throws NetException {
+<span class="nc bnc" id="L315" title="All 4 branches missed.">		switch (id) {</span>
+			case PROPERTY_ID_ARRIVING_JOBS:
+<span class="nc" id="L317">				return jobsList.getJobsInPerClass(jobClass);</span>
+			case PROPERTY_ID_DEPARTING_JOBS:
+<span class="nc" id="L319">				return jobsList.getJobsOutPerClass(jobClass);</span>
+			case PROPERTY_ID_RESIDENT_JOBS:
+<span class="nc" id="L321">				return jobsList.size(jobClass);</span>
+			default:
+<span class="nc" id="L323">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a double type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier (see properties constants).
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public double getDoubleSectionProperty(int id) throws NetException {
+<span class="nc" id="L335">		NetSystem netSystem = ownerNode.getNetSystem();</span>
+<span class="nc bnc" id="L336" title="All 4 branches missed.">		switch (id) {</span>
+			case PROPERTY_ID_RESIDENCE_TIME:
+<span class="nc" id="L338">				return jobsList.getLastJobSojournTime();</span>
+			case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L340">				return jobsList.size();</span>
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L342" title="All 2 branches missed.">				return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L343">						: jobsList.getTotalSojournTime() / netSystem.getTime();</span>
+			default:
+<span class="nc" id="L345">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a double type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier (see properties constants).
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public double getDoubleSectionProperty(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L359">		NetSystem netSystem = ownerNode.getNetSystem();</span>
+<span class="nc bnc" id="L360" title="All 4 branches missed.">		switch (id) {</span>
+			case PROPERTY_ID_RESIDENCE_TIME:
+<span class="nc" id="L362">				return jobsList.getLastJobSojournTimePerClass(jobClass);</span>
+			case PROPERTY_ID_UTILIZATION:
+<span class="nc" id="L364">				return jobsList.size(jobClass);</span>
+			case PROPERTY_ID_AVERAGE_UTILIZATION:
+<span class="nc bnc" id="L366" title="All 2 branches missed.">				return (netSystem.getTime() &lt;= 0.0) ? 0.0</span>
+<span class="nc" id="L367">						: jobsList.getTotalSojournTimePerClass(jobClass) / netSystem.getTime();</span>
+			default:
+<span class="nc" id="L369">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a parameter type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public Parameter getParameter(int id) throws NetException {
+<span class="nc" id="L381">		switch (id) {</span>
+			default:
+<span class="nc" id="L383">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets a parameter type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier.
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public Parameter getParameter(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L397">		switch (id) {</span>
+			default:
+<span class="nc" id="L399">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets an object type property of this node. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public Object getObject(int id) throws NetException {
+<span class="nc" id="L411">		switch (id) {</span>
+			default:
+<span class="nc" id="L413">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Gets an object type property of this node depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier.
+	 * @param jobClass the jobClass which property refers to.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public Object getObject(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L427">		switch (id) {</span>
+			default:
+<span class="nc" id="L429">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Checks if a property of this node is enabled. Note that the first 256
+	 * identifiers are reserved by NodeSection class.
+	 * @param id Property identifier.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public boolean isEnabled(int id) throws NetException {
+<span class="nc" id="L441">		switch (id) {</span>
+			default:
+<span class="nc" id="L443">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * Checks if a property of this node is enabled depending on a specified job
+	 * class. Note that the first 256 identifiers are reserved by NodeSection
+	 * class.
+	 * @param id Property identifier.
+	 * @param jobClass jobClass.
+	 * @return Property value.
+	 * @throws NetException if the requested property is not available.
+	 */
+	public boolean isEnabled(int id, JobClass jobClass) throws NetException {
+<span class="nc" id="L457">		switch (id) {</span>
+			default:
+<span class="nc" id="L459">				throw new NetException(this, EXCEPTION_PROPERTY_NOT_AVAILABLE, &quot;required property is not available.&quot;);</span>
+		}
+	}
+
+	/**
+	 * This method should be overridden to implement a specific NetMessage
+	 * processor.
+	 * @param message message to be processed.
+	 * @return message processing result.
+	 */
+	protected abstract int process(NetMessage message) throws NetException, IncorrectDistributionParameterException;
+
+	/**
+	 * Sends an event to a section of a node.
+	 * @param event event to be sent.
+	 * @param data  data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection destination section.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(int event, Object data, double delay, byte destinationSection, NetNode destination) {
+<span class="nc bnc" id="L481" title="All 4 branches missed.">		if (event == NetEvent.EVENT_JOB || event == NetEvent.EVENT_PREEMPTED_JOB) {</span>
+<span class="nc bnc" id="L482" title="All 6 branches missed.">			if ((destination != ownerNode) || (destination == ownerNode &amp;&amp; destinationSection != sectionID)) {</span>
+				//it is a JOB event and the destination is not the owner node or it is the owner
+				//node but the dest section is not this section
+<span class="nc bnc" id="L485" title="All 2 branches missed.">				if (auto) {</span>
+<span class="nc" id="L486">					updateJobsListAfterSend((Job) data);</span>
+				}
+			}
+		}
+<span class="nc bnc" id="L490" title="All 2 branches missed.">		if (event == NetEvent.EVENT_RETRIAL) {</span>
+<span class="nc" id="L491">			updateJobsListAfterSendOnly((Job) data);</span>
+		}
+<span class="nc" id="L493">		return ownerNode.send(event, data, delay, sectionID, destinationSection, destination);</span>
+	}
+
+	/**
+	 * Sends an event to the &lt;b&gt;input&lt;/b&gt; section of a node.
+	 * @param event event to be sent.
+	 * @param data  data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(int event, Object data, double delay, NetNode destination) {
+<span class="nc" id="L505">		return send(event, data, delay, NodeSection.INPUT, destination);</span>
+	}
+
+	/**
+	 * Sends an event to a section of this node.
+	 * @param event event to be sent.
+	 * @param data  data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection Destination section.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(int event, Object data, double delay, byte destinationSection) {
+<span class="nc" id="L517">		return send(event, data, delay, destinationSection, ownerNode);</span>
+	}
+
+	/**
+	 * Sends an event to this section.
+	 * @param event event to be sent.
+	 * @param data  data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken sendMe(int event, Object data, double delay) {
+<span class="nc" id="L528">		return send(event, data, delay, sectionID, ownerNode);</span>
+	}
+
+	/**
+	 * Sends a job to a section of a node.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection destination section.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(Job job, double delay, byte destinationSection, NetNode destination) {
+<span class="nc" id="L540">		return send(NetEvent.EVENT_JOB, job, delay, destinationSection, destination);</span>
+	}
+
+	/**
+	 * Sends a job to the &lt;b&gt;input&lt;/b&gt; section of a node.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(Job job, double delay, NetNode destination) {
+<span class="nc" id="L551">		return send(NetEvent.EVENT_JOB, job, delay, NodeSection.INPUT, destination);</span>
+	}
+
+	/**
+	 * Sends a job to a section of this node.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection Destination section.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken send(Job job, double delay, byte destinationSection) {
+<span class="nc" id="L562">		return send(NetEvent.EVENT_JOB, job, delay, destinationSection, ownerNode);</span>
+	}
+
+	/**
+	 * Sends a job to this section.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @return a token to remove sent event.
+	 */
+	protected RemoveToken sendMe(Job job, double delay) {
+<span class="nc" id="L572">		return send(NetEvent.EVENT_JOB, job, delay, sectionID, ownerNode);</span>
+	}
+
+	/**
+	 * Removes a message previously sent.
+	 * @param token the token to remove the message.
+	 * @return true if message was removed, false otherwise.
+	 */
+	protected boolean removeMessage(RemoveToken token) {
+<span class="nc" id="L581">		return ownerNode.removeMessage(token);</span>
+	}
+
+	//TODO: not used
+	/**
+	 * Sends a message to a section of all the NetNodes of the QueueNetwork.
+	 * @param event event tag.
+	 * @param data  data to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection The destination section.
+	 * @param nodeType Type of the node.
+	 * @throws NetException
+	 */
+	protected void sendBroadcast(int event, Object data, double delay, byte destinationSection, int nodeType)
+			throws NetException {
+<span class="nc" id="L596">		ownerNode.sendBroadcast(event, data, delay, sectionID, destinationSection, nodeType);</span>
+<span class="nc" id="L597">	}</span>
+
+	/**
+	 * Checks if a message has been sent by this section. Note that this method
+	 * could be called only after that the owner node has been linked to this
+	 * section.
+	 * @param message message to be checked.
+	 * @return True if the message has been sent by this section, false
+	 * otherwise.
+	 */
+	protected boolean isMine(NetMessage message) {
+<span class="nc" id="L608">		return message.sentBy(sectionID, ownerNode);</span>
+	}
+
+	/**
+	 * Updates the JobInfoList after sending this job.
+	 * @param job job to be sent.
+	 */
+	private void updateJobsListAfterSend(Job job) {
+<span class="nc" id="L616">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L617" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L618">			jobsList.remove(jobInfo);</span>
+		}
+<span class="nc" id="L620">	}</span>
+
+	/**
+	 * Updates the JobInfoList after sending this job.
+	 * @param job job to be sent.
+	 */
+	private void updateJobsListAfterSendOnly(Job job) {
+<span class="nc" id="L627">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L628" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L629">			jobsList.removeOnly(jobInfo);</span>
+		}
+<span class="nc" id="L631">	}</span>
+
+	/**
+	 * Receives a message to a section of a node.
+	 * @param message message to be received.
+	 * @throws NetException
+	 */
+	int receive(NetMessage message) throws NetException {
+<span class="nc bnc" id="L639" title="All 2 branches missed.">		if (logger.isLogCalenderOn()) {</span>
+<span class="nc" id="L640">			String[] allowedEvents = LoggerStateManager.getInstance().getAllowedEvents();</span>
+<span class="nc bnc" id="L641" title="All 2 branches missed.">			if (allowedEvents.length &gt; 0) {</span>
+<span class="nc bnc" id="L642" title="All 2 branches missed.">				for (String allowedEvent : allowedEvents) {</span>
+<span class="nc bnc" id="L643" title="All 2 branches missed.">					if (NetEvent.getEventName(message.getEvent()).equals(allowedEvent)) {</span>
+<span class="nc" id="L644">						String sender = String.valueOf(message.getSource().getName());</span>
+<span class="nc" id="L645">						String eventName = NetEvent.getEventName(message.getEvent());</span>
+<span class="nc" id="L646">						String receiver = message.getDestination().getName();</span>
+<span class="nc" id="L647">						String timestamp = String.valueOf(message.getDestination().getNetSystem().getTime())</span>
+<span class="nc" id="L648">								.replace(&quot;.&quot;, JSimLogger.getDecimalSeparator());</span>
+<span class="nc" id="L649">						JSimLogger.logCustomDebug(&quot;receive&quot;,sender, eventName, receiver, timestamp);</span>
+<span class="nc" id="L650">						break;</span>
+					}
+				}
+			}
+		}
+<span class="nc bnc" id="L655" title="All 2 branches missed.">		if (message.getEvent() == NetEvent.EVENT_JOB) {</span>
+<span class="nc bnc" id="L656" title="All 6 branches missed.">			if ((message.getSource() != ownerNode) || (message.getSource() == ownerNode &amp;&amp; message.getSourceSection() != sectionID)) {</span>
+<span class="nc bnc" id="L657" title="All 2 branches missed.">				if (auto) {</span>
+<span class="nc" id="L658">					updateJobsListAfterReceive(message.getJob());</span>
+				}
+			}
+		}
+		try {
+<span class="nc" id="L663">			return process(message);</span>
+<span class="nc" id="L664">		} catch (IncorrectDistributionParameterException e) {</span>
+<span class="nc" id="L665">			throw new RuntimeException(e);</span>
+		}
+	}
+
+	/**
+	 * Updates the JobInfoList after receiving this job.
+	 * @param job job to be received.
+	 */
+	private void updateJobsListAfterReceive(Job job) {
+<span class="nc" id="L674">		JobInfo jobInfo = new JobInfo(job);</span>
+<span class="nc" id="L675">		jobsList.add(jobInfo);</span>
+<span class="nc" id="L676">	}</span>
+
+	/**
+	 * Redirects a job to a section of a node without updating measures.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection destination section.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 * @throws NetException
+	 */
+	protected RemoveToken redirect(Job job, double delay, byte destinationSection, NetNode destination)
+			throws NetException {
+<span class="nc bnc" id="L689" title="All 2 branches missed.">		if (auto) {</span>
+<span class="nc" id="L690">			updateJobsListAfterRedirect(job);</span>
+		}
+<span class="nc" id="L692">		return ownerNode.redirect(job, delay, sectionID, destinationSection, destination);</span>
+	}
+
+	/**
+	 * Updates the JobInfoList after redirecting this job.
+	 * @param job job to be redirected.
+	 */
+	private void updateJobsListAfterRedirect(Job job) {
+<span class="nc" id="L700">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L701" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L702">			jobsList.redirectJob(jobInfo);</span>
+		}
+<span class="nc" id="L704">	}</span>
+
+	/**
+	 * Sends an &quot;ack&quot; event to a section of a node to inform it that the job
+	 * previously sent has been dropped.
+	 * @param job job to be attached to the message.
+	 * @param delay Scheduling delay.
+	 * @param destinationSection destination section.
+	 * @param destination destination node.
+	 * @return a token to remove sent event.
+	 * @throws NetException
+	 */
+	protected RemoveToken sendAckAfterDrop(Job job, double delay, byte destinationSection, NetNode destination)
+			throws NetException {
+<span class="nc bnc" id="L718" title="All 2 branches missed.">		if (auto) {</span>
+<span class="nc" id="L719">			updateJobsListAfterDrop(job);</span>
+		}
+<span class="nc" id="L721">		return ownerNode.sendAckAfterDrop(job, delay, sectionID, destinationSection, destination);</span>
+	}
+
+	/**
+	 * Updates the JobInfoList after dropping this job.
+	 * @param job job to be dropped.
+	 */
+	private void updateJobsListAfterDrop(Job job) {
+<span class="nc" id="L729">		JobInfo jobInfo = jobsList.lookFor(job);</span>
+<span class="nc bnc" id="L730" title="All 2 branches missed.">		if (jobInfo != null) {</span>
+<span class="nc" id="L731">			jobsList.dropJob(jobInfo);</span>
+		}
+<span class="nc" id="L733">	}</span>
+
+	/**
+	 * Updates the visit path of this job.
+	 * @param job job whose visit path is to be updated.
+	 */
+	protected void updateVisitPath(Job job) {
+<span class="nc" id="L740">		Pair&lt;NetNode, JobClass&gt; pair = null;</span>
+<span class="nc bnc" id="L741" title="All 2 branches missed.">		if (job instanceof ForkJob) {</span>
+<span class="nc" id="L742">			pair = new Pair&lt;NetNode, JobClass&gt;(ownerNode, ((ForkJob) job).getOriginalJob().getJobClass());</span>
+		} else {
+<span class="nc" id="L744">			pair = new Pair&lt;NetNode, JobClass&gt;(ownerNode, job.getJobClass());</span>
+		}
+<span class="nc" id="L746">		job.AddToVisitPath(pair);</span>
+<span class="nc" id="L747">	}</span>
+
+	/**
+	 * Tells if jobinfolist at node section should be updated automatically.
+	 * @return true if it should be handled automatically, false otherwise.
+	 */
+	boolean automaticUpdateNodeJobinfolist() {
+<span class="nc" id="L754">		return nodeAuto;</span>
+	}
+
+	public void analyzeJoin(int name, JobClass jobClass, Measure measurement) throws NetException {
+<span class="nc" id="L758">		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+	}
+
+	public void analyzeFCR(int name, Measure measurement) throws NetException {
+<span class="nc" id="L762">		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+	}
+
+	public void analyzeFJ(int name, JobClass jobClass, Measure measurement) throws NetException {
+<span class="nc" id="L766">		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+	}
+
+	public void analyzeTransition(int name, String modeName, Measure measurement) throws NetException {
+<span class="nc" id="L770">		throw new NetException(this, EXCEPTION_MEASURE_DOES_NOT_EXIST, &quot;required analyzer does not exist!&quot;);</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

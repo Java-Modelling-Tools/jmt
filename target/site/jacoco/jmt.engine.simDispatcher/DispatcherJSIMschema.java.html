@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="ja"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DispatcherJSIMschema.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">jmt</a> &gt; <a href="index.source.html" class="el_package">jmt.engine.simDispatcher</a> &gt; <span class="el_source">DispatcherJSIMschema.java</span></div><h1>DispatcherJSIMschema.java</h1><pre class="source lang-java linenums">/**
+ * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
+
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+ */
+
+package jmt.engine.simDispatcher;
+
+import java.io.File;
+import java.util.LinkedList;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import jmt.common.exception.NetException;
+import jmt.engine.QueueNet.QueueNetwork;
+import jmt.engine.dataAnalysis.Measure;
+import jmt.engine.dataAnalysis.TempMeasure;
+import jmt.engine.log.JSimLogger;
+import jmt.engine.simEngine.SimLoader;
+import jmt.engine.simEngine.Simulation;
+
+/**
+ * Receives the absolute path of a xml file which describes the model using the
+ * SIMmodeldefinition.xsd schema.
+ * The simulation results, at the end, are converted and
+ * are inserted in the original file.
+ *
+ * @author Stefano Omini
+ * Modified by Bertoli Marco
+ *
+ * Modified by Francesco D'Aquino
+ */
+public class DispatcherJSIMschema {
+
+	//xml files containing model definition, simmodel definition and sim results
+	File simModelDefinition;
+	File simResults;
+
+	//path of the xml files
+	String simModelDefinitionPath;
+	String simResultsPath;
+
+	//true if the simulation results have been already obtained, false otherwise
+<span class="nc" id="L57">	boolean resultsObtained = false;</span>
+
+	//if true, the simulation seed
+<span class="nc" id="L60">	private boolean automaticSeed = true;</span>
+	//if true, the simulation seed
+	private long simulationSeed;
+
+<span class="nc" id="L64">	private JSimLogger logger = JSimLogger.getLogger(JSimLogger.STD_LOGGER);</span>
+
+	//used to compute the progress of the simulation
+<span class="nc" id="L67">	private boolean simStarted = false;</span>
+<span class="nc" id="L68">	private boolean simFinished = false;</span>
+<span class="nc" id="L69">	private boolean simPaused = false;</span>
+	private QueueNetwork net;
+
+	//used to store temp measures info
+<span class="nc" id="L73">	private TempMeasure[] tempMeasures = null;</span>
+
+	//used to store progress - Bertoli Marco
+	private double progress;
+<span class="nc" id="L77">	private Vector&lt;Integer&gt; measuresToAbort = new Vector&lt;Integer&gt;(); // Vector with measures to abort at refresh</span>
+
+<span class="nc" id="L79">	private long maxDuration = -1;</span>
+
+	private Simulation sim;
+<span class="nc" id="L82">	boolean isTerminalSimulation = false;</span>
+<span class="nc" id="L83">	int parametricStep = -1;</span>
+
+	/**
+	 * This constructor receives the absolute path of the xml file containing
+	 * the model to be solved.
+	 * The model must be described using the SIMmodeldefinition.xsd schema
+	 *
+	 * @param absolutePath absolute path of the xml file containing the
+	 * model to be solved
+	 */
+<span class="nc" id="L93">	public DispatcherJSIMschema(String absolutePath) {</span>
+<span class="nc" id="L94">		simModelDefinitionPath = absolutePath;</span>
+<span class="nc" id="L95">		simModelDefinition = new File(absolutePath);</span>
+<span class="nc" id="L96">	}</span>
+
+	/**
+	 * This constructor receives the absolute path of the xml file containing
+	 * the model to be solved.
+	 * The model must be described using the SIMmodeldefinition.xsd schema
+	 *
+	 * @param model the xml file containing the
+	 * model to be solved
+	 */
+<span class="nc" id="L106">	public DispatcherJSIMschema(File model) {</span>
+<span class="nc" id="L107">		simModelDefinition = model;</span>
+<span class="nc" id="L108">		simModelDefinitionPath = model.getAbsolutePath();</span>
+<span class="nc" id="L109">	}</span>
+
+	/**
+	 * By invoking this method, simulation will generate a random simulation seed
+	 */
+	public void automaticSimulationSeed() {
+<span class="nc" id="L115">		automaticSeed = true;</span>
+<span class="nc" id="L116">	}</span>
+
+	/**
+	 * Specifies the seed to be used in the simulation.
+	 * @param seed the simulation seed
+	 */
+	public void setSimulationSeed(long seed) {
+<span class="nc" id="L123">		simulationSeed = seed;</span>
+<span class="nc" id="L124">		automaticSeed = false;</span>
+<span class="nc" id="L125">	}</span>
+
+	/**
+	 * Sets simulation max duration time
+	 * @param durationMillis maximum time in milliseconds
+	 */
+	public void setSimulationMaxDuration(long durationMillis) {
+<span class="nc" id="L132">		maxDuration = durationMillis;</span>
+<span class="nc" id="L133">	}</span>
+
+	public boolean solveModel() throws Exception {
+		/*********************SIM DEFINITION MODEL*********************/
+		//does model file exist??
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		if (!simModelDefinition.exists()) {</span>
+			//the passed file does not exist
+<span class="nc" id="L140">			logger.error(&quot;The sim model file &quot; + simModelDefinitionPath + &quot; does not exist...&quot;);</span>
+<span class="nc" id="L141">			return false;</span>
+		} else {
+<span class="nc" id="L143">			logger.debug(&quot;Sim model definition path: &quot; + simModelDefinitionPath);</span>
+		}
+
+		/*********************SIMULATION LOADING AND RUNNING*********************/
+		//now prepare simulation
+<span class="nc" id="L148">		SimLoader simLoader = new SimLoader(simModelDefinitionPath);</span>
+<span class="nc" id="L149">		sim = simLoader.getSim();</span>
+<span class="nc" id="L150">		sim.setTerminalSimulation(isTerminalSimulation);</span>
+<span class="nc" id="L151">		sim.setParametricStep(parametricStep);</span>
+
+		//set path of the xml model definition
+<span class="nc" id="L154">		sim.setXmlSimModelDefPath(simModelDefinitionPath);</span>
+
+<span class="nc bnc" id="L156" title="All 2 branches missed.">		if (automaticSeed) {</span>
+			//generate only positive integers (to facilitate replay in the gui)
+<span class="nc" id="L158">			simulationSeed = sim.getEngine().nextInt();</span>
+<span class="nc bnc" id="L159" title="All 2 branches missed.">			if (simulationSeed &lt; 0) {</span>
+<span class="nc" id="L160">				simulationSeed = -simulationSeed;</span>
+			}
+		}
+
+<span class="nc" id="L164">		sim.setRandomEngineSeed(simulationSeed);</span>
+<span class="nc" id="L165">		sim.initialize();</span>
+<span class="nc" id="L166">		logger.debug(&quot;JSIM correctly initialized with simulation seed = &quot; + simulationSeed);</span>
+
+		//find QueueNetwork reference
+<span class="nc" id="L169">		net = sim.getNetwork();</span>
+
+		long start, stop, elapsed;
+
+		//set simulation max duration (if specified)
+<span class="nc" id="L174">		ExecutorService es = Executors.newSingleThreadExecutor();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">		if (maxDuration &gt; 0) {</span>
+<span class="nc" id="L176">			es.submit(new Runnable() {</span>
+				public void run() {
+					try {
+<span class="nc" id="L179">						Thread.sleep(maxDuration);</span>
+<span class="nc" id="L180">						abortAllMeasures();	</span>
+<span class="nc" id="L181">					} catch (InterruptedException ex) {</span>
+						//do nothing
+<span class="nc" id="L183">					}</span>
+<span class="nc" id="L184">				}</span>
+			});
+		}
+
+<span class="nc" id="L188">		simStarted = true;</span>
+		//start time
+<span class="nc" id="L190">		start = System.currentTimeMillis();</span>
+
+		//run simulation
+<span class="nc" id="L193">		sim.run();</span>
+
+		//stop time
+<span class="nc" id="L196">		stop = System.currentTimeMillis();</span>
+<span class="nc" id="L197">		elapsed = (stop - start) / 1000;</span>
+
+<span class="nc" id="L199">		simPaused = false;</span>
+<span class="nc" id="L200">		simFinished = true;</span>
+
+		//shut down simulation timer (if any)
+<span class="nc" id="L203">		es.shutdownNow();</span>
+
+<span class="nc" id="L205">		logger.info(&quot;Model &quot; + simModelDefinitionPath + &quot; solved by JSIM in &quot; + Double.toString(elapsed) + &quot; seconds&quot;);</span>
+
+<span class="nc" id="L207">		return true;</span>
+	}
+
+	public boolean solveHandlingExceptions() {
+		try {
+<span class="nc" id="L212">			return solveModel();</span>
+<span class="nc" id="L213">		} catch (Exception ex) {</span>
+<span class="nc" id="L214">			ex.printStackTrace();</span>
+<span class="nc" id="L215">			logger.error(ex.getMessage());</span>
+<span class="nc" id="L216">			return false;</span>
+		}
+	}
+
+	/**
+	 * Tells if simulation was started
+	 * @return true iff simulation was started
+	 */
+	public boolean isStarted() {
+<span class="nc" id="L225">		return simStarted;</span>
+	}
+
+	/**
+	 * Tells if simulation was finished
+	 * @return true iff simulation was finished
+	 */
+	public boolean isFinished() {
+<span class="nc" id="L233">		return simFinished;</span>
+	}
+
+	/**
+	 * Tells if simulation was paused
+	 * @return true iff simulation was paused
+	 */
+	public boolean isPaused() {
+<span class="nc" id="L241">		return simPaused;</span>
+	}
+
+	/**
+	 * allows to know the state of simulation. Value is calculated at every
+	 * &lt;code&gt;refreshTempMeasures()&lt;/code&gt; to avoid pausing simulation two times.
+	 * @return the percentage of progress (= number of computed confidence intervals /
+	 * total number of required confidence intervals)
+	 */
+	public double checkSimProgress() {
+<span class="nc bnc" id="L251" title="All 2 branches missed.">		if (!simStarted) {</span>
+			//not started yet
+<span class="nc" id="L253">			return 0.0;</span>
+		}
+<span class="nc bnc" id="L255" title="All 2 branches missed.">		if (simFinished) {</span>
+			//already finished
+<span class="nc" id="L257">			return 1.0;</span>
+		}
+<span class="nc" id="L259">		return progress;</span>
+	}
+
+	/**
+	 * Pauses the simulation, refreshes temp measures and then restarts simulation
+	 */
+	public synchronized void refreshTempMeasures() {
+		//simulation not started yet
+<span class="nc bnc" id="L267" title="All 2 branches missed.">		if (!simStarted) {</span>
+<span class="nc" id="L268">			return;</span>
+		}
+
+		//pauses the computation
+<span class="nc bnc" id="L272" title="All 2 branches missed.">		if (pauseSim()) {</span>
+			// Aborts measures (if any)
+<span class="nc bnc" id="L274" title="All 2 branches missed.">			while (!measuresToAbort.isEmpty()) {</span>
+<span class="nc" id="L275">				int index = measuresToAbort.remove(0).intValue();</span>
+<span class="nc" id="L276">				tempMeasures[index].abort();</span>
+<span class="nc" id="L277">			}</span>
+
+			//at the first execution, measures must be retrieved
+<span class="nc bnc" id="L280" title="All 2 branches missed.">			if (tempMeasures == null) {</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">				if (net == null) {</span>
+<span class="nc" id="L282">					return;</span>
+				} else {
+					//gets the measures defined for this queue network
+<span class="nc" id="L285">					LinkedList&lt;Measure&gt; measures = net.getMeasures();</span>
+
+					//creates the array of temp measures
+<span class="nc" id="L288">					tempMeasures = new TempMeasure[measures.size()];</span>
+
+<span class="nc bnc" id="L290" title="All 2 branches missed.">					for (int m = 0; m &lt; measures.size(); m++) {</span>
+<span class="nc" id="L291">						tempMeasures[m] = new TempMeasure(measures.get(m));</span>
+<span class="nc" id="L292">						tempMeasures[m].refreshMeasure();</span>
+					}
+<span class="nc" id="L294">				}</span>
+			} else {
+				//temp measures have already been retrieved
+				//only refresh temp values
+<span class="nc bnc" id="L298" title="All 2 branches missed.">				for (TempMeasure tempMeasure : tempMeasures) {</span>
+<span class="nc" id="L299">					tempMeasure.refreshMeasure();</span>
+				}
+			}
+			// Updates simulation progress
+			try {
+<span class="nc" id="L304">				progress = net.getNetSystem().checkProgress(net);</span>
+<span class="nc" id="L305">			} catch (NetException e) {</span>
+<span class="nc" id="L306">				progress = 0.0;</span>
+<span class="nc" id="L307">			}</span>
+
+			//restart computation
+<span class="nc" id="L310">			restartSim();</span>
+
+<span class="nc bnc" id="L312" title="All 2 branches missed.">		} else if (simFinished) { // Gets last value for each measure</span>
+<span class="nc bnc" id="L313" title="All 2 branches missed.">			for (TempMeasure tempMeasure : tempMeasures) {</span>
+<span class="nc" id="L314">				tempMeasure.refreshMeasure();</span>
+			}
+		}
+<span class="nc" id="L317">	}</span>
+
+	/**
+	 * gets the temp measures
+	 * @return the temp measures
+	 */
+	public TempMeasure[] getTempMeasures() {
+<span class="nc" id="L324">		return tempMeasures;</span>
+	}
+
+	public synchronized boolean abortAllMeasures() {
+<span class="nc bnc" id="L328" title="All 2 branches missed.">		if (!simStarted) {</span>
+<span class="nc" id="L329">			return false;</span>
+		}
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc" id="L333">			refreshTempMeasures();</span>
+
+<span class="nc" id="L335">			logger.debug(&quot;All remaining measures will be aborted&quot;);</span>
+<span class="nc bnc" id="L336" title="All 2 branches missed.">			for (int m = 0; m &lt; tempMeasures.length; m++) {</span>
+<span class="nc" id="L337">				abortMeasure(m);</span>
+			}
+<span class="nc" id="L339">			return true;</span>
+		} else {
+<span class="nc" id="L341">			return false;</span>
+		}
+	}
+
+	public synchronized boolean killSimulation() {
+		//simulation not started yet
+<span class="nc bnc" id="L347" title="All 2 branches missed.">		if (!simStarted) {</span>
+<span class="nc" id="L348">			return false;</span>
+		}
+<span class="nc" id="L350">		net.getNetSystem().terminate();</span>
+<span class="nc" id="L351">		return true;</span>
+	}
+
+	public synchronized boolean abortMeasure(int index) {
+<span class="nc" id="L355">		boolean success = false;</span>
+<span class="nc bnc" id="L356" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc" id="L357">			refreshTempMeasures();</span>
+
+<span class="nc bnc" id="L359" title="All 4 branches missed.">			if ((0 &lt;= index) &amp;&amp; (index &lt;= tempMeasures.length)) {</span>
+<span class="nc" id="L360">				success = tempMeasures[index].abort();</span>
+			} else {
+<span class="nc" id="L362">				success = false;</span>
+			}
+<span class="nc" id="L364">			restartSim();</span>
+		}
+<span class="nc" id="L366">		return success;</span>
+	}
+
+	/**
+	 * Aborts a measure at next measure refresh... Used to avoid to stop simulation too frequently
+	 * Author: Bertoli Marco
+	 */
+	public synchronized void abortMeasureAtRefresh(int measureIndex) {
+<span class="nc" id="L374">		measuresToAbort.add(new Integer(measureIndex));</span>
+<span class="nc" id="L375">	}</span>
+
+	/**
+	 * Prints on System.out the temp values of measures that have not finished yet
+	 */
+	public void printTempMeasures() {
+<span class="nc bnc" id="L381" title="All 2 branches missed.">		if (pauseSim()) {</span>
+<span class="nc bnc" id="L382" title="All 2 branches missed.">			if (tempMeasures != null) {</span>
+<span class="nc bnc" id="L383" title="All 2 branches missed.">				for (TempMeasure tempMeasure : tempMeasures) {</span>
+<span class="nc" id="L384">					TempMeasure temp = tempMeasure;</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">					if (!temp.isFinished()) {</span>
+<span class="nc" id="L386">						System.out.println(temp.getName() + &quot;: &quot; + Double.toString(temp.getTempMean()) + &quot; &quot; + temp.getNsamples());</span>
+					}
+				}
+			}
+<span class="nc" id="L390">			restartSim();</span>
+		}
+<span class="nc" id="L392">	}</span>
+
+	/**
+	 * Pauses the simulation
+	 * @return true if the operation was successful, false otherwise (for example
+	 * simulation not started or already finished)
+	 */
+	public synchronized boolean pauseSim() {
+<span class="nc" id="L400">		simPaused = true;</span>
+<span class="nc" id="L401">		return net.getNetSystem().pause();</span>
+	}
+
+	/**
+	 * Resumes the simulation
+	 * @return true if the operation was successful, false otherwise (for example
+	 * simulation not started or already finished)
+	 */
+	public synchronized boolean restartSim() {
+<span class="nc" id="L410">		simPaused = false;</span>
+<span class="nc" id="L411">		return net.getNetSystem().restartFromPause();</span>
+	}
+
+	//Francesco D'Aquino
+	public Simulation getSimulation() {
+<span class="nc" id="L416">		return sim;</span>
+	}
+
+	//------------------------TEST-----------------------------------//
+
+	public static void testSimulationTime() {
+<span class="nc" id="L422">		int N = 5;</span>
+<span class="nc" id="L423">		long[] duration = new long[N];</span>
+<span class="nc" id="L424">		long tot = 0;</span>
+
+<span class="nc bnc" id="L426" title="All 2 branches missed.">		for (int i = 0; i &lt; N; i++) {</span>
+<span class="nc" id="L427">			String path = &quot;D:\\JMTtest\\prova&quot; + i + &quot;.xml&quot;;</span>
+
+<span class="nc" id="L429">			DispatcherJSIMschema disp = new DispatcherJSIMschema(path);</span>
+			long start, stop, elapsed;
+
+<span class="nc" id="L432">			start = System.currentTimeMillis();</span>
+
+<span class="nc bnc" id="L434" title="All 2 branches missed.">			if (disp.solveHandlingExceptions()) {</span>
+<span class="nc" id="L435">				stop = System.currentTimeMillis();</span>
+<span class="nc" id="L436">				elapsed = stop - start;</span>
+				//System.out.println(&quot;Duration execution &quot;+i+&quot;: &quot;);
+<span class="nc" id="L438">				System.out.println(Long.toString(elapsed));</span>
+
+<span class="nc" id="L440">				duration[i] = elapsed;</span>
+<span class="nc" id="L441">				tot += elapsed;</span>
+
+			} else {
+<span class="nc" id="L444">				System.out.println(&quot;Error!!&quot;);</span>
+			}
+		}
+
+<span class="nc" id="L448">		long mean = tot / N;</span>
+<span class="nc" id="L449">		System.out.println(&quot;Mean: &quot;);</span>
+<span class="nc" id="L450">		System.out.println(Long.toString(mean));</span>
+<span class="nc" id="L451">	}</span>
+
+	/**
+	 * @return the output XML file with the results of the simulation.
+	 */
+	public File getOutputFile() {
+<span class="nc" id="L457">		return sim.getOutputFile();</span>
+	}
+
+	public static void testSolution() {
+		//Dispatcher disp = new Dispatcher(&quot;D:\\test_2open.xml&quot;);
+<span class="nc" id="L462">		DispatcherJSIMschema disp = new DispatcherJSIMschema(&quot;D:\\JMTtest\\solverstep0.xml&quot;);</span>
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\solverstep10.xml&quot;);
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\prova.xml&quot;);
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\test_base.xml&quot;);
+
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\model_with_blocking.xml&quot;);
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\model_with_blocking_2.xml&quot;);
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\model_with_blocking_open_drop.xml&quot;);
+		//Dispatcher disp = new Dispatcher(&quot;D:\\JMTtest\\preload.xml&quot;);
+<span class="nc" id="L471">		disp.setSimulationSeed(23000);</span>
+
+		long start, stop, elapsed;
+<span class="nc" id="L474">		start = System.currentTimeMillis();</span>
+
+<span class="nc bnc" id="L476" title="All 2 branches missed.">		if (disp.solveHandlingExceptions()) {</span>
+<span class="nc" id="L477">			stop = System.currentTimeMillis();</span>
+<span class="nc" id="L478">			elapsed = stop - start;</span>
+<span class="nc" id="L479">			System.out.println(&quot;OK - Simulation time: &quot;);</span>
+<span class="nc" id="L480">			System.out.println(Long.toString(elapsed));</span>
+		} else {
+<span class="nc" id="L482">			System.out.println(&quot;Error!!&quot;);</span>
+		}
+<span class="nc" id="L484">	}</span>
+
+	public void setTerminalSimulation(boolean isTerminalSimulation) {
+<span class="nc" id="L487">		this.isTerminalSimulation = isTerminalSimulation;</span>
+<span class="nc" id="L488">	}</span>
+
+	public void setParametricStep(int parametricStep) {
+<span class="nc" id="L491">		this.parametricStep = parametricStep;</span>
+<span class="nc" id="L492">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
