@@ -77,4 +77,8 @@ public interface GuiInterface {
 
 	public String getFileName();
 
+	/**
+	 * Used only for the AnimationPanel to update the table
+	 */
+	public void simulationFinished();
 }

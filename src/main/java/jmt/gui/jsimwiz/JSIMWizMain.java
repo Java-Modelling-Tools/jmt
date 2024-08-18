@@ -1100,4 +1100,10 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 		}
 	}
 
+	@Override
+	public void simulationFinished() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'simulationFinished'");
+	}
+
 }

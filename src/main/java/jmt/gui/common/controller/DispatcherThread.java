@@ -30,6 +30,7 @@ import jmt.gui.common.panels.ResultsWindow;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.controller.ModelSnapshot;
 import jmt.gui.jsimgraph.controller.SimulationStateChecker;
+import jmt.jmch.wizard.panels.AnimationPanel;
 
 /**
  * <p>Title: Dispatcher Thread</p>
@@ -90,6 +91,10 @@ public class DispatcherThread extends Thread implements AbortMeasure {
 		timer.kill();
 		gui.changeSimActionsState(true, false, false);
 		results.refresh(1.0, timer.getElapsedTime());
+
+		if(gui instanceof AnimationPanel){ //---Lorenzo Torri---
+			gui.simulationFinished();
+		}
 
 		// Removes output file, if it was created.
 		if (simulator.getOutputFile() != null) {

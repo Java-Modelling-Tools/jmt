@@ -48,7 +48,7 @@ import jmt.gui.common.Defaults;
 import jmt.jmarkov.Graphics.LogFile;
 
 /* 1.4 example used by DialogDemo.java. */
-class CustomDialog extends JDialog implements ActionListener, PropertyChangeListener {
+public class CustomDialog extends JDialog implements ActionListener, PropertyChangeListener {
 	/**
 	 * 
 	 */
