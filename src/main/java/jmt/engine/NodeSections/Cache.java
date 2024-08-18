@@ -268,14 +268,13 @@ public class Cache extends ServiceSection {
 									caches[itemPos[0]].set(itemPos[1], removedItem);
 								}
 								caches[newItemPos].add(targetItem);
-								break;
 							}
 							else{
 								//remove targetItem from the old cache and add it to the new cache
 								caches[itemPos[0]].remove(targetItem);
 								caches[newItemPos].add(targetItem);
-								break;
 								}
+								break;
 						case 1:
 							if (newItemPos >= 0 && newItemPos != itemPos[0]) {  // if the item need to be moved to another cache.
 								// update the cache item position.
@@ -288,7 +287,10 @@ public class Cache extends ServiceSection {
 									caches[itemPos[0]].remove(targetItem);
 									caches[itemPos[0]].add(removedItem);
 								}
-								caches[newItemPos].add(targetItem);
+								else{
+									caches[itemPos[0]].remove(targetItem);
+									caches[newItemPos].add(targetItem);
+								}
 								break;
 							}
 							else{
@@ -340,64 +342,6 @@ public class Cache extends ServiceSection {
 								itemPos = new Integer[]{newItemPos, findIteminCacheList(requsetId,newItemPos)};
 							}
 					}
-
-					/*
-					if (newItemPos >= 0 && newItemPos != itemPos[0]) {  // if the item need to be moved to another cache.
-						// update the cache item position.
-						// execute the replace policy
-						if (caches[newItemPos].size() == cacheCapacity[newItemPos]) {  // if the target cache list is full, remove the item
-							// execute the replace policy
-							CacheItem removedItem = replacePolicy.getRemoveItem(caches[newItemPos]);
-							//removeItem.clear();				// set isCache false and clear the accessTimes list.
-							switch (replacePolicy.getRemoveItemMode()) {
-								case 0:
-									caches[newItemPos].remove(removedItem);
-									caches[itemPos[0]].set(itemPos[1], removedItem);
-									break;
-								case 1:
-									caches[newItemPos].remove(removedItem);
-									caches[itemPos[0]].remove(targetItem);
-									caches[itemPos[0]].add(removedItem);
-									break;
-								case 2:
-									//if target item is in the new cache list, move it to the first place
-									for(int j = 0; j < caches[newItemPos].size(); j++){
-										if(caches[newItemPos].get(j).getId() == requsetId){
-											caches[newItemPos].remove(targetItem);
-											caches[itemPos[0]].remove(targetItem);
-											caches[itemPos[0]].add(targetItem);
-											break;
-										}
-									}
-									caches[newItemPos].remove(removedItem);
-									caches[itemPos[0]].remove(targetItem);
-									caches[itemPos[0]].add(targetItem);
-									break;
-							}
-							caches[newItemPos].add(targetItem);
-						}
-						else{
-							switch (replacePolicy.getRemoveItemMode()) {
-								case 2:
-									//if target item is in the new cache list, move it to the first place
-									for(int j = 0; j < caches[newItemPos].size(); j++){
-										if(caches[newItemPos].get(j).getId() == requsetId){
-											caches[newItemPos].remove(targetItem);
-											caches[itemPos[0]].remove(targetItem);
-											caches[itemPos[0]].add(targetItem);
-											break;
-										}
-									}
-									break;
-								default:
-									//remove targetItem from the old cache and add it to the new cache
-									caches[itemPos[0]].remove(targetItem);
-									caches[newItemPos].add(targetItem);
-							}
-								
-							}
-						}	
-						*/
 
 
 

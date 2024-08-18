@@ -159,5 +159,9 @@ public interface GuiInterface {
 
 	public String getFileName();
 
+	/**
+	 * Used only for the AnimationPanel to update the table
+	 */
+	public void simulationFinished();
 }
 >>>>>>> b0a37c45 (Initial commit at SVN r1153.)

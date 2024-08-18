@@ -52,6 +52,7 @@ import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 import jmt.gui.jsimwiz.JSIMWizMain;
 import jmt.gui.jwat.MainJwatWizard;
 import jmt.jmarkov.MMQueues;
+import jmt.jmch.wizard.MainWizard;
 import jmt.jmva.gui.JMVAWizard;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
@@ -157,7 +158,7 @@ public class GraphStartScreen extends JMTFrame {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			MMQueues.main(args);
+			MainWizard.main(args);
 		}
 
 	};

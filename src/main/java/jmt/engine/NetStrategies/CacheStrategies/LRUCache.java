@@ -1,14 +1,15 @@
 package jmt.engine.NetStrategies.CacheStrategies;
 
+import java.util.LinkedList;
+
 import jmt.engine.NetStrategies.CacheStrategy;
 import jmt.engine.QueueNet.CacheItem;
 
-import java.util.LinkedList;
 
 public class LRUCache extends CacheStrategy{
 
 	public LRUCache(){
-		setRemoveItemMode(2);   // removeItemMode = 1 for LRU(m). removeItemMode = 2 for h-LRU(m)
+		setRemoveItemMode(1);   // removeItemMode = 1 for LRU(m). removeItemMode = 2 for h-LRU(m)
 	}
 
 	/**

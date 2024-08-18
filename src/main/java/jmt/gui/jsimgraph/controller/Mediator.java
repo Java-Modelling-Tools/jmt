@@ -4074,4 +4074,10 @@ public class Mediator implements GuiInterface {
 				500,
 				true, "JSIMDebugSolverWindowWidth", "JSIMDebugSolverWindowHeight");
 	}
+
+	@Override
+	public void simulationFinished() {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'simulationFinished'");
+	}
 }
