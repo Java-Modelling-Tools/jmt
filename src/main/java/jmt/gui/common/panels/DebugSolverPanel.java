@@ -82,7 +82,7 @@ public class DebugSolverPanel extends JPanel {
         enableButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e1) {
-                DebugSolverPanel.this.runSimulation(e1);
+                DebugSolverPanel.this.enableDebugSolver(e1);
             }
         });
 
@@ -160,7 +160,7 @@ public class DebugSolverPanel extends JPanel {
         }
     }
 
-    private void runSimulation(ActionEvent e) {
+    private void enableDebugSolver(ActionEvent e) {
         if (LoggerStateManager.getAllowedEvents().length == 0) {
             JOptionPane.showMessageDialog(this, "Please select at least one event to log");
             return;

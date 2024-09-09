@@ -65,20 +65,20 @@ public class UpdateByInstailerPanel {
         return compareVersions(currentVersion, latestVersion) < 0;
     }
 
-    public static int compareVersions(String v1, String v2) {
+    public static int compareVersions(String currentVersion, String latestVersion) {
         // Remove non-numeric characters (like 'BETA') for a basic numeric comparison
-        v1 = v1.replaceAll("[^0-9.]", "");
-        v2 = v2.replaceAll("[^0-9.]", "");
+        currentVersion = currentVersion.replaceAll("[^0-9.]", "");
+        latestVersion = latestVersion.replaceAll("[^0-9.]", "");
 
-        String[] parts1 = v1.split("\\.");
-        String[] parts2 = v2.split("\\.");
+        String[] parts1 = currentVersion.split("\\.");
+        String[] parts2 = latestVersion.split("\\.");
 
         int length = Math.max(parts1.length, parts2.length);
         for (int i = 0; i < length; i++) {
             int num1 = i < parts1.length ? Integer.parseInt(parts1[i]) : 0;
             int num2 = i < parts2.length ? Integer.parseInt(parts2[i]) : 0;
-            if (num1 > num2) return 1; // v1 is newer
-            if (num1 < num2) return -1; // v2 is newer
+            if (num1 > num2) return 1; // currentVersion is newer
+            if (num1 < num2) return -1; // latestVersion is newer
         }
         return 0;
     }
