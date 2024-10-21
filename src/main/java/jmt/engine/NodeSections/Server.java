@@ -725,15 +725,17 @@ public class Server extends ServiceSection {
 		int job_id = job.getId();
 		List<BusyServer> busyServers = busyServersPerJob.get(job_id);
 
-		for(BusyServer busyServer: busyServers){
-			int numOfBusyServers = busyServer.getNumOfBusyServers();
-			for (ServerType serverType : serverTypes) {
-				if (serverType.getId() == busyServer.getId()) {
-					serverType.decrementBusyCounter(numOfBusyServers);
-					break;
+		if (busyServers != null && !busyServers.isEmpty()) {
+			for (BusyServer busyServer : busyServers) {
+				int numOfBusyServers = busyServer.getNumOfBusyServers();
+				for (ServerType serverType : serverTypes) {
+					if (serverType.getId() == busyServer.getId()) {
+						serverType.decrementBusyCounter(numOfBusyServers);
+						break;
+					}
 				}
+				changeBusyCounters(-numOfBusyServers, busyServer.getCompatibilities());
 			}
-			changeBusyCounters(-numOfBusyServers, busyServer.getCompatibilities());
 		}
 
 		// update jobInfoLists
