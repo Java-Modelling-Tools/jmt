@@ -29,6 +29,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import jmt.gui.common.JMTImageLoader;
+import jmt.jmch.Constants;
 import jmt.jmch.simulation.Simulation;
 
 /**
@@ -38,7 +39,7 @@ import jmt.jmch.simulation.Simulation;
  * Date: 02-apr-2024
  * Time: 10.10
  */
-public class Router extends JComponent implements JobContainer{
+public class Router extends JComponent implements JobContainer, GraphicComponent{
 	private JPanel parent; //panel in which the Station is drawn
 	
 	//general information about the station
@@ -76,7 +77,7 @@ public class Router extends JComponent implements JobContainer{
 		this.nextEdges = nextEdges;
 		this.nextStations = nextStations;
 		
-		if(simulation.getName() == "JSQ") { //if the policy is the JSQ then the stations must paint the size of their queue
+		if(simulation.getName() == Constants.JSQ) { //if the policy is the JSQ then the stations must paint the size of their queue
 			for(Station st: nextStations) {
 				st.paintQueueSize();
 			}
@@ -94,9 +95,9 @@ public class Router extends JComponent implements JobContainer{
 		this(parent, xcentered, ycentered, pos, nextEdges, nextStations, simulation);
 		this.percentages = percentages;
 		
-		if(simulation.getName() == "PROBABILITIES") { //if the policy is the PROB then the edges must paint also their percentage
+		if(simulation.getName() == Constants.PROBABILISTIC) { //if the policy is the PROB then the edges must paint also their percentage
 			for(int i = 0; i < nextEdges.size(); i++) {
-				nextEdges.get(i).paintPercentage(percentages[i]);
+				nextEdges.get(i).paintPercentage(percentages[i], i+1);
 			}
 		}
 	}
@@ -108,7 +109,7 @@ public class Router extends JComponent implements JobContainer{
 		//get the correct position for centering the station in the panel
 		if(xcentered) {
 			int widthPanel = parent.getWidth();	
-			pos.x = parent.getX()+(widthPanel - size)/2;;		
+			pos.x = parent.getX()+(widthPanel - size)/2;		
 		}
 		if(ycentered) {
 			int heightPanel = parent.getHeight();
@@ -150,7 +151,6 @@ public class Router extends JComponent implements JobContainer{
 	 */
 	private int roundRobin() {
 		indexRoundRobin = (indexRoundRobin+1) % 3;
-		System.out.println(indexRoundRobin);
 		return indexRoundRobin;
 	}
 	
@@ -179,15 +179,32 @@ public class Router extends JComponent implements JobContainer{
 		int min = Integer.MAX_VALUE;
 		int index = -1;
 		int size;
+		int count = 0;
+		Random rand = new Random();
+
 		for(int i = 0; i < nextStations.size(); i++) {		
 			size = nextStations.get(i).getNumberWaitingJobs();
-			if(min > size) {
-				min = size;
-				index = i;
-			}
+
+			//Reservoir Sampling, select one of the mins casually
+			if (size < min) {
+                min = size;
+                index = i;
+                count = 1; 
+            } else if (size == min) {
+                count++; // other min found
+
+                // eventual substitution
+                if (rand.nextInt(count) == 0) { //new min has a probability of 1/count of beeing selected as min
+                    index = i;
+                }
+            }
 		}
+
+		nextStations.get(index).addArrivingJob();
 		return index;
 	}
+
+	
 	
 	/**
 	 * method to route a job to one of the edges connected to the Router
@@ -216,8 +233,35 @@ public class Router extends JComponent implements JobContainer{
 		percentages = probabilities;
 		//repaint all the edges
 		for(int i = 0; i < nextEdges.size(); i++) {
-			nextEdges.get(i).paintPercentage(percentages[i]);
+			nextEdges.get(i).paintPercentage(percentages[i], i+1);
 		}
+	}
+
+
+	//---------- Graphic Component methods
+	@Override
+	public void setXPos(int xpos) {
+		pos.x = xpos;
+	}
+
+	@Override
+	public void setYPos(int ypos) {
+		pos.y = ypos;
+	}
+
+	@Override
+	public int getXPos() {
+		return pos.x;
+	}
+
+	@Override
+	public int getYPos() {
+		return pos.y;
+	}
+
+	@Override
+	public int getTotalLenght() {
+		return size;
 	}
 	
 	

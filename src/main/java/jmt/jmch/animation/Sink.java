@@ -34,7 +34,7 @@ import jmt.gui.common.JMTImageLoader;
  * Date: 01-apr-2024
  * Time: 11.31
  */
-public class Sink extends JComponent implements JobContainer{
+public class Sink extends JComponent implements JobContainer, GraphicComponent{
     private JPanel parent;
     
     private Image sinkImg;
@@ -72,6 +72,10 @@ public class Sink extends JComponent implements JobContainer{
         
         g.drawImage(sinkImg, pos.x, pos.y, size, size, null);
     }
+
+    public int getPositionX(){
+        return pos.x;
+    }
     
 
 	@Override
@@ -83,5 +87,31 @@ public class Sink extends JComponent implements JobContainer{
 	public void addJob(JobContainer prec, Job newJob) {
 		//here the addJob is removing the job from the list of jobs
 		anim.removeJob(newJob);
+	}
+
+    //----- Graphic Component Methods
+    @Override
+	public int getXPos() {
+		return pos.x;
+	}
+
+    @Override
+	public int getYPos() {
+		return pos.y;
+	}
+
+    @Override
+	public int getTotalLenght() {
+		//this is never used
+        return size;
+	}
+
+    @Override
+	public void setYPos(int yPos){
+		pos.y = yPos;
+	}
+	@Override
+	public void setXPos(int xPos){
+		pos.x = xPos;
 	}
 }

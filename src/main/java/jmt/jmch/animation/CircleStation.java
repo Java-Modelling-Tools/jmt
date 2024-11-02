@@ -37,7 +37,7 @@ public class CircleStation extends JComponent implements JobContainer{
 	
 	private long pauseTime; //this variable is important if we are processing a job and then the animator is paused, we need to know how much time the job remained paused and remove this value from the passedTime
 	//then set this value = 0 when the job gets out from this class
-	private int velocityFactor = 0; //to increase the velocity of the simulation
+	private int velocityFactor = 1; //to increase the velocity of the simulation
 	private double processorSpeed = 1; //only for processorsharing
 	
 	/**
@@ -73,7 +73,7 @@ public class CircleStation extends JComponent implements JobContainer{
 	public void refresh() {
 		if(isWorking) {
 			long duration = (long) (currentJob.getDuration() * Math.pow(10, 3));
-			passedTime += (System.currentTimeMillis() - entranceTime - pauseTime)* (velocityFactor + processorSpeed); //both the factor for the step and the one of processor sharing
+			passedTime += (System.currentTimeMillis() - entranceTime - pauseTime)* (velocityFactor * processorSpeed); //both the factor for the step and the one of processor sharing
 			entranceTime = System.currentTimeMillis();
 			pauseTime = 0;
 			

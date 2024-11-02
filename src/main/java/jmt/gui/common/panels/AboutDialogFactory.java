@@ -107,7 +107,7 @@ public class AboutDialogFactory {
 
 	/** JMCH main contributors */
 	private static final Contributors[] JMCH = {
-			new Contributors(Company.POLIMI, "Canakoglu Arif", "Di Mauro Ernesto")
+			new Contributors(Company.POLIMI, "Canakoglu Arif", "Di Mauro Ernesto", "Torri Lorenzo")
 	};
 
 	/** JWAT main contributors */

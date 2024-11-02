@@ -43,7 +43,7 @@ import jmt.jmch.simulation.Simulation;
  * Date: 11-mar-2024
  * Time: 16.29
  */
-public class Station extends JComponent implements JobContainer{
+public class Station extends JComponent implements JobContainer, GraphicComponent{
 	private JPanel parent; //panel in which the Station is drawn
 	private AnimationClass animation;
 	
@@ -59,6 +59,8 @@ public class Station extends JComponent implements JobContainer{
 	
 	//this is the queue of Jobs, see CustomCollection to understand why this and not a general Collection
 	private CustomCollection<Job> jobQueue; 
+	private int arrivingJobs = 0; //jobs on the edge from the router to the station
+	private int currentSizeQueue = 0;
 	private JobContainer next;
 	
 	//-- subcomponents of the station, the BoxStation, and the Circle
@@ -196,7 +198,7 @@ public class Station extends JComponent implements JobContainer{
         if(paintQueueSize) {
         	g.setColor(Color.BLACK);
         	g.setFont(new Font("Arial", Font.PLAIN, 10));
-        	g.drawString("Queue Size: "+String.valueOf(jobQueue.size()), pos.x,  pos.y-20);
+        	g.drawString("Queue Size: "+String.valueOf(jobQueue.size() + arrivingJobs), pos.x,  pos.y-10);
         }
 
 		if(simulation.getName() == Constants.PS){ //if processor sharing, then print the processorSpeed
@@ -211,9 +213,13 @@ public class Station extends JComponent implements JobContainer{
 	
 	@Override
 	public void refresh() {		
+		boolean somethingHasChanged = false;
+		somethingHasChanged = currentSizeQueue != jobQueue.size(); //in case a new job is added to the station
+
 		if(jobQueue.size() >= 1) { //some jobs are waiting to enter inside the circles
 			for(int i = 0; i < nServers; i++) {
 				if(!circles[i].isWorking()) { //if the circle is not working than the head of the queue can go inside the circle
+					somethingHasChanged = true;
 					circles[i].addJob(this, (Job) jobQueue.first());
 					jobQueue.removeHead();
 					
@@ -251,6 +257,13 @@ public class Station extends JComponent implements JobContainer{
 				b.refresh();
 			}
 		}
+
+		currentSizeQueue = jobQueue.size();
+
+		if(somethingHasChanged && nextEvent){ //stop the simulation if the jobs inside the station moved
+			animation.pause();
+			animation.resetNextEvent();
+		}
 	}
 	
 	/**
@@ -285,22 +298,25 @@ public class Station extends JComponent implements JobContainer{
 	@Override
 	public void addJob(JobContainer prec, Job newJob) {
 		newJob.setEntrance(); //update the entrance in the queue
+		arrivingJobs--;
 		
 		//try to add the job inside the queue, if the queue is full, then drop the job
 		if(jobQueue.size() != sizeQueue) {
 			jobQueue.addNew(newJob);
 		}	
 
-		if(nextEvent) {
+		if(nextEvent) { //refresh the component to stop the simulation, the stopping politic is then handled in the refresh method
 			refresh();
-			animation.pause();
-			animation.resetNextEvent();
 		}
 	}
 
 	/** Remove the job from the collection, called by the BoxStation */
 	public void removeJob(Job job) {
 		jobQueue.removeObject(job);
+	}
+
+	public void addArrivingJob(){
+		arrivingJobs++;
 	}
 
 	public Point getPosition() {
@@ -320,7 +336,7 @@ public class Station extends JComponent implements JobContainer{
 	}
 	
 	public int getNumberWaitingJobs() {
-		return jobQueue.size();
+		return jobQueue.size() + arrivingJobs;
 	}
 	
 	public Simulation getSimulation() {
@@ -372,4 +388,32 @@ public class Station extends JComponent implements JobContainer{
 		return simulation.getName() == Constants.PS;
 	}
 
+	
+
+	
+
+	//------- Graphic Component Methods
+	@Override
+	public int getXPos() {
+		return pos.x;
+	}
+
+	@Override
+	public int getYPos(){
+		return pos.y;
+	}
+	
+	@Override
+	public int getTotalLenght() {
+		return length + length/2;
+	}
+
+	@Override
+	public void setYPos(int yPos){
+		pos.y = yPos;
+	}
+	@Override
+	public void setXPos(int xPos){
+		pos.x = xPos;
+	}
 }

@@ -42,8 +42,8 @@ import jmt.jmch.wizard.panels.JMCHWizardPanel;
      public NextStepSimulation(JMCHWizardPanel wizardpanel) {
          super("Next step", "SimDouble", wizardpanel);
          putValue(SHORT_DESCRIPTION, "Next step");
-         putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
-         putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
+         //putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_N));
+         //putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_N, InputEvent.ALT_MASK));
      }
  
      /**

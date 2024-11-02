@@ -17,9 +17,16 @@
  */
 package jmt.jmch.wizard.panels.resultsPanel;
 
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+
 import jmt.framework.gui.help.HoverHelp;
-import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.JMTImageLoader;
+import jmt.jmch.Constants;
+import jmt.jmch.simulation.SimulationType;
 import jmt.jmch.wizard.MainWizard;
+import jmt.jmch.wizard.panels.JMCHWizardPanel;
 
 /**
  * Panel for showing the results of the simulations.
@@ -30,12 +37,26 @@ import jmt.jmch.wizard.MainWizard;
  * Date: 15-jul-2024
  * Time: 10.53
  */
-public class ResultsPanel extends WizardPanel{
+public class ResultsPanel extends JMCHWizardPanel{
     private static final String PANEL_NAME = "Results";
 
     //------------ components of the panel 
-    protected MainWizard parent;
     protected HoverHelp help;
+	protected ImageIcon statusResults;
+	protected JLabel statusResultsLabel;
+
+	//for each column, an array of values
+    protected String[] algorithms = new String[0];
+    protected String[] arrivalDistibutions = new String[0];
+    protected double[] lambdas = new double[0];
+    protected String[] serviceDistributions = new String[0];
+	protected int[] serversNumber = new int[0];
+    protected int[] queuesNumber = new int[0];
+    protected double[] services = new double[0];
+    protected double[] responseTimes = new double[0];
+    protected double[] queueTimes = new double[0];
+    protected double[] thoughputs = new double[0];
+    protected double[] nCustomers = new double[0];
 
     public ResultsPanel(MainWizard main){
         this.parent = main;
@@ -70,14 +91,117 @@ public class ResultsPanel extends WizardPanel{
 	 * @param arrivalDistr arrival time distribution
 	 * @param lambda the inter arrival time
 	 * @param serviceDistr service time distribution
-	 * @param service service time of the system
+	 * @param nQueues number of queues reachable
 	 * @param responseTime response time of the system
-	 * @param queueTime queue time of the system
 	 * @param thoughput thoughput of the system
 	 * @param nCustomers customer numbers of the system
 	 */
-    public void addResult(String algorithm, String arrivalDistr, double lambda, String serviceDistr, double service, double responseTime, double queueTime, double thoughput, double nCustomer){
+    public void addResult(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
         
     }
 
+	/* Methods called by the Main Wizard to update the icon */
+	public void loadingResult(){
+		statusResults = JMTImageLoader.loadImage("loader");
+		statusResultsLabel.setIcon(statusResults);
+	}
+
+	public void endResult(){
+		statusResults = JMTImageLoader.loadImage("Measure_ok");
+		statusResultsLabel.setIcon(statusResults);
+	}
+
+	/** Sets the results of previous analysis */
+	public void setResults(ResultStructure rs){
+		if(rs.getPreviousSimulationType() == SimulationType.ROUTING){
+			for(int i = 0; i < rs.getAlgorithms().length; i++){
+				addResult(
+					rs.getAlgorithms()[i], 
+					rs.getArrivalDistibutions()[i], 
+					rs.getLambdas()[i], 
+					rs.getServiceDistributions()[i], 
+					rs.getQueuesNumber()[i], 
+					rs.getResponseTimes()[i], 
+					rs.getThoughputs()[i], 
+					rs.getnCustomers()[i]);
+			}
+		}
+		else{
+			for(int i = 0; i < rs.getAlgorithms().length; i++){
+				addResult(
+					rs.getAlgorithms()[i], 
+					rs.getArrivalDistibutions()[i], 
+					rs.getLambdas()[i], 
+					rs.getServiceDistributions()[i], 
+					rs.getNservers()[i],
+					rs.getServices()[i], 
+					rs.getResponseTimes()[i], 
+					rs.getQueueTimes()[i],
+					rs.getThoughputs()[i], 
+					rs.getnCustomers()[i]);
+			}
+		}
+	}
+
+	@Override
+    public boolean canGoBack() {
+		//parent.setSelectedPanel();
+		return true;	
+	}
+
+	@Override
+    public void setLastPanel(){
+        parent.setLastPanel(Constants.PANEL_RESULTS);
+    }
+
+	@Override
+    public void lostFocus() { 
+        setLastPanel();
+    }
+
+
+	//methods for saving the results
+	public String[] getAlgorithms(){
+		return algorithms;
+	}
+
+	public String[] getArrivalDistirbutions(){
+		return arrivalDistibutions;
+	}
+
+	public double[] getLambdas(){
+		return lambdas;
+	}
+
+	public String[] getServiceDistributions(){
+		return serviceDistributions;
+	}
+
+	public int[] getNservers(){
+		return serversNumber;
+	}
+
+	public int[] getNQueues(){
+		return queuesNumber;
+	}
+
+	public double[] getServiceTimes(){
+		return services;
+	}
+
+	public double[] getResponseTimes(){
+		return responseTimes;
+	}
+
+	public double[] getThroughputs(){
+		return thoughputs;
+	}
+
+	public double[] getQueueTimes(){
+		return queueTimes;
+	}
+
+	public double[] getNumberOfCustomers(){
+		return nCustomers;
+	}
 }

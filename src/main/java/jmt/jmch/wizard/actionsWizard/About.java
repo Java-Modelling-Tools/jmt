@@ -36,8 +36,8 @@ public class About extends AbstractMCHAction {
      * description string and default icon.
      */
     public About(JMCHWizardPanel panel) {
-        super("About JTeach", panel);
-        this.setTooltipText("About JTeach");
+        super("About JMCH", panel);
+        this.setTooltipText("About JMCH");
         this.setMnemonicKey(KeyEvent.VK_A);
     }
 
@@ -45,7 +45,7 @@ public class About extends AbstractMCHAction {
      * Invoked when an action occurs.
      */
     public void actionPerformed(ActionEvent e) {
-        //TODO
+        panel.about();
     }
 
 }

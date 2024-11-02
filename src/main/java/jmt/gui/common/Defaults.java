@@ -203,7 +203,7 @@ public class Defaults implements CommonConstants {
 	 * @throws NumberFormatException if the parameter does not contain a parsable integer
 	 */
 	public static Integer getAsInteger(String parameterName) {
-		return new Integer(get(parameterName));
+		return Integer.parseInt(get(parameterName));
 	}
 
 	/**
@@ -213,7 +213,7 @@ public class Defaults implements CommonConstants {
 	 * @throws NumberFormatException if the parameter does not contain a parsable long
 	 */
 	public static Long getAsLong(String parameterName) {
-		return new Long(get(parameterName));
+		return Long.parseLong(get(parameterName));
 	}
 
 	/**
@@ -223,7 +223,7 @@ public class Defaults implements CommonConstants {
 	 * @throws NumberFormatException if the parameter does not contain a parsable integer
 	 */
 	public static Double getAsDouble(String parameterName) {
-		return new Double(get(parameterName));
+		return Double.parseDouble(get(parameterName));
 	}
 
 	/**
@@ -232,7 +232,7 @@ public class Defaults implements CommonConstants {
 	 * @return selected parameter default value in Boolean format
 	 */
 	public static Boolean getAsBoolean(String parameterName) {
-		return new Boolean(get(parameterName));
+		return Boolean.parseBoolean(get(parameterName));
 	}
 
 	/**
