@@ -19,7 +19,6 @@
  package jmt.jmch.animation;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -31,8 +30,15 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.Uniform;
+import jmt.engine.random.engine.MersenneTwister;
+import jmt.engine.random.engine.RandomEngine;
+import jmt.engine.random.UniformPar;
+import jmt.engine.random.Parameter;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.distributions.Distribution;
 import jmt.jmch.distributions.AnimDistribution;
+import jmt.jmch.distributions.DistributionFactory;
 
 /**
  * This class is responsible for creating the jobs and routing them to the first edge of the animation
@@ -41,7 +47,7 @@ import jmt.jmch.distributions.AnimDistribution;
  * Date: 31-mar-2024
  * Time: 11.30
  */
-public class Source extends JComponent implements JobContainer{
+public class Source extends JComponent implements JobContainer, GraphicComponent{
 	private JPanel parent;
 	private Point pos;
 	private JobContainer next;
@@ -66,7 +72,7 @@ public class Source extends JComponent implements JobContainer{
 	private float progression = 0.0f;
 
 	private Color jobColor;
-	
+	private UniformD uniform;
 	
 	/**
      * Constructor
@@ -86,10 +92,11 @@ public class Source extends JComponent implements JobContainer{
 		this.interArrival = interArrival;
 		this.service = service;
 		
+		uniform = new UniformD();
 		jobColor = getRandomColor();
-		sourceImg = JMTImageLoader.loadImageAwt("Source");
+		sourceImg = JMTImageLoader.loadImageAwt("Source");		
 	}
-	
+
 	public void paint(Graphics g) {
 		super.paint(g);
 		
@@ -120,7 +127,7 @@ public class Source extends JComponent implements JobContainer{
 		start = System.currentTimeMillis();
 		pauseTime = 0;
 		
-		long nextValue = (long)nextRandomValue*1000;
+		long nextValue = Math.round(nextRandomValue * 1000);
 		long diff = nextValue - passedTime;
 		progression = (float) diff/nextValue;
 		
@@ -130,16 +137,19 @@ public class Source extends JComponent implements JobContainer{
 			passedTime = 0;
 			start = System.currentTimeMillis();
 
-			routeJob = new Job(service, jobColor);
-			jobColor = getRandomColor(); //get a new color for the next job
-			routeJob(0);
-
+			double duration = 0.0;
 			try {
 				nextRandomValue = interArrival.nextRand();
+				duration = service.nextRand();
 			} catch (IncorrectDistributionParameterException e) {
 				//this will never happen, since the parameters of the distribution of the interArrival are OK
 				nextRandomValue = 64.0;
 			}
+
+			routeJob = new Job(service, duration, jobColor);
+			jobColor = getRandomColor(); //get a new color for the next job
+			routeJob(0);
+	
 			anim.addNewJob(routeJob);
 		}		
 	}
@@ -163,10 +173,15 @@ public class Source extends JComponent implements JobContainer{
 
 	/** Create a random color associated to each job */
     private Color getRandomColor() {
-        Random rand = new Random();
-        int r = rand.nextInt(256);
-        int g = rand.nextInt(256);
-        int b = rand.nextInt(256);
+        int r = 0, g = 0, b = 0;
+		try {
+			r = (int) Math.round(uniform.nextRand());
+			g = (int) Math.round(uniform.nextRand());
+			b = (int) Math.round(uniform.nextRand());
+		} catch (IncorrectDistributionParameterException e) {
+			e.printStackTrace();
+		}
+  
         return new Color(r, g, b); 
     }
 
@@ -202,5 +217,78 @@ public class Source extends JComponent implements JobContainer{
 
 	public void setVelocityFactor(int value) {
 		velocityFactor = value;
-	}	
+	}
+	
+	
+	//----- Graphic component Methods
+	@Override
+	public int getXPos() {
+		return pos.x;
+	}
+
+	@Override
+	public int getYPos() {
+		return pos.y;
+	}
+
+	@Override
+	public int getTotalLenght() {
+		return size;
+	}
+
+	@Override
+	public void setYPos(int yPos){
+		pos.y = yPos;
+	}
+	@Override
+	public void setXPos(int xPos){
+		pos.x = xPos;
+	}
+
+	public void resetEngines(){
+		if(interArrival != null){
+			interArrival.resetEngine();
+		}
+		if(service != null){
+			service.resetEngine();
+		}	
+	}
+}
+
+/**
+ * This class is used for obtaining random colors. It is separated from the AnimDistributions, because it must have a different engine
+ */
+class UniformD{
+    protected double mean;
+    protected double lambda;
+    protected double[] percentiles = new double[2];
+    protected RandomEngine engine;
+
+	public UniformD(){
+		engine = new MersenneTwister(23000);
+		setMean(127.5);
+	}
+
+
+    public double nextRand() throws IncorrectDistributionParameterException {
+        Parameter par = new UniformPar(0, 255); //if max > min or the mean is < 0 Exception
+        Uniform distribution = new Uniform();
+        distribution.setRandomEngine(engine);
+        return distribution.nextRand(par); 
+    }
+
+
+    public void setMean(double value) {
+        lambda = value;
+        mean = 1/value;
+        setPercentiles();
+    }
+
+
+    protected void setPercentiles() {
+        double a = 0;
+        double b = 255;
+        percentiles[0] = a + 0.10 * (b-a);
+        percentiles[1] = a + 0.90 * (b-a);
+    } 
 }

@@ -17,36 +17,60 @@
  */
 package jmt.jmch.wizard.panels;
 
+import jmt.framework.gui.wizard.WizardPanel;
+import jmt.jmch.wizard.MainWizard;
+
 /**
- * This interface is for all the methods associated to the actions.
- * Each WizardPanel has to implement those methods. If one panel does not support an action, then method can remain empty.
+ * Abstract class to group all the new methods used in the panels of the wizard
  *
  * @author Lorenzo Torri
  * Date: 29-mar-2024
  * Time: 15.43
  */
-public interface JMCHWizardPanel{
+public abstract class JMCHWizardPanel extends WizardPanel{
+    protected MainWizard parent;
+
     /** Opens the panel for help */
-    public void openHelp();
+    public void openHelp(){ }
 
     /** Starts the animation */
-    public void startAnimation();
+    public void startAnimation(){ }
 
     /** Pauses the animation */
-    public void pauseAnimation();
+    public void pauseAnimation(){ }
 
     /** Reloads the animation */
-    public void reloadAnimation();
+    public void reloadAnimation(){ }
 
     /** Updates the animation to the next step */
-    public void nextStepAnimation();
+    public void nextStepAnimation(){ }
 
-    /** Goes back to the main menu */
-    public void exit();
+    /** Double the animation's velocity */
+    public void increaseVelocity() { }
+
+    /** Halve the animation's velocity */
+    public void decreaseVelocity() { }
+
+    /** Go back to the main menu */
+    public void exit(){ 
+        parent.close();
+    }
+
+    /** Open the about page */
+    public void about(){
+        parent.about();
+    }
 
     /** 
      * Stops the simulation, 
      * used in Markov Chain, but also in the Simulation Models in reverse mode (it's the simulation that decides when the animation has to be stopped and all the UI changes must be done) 
      */
-    public void stopAnimation();
+    public void stopAnimation(){ }
+
+    public void setLastPanel(){ }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }

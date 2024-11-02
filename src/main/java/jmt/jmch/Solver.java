@@ -18,6 +18,7 @@ import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.jmch.simulation.Simulation;
 import jmt.jmch.simulation.SimulationType;
 
+
 /**
  * This class transforms the information of the Animation to match the structure of the CommonModel class.
  * CommonModel is used to obtain the results of the simulation.
@@ -30,10 +31,13 @@ public class Solver implements CommonConstants{
     private CommonModel model;
     private Simulation simulation;
     private boolean isSingleQueue = true;
+    private double lambda;
 
     private int classNameIndex = 1;
     private int serverNameIndex = 1;
     private int servers = 1;
+
+    private int nQueues = 1; //(for the probabilities, nQueues could be 1,2 or 3 based on the probabilities)
 
     //------------------- keys of the model --------------------------
     private Object classKey;
@@ -103,6 +107,7 @@ public class Solver implements CommonConstants{
         model = new CommonModel();
         simulation = sim;
         servers = nservers;
+        this.lambda = lambda;
         isSingleQueue = simulation.getType() != SimulationType.ROUTING;
         setDistributionsParameters(serviceDistributions, mhu);
         setDistributionsParameters(interArrivalDistributions, lambda);
@@ -125,11 +130,16 @@ public class Solver implements CommonConstants{
         
         if(!isSingleQueue){ //this operation needs to be performed after setting the connections
             setRouterStrategy(prob);
+            checkNumberOfQueues(prob);
         } 
+
+        //same configuration = same result (remove randomness)
+        model.setUseRandomSeed(false);
+        model.setSimulationSeed(23000l);
     }
 
     /** Set the parameters for all the distributions. Always keep the mean = 1/mhu, change the cv accordingly */
-    public void setDistributionsParameters(Distribution[] distributions, double mhu){
+    private void setDistributionsParameters(Distribution[] distributions, double mhu){
         double mean = 1/mhu;
         distributions[0].setMean(1/mhu);
 
@@ -152,7 +162,7 @@ public class Solver implements CommonConstants{
     /** Add a class to the model (similar to the task you perform in JSIM when you click on the class button) */
     private void addClass(int indexInter){
         classKey = model.addClass(Defaults.get("className") + (++classNameIndex),
-            0,
+            0,//Defaults.getAsInteger("classType").intValue(), 
             Defaults.getAsInteger("classPriority"),
             Defaults.getAsDouble("classSoftDeadline"),
             Defaults.getAsInteger("classPopulation"), 
@@ -172,7 +182,7 @@ public class Solver implements CommonConstants{
         Object serverKey = model.addStation("Queue "+(serverNameIndex), STATION_TYPE_SERVER, 1, new ArrayList<ServerType>());
         serverNameIndex++;
 
-        model.setStationQueueCapacity(serverKey, 5);
+        model.setStationQueueCapacity(serverKey, 5+nservers);
         model.setDropRule(serverKey, classKey, "Drop");
         setStrategy(serverKey);
         //model.setServiceWeight(serverKey, classKey, Defaults.getAsDouble("serviceWeight"));
@@ -236,12 +246,27 @@ public class Solver implements CommonConstants{
 
     /** Add all the metrics to control (like setting the parameters in JSIM) */
     private void addMeasure(){
-        model.addMeasure(SimulationDefinition.MEASURE_AR, model.getStationKeys().get(0), classKey); //0
-        //service??
-        model.addMeasure(SimulationDefinition.MEASURE_RP, model.getStationKeys().get(0), classKey); //1
+        if(isSingleQueue){
+            model.addMeasure(SimulationDefinition.MEASURE_AR, model.getStationKeys().get(0), classKey); //0
+            model.addMeasure(SimulationDefinition.MEASURE_RP, model.getStationKeys().get(0), classKey); //1
+        }
+        else{
+            model.addMeasure(SimulationDefinition.MEASURE_AR, routerKey, classKey);
+            model.addMeasure(SimulationDefinition.MEASURE_S_RP, "", classKey); //1
+        }
+        
+       
         model.addMeasure(SimulationDefinition.MEASURE_QT, model.getStationKeys().get(0), classKey); //2
-        model.addMeasure(SimulationDefinition.MEASURE_X, model.getStationKeys().get(0), classKey); //3
-        model.addMeasure(SimulationDefinition.MEASURE_QL, model.getStationKeys().get(0), classKey);  //4             
+
+        if(isSingleQueue){
+            model.addMeasure(SimulationDefinition.MEASURE_X, model.getStationKeys().get(0), classKey); //3
+            model.addMeasure(SimulationDefinition.MEASURE_QL, model.getStationKeys().get(0), classKey);  //4 
+        }
+        else{ //in this case we look at system parameters, so stationKey = null
+            model.addMeasure(SimulationDefinition.MEASURE_S_X, "", classKey); //3
+            model.addMeasure(SimulationDefinition.MEASURE_S_CN, "", classKey);  //4 
+        }
+                    
     }
 
     /** Set the router strategy */
@@ -266,7 +291,29 @@ public class Solver implements CommonConstants{
                 } 
                 break;                  
         }
-        
+    }
+
+    /* Check the number of queues reachable */
+    private void checkNumberOfQueues(double[] prob){
+        if(prob == null){
+            if(isSingleQueue){
+                nQueues = 1;
+            }
+            else{
+                nQueues = 3;
+            }    
+            return;
+        }
+        nQueues = 0;
+        if(prob[0] > 0){
+            nQueues++;
+        }
+        if(prob[1] > 0){
+            nQueues++;
+        }
+        if(prob[2] > 0){
+            nQueues++;
+        }
     }
 
     public CommonModel getModel(){
@@ -274,12 +321,16 @@ public class Solver implements CommonConstants{
     }
 
     //--------------- methods to get some parameters of the simulation --------------------
-    public String getQueueStrategy(){
-        return model.getQueueStrategy(model.getStationKeys().get(0), classKey);
+    public String getStrategy(){
+        return simulation.getName();
     }
 
     public String getInterArrivalDistribution(){
         return ((Distribution) model.getClassDistribution(classKey)).toString();
+    }
+
+    public double getInterArrivalTimeMean(){
+        return lambda;
     }
 
     public String getServiceDistribution(){
@@ -292,5 +343,9 @@ public class Solver implements CommonConstants{
 
     public int getNumberServers(){  
         return servers;
-    }    
+    }   
+
+    public int getNumberQueues(){
+        return nQueues;
+    }
 }

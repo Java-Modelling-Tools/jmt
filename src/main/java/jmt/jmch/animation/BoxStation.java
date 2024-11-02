@@ -48,12 +48,12 @@ public class BoxStation extends JComponent implements JobContainer{
 	private Job currentJob = null;
 	private Color color;
 	private double duration;
-	private int maxValue = 10; //this value is for the conversion from the duration to a colored box (try to select a max value accordingly to the type of distribution)
+	private double mapDuration;
 
 	//information about the current Job for processor sharing
 	private long entranceTime;
 	private long pausedTime = 0;
-	private double velocityFactor = 0;
+	private double velocityFactor = 1;
 	private double processorSpeed = 1;
 	
 	private boolean isWorking = false; //to know if there is a job in this BoxStation or not to print the circle above
@@ -81,9 +81,8 @@ public class BoxStation extends JComponent implements JobContainer{
 		int size = sLength/queueSize;
 		
 		g.setColor(color); //set the color of the job
-		int factor = sHeight/maxValue; 
-		int result = (int) Math.round(duration * factor >= sHeight ? sHeight - 1: duration*factor); //this one provides the problem of having duration greater than the max size of the box
-		g.fillRect(sPos.x + (queueSize-index-1)*size + 1, sPos.y + (sHeight-result), size - 1, result); //+1 - 1 values are used to avoid clipping with other figures, remove *10
+		int result = (int) Math.round(mapDuration == 1.0 ? sHeight - 1: mapDuration*sHeight);
+		g.fillRect(sPos.x + (queueSize-index-1)*size + 1, sPos.y + (sHeight-result), size - 1, result); //+1 - 1 values are used to avoid clipping with other figures
 		
 		//paint the circle above
 		if(isWorking) {
@@ -97,7 +96,7 @@ public class BoxStation extends JComponent implements JobContainer{
 		if(station.isProcessorSharing() && isWorking) {
 			long jobDuration = (long) (currentJob.getDuration() * Math.pow(10, 3));
 			//System.out.println((System.currentTimeMillis() - entranceTime - pausedTime)*velocityFactor);
-			double newDuration = (jobDuration - (System.currentTimeMillis() - entranceTime - pausedTime)* (velocityFactor + processorSpeed)) / (Math.pow(10,3));
+			double newDuration = (jobDuration - (System.currentTimeMillis() - entranceTime - pausedTime)* (velocityFactor * processorSpeed)) / (Math.pow(10,3));
 			currentJob.setDuration(newDuration);
 			entranceTime = System.currentTimeMillis();
 			pausedTime = 0;
@@ -124,6 +123,7 @@ public class BoxStation extends JComponent implements JobContainer{
 		currentJob = newJob;		
 		color = newJob.getColor();
 		duration = newJob.getDuration();
+		mapDuration = newJob.getMapDuration();
 		isWorking = true;
 	}
 	
@@ -132,6 +132,7 @@ public class BoxStation extends JComponent implements JobContainer{
 	 */
 	public void clear() {
 		duration = 0;
+		mapDuration = 0;
 		isWorking = false;
 	}
 

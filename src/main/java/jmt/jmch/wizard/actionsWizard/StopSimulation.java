@@ -42,8 +42,8 @@ public class StopSimulation extends AbstractMCHAction {
     public StopSimulation(JMCHWizardPanel wizardpanel) {
         super("Stop Simulation", "Stop", wizardpanel);
         putValue(SHORT_DESCRIPTION, "Stop simulation");
-        putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
-        putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
+        //putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
+        //putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_MASK));
     }
 
     /**

@@ -18,6 +18,7 @@
 
 package jmt.jmch;
 
+
 /**
  * Class that contains most of the descriptions and help labels of JMCH
  * 
@@ -26,6 +27,10 @@ package jmt.jmch;
  * Time: 13.40
  */
 public class Constants {
+    public static final int PANEL_MAIN = 0;
+    public static final int PANEL_ANIMATION = 1;
+    public static final int PANEL_RESULTS = 2;
+    public static final int PANEL_MARKOV = 1;
 
     //all the algorithms
     public static final String FCFS = "FCFS";
@@ -41,50 +46,40 @@ public class Constants {
 
     //descriptions of all the policies
     public static final String FCFS_DESCRIPTION = 
-        "The FCFS (First come first served) sheduling policy is a scheduling algorithm that orders the jobs inside the queue of a station based on their arrival time. The first task that arrives is the first to be executed and subsequent tasks are executed in the order of their arrival.";
+        "The FCFS (First come first served) sheduling policy is a scheduling rule that executes queued jobs based on their arrival time.";
     public static final String LCFS_DESCRIPTION = 
-        "The LCFS (Last come first served) sheduling policy is a scheduling algorithm that orders the jobs inside the queue of a station based on their arrival time. Most recently arrived tasks are executed before any others. It operates on a 'last come, first served' basis, as a stack data structure.";
+        "The LCFS (Last come first served) sheduling policy  is a scheduling rule that executes queued jobs in reverse sequence with respect to their arrival time.";
     public static final String SJF_DESCRIPTION =
-        "The SJF (Shortest Job First) scheduling policy is a scheduling algorithm that orders the job inside the queue based on their service time. Jobs with smaller service time are prioritized with respect to the others inside the queue.";
+        "The SJF (Shortest Job First) scheduling policy is a scheduling rule that executes queued jobs in reverse sequence of their requested service time (the shortest job is the first).";
     public static final String LJF_DESCRIPTION =
-        "The LJF (Longest Job First) scheduling policy is a scheduling algorithm that orders the job inside the queue based on their service time. Jobs with higher service time are prioritized with respect to the others inside the queue.";
+        "The LJF (Longest Job First) scheduling policy is a scheduling rule that executes queued jobs based on the sequence of required service time (the longest job is the first).";
     
     public static final String PS_DESCRIPTION = 
-        "<html>The Processor Sharing (PS) scheduling policy is a scheduling algorithm where the server processes all customers simultaneously, allocating a fraction of its total capacity to each, inversely proportional to the number of customers. If the station has m servers but only n &lt; m customers. each is executed as if it were alone.</html>";
+        "<html>The Processor Sharing (PS) scheduling policy is a scheduling rule where all jobs are executed simultaneously. A fraction of the total server capacity, inversely proportional to the number of running jobs, is assigned to each of them. If the station has n servers but only m &lt; n customers, then each customer is executed as if it were alone in the system.</html>";
 
     public static final String RR_DESCRIPTION =
-        "The RR (Round Robin) routing policy is a routing algorithm to distribute jobs as they arrive at the router. Jobs are routed cyclically to the outgoing links according to a circular routing pattern. The first customer is send to the top station, then second one to the central one, the third to the bottom one, and the cycle repeates.";
+        "The RR (Round Robin) policy is a routing rule where jobs are routed cyclically to outgoing links based on circular routing pattern. The first job is sent to the link of the top station.";
     public static final String PROB_DESCRIPTION =
-        "The Probabilities routing policy is a routing algorithm to distribute jobs as they arrive at the router. Jobs are routed based on probabilities to one of the edges connected to the router. The sum of all probabilities must be equal to 1.";
+        "The Probabilities policy is a routing rule where jobs are routed to outgoing links based on assigned probabilities (that must sum to 1).";
     public static final String JSQ_DESCRIPTION =
-        "The JSQ (Join the Shortest Job Queue) routing policy is a routing algorithm to distribute jobs as they arrive at the router. Jobs are routed to the station connected to the router that has the smallest number of customers in its queue.";
+        "The JSQ (Join the Shortest Job Queue) policy is a routing rule where arriving jobs are routed to the connected station with the least number of customers in the queue.";
     
-    //introduction AnimationPanel
-    public static final String INTRODUCTION_SIMULATION = "<html><body>"
-        + "<p style='text-align:justify;'>"
-        //+ "<font size=\"4\"><b>Simulation</b></font><br>"
-        + "<font size=\"3\">In this panel, you can simulate a queue or routing policy. "
-        + "Parameters can be set in the <i>Parameters</i> panel and once selected, click on <i>Create</i> button. "
-        + "At this point, simulation can be executed. "
-        + "At any time, simulation parameters can be altered to initiate a new simulation. <br>"
-        + "Each time a simulation with different parameters is initiated, new results will be displayed in the <i>Results</i> panel.</font>"
-        + "</p></body></html>";
+    static final String HTML_START = "<html><body><p style='text-align:justify;'>";
+    static final String HTML_END = "</p></body></html>";
+    static final String HTML_FONT_TITLE = "<font size=\"4\"><b>";
+    static final String HTML_FONT_TIT_END = "</b></font><br>";
+    static final String HTML_FONT_NORM = "<font size=\"3\">";
+    static final String HTML_FONT_NOR_END = "</font>";
 
-    public static final String NO_DESCRIPTION = "<html><body>"
-        + "<p style='text-align:justify;'>"
-        + "<font size=\"3\"> <i>No description, set parameters first</i>"
-        + "</p></body></html>";
+    //introduction AnimationPanel
+    public static final String INTRODUCTION_SIMULATION = HTML_START + HTML_FONT_TITLE + "Simulation" + HTML_FONT_TIT_END
+        + HTML_FONT_NORM + "In this panel it is possible to simulate the behavior of a scheduling algorithm of a queue station or a routing algorithm.<br> "
+        + "Set the Parameters and then click the <i>Play</i> button. The simulation will start, the obtained metrics will be displayed in the <i>Results</i> panel." + HTML_FONT_NOR_END + HTML_END;
 
     //introduction ResultsPanel
-    public static final String INTRODUCTION_RESULTS = "<html><body>"
-        + "<p style='text-align:justify;'>"
-        //+ "<font size=\"4\"><b>Simulation Results</b></font><br>"
-        + "<font size=\"3\">In this panel, it is possible to visualize all the results of the simulations and to compare them. "
-        + "When a new simulation is created and started, the results of the simulation will be displayed in this table. "
-        + "Simulation results are ordered chronologically based on the time the associated simulation was run. <br>"
-        + "Simulations results can also be removed from the table. <br>"
-        + "Please note that returning to the <i>Main Panel</i> will result in the loss of all table data.</font>"
-        + "</p></body></html>";
+    public static final String INTRODUCTION_RESULTS = HTML_START + HTML_FONT_TITLE + "Simulation Results" + HTML_FONT_TIT_END
+        + HTML_FONT_NORM + "In this panel the results of the simulations are shown according to the sequence of the executions. <br> "
+        + "Note that returning to the <i>Main Panel</i> will result in the loss of all data in the table." + HTML_FONT_NOR_END + HTML_END;
     
     //tooltips of the MainPanel
     public static final String[] PREEMPTIVE_TOOLTIPS = {
@@ -113,11 +108,15 @@ public class Constants {
     };
     
     //help text
+    public static final String HELP_ANIMATION = "The max number of jobs in the queue is 5, jobs that arrive when this value has been reached are dropped";
+
     public static final String[] HELP_BUTTONS_ANIMATIONS = {
-        "Start the simulation or reload it, if it was paused", 
+        "Start the simulation or restart it, if it was paused", 
         "Pause the running simulation",
-        "Reload the simulation",  
+        "Restart the simulation",  
         "Perform a next step in the simulation",
+        "Halve the simulation's velocity",
+        "Double the simulation's velocity",
         "Open the help page"
     };
         
@@ -136,20 +135,29 @@ public class Constants {
     };
     
     public static final String[] HELP_PARAMETERS_PANELS = {
-        "Choose the type of Algorithm for the simulation",
+        "Choose the type of Policy for the simulation",
         "Select how many servers are available for each station",
+        "Select the first two probabilities for the router's edges. The third is automatically computed as 1 - p1 - p2. The play button is blocked if p1 + p2 > 1",
         "Select the type of distribution for the inter arrival time between jobs",
         "Select the type of distribution for the service time for each station in the simulation",
-        "Select the traffic intensity for the simulation. Based on the chosen value, the parameters of Inter arrival and Service distribution will be adjusted accordingly",
-        "Select the maximum number of samples collected for each performance index in the simulation",
-        "Once all the parameters are setted, click this button to create the animation. At this point you can start the animation"
+        "Select the arrival rate and service time of the simulation such that the utilization of the system is always "+ "\u2264" + " 1",
+        "Select the maximum number of samples collected for each performance index of the correspondent JSIM model",
     };
 
-    public static final String HELP_PROBABILITIES = 
-        "Set the first two probabilities associated to the three outgoing edges of the router. The third probability is computed by the tool as 1.00 - p1 - p2. The create button is blocked if p1 + p2 > 1";
+    public static final String[] TOOLTIPS_PARAMETERS_PANEL = {
+        "Policy of the simulation",
+        "Number of servers",
+        "Probabilities of router's edges",
+        "Inter Arrival Time distribution",
+        "Service Time distribution",
+        "Arrival Rate",
+        "Service Time",
+        "Arrival Rate x Service Time",
+        "Maximum number of samples per JSIM metric",
+    };
 
     public static final String[] HELP_BUTTONS_MARKOV = {
-        "Start the simulation or reload it, if it was paused", 
+        "Start the simulation or restart it, if it was paused", 
         "Pause the running simulation",
         "Stop the running simulation",
         "Open the help page"

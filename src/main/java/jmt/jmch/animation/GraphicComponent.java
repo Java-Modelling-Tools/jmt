@@ -15,39 +15,23 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
-
-package jmt.jmch.wizard.actionsWizard;
-
-import java.awt.event.ActionEvent;
-
-import jmt.jmch.wizard.panels.JMCHWizardPanel;
+package jmt.jmch.animation;
 
 /**
+ * Interface to wrap up all the methods for a graphic component
+ *
  * @author Lorenzo Torri
- * Date: 30-mar-2024
- * Time: 15.20
+ * Date: 02-sept-2024
+ * Time: 14.00
  */
-public class ReloadSimulation extends AbstractMCHAction {
+public interface GraphicComponent {
+    public void setXPos(int xpos);
+    public void setYPos(int ypos);
 
-    private static final long serialVersionUID = 1L;
+    /** Return the drawing starting position in the panel of a component*/
+    public int getXPos();
+    public int getYPos();
 
-    /**
-     * Defines an <code>Action</code> object with a default
-     * description string and default icon.
-     */
-    public ReloadSimulation(JMCHWizardPanel panel) {
-        super("Reload Simulation", "RotateLeft", panel);
-        putValue(SHORT_DESCRIPTION, "Reload simulation");
-        //putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_S));
-    }
-
-    /**
-     * Invoked when an action occurs.
-     */
-    public void actionPerformed(ActionEvent e) {
-        panel.reloadAnimation();
-    }
-
+    /** Get the total length of a component when drawn */
+    public int getTotalLenght();
 }
-   
- 

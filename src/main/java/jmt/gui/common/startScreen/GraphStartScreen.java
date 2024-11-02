@@ -158,8 +158,8 @@ public class GraphStartScreen extends JMTFrame {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			MMQueues.main(args);
-			//MainWizard.main(args);
+			//MMQueues.main(args);
+			MainWizard.main(args);
 		}
 
 	};

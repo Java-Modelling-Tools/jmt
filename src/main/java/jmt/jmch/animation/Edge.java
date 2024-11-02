@@ -85,13 +85,14 @@ public class Edge extends JComponent implements JobContainer{
 	private boolean centered;
 	private boolean isArrow;
 	private Point[] points;
-	private double speed = 2; //by default the speed of the jobs over the edge is = 2, but you can change this value (in Routing the central edge has speed << than other edges)
+	private double speed = 1;
 	
 	private List<Job> jobList;
 	private JobContainer nextContainer = null;
 	
 	//for the probabilistic routing
 	private boolean paintPercentage = false;
+	private int index = -1;
 	private double percentage = 0.00;
 
 	//for the nextEvent simulation
@@ -111,17 +112,15 @@ public class Edge extends JComponent implements JobContainer{
 	 * @param centered, if the edge is y centered with respect to the JPanel or not
 	 * @param isArrow, if the edge is an arrow and not a simple line
 	 * @param points, points of the edge
-	 * @param speed, the speed of the jobs running over this edge
 	 * @param next, JobContainer next to this edge
 	 */
-	public Edge(AnimationClass anim, JPanel container, boolean centered, boolean isArrow, Point[] points, double speed, JobContainer next) {
+	public Edge(AnimationClass anim, JPanel container, boolean centered, boolean isArrow, Point[] points, JobContainer next) {
 		this.animation = anim;
 		this.parent = container;
 		this.centered = centered;
 		this.isArrow = isArrow;
 		this.points = points;
 		this.nextContainer = next;
-		this.speed = speed;
 		
 		jobList = new ArrayList<>();
 	}
@@ -160,13 +159,13 @@ public class Edge extends JComponent implements JobContainer{
 		if(paintPercentage) {
 			g.setFont(new Font("Arial", Font.PLAIN, 10));
 			DecimalFormat df = new DecimalFormat("#.##");
-			String value = "prob: "+ df.format(percentage);
+			String value = "P" + index + ": "+ df.format(percentage);
 			Direction direction = getDirection(points[0], points[1]);
 			if(direction == Direction.UP || direction == Direction.DOWN) {
-				g.drawString(value, points[0].x - 50,  points[0].y + direction.direction() * 20);
+				g.drawString(value, points[0].x - 40,  points[0].y + direction.direction() * 15);
 			}
 			else {
-				g.drawString(value, points[0].x,  points[0].y + direction.direction() * 20);
+				g.drawString(value, points[0].x - 10,  points[0].y + direction.direction() * 22);
 			}
 		}
 
@@ -182,10 +181,12 @@ public class Edge extends JComponent implements JobContainer{
 	/**
 	 * Method to paint the percentage near the edge. 
 	 * This method is useful for Routing Probabilistic policy
-	 * @param p
+	 * @param p percentage
+	 * @param index value of the i-th edge
 	 */
-	public void paintPercentage(double p) {
+	public void paintPercentage(double p, int index) {
 		paintPercentage = true;
+		this.index = index;
 		percentage = p;
 	}
 	
@@ -236,16 +237,16 @@ public class Edge extends JComponent implements JobContainer{
 		Point current = j.getPosition();
 		switch(j.getDirection()) {
 			case UP: 
-				j.updatePosition(current.x, current.y - speed);
+				j.updatePosition(current.x, current.y - speed * velocityFactor);
 				break;
 			case DOWN:
-				j.updatePosition(current.x, current.y + speed);
+				j.updatePosition(current.x, current.y + speed * velocityFactor);
 				break;
 			case RIGHT:
-				j.updatePosition(current.x + speed, current.y);
+				j.updatePosition(current.x + speed * velocityFactor, current.y);
 				break;
 			case LEFT:	
-				j.updatePosition(current.x - speed, current.y);
+				j.updatePosition(current.x - speed * velocityFactor, current.y);
 				break;
 		}
 	}
@@ -292,7 +293,7 @@ public class Edge extends JComponent implements JobContainer{
 		newJob.setStartingPosition(points[0].x, points[0].y, getDirection(points[0], points[1]), 1); //when a new Job is added, then its position is the starting point of the edge
 		jobList.add(newJob);
 
-		if(nextEvent) { //do not stop for the next event if a job is passing from an edge to another
+		if(nextEvent && (prec instanceof Source)) { //stop only when a new job is created
 			animation.pause();
 			animation.resetNextEvent();
 		}
@@ -330,14 +331,17 @@ public class Edge extends JComponent implements JobContainer{
 
 	/* Methods for the Next Step */
 	public void setVelocityFactor(int value) {
-    	speed *= value;
     	velocityFactor = value;
     }
 
-	public void resetVelocityFactor() {
-    	speed /= velocityFactor;
-    	velocityFactor = 1;
-    }
+	public double getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(double sp){
+		speed = sp;
+	}
+
 
 	/* Methods for highlight */
 	public void highlightON(Color jobColor) {
@@ -367,6 +371,37 @@ public class Edge extends JComponent implements JobContainer{
 			highlight = !highlight;
 			counterHighLight++;
 		}
-		
+	}
+
+	public int getTotalLength(){
+		int sum = 0;
+		for(int i = 1; i < points.length; i++){
+			sum += Math.abs(points[i].y - points[i-1].y) + Math.abs(points[i].x - points[i-1].x); //Manhattan distance
+		}
+		return sum;
+	}
+
+	public void setXFinish(int xpos) {
+		points[points.length - 1].x = xpos;
+	}
+	
+	public void setXStart(int xpos) {
+		points[0].x = xpos;
+	}
+
+	public void setYFinish(int ypos) {
+		points[points.length - 1].y = ypos;
+	}
+	
+	public void setYStart(int ypos) {
+		points[0].y = ypos;
+	}
+
+	public void setYPoint(int ypos, int i) {
+		points[i].y = ypos;
+	}
+
+	public void setXPoint(int xpos, int i) {
+		points[i].x = xpos;
 	}
 }

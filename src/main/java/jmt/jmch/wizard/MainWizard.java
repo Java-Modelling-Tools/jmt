@@ -20,11 +20,14 @@ package jmt.jmch.wizard;
 
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.panels.AboutDialogFactory;
 import jmt.jmch.simulation.RoutingSimulation;
 import jmt.jmch.simulation.Simulation;
+import jmt.jmch.simulation.SimulationType;
 import jmt.jmch.wizard.panels.AnimationPanel;
 import jmt.jmch.wizard.panels.MainPanel;
 import jmt.jmch.wizard.panels.markovPanel.MMQueuesPanel;
+import jmt.jmch.wizard.panels.resultsPanel.ResultStructure;
 import jmt.jmch.wizard.panels.resultsPanel.ResultsPanel;
 import jmt.jmch.wizard.panels.resultsPanel.ResultsPanelRouting;
 import jmt.jmch.wizard.panels.resultsPanel.ResultsPanelScheduling;
@@ -54,6 +57,7 @@ public class MainWizard extends JMCHWizard{
     private String IMG_JWATICON = "JMCHIcon";
     private static final String TITLE = "JMCH - Modelling Classroom Helper"; 
 	private static final String TITLE_QUEUEING = "Queueing";
+	private int lastPanel = 0; //this variable is used to set the focus on the last panel visited when going back to the main panel and answering NO to the "Are you sure..."
 
     //components of the panel
     private JPanel menus;
@@ -63,14 +67,16 @@ public class MainWizard extends JMCHWizard{
 	private List<WizardPanel> panelCollection = new ArrayList<>();
 	private AnimationPanel animationPanel;
 	private Simulation sim;
-	private ResultsPanel resultsPanel;
-	
+	private ResultsPanel resultsPanel = null;
+
+	//results information
+	private ResultStructure rs;
     
 	public MainWizard() {
         this.setIconImage(JMTImageLoader.loadImage(IMG_JWATICON).getImage());
 		this.setTitle(TITLE);
 		this.setSize(CommonConstants.MAX_GUI_WIDTH_JWAT, CommonConstants.MAX_GUI_HEIGHT_JWAT);
-		this.setResizable(false);
+		this.setResizable(true);
 
         centerWindow();
 
@@ -102,17 +108,24 @@ public class MainWizard extends JMCHWizard{
 	public void setAnimationPanelEnv(Simulation simulation){
 		this.sim = simulation;
 		this.setTitle(TITLE + " - "+ TITLE_QUEUEING + ", "+simulation.getType().toString());
-
+		
+		
 		animationPanel = new AnimationPanel(this, simulation);
 		this.addPanel(animationPanel);
 		panelCollection.add(animationPanel);
 
-		if(simulation instanceof RoutingSimulation){
+		if(simulation.getType() == SimulationType.ROUTING){
 			resultsPanel = new ResultsPanelRouting(this);
 		}
 		else{
 			resultsPanel = new ResultsPanelScheduling(this);
 		}
+
+		// decide if you need to forward also the results of previous simulations
+		if(rs != null && rs.getPreviousSimulationType() == simulation.getType()){	
+			resultsPanel.setResults(rs);
+		}
+		
 		this.addPanel(resultsPanel);
 		panelCollection.add(resultsPanel);
 
@@ -181,11 +194,47 @@ public class MainWizard extends JMCHWizard{
 		this.setTitle(TITLE);
 		mainPanel.createMenu(); //update the menu and toolbar
 		mainPanel.createToolBar();
+		setEnableButton("Next >", false);
+		setEnableButton("Back", false);
 		this.validate();
+	}
+
+	public void setSelectedPanel(){
+		showPrev();
 	}
 
 	public int getNumbersPanel(){
 		return panelCollection.size();
+	}
+
+	/* Two methods for setting the icon of loading or end result. Called by the Animation Panel*/
+	public void setIconLoading(){
+		resultsPanel.loadingResult();
+	}
+
+	public void setIconFinish(){
+		resultsPanel.endResult();
+	}
+
+	/** Save the results of the Results Panel, and display them in the next chosen simulation, if the type is the same */
+	public void saveResults(){
+		if(resultsPanel != null){ 
+			rs = new ResultStructure();
+			rs.setAll(
+				animationPanel.getSimulationType(),
+				resultsPanel.getAlgorithms(), 
+				resultsPanel.getArrivalDistirbutions(), 
+				resultsPanel.getLambdas(), 
+				resultsPanel.getServiceDistributions(), 
+				resultsPanel.getResponseTimes(), 
+				resultsPanel.getThroughputs(),
+				resultsPanel.getNumberOfCustomers(),
+				resultsPanel.getNQueues(), 
+				resultsPanel.getNservers(),				
+				resultsPanel.getServiceTimes(), 			
+				resultsPanel.getQueueTimes()
+			);
+		}	
 	}
 
 	/**
@@ -196,18 +245,32 @@ public class MainWizard extends JMCHWizard{
 	 * @param serviceDistr service time distribution
 	 * @param nServers number of servers for each station
 	 * @param service service time
+	 * @param nQueues number of queues reachable
 	 * @param responseTime response time
 	 * @param queueTime queue time
 	 * @param thoughput thoughput
 	 * @param queueNumber queue number
 	 */
-	public void routeResults(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double queueNumber){
+	public void routeResults(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, int nQueues, double responseTime, double queueTime, double thoughput, double queueNumber){
 		if(sim instanceof RoutingSimulation){
-			resultsPanel.addResult(algorithm, arrivalDistr, lambda, serviceDistr, service, responseTime, queueTime, thoughput, queueNumber);
+			resultsPanel.addResult(algorithm, arrivalDistr, lambda, serviceDistr, nQueues, responseTime, thoughput, queueNumber);
 		}
 		else{
 			resultsPanel.addResult(algorithm, arrivalDistr, lambda, serviceDistr, nServers, service, responseTime, queueTime, thoughput, queueNumber);
 		}
-		
+	}
+
+	public void setLastPanel(int value){
+		lastPanel = value;
+	}
+
+	public void setLastPanel() {
+		tabbedPane.setSelectedIndex(lastPanel);
+	}
+
+	public void about() {
+		AboutDialogFactory.showJMCH(this);
 	}
 }
+
+

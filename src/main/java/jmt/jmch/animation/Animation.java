@@ -60,6 +60,9 @@ public interface Animation {
 	 * The simulation time is increased (whenever System.currentMillis() is used, multiply it for a factor > 1), and the simulation pauses when a new event occurs
 	 */
 	public void next();
+
+	/** Set the velocity Factor of the animation */
+	public void setVelocityFactor(int velocity);
 		
 	/**
 	* This method is important for udpdating all those components inside the Animation that are affected by a pause of the Animator.
@@ -69,5 +72,6 @@ public interface Animation {
 	*/
 	public void updatePause(long pause);
 
+	public Source getSource();
 }
  

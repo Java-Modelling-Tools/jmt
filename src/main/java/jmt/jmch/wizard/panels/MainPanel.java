@@ -22,20 +22,18 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
@@ -43,7 +41,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
@@ -52,10 +49,10 @@ import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.listeners.MenuAction;
-import jmt.framework.gui.wizard.WizardPanel;
+import jmt.gui.common.CommonConstants;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.jwat.JWatWizard;
 import jmt.jmch.Constants;
+import jmt.jmch.wizard.actionsWizard.About;
 import jmt.jmch.wizard.actionsWizard.AbstractMCHAction;
 import jmt.jmch.wizard.actionsWizard.Help;
 import jmt.jmch.simulation.Simulation;
@@ -70,12 +67,14 @@ import jmt.jmch.wizard.MainWizard;
  * Date: 29-mar-2024
  * Time: 15.04
  */
-public class MainPanel extends WizardPanel implements JMCHWizardPanel{
+public class MainPanel extends JMCHWizardPanel{
 
     private static final String PANEL_NAME = "Main Panel";
     private static final String IMG_STARTSCREEN = "StartScreenJMCH";
+	private int imgHeight;
+	private int imgWeight;
+	private int BUTTONHEIGHT;
 
-    private MainWizard parent;
 	private JMTMenuBar menu;
 	private JMTToolBar toolbar;
     private HoverHelp help; //retrieve from parent the HoverHelp
@@ -86,6 +85,7 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
 
 	//all actions associated to the buttons of the Menu and ToolBar
     private AbstractMCHAction openHelp;
+	private AbstractMCHAction about;
 
 
 	//all the AbstractActions associated to the buttons related of this panel only
@@ -230,16 +230,17 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
 	};
 
     public MainPanel(MainWizard main){
-        this.parent = main;
+        parent = main;
 		help = parent.getHoverHelp();
 
-        openHelp = new Help(this,"JTCH");
+        openHelp = new Help(this, "JMCH");
+		about = new About(this);
 
         initGUI();
     }
 
     public void initGUI(){
-		this.setLayout(new BorderLayout());
+		this.setLayout(new BorderLayout()); //border layout to help the resizing of the central image
 
 		//---------------upper and bottom panels
 		JPanel upper = new JPanel(new FlowLayout());
@@ -255,26 +256,25 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
 		this.add(upper, BorderLayout.NORTH);
 		this.add(bottom, BorderLayout.SOUTH);
 
-		//---------------central panel
-		JPanel centerPanel = new JPanel(new GridBagLayout());
-		GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.NORTH;
-        gbc.insets = new Insets(20, 0, 0, 0); // Image just a little down
-      
-        //---------------------flow chart schema
+		deterimineSize();
+
+		//--------------- image
 		JLabel imageLabel = new JLabel();
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(473, 470)));
-		centerPanel.add(imageLabel, gbc);
+		imageLabel.setBorder(BorderFactory.createEmptyBorder((int)(BUTTONHEIGHT * 0.5), 1, 0, 0));
+		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(imgWeight, imgHeight)));
+		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
+		this.add(imageLabel, BorderLayout.CENTER);
 
 		//---------------------panel with all the buttons
-		JPanel eastPanel = new JPanel(new FlowLayout());
+		JPanel eastPanel = new JPanel(new BorderLayout());
+		eastPanel.add(Box.createHorizontalStrut(150), BorderLayout.EAST);
+		eastPanel.add(Box.createHorizontalStrut(10), BorderLayout.WEST);
 		list.setCellRenderer(selectedRender(-1)); //-1 since no element is highlighted
 		list.setBackground(null);
 
 		//TODO: add help for each element of the list
-		ListModel<String> model = list.getModel();
+		/*ListModel<String> model = list.getModel();
 		ListCellRenderer<? super String> cellRenderer = list.getCellRenderer();
 		List<Component> components = new ArrayList<>();
 		for(int i = 0; i < model.getSize(); i++){
@@ -285,11 +285,9 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
 				}
 				
 			}
-		}
+		}*/
 
-		help.addHelp(list, "Select the JTCH Mode");
-
-		
+		help.addHelp(list, "Select the JMCH Mode");
 		eastPanel.add(list, BorderLayout.CENTER);
 
 		final JPopupMenu[] popupMenu = createSubMenus();
@@ -319,17 +317,24 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
         });
 
 
-		gbc = new GridBagConstraints();
-		gbc.gridx = 1;
-		gbc.gridy = 0;
-		gbc.fill = GridBagConstraints.VERTICAL;
-		centerPanel.add(eastPanel, gbc);
-
-		this.add(centerPanel, BorderLayout.CENTER);
+		this.add(eastPanel, BorderLayout.EAST);
 		
         createMenu();
         createToolBar();
     }
+
+	/* Custom method to resize the content of the main panel based on the dimensions of the user's screen */
+	private void deterimineSize(){
+		Toolkit toolkit =  Toolkit.getDefaultToolkit ();
+		Dimension dim = toolkit.getScreenSize();
+		int height = (CommonConstants.MAX_GUI_HEIGHT_JWAT+150) < (int) dim.getHeight() ? (CommonConstants.MAX_GUI_HEIGHT_JWAT+150) : (int) dim.getHeight();
+		double aspectRatio = 501/498;
+
+		
+		imgHeight = height * 315 / 600; //we know for sure that if the height of the panel is 600, then the image's height is 315
+		BUTTONHEIGHT = 30 * height / (CommonConstants.MAX_GUI_HEIGHT_JWAT+150);//we know that if the panel is 768 in height, then the correct size of BUTTONHEIGHT = 30
+		imgWeight = (int) (aspectRatio * imgHeight);
+	}
 
 	/**
 	 * To set the look of each element inside the JList.
@@ -343,12 +348,12 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
             	JLabel label = new JLabel(value);
             	
             	if(index % 2 != 0) { //index odd are divisors
-            		label.setPreferredSize(new Dimension(150,30));
-            		label.setMinimumSize(new Dimension(150,30));
+            		label.setPreferredSize(new Dimension(150, 30));
+            		label.setMinimumSize(new Dimension(150, 30));
             	}
             	else {            		
 					label.setHorizontalAlignment(SwingConstants.CENTER);
-					Border borderEmpty = BorderFactory.createEmptyBorder(12, 5, 12, 5);
+					Border borderEmpty = BorderFactory.createEmptyBorder(BUTTONHEIGHT-18, 5, BUTTONHEIGHT-18, 5);
 					Border borderEtched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 					Border compoundBorder = BorderFactory.createCompoundBorder(borderEtched, borderEmpty);
                     label.setBorder(compoundBorder);
@@ -441,7 +446,7 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
         MenuAction action = new MenuAction("File", new AbstractMCHAction[] { null});
 
         //Help window
-        action = new MenuAction("Help", new AbstractMCHAction[] {openHelp, null});
+        action = new MenuAction("Help", new AbstractMCHAction[] {openHelp, null, about});
 		menu.addMenu(action);
 
         parent.setMenuBar(menu);
@@ -454,7 +459,7 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
         toolbar = new JMTToolBar(JMTImageLoader.getImageLoader());	
 
         //first add all the icons with their actions
-        AbstractMCHAction[] actions = new AbstractMCHAction[] {null, openHelp}; // Builds an array with all actions to be put in the toolbar
+        AbstractMCHAction[] actions = new AbstractMCHAction[] {openHelp}; // Builds an array with all actions to be put in the toolbar
 		String[] helpText = {"Open the help page"};
         toolbar.populateToolbar(actions);
         ArrayList<AbstractButton> buttons = new ArrayList<AbstractButton>(); //create a list of AbstractButtons for the helpLabel
@@ -469,47 +474,29 @@ public class MainPanel extends WizardPanel implements JMCHWizardPanel{
 		parent.setToolBar(toolbar);
 	}
 
-    //Overrided methods for performing the actions when the buttons of JToolBar or JMenuBar are pressed
-    @Override
-    public void openHelp() {
-        
-    }
-
-	@Override
-	public void startAnimation() {
-	}
-
-	@Override
-	public void pauseAnimation() {
-	}
-
-	@Override
-	public void reloadAnimation() {
-	}
-
-	@Override
-	public void nextStepAnimation() {
-
-	}
-
-	@Override
-	public void exit() {
-	}
-
-	@Override
-	public void stopAnimation() {
-	}   
-	
 	
 	@Override
 	public void gotFocus() { //this method is essential for controlling if the user tries to go back to the main panel from a panel like the Result one
 		if (parent.getNumbersPanel() > 0) {
-			if (JOptionPane.showConfirmDialog(this, "This operation resets all data. Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) != JOptionPane.NO_OPTION){
+			if (JOptionPane.showConfirmDialog(this, "This operation resets the Results table only when a different algorithm group is selected (Scheduling or Routing, Single Station). \n Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				parent.saveResults();
 				parent.resetScreen();
-				((JWatWizard) getParentWizard()).setEnableButton("Next >", false);
-			} 
+			} else {
+				parent.setLastPanel();
+			}
 		}
 	}
+
+
+	@Override
+    public void setLastPanel(){
+        parent.setLastPanel(Constants.PANEL_MAIN);
+    }
+
+	@Override
+    public void lostFocus() { 
+        setLastPanel();
+    }
 }
 
 

@@ -49,26 +49,23 @@ public class Job extends JComponent{
 	private int boxHeight = 30;
 	
 	private double duration;
+	private double mapDuration;
 	private Color color;
 	private int priority;
 	
 	//those values are only for debug now
-	public int maxValue = 10; //this value is for the conversion from the duration to a colored box (try to select a max value accordingly to the type of distribution)
+	public int maxValue = 10; //this value is for the conversion from the duration to a colored box
 	public AnimDistribution service;
 	
 	private long entrance; //this value is the associated long value for the entrance of a job inside a JComponent
 	private int velocityFactor = 1;
 	
-	public Job(AnimDistribution service, Color color) {	
+	public Job(AnimDistribution service, double duration, Color color) {	
 		this.color = color;
 		priority = new Random().nextInt(5)+1; //set priority always > 1 otherwise it does not work properly in the BoxStation
 		this.service = service;
-		try {
-			duration = service.nextRand(); //duration = new Random().nextInt(maxValue+1) + 1;
-		} catch (IncorrectDistributionParameterException e) {
-			//this will never happen if the parameters of the distribution are correclty chosen
-			duration = 0.0;
-		}
+		this.duration = duration;
+		mapDuration = service.mapValue(duration); //based on the type of distribution, map the duration to a value between 0 and 1
 	}
 	
 	/** This paint needs to know if we are on an edge or not, because if we are not on an edge, then we do not need to paint anything */
@@ -84,12 +81,11 @@ public class Job extends JComponent{
 			g.drawRect(pos.x + 15, pos.y - 30, boxWidth, boxHeight);
 
 			//g.setFont(new Font("Arial", Font.BOLD, 13));
-			//g.drawString(String.valueOf(duration), pos.x - 15, pos.y-40);
+			//g.drawString(String.valueOf(mapDuration), pos.x - 15, pos.y-40);
 			
 			//to convert the duration to the size of the above box
 			g.setColor(color);
-			int factor = boxHeight/maxValue;
-			int result = (int) Math.round(duration*factor >= boxHeight? boxHeight-1: duration*factor); //this solution provides the problem of having jobs with duration > maximum height of the box
+			int result = (int) Math.round(mapDuration == 1.0 ? boxHeight-1: mapDuration * boxHeight); 
 			g.fillRect(pos.x + 16, pos.y - 30 + (boxHeight-result), boxWidth-1, result);
 		}	
 	}
@@ -113,6 +109,10 @@ public class Job extends JComponent{
     public double getDuration() {
     	return duration;
     }
+
+	public double getMapDuration(){
+		return mapDuration;
+	}
     
     /**
      * Method to set the staring point position of a job. It is called by an edge that have this new Job on its route.
@@ -166,6 +166,7 @@ public class Job extends JComponent{
     /** Called once the Job is going outside of a station */
     public void setDuration() {
     	duration = 0;
+		mapDuration = 0;
     }
 
 	public Direction getDirection(){
@@ -179,6 +180,7 @@ public class Job extends JComponent{
 	/** Called by the BoxStation in PS, to update the new duration of the job */
 	public void setDuration(double value) {
     	duration = value;
+		mapDuration = service.mapValue(duration);
     }
     
     public void setOnEdge() {
@@ -192,9 +194,5 @@ public class Job extends JComponent{
 	/* Next step methods */
 	public void setVelocityFactor(int value) {
     	velocityFactor = value;
-    }
-
-	public void resetVelocityFactor() {
-    	velocityFactor = 1;
     }
 }
