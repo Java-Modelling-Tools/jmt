@@ -30,9 +30,17 @@ import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
 public class TestUtil {
 
-	public static boolean testJSIMGraph(String testFilePath, String testResultFilePath) {
+	final static String TEST_FILES_BASE_FOLDER_PATH = "/linetesting/input/";
+	final static String TEST_MODEL_FILE_NAME = "model.jsim";
+	final static String TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
+
+	public static boolean testJSIMGraph(String testFolderName) {
 
 		try {
+
+			String testFolder = TEST_FILES_BASE_FOLDER_PATH + testFolderName + "/";
+			String testFilePath = testFolder + TEST_MODEL_FILE_NAME;
+			String testResultFilePath = testFolder + TEST_MODEL_RESULTS_FILE_NAME;
 
 			Path resourcePath = Paths.get(TestUtil.class.getResource(testFilePath).toURI());
 
@@ -54,7 +62,7 @@ public class TestUtil {
 
 			mediator.startSimulation();
 
-			System.out.println("Simulation truly started");
+			// System.out.println("Simulation truly started");
 
 			// Get Dispatcher
 			Field dispatcherField = Mediator.class.getDeclaredField("dispatcher");
@@ -71,7 +79,7 @@ public class TestUtil {
 			// Now join on the real simulation thread
 			pollerThread.join();
 
-			System.out.println("Simulation truly finished");
+			// System.out.println("Simulation truly finished");
 
 			// Get the model file parent folder name
 			String parentFolderName = resourcePath.getParent().getFileName().toString();
@@ -84,7 +92,7 @@ public class TestUtil {
 				throw new FileNotFoundException("Could not create model output file");
 			}
 
-			System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
+			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 
 			// Get ModelLoader
 			Field modelLoaderField = Mediator.class.getDeclaredField("modelLoader");
@@ -118,7 +126,7 @@ public class TestUtil {
 				finalValues.add(finalValue);
 			}
 
-			System.out.println("finalValues: " + finalValues);
+			// System.out.println("finalValues: " + finalValues);
 
 			// === Parse second file: model.jsim-result.jsim ===
 			Path resultsFilePath = Paths.get(TestUtil.class.getResource(testResultFilePath).toURI());
@@ -142,8 +150,8 @@ public class TestUtil {
 				Element solution = (Element) solutionNodes.item(i);
 				String meanValue = solution.getAttribute("meanValue");
 				String finalValue = finalValues.get(i);
-				System.out.println("finalValue: " + finalValue);
-				System.out.println("meanValue: " + meanValue);
+				// System.out.println("finalValue: " + finalValue);
+				// System.out.println("meanValue: " + meanValue);
 				// System.out.println("match: " + finalValue.equals(meanValue));
 				isDoResultsMatch = finalValue.equals(meanValue);
 				i++;

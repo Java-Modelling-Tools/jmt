@@ -9,10 +9,9 @@ public class LineTest {
 	@Test
 	void testLine() {
 
-		String testFilePath = "/linetesting/input/tpb80d3b67_44ae_4d6c_8a83_fa3b14eb9397/model.jsim";
-		String testResultFilePath = "/linetesting/input/tpb80d3b67_44ae_4d6c_8a83_fa3b14eb9397/model.jsim-result.jsim";
+		String testFolderName = "tpb80d3b67_44ae_4d6c_8a83_fa3b14eb9397";
 
-		assertTrue(TestUtil.testJSIMGraph(testFilePath, testResultFilePath));
+		assertTrue(TestUtil.testJSIMGraph(testFolderName));
 
 	}
 
