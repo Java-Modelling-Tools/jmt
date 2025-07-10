@@ -94,3 +94,5 @@ nb-configuration.xml
 ## Miscellaneous
 ##############################
 *.log
+# Remove test output folder
+/src/test/resources/linetesting/output
