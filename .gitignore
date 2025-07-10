@@ -3,3 +3,6 @@
 *.classpath
 *.project
 *.settings
+
+# Remove test output folder
+/src/test/resources/linetesting/output
