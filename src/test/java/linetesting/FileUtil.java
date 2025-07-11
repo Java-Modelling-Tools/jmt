@@ -1,16 +1,13 @@
 package linetesting;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class FileUtil {
 
-	public static File createFileInTestResources(String[] folderHierarchy, String fileName, String content)
-			throws IOException {
+	public static File createFileInTestResources(String[] folderHierarchy, String fileName) throws IOException {
 		// Base path: src/test/resources
 		Path basePath = Paths.get("src", "test", "resources");
 
@@ -27,8 +24,10 @@ public class FileUtil {
 
 		// Create/overwrite file
 		File outputFile = basePath.resolve(fileName).toFile();
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
-			writer.write(content);
+		if (!outputFile.exists()) {
+			if (!outputFile.createNewFile()) {
+				throw new IOException("Failed to create file: " + outputFile.getAbsolutePath());
+			}
 		}
 
 		return outputFile; // Return for reference or assertion

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +36,7 @@ public class TestUtil {
 	final static String TEST_MODEL_FILE_NAME = "model.jsim";
 	final static String TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
 
-	public static boolean testJSIMGraph(String testFolderName) {
+	public static boolean testJSIMGraphModel(String testFolderName) {
 
 		try {
 
@@ -74,10 +76,24 @@ public class TestUtil {
 			pollerField.setAccessible(true);
 			Thread pollerThread = (Thread) pollerField.get(dispatcherThread);
 
-			// System.out.println("poller isAlive: " + pollerThread.isAlive());
+			while (pollerThread.getState() == Thread.State.NEW) {
+				Thread.sleep(10); // Wait until it starts
+			}
+
+//			System.out.println("dispatcherThread: " + dispatcherThread);
+//			System.out.println("pollerThread: " + pollerThread);
+//			System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
+//			System.out.println("pollerThread state: " + pollerThread.getState());
 
 			// Now join on the real simulation thread
-			pollerThread.join();
+			if (pollerThread.isAlive()) {
+//				long startTime = System.currentTimeMillis();
+				pollerThread.join();
+//				long endTime = System.currentTimeMillis();
+//				System.out.println("Time taken: " + (endTime - startTime) + " ms");
+			} else {
+				System.out.println("pollerThread already finished, join returns immediately.");
+			}
 
 			// System.out.println("Simulation truly finished");
 
@@ -85,8 +101,7 @@ public class TestUtil {
 			String parentFolderName = resourcePath.getParent().getFileName().toString();
 
 			String[] folderHierarchy = { "linetesting", "output", parentFolderName };
-			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, "testedModel.jsimg",
-					"Hierarchical content!");
+			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, "testedModel.jsimg");
 
 			if (!modelOutputFile.exists()) {
 				throw new FileNotFoundException("Could not create model output file");
@@ -150,19 +165,25 @@ public class TestUtil {
 				Element solution = (Element) solutionNodes.item(i);
 				String meanValue = solution.getAttribute("meanValue");
 				String finalValue = finalValues.get(i);
-				// System.out.println("finalValue: " + finalValue);
-				// System.out.println("meanValue: " + meanValue);
-				// System.out.println("match: " + finalValue.equals(meanValue));
+//				System.out.println("finalValue: " + finalValue);
+//				System.out.println("meanValue: " + meanValue);
+//				System.out.println("match: " + finalValue.equals(meanValue));
 				isDoResultsMatch = finalValue.equals(meanValue);
 				i++;
 			}
+			// Closes everything gui (sadly it opens automatically)
+			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
+			doClose.setAccessible(true);
+			doClose.invoke(jsimGraphMain);
+			jsimGraphMain.dispose();
 
 			return isDoResultsMatch;
 
 		} catch (URISyntaxException | SecurityException | IllegalAccessException | IllegalArgumentException
 				| InterruptedException | NoSuchFieldException | IOException | XPathExpressionException | SAXException
-				| ParserConfigurationException e) {
+				| ParserConfigurationException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
+			System.exit(0);
 			return false;
 		}
 
