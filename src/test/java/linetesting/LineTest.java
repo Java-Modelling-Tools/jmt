@@ -2,16 +2,30 @@ package linetesting;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.jupiter.api.Test;
+import java.io.File;
+import java.util.stream.Stream;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 public class LineTest {
 
-	@Test
-	void testLine() {
+	final static String TEST_FILES_BASE_FOLDER_PATH = "src/test/resources/linetesting/input";
 
-		String testFolderName = "tpb80d3b67_44ae_4d6c_8a83_fa3b14eb9397";
+	static Stream<String> folderProvider() {
+		File outputDir = new File(TEST_FILES_BASE_FOLDER_PATH);
+		if (!outputDir.exists() || !outputDir.isDirectory()) {
+			throw new RuntimeException("Directory not found: " + outputDir.getAbsolutePath());
+		}
 
-		assertTrue(TestUtil.testJSIMGraph(testFolderName));
+		return Stream.of(outputDir.listFiles(File::isDirectory)).map(File::getName);
+	}
+
+	@ParameterizedTest
+	@MethodSource("folderProvider")
+	void testLine(String testFolderName) {
+
+		assertTrue(TestUtil.testJSIMGraphModel(testFolderName));
 
 	}
 
