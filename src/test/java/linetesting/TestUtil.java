@@ -29,6 +29,8 @@ import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
 public class TestUtil {
 
+	final static String JSIM_TESTS_FOLDER_NAME = "jsim"; // must be same as in LineTest
+
 	private static List<String> testJSIMGraph(File testModel) {
 
 		try {
@@ -42,6 +44,15 @@ public class TestUtil {
 			Mediator mediator = (Mediator) mediatorField.get(jsimGraphMain);
 
 			mediator.openModel(testModel);
+
+			// Get Model
+			Field modelField = Mediator.class.getDeclaredField("model");
+			modelField.setAccessible(true);
+			JSimGraphModel model = (JSimGraphModel) modelField.get(mediator);
+
+			// Reset results in order to avoid "This operation will overwrite old simulation
+			// results. " confirm dialog
+			model.setSimulationResults(null);
 
 			mediator.startSimulation();
 
@@ -85,8 +96,14 @@ public class TestUtil {
 				throw new RuntimeException("Line test model does not have parent folder");
 			}
 
-			String[] folderHierarchy = { "linetesting", "output", parentFolderName };
-			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, "testedModel.jsimg");
+			List<String> folderHierarchy = new ArrayList<String>();
+			folderHierarchy.add("linetesting");
+			folderHierarchy.add("output");
+			folderHierarchy.add(JSIM_TESTS_FOLDER_NAME);
+			if (!parentFolderName.equals(JSIM_TESTS_FOLDER_NAME)) {
+				folderHierarchy.add(parentFolderName);
+			}
+			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
 
 			if (!modelOutputFile.exists()) {
 				throw new FileNotFoundException("Could not create model output file");
@@ -99,18 +116,33 @@ public class TestUtil {
 			modelLoaderField.setAccessible(true);
 			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(mediator);
 
-			// Get Model
-			Field modelField = Mediator.class.getDeclaredField("model");
-			modelField.setAccessible(true);
-			JSimGraphModel model = (JSimGraphModel) modelField.get(mediator);
-
 			// Updates station positions into data structure - otherwise next instruction
 			// gives error
 			mediator.updateStationPositions();
 			modelLoader.saveModel(model, jsimGraphMain, modelOutputFile);
 
-			// === Parse first file: testfile.jsimg ===
-			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(modelOutputFile);
+			// Closes everything gui (sadly it opens automatically)
+			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
+			doClose.setAccessible(true);
+			doClose.invoke(jsimGraphMain);
+			jsimGraphMain.dispose();
+
+			return getJSIMGraphModelFinalValues(modelOutputFile);
+
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
+				| NoSuchFieldException | IOException | NoSuchMethodException | InvocationTargetException e) {
+			e.printStackTrace();
+			System.exit(0);
+			return new ArrayList<String>();
+		}
+
+	}
+
+	private static List<String> getJSIMGraphModelFinalValues(File jsimGraphModelFile) {
+
+		try {
+			// Parse file
+			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jsimGraphModelFile);
 
 			// Normalize the XML structure
 			measuresDoc.getDocumentElement().normalize();
@@ -127,23 +159,13 @@ public class TestUtil {
 			}
 
 			// System.out.println("finalValues: " + finalValues);
-
-			// Closes everything gui (sadly it opens automatically)
-			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
-			doClose.setAccessible(true);
-			doClose.invoke(jsimGraphMain);
-			jsimGraphMain.dispose();
-
 			return finalValues;
-
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
-				| NoSuchFieldException | IOException | XPathExpressionException | SAXException
-				| ParserConfigurationException | NoSuchMethodException | InvocationTargetException e) {
+		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
+				| ParserConfigurationException e) {
 			e.printStackTrace();
 			System.exit(0);
 			return new ArrayList<String>();
 		}
-
 	}
 
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
@@ -167,9 +189,9 @@ public class TestUtil {
 				Element solution = (Element) solutionNodes.item(i);
 				String meanValue = solution.getAttribute("meanValue");
 				String finalValue = finalValues.get(i);
-				System.out.println("finalValue: " + finalValue);
-				System.out.println("meanValue: " + meanValue);
-				System.out.println("match: " + finalValue.equals(meanValue));
+//				System.out.println("finalValue: " + finalValue);
+//				System.out.println("meanValue: " + meanValue);
+//				System.out.println("match: " + finalValue.equals(meanValue));
 				isDoResultsMatch = finalValue.equals(meanValue);
 				i++;
 			}
@@ -182,6 +204,30 @@ public class TestUtil {
 			System.exit(0);
 			return false;
 		}
+
+	}
+
+	public static boolean testJSIMGraphModel(File testModel) {
+
+		List<String> testModelFinalValues = getJSIMGraphModelFinalValues(testModel); // get sim results first before
+																						// running simulation, otherwise
+																						// results will be overwritten
+		List<String> simulatedModelFinalValues = testJSIMGraph(testModel);
+
+		boolean isDoResultsMatch = true;
+		int i = 0;
+
+		while (isDoResultsMatch && i < testModelFinalValues.size()) {
+			String testModelFinalValue = testModelFinalValues.get(i);
+			String simulatedModelFinalValue = simulatedModelFinalValues.get(i);
+//			System.out.println("testModelFinalValue: " + testModelFinalValue);
+//			System.out.println("simulatedModelFinalValue: " + simulatedModelFinalValue);
+//			System.out.println("match: " + testModelFinalValue.equals(simulatedModelFinalValue));
+			isDoResultsMatch = testModelFinalValue.equals(simulatedModelFinalValue);
+			i++;
+		}
+
+		return isDoResultsMatch;
 
 	}
 

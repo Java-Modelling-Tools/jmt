@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class LineTest {
 
 	final static String TEST_FILES_BASE_FOLDER_PATH = "src/test/resources/linetesting/input";
-	final static String JSIM_TESTS_FOLDER_NAME = "jsim";
+	final static String JSIM_TESTS_FOLDER_NAME = "jsim"; // must be same as in TestUtil
 
 	final static String JSIM_LINE_TEST_MODEL_FILE_NAME = "model.jsim";
 	final static String JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
@@ -39,21 +39,21 @@ public class LineTest {
 	void testLine(File jsimTestFile) throws IOException {
 
 		if (jsimTestFile.isDirectory()) {
+
 			// Check if it's a line test
 			File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIM_LINE_TEST_MODEL_FILE_NAME);
 			File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
 					JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
 			if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
-				System.out.println(jsimTestFile.getPath());
+//				System.out.println("Running test on JSIMGraph line test: " + jsimTestFile.getAbsolutePath());
 				assertTrue(TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
 			}
+
+		} else {
+			System.out.println("Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
+			assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
 		}
 
-		if (jsimTestFile.isFile()) {
-
-		}
-
-		// System.out.println("Running test on: " + jsimTestFile.getAbsolutePath());
 	}
 
 }
