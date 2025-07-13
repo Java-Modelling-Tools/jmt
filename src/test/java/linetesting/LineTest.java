@@ -50,7 +50,7 @@ public class LineTest {
 			}
 
 		} else {
-			System.out.println("Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
+//			System.out.println("Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
 			assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
 		}
 
