@@ -6,9 +6,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,25 +29,9 @@ import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
 public class TestUtil {
 
-	final static String TEST_FILES_BASE_FOLDER_PATH = "/linetesting/input/";
-	final static String TEST_MODEL_FILE_NAME = "model.jsim";
-	final static String TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
-
-	public static boolean testJSIMGraphModel(String testFolderName) {
+	public static boolean testJSIMGraphModel(File testModel, File testResults) {
 
 		try {
-
-			String testFolder = TEST_FILES_BASE_FOLDER_PATH + testFolderName + "/";
-			String testFilePath = testFolder + TEST_MODEL_FILE_NAME;
-			String testResultFilePath = testFolder + TEST_MODEL_RESULTS_FILE_NAME;
-
-			Path resourcePath = Paths.get(TestUtil.class.getResource(testFilePath).toURI());
-
-			File resourceFile = resourcePath.toFile();
-
-			if (!resourceFile.exists()) {
-				throw new FileNotFoundException("Test file not found");
-			}
 
 			// Create test instance with overridden checkForSave
 			JSIMGraphMain jsimGraphMain = new JSIMGraphMain();
@@ -60,7 +41,7 @@ public class TestUtil {
 			mediatorField.setAccessible(true);
 			Mediator mediator = (Mediator) mediatorField.get(jsimGraphMain);
 
-			mediator.openModel(resourceFile);
+			mediator.openModel(testModel);
 
 			mediator.startSimulation();
 
@@ -98,7 +79,11 @@ public class TestUtil {
 			// System.out.println("Simulation truly finished");
 
 			// Get the model file parent folder name
-			String parentFolderName = resourcePath.getParent().getFileName().toString();
+			String parentFolderName = FileUtil.getParentFolderName(testModel);
+
+			if (parentFolderName == null) {
+				throw new RuntimeException("Line test model does not have parent folder");
+			}
 
 			String[] folderHierarchy = { "linetesting", "output", parentFolderName };
 			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, "testedModel.jsimg");
@@ -144,15 +129,7 @@ public class TestUtil {
 			// System.out.println("finalValues: " + finalValues);
 
 			// === Parse second file: model.jsim-result.jsim ===
-			Path resultsFilePath = Paths.get(TestUtil.class.getResource(testResultFilePath).toURI());
-
-			File resultsFile = resultsFilePath.toFile();
-
-			if (!resultsFile.exists()) {
-				throw new FileNotFoundException("Test results file not found");
-			}
-
-			Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(resultsFile);
+			Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResults);
 			solutionDoc.getDocumentElement().normalize();
 
 			NodeList solutionNodes = (NodeList) xPath.evaluate("//solutions/measure", solutionDoc,
@@ -179,8 +156,8 @@ public class TestUtil {
 
 			return isDoResultsMatch;
 
-		} catch (URISyntaxException | SecurityException | IllegalAccessException | IllegalArgumentException
-				| InterruptedException | NoSuchFieldException | IOException | XPathExpressionException | SAXException
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
+				| NoSuchFieldException | IOException | XPathExpressionException | SAXException
 				| ParserConfigurationException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
 			System.exit(0);
