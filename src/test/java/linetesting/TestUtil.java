@@ -29,7 +29,7 @@ import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
 
 public class TestUtil {
 
-	public static boolean testJSIMGraphModel(File testModel, File testResults) {
+	private static List<String> testJSIMGraph(File testModel) {
 
 		try {
 
@@ -61,17 +61,17 @@ public class TestUtil {
 				Thread.sleep(10); // Wait until it starts
 			}
 
-//			System.out.println("dispatcherThread: " + dispatcherThread);
-//			System.out.println("pollerThread: " + pollerThread);
-//			System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
-//			System.out.println("pollerThread state: " + pollerThread.getState());
+//					System.out.println("dispatcherThread: " + dispatcherThread);
+//					System.out.println("pollerThread: " + pollerThread);
+//					System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
+//					System.out.println("pollerThread state: " + pollerThread.getState());
 
 			// Now join on the real simulation thread
 			if (pollerThread.isAlive()) {
-//				long startTime = System.currentTimeMillis();
+//						long startTime = System.currentTimeMillis();
 				pollerThread.join();
-//				long endTime = System.currentTimeMillis();
-//				System.out.println("Time taken: " + (endTime - startTime) + " ms");
+//						long endTime = System.currentTimeMillis();
+//						System.out.println("Time taken: " + (endTime - startTime) + " ms");
 			} else {
 				System.out.println("pollerThread already finished, join returns immediately.");
 			}
@@ -128,10 +128,35 @@ public class TestUtil {
 
 			// System.out.println("finalValues: " + finalValues);
 
+			// Closes everything gui (sadly it opens automatically)
+			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
+			doClose.setAccessible(true);
+			doClose.invoke(jsimGraphMain);
+			jsimGraphMain.dispose();
+
+			return finalValues;
+
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
+				| NoSuchFieldException | IOException | XPathExpressionException | SAXException
+				| ParserConfigurationException | NoSuchMethodException | InvocationTargetException e) {
+			e.printStackTrace();
+			System.exit(0);
+			return new ArrayList<String>();
+		}
+
+	}
+
+	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
+
+		try {
+
+			List<String> finalValues = testJSIMGraph(testModel);
+
 			// === Parse second file: model.jsim-result.jsim ===
 			Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResults);
 			solutionDoc.getDocumentElement().normalize();
 
+			XPath xPath = XPathFactory.newInstance().newXPath();
 			NodeList solutionNodes = (NodeList) xPath.evaluate("//solutions/measure", solutionDoc,
 					XPathConstants.NODESET);
 
@@ -142,23 +167,17 @@ public class TestUtil {
 				Element solution = (Element) solutionNodes.item(i);
 				String meanValue = solution.getAttribute("meanValue");
 				String finalValue = finalValues.get(i);
-//				System.out.println("finalValue: " + finalValue);
-//				System.out.println("meanValue: " + meanValue);
-//				System.out.println("match: " + finalValue.equals(meanValue));
+				System.out.println("finalValue: " + finalValue);
+				System.out.println("meanValue: " + meanValue);
+				System.out.println("match: " + finalValue.equals(meanValue));
 				isDoResultsMatch = finalValue.equals(meanValue);
 				i++;
 			}
-			// Closes everything gui (sadly it opens automatically)
-			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
-			doClose.setAccessible(true);
-			doClose.invoke(jsimGraphMain);
-			jsimGraphMain.dispose();
 
 			return isDoResultsMatch;
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
-				| NoSuchFieldException | IOException | XPathExpressionException | SAXException
-				| ParserConfigurationException | NoSuchMethodException | InvocationTargetException e) {
+		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
+				| ParserConfigurationException e) {
 			e.printStackTrace();
 			System.exit(0);
 			return false;
