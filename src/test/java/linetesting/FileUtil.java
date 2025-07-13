@@ -7,6 +7,62 @@ import java.nio.file.Paths;
 
 public class FileUtil {
 
+	public static boolean isFileWithNameInsideFolder(File folder, String fileName) {
+		if (!folder.exists() || !folder.isDirectory()) {
+			return false;
+		}
+
+		File[] entries = folder.listFiles();
+		if (entries == null)
+			return false;
+
+		for (File entry : entries) {
+			if (entry.isDirectory()) {
+				// Recursively search in subfolder
+				if (isFileWithNameInsideFolder(entry, fileName)) {
+					return true;
+				}
+			} else if (entry.isFile() && entry.getName().equals(fileName)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public static File getFileInFolder(File folder, String fileName) {
+		if (!folder.exists() || !folder.isDirectory()) {
+			throw new IllegalArgumentException("Invalid folder: " + folder.getAbsolutePath());
+		}
+
+		File[] files = folder.listFiles();
+		if (files == null)
+			return null;
+
+		for (File file : files) {
+			if (file.isFile() && file.getName().equals(fileName)) {
+				return file; // found
+			}
+		}
+
+		return null; // not found
+	}
+
+	public static String getParentFolderName(File file) {
+		File parent = file.getParentFile();
+		return (parent != null) ? parent.getName() : null;
+	}
+
+	public static File[] listAllFilesAndFoldersInFolder(String folderName) throws RuntimeException {
+		File folder = new File(folderName);
+
+		if (!folder.exists() || !folder.isDirectory()) {
+			throw new RuntimeException("Folder not found: " + folder.getAbsolutePath());
+		}
+
+		return folder.listFiles(); // includes both files and folders
+	}
+
 	public static File createFileInTestResources(String[] folderHierarchy, String fileName) throws IOException {
 		// Base path: src/test/resources
 		Path basePath = Paths.get("src", "test", "resources");
