@@ -45,7 +45,7 @@ public class LineTest {
 					JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
 			if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
 				System.out.println(jsimTestFile.getPath());
-				assertTrue(TestUtil.testJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
+				assertTrue(TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
 			}
 		}
 
