@@ -27,10 +27,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -44,6 +41,7 @@ import jmt.engine.NetStrategies.RoutingStrategies.LoadDependentRoutingParameter;
 import jmt.engine.NetStrategies.ServiceStrategies.LDParameter;
 import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.NodeSections.*;
+import jmt.engine.NodeSections.Queue;
 import jmt.engine.QueueNet.JobClass;
 import jmt.engine.QueueNet.NetNode;
 import jmt.engine.QueueNet.NodeSection;
@@ -616,13 +614,16 @@ public class SimLoader {
 							System.out.println("        parameter of class = " + parameterTypes[i].getName());
 						}
 					} else {
-						if (!((Element) parameterList.item(i)).getAttribute("array").equals("true")) {
-							//the parameter is not an array
-							parameterTypes[i] = Class.forName(((Element) parameterList.item(i)).getAttribute("classPath"));
-						} else {
+						if (((Element) parameterList.item(i)).getAttribute("array").equals("true")) {
 							// array parameter
 							parameterTypes[i] = Array.newInstance(Class.forName(((Element) parameterList.item(i)).getAttribute("classPath")), 0)
 									.getClass();
+						} else if (((Element) parameterList.item(i)).getAttribute("map").equals("true")) {
+							// map parameter
+							parameterTypes[i] = Map.class;
+						} else {
+							//the parameter is not an array
+							parameterTypes[i] = Class.forName(((Element) parameterList.item(i)).getAttribute("classPath"));
 						}
 						if (DEBUG) {
 							System.out.println("        parameter of class = " + parameterTypes[i].getName());
@@ -678,7 +679,36 @@ public class SimLoader {
 			if (DEBUG) {
 				System.out.println("        parameter class found = " + classPath);
 			}
-			//parameter is an array;
+
+			//parameter is a map:
+			if (param.getAttribute("map").equals("true")) {
+				if (DEBUG) {
+					System.out.println("        parameter is a map");
+				}
+				//check if there are child nodes in the map
+				if (!param.hasChildNodes()) {
+					if (DEBUG) {
+						System.out.println("        creates empty map");
+					}
+					return new HashMap<String, Object>();//return an empty map
+				}
+				//creates a map
+				Map<String, Object> map = new HashMap<String, Object>();
+				NodeList childList = XMLParser.getElementsByTagName(param, "subParameter");
+				for (int i = 0; i < childList.getLength(); i++) {
+					Element e = (Element) childList.item(i);
+					if (DEBUG) {
+						System.out.println("            creates subparameter = " + e.getAttribute("name"));
+					}
+					map.put(e.getAttribute("name"), createSubParameter(e));
+				}
+				if (DEBUG) {
+					System.out.println("        created parameter");
+				}
+				return map;
+			}
+
+			// parameter is an array;
 			if (param.getAttribute("array").equals("true")) {
 				if (DEBUG) {
 					System.out.println("        parameter is an array");

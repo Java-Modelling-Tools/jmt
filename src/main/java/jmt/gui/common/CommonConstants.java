@@ -169,6 +169,19 @@ public interface CommonConstants {
 	public static final Dimension SMALL_ICON_SIZE_TOOL_BAR = new Dimension((int)(25 * CommonConstants.widthScaling), (int)(25 * CommonConstants.heightScaling));
 	public static final Dimension LARGE_ICON_SIZE_TOOL_BAR = new Dimension((int)(35 * CommonConstants.widthScaling), (int)(35 * CommonConstants.heightScaling));
 
+	/**Constants for server station advanced features*/
+	public static final String SERVER_PARAMETER_ADVANCED_FEATURES = "advancedFeatures";
+	public static final String SERVER_FEATURE_PREEMPTIVE_STRATEGIES = "preemptiveStrategies";
+	public static final String SERVER_FEATURE_SWITCHOVER_STRATEGIES = "SwitchoverStrategy";
+	public static final String SERVER_FEATURE_DELAY_OFF_STRATEGIES = "delayOffTime";
+	public static final String SERVER_FEATURE_SETUP_STRATEGIES = "setUpTime";
+	public static final String SERVER_FEATURE_CLASS_PARALLELISM = "classParallelism";
+	public static final String SERVER_FEATURE_SERVER_NAMES = "serverNames";
+	public static final String SERVER_FEATURE_SERVERS_PER_SERVER_TYPE = "serversPerServerType";
+	public static final String SERVER_FEATURE_SERVER_COMPATIBILITIES = "serverCompatibilities";
+	public static final String SERVER_FEATURE_SCHEDULING_POLICY = "schedulingPolicy";
+	public static final String SERVER_FEATURE_VACATION_STRATEGY = "vacationStrategy";
+
 	/**Constants for selection of station queueing strategy*/
 	public static final String STATION_QUEUE_STRATEGY_PSSERVER = "Processor Sharing Scheduling";
 	public static final String STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY = "Processor Sharing Scheduling (Priority)";
@@ -189,6 +202,12 @@ public interface CommonConstants {
 	public static final String STATION_SCHEDULING_POLICY_RAIS = "RAIS (Random Assignment to Idle Servers)";
 	public static final String STATION_SCHEDULING_POLICY_ALFS =  "ALFS (Assign Least Flexible Server)";
 	public static final String STATION_SCHEDULING_POLICY_FSF =  "FSF (Fastest Servers First)";
+
+	/**Constants for selection of server vacation policy */
+	public static final String STATION_VACATION_POLICY_NONE = "No Vacation";
+	public static final String STATION_VACATION_POLICY_SINGLE = "Single Vacation when Idle";
+	public static final String STATION_VACATION_POLICY_MULTIPLE = "Multiple Vacation when Idle";
+	public static final String STATION_VACATION_POLICY_BERNOULLI = "Bernoulli Vacation";
 
 	/**Constants for selection of queueing strategy*/
 	public static final String QUEUE_STRATEGY_PS = "PS";
@@ -217,6 +236,7 @@ public interface CommonConstants {
 	public static final String SERVICE_DISABLED = "Disabled";
 
 	/**Constants for selection of distributions*/
+	public static final String DISTRIBUTION_BATCH = "Batch";
 	public static final String DISTRIBUTION_BURST = "Burst";
 	public static final String DISTRIBUTION_MAP = "MAP";
 	public static final String DISTRIBUTION_MMPP2 = "MMPP2";
@@ -235,6 +255,12 @@ public interface CommonConstants {
 	//public static final String DISTRIBUTION_STUDENTT = "StudentT";
 	public static final String DISTRIBUTION_UNIFORM = "Uniform";
 	public static final String DISTRIBUTION_WEIBULL = "Weibull";
+	public static final String DISTRIBUTION_BERNOULLI_DISCRETE = "Bernoulli";
+	public static final String DISTRIBUTION_BINOMIAL_DISCRETE = "Binomial";
+	public static final String DISTRIBUTION_UNIFORM_DISCRETE = "DiscreteUniform";
+	public static final String DISTRIBUTION_SHIFTED_GEOMETRIC_DISCRETE = "ShiftedGeometric";
+	public static final String DISTRIBUTION_POISSON_DISCRETE = "Poisson";
+	public static final String DISTRIBUTION_ZIPF_DISCRETE = "Zipf";
 
 	/**Constants for selection of timing strategy*/
 	public static final String TIMING_STRATEGY_TIMED = "Timed";
@@ -347,6 +373,11 @@ public interface CommonConstants {
 	public static final String MEASURE_LOG_DESCRIPTION = HTML_START + HTML_FONT_TITLE + "Statistics CSV file" + HTML_FONT_TIT_END + HTML_FONT_NORM
 			+ "Check the \"Save Stats\" box to collect samples in a CSV file for additional statistical analysis. This option may produce a file with a large size."
 			+ HTML_FONT_NOR_END + HTML_END;
+
+	public static final String SERVER_VACATION_DESCRIPTION = HTML_START + "<p style='padding:5px; text-align:center;': 10px'>"
+			+ "Server can take a vacation when certain conditions are met. "
+			+ "When in a vacation, the server won't accept new jobs even if there are compatible jobs waiting in the queue. </p>"
+			+ HTML_END;
 
 	// String tokens
 	public static final String PAR1 = "%PAR1%";

@@ -267,20 +267,21 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 =======
 package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 
-import jmt.jmva.analytical.solvers.SolverMulti;
-import jmt.jmva.analytical.solvers.dataStructures.QNModel;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver.MonteCarloLogisticSolver;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.arrays2qnm;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.arrays2qnm;
+import jmt.jmva.analytical.solvers.SolverMulti;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.MonteCarloLogisticSolver;
 
 /**
  * Solves a multiclass closed model, using Monte Carlo Logistic algorithm.
- * @author  Ong Wai Hong
+ * 
+ * @author Ong Wai Hong
  */
 public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 
@@ -293,10 +294,12 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 	protected int[] population;
 	protected int[] servNum;
 
-	/** Creates new SolverMultiClosedMonteCarlo
-	 *  @param  stations    number of service centers
-	 *  @param  classes     number of classes
-	 *  @param  population  array of class populations
+	/**
+	 * Creates new SolverMultiClosedMonteCarlo
+	 * 
+	 * @param stations   number of service centers
+	 * @param classes    number of classes
+	 * @param population array of class populations
 	 */
 	public SolverMultiClosedMonteCarloLogistic(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -305,24 +308,29 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 		this.population = population;
 	}
 
-    public SolverMultiClosedMonteCarloLogistic(int classes, int stations, int[] population, int max_samples, int precision) throws InternalErrorException {
-        this(classes, stations, population);
-		if (max_samples<20)
+	public SolverMultiClosedMonteCarloLogistic(int classes, int stations, int[] population, int max_samples,
+			int precision) throws InternalErrorException {
+		this(classes, stations, population);
+		if (max_samples < 20)
 			throw new InternalErrorException("Max samples has to greater than 20!");
-		System.out.print("<Logistic Sampling> Using max samples: "); System.out.println(max_samples);
+		System.out.print("<Logistic Sampling> Using max samples: ");
+		System.out.println(max_samples);
 		this.maxSamples = max_samples;
-        if (precision<8)
-            throw new InternalErrorException("Precision has to be greater than 8 digits!");
-        System.out.print("<Logistic Sampling> Using precision: "); System.out.println(precision);
-        this.precision = precision;
-    }
+		if (precision < 8)
+			throw new InternalErrorException("Precision has to be greater than 8 digits!");
+		System.out.print("<Logistic Sampling> Using precision: ");
+		System.out.println(precision);
+		this.precision = precision;
+	}
 
-	/** Initializes the solver with the system parameters.
-	 * It must be called before trying to solve the model.
-	 *  @param  t   array of the types (LD or LI) of service centers
-	 *  @param  s   matrix of service times of the service centers
-	 *  @param  v   array of visits to the service centers
-	 *  @return True if the operation is completed with success
+	/**
+	 * Initializes the solver with the system parameters. It must be called before
+	 * trying to solve the model.
+	 * 
+	 * @param t array of the types (LD or LI) of service centers
+	 * @param s matrix of service times of the service centers
+	 * @param v array of visits to the service centers
+	 * @return True if the operation is completed with success
 	 */
 	public boolean input(int[] t, double[][][] s, double[][] v) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
@@ -443,7 +451,8 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 			c = new MonteCarloLogisticSolver(qnm, 0.0, maxSamples, precision, 1);
 			c.computeNormalisingConstant();
 			BigDecimal G = (((MonteCarloLogisticSolver) c).getNormalisingConstantAsBigDecimal());
-			System.out.println("<Logistic Sampling> Normalising constant:"); System.out.println(G);
+			System.out.println("<Logistic Sampling> Normalising constant:");
+			System.out.println(G);
 			c.computePerformanceMeasures();
 			c.printTimeStatistics();
 		} catch (InternalErrorException e) {
@@ -477,8 +486,8 @@ public class SolverMultiClosedMonteCarloLogistic extends SolverMulti {
 					for (int r = 0; r < classes; r++) {
 						throughput[m][r] = clsThroughput[r] * visits[m][r];
 						utilization[m][r] = throughput[m][r] * servTime[m][r][0]; // Umc=Xmc*Smc
-						residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r];
-						clsQueueLen[m][r] = queueLen[m-shift][r];
+						residenceTime[m][r] = queueLen[m - shift][r] / clsThroughput[r];
+						clsQueueLen[m][r] = queueLen[m - shift][r];
 					}
 				} else if (qnm.getQueueType(m) == QNModel.QueueType.DELAY) {
 					shift = shift + 1;

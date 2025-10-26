@@ -84,9 +84,13 @@ public class Sink extends JComponent implements JobContainer, GraphicComponent{
 	}
 
 	@Override
-	public void addJob(JobContainer prec, Job newJob) {
-		//here the addJob is removing the job from the list of jobs
-		anim.removeJob(newJob);
+	public void addJob(JobContainer prec, Job newJob) {        
+		anim.removeJob(newJob);     
+
+        if(anim.getSource().getMaxJobs() <= 0 && anim.getListJobSize() == 0){ //stop the animation when the source has finished, and there are no jobs in the animation 
+            anim.updateAnimResults();
+            anim.stop();
+        }   
 	}
 
     //----- Graphic Component Methods

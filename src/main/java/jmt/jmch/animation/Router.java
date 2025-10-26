@@ -28,8 +28,12 @@ import java.util.Random;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.engine.MersenneTwister;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.common.distributions.Uniform;
 import jmt.jmch.Constants;
+import jmt.jmch.distributions.DistributionJMCH;
 import jmt.jmch.simulation.Simulation;
 
 /**
@@ -48,8 +52,10 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	private boolean ycentered;
 	private int size = 40;
 	private Image routerImg;
-	private List<Edge> nextEdges;
+	private List<JobContainer> nextContainers;
 	private List<Station> nextStations;
+
+	private DistributionJMCH distribution;
 
 	private Simulation simulation;
 	private int indexRoundRobin = -1;
@@ -67,14 +73,14 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 * @param nextStations, the stations linked to this router
 	 * @param simulation, information of the simulation
 	 */
-	public Router(JPanel parent, boolean xcentered, boolean ycentered, Point pos, List<Edge> nextEdges, List<Station> nextStations, Simulation simulation) {
+	public Router(JPanel parent, boolean xcentered, boolean ycentered, Point pos, List<JobContainer> nextContainers, List<Station> nextStations, Simulation simulation) {
 		this.parent = parent;
 		this.pos = pos; 
 		this.xcentered = xcentered;
 		this.ycentered = ycentered;
 		this.simulation = simulation;
 		
-		this.nextEdges = nextEdges;
+		this.nextContainers = nextContainers;
 		this.nextStations = nextStations;
 		
 		if(simulation.getName() == Constants.JSQ) { //if the policy is the JSQ then the stations must paint the size of their queue
@@ -84,6 +90,10 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 		}
 
 		routerImg = JMTImageLoader.loadImageAwt("Router");
+
+		distribution = new DistributionJMCH();
+		distribution.convertDistribution(new Uniform());
+		distribution.setEngine(new MersenneTwister(23000));
 	}
 	
 	/**
@@ -91,14 +101,12 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 * @param percentages, must be of size = 3 and all doubles between 0 and 1, and they must sum up to 1. 
 	 * This check is not performed here, since it is something that have to check in the TextField before creating the Animation
 	 */
-	public Router(JPanel parent, boolean xcentered, boolean ycentered, Point pos, List<Edge> nextEdges, List<Station> nextStations, Simulation simulation, double[] percentages) {
-		this(parent, xcentered, ycentered, pos, nextEdges, nextStations, simulation);
+	public Router(JPanel parent, boolean xcentered, boolean ycentered, Point pos, List<JobContainer> nextContainers, List<Station> nextStations, Simulation simulation, double[] percentages) {
+		this(parent, xcentered, ycentered, pos, nextContainers, nextStations, simulation);
 		this.percentages = percentages;
 		
 		if(simulation.getName() == Constants.PROBABILISTIC) { //if the policy is the PROB then the edges must paint also their percentage
-			for(int i = 0; i < nextEdges.size(); i++) {
-				nextEdges.get(i).paintPercentage(percentages[i], i+1);
-			}
+			paintProbabilities();
 		}
 	}
 	
@@ -159,7 +167,13 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 * @return index of the outgoing edge
 	 */
 	private int probabilistic() {
-		double r = new Random().nextDouble();
+		double r;
+		try {
+			r = distribution.nextRand();
+		} catch (IncorrectDistributionParameterException e) {
+			r = 0;
+		}
+
 		if(r < percentages[0]) {
 			return 0;
 		}
@@ -212,16 +226,17 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 * @param index of the edge inside the list of edges
 	 */
 	private void route(Job job, int index) {
-		if(nextEdges.get(2) != null) {
-			if(nextEdges.get(2) instanceof Edge) {
+		//if(nextEdges.get(2) != null) {
+			if(nextContainers.get(2) instanceof Edge) {
+				Edge e = (Edge) nextContainers.get(index);
+				e.highlightON(job.getColor());
 				job.setOnEdge();
 			}
 			else {
 				job.unsetOnEdge();
 			}
-			nextEdges.get(index).addJob(this, job);	
-			nextEdges.get(index).highlightON(job.getColor());
-		}
+			nextContainers.get(index).addJob(this, job);	
+		//}
 		
 	}
 
@@ -231,10 +246,24 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 */
 	public void changeProbabilities(double[] probabilities){
 		percentages = probabilities;
-		//repaint all the edges
-		for(int i = 0; i < nextEdges.size(); i++) {
-			nextEdges.get(i).paintPercentage(percentages[i], i+1);
+		paintProbabilities();
+	}
+
+	/**
+	 * paint the probabilities of each edge
+	 */
+	public void paintProbabilities(){
+		for(int i = 0; i < nextContainers.size(); i++) {
+			if(nextContainers.get(0) instanceof Edge){
+				Edge e = (Edge) nextContainers.get(i);
+				e.paintPercentage(percentages[i], i+1);
+			}
+			
 		}
+	}
+
+	public void updateNextContainers(List<JobContainer> nextContainers){
+		this.nextContainers = nextContainers;
 	}
 
 

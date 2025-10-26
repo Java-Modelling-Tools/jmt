@@ -19,13 +19,11 @@
 package jmt.engine.NodeSections;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.PSStrategies.QBPSStrategy;
-<<<<<<< HEAD
-=======
 import jmt.engine.NetStrategies.PSStrategies.QBPSStrategyPriority;
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 import jmt.engine.NetStrategies.PSStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.NetStrategies.PSStrategies.EPSStrategy;
@@ -89,25 +87,17 @@ public class PSServer extends Server {
 	private double switchTime;
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies) throws NetException {
-<<<<<<< HEAD
-		this(numberOfServers, null, numberOfVisits, serviceStrategies, null, null, null, null, null, null, null);
-=======
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, null,null, null, null, null, null, null, null);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	}
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,
 									PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
-<<<<<<< HEAD
-		this(numberOfServers, null, numberOfVisits, serviceStrategies, psStrategies, serviceWeights, null, null, null, null, null);
-=======
 		this(numberOfServers, null, numberOfVisits, serviceStrategies,  null, psStrategies,serviceWeights, null, null, null, null, null);
 	}
 
 	public PSServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,Boolean priorityUsed,
 					PSStrategy[] psStrategies, Double[] serviceWeights) throws NetException {
 		this(numberOfServers, null, numberOfVisits, serviceStrategies, priorityUsed, psStrategies, serviceWeights, null, null, null, null, null);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	}
 
 	/**
@@ -120,17 +110,28 @@ public class PSServer extends Server {
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
 	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
-<<<<<<< HEAD
-									ServiceStrategy[] serviceStrategies, PSStrategy[] psStrategies, Double[] serviceWeights,
-=======
-									ServiceStrategy[] serviceStrategies, Boolean priorityUsed,PSStrategy[] psStrategies,  Double[] serviceWeights,
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
+									ServiceStrategy[] serviceStrategies, Boolean priorityUsed, PSStrategy[] psStrategies,  Double[] serviceWeights,
 									Integer[] serverNumRequired,
 									String[] serverNames,
 									Integer[] serversPerServerType,
 									Object[] serverCompatibilities,
 									String schedulingPolicy) throws NetException {
-		super(numberOfServers,numberOfVisits,serviceStrategies,null,serverNumRequired,serverNames,serversPerServerType,serverCompatibilities,schedulingPolicy);
+		this(numberOfServers, maxRunningJobs, numberOfVisits, serviceStrategies, priorityUsed, psStrategies, serviceWeights,
+				((Supplier<Map<String, Object>>) () -> {
+					Map<String, Object> advancedFeatures = new HashMap<>();
+					advancedFeatures.put(SERVER_FEATURE_CLASS_PARALLELISM, serverNumRequired);
+					advancedFeatures.put(SERVER_FEATURE_SERVER_NAMES, serverNames);
+					advancedFeatures.put(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, serversPerServerType);
+					advancedFeatures.put(SERVER_FEATURE_SERVER_COMPATIBILITIES, serverCompatibilities);
+					advancedFeatures.put(SERVER_FEATURE_SCHEDULING_POLICY, schedulingPolicy);
+					return advancedFeatures;
+				}).get());
+	}
+
+	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
+					ServiceStrategy[] serviceStrategies, Boolean priorityUsed, PSStrategy[] psStrategies,  Double[] serviceWeights,
+					Map<String, Object> advancedFeatures) throws NetException {
+		super(numberOfServers,numberOfVisits,serviceStrategies,advancedFeatures);
 		this.numberOfServers = numberOfServers.intValue();
 		if (maxRunningJobs == null) {
 			this.maxRunningJobs = -1;
@@ -146,11 +147,7 @@ public class PSServer extends Server {
 		} else {
 			this.psStrategies = psStrategies;
 			for (int i = 0; i < psStrategies.length; i++) {
-<<<<<<< HEAD
-				if(psStrategies[i] instanceof QBPSStrategy) {
-=======
 				if(psStrategies[i] instanceof QBPSStrategy || psStrategies[i] instanceof QBPSStrategyPriority) {
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 					QBPS = true;
 				}
 			}
@@ -167,6 +164,7 @@ public class PSServer extends Server {
 			}
 		}
 		busyCounter = 0;
+		String schedulingPolicy = (String) advancedFeatures.get(SERVER_FEATURE_SCHEDULING_POLICY);
 		if (schedulingPolicy == null) {
 			schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;
 		}

@@ -255,13 +255,15 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 
 package jmt.jmva.analytical.solvers;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.RECALSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RECALSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can

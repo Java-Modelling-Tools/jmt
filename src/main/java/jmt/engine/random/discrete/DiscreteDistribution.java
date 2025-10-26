@@ -3,10 +3,11 @@ package jmt.engine.random.discrete;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.random.AbstractDistribution;
 import jmt.engine.random.Parameter;
+import jmt.engine.random.StorableDistribution;
 
 import java.util.Hashtable;
 
-public abstract class DiscreteDistribution extends AbstractDistribution{
+public abstract class DiscreteDistribution extends AbstractDistribution implements StorableDistribution {
 
 	/*
 	 This Class extends from `AbstractDistribution`, also has a field - RandomEngine and its corresponding setter.

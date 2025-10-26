@@ -83,6 +83,10 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 				for (Distribution d : all) {
 					distributionMap.put(d.getName(), d);
 				}
+				Distribution[] allDiscrete = Distribution.findAllDiscrete();
+				for (Distribution d : allDiscrete) {
+					distributionMap.put(d.getName(), d);
+				}
 			}
 
 			HLAPIRootClass docApi = PNMLUtils.importPnmlDocument(file, false);

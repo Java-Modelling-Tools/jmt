@@ -797,6 +797,7 @@ public abstract class Distribution implements ServiceStrategy {
 	protected static Distribution[] all = null; // Used to store all distributions
 	protected static Distribution[] allWithMean = null; // Used to store all distributions with Mean value adjustable
 	protected static Distribution[] nestableDistributions = null; // Used to store nestable distributions
+	protected static Distribution[] discreteDistributions = null; // Used to store discrete distributions
 	protected static DecimalFormat df = new DecimalFormat();
 
 	static {
@@ -1027,6 +1028,8 @@ public abstract class Distribution implements ServiceStrategy {
 	/**
 	 * Returns an array with an instance of every allowed Distribution. Uses internal
 	 * caching to search for distributions only the first time that this method is called.
+	 * Note: this method is used to get all <b>continuous</b> distributions. If you need
+	 * discrete distributions, use <code>findAllDiscrete()</code>.
 	 * @return an array with an instance of every allowed Distribution
 	 */
 	public static Distribution[] findAll() {
@@ -1038,7 +1041,7 @@ public abstract class Distribution implements ServiceStrategy {
 		ArrayList<Distribution> tmp = new ArrayList<Distribution>();
 		try {
 			for (Field field : fields) {
-				if (field.getName().startsWith("DISTRIBUTION_")) {
+				if (field.getName().startsWith("DISTRIBUTION_") && !field.getName().endsWith("_DISCRETE")) {
 					tmp.add((Distribution) Class.forName(path + (String) field.get(null)).newInstance());
 				}
 			}
@@ -1107,6 +1110,41 @@ public abstract class Distribution implements ServiceStrategy {
 			nestableDistributions[i] = tmp[i];
 		}
 		return nestableDistributions;
+	}
+
+	/**
+	 * Returns an array with an instance of every discrete Distribution. Uses internal
+	 * caching to search for distributions only the first time that this method is called.
+	 * @return an array with an instance of every discrete Distribution
+	 */
+	public static Distribution[] findAllDiscrete() {
+		if (discreteDistributions != null) {
+			return discreteDistributions;
+		}
+		String path = "jmt.gui.common.distributions.discrete.";
+		Field[] fields = jmt.gui.common.CommonConstants.class.getFields();
+		ArrayList<Distribution> tmp = new ArrayList<Distribution>();
+		try {
+			for (Field field : fields) {
+				if (field.getName().startsWith("DISTRIBUTION_") && field.getName().endsWith("_DISCRETE")) {
+					tmp.add((Distribution) Class.forName(path + (String) field.get(null)).newInstance());
+				}
+			}
+		} catch (IllegalAccessException ex) {
+			System.err.println("A security manager has blocked reflection");
+			ex.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			System.err.println("Reflection Error: cannot access to distribution's implementation");
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			System.err.println("Reflection Error: Cannot instantiate a distribution");
+			e.printStackTrace();
+		}
+		discreteDistributions = new Distribution[tmp.size()];
+		for (int i = 0; i < tmp.size(); i++) {
+			discreteDistributions[i] = tmp.get(i);
+		}
+		return discreteDistributions;
 	}
 
 	/**

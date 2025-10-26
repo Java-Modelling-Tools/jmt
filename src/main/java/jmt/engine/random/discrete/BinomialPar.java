@@ -2,8 +2,9 @@ package jmt.engine.random.discrete;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.random.AbstractParameter;
+import jmt.engine.random.Parameter;
 
-public class BinomialPar extends AbstractParameter {
+public class BinomialPar extends AbstractParameter implements Parameter {
 
 	private int n;
 	private double probability;

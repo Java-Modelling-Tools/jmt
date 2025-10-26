@@ -222,6 +222,8 @@ public class MainWizard extends JMCHWizard{
 			rs = new ResultStructure();
 			rs.setAll(
 				animationPanel.getSimulationType(),
+				resultsPanel.getTypeOfResult(),
+				resultsPanel.getGeneratedJobs(),
 				resultsPanel.getAlgorithms(), 
 				resultsPanel.getArrivalDistirbutions(), 
 				resultsPanel.getLambdas(), 
@@ -239,6 +241,8 @@ public class MainWizard extends JMCHWizard{
 
 	/**
 	 * Method called by the AnimationPanel to update the Result Panel
+	 * @param typeOfResult if the result is the one from JSIM or from the Animation
+	 * @param generatedJobs the number of jobs generated for this simulation
 	 * @param algorithm queue algorithm of the animation
 	 * @param arrivalDistr arrival time distribution
 	 * @param lambda the inter arrival time
@@ -251,13 +255,21 @@ public class MainWizard extends JMCHWizard{
 	 * @param thoughput thoughput
 	 * @param queueNumber queue number
 	 */
-	public void routeResults(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, int nQueues, double responseTime, double queueTime, double thoughput, double queueNumber){
+	public void routeResults(String typeOfResult, int genereatedJobs, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, int nQueues, double responseTime, double queueTime, double thoughput, double queueNumber){
 		if(sim instanceof RoutingSimulation){
-			resultsPanel.addResult(algorithm, arrivalDistr, lambda, serviceDistr, nQueues, responseTime, thoughput, queueNumber);
+			resultsPanel.addResult(typeOfResult, genereatedJobs, algorithm, arrivalDistr, lambda, serviceDistr, nQueues, responseTime, thoughput, queueNumber);
 		}
 		else{
-			resultsPanel.addResult(algorithm, arrivalDistr, lambda, serviceDistr, nServers, service, responseTime, queueTime, thoughput, queueNumber);
+			resultsPanel.addResult(typeOfResult, genereatedJobs, algorithm, arrivalDistr, lambda, serviceDistr, nServers, service, responseTime, queueTime, thoughput, queueNumber);
 		}
+	}
+
+	/**
+	 * Called each time the animator is paused, to udpate the row of ANIM results
+	 * @param measures
+	 */
+	public void updateAnimResults(int generatedJobs, double[] measures){
+		resultsPanel.updateResult(generatedJobs, measures[0], measures[1], measures[2], measures[3]);
 	}
 
 	public void setLastPanel(int value){
@@ -270,6 +282,10 @@ public class MainWizard extends JMCHWizard{
 
 	public void about() {
 		AboutDialogFactory.showJMCH(this);
+	}
+
+	public AnimationPanel getAnimationPanel(){
+		return animationPanel;
 	}
 }
 

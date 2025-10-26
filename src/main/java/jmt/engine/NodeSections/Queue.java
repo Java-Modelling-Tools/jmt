@@ -34,12 +34,12 @@ import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
 import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
+import jmt.engine.NetStrategies.VacationStrategies.QueueIdleAckBody;
 import jmt.engine.QueueNet.*;
 import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
 import jmt.engine.dataAnalysis.Measure;
 import jmt.engine.simEngine.RemoveToken;
-import jmt.gui.common.distributions.Distribution;
 
 /**
  * This class implements a generic finite/infinite queue. In finite queue, if
@@ -533,7 +533,10 @@ public class Queue extends InputSection {
 
 							coolStart = false;
 						} else {
-							if (putStrategies[jobClass] instanceof PreemptiveStrategy) {
+							// coolStart is false: the server is not idle
+							if (server != null && server.isInVacation()) {
+								// do nothing
+							} else if (putStrategies[jobClass] instanceof PreemptiveStrategy) {
 								PreemptiveStrategy preemptiveStrategy = (PreemptiveStrategy) putStrategies[jobClass];
 								Job lastJobInService = ((PreemptiveServer) getOwnerNode().getSection(NodeSection.SERVICE)).getLastJobInfo().getJob();
 								if (preemptiveStrategy.compare(job, lastJobInService) > 0) {
@@ -682,9 +685,24 @@ public class Queue extends InputSection {
 							switchOverRequest = true;
 						}
 					}
+
+					// The queue notifies the server that it became idle
+					// so that the server could choose to start a vacation.
+					// Sets coolStart to true if the downstream is not a server
+					// or the server replies to not start a vacation
+					if(getOwnerNode().getServer() != null) {
+						sendForward(NetEvent.EVENT_QUEUE_IDLE, null, 0.0);
+					} else {
+						coolStart = true;
+					}
+				}
+				break;
+
+			case NetEvent.EVENT_QUEUE_IDLE_ACK:
+				QueueIdleAckBody body = (QueueIdleAckBody) message.getData();
+				if (!body.isServerStartsVacation()) {
 					coolStart = true;
 				}
-
 				break;
 
 			case NetEvent.EVENT_PREEMPTED_JOB:

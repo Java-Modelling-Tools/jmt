@@ -242,6 +242,5 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 			return 0;
 		}
 	}
-
 }
 >>>>>>> b0a37c45 (Initial commit at SVN r1153.)

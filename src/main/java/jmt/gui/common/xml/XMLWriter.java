@@ -55,6 +55,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.VacationParameters;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Distribution.Parameter;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
@@ -175,6 +176,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 	public static final String queuePutStrategiesSuffix = "QueuePutStrategies.";
 	public static final String serviceStrategiesSuffix = "ServiceStrategies.";
 	public static final String routingStrategiesSuffix = "RoutingStrategies.";
+	public static final String vacationStrategiesSuffix = "VacationStrategies.";
 	public static final String transitionUtilitiesSuffix = "TransitionUtilities.";
 	public static final String distributionContainerClasspath = "jmt.engine.random.DistributionContainer";
 
@@ -1015,8 +1017,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		globalStrategyParameter.appendParameterElement(doc, elem);
 	}
 
-	static protected void writeServerSection(Document doc, Node node,
-																					 CommonModel model, Object stationKey) {
+	static protected void writeServerSection(Document doc, Node node, CommonModel model, Object stationKey) {
 		Element elem = doc.createElement(XML_E_STATION_SECTION);
 		String queueStrategy = model.getStationQueueStrategy(stationKey);
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
@@ -1144,12 +1145,23 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			serviceWeights.appendParameterElement(doc, elem);
 		}
 
+		Element advancedFeatures = doc.createElement(XML_E_PARAMETER);
+		advancedFeatures.setAttribute(XML_A_PARAMETER_MAP, "true");
+		advancedFeatures.setAttribute(XML_A_PARAMETER_CLASSPATH, HashMap.class.getName());
+		advancedFeatures.setAttribute(XML_A_PARAMETER_NAME, SERVER_PARAMETER_ADVANCED_FEATURES);
+		writeServerAdvancedFeatures(doc, model, stationKey, advancedFeatures);
+		elem.appendChild(advancedFeatures);
+	}
+
+	private static void writeServerAdvancedFeatures(Document doc, CommonModel model, Object stationKey, Element elem) {
+		String queueStrategy = model.getStationQueueStrategy(stationKey);
+		Vector<Object> classes = model.getClassKeys();
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 				|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 			XMLParameter[] preemptiveStrategy = new XMLParameter[classes.size()];
-			XMLParameter preemptiveStrategies = new XMLParameter("PreemptiveStrategy",
+			XMLParameter preemptiveStrategies = new XMLParameter(SERVER_FEATURE_PREEMPTIVE_STRATEGIES,
 					strategiesClasspathBase + "QueuePutStrategy", null,
-					preemptiveStrategy, false);
+					preemptiveStrategy, true);
 			for (int i = 0; i < preemptiveStrategy.length; i++) {
 				String strategy = model.getQueueStrategy(stationKey,
 						classes.get(i));
@@ -1176,8 +1188,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					Object classKey = classes.get(i);
 					setupStrategy[i] = QueueSwitchOverStrategyWriter.getServiceSection(model, stationKey, classKey);
 				}
-				XMLParameter setupStrategies = new XMLParameter("SwitchoverStrategy",
-						Object.class.getName(), null, setupStrategy, false);
+				XMLParameter setupStrategies = new XMLParameter(SERVER_FEATURE_SWITCHOVER_STRATEGIES,
+						Object.class.getName(), null, setupStrategy, true);
 				setupStrategies.appendParameterElement(doc, elem);
 			}
 		}
@@ -1189,8 +1201,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				Object classKey = classes.get(i);
 				delayOffStrategy[i] = delayOffStrategyWriter.getServiceSection(model, stationKey, classKey);
 			}
-			XMLParameter delayOffStrategies = new XMLParameter("delayOffTime",
-					Object.class.getName(), null, delayOffStrategy, false);
+			XMLParameter delayOffStrategies = new XMLParameter(SERVER_FEATURE_DELAY_OFF_STRATEGIES,
+					Object.class.getName(), null, delayOffStrategy, true);
 			delayOffStrategies.appendParameterElement(doc, elem);
 
 			XMLParameter[] setupStrategy = new XMLParameter[classes.size()];
@@ -1198,11 +1210,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				Object classKey = classes.get(i);
 				setupStrategy[i] = setUpStrategyWriter.getServiceSection(model, stationKey, classKey);
 			}
-			XMLParameter delaySetupStrategies = new XMLParameter("setUpTime",
-					Object.class.getName(), null, setupStrategy, false);
+			XMLParameter delaySetupStrategies = new XMLParameter(SERVER_FEATURE_SETUP_STRATEGIES,
+					Object.class.getName(), null, setupStrategy, true);
 			delaySetupStrategies.appendParameterElement(doc, elem);
 		}
-
 
 
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_POLLING)) {
@@ -1220,8 +1231,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					"java.lang.Integer", model.getClassName(classes.get(i)),
 					num.toString(), true);
 		}
-		XMLParameter classParallelism = new XMLParameter("classParallelism",
-				"java.lang.Integer", null, serverParallelism, false);
+		XMLParameter classParallelism = new XMLParameter(SERVER_FEATURE_CLASS_PARALLELISM,
+				"java.lang.Integer", null, serverParallelism, true);
 		classParallelism.appendParameterElement(doc, elem);
 
 		// Michalis - Server Types
@@ -1245,7 +1256,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				num = server.getNumOfServers();
 				name = model.getStationName(stationKey) + " - " + server.getName();
 
-				for(int j=0; j<classes.size(); j++){
+				for(int j = 0; j< classes.size(); j++){
 					Boolean compatible = server.isCompatible(model.getClassKeys().get(j));
 					compatibilities[j] =  new XMLParameter("compatibilities",
 							"java.lang.Boolean", null,
@@ -1256,7 +1267,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				num = 1;
 				name = model.getStationName(stationKey) + " - Server Type 1";
 
-				for(int j=0; j<classes.size(); j++){
+				for(int j = 0; j< classes.size(); j++){
 					Boolean compatible = true;
 					compatibilities[j] =  new XMLParameter("compatibilities",
 							"java.lang.Boolean", null,
@@ -1275,25 +1286,28 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					compatibilities, true);
 		}
 
-		XMLParameter serverNames = new XMLParameter("serverNames",
-				"java.lang.String", null, serverTypesNames, false);
+		XMLParameter serverNames = new XMLParameter(SERVER_FEATURE_SERVER_NAMES,
+				"java.lang.String", null, serverTypesNames, true);
 		serverNames.appendParameterElement(doc, elem);
 
-		XMLParameter serversPerServerType = new XMLParameter("serversPerServerType",
-				"java.lang.Integer", null, serverTypesNumOfServers, false);
+		XMLParameter serversPerServerType = new XMLParameter(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE,
+				"java.lang.Integer", null, serverTypesNumOfServers, true);
 		serversPerServerType.appendParameterElement(doc, elem);
 
-		XMLParameter serverCompatibilities = new XMLParameter("serverCompatibilities",
-				"java.lang.Object", null, serverTypesCompatibilities, false);
+		XMLParameter serverCompatibilities = new XMLParameter(SERVER_FEATURE_SERVER_COMPATIBILITIES,
+				"java.lang.Object", null, serverTypesCompatibilities, true);
 		serverCompatibilities.appendParameterElement(doc, elem);
 
 		// Adding scheduling policy for server tpyes
 
 		String serverSchedulingPolicy = model.getStationSchedulingPolicy(stationKey);
-		XMLParameter schedulingPolicy = new XMLParameter("schedulingPolicy",
-				"java.lang.String", null, serverSchedulingPolicy, false);
+		XMLParameter schedulingPolicy = new XMLParameter(SERVER_FEATURE_SCHEDULING_POLICY,
+				"java.lang.String", null, serverSchedulingPolicy, true);
 		schedulingPolicy.appendParameterElement(doc, elem);
 		//Michalis
+
+		XMLParameter vacationStrategy = VacationStrategyWriter.getServiceSection(model, stationKey);
+		vacationStrategy.appendParameterElement(doc, elem);
 	}
 
 	protected interface DistributionStrategyGetter {
@@ -1446,6 +1460,57 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		XMLParameter globalDistr = new XMLParameter("ServiceStrategy",
 				strategiesClasspathBase + "ServiceStrategy", null, distrParams, false);
 		return globalDistr;
+	}
+
+	protected static class VacationStrategyWriter {
+		private VacationStrategyWriter() {}
+
+		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
+			String className = "NoVacationStrategy";
+            String vacationPolicy = model.getStationVacationPolicy(stationKey);
+			VacationParameters parameters = model.getStationVacationParameters(stationKey);
+			List<XMLParameter> strategyParams = new ArrayList<>();
+
+            switch (vacationPolicy) {
+				case STATION_VACATION_POLICY_NONE:
+                    className = "NoVacationStrategy";
+                    break;
+				case STATION_VACATION_POLICY_SINGLE:
+					className = "VacationWhenIdleStrategy";
+					strategyParams.add(new XMLParameter("type", "java.lang.Integer", null, String.valueOf(0), true));
+
+					XMLParameter[] params = DistributionWriter.getDistributionParameter(parameters.getVacationTimeDistribution());
+					strategyParams.add(params[0]);
+					strategyParams.add(params[1]);
+					break;
+				case STATION_VACATION_POLICY_MULTIPLE:
+                    className = "VacationWhenIdleStrategy";
+					strategyParams.add(new XMLParameter("type", "java.lang.Integer", null, String.valueOf(1), true));
+
+					XMLParameter[] params2 = DistributionWriter.getDistributionParameter(parameters.getVacationTimeDistribution());
+					strategyParams.add(params2[0]);
+					strategyParams.add(params2[1]);
+                    break;
+				case STATION_VACATION_POLICY_BERNOULLI:
+                    className = "BernoulliVacationStrategy";
+					double p = parameters.getBernoulliP();
+					strategyParams.add(new XMLParameter("p", "java.lang.Double", null, String.valueOf(p), true));
+
+					XMLParameter[] params3 = DistributionWriter.getDistributionParameter(parameters.getVacationTimeDistribution());
+					strategyParams.add(params3[0]);
+					strategyParams.add(params3[1]);
+                    break;
+                default:
+					throw new RuntimeException("Unknown vacation policy: " + vacationPolicy);
+            }
+
+			XMLParameter[] strategyParamsArray = strategyParams.toArray(new XMLParameter[0]);
+            XMLParameter result = new XMLParameter(SERVER_FEATURE_VACATION_STRATEGY,
+                    strategiesClasspathBase + vacationStrategiesSuffix + className,
+                    null, strategyParamsArray, true);
+			result.parameterArray = "false";
+			return result;
+		}
 	}
 
 	protected static XMLParameter getServiceSectionHeterogeneous(CommonModel model,

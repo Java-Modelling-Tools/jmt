@@ -19,6 +19,7 @@
  package jmt.jmch.animation;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -36,9 +37,7 @@ import jmt.engine.random.engine.RandomEngine;
 import jmt.engine.random.UniformPar;
 import jmt.engine.random.Parameter;
 import jmt.gui.common.JMTImageLoader;
-import jmt.gui.common.distributions.Distribution;
-import jmt.jmch.distributions.AnimDistribution;
-import jmt.jmch.distributions.DistributionFactory;
+import jmt.jmch.distributions.DistributionJMCH;
 
 /**
  * This class is responsible for creating the jobs and routing them to the first edge of the animation
@@ -51,7 +50,7 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	private JPanel parent;
 	private Point pos;
 	private JobContainer next;
-	private Job routeJob;
+	private Job newJob;
 	
 	private long start; //solo per debug, sarà da eliminare
 	
@@ -60,9 +59,9 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	private int size = 50;
 	
 	private AnimationClass anim;
-	private AnimDistribution interArrival;
-	private AnimDistribution service;
-	private double nextRandomValue = 0;
+	private DistributionJMCH interArrival;
+	private DistributionJMCH service;
+	private double interArrivalTime = 0;
 
 	private long pauseTime = 0; //keep track for how long the animation was paused
 	private long passedTime = 0;
@@ -71,6 +70,9 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	private int sizeCircle = 20;
 	private float progression = 0.0f;
 
+	private int maxJobs = 10;
+	private int generatedJobs = 0;
+	private Image doneImg;
 	private Color jobColor;
 	private UniformD uniform;
 	
@@ -83,7 +85,7 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
      * @param next, next JContainer linked to the source
 	 * @param interArrival, distribution of the interarrival time
      */
-	public Source(AnimationClass anim, JPanel container,boolean centered, Point pos, JobContainer next, AnimDistribution interArrival, AnimDistribution service) {
+	public Source(AnimationClass anim, JPanel container,boolean centered, Point pos, JobContainer next, DistributionJMCH interArrival, DistributionJMCH service) {
 		this.parent = container;
 		this.pos = pos;
 		this.next = next;	
@@ -94,11 +96,17 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 		
 		uniform = new UniformD();
 		jobColor = getRandomColor();
-		sourceImg = JMTImageLoader.loadImageAwt("Source");		
+		sourceImg = JMTImageLoader.loadImageAwt("Source");	
+		doneImg = JMTImageLoader.loadImageAwt("Measure_ok");
+		generatedJobs = 0;
 	}
 
 	public void paint(Graphics g) {
 		super.paint(g);
+
+		if(maxJobs <= 0){
+			g.drawImage(doneImg, pos.x + size + 10, pos.y - 10, size/2, size/2, null);
+		}
 		
 		if(centered) {
 			//int widthPanel = parent.getWidth();
@@ -109,9 +117,8 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 		
 		g.drawImage(sourceImg, pos.x, pos.y, size, size, null);
 
-		//TODO: remove those two lines, only for debug
 		//g.setFont(new Font("Arial", Font.BOLD, 13));
-		//g.drawString(String.valueOf(nextRandomValue), pos.x, pos.y-20);
+		//g.drawString(String.valueOf(interArrivalTime), pos.x, pos.y-20);
 
 		//pie arrivals
 		g.drawOval(pos.x + size/2 - sizeCircle/2, pos.y+size+10, sizeCircle, sizeCircle);
@@ -119,39 +126,58 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 		Graphics2D g2d = (Graphics2D) g.create();
 		Arc2D arc = new Arc2D.Double(pos.x + size/2 - sizeCircle/2, pos.y+size+10, sizeCircle, sizeCircle, 90, 360*progression, Arc2D.PIE); //paint the circle
 	    g2d.fill(arc); 
+
+		//generated jobs
+		g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 10));
+        g.drawString("Generated Jobs: "+String.valueOf(generatedJobs), pos.x,  pos.y - size/2);
 	}
 
 	@Override
 	public void refresh() {
-		passedTime += (System.currentTimeMillis() - pauseTime - start)*velocityFactor;
-		start = System.currentTimeMillis();
-		pauseTime = 0;
+		this.velocityFactor = anim.getVelocityFactor();
 		
-		long nextValue = Math.round(nextRandomValue * 1000);
-		long diff = nextValue - passedTime;
-		progression = (float) diff/nextValue;
-		
-		if(progression < 0) {
-			progression = 0;
-			pauseTime = 0;
-			passedTime = 0;
+		if(maxJobs > 0){
+			passedTime += (System.currentTimeMillis() - pauseTime - start)*velocityFactor;
 			start = System.currentTimeMillis();
+			pauseTime = 0;
+			
+			long nextValue = Math.round(interArrivalTime * 1000);
+			long diff = nextValue - passedTime;
+			progression = (float) diff/nextValue;
+			
+			if(progression < 0) {
+				maxJobs--;
+				generatedJobs++;
 
-			double duration = 0.0;
-			try {
-				nextRandomValue = interArrival.nextRand();
-				duration = service.nextRand();
-			} catch (IncorrectDistributionParameterException e) {
-				//this will never happen, since the parameters of the distribution of the interArrival are OK
-				nextRandomValue = 64.0;
+				progression = 0;
+				pauseTime = 0;
+				passedTime = 0;
+				start = System.currentTimeMillis();
+
+				double duration = 0.0;
+				try {
+					duration = service.nextRand();
+				} catch (IncorrectDistributionParameterException e) {
+					//this will never happen, since the parameters of the distribution of the service are OK
+					duration = 64.0;
+				}
+
+				newJob = new Job(generatedJobs, anim, service, interArrivalTime, duration, jobColor);
+				jobColor = getRandomColor(); //get a new color for the next job
+				routeJob(0);
+
+				try {
+					interArrivalTime = interArrival.nextRand();
+				} catch (IncorrectDistributionParameterException e) {
+					//this will never happen, since the parameters of the distribution of the interArrival are OK
+					interArrivalTime = 64.0;
+				}
+		
+				anim.addNewJob(newJob);
 			}
-
-			routeJob = new Job(service, duration, jobColor);
-			jobColor = getRandomColor(); //get a new color for the next job
-			routeJob(0);
-	
-			anim.addNewJob(routeJob);
-		}		
+		}
+				
 	}
 	
 	/**
@@ -163,10 +189,10 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 
 		if(!anim.getAnimator().isPaused()) { //if it is paused, and we restart the animation, we don't have to create another arrival time
 			try {
-				nextRandomValue = interArrival.nextRand();
+				interArrivalTime = interArrival.nextRand();
 			} catch (IncorrectDistributionParameterException e) {
 				//this will never happen, since the parameters of the distribution of the interArrival are OK
-				nextRandomValue = 64.0;
+				interArrivalTime = 64.0;
 			}
 		}
 	}
@@ -188,12 +214,12 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	
 	public void routeJob(int i) {
 		if(next instanceof Edge) {
-			routeJob.setOnEdge();
+			newJob.setOnEdge();
 		}
 		else {
-			routeJob.unsetOnEdge();
+			newJob.unsetOnEdge();
 		}
-		next.addJob(this, routeJob);
+		next.addJob(this, newJob);
 	}
 
 	@Override
@@ -210,15 +236,26 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	 * @param service new distribution for service time
 	 * @param interA new distribution for inter arrival time
 	 */
-	public void updateDistribution(AnimDistribution service, AnimDistribution interA){
+	public void updateDistribution(DistributionJMCH service, DistributionJMCH interA){
 		this.service = service;
 		interArrival = interA;
 	}
 
-	public void setVelocityFactor(int value) {
-		velocityFactor = value;
+	public void updateMaxJobs(int maxJobs){
+		this.maxJobs = maxJobs;
+	}
+
+	public void updateNextContainer(JobContainer next){
+		this.next = next;
 	}
 	
+	public int getMaxJobs(){
+		return maxJobs;
+	}
+
+	public int getGeneratedJobs(){
+		return generatedJobs;
+	}
 	
 	//----- Graphic component Methods
 	@Override
@@ -243,15 +280,6 @@ public class Source extends JComponent implements JobContainer, GraphicComponent
 	@Override
 	public void setXPos(int xPos){
 		pos.x = xPos;
-	}
-
-	public void resetEngines(){
-		if(interArrival != null){
-			interArrival.resetEngine();
-		}
-		if(service != null){
-			service.resetEngine();
-		}	
 	}
 }
 

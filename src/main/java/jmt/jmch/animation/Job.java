@@ -19,14 +19,14 @@
 package jmt.jmch.animation;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.Random;
 
 import javax.swing.JComponent;
 
-import jmt.common.exception.IncorrectDistributionParameterException;
-import jmt.jmch.distributions.AnimDistribution;
+import jmt.jmch.distributions.DistributionJMCH;
 
 /**
  * Class for a job in the animation
@@ -36,6 +36,9 @@ import jmt.jmch.distributions.AnimDistribution;
  * Time: 13.50
  */
 public class Job extends JComponent{
+	private AnimationClass animation;
+	public int id;
+
 	//--variables needed only for the movement along the edges (speed is a value of the edge, since jobs can have different speeds based on the edge on which they are)
 	private Point pos;	
 	private boolean onEdge = false; //this parameter is used to know if the current job is on a Edge or not
@@ -44,26 +47,37 @@ public class Job extends JComponent{
 	private double fractX = 0.0;
 	private double fractY = 0.0;
 	
-	private int circleSize = 15;
-	private int boxWidth = 12;
-	private int boxHeight = 30;
+	private final int circleSize = 15;
+	private final int boxWidth = 12;
+	private final int boxHeight = 30;
 	
-	private double duration;
+	//-- values used both for the animation and the solver
+	private double interArrivalTime;
+	private double arrivalTime; //global arrival time 
+	public double serviceTime = 0.0; 
+	public double duration = 0.0; //duration is the serviceTime, but it's used for graphical purposes
+	public DistributionJMCH service;
+	private int idServer; //the id of the server that consumes the job (can be 0 or 1)
+
+	//-- variables for solverPS
+	private double cumulatedService; //this is used by the  for keeping track of the totalService
+	private double cumulatedResponseTime; 
+
 	private double mapDuration;
 	private Color color;
 	private int priority;
 	
-	//those values are only for debug now
 	public int maxValue = 10; //this value is for the conversion from the duration to a colored box
-	public AnimDistribution service;
 	
-	private long entrance; //this value is the associated long value for the entrance of a job inside a JComponent
-	private int velocityFactor = 1;
 	
-	public Job(AnimDistribution service, double duration, Color color) {	
+	public Job(int id, AnimationClass anim, DistributionJMCH service, double arrivalTime, double duration, Color color) {	
+		this.id = id;
+		this.animation = anim;
 		this.color = color;
 		priority = new Random().nextInt(5)+1; //set priority always > 1 otherwise it does not work properly in the BoxStation
+		this.interArrivalTime = arrivalTime;
 		this.service = service;
+		this.serviceTime = duration;
 		this.duration = duration;
 		mapDuration = service.mapValue(duration); //based on the type of distribution, map the duration to a value between 0 and 1
 	}
@@ -81,7 +95,7 @@ public class Job extends JComponent{
 			g.drawRect(pos.x + 15, pos.y - 30, boxWidth, boxHeight);
 
 			//g.setFont(new Font("Arial", Font.BOLD, 13));
-			//g.drawString(String.valueOf(mapDuration), pos.x - 15, pos.y-40);
+			//g.drawString(String.valueOf(id), pos.x - 15, pos.y-40);
 			
 			//to convert the duration to the size of the above box
 			g.setColor(color);
@@ -89,14 +103,6 @@ public class Job extends JComponent{
 			g.fillRect(pos.x + 16, pos.y - 30 + (boxHeight-result), boxWidth-1, result);
 		}	
 	}
-    
-    public void setEntrance() {
-    	entrance = System.currentTimeMillis()*velocityFactor;
-    }
-    
-    public long getEntrance() {
-    	return entrance;
-    }
     
     public int getPriority() {
     	return priority;
@@ -112,6 +118,11 @@ public class Job extends JComponent{
 
 	public double getMapDuration(){
 		return mapDuration;
+	}
+
+
+	public boolean isOnEdge(){
+		return onEdge;
 	}
     
     /**
@@ -191,8 +202,40 @@ public class Job extends JComponent{
     	onEdge = false;
     }
 
-	/* Next step methods */
-	public void setVelocityFactor(int value) {
-    	velocityFactor = value;
-    }
+	public double getInterArrivalTime(){
+		return interArrivalTime;
+	}
+
+	public double getServiceTime(){
+		return serviceTime;
+	}
+
+	public double getCumulatedService(){
+		return cumulatedService;
+	}
+
+	public double getCumulatedResponseTime(){
+		return cumulatedResponseTime;
+	}
+
+	public void updateCumulatedService(double speed, double interval){
+		cumulatedService += interval * speed;
+		cumulatedResponseTime += interval;
+	}
+
+	public void setArrivalTime(double arrivalT){
+		arrivalTime = arrivalT;
+	}
+
+	public double getArrivalTime(){
+		return arrivalTime;
+	}
+
+	public void setIdServer(int server){
+		idServer = server;
+	}
+
+	public int getIdServer(){
+		return idServer;
+	}
 }

@@ -22,12 +22,13 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JPanel;
 
+import jmt.jmch.distributions.DistributionJMCH;
 import jmt.jmch.simulation.Simulation;
-import jmt.jmch.distributions.AnimDistribution;
 import jmt.jmch.wizard.panels.AnimationPanel;
 
 /**
@@ -38,41 +39,38 @@ import jmt.jmch.wizard.panels.AnimationPanel;
  * Time: 09.10
  */
 public class MultipleQueueNetAnimation extends AnimationClass{
-	private AnimationPanel animPanel;
-	private JPanel parent;
-
 	//-- characteristics of the main panel
 	private int panelWidth = 0;
 	private int panelHeight = 0;
 	
 	//-- all the classes contained in the Animation, like stations, edges...
-	private Source source;
 	private Router router;
-	private Sink sink;
-	private List<Station> stationList;
-	private List<Edge> edgeList;
 	private double[] probabilities = {0.00,0.00,0.00};
-	
 	
 	//-- all the characteristics of the Animation
 	private int nServers = 1; //by default = 1
-	private AnimDistribution interArrival;
-	private AnimDistribution service;
+	private DistributionJMCH interArrival;
+	private DistributionJMCH service;
+
+	//-- components that are possibly removed (three edges from router to stations, and the edge from source to router)
+	private List<Edge> routerEdges;
+	private List<JobContainer> stationsContainer;
+	private List<JobContainer> edgesContainer;
+	private Edge e4;
 	
 	/** Constructor */
 	public MultipleQueueNetAnimation(AnimationPanel animPanel, JPanel container, Simulation sim) {
-		this.parent = container;
-		this.animPanel = animPanel;
-		simulation = sim;	
+		super(animPanel, container, sim, 3);
+			
 		initGUI(container);
 	}
 	
-	public void initGUI(JPanel container) {	
-		anim = new Animator(30, this);	
+	@Override
+	public void initGUI(JPanel container) {		
 		edgeList = new ArrayList<>();
 		stationList = new ArrayList<>();
 		sink = new Sink(container, true, new Point(800,0), this);
-		jobList = new ArrayList<>(); //do not move this line in the super class
+		jobSet = new HashSet<>();
 		
 		//final horizontal edge
 		edgeList.add(new Edge(this,container, true, true, new Point[] {new Point(550,0), new Point(580,0)}, sink));
@@ -83,21 +81,25 @@ public class MultipleQueueNetAnimation extends AnimationClass{
 		edgeList.add(new Edge(this, container, false, false, new Point[] { new Point(500,340+30), new Point(550,340+30), new Point(550,235)}, edgeList.get(0)));
 		
 		//three stations
-		stationList.add(new Station(this, container, false, false, new Point(300,75), edgeList.get(1), simulation, nServers));
-		stationList.add(new Station(this, container, false, true, new Point(300,0), edgeList.get(2), simulation, nServers));
-		stationList.add(new Station(this, container, false, false, new Point(300, 340), edgeList.get(3), simulation, nServers));
+		stationList.add(new Station(this, container, false, false, new Point(300,75), edgeList.get(1), simulation, nServers, 0));
+		stationList.add(new Station(this, container, false, true, new Point(300,0), edgeList.get(2), simulation, nServers, 1));
+		stationList.add(new Station(this, container, false, false, new Point(300, 340), edgeList.get(3), simulation, nServers, 2));
+
+		stationsContainer =  new ArrayList<>(Arrays.asList(stationList.get(0), stationList.get(1), stationList.get(2)));
 		
 		//3 edges from router to stations
-		edgeList.add(new Edge(this, container, false, true, new Point[] {new Point(180,235 - 30), new Point(180, 75+30), new Point(280,75+30)}, stationList.get(0)));
-		edgeList.add(new Edge(this, container, true, true, new Point[] {new Point(210,0), new Point(280,0)}, stationList.get(1)));
-		edgeList.add(new Edge(this, container, false, true, new Point[] { new Point(180,235 + 30), new Point(180, 340+30), new Point(280,340+30)}, stationList.get(2)));
+		edgeList.add(new Edge(this, container, false, true, new Point[] {new Point(180,235 - 30), new Point(180, 75+30), new Point(280,75+30)}, stationList.get(0), 3));
+		edgeList.add(new Edge(this, container, true, true, new Point[] {new Point(210,0), new Point(280,0)}, stationList.get(1), 3));
+		edgeList.add(new Edge(this, container, false, true, new Point[] { new Point(180,235 + 30), new Point(180, 340+30), new Point(280,340+30)}, stationList.get(2), 3));
 				
 		//create the two Lists for the router
 		int l = edgeList.size();
-		List<Edge> eList = new ArrayList<>(Arrays.asList(edgeList.get(l-3), edgeList.get(l-2), edgeList.get(l-1)));
-		router = new Router(container, false, true, new Point(160,0), eList, stationList, simulation, probabilities);
+		routerEdges = new ArrayList<>(Arrays.asList(edgeList.get(l-3), edgeList.get(l-2), edgeList.get(l-1)));
+		edgesContainer = new ArrayList<>(Arrays.asList(edgeList.get(l-3), edgeList.get(l-2), edgeList.get(l-1)));
+		router = new Router(container, false, true, new Point(160,0), edgesContainer, stationList, simulation, probabilities);
 		
-		edgeList.add(new Edge(this, container, true, true, new Point[] {new Point(80,0), new Point(150,0)}, router));
+		e4 = new Edge(this, container, true, true, new Point[] {new Point(80,0), new Point(150,0)}, router);
+		edgeList.add(e4);
 		
 		source = new Source(this, container, true, new Point(10,0), edgeList.get(edgeList.size()-1), interArrival, service);
 
@@ -145,7 +147,7 @@ public class MultipleQueueNetAnimation extends AnimationClass{
 		for(Edge e: edgeList) {
 			e.paint(g);
 		}
-		for(Job j: jobList) {
+		for(Job j: jobSet) {
 			j.paint(g);
 		}
 	}
@@ -188,143 +190,73 @@ public class MultipleQueueNetAnimation extends AnimationClass{
 		edgeList.get(3).setYPoint(stationList.get(2).getYPos() + stationList.get(2).getHeight()/2, 1);
 		edgeList.get(3).setYFinish(parent.getY() + parent.getHeight()/2);
 
-		edgeList.get(4).setXStart(router.getXPos() + router.getTotalLenght()/2);
-		edgeList.get(4).setXPoint(router.getXPos() + router.getTotalLenght()/2, 1);
-		edgeList.get(4).setXFinish(stationList.get(0).getXPos() - padding); 
-		edgeList.get(4).setYStart(router.getYPos() - padding);
-		edgeList.get(4).setYPoint(stationList.get(0).getYPos() + stationList.get(0).getHeight()/2, 1);
-		edgeList.get(4).setYFinish(stationList.get(0).getYPos() + stationList.get(0).getHeight()/2);
+		if(edgeList.size() > 4){
+			edgeList.get(4).setXStart(router.getXPos() + router.getTotalLenght()/2);
+			edgeList.get(4).setXPoint(router.getXPos() + router.getTotalLenght()/2, 1);
+			edgeList.get(4).setXFinish(stationList.get(0).getXPos() - padding); 
+			edgeList.get(4).setYStart(router.getYPos() - padding);
+			edgeList.get(4).setYPoint(stationList.get(0).getYPos() + stationList.get(0).getHeight()/2, 1);
+			edgeList.get(4).setYFinish(stationList.get(0).getYPos() + stationList.get(0).getHeight()/2);
 
-		edgeList.get(5).setXStart(router.getXPos() + router.getTotalLenght() + padding);
-		edgeList.get(5).setXFinish(stationList.get(1).getXPos() - padding);
+			edgeList.get(5).setXStart(router.getXPos() + router.getTotalLenght() + padding);
+			edgeList.get(5).setXFinish(stationList.get(1).getXPos() - padding);
 
-		edgeList.get(6).setXStart(router.getXPos() + router.getTotalLenght()/2);
-		edgeList.get(6).setXPoint(router.getXPos() + router.getTotalLenght()/2, 1);
-		edgeList.get(6).setXFinish(stationList.get(0).getXPos() - padding); 
-		edgeList.get(6).setYStart(router.getYPos() + router.getTotalLenght() + padding);
-		edgeList.get(6).setYPoint(stationList.get(2).getYPos() + stationList.get(2).getHeight()/2, 1);
-		edgeList.get(6).setYFinish(stationList.get(2).getYPos() + stationList.get(2).getHeight()/2);
+			edgeList.get(6).setXStart(router.getXPos() + router.getTotalLenght()/2);
+			edgeList.get(6).setXPoint(router.getXPos() + router.getTotalLenght()/2, 1);
+			edgeList.get(6).setXFinish(stationList.get(0).getXPos() - padding); 
+			edgeList.get(6).setYStart(router.getYPos() + router.getTotalLenght() + padding);
+			edgeList.get(6).setYPoint(stationList.get(2).getYPos() + stationList.get(2).getHeight()/2, 1);
+			edgeList.get(6).setYFinish(stationList.get(2).getYPos() + stationList.get(2).getHeight()/2);
 
-		edgeList.get(7).setXStart(source.getXPos() + source.getTotalLenght() + padding);
-		edgeList.get(7).setXFinish(router.getXPos() - padding);
+			edgeList.get(7).setXStart(source.getXPos() + source.getTotalLenght() + padding);
+			edgeList.get(7).setXFinish(router.getXPos() - padding);
+		}	
 	}
 
 	@Override
 	public void refresh() {
-		source.refresh();
-		router.refresh();
+		super.refresh();
+		router.refresh(); //for multiple queue there is also the router
+	}
+
 		
-		for(Station st: stationList) {
-			st.refresh();
-		}
-		for(Edge e: edgeList) {
-			e.refresh();
-		}
-
-		repaint();	
-	}
-
-	
-
 	@Override
-	public void start() {
-		if(!anim.isPaused()) { //if it's the first time the animation is started, otherwise it is a simple restart after a pause
-			source.setStart(System.currentTimeMillis());			
-		}
-		anim.start();
-	}
-	
-	@Override
-	public void pause() {
-		anim.pause();
-	}
-	
-	@Override
-	public void reload() {
-		initGUI(parent);
-		repaint();
-	}
-
-	@Override
-	public void updatePause(long pause) {
-		//update all those elements that work with System.currentMillis() like CircleStation
-		for(Station st: stationList) {
-			st.updatePause(pause);
-		}
-		source.updatePause(pause);
-	}
-
-	
-	@Override
-	public void stop(){
-		anim.terminate();
-		animPanel.stopAnimation();
-	}
-
-	@Override
-	public void setVelocityFactor(int factor){
-		source.setVelocityFactor(factor);
-		for(Station st: stationList){
-			st.setVelocityFactor(factor);
-		}
-		for(Job j: jobList) {
-			j.setVelocityFactor(factor);
-		}
-		for(Edge e: edgeList){
-			e.setVelocityFactor(factor);
-		}
-	}
-
-	@Override
-	public void next() {
-		//first update the velocity of each component that works with time
-		setVelocityFactor(5);
-		
-		anim.start();
-		
-		for(Edge e: edgeList) {
-			e.nextEvent();
-		}
-		for(Station st: stationList){
-			st.nextEvent();
-		}	
-	}
-
-	public void resetNextEvent() {
-		//reset all the velocity factors
-		setVelocityFactor(1);
-		
-		for(Edge e: edgeList) {
-			e.resetNextEvent();
-		}
-		for(Station st: stationList){
-			st.resetNextEvent();
-		}
-
-		//reset the buttons of the animationPanel
-		animPanel.resetNextStepAnimation();
-	} 
-
-	@Override
-	public void updateMultiple(Simulation sim, AnimDistribution service, AnimDistribution interA){
+	public void updateMultiple(Simulation sim, DistributionJMCH service, DistributionJMCH interA, int maxJobs, boolean isGraphicalAnimation){
 		simulation = sim;
 		interArrival = interA;
 		this.service = service;
 
 		source.updateDistribution(service, interA);	
+		source.updateMaxJobs(maxJobs);
+
+		if(isGraphicalAnimation){
+			if(edgeList.size() < 7){
+				edgeList.add(routerEdges.get(0));
+				edgeList.add(routerEdges.get(1));
+				edgeList.add(routerEdges.get(2));
+				edgeList.add(e4);
+
+				source.updateNextContainer(e4);
+				router.updateNextContainers(edgesContainer);
+			}
+		}
+		else{
+			edgeList.remove(7);
+			edgeList.remove(6);
+			edgeList.remove(5);
+			edgeList.remove(4);
+			
+			source.updateNextContainer(router);
+			router.updateNextContainers(stationsContainer);
+		}
 	}
 
 	@Override
-	public void updateMultiple(Simulation sim, double[] percentages, AnimDistribution service, AnimDistribution interA){
-		updateMultiple(sim, service, interA);
+	public void updateMultiple(Simulation sim, double[] percentages, DistributionJMCH service, DistributionJMCH interA, int maxJobs, boolean isGraphicalAnimation){
+		updateMultiple(sim, service, interA, maxJobs, isGraphicalAnimation);
 		probabilities[0] = percentages[0];
 		probabilities[1] = percentages[1];
 		probabilities[2] = 1.00 - percentages[0] - percentages[1];
 		router.changeProbabilities(probabilities);
-	}
-
-	@Override
-	public Source getSource() {
-		return source;
 	}
 }

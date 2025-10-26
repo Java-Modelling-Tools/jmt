@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
 
@@ -19,6 +18,8 @@
 
 package jmt.engine.random;
 
+import jmt.engine.random.discrete.DiscreteDistribution;
+
 /**
  * <p>Title:Distribution Container</p>
  * <p>Description: Data structure that stores a nested distribution</p>
@@ -26,7 +27,7 @@ package jmt.engine.random;
  *         Date: 17-dec-1007
  */
 public class DistributionContainer {
-	protected Distribution distribution;
+	protected StorableDistribution distribution;
 	protected Parameter parameter;
 
 	/**
@@ -34,17 +35,35 @@ public class DistributionContainer {
 	 * @param distribution the distribution to be stored
 	 * @param parameter the parameter of the distribution
 	 */
-	public DistributionContainer(Distribution distribution, Parameter parameter) {
+	public DistributionContainer(StorableDistribution distribution, Parameter parameter) {
 		this.distribution = distribution;
 		this.parameter = parameter;
 	}
 
 	/**
-	 * Get method for the distribution
-	 * @return the distribution
+	 * Get the continuous distribution stored in the container
+	 * @return the distribution stored in the container
+	 * @throws ClassCastException if the distribution stored is not a continuous distribution
 	 */
 	public Distribution getDistribution() {
-		return distribution;
+		if (distribution instanceof Distribution) {
+			return (Distribution) distribution;
+		} else {
+			throw new ClassCastException("The distribution stored is not a continuous distribution");
+		}
+	}
+
+	/**
+	 * Get the discrete distribution stored in the container
+	 * @return the distribution stored in the container
+	 * @throws ClassCastException if the distribution stored is not a discrete distribution
+	 */
+	public DiscreteDistribution getDiscreteDistribution() {
+		if (distribution instanceof DiscreteDistribution) {
+			return (DiscreteDistribution) distribution;
+		} else {
+			throw new ClassCastException("The distribution stored is not a discrete distribution");
+		}
 	}
 
 	/**
@@ -77,6 +96,8 @@ public class DistributionContainer {
 
 package jmt.engine.random;
 
+import jmt.engine.random.discrete.DiscreteDistribution;
+
 /**
  * <p>Title:Distribution Container</p>
  * <p>Description: Data structure that stores a nested distribution</p>
@@ -84,7 +105,7 @@ package jmt.engine.random;
  *         Date: 17-dec-1007
  */
 public class DistributionContainer {
-	protected Distribution distribution;
+	protected StorableDistribution distribution;
 	protected Parameter parameter;
 
 	/**
@@ -92,17 +113,35 @@ public class DistributionContainer {
 	 * @param distribution the distribution to be stored
 	 * @param parameter the parameter of the distribution
 	 */
-	public DistributionContainer(Distribution distribution, Parameter parameter) {
+	public DistributionContainer(StorableDistribution distribution, Parameter parameter) {
 		this.distribution = distribution;
 		this.parameter = parameter;
 	}
 
 	/**
-	 * Get method for the distribution
-	 * @return the distribution
+	 * Get the continuous distribution stored in the container
+	 * @return the distribution stored in the container
+	 * @throws ClassCastException if the distribution stored is not a continuous distribution
 	 */
 	public Distribution getDistribution() {
-		return distribution;
+		if (distribution instanceof Distribution) {
+			return (Distribution) distribution;
+		} else {
+			throw new ClassCastException("The distribution stored is not a continuous distribution");
+		}
+	}
+
+	/**
+	 * Get the discrete distribution stored in the container
+	 * @return the distribution stored in the container
+	 * @throws ClassCastException if the distribution stored is not a discrete distribution
+	 */
+	public DiscreteDistribution getDiscreteDistribution() {
+		if (distribution instanceof DiscreteDistribution) {
+			return (DiscreteDistribution) distribution;
+		} else {
+			throw new ClassCastException("The distribution stored is not a discrete distribution");
+		}
 	}
 
 	/**
@@ -114,4 +153,4 @@ public class DistributionContainer {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
+

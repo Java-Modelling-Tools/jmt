@@ -129,6 +129,12 @@ public interface StationDefinition {
 
 	public void setHeterogeneousServersEnabled(Object stationKey, Boolean enabled);
 
+	public void setStationVacationPolicy(Object stationKey, String vacationPolicy);
+
+	public String getStationVacationPolicy(Object stationKey);
+
+	public VacationParameters getStationVacationParameters(Object stationKey);
+
 	///
 
 	/**

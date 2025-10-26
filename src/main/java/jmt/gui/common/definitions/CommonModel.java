@@ -33,6 +33,7 @@ import java.util.Vector;
 import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
+import jmt.engine.NetStrategies.VacationStrategy;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.BDMap;
@@ -4510,12 +4511,16 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		public int nextServerNum;
 		public String schedulingPolicy;
 		public Boolean heterogeneousServersEnabled;
+		public String vacationPolicy;
+		public VacationParameters vacationPolicyPar;
 
 		public StationData(String name, String type) {
 			this.name = name;
 			this.type = type;
 			this.nextServerNum = 1;
 			this.serverTypes = new ArrayList<>();
+			this.vacationPolicy = STATION_VACATION_POLICY_NONE;
+			this.vacationPolicyPar = new VacationParameters();
 		}
 
 		@Override
@@ -4534,6 +4539,8 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.switchoverTimesEnabled = switchoverTimesEnabled;
 			sd.delayOffTimesEnabled = delayOffTimesEnabled;
 			sd.heterogeneousServersEnabled = heterogeneousServersEnabled;
+			sd.vacationPolicy = vacationPolicy;
+			sd.vacationPolicyPar = vacationPolicyPar;
 			sd.forkBlock = forkBlock;
 			sd.isSimplifiedFork = isSimplifiedFork;
 			if (loggerParameters != null) {
@@ -5074,6 +5081,42 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			sd.heterogeneousServersEnabled = enabled;
 			save = true;
 		}
+	}
+
+	@Override
+	public void setStationVacationPolicy(Object stationKey, String vacationPolicy) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+		} else {
+			return;
+		}
+		if (sd.vacationPolicy == null || !sd.vacationPolicy.equals(vacationPolicy)) {
+			sd.vacationPolicy = vacationPolicy;
+			save = true;
+		}
+	}
+
+	@Override
+	public String getStationVacationPolicy(Object stationKey) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+		} else {
+			return null;
+		}
+		return sd.vacationPolicy;
+	}
+
+	@Override
+	public VacationParameters getStationVacationParameters(Object stationKey) {
+		StationData sd;
+		if (stationDataHM.containsKey(stationKey)) {
+			sd = (StationData) stationDataHM.get(stationKey);
+		} else {
+			return null;
+		}
+		return sd.vacationPolicyPar;
 	}
 
 

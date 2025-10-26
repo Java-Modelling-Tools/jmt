@@ -1,8 +1,8 @@
-<<<<<<< HEAD
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
- * This class implements the Bard-Schweitzer algorithm for solving multi-closed models
+ * This class implements the Bard-Schweitzer algorithm for solving multi-closed
+ * models
  * 
  * @author Abhimanyu Chugh
  *
@@ -21,13 +21,13 @@ public class BardSchweitzer extends AMVA {
 				double currQueueLen = 0;
 				for (int r = 0; r < classes; r++) {
 					// if this is the class with one less customer, normalise its queue length
-					// otherwise assume its queue length is same as queue length with full customer population
+					// otherwise assume its queue length is same as queue length with full customer
+					// population
 					if (c == r) {
 						if (clsPopulation[r] != 0) {
-							currQueueLen += queueLen[k][r]*(clsPopulation[r] - 1)/(double)clsPopulation[r];
+							currQueueLen += queueLen[k][r] * (clsPopulation[r] - 1) / (double) clsPopulation[r];
 						}
-					}
-					else {
+					} else {
 						currQueueLen += queueLen[k][r];
 					}
 				}
@@ -36,46 +36,5 @@ public class BardSchweitzer extends AMVA {
 		}
 		return scQueueLens;
 	}
-	
+
 }
-=======
-package jmt.jmva.analytical.solvers.queueingNet.amva;
-
-/**
- * This class implements the Bard-Schweitzer algorithm for solving multi-closed models
- * 
- * @author Abhimanyu Chugh
- *
- */
-public class BardSchweitzer extends AMVA {
-
-	public BardSchweitzer(int classes, int stations, int[] classPopulation) {
-		super(classes, stations, classPopulation);
-	}
-
-	@Override
-	protected double[][] getQueueLensWithOneLessCustomer() {
-		double[][] scQueueLens = new double[stations][classes];
-		for (int k = 0; k < stations; k++) {
-			for (int c = 0; c < classes; c++) {
-				double currQueueLen = 0;
-				for (int r = 0; r < classes; r++) {
-					// if this is the class with one less customer, normalise its queue length
-					// otherwise assume its queue length is same as queue length with full customer population
-					if (c == r) {
-						if (clsPopulation[r] != 0) {
-							currQueueLen += queueLen[k][r]*(clsPopulation[r] - 1)/(double)clsPopulation[r];
-						}
-					}
-					else {
-						currQueueLen += queueLen[k][r];
-					}
-				}
-				scQueueLens[k][c] = currQueueLen;
-			}
-		}
-		return scQueueLens;
-	}
-	
-}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

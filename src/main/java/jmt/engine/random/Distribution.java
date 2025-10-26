@@ -108,6 +108,7 @@ public interface Distribution {
 package jmt.engine.random;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
+import jmt.engine.random.engine.RandomEngine;
 
 /**
  * 
@@ -119,7 +120,7 @@ import jmt.common.exception.IncorrectDistributionParameterException;
  * @author Modified by Stefano Omini, 7/5/2004
  * 
  */
-public interface Distribution {
+public interface Distribution extends StorableDistribution {
 
 	/**
 	 * This method is used to ask all the distribution to return a new random number
@@ -172,6 +173,9 @@ public interface Distribution {
 	 * @return double with the theoretic variance of the distribution.
 	 */
 	public abstract double theorVariance(Parameter p) throws IncorrectDistributionParameterException;
+
+	//added in order to be able to call this method (of the Abstract Distibution) with a Distribution object
+	public void setRandomEngine(RandomEngine engine);
 
 } // end Distribution
 >>>>>>> b0a37c45 (Initial commit at SVN r1153.)

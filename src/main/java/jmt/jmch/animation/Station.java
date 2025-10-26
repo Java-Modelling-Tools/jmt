@@ -29,6 +29,7 @@ import java.util.Comparator;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 
+import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.jmch.Constants;
 import jmt.jmch.animation.customQueue.CustomCollection;
 import jmt.jmch.animation.customQueue.FIFOQueue;
@@ -56,6 +57,11 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 	private Simulation simulation;
 	private int nServers;
 	private boolean paintQueueSize = false; //this parameter is used to know if it is needed to paint the size of the queue above the station (useful for polices like JSQ
+	private int droppedJobs = 0; //count the number of jobs dropped
+	private int index;
+
+	//for PS
+	private double processorSpeed = 0.0;
 	
 	//this is the queue of Jobs, see CustomCollection to understand why this and not a general Collection
 	private CustomCollection<Job> jobQueue; 
@@ -81,8 +87,9 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 	 * @param next, Jobcontainer connected to this station
 	 * @param sim, information about the simulation
 	 * @param servers, number of servers
+	 * @param index, index in the array of stations, 0 if the station is in a single queue animation
 	 */
-	public Station(AnimationClass anim, JPanel parent, boolean xcentered, boolean ycentered, Point pos, JobContainer next, Simulation sim, int servers) {
+	public Station(AnimationClass anim, JPanel parent, boolean xcentered, boolean ycentered, Point pos, JobContainer next, Simulation sim, int servers, int index) {
 		this.animation = anim;
 		this.parent = parent;
 		this.pos = pos; 
@@ -90,7 +97,8 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		this.ycentered = ycentered;
 		this.simulation = sim;
 		this.nServers = servers;
-		this.next = next;		
+		this.next = next;
+		this.index = index;		
 		
 		boxes = new BoxStation[sizeQueue];
 		for(int i = 0; i < sizeQueue; i++) {
@@ -162,11 +170,11 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		//get the correct position for centering the station in the panel
 		if(xcentered) {
 			int widthPanel = parent.getWidth();	
-			pos.x = parent.getX()+(widthPanel - length - height)/2;;		
+			pos.x = parent.getX()  + (widthPanel - length - height)/2;;		
 		}
 		if(ycentered) {
 			int heightPanel = parent.getHeight();
-			pos.y = parent.getY()+(heightPanel- height)/2;
+			pos.y = parent.getY() +(heightPanel- height)/2;
 		}
 		
 		for(BoxStation box: boxes) {
@@ -204,11 +212,15 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		if(simulation.getName() == Constants.PS){ //if processor sharing, then print the processorSpeed
 			g.setColor(Color.BLACK);
         	g.setFont(new Font("Arial", Font.PLAIN, 10));
-        	double processorSpeed = jobQueue.size() > 0 ? (double)nServers/(jobQueue.size() + nServers): 1;
+        	processorSpeed = jobQueue.size() > 0 ? (double)nServers/(jobQueue.size() + nServers): 1;
         	DecimalFormat df = new DecimalFormat("#.##");
 			int percentage = (int) (processorSpeed * 100);
         	g.drawString("Processor Speed: "+df.format(processorSpeed) + "  ("+ percentage +"%)", pos.x,  pos.y-25);
 		}
+
+		g.setColor(Color.BLACK);
+        g.setFont(new Font("Arial", Font.BOLD, 10));
+        g.drawString("Dropped Jobs: "+String.valueOf(droppedJobs), pos.x + length,  pos.y-10);
 	}
 	
 	@Override
@@ -220,7 +232,9 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 			for(int i = 0; i < nServers; i++) {
 				if(!circles[i].isWorking()) { //if the circle is not working than the head of the queue can go inside the circle
 					somethingHasChanged = true;
-					circles[i].addJob(this, (Job) jobQueue.first());
+					Job jobToServe =  (Job) jobQueue.first();
+					jobToServe.setIdServer(i);
+					circles[i].addJob(this, jobToServe);
 					jobQueue.removeHead();
 					
 					if(jobQueue.size() == 0) {
@@ -230,7 +244,7 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 			}
 		}
 
-		double processorSpeed = jobQueue.size() > 0 ? (double)nServers/(jobQueue.size() + nServers): 1; //this is needed only for processorSharing
+		processorSpeed = jobQueue.size() > 0 ? (double)nServers/(jobQueue.size() + nServers): 1; //this is needed only for processorSharing
 		
 		for(int i = 0; i < nServers; i++) {
 			if(simulation.getName() == Constants.PS) {
@@ -284,6 +298,7 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 	 * @param job the job to be routed
 	 */
 	public void routeJob(Job job) {
+		animation.getSolverAnimation().jobExit(job, index);
 		job.setDuration(); //set the duration = 0 since the job is completely processed
 		//then if the next element is an edge, the job must be painted as a green circle, otherwise do not paint it
 		if(getNextContainer() instanceof Edge) {
@@ -291,19 +306,26 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		}
 		else {
 			job.unsetOnEdge();
-		}
+		}	
 		getNextContainer().addJob(this, job);
 	}
 	
 	@Override
 	public void addJob(JobContainer prec, Job newJob) {
-		newJob.setEntrance(); //update the entrance in the queue
 		arrivingJobs--;
+
+		//ystem.out.println("Entering job "+ newJob.id);
+		double arrivalTime = animation.getSolverAnimation().jobEntrance(newJob.getInterArrivalTime()); 
+		newJob.setArrivalTime(arrivalTime);
 		
 		//try to add the job inside the queue, if the queue is full, then drop the job
 		if(jobQueue.size() != sizeQueue) {
 			jobQueue.addNew(newJob);
 		}	
+		else{
+			animation.removeJob(newJob);
+			droppedJobs++;
+		}
 
 		if(nextEvent) { //refresh the component to stop the simulation, the stopping politic is then handled in the refresh method
 			refresh();
@@ -351,6 +373,10 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		paintQueueSize = true;
 	}
 
+	public AnimationClass getAnimationClass(){
+		return animation;
+	}
+
 	public void updateNServers(int nservers){
 		this.nServers = nservers;
 		float position = 0.0f;
@@ -361,16 +387,6 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		for(int i = 0; i < nServers; i++) {
 			circles[i] = new CircleStation(this, position);
 			position *= -1;
-		}
-	}
-
-	public void setVelocityFactor(int value) {
-		for(CircleStation c: circles) {
-			c.setVelocityFactor(value);
-		}
-
-		for(BoxStation b: boxes) {
-			b.setVelocityFactor(value);
 		}
 	}
 
@@ -388,10 +404,11 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 		return simulation.getName() == Constants.PS;
 	}
 
-	
+	public double getProcessorSharingSpeed(){
+		return processorSpeed;
+	}
 
 	
-
 	//------- Graphic Component Methods
 	@Override
 	public int getXPos() {
@@ -415,5 +432,19 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 	@Override
 	public void setXPos(int xPos){
 		pos.x = xPos;
+	}
+
+	/**
+	 * This method is called by the PSSolver. With Processor Sharing we need to keep track of the cumulative Service of all the jobs in the queue and in the circleStation
+	 * @param interArrivalTime
+	 */
+	public void updateCumulativeService(double interArrivalTime){
+		for(CircleStation c: circles){
+			c.updateCumulativeService(processorSpeed, interArrivalTime);
+		}
+
+		for(BoxStation bs: boxes){
+			bs.updateCumulativeService(processorSpeed, interArrivalTime);
+		}
 	}
 }

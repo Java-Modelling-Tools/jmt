@@ -30,10 +30,7 @@ import jmt.framework.gui.wizard.WizardPanel;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.ClassDefinition;
 import jmt.gui.common.definitions.StationDefinition;
-import jmt.gui.common.editors.JobParallelismEditor;
-import jmt.gui.common.editors.ServerTypesEditor;
-import jmt.gui.common.editors.SwitchoverTimesEditor;
-import jmt.gui.common.editors.DeadlineEditor;
+import jmt.gui.common.editors.*;
 
 /**
  * Tabbed panel for editing advanced server features
@@ -52,6 +49,8 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 	private DelayOffSectionPanel doPane;
 
 	private JobParallelismEditor jobParallelismEditor;
+
+	private ServerVacationEditor serverVacationEditor;
 
 	public ServerFeaturePanel() {
 		this.setLayout(new BorderLayout(5, 5));
@@ -92,6 +91,8 @@ public class ServerFeaturePanel extends WizardPanel implements CommonConstants {
 			mainPanel.add(serverTypesEditor, serverTypesEditor.getName());
 			jobParallelismEditor = new JobParallelismEditor(sd, cd, stationKey);
 			mainPanel.add(jobParallelismEditor, jobParallelismEditor.getName());
+			serverVacationEditor = new ServerVacationEditor(sd, cd, stationKey);
+			mainPanel.add(serverVacationEditor, serverVacationEditor.getName());
 		}
 		mainPanel.setSelectedComponent(deadlineEditor);
 		current = deadlineEditor;

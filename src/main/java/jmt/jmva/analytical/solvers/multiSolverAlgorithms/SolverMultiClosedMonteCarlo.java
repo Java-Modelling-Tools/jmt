@@ -252,8 +252,8 @@ import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.MonteCarloSolver;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.MonteCarloSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
 
 /**
  * Created by ellasu on 25 Jun 2016.

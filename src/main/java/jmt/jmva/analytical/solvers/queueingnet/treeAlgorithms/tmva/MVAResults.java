@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva;
 
 /** Class for storing MVA performance measure results.
  *  @author Ben Homer, 2014

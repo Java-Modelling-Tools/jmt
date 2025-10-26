@@ -146,7 +146,7 @@ public class QNSolver implements QNSolverInterface {
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -180,7 +180,8 @@ public class QNSolver implements QNSolverInterface {
 	 */
 	protected BigRational G;
 	/**
-	 * Contains a human-readable string representation of the QNSolver's memory usage.
+	 * Contains a human-readable string representation of the QNSolver's memory
+	 * usage.
 	 */
 	protected String memUsage;
 
@@ -197,13 +198,17 @@ public class QNSolver implements QNSolverInterface {
 	/**
 	 * Computes the normalising constant for the specified QNModel.
 	 *
-	 * @throws InternalErrorException * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
-	 * @throws BTFMatrixErrorException 
-	 * @throws InconsistentLinearSystemException 
-	 * @throws OperationNotSupportedException 
+	 * @throws InternalErrorException            * @throws InternalErrorException An
+	 *                                           exception is thrown if any internal
+	 *                                           error is encountered during
+	 *                                           computations.
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
 	 */
 	@Override
-	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
+	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException,
+			InconsistentLinearSystemException, BTFMatrixErrorException {
 		throw new UnsupportedOperationException("Not supported.");
 	}
 
@@ -230,8 +235,8 @@ public class QNSolver implements QNSolverInterface {
 	}
 
 	/**
-	 * Computes and stores the performance measures (mean throughputs and mean
-	 * queue lengths for the current model.
+	 * Computes and stores the performance measures (mean throughputs and mean queue
+	 * lengths for the current model.
 	 *
 	 * @throws InternalErrorException Thrown when any computation fails
 	 */
