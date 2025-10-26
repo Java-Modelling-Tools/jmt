@@ -1,5 +1,12 @@
 package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.isInvalidModel;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 import cern.colt.list.DoubleArrayList;
 import cern.colt.list.IntArrayList;
 import cern.colt.matrix.DoubleMatrix1D;
@@ -11,14 +18,9 @@ import cern.jet.math.Functions;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions.MultiVariateStudentT;
 import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.MCIntegrator;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions.MultiVariateStudentT;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.MCIntegrator;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-
-import static jmt.engine.math.GammaFun.lnGamma;
-import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
-import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.isInvalidModel;
 
 /**
  * Implements the core Logistic Sampling algorithm by calling the required

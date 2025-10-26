@@ -203,6 +203,8 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 =======
 package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.jmva.analytical.solvers.SolverMulti;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
