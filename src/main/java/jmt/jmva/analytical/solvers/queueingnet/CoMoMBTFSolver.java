@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import jmt.jmva.analytical.solvers.basis.BTFCoMoMBasis;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
@@ -8,14 +8,17 @@ import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.linearSystem.btf.BTFLinearSystem;
 
 /**
- * A concrete implementation of the CoMoMSolver class that choose to use the BTF Linear System.
+ * A concrete implementation of the CoMoMSolver class that choose to use the BTF
+ * Linear System.
+ * 
  * @author Jack Bradshaw
  */
 public class CoMoMBTFSolver extends CoMoMSolver {
 
-	public CoMoMBTFSolver(QNModel qnm) throws InternalErrorException, BTFMatrixErrorException, InconsistentLinearSystemException {
+	public CoMoMBTFSolver(QNModel qnm)
+			throws InternalErrorException, BTFMatrixErrorException, InconsistentLinearSystemException {
 		super(qnm);
-		basis =  new BTFCoMoMBasis(qnm);
+		basis = new BTFCoMoMBasis(qnm);
 		system = new BTFLinearSystem(qnm, basis);
 	}
 

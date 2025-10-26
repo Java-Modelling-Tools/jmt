@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -35,12 +35,15 @@ public interface QNSolverInterface {
 	/**
 	 * Computes and stores the normalising constant.
 	 *
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
-	 * @throws BTFMatrixErrorException 
-	 * @throws InconsistentLinearSystemException 
-	 * @throws OperationNotSupportedException 
+	 * @throws InternalErrorException            An exception is thrown if any
+	 *                                           internal error is encountered
+	 *                                           during computations.
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
 	 */
-	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException;
+	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException,
+			InconsistentLinearSystemException, BTFMatrixErrorException;
 
 	/**
 	 * Returns a string representing the normalising constant.
@@ -55,16 +58,16 @@ public interface QNSolverInterface {
 	public void printWelcome();
 
 	/**
-	 * Computes and stores the performance measures (mean throughputs and mean
-	 * queue lengths for the current model.
+	 * Computes and stores the performance measures (mean throughputs and mean queue
+	 * lengths for the current model.
 	 *
 	 * @throws InternalErrorException Thrown when any computation fails
 	 */
 	public void computePerformanceMeasures() throws InternalErrorException;
 
 	/**
-	 * Prints the time needed for the solver object to evaluate the network.
-	 * May print a more detailed time break-down.
+	 * Prints the time needed for the solver object to evaluate the network. May
+	 * print a more detailed time break-down.
 	 */
 	public void printTimeStatistics();
 

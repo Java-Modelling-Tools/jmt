@@ -2,8 +2,9 @@ package jmt.engine.random.discrete;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.random.AbstractParameter;
+import jmt.engine.random.Parameter;
 
-public class BernoulliPar extends AbstractParameter {
+public class BernoulliPar extends AbstractParameter implements Parameter {
 
 	private double p;
 

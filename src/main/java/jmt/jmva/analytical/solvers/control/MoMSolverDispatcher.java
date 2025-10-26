@@ -24,8 +24,8 @@ import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.MoMSolver;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.MoMSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 /**

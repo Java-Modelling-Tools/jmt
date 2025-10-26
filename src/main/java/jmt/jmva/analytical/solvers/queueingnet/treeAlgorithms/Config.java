@@ -1,8 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
 
 import java.math.MathContext;
 
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePlanter.PlantMode;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter.PlantMode;
 
 /**
  * Configuration values for tree algorithms.

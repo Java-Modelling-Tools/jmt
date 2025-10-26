@@ -19,13 +19,20 @@
 package jmt.jmch.animation;
 
 import java.awt.Graphics;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
+import jmt.jmch.Constants;
+import jmt.jmch.animation.solver.GeneralSolver;
+import jmt.jmch.animation.solver.PSSolver;
+import jmt.jmch.animation.solver.AnimationSolver;
+import jmt.jmch.distributions.DistributionJMCH;
 import jmt.jmch.simulation.Simulation;
-import jmt.jmch.distributions.AnimDistribution;
+import jmt.jmch.wizard.panels.AnimationPanel;
 
 /**
  * This class is a super class for all the animations.
@@ -36,41 +43,147 @@ import jmt.jmch.distributions.AnimDistribution;
  */
 public class AnimationClass extends JComponent implements Animation{
 	//each Animation must have a jobList of the Jobs inside the Animation. This because the rendering must be performed by the animation, so that it can paint the jobs over all the other components
-	protected List<Job> jobList; //instanciate it inside the constructor of the subclass
+	protected Set<Job> jobSet;
 	protected Animator anim;
+	protected AnimationPanel animPanel;
+	protected JPanel parent;
 
 	protected Simulation simulation;
+	private AnimationSolver solverAnim;
 
-	public AnimationClass(){
-		jobList = new ArrayList<>();
+	protected int velocityFactor;
+
+	//common components of all Animations
+	protected Source source;
+	protected Sink sink;
+	protected List<Edge> edgeList;
+	protected List<Station> stationList;
+
+
+	public AnimationClass(AnimationPanel animPanel, JPanel container, Simulation sim, int nQueues){
+		restartAnimator();
+		jobSet = new HashSet<>();
+		this.simulation = sim;
+		this.parent = container;
+		this.animPanel = animPanel;
+
+		if(simulation.getName() == Constants.PS){
+			solverAnim = new PSSolver(this, nQueues);
+		}
+		else{
+			solverAnim = new GeneralSolver(this, nQueues);
+		}		
 	}
+
+	public void restartAnimator(){
+		if(anim != null){
+			anim.terminate();
+		}
+		anim = new Animator(30, this);
+	}
+
+	// ================== GRAPHICS METHODS ==================
+
+	@Override
+	public void initGUI(JPanel container) {}
 	
 	@Override
-	public void refresh() {}
+	public void refresh() {
+		source.refresh();
+		
+		for(Station st: stationList) {
+			st.refresh();
+		}
+		for(Edge e: edgeList) {
+			e.refresh();
+		}
+
+		repaint();	
+	}
 
 	@Override
 	public void paint(Graphics g) {}
 
-	@Override
-	public void start() {}
+	// ================== ANIMATION'S LIFE METHODS ==================
 
 	@Override
-	public void pause() {}
+	public void start() {
+		if(!anim.isPaused()) { //if it's the first time the animation is started, otherwise it is a simple restart after a pause
+			source.setStart(System.currentTimeMillis());			
+		}
+		anim.start();
+	}
 
 	@Override
-	public void reload() {}
+	public void pause() {
+		anim.pause();
+	}
 
 	@Override
-	public void stop() {}
+	public void reload() { 
+		restartAnimator();
+		initGUI(parent);
+		repaint();
+		solverAnim.init();
+	}
 
 	@Override
-	public void next() {}
+	public void stop(){
+		anim.terminate();
+		animPanel.stopAnimation();
+	}
+
+	@Override
+	public void next() {
+		if(!anim.isPaused()) { //if it's the first time the animation is started, otherwise it is a simple restart after a pause
+			source.setStart(System.currentTimeMillis());			
+		}
+
+		setVelocityFactor(5);
+		
+		anim.start();
+		
+		for(Edge e: edgeList) {
+			e.nextEvent();
+		}
+		for(Station st: stationList){
+			st.nextEvent();
+		}
+	}
 
 	/** To set all the subcomponents with nextEvent = false (because we want, after an event, the possibility to continue the simulation in normal mode or with nextEvent way) */
-	public void resetNextEvent() { }
+	public void resetNextEvent() { 
+		setVelocityFactor(1);
+		
+		for(Edge e: edgeList) {
+			e.resetNextEvent();
+		}
+		for(Station st: stationList){
+			st.resetNextEvent();
+		}
+
+		//reset the buttons of the animationPanel
+		animPanel.resetNextStepAnimation();
+	}
 
 	@Override
-	public void updatePause(long pause) {}
+	public void setVelocityFactor(int velocity) {
+		this.velocityFactor = velocity;
+	}
+
+	public boolean isPaused(){
+		return anim.isPaused();
+	}
+
+	@Override
+	public void updatePause(long pause) {
+		for(Station st: stationList) {
+			st.updatePause(pause);
+		}
+		source.updatePause(pause);
+	}
+
+	// ================== UTILS METHODS ==================
 	
 	/**
 	 * This method adds a new job inside the list of jobs of the Animation.
@@ -78,7 +191,7 @@ public class AnimationClass extends JComponent implements Animation{
 	 * @param job to add in the list
 	 */
 	public void addNewJob(Job job) {
-		jobList.add(job);
+		jobSet.add(job);
 	}
 	
 	/**
@@ -87,25 +200,29 @@ public class AnimationClass extends JComponent implements Animation{
 	 * @param job to remove from the list
 	 */
 	public void removeJob(Job job) {
-		jobList.remove(job);
+		jobSet.remove(job);
 	}
 
 	/**
-	 * Method for updating the SingleQueue (called when the create button is pressed)
+	 * Method for updating the SingleQueue 
 	 * @param sim new info about the simulation
 	 * @param nservers number of servers
 	 * @param serviceTime distribution of the service time
 	 * @param interArrivalTime distribution of the inter-arrival time
+	 * @param maxJobs max number of generated jobs
+	 * @param isGraphicalAnimation if the edge between the source and the station is there or not
 	 */
-	public void updateSingle(Simulation sim, int nservers, AnimDistribution serviceTime, AnimDistribution interArrivalTime){ }
+	public void updateSingle(Simulation sim, int nservers, DistributionJMCH serviceTime, DistributionJMCH interArrivalTime, int maxJobs, boolean isGraphicalAnimation){ }
 
 	/**
 	 * Method for updating the MultipleQueue
 	 * @param sim new info about the simulation
 	 * @param serviceTime distribution of the service time
 	 * @param interArrivalTime distribution of the inter-arrival time
+	 * @param maxJobs max number of generated jobs
+	 * @param isGraphicalAnimation if the edge between the source and the station is there or not
 	 */
-	public void updateMultiple(Simulation sim, AnimDistribution serviceTime, AnimDistribution interArrivalTime){}
+	public void updateMultiple(Simulation sim, DistributionJMCH serviceTime, DistributionJMCH interArrivalTime, int maxJobs, boolean isGraphicalAnimation){}
 
 	/**
 	 * Method for updating the MultipleQueue with routing Policy = PROBABILISTIC
@@ -113,8 +230,10 @@ public class AnimationClass extends JComponent implements Animation{
 	 * @param percentages new array of percentages associated to the outgoing arcs from the router
 	 * @param serviceTime distribution of the service time
 	 * @param interArrivalTime distribution of the inter-arrival time
+	 * @param maxJobs max number of generated jobs
+	 * @param isGraphicalAnimation if the edge between the source and the station is there or not
 	 */
-	public void updateMultiple(Simulation sim, double[] percentages, AnimDistribution serviceTime, AnimDistribution interArrivalTime){}
+	public void updateMultiple(Simulation sim, double[] percentages, DistributionJMCH serviceTime, DistributionJMCH interArrivalTime, int maxJobs, boolean isGraphicalAnimation){}
 
 
 	public Animator getAnimator(){
@@ -125,13 +244,28 @@ public class AnimationClass extends JComponent implements Animation{
 		return simulation;
 	}
 
-	@Override
-	public void setVelocityFactor(int velocity) {
-		
+	public AnimationSolver getSolverAnimation(){
+		return solverAnim;
+	}
+
+	public int getVelocityFactor(){
+		return velocityFactor;
+	}
+
+	public int getListJobSize(){
+		return jobSet.size();
+	}
+
+	public Source getSource() {
+		return source;
+	}
+
+	public Station getSingleStation(){
+		return stationList.get(0);
 	}
 
 	@Override
-	public Source getSource(){
-		return null;
+	public void updateAnimResults() {
+		animPanel.updateAnimResults(source.getGeneratedJobs(), solverAnim.getMeasures());
 	}
 }

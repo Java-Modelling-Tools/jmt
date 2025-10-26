@@ -1,18 +1,22 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
-import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
-import jmt.jmva.analytical.solvers.dataStructures.BigRational;
-import jmt.jmva.analytical.solvers.dataStructures.QNModel;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.utilities.Timer;
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.augmentDemandsAtServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.augmentSeverCountAtServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.pprod;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.removeServer;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.removeSeverCountAtServer;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-import static jmt.engine.math.GammaFun.lnGamma;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.*;
-import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.utilities.Timer;
 
 public class MonteCarloLogisticSolver extends QNSolver {
 

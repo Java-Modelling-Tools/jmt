@@ -66,7 +66,7 @@ public class MMQueuesPanel extends JMCHWizardPanel{
         start = new StartSimulation(this);
         pause = new PauseSimulation(this);
         stop = new StopSimulation(this);
-        openHelp = new Help(this,"JMCH");
+        openHelp = new Help(this);
 
         pause.setEnabled(false);
         stop.setEnabled(false);

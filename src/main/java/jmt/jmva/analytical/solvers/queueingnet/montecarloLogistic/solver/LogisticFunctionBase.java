@@ -1,9 +1,9 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.SafeFunction;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.SafeFunction;
 
 /**
  * Extension of the SafFunction base class. Provides basic, reusable structure of logistic functions

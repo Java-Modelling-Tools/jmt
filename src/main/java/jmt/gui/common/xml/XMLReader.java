@@ -46,7 +46,6 @@ import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceParameter;
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.ImpatienceStrategies.RenegingParameter;
-import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.log.JSimLogger;
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.MacroReplacer;
@@ -55,6 +54,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.SimulationDefinition;
+import jmt.gui.common.definitions.VacationParameters;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
 import jmt.gui.common.forkStrategies.CombFork;
@@ -1023,8 +1023,19 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		List<Object> heterogeneousServiceStrategies = new ArrayList<>();
 
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);
-		for (int i = 0; i < parameters.getLength(); i++) {
+		List<Element> allParameters = new ArrayList<>();
+		for (int i = 0; i < parameters.getLength(); ++i) {
 			Element curr = (Element) parameters.item(i);
+			if (curr.getAttribute(XML_A_PARAMETER_NAME).equals(SERVER_PARAMETER_ADVANCED_FEATURES)) {
+				NodeList advancedFeatures = curr.getElementsByTagName(XML_E_SUBPARAMETER);
+				for (int j = 0; j < advancedFeatures.getLength(); ++j) {
+					allParameters.add((Element) advancedFeatures.item(j));
+				}
+			} else {
+				allParameters.add(curr);
+			}
+		}
+		for (Element curr : allParameters) {
 			String name = curr.getAttribute(XML_A_PARAMETER_NAME);
 			String classpath = curr.getAttribute(XML_A_PARAMETER_CLASSPATH);
 			if (name.equals("maxJobs")) {
@@ -1035,7 +1046,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Sets max running jobs
 				Integer running = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationMaxRunningJobs(key, running);
-			} else if (name.equals("SwitchoverStrategy") || name.equals("SetupStrategy")) {
+			} else if (name.equals(SERVER_FEATURE_SWITCHOVER_STRATEGIES) || name.equals(SERVER_FEATURE_SETUP_STRATEGIES) ) {
 				if (model.getStationQueueStrategy(key) == STATION_QUEUE_STRATEGY_POLLING) {
 					// Retrieves all switchover strategy subParameters
 					Map<String, Node> distributions = parseParameterRefclassArray(curr);
@@ -1057,7 +1068,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						}
 					}
 				}
-				}else if (name.equals("delayOffTime")){
+				}else if (name.equals(SERVER_FEATURE_DELAY_OFF_STRATEGIES)){
 					model.setDelayOffTimesEnabled(key, Boolean.valueOf(true));
 					Map<String, Node> delayOffTime = parseParameterRefclassArray(curr);
 					Object[] classNames = delayOffTime.keySet().toArray();
@@ -1066,7 +1077,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 						Map<String, Node> delayOffTimeDistribution = parseParameterRefclassArray(subCurr);
 						model.setDelayOffTimeDistribution(key, classes.get(className), parseServiceStrategy((Element) delayOffTimeDistribution.get(className)));
 					}
-				}else if (name.equals("setUpTime")) {
+				}else if (name.equals(SERVER_FEATURE_SETUP_STRATEGIES)) {
 				Map<String, Node> setUpTime = parseParameterRefclassArray(curr);
 				Object[] classNames = setUpTime.keySet().toArray();
 				for (Object className : classNames) {
@@ -1124,28 +1135,28 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				if (Boolean.parseBoolean(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)))) {
 					model.setStationQueueStrategy(key, STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY);
 				}
-			} else if (name.equals("classParallelism")) {
+			} else if (name.equals(SERVER_FEATURE_CLASS_PARALLELISM)) {
 				// Retrieves all servers num required (parallelism) subParameters
-				Map<String, Node> classParallelism = parseParameterRefclassArray((Element) parameters.item(i));
+				Map<String, Node> classParallelism = parseParameterRefclassArray(curr);
 				Object[] classNames = classParallelism.keySet().toArray();
 				// Sets all server num required
 				for (Object className : classNames) {
 					Integer num = Integer.valueOf(findText(((Element) classParallelism.get(className)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 					model.setServerNumRequired(key, classes.get(className), num);
 				}
-			} else if (name.equals("serverNames")) {
+			} else if (name.equals(SERVER_FEATURE_SERVER_NAMES)) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
 					Element subParam = (Element) subParams.item(j);
 					serverNames.add(findText(subParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 				}
-			} else if (name.equals("serversPerServerType")) {
+			} else if (name.equals(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE)) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
 					Element subParam = (Element) subParams.item(j);
 					serversPerServerType.add(Integer.valueOf(findText(subParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0))));
 				}
-			} else if (name.equals("serverCompatibilities")) {
+			} else if (name.equals(SERVER_FEATURE_SERVER_COMPATIBILITIES)) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
 					Element subParam = (Element) subParams.item(j);
@@ -1157,6 +1168,27 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 							serverCompatibilities.get(serverCompatibilities.size() - 1).add(Boolean.valueOf(findText(subSubParam.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0))));
 						}
 					}
+				}
+			} else if (name.equals(SERVER_FEATURE_VACATION_STRATEGY)) {
+				model.setStationVacationPolicy(key, STATION_VACATION_POLICY_NONE);
+				VacationParameters vacationParameters = model.getStationVacationParameters(key);
+				if (classpath.endsWith("VacationWhenIdleStrategy")) {
+					NodeList subParameters = curr.getElementsByTagName(XML_E_SUBPARAMETER);
+					Node type = ((Element) subParameters.item(0)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0);
+					if (findText(type).equals("0")) {
+						model.setStationVacationPolicy(key, STATION_VACATION_POLICY_SINGLE);
+					} else if (findText(type).equals("1")) {
+						model.setStationVacationPolicy(key, STATION_VACATION_POLICY_MULTIPLE);
+					}
+					Distribution vacationTime = parseDistribution((Element) subParameters.item(1), (Element) subParameters.item(2));
+					vacationParameters.setVacationTimeDistribution(vacationTime);
+				} else if (classpath.endsWith("BernoulliVacationStrategy")) {
+					model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_BERNOULLI);
+					NodeList subParameters = curr.getElementsByTagName(XML_E_SUBPARAMETER);
+					Node p = ((Element) subParameters.item(0)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0);
+					vacationParameters.setBernoulliP(Double.valueOf(findText(p)));
+					Distribution vacationTime = parseDistribution((Element) subParameters.item(1), (Element) subParameters.item(2));
+					vacationParameters.setVacationTimeDistribution(vacationTime);
 				}
 			}
 		}
@@ -2283,6 +2315,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 			Distribution[] allDistr = Distribution.findAll();
 			engineToGuiDistr = new TreeMap<String, Distribution>();
 			for (Distribution element : allDistr) {
+				engineToGuiDistr.put(element.getClassPath(), element);
+			}
+			Distribution[] allDiscreteDistr = Distribution.findAllDiscrete();
+			for (Distribution element : allDiscreteDistr) {
 				engineToGuiDistr.put(element.getClassPath(), element);
 			}
 		}

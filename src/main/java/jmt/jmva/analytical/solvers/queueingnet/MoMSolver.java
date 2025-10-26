@@ -15,7 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.naming.OperationNotSupportedException;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
@@ -32,17 +40,10 @@ import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 import jmt.jmva.analytical.solvers.utilities.Timer;
 
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import javax.naming.OperationNotSupportedException;
-
 /**
- * This class implements the MoMSolver object, which computes the
- * normalising constant for a network using the MoM algorithm. This algorithm is
- * linear system solver agnostic.
+ * This class implements the MoMSolver object, which computes the normalising
+ * constant for a network using the MoM algorithm. This algorithm is linear
+ * system solver agnostic.
  *
  * @author Michail Makaronidis, 2010
  */
@@ -68,8 +69,10 @@ public class MoMSolver extends QNSolver {
 
 	/**
 	 * Creates and initialises a RECALSolver object.
-	 * @param qnm The QNModel object that we are working on
-	 * @param nThreads The number of threads the MoMSolver must use for solution. If nThreads >= 2, then LinearSystem.ModularSolver is used.
+	 * 
+	 * @param qnm      The QNModel object that we are working on
+	 * @param nThreads The number of threads the MoMSolver must use for solution. If
+	 *                 nThreads >= 2, then LinearSystem.ModularSolver is used.
 	 */
 	public MoMSolver(QNModel qnm, int nThreads) {
 		super(qnm);
@@ -81,7 +84,7 @@ public class MoMSolver extends QNSolver {
 	 */
 	@Override
 	public void printWelcome() {
-		System.out.println("Using MoM (matrixSize = " + matrixSize+")");
+		System.out.println("Using MoM (matrixSize = " + matrixSize + ")");
 	}
 
 	/**
@@ -107,7 +110,8 @@ public class MoMSolver extends QNSolver {
 
 		for (int i = 0; i < matrixSize; i++) {
 			for (int j = 0; j < matrixSize; j++) {
-				A[i][j] = BigRational.ZERO; // We do not use writeToA() as this would remove j from the uncomputable set and we are in the initialisation phase.
+				A[i][j] = BigRational.ZERO; // We do not use writeToA() as this would remove j from the uncomputable set
+											// and we are in the initialisation phase.
 				B[i][j] = BigRational.ZERO;
 			}
 			uncomputables.add(i);
@@ -140,7 +144,7 @@ public class MoMSolver extends QNSolver {
 					row++;
 					writeToA(row, i, N.getAsBigRational(r - 1));
 					int pos = sz * r + i;
-					writeToA(row, pos, qnm.getDelayAsBigRational(r-1).negate());
+					writeToA(row, pos, qnm.getDelayAsBigRational(r - 1).negate());
 					MultiplicitiesVector dMPlusk = dM.copy();
 					for (int k = 1; k <= M; k++) {
 						dMPlusk.plusOne(k);
@@ -157,13 +161,14 @@ public class MoMSolver extends QNSolver {
 				int pos = sz * r + i;
 				writeToA(row, pos, N.getAsBigRational(s - 1));
 				UList.add(new Tuple<Integer, Integer>(row, pos));
-				B[row][pos] = qnm.getDelayAsBigRational(s-1);
+				B[row][pos] = qnm.getDelayAsBigRational(s - 1);
 				MultiplicitiesVector dMPlusk = dM.copy();
 				for (int k = 1; k <= M; k++) {
 					dMPlusk.plusOne(k);
 					int f = dM.get(k - 1) + qnm.multiplicities.get(k - 1);
 					BigRational bf = new BigRational(f);
-					B[row][sz * r + canonicalMVCalc.vectoint(dMPlusk)] = bf.multiply(qnm.getDemandAsBigRational(k - 1, s - 1));
+					B[row][sz * r + canonicalMVCalc.vectoint(dMPlusk)] = bf
+							.multiply(qnm.getDemandAsBigRational(k - 1, s - 1));
 					dMPlusk.restore();
 				}
 			}
@@ -210,9 +215,10 @@ public class MoMSolver extends QNSolver {
 			} else {
 				s = new ModularSolver(nThreads);
 			}
-			Integer maxA = (int)getMaxAElement();
+			Integer maxA = (int) getMaxAElement();
 			Integer val = matrixSize;
-			BigInteger maxB = qnm.getMaxG().multiply(new BigInteger(maxA.toString())).multiply(new BigInteger(val.toString()));
+			BigInteger maxB = qnm.getMaxG().multiply(new BigInteger(maxA.toString()))
+					.multiply(new BigInteger(val.toString()));
 			s.initialise(A, UList, uncomputables, maxA, maxB, new BigRational(qnm.getMaxG()));
 			N0.set(0, 0);
 			int N0r = 1;
@@ -257,10 +263,10 @@ public class MoMSolver extends QNSolver {
 			solverTimer = s.getTimer();
 			s.shutdown();
 		} catch (OperationNotSupportedException ex) {
-			//ex.printStackTrace();
+			// ex.printStackTrace();
 			throw new InternalErrorException("Error in linear system solver.");
 		} catch (InconsistentLinearSystemException ex) {
-			//ex.printStackTrace();
+			// ex.printStackTrace();
 			throw new InternalErrorException(ex.getMessage());
 		}
 		qnm.setNormalisingConstant(G);
@@ -318,7 +324,8 @@ public class MoMSolver extends QNSolver {
 		System.out.println("Total time: " + totalTimer.getPrettyInterval());
 	}
 
-	private BigRational[] solve(Solver s, BigRational[] b) throws InconsistentLinearSystemException, OperationNotSupportedException, InternalErrorException {
+	private BigRational[] solve(Solver s, BigRational[] b)
+			throws InconsistentLinearSystemException, OperationNotSupportedException, InternalErrorException {
 		BigRational[] sol = s.solve(b);
 		// If the first element (current normalising constant) has been corrupted
 		// then there is no recovery

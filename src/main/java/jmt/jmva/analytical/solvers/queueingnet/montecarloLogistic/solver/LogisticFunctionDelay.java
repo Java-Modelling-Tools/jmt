@@ -1,4 +1,11 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
+
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.logistic_transform_add;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.Arrays;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -7,15 +14,8 @@ import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.jet.math.Functions;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.Function;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.Arrays;
-
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.check_inputs;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.logistic_transform_add;
 
 /**
  * Implementation of logistic function for single + delay servers under the additive transform

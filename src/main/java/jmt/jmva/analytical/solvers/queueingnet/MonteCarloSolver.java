@@ -1,18 +1,26 @@
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
-
-import jmt.jmva.analytical.solvers.dataStructures.*;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.amva.Linearizer;
-import jmt.jmva.analytical.solvers.queueingNet.amva.Solver;
-import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
-import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.dataStructures.Tuple;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Linearizer;
+import jmt.jmva.analytical.solvers.queueingnet.amva.Solver;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 public class MonteCarloSolver extends QNSolver {
 
@@ -22,7 +30,7 @@ public class MonteCarloSolver extends QNSolver {
 
 	private int N; // Number of queues
 
-	private PopulationVector pop; //Population
+	private PopulationVector pop; // Population
 
 	private int M; // Number of classes
 
@@ -107,7 +115,7 @@ public class MonteCarloSolver extends QNSolver {
 		double currentSumSquared = 0;
 		int currentSamples = I;
 		double mean = currentSum / currentSamples;
-		double variance = (currentSumSquared - currentSum * currentSum/currentSamples)/currentSamples;
+		double variance = (currentSumSquared - currentSum * currentSum / currentSamples) / currentSamples;
 		try {
 			do {
 				List<Future<Tuple<Double, Double>>> results = pool.invokeAll(tasks);
@@ -119,13 +127,14 @@ public class MonteCarloSolver extends QNSolver {
 				}
 				currentSamples += I;
 				mean = currentSum / currentSamples;
-				variance = (currentSumSquared - currentSum * currentSum/currentSamples)/currentSamples;
+				variance = (currentSumSquared - currentSum * currentSum / currentSamples) / currentSamples;
 			} while (getConfidenceLevel(variance, currentSamples) > tolerance * mean && currentSamples < maxSamples);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		System.out.println("Monte Carlo : " + mean + " with confidence level: " + getConfidenceLevel(variance, currentSamples));
+		System.out.println(
+				"Monte Carlo : " + mean + " with confidence level: " + getConfidenceLevel(variance, currentSamples));
 		pool.shutdown();
 		return new BigRational(mean);
 	}
@@ -149,10 +158,10 @@ public class MonteCarloSolver extends QNSolver {
 
 	@Override
 	public void computePerformanceMeasures() throws InternalErrorException {
-		//Array of Mean Throughputs per class
+		// Array of Mean Throughputs per class
 		BigRational[] X = new BigRational[qnm.R];
 
-		//Array of Mean Queue Lengths
+		// Array of Mean Queue Lengths
 		BigRational[][] Q = new BigRational[qnm.M][qnm.R];
 
 		PopulationVector p = qnm.getPopulationVector();
@@ -171,7 +180,8 @@ public class MonteCarloSolver extends QNSolver {
 				p.minusOne(j + 1);
 				setUp(m, p);
 				BigRational tempNormalisingCons = computeNotSetNormalisingConstant();
-				Q[i][j] = qnm.getDemandAsBigRational(i, j).multiply(tempNormalisingCons).divide(qnm.getNormalisingConstant());
+				Q[i][j] = qnm.getDemandAsBigRational(i, j).multiply(tempNormalisingCons)
+						.divide(qnm.getNormalisingConstant());
 				p.restore();
 			}
 			m.restore();

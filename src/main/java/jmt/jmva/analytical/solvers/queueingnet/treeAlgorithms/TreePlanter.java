@@ -1,15 +1,15 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
-import jmt.engine.random.engine.RandomEngine;
 
+import jmt.engine.random.engine.RandomEngine;
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils.Covered;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils.Covered;
 import jmt.jmva.analytical.solvers.utilities.Timer;
 
 /**

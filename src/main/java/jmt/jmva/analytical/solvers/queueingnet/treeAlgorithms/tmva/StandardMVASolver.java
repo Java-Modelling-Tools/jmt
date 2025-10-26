@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva;
 
 import java.util.HashMap;
 import java.util.TreeSet;
@@ -6,9 +6,9 @@ import java.util.TreeSet;
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
 
 /**
  * Implementation of standard/sequential MVA algorithm.

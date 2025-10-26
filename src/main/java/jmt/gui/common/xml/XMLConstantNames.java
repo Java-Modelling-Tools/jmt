@@ -68,6 +68,7 @@ public interface XMLConstantNames {
 	public static final String XML_A_PARAMETER_NAME = "name";
 	public static final String XML_A_PARAMETER_CLASSPATH = "classPath";
 	public static final String XML_A_PARAMETER_ARRAY = "array";
+	public static final String XML_A_PARAMETER_MAP = "map";
 	public static final String XML_E_PARAMETER_VALUE = "value";
 	public static final String XML_E_PARAMETER_REFCLASS = "refClass";
 

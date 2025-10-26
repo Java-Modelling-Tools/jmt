@@ -22,9 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -61,20 +59,20 @@ public class ResultsPanelRouting extends ResultsPanel{
     private ResultTable table;
     private int nResults = 0; //n of Simulations, which is also the number of rows of the table
     
-
-    private List<ListOp> classOps; //for keeping track of row deletions and insertions
 	private boolean deleting = false;
 
     // Column numbers
-	private final static int COL_ALGO = 0;
-	private final static int COL_DISTR_ARRIVAL = 1;
-	private final static int COL_LAMBDA = 2;
-	private final static int COL_DISTR_SERVICE = 3;
-    private final static int COL_QUEUES = 4;
-    private final static int COL_R = 5;
-    private final static int COL_NQUEUE = 6;
-    private final static int COL_THROUGHPUT = 7;
-	private final static int COL_DELETE_BUTTON = 8;
+	private final static int COL_TYPE_RESULT = 0;
+    private final static int COL_GEN_JOBS = 1;
+    private final static int COL_ALGO = 2;
+	private final static int COL_DISTR_ARRIVAL = 3;
+	private final static int COL_LAMBDA = 4;
+	private final static int COL_DISTR_SERVICE = 5;
+    private final static int COL_QUEUES = 6;
+    private final static int COL_R = 7;
+    private final static int COL_NQUEUE = 8;
+    private final static int COL_THROUGHPUT = 9;
+	private final static int COL_DELETE_BUTTON = 10;
 
     /** This Action is only for displaying the X in each row */
     private AbstractAction deleteOneResult = new AbstractAction("") {
@@ -110,8 +108,11 @@ public class ResultsPanelRouting extends ResultsPanel{
 	};
 
     @Override
-    public void addResult(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
-        setNumberOfResults(nResults+1, algorithm, arrivalDistr, lambda, serviceDistr, nQueues, responseTime, thoughput, nCustomer);
+    public void addResult(String typeRes, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
+        if(typeRes.equals(Constants.RESULT_ANIM)){ 
+            animRow = nResults;
+        }
+        setNumberOfResults(nResults+1, typeRes, generatedJob, algorithm, arrivalDistr, lambda, serviceDistr, nQueues, responseTime, thoughput, nCustomer);
     }
 
     private void addRow() {
@@ -119,12 +120,14 @@ public class ResultsPanelRouting extends ResultsPanel{
 	}
 
     /** Change the size of data structures updating also the table */
-    private void setNumberOfResults(int number, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer) {
+    private void setNumberOfResults(int number, String typeRes, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer) {
 		table.stopEditing();
 		nResults = number;
 
         //resize the arrays
-		algorithms = ArrayUtils.resize(algorithms, nResults, null);
+		typeOfResult = ArrayUtils.resize(typeOfResult, nResults, null);
+        generatedJobs = ArrayUtils.resize(generatedJobs, nResults, 0);
+        algorithms = ArrayUtils.resize(algorithms, nResults, null);
         arrivalDistibutions = ArrayUtils.resize(arrivalDistibutions, nResults, null);
         lambdas = ArrayUtils.resize(lambdas, nResults, 0.0);
         serviceDistributions = ArrayUtils.resize(serviceDistributions, nResults, null);
@@ -134,6 +137,8 @@ public class ResultsPanelRouting extends ResultsPanel{
         nCustomers = ArrayUtils.resize(nCustomers, nResults, 0);
 
         //add new values
+        typeOfResult[nResults-1] = typeRes;
+        generatedJobs[nResults-1] = generatedJob;
         algorithms[nResults-1] = algorithm;		
         arrivalDistibutions[nResults-1] = arrivalDistr;
         lambdas[nResults-1] = lambda;
@@ -145,6 +150,18 @@ public class ResultsPanelRouting extends ResultsPanel{
        
 		updateTable();
 	}
+
+    @Override
+    public void updateResult(int generatedJob, double responseTime, double queueTime, double thoughput, double nCustomer) {
+        if(animRow >= 0 && animRow <= nResults){ //update only if the animRow is still there (maybe it was deleted by the user)
+            generatedJobs[animRow] = generatedJob;
+            responseTimes[animRow] = responseTime;
+            thoughputs[animRow] = thoughput;
+            nCustomers[animRow] = nCustomer;
+
+            updateTable();
+        }  
+    }
 
     /** Update the changes on the table */
     private void updateTable(){
@@ -159,7 +176,6 @@ public class ResultsPanelRouting extends ResultsPanel{
 
     public ResultsPanelRouting(MainWizard main){
         super(main);
-        classOps = new ArrayList<ListOp>();
 
         initGUI();
     }
@@ -227,6 +243,13 @@ public class ResultsPanelRouting extends ResultsPanel{
 		deleting = true;
 		Arrays.sort(idx);
 		for (int i = idx.length - 1; i >= 0; i--) {
+            //update the value of animRow based on the value of the row to be deleted
+            if(idx[i] < animRow){
+                animRow--;
+            }
+            else if(idx[i] == animRow){
+                animRow = -1;
+            }
 			deleteResult(idx[i]);
 		}
 		updateTable();
@@ -240,6 +263,8 @@ public class ResultsPanelRouting extends ResultsPanel{
 	private void deleteResult(int i) {
 		nResults--;
 
+        typeOfResult = ArrayUtils.delete(typeOfResult, i);
+        generatedJobs = ArrayUtils.delete(generatedJobs, i);
         algorithms = ArrayUtils.delete(algorithms, i);
 		arrivalDistibutions = ArrayUtils.delete(arrivalDistibutions, i);
 		lambdas = ArrayUtils.delete(lambdas, i);
@@ -362,10 +387,10 @@ public class ResultsPanelRouting extends ResultsPanel{
 
     /** The model for the table */
     private class ResultsTableModel extends ExactTableModel{
-        private final int nColumns = 9;
+        private final int nColumns = 11;
 
-        //------------------------------index, algorithm, distribution arrival, --------lambda, distribution service, ----nServers, response time, ncustomers, thoughput, delete
-        private Object[] prototypes = { "100", "------", "------------------", "", "------------------", "", "", "", "", ""};
+        //------------------------------index, typeOfResult, generatedJobs, algorithm, distribution arrival, --------lambda, distribution service, ----nServers, response time, ncustomers, thoughput, delete
+        private Object[] prototypes = { "100", "------", "----------", "------", "------------------", "", "------------------", "", "", "", "", ""};
 
 		@Override
 		public Object getPrototype(int columnIndex) {
@@ -375,6 +400,10 @@ public class ResultsPanelRouting extends ResultsPanel{
         @Override
         public String getColumnName(int index) {
             switch (index) {
+                case COL_TYPE_RESULT:
+                    return "Sim Type";
+                case COL_GEN_JOBS:
+                    return "Gen Jobs";
                 case COL_ALGO:
                     return "Routing Algo.";
                 case COL_DISTR_ARRIVAL:
@@ -409,6 +438,10 @@ public class ResultsPanelRouting extends ResultsPanel{
         @Override
         protected Object getValueAtImpl(int rowIndex, int columnIndex) {
             switch (columnIndex) { //select the column, then the value in the row
+                case COL_TYPE_RESULT:
+                    return typeOfResult[rowIndex];
+                case COL_GEN_JOBS:
+                    return generatedJobs[rowIndex];
                 case COL_ALGO:
                     return algorithms[rowIndex];
                 case COL_DISTR_ARRIVAL:

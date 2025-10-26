@@ -1,13 +1,17 @@
-package jmt.jmva.analytical.solvers.queueingNet;
-
-import jmt.jmva.analytical.solvers.dataStructures.*;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
-import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.EnhancedVector;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 public class RGFSolver extends QNSolver {
 
@@ -37,13 +41,14 @@ public class RGFSolver extends QNSolver {
 	@Override
 	public void computeNormalisingConstant() throws InternalErrorException {
 		totalTimer.start();
-		BigRational normalisingConstant
-		= computeNotSetNormalisingConstant(qnm.getMultiplicitiesVector(), qnm.getPopulationVector());
+		BigRational normalisingConstant = computeNotSetNormalisingConstant(qnm.getMultiplicitiesVector(),
+				qnm.getPopulationVector());
 		System.out.println(normalisingConstant.approximateAsDouble());
 		qnm.setNormalisingConstant(normalisingConstant);
 	}
 
-	private BigRational computeNotSetNormalisingConstant(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
+	private BigRational computeNotSetNormalisingConstant(MultiplicitiesVector m, PopulationVector p)
+			throws InternalErrorException {
 		BigRational[][] load = new BigRational[nodeType][qnm.R];
 		for (int i = 0; i < nodeType; i++) {
 			for (int j = 0; j < qnm.R; j++) {
@@ -108,14 +113,12 @@ public class RGFSolver extends QNSolver {
 	}
 
 	private BigRational f(int i, int j, MultiplicitiesVector m, BigRational[][] load) {
-		BigRational coeff = new BigRational(MiscMathsFunctions.binomialCoefficient(j
-				+ m.get(i) - 1, j));
+		BigRational coeff = new BigRational(MiscMathsFunctions.binomialCoefficient(j + m.get(i) - 1, j));
 		BigRational rho = load[i][0].pow(j);
 		return coeff.multiply(rho);
 	}
 
-	private BigRational computeBuzenG(MultiplicitiesVector m,
-			PopulationVector p, BigRational[][] load) {
+	private BigRational computeBuzenG(MultiplicitiesVector m, PopulationVector p, BigRational[][] load) {
 		int k = p.get(0);
 		BigRational[][] G = new BigRational[nodeType][k + 1];
 		for (int i = 0; i < nodeType; i++) {
@@ -141,8 +144,7 @@ public class RGFSolver extends QNSolver {
 		return G[nodeType - 1][k];
 	}
 
-	private BigRational reiserAndKobayashi(MultiplicitiesVector m,
-			PopulationVector p, BigRational[][] load) {
+	private BigRational reiserAndKobayashi(MultiplicitiesVector m, PopulationVector p, BigRational[][] load) {
 		int k = p.get(0);
 		BigRational[][] G = new BigRational[nodeType][k + 1];
 		for (int i = 0; i < nodeType; i++) {
@@ -159,8 +161,7 @@ public class RGFSolver extends QNSolver {
 		return G[nodeType - 1][k];
 	}
 
-	private BigRational computeSingleClass(MultiplicitiesVector m,
-			PopulationVector p, BigRational[][] load) {
+	private BigRational computeSingleClass(MultiplicitiesVector m, PopulationVector p, BigRational[][] load) {
 		SingleClassBase base = new SingleClassBase(load, m, p);
 		BigRational result = singleClassResult.get(base);
 		if (result != null) {
@@ -179,10 +180,8 @@ public class RGFSolver extends QNSolver {
 				int value = m.get(index);
 				newM.set(index, 1);
 				newM.set(0, value);
-				System.arraycopy(load[index], 0, newLoad[0], 0,
-						load[index].length);
-				System.arraycopy(load[0], 0, newLoad[index], 0,
-						load[0].length);
+				System.arraycopy(load[index], 0, newLoad[0], 0, load[index].length);
+				System.arraycopy(load[0], 0, newLoad[index], 0, load[0].length);
 
 			}
 			result = reiserAndKobayashi(newM, p, newLoad);
@@ -219,8 +218,8 @@ public class RGFSolver extends QNSolver {
 	}
 
 	// Generic method to calculate the normalising constant.
-	private BigRational computeForEach(MultiplicitiesVector m,
-			PopulationVector p, int q, BigRational[][] load) throws InternalErrorException {
+	private BigRational computeForEach(MultiplicitiesVector m, PopulationVector p, int q, BigRational[][] load)
+			throws InternalErrorException {
 		if (q == 1) {
 			BigRational singleResult = computeSingleClass(m, p, load);
 			return singleResult;
@@ -233,8 +232,7 @@ public class RGFSolver extends QNSolver {
 			BigRational sum = BigRational.ZERO;
 			BigRational piq = load[i][q - 1];
 			for (int j = 1; j <= mi; j++) {
-				BigRational coeff = new BigRational(
-						MiscMathsFunctions.binomialCoefficient(mi + kq - j, kq));
+				BigRational coeff = new BigRational(MiscMathsFunctions.binomialCoefficient(mi + kq - j, kq));
 				BigRational rhoPow = piq.pow(kq);
 				BigRational mult = new BigRational(-1).pow(j + 1).multiply(coeff).multiply(rhoPow);
 				for (int l = 0; l < nodeType; l++) {
@@ -280,8 +278,8 @@ public class RGFSolver extends QNSolver {
 	}
 
 	// Method to calculate when M = 1.
-	protected BigRational compute(MultiplicitiesVector m, PopulationVector p, int q,
-			BigRational[][] load) throws InternalErrorException {
+	protected BigRational compute(MultiplicitiesVector m, PopulationVector p, int q, BigRational[][] load)
+			throws InternalErrorException {
 		int i = counters[q - 1] - 1;
 		BigRational piq = load[i][q - 1];
 		BigRational multResult = piq.pow(p.get(q - 1));
@@ -305,11 +303,10 @@ public class RGFSolver extends QNSolver {
 		return multResult;
 	}
 
-	// Get the vector of size length, sums up to sum without adding the element at index.
-	private Set<Integer[]> getSetCombinations(int length, int sum,
-			int index) {
-		HashMap<Integer, HashMap<Integer, Set<Integer[]>>> combinations = setCombinations
-				.get(length);
+	// Get the vector of size length, sums up to sum without adding the element at
+	// index.
+	private Set<Integer[]> getSetCombinations(int length, int sum, int index) {
+		HashMap<Integer, HashMap<Integer, Set<Integer[]>>> combinations = setCombinations.get(length);
 		if (combinations == null) {
 			generateSetCombinations(length, sum, index);
 		} else {
@@ -327,8 +324,7 @@ public class RGFSolver extends QNSolver {
 	}
 
 	private void addArray(int length, int sum, int index, Integer[] array) {
-		HashMap<Integer, HashMap<Integer, Set<Integer[]>>> combinations = setCombinations
-				.get(length);
+		HashMap<Integer, HashMap<Integer, Set<Integer[]>>> combinations = setCombinations.get(length);
 		if (combinations == null) {
 			combinations = new HashMap<Integer, HashMap<Integer, Set<Integer[]>>>();
 		}
@@ -367,14 +363,13 @@ public class RGFSolver extends QNSolver {
 		int startIndex = index == 0 ? 1 : 0;
 		for (int i = 0; i <= sum; i++) {
 			array[startIndex] = i;
-			generateSubSetCombinations(length, sum, i, index, startIndex + 1,
-					array);
+			generateSubSetCombinations(length, sum, i, index, startIndex + 1, array);
 			array[startIndex] = 0;
 		}
 	}
 
-	private void generateSubSetCombinations(int length, int sum, int tempSum,
-			int index, int startIndex, Integer[] array) {
+	private void generateSubSetCombinations(int length, int sum, int tempSum, int index, int startIndex,
+			Integer[] array) {
 		if (startIndex == index) {
 			startIndex++;
 		}
@@ -390,8 +385,7 @@ public class RGFSolver extends QNSolver {
 
 		for (int i = 0; i <= sum - tempSum; i++) {
 			array[startIndex] = i;
-			generateSubSetCombinations(length, sum, tempSum + i, index,
-					startIndex + 1, array);
+			generateSubSetCombinations(length, sum, tempSum + i, index, startIndex + 1, array);
 			array[startIndex] = 0;
 		}
 	}
@@ -400,10 +394,10 @@ public class RGFSolver extends QNSolver {
 	public void computePerformanceMeasures() throws InternalErrorException {
 		BigRational normalisingConstant = qnm.getNormalisingConstant();
 
-		//Array of Mean Throughputs per class
+		// Array of Mean Throughputs per class
 		BigRational[] X = new BigRational[qnm.R];
 
-		//Array of Mean Queue Lengths
+		// Array of Mean Queue Lengths
 		BigRational[][] Q = new BigRational[qnm.M][qnm.R];
 
 		PopulationVector p = qnm.getPopulationVector();
@@ -411,7 +405,7 @@ public class RGFSolver extends QNSolver {
 		for (int i = 0; i < qnm.R; i++) {
 			reset();
 			p.minusOne(i + 1);
-			BigRational tempNormalisingCons = computeNotSetNormalisingConstant(m,p);
+			BigRational tempNormalisingCons = computeNotSetNormalisingConstant(m, p);
 			p.restore();
 			X[i] = tempNormalisingCons.divide(normalisingConstant);
 		}
@@ -421,7 +415,7 @@ public class RGFSolver extends QNSolver {
 			for (int j = 0; j < qnm.R; j++) {
 				reset();
 				p.minusOne(j + 1);
-				BigRational tempNormalisingCons = computeNotSetNormalisingConstant(m,p);
+				BigRational tempNormalisingCons = computeNotSetNormalisingConstant(m, p);
 				Q[i][j] = qnm.getDemandAsBigRational(i, j).multiply(tempNormalisingCons).divide(normalisingConstant);
 				p.restore();
 			}
@@ -471,10 +465,8 @@ public class RGFSolver extends QNSolver {
 		public boolean equals(Object obj) {
 			if (obj instanceof SingleClassBase) {
 				SingleClassBase that = (SingleClassBase) obj;
-				if (load.length != that.load.length
-						|| load[0].length != that.load[0].length
-						|| m.size() != that.m.size()
-						|| p.size() != that.p.size()) {
+				if (load.length != that.load.length || load[0].length != that.load[0].length
+						|| m.size() != that.m.size() || p.size() != that.p.size()) {
 					return false;
 				}
 				for (int i = 0; i < load.length; i++) {
@@ -528,8 +520,7 @@ public class RGFSolver extends QNSolver {
 		public boolean equals(Object obj) {
 			if (obj instanceof Base) {
 				Base that = (Base) obj;
-				if (load.length != that.load.length
-						|| load[0].length != that.load[0].length) {
+				if (load.length != that.load.length || load[0].length != that.load[0].length) {
 					return false;
 				}
 				for (int i = 0; i < load.length; i++) {

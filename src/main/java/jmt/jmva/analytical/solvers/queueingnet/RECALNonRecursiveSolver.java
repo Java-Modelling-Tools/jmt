@@ -15,7 +15,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
@@ -24,10 +27,6 @@ import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.utilities.CanonicalMultiplicitiesVectorCalculator;
 import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
-import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class implements the RECALSolver object, which computes the normalising
@@ -51,13 +50,14 @@ public class RECALNonRecursiveSolver extends RecursiveSolver {
 	}
 
 	/**
-	 * Computes any normalising constant non-recursively and by taking
-	 * advantage of any already computed and stored value.
+	 * Computes any normalising constant non-recursively and by taking advantage of
+	 * any already computed and stored value.
 	 *
 	 * @param finalm The MultiplicitiesVector
 	 * @param finalp The PopulationVector
 	 * @return The normalising constant as a BigRational object
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	@Override
 	protected BigRational compute(MultiplicitiesVector finalm, PopulationVector finalp) throws InternalErrorException {
@@ -88,7 +88,8 @@ public class RECALNonRecursiveSolver extends RecursiveSolver {
 
 							for (int k = 0; k < qnm.M; k++) {
 								m.plusOne(k + 1);
-								BigRational toAdd = qnm.getDemandAsBigRational(k, r).multiply(new BigRational(m.get(k) - 1));
+								BigRational toAdd = qnm.getDemandAsBigRational(k, r)
+										.multiply(new BigRational(m.get(k) - 1));
 								toAdd = toAdd.multiply(recallG(m, p));
 								curG = curG.add(toAdd);
 								m.restore();
@@ -131,7 +132,8 @@ public class RECALNonRecursiveSolver extends RecursiveSolver {
 	/**
 	 * Computes the normalising constant for the specified QNModel.
 	 *
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	@Override
 	public void computeNormalisingConstant() throws InternalErrorException {

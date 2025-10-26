@@ -218,6 +218,7 @@
 			<xs:attribute name="name" type="xs:string" use="optional"/>
 			<xs:attribute name="classPath" type="xs:string" use="required"/>
 			<xs:attribute name="array" type="xs:boolean" use="optional" default="false"/>
+			<xs:attribute name="map" type="xs:boolean" use="optional" default="false"/>
 		</xs:complexType>
 	</xs:element>
 	<xs:element name="node">

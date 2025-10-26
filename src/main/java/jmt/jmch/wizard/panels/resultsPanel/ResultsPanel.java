@@ -18,11 +18,15 @@
 package jmt.jmch.wizard.panels.resultsPanel;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import jmt.framework.gui.help.HoverHelp;
 import jmt.gui.common.JMTImageLoader;
+import jmt.gui.table.ListOp;
 import jmt.jmch.Constants;
 import jmt.jmch.simulation.SimulationType;
 import jmt.jmch.wizard.MainWizard;
@@ -46,6 +50,8 @@ public class ResultsPanel extends JMCHWizardPanel{
 	protected JLabel statusResultsLabel;
 
 	//for each column, an array of values
+	protected String[] typeOfResult = new String[0];
+	protected int[] generatedJobs = new int[0];
     protected String[] algorithms = new String[0];
     protected String[] arrivalDistibutions = new String[0];
     protected double[] lambdas = new double[0];
@@ -58,11 +64,18 @@ public class ResultsPanel extends JMCHWizardPanel{
     protected double[] thoughputs = new double[0];
     protected double[] nCustomers = new double[0];
 
+	protected List<ListOp> classOps; //for keeping track of row deletions and insertions
+
+	protected int animRow; //this is the index of the table that needs to be updated with the values of the animation
+
     public ResultsPanel(MainWizard main){
         this.parent = main;
+		this.animRow = -1;
         help = parent.getHoverHelp();
+		classOps = new ArrayList<ListOp>();
     }
 
+	
     @Override
     public String getName() {
         return PANEL_NAME;
@@ -70,6 +83,8 @@ public class ResultsPanel extends JMCHWizardPanel{
 
     /**
 	 * Method called by the MainWizard to update the Result Panel for SCHEDULING
+	 * @param typeOfResult if the result is the one from JSIM or from the Animation
+	 * @param generatedJob the number of jobs used for this result
 	 * @param algorithm queue algorithm of the animation
 	 * @param arrivalDistr arrival time distribution
 	 * @param lambda the inter arrival time
@@ -81,12 +96,14 @@ public class ResultsPanel extends JMCHWizardPanel{
 	 * @param thoughput thoughput
 	 * @param nCustomers customer numbers
 	 */
-    public void addResult(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double nCustomer){
+    public void addResult(String typeOfResult, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double nCustomer){
         
     }
 
     /**
 	 * Method called by the MainWizard to update the Result Panel for ROUTING
+	 * @param typeOfResult if the result is the one from JSIM or from the Animation
+	 * @param generatedJob the number of jobs used for this result
 	 * @param algorithm routing algorithm of the animation
 	 * @param arrivalDistr arrival time distribution
 	 * @param lambda the inter arrival time
@@ -96,9 +113,20 @@ public class ResultsPanel extends JMCHWizardPanel{
 	 * @param thoughput thoughput of the system
 	 * @param nCustomers customer numbers of the system
 	 */
-    public void addResult(String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
+    public void addResult(String typeOfResult, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
         
     }
+
+	/**
+	 * Update the result of the ANIMSimulation
+	 * @param responseTime
+	 * @param queueTime
+	 * @param thoughput
+	 * @param nCustomer
+	 */
+	public void updateResult(int generatedJob, double responseTime, double queueTime, double thoughput, double nCustomer){
+
+	}
 
 	/* Methods called by the Main Wizard to update the icon */
 	public void loadingResult(){
@@ -116,6 +144,8 @@ public class ResultsPanel extends JMCHWizardPanel{
 		if(rs.getPreviousSimulationType() == SimulationType.ROUTING){
 			for(int i = 0; i < rs.getAlgorithms().length; i++){
 				addResult(
+					rs.getTypeOfResult()[i],
+					rs.getGeneratedJobs()[i],
 					rs.getAlgorithms()[i], 
 					rs.getArrivalDistibutions()[i], 
 					rs.getLambdas()[i], 
@@ -129,6 +159,8 @@ public class ResultsPanel extends JMCHWizardPanel{
 		else{
 			for(int i = 0; i < rs.getAlgorithms().length; i++){
 				addResult(
+					rs.getTypeOfResult()[i],
+					rs.getGeneratedJobs()[i],
 					rs.getAlgorithms()[i], 
 					rs.getArrivalDistibutions()[i], 
 					rs.getLambdas()[i], 
@@ -161,6 +193,14 @@ public class ResultsPanel extends JMCHWizardPanel{
 
 
 	//methods for saving the results
+	public String[] getTypeOfResult(){
+		return typeOfResult;
+	}
+
+	public int[] getGeneratedJobs(){
+		return generatedJobs;
+	}
+
 	public String[] getAlgorithms(){
 		return algorithms;
 	}

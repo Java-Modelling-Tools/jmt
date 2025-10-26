@@ -47,7 +47,6 @@ public class BoxStation extends JComponent implements JobContainer{
 	//information about the current Job inside the BoxStation
 	private Job currentJob = null;
 	private Color color;
-	private double duration;
 	private double mapDuration;
 
 	//information about the current Job for processor sharing
@@ -71,7 +70,6 @@ public class BoxStation extends JComponent implements JobContainer{
 		sLength = st.getLength();
 		sHeight = st.getHeight();
 		queueSize = st.getsizeQueue();
-		duration = 0;
 	}
 	
 	@Override
@@ -93,6 +91,8 @@ public class BoxStation extends JComponent implements JobContainer{
 
 	@Override
 	public void refresh() { //in general refresh does nothing, but if processor sharing is active, then the job is processed even if is in the queue
+		this.velocityFactor = station.getAnimationClass().getVelocityFactor();
+		
 		if(station.isProcessorSharing() && isWorking) {
 			long jobDuration = (long) (currentJob.getDuration() * Math.pow(10, 3));
 			//System.out.println((System.currentTimeMillis() - entranceTime - pausedTime)*velocityFactor);
@@ -101,15 +101,14 @@ public class BoxStation extends JComponent implements JobContainer{
 			entranceTime = System.currentTimeMillis();
 			pausedTime = 0;
 			
-			duration = currentJob.getDuration();
-			//System.out.println("job "+currentJob.toString()+ " duration:"+duration);
-			
-			if(duration < 0) {
+			if(currentJob.getDuration() < 0) {
 				isWorking = false;
 				pausedTime = 0;
 				
-				station.removeJob(currentJob);
-				station.routeJob(currentJob);
+				Job routeJob = currentJob;
+				currentJob = null;
+				station.removeJob(routeJob);
+				station.routeJob(routeJob);
 			}
 		}
 		
@@ -122,7 +121,6 @@ public class BoxStation extends JComponent implements JobContainer{
 		}
 		currentJob = newJob;		
 		color = newJob.getColor();
-		duration = newJob.getDuration();
 		mapDuration = newJob.getMapDuration();
 		isWorking = true;
 	}
@@ -131,9 +129,9 @@ public class BoxStation extends JComponent implements JobContainer{
 	 * Paint the box white, since we do not have any job to display
 	 */
 	public void clear() {
-		duration = 0;
 		mapDuration = 0;
 		isWorking = false;
+		currentJob = null;
 	}
 
 	/**
@@ -158,4 +156,14 @@ public class BoxStation extends JComponent implements JobContainer{
 		sPos = pos;
 	}
 
+	//used by PSSolver. see Station
+	public void updateCumulativeService(double speed, double value){
+		if(currentJob != null){
+			currentJob.updateCumulatedService(speed, value);
+		}
+	}
+
+	public Job getJob(){
+		return currentJob;
+	}
 }

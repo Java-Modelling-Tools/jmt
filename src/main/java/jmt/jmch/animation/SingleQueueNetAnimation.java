@@ -21,12 +21,13 @@ package jmt.jmch.animation;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.swing.JPanel;
 
+import jmt.jmch.distributions.DistributionJMCH;
 import jmt.jmch.simulation.Simulation;
-import jmt.jmch.distributions.AnimDistribution;
 import jmt.jmch.wizard.panels.AnimationPanel;
 
 /**
@@ -36,48 +37,42 @@ import jmt.jmch.wizard.panels.AnimationPanel;
  * Date: 25-mar-2024
  * Time: 10.46
  */
-public class SingleQueueNetAnimation extends AnimationClass{
-	private AnimationPanel animPanel;
-	private JPanel parent;
-	
-	//-- all the classes contained in the Animation, like stations, edges...
-	private Source source;
-	private Sink sink;
-	private Station station;
-	private List<Edge> edgeList;
-	
+public class SingleQueueNetAnimation extends AnimationClass{		
 	//--all the characteristics of the Animation
 	private int nServers = 1;
-	private AnimDistribution interArrival; //by default the two distributions are DETERMINSTIC
-	private AnimDistribution service;
+	private DistributionJMCH interArrival; //by default the two distributions are DETERMINSTIC
+	private DistributionJMCH service;
+
+	//-- components that are possibly removed
+	private Edge edge;
 	
 	
 	/** Constructor*/
 	public SingleQueueNetAnimation(AnimationPanel animPanel, JPanel container, Simulation sim) {		
-		super();
-		this.animPanel = animPanel;
-		this.parent = container;
-		simulation = sim;
+		super(animPanel, container, sim, 1);
+		
 		initGUI(container);
 	}
 	
+	@Override
 	public void initGUI(JPanel container) {
 		//Define the elements of the Animation from the last to the first, since each element must have a reference to the next one
+		stationList = new ArrayList<>();
 		edgeList = new ArrayList<>();
-		anim = new Animator(30, this);
-		jobList = new ArrayList<>(); //do not move in the super class, since each time I have to reload the simulation, this method is called
+		jobSet = new HashSet<>();
 		
 		sink = new Sink(container, true, new Point(0,0), this);
 		edgeList.add(new Edge(this, container, true, true, new Point[] {new Point(450,0), new Point(sink.getPositionX() - 10 ,0)}, sink));
-		station = new Station(this, container, true, true, new Point(0,0), edgeList.get(0), simulation, nServers);
-		edgeList.add(new Edge(this, container, true, true, new Point[] {new Point(80,0), new Point(230,0)}, station));
-		source = new Source(this, container, true, new Point(0,0), edgeList.get(edgeList.size()-1), interArrival, service);
+		stationList.add(new Station(this, container, true, true, new Point(0,0), edgeList.get(0), simulation, nServers, 0));
+		edge = new Edge(this, container, true, true, new Point[] {new Point(80,0), new Point(230,0)}, stationList.get(0));
+		edgeList.add(edge);
+		source = new Source(this, container, true, new Point(0,0), edgeList.get(edgeList.size()-1), interArrival, service);	
 	}
 	
 	/**
 	 * This is the most important method for repainting.
 	 * This one is the only one paint that needs to be called when repaint is invoked.
-	 * Do not call repaint in other classes related to QNAnimation, otherwise it will not work, since in paint, there is a call to the paint methods of all the classes related to QNA
+	 * Do not call repaint in other classes related to Animation, otherwise it will not work, since in paint, there is a call to the paint methods of all the classes related to QNA
 	 */
 	@Override
 	public void paint(Graphics g) {
@@ -85,120 +80,49 @@ public class SingleQueueNetAnimation extends AnimationClass{
 		
 		sink.paint(g);
 		source.paint(g);
-		station.paint(g);
+		for(Station st: stationList){
+			st.paint(g);
+		}
 		
 		int padding = 10;
 		//modify the position of the start and finish points of the edges based on the position of sink, source and station
 		edgeList.get(0).setXFinish(sink.getXPos() - padding);
-		edgeList.get(0).setXStart(station.getXPos() + station.getTotalLenght() + padding);
+		edgeList.get(0).setXStart(stationList.get(0).getXPos() + stationList.get(0).getTotalLenght() + padding);
 		
-		edgeList.get(1).setXFinish(station.getXPos() - padding);
-		edgeList.get(1).setXStart(source.getXPos() + source.getTotalLenght() + padding);
+		if(edgeList.size() > 1){
+			edgeList.get(1).setXFinish(stationList.get(0).getXPos() - padding);
+			edgeList.get(1).setXStart(source.getXPos() + source.getTotalLenght() + padding);
+		}
 		
 		for(Edge e: edgeList) {
 			e.paint(g);
 		}
-		for(Job j: jobList) {
+		for(Job j: jobSet) {
 			j.paint(g);
 		}
 	}
-	
-	@Override
-	public void refresh() {		
-		source.refresh();
-		station.refresh();
-		
-		for(Edge e: edgeList) {
-			e.refresh();
-		}
-
-		repaint();
-	}
-	
-	@Override
-	public void start() {
-		if(!anim.isPaused()) { //if it's the first time the animation is started, otherwise it is a simple restart after a pause
-			source.setStart(System.currentTimeMillis());			
-		}
-		anim.start();
-	}
-	
-	@Override
-	public void pause() {
-		anim.pause();
-	}
-	
-	@Override
-	public void reload() {
-		initGUI(parent);
-		repaint();
-	}
 
 	@Override
-	public void stop(){
-		anim.terminate();
-		animPanel.stopAnimation();
-	}
-
-	@Override
-	public void updatePause(long pause) {
-		//update all those elements that work with System.currentMillis()
-		station.updatePause(pause);
-		source.updatePause(pause);
-	}
-
-	@Override
-	public void setVelocityFactor(int factor){
-		source.setVelocityFactor(factor);
-		station.setVelocityFactor(factor);
-		for(Job j: jobList) {
-			j.setVelocityFactor(factor);
-		}
-		for(Edge e: edgeList){
-			e.setVelocityFactor(factor);
-		}
-	}
-
-	@Override
-	public void next() {
-		//first update the velocity of each component that works with time
-		setVelocityFactor(5);
-		
-		anim.start();
-		
-		for(Edge e: edgeList) {
-			e.nextEvent();
-		}
-		station.nextEvent();
-	}
-
-	public void resetNextEvent() {
-		//reset all the velocity factors
-		setVelocityFactor(2);
-		
-		for(Edge e: edgeList) {
-			e.resetNextEvent();
-		}
-		station.resetNextEvent();
-
-		//reset the buttons of the animationPanel
-		animPanel.resetNextStepAnimation();
-	}
-
-	@Override
-	public void updateSingle(Simulation sim, int nservers, AnimDistribution service, AnimDistribution interA){
+	public void updateSingle(Simulation sim, int nservers, DistributionJMCH service, DistributionJMCH interA, int maxJobs, boolean isGraphicalAnimation){
 		simulation = sim;
 		interArrival = interA;
 		this.service = service;
 		this.nServers = nservers;
 
-		station.typeOfQueue(simulation);
-		station.updateNServers(nservers);
+		stationList.get(0).typeOfQueue(simulation);
+		stationList.get(0).updateNServers(nservers);
 		source.updateDistribution(service, interA);	
-	}
+		source.updateMaxJobs(maxJobs);
 
-	@Override
-	public Source getSource() {
-		return source;
-	}
+		if(isGraphicalAnimation){
+			if(edgeList.size() == 1){ //otherwise each time we update the single station with isGraphicalAnimation = true, a new edge is added
+				edgeList.add(edge);
+				source.updateNextContainer(edge);
+			} 	
+		}
+		else{
+			edgeList.remove(1);
+			source.updateNextContainer(stationList.get(0));
+		}
+	}	
 }

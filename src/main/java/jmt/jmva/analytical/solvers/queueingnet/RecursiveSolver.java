@@ -15,7 +15,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.naming.OperationNotSupportedException;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
@@ -25,15 +32,9 @@ import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 import jmt.jmva.analytical.solvers.utilities.Timer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.naming.OperationNotSupportedException;
-
 /**
- * This class implements the RecursiveSolver object, which contains common methods
- * for the Convolution and RECAL algorithms.
+ * This class implements the RecursiveSolver object, which contains common
+ * methods for the Convolution and RECAL algorithms.
  *
  * @author Michail Makaronidis, 2010
  */
@@ -76,8 +77,8 @@ public class RecursiveSolver extends QNSolver {
 	}
 
 	/**
-	 * Returns the initial condition corresponding to a particular
-	 * PopulationVector object.
+	 * Returns the initial condition corresponding to a particular PopulationVector
+	 * object.
 	 *
 	 * @param n The PopulationVector object
 	 * @return The corresponding initial condition
@@ -85,16 +86,16 @@ public class RecursiveSolver extends QNSolver {
 	protected BigRational initialConditionFor(PopulationVector n) {
 		// Consider think time
 		BigRational toAssign = BigRational.ONE;
-        boolean nnzDelay = false;
-        for (int r = 0; r < qnm.R; r++) {
-        	if (qnm.getDelay(r)>0) {
-        		nnzDelay = true;
-        	}
-        }
-        if (nnzDelay == false) {
-            return BigRational.ZERO;        	
-        }
-		
+		boolean nnzDelay = false;
+		for (int r = 0; r < qnm.R; r++) {
+			if (qnm.getDelay(r) > 0) {
+				nnzDelay = true;
+			}
+		}
+		if (nnzDelay == false) {
+			return BigRational.ZERO;
+		}
+
 		for (int r = 0; r < qnm.R; r++) {
 			int nr = n.get(r);
 			if (nr > 0) {
@@ -111,8 +112,8 @@ public class RecursiveSolver extends QNSolver {
 	/**
 	 * Stores a computed normalising constant value for future re-use.
 	 *
-	 * @param m The MultiplicitiesVector
-	 * @param p The PopulationVector
+	 * @param m    The MultiplicitiesVector
+	 * @param p    The PopulationVector
 	 * @param Gval The corresponding normalising constant that has been computed
 	 */
 	protected void storeG(MultiplicitiesVector m, PopulationVector p, BigRational Gval) {
@@ -120,15 +121,17 @@ public class RecursiveSolver extends QNSolver {
 	}
 
 	/**
-	 * Stores at a particular Map<PopulationVector, Map<MultiplicitiesVector, BigRational>>
-	 * data structure a computed normalising constant value for future re-use.
+	 * Stores at a particular Map<PopulationVector, Map<MultiplicitiesVector,
+	 * BigRational>> data structure a computed normalising constant value for future
+	 * re-use.
 	 *
-	 * @param m The MultiplicitiesVector
-	 * @param p The PopulationVector
+	 * @param m    The MultiplicitiesVector
+	 * @param p    The PopulationVector
 	 * @param Gval The corresponding normalising constant that has been computed
-	 * @param map The data structure at which the constant will be stored
+	 * @param map  The data structure at which the constant will be stored
 	 */
-	protected void storeG(MultiplicitiesVector m, PopulationVector p, BigRational Gval, Map<PopulationVector, Map<MultiplicitiesVector, BigRational>> map) {
+	protected void storeG(MultiplicitiesVector m, PopulationVector p, BigRational Gval,
+			Map<PopulationVector, Map<MultiplicitiesVector, BigRational>> map) {
 		Map<MultiplicitiesVector, BigRational> step1 = map.get(p);
 		if (step1 == null) {
 			Map<MultiplicitiesVector, BigRational> step2 = new HashMap<MultiplicitiesVector, BigRational>();
@@ -145,7 +148,8 @@ public class RecursiveSolver extends QNSolver {
 	 *
 	 * @param m The MultiplicitiesVector
 	 * @param p The PopulationVector
-	 * @return The normalising constant as a BigRational object. Null if it has not been precomputed in the past.
+	 * @return The normalising constant as a BigRational object. Null if it has not
+	 *         been precomputed in the past.
 	 */
 	protected BigRational recallG(MultiplicitiesVector m, PopulationVector p) {
 		if (p.isZeroVector()) {
@@ -171,10 +175,12 @@ public class RecursiveSolver extends QNSolver {
 	/**
 	 * Searches for a normalising constant in the memory. If it's not found, it
 	 * computes and returns it.
+	 * 
 	 * @param m The MultiplicitiesVector
 	 * @param p The PopulationVector
 	 * @return The normalising constant as a BigRational object
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	protected BigRational findG(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
 		BigRational toReturn = recallG(m, p);
@@ -191,7 +197,8 @@ public class RecursiveSolver extends QNSolver {
 	 * @param m The MultiplicitiesVector
 	 * @param p The PopulationVector
 	 * @return The normalising constant as a BigRational object
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	protected BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
 		throw new InternalErrorException("Operation not supported.");

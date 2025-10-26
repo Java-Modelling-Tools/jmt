@@ -71,22 +71,28 @@ public class CircleStation extends JComponent implements JobContainer{
 	
 	@Override
 	public void refresh() {
+		this.velocityFactor = station.getAnimationClass().getVelocityFactor();
+
 		if(isWorking) {
+			long now = System.currentTimeMillis();
 			long duration = (long) (currentJob.getDuration() * Math.pow(10, 3));
-			passedTime += (System.currentTimeMillis() - entranceTime - pauseTime)* (velocityFactor * processorSpeed); //both the factor for the step and the one of processor sharing
-			entranceTime = System.currentTimeMillis();
+			passedTime += (now - entranceTime - pauseTime)* (velocityFactor * processorSpeed); //both the factor for the step and the one of processor sharing
+			entranceTime = now;
 			pauseTime = 0;
 			
 			long diff =  duration - passedTime;
 			progression = (float) diff/duration;
 			
 			if(progression < 0) {
+				//System.out.println(System.currentTimeMillis() + " leaving the circle");
 				isWorking = false;
 				progression = 0; //to avoid printing another cycle of the circle
 				pauseTime = 0;
 				passedTime = 0;
 				
-				station.routeJob(currentJob);
+				Job routeJob = currentJob;
+				currentJob = null; //this is needed otherwise the currentJob is still in this circle until a new one arrives
+				station.routeJob(routeJob);
 			}
 		}	
 	}
@@ -129,5 +135,15 @@ public class CircleStation extends JComponent implements JobContainer{
 		processorSpeed = velocity;
 	}
 
+	//used by PSSolver. see Station
+	public void updateCumulativeService(double speed, double value){
+		if(currentJob != null){
+			currentJob.updateCumulatedService(speed, value);
+		}
+	}
+
+	public Job getJob(){
+		return currentJob;
+	}
 	
 }

@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -12,15 +12,15 @@ import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.linearSystem.LinearSystem;
 
 /**
- * This class provides the high-level implementation of the CoMoM algorithm, it is programmed 
- * to the interface provided by the LinearSystem class. Sub-classes must choose the linear system they 
- * are to use.
+ * This class provides the high-level implementation of the CoMoM algorithm, it
+ * is programmed to the interface provided by the LinearSystem class.
+ * Sub-classes must choose the linear system they are to use.
  * 
  * @author Jack Bradshaw *
  */
 public class CoMoMSolver extends QNSolver {
 
-	private  int M,R;
+	private int M, R;
 
 	private PopulationVector current_N;
 	private PopulationVector target_N;
@@ -37,8 +37,9 @@ public class CoMoMSolver extends QNSolver {
 	}
 
 	@Override
-	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
-		current_N = new PopulationVector(0,R);
+	public void computeNormalisingConstant() throws InternalErrorException, OperationNotSupportedException,
+			InconsistentLinearSystemException, BTFMatrixErrorException {
+		current_N = new PopulationVector(0, R);
 
 		for (int _class = 1; _class <= R; _class++) {
 			current_N.plusOne(_class);
@@ -47,15 +48,15 @@ public class CoMoMSolver extends QNSolver {
 			solveForClass(_class);
 		}
 
-		//Store the computed normalising constant
+		// Store the computed normalising constant
 		BigRational G = basis.getNormalisingConstant();
 		qnm.setNormalisingConstant(G);
 	}
 
-	private  void solveForClass(int _class) throws InternalErrorException, OperationNotSupportedException, InconsistentLinearSystemException, BTFMatrixErrorException {
-		for (int class_population = current_N.get(_class - 1);
-				class_population <= target_N.get(_class - 1);
-				class_population++) {
+	private void solveForClass(int _class) throws InternalErrorException, OperationNotSupportedException,
+			InconsistentLinearSystemException, BTFMatrixErrorException {
+		for (int class_population = current_N.get(_class - 1); class_population <= target_N
+				.get(_class - 1); class_population++) {
 			system.update(class_population);
 			system.solve();
 

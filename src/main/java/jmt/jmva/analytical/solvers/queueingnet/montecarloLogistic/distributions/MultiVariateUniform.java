@@ -1,12 +1,13 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.distributions;
-
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import cern.jet.random.Uniform;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions;
 
 import java.util.Date;
 
+import cern.jet.random.Uniform;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+
 /**
- * Multivariate uniform distribution with specifiable lower and upper bounds per dimension
+ * Multivariate uniform distribution with specifiable lower and upper bounds per
+ * dimension
  */
 public class MultiVariateUniform implements MultiVariateRealDistribution {
 
@@ -17,11 +18,12 @@ public class MultiVariateUniform implements MultiVariateRealDistribution {
 	private double[] ub;
 
 	/**
-	 * Constructor for the Multivariate Uniform distribution. Accepts two double arrays representing
-	 * the lower and upper bounds, for each dimension
+	 * Constructor for the Multivariate Uniform distribution. Accepts two double
+	 * arrays representing the lower and upper bounds, for each dimension
+	 * 
 	 * @param ndim number of dimensions of distribution
-	 * @param lb lower bound vector
-	 * @param ub upper bound vector
+	 * @param lb   lower bound vector
+	 * @param ub   upper bound vector
 	 * @param seed integer seed
 	 * @throws InternalErrorException
 	 */
@@ -34,21 +36,23 @@ public class MultiVariateUniform implements MultiVariateRealDistribution {
 		this.lb = new double[ndim];
 		this.ub = new double[ndim];
 
-		for (int i=0; i<ndim; i++) {
-			if (lb[i] > ub[i]) throw new InternalErrorException("Invalid bounds for uniform distribution!");
-			V = V*(ub[i]-lb[i]);
+		for (int i = 0; i < ndim; i++) {
+			if (lb[i] > ub[i])
+				throw new InternalErrorException("Invalid bounds for uniform distribution!");
+			V = V * (ub[i] - lb[i]);
 			Date date = new Date();
-			distributions[i] = new Uniform(lb[i], ub[i], date.hashCode()+seed);
+			distributions[i] = new Uniform(lb[i], ub[i], date.hashCode() + seed);
 			this.lb[i] = lb[i];
 			this.ub[i] = ub[i];
 		}
 
 		this.ndim = ndim;
-		this.p = 1./V;
+		this.p = 1. / V;
 	}
 
 	/**
 	 * Constructor with default seed = 0
+	 * 
 	 * @param ndim
 	 * @param lb
 	 * @param ub
@@ -60,6 +64,7 @@ public class MultiVariateUniform implements MultiVariateRealDistribution {
 
 	/**
 	 * Copy constructor
+	 * 
 	 * @param MVU
 	 * @throws InternalErrorException
 	 */
@@ -69,6 +74,7 @@ public class MultiVariateUniform implements MultiVariateRealDistribution {
 
 	/**
 	 * Copy constructor with specified seed
+	 * 
 	 * @param MVU
 	 * @param seed
 	 * @throws InternalErrorException
@@ -90,7 +96,7 @@ public class MultiVariateUniform implements MultiVariateRealDistribution {
 	@Override
 	public double[] getSample() {
 		double[] sample = new double[ndim];
-		for (int i=0; i<ndim; i++) {
+		for (int i = 0; i < ndim; i++) {
 			sample[i] = this.distributions[i].nextDouble();
 		}
 		return sample;

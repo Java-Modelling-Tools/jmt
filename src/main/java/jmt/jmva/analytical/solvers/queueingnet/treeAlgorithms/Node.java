@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -6,8 +6,8 @@ import java.util.TreeSet;
 
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils.Covered;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva.MVAResults;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils.Covered;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva.MVAResults;
 
 /** Class representing a tree node. 
  * @author Ben Homer, 2014.

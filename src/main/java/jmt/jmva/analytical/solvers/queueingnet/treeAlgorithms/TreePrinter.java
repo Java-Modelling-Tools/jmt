@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -18,10 +18,13 @@
 
 package jmt.jmch.wizard.actionsWizard;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
 import jmt.jmch.wizard.panels.JMCHWizardPanel;
+import jmt.manual.ChapterIdentifier;
+import jmt.manual.PDFViewer;
 
 
 
@@ -39,17 +42,26 @@ public class Help extends AbstractMCHAction {
     * Defines an <code>Action</code> object with a default
     * description string and default icon.
     */
-    public Help(JMCHWizardPanel wizardpanel, String help) {
-        super(help+" Help", "Help", wizardpanel);
-        putValue(SHORT_DESCRIPTION, help+" help");
-        putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
+    public Help(JMCHWizardPanel wizardpanel) {
+        super("JMCH Help", "Help", wizardpanel);
+		putValue(SHORT_DESCRIPTION, "Show JMCH help");
+		putValue(MNEMONIC_KEY, new Integer(KeyEvent.VK_H));
     }
 
     /**
      * Invoked when an action occurs.
      */
     public void actionPerformed(ActionEvent e) {
-        panel.openHelp();
+        Runnable r = new Runnable() {
+			public void run() {
+				try {
+					new PDFViewer("JMCH Manual", ChapterIdentifier.JMCH);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+		EventQueue.invokeLater(r);
     }
 
 }

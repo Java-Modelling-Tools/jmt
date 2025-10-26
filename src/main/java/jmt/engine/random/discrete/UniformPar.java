@@ -2,8 +2,9 @@ package jmt.engine.random.discrete;
 
 import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.engine.random.AbstractParameter;
+import jmt.engine.random.Parameter;
 
-public class UniformPar extends AbstractParameter {
+public class UniformPar extends AbstractParameter implements Parameter {
 
 	private int min;
 	private int max;

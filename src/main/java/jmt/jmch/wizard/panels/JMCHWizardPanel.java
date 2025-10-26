@@ -30,8 +30,6 @@ import jmt.jmch.wizard.MainWizard;
 public abstract class JMCHWizardPanel extends WizardPanel{
     protected MainWizard parent;
 
-    /** Opens the panel for help */
-    public void openHelp(){ }
 
     /** Starts the animation */
     public void startAnimation(){ }

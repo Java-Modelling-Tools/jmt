@@ -118,5 +118,4 @@ public class ServiceTimeStrategy extends ServiceStrategy {
 			return 0;
 		}
 	}
-
 }

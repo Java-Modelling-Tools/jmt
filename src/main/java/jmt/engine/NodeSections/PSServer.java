@@ -19,6 +19,7 @@
 package jmt.engine.NodeSections;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.PSStrategies.QBPSStrategy;
@@ -109,13 +110,28 @@ public class PSServer extends Server {
 	 * @param serviceWeights Array of service weights, one per class.
 	 */
 	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
-									ServiceStrategy[] serviceStrategies, Boolean priorityUsed,PSStrategy[] psStrategies,  Double[] serviceWeights,
+									ServiceStrategy[] serviceStrategies, Boolean priorityUsed, PSStrategy[] psStrategies,  Double[] serviceWeights,
 									Integer[] serverNumRequired,
 									String[] serverNames,
 									Integer[] serversPerServerType,
 									Object[] serverCompatibilities,
 									String schedulingPolicy) throws NetException {
-		super(numberOfServers,numberOfVisits,serviceStrategies,null,serverNumRequired,serverNames,serversPerServerType,serverCompatibilities,schedulingPolicy);
+		this(numberOfServers, maxRunningJobs, numberOfVisits, serviceStrategies, priorityUsed, psStrategies, serviceWeights,
+				((Supplier<Map<String, Object>>) () -> {
+					Map<String, Object> advancedFeatures = new HashMap<>();
+					advancedFeatures.put(SERVER_FEATURE_CLASS_PARALLELISM, serverNumRequired);
+					advancedFeatures.put(SERVER_FEATURE_SERVER_NAMES, serverNames);
+					advancedFeatures.put(SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, serversPerServerType);
+					advancedFeatures.put(SERVER_FEATURE_SERVER_COMPATIBILITIES, serverCompatibilities);
+					advancedFeatures.put(SERVER_FEATURE_SCHEDULING_POLICY, schedulingPolicy);
+					return advancedFeatures;
+				}).get());
+	}
+
+	public PSServer(Integer numberOfServers, Integer maxRunningJobs, Integer[] numberOfVisits,
+					ServiceStrategy[] serviceStrategies, Boolean priorityUsed, PSStrategy[] psStrategies,  Double[] serviceWeights,
+					Map<String, Object> advancedFeatures) throws NetException {
+		super(numberOfServers,numberOfVisits,serviceStrategies,advancedFeatures);
 		this.numberOfServers = numberOfServers.intValue();
 		if (maxRunningJobs == null) {
 			this.maxRunningJobs = -1;
@@ -148,6 +164,7 @@ public class PSServer extends Server {
 			}
 		}
 		busyCounter = 0;
+		String schedulingPolicy = (String) advancedFeatures.get(SERVER_FEATURE_SCHEDULING_POLICY);
 		if (schedulingPolicy == null) {
 			schedulingPolicy = STATION_SCHEDULING_POLICY_ALIS;
 		}

@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.treeConvolution;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -10,10 +10,10 @@ import javax.naming.OperationNotSupportedException;
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Config;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 /** 

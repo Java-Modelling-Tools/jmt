@@ -1,7 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
- * This class implements the Bard-Schweitzer algorithm for solving multi-closed models
+ * This class implements the Bard-Schweitzer algorithm for solving multi-closed
+ * models
  * 
  * @author Abhimanyu Chugh
  *
@@ -20,13 +21,13 @@ public class BardSchweitzer extends AMVA {
 				double currQueueLen = 0;
 				for (int r = 0; r < classes; r++) {
 					// if this is the class with one less customer, normalise its queue length
-					// otherwise assume its queue length is same as queue length with full customer population
+					// otherwise assume its queue length is same as queue length with full customer
+					// population
 					if (c == r) {
 						if (clsPopulation[r] != 0) {
-							currQueueLen += queueLen[k][r]*(clsPopulation[r] - 1)/(double)clsPopulation[r];
+							currQueueLen += queueLen[k][r] * (clsPopulation[r] - 1) / (double) clsPopulation[r];
 						}
-					}
-					else {
+					} else {
 						currQueueLen += queueLen[k][r];
 					}
 				}
@@ -35,5 +36,5 @@ public class BardSchweitzer extends AMVA {
 		}
 		return scQueueLens;
 	}
-	
+
 }

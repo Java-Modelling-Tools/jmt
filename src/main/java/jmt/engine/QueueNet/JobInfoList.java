@@ -662,4 +662,10 @@ public interface JobInfoList {
 	public void CacheJob(JobClass jclass, boolean isHit);
 
 
+	/**
+	 * Methods related to server vacations
+	 */
+	void startsServerVacation(VacationJob vacationJob);
+
+	void endsServerVacation(VacationJob vacationJob);
 }

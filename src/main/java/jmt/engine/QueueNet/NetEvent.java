@@ -83,6 +83,9 @@ public class NetEvent {
 	/** Event ID: Set up complete event */
 	public static final int EVENT_SET_UP_COMPLETE = 0x0019;
 	public static final int EVENT_CHECK_DELAY_OFF = 0x001A;
+	public static final int EVENT_QUEUE_IDLE = 0x001B;
+	public static final int EVENT_QUEUE_IDLE_ACK = 0x001C;
+	public static final int EVENT_VACATION_JOB = 0x001D;
 
 	/**
 	 * Returns the name of the event, used in debug.
@@ -141,6 +144,12 @@ public class NetEvent {
 				return "EVENT_JOB_REQUEST_FROM_SERVER";
 			case EVENT_RESET_COOLSTART:
 				return "EVENT_RESET_COOLSTART";
+			case EVENT_QUEUE_IDLE:
+				return "EVENT_QUEUE_IDLE";
+			case EVENT_QUEUE_IDLE_ACK:
+				return "EVENT_QUEUE_IDLE_ACK";
+			case EVENT_VACATION_JOB:
+				return "EVENT_VACATION_JOB";
 			default:
 				return "UNKNOWN_EVENT";
 		}

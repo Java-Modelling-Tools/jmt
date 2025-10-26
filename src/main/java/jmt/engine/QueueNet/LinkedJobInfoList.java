@@ -1942,6 +1942,53 @@ public class LinkedJobInfoList implements JobInfoList {
 			utilization.update((double) (list.size() * mult) / numberOfServers, getTime() - getLastModifyTime());
 		}
 	}
+	protected void updateUtilization(VacationJob vacationJob, boolean onStartOfVacation) {
+		double sample = onStartOfVacation ? 0.0 : 1.0;
+		if (utilizationPerServerType != null) {
+			for (int c = 0; c < numberOfJobClasses; ++c) {
+				Boolean[] classComp = classCompatibilities[c];
+				for (int s = 0; s < classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = utilizationPerServerType[s];
+						if (m != null) {
+							m.update(sample, getTime() - getLastModifyTimePerServer(s));
+						}
+					}
+				}
+			}
+		}
+
+		if (utilizationPerServerTypePerClass != null) {
+			for (int c = 0; c < numberOfJobClasses; ++c) {
+				Boolean[] classComp = classCompatibilities[c];
+
+				for (int s = 0; s < classComp.length; s++) {
+					if (classComp[s]) {
+						Measure m = utilizationPerServerTypePerClass[s][c];
+						if (m != null) {
+							m.update(sample, getTime() - getLastModifyTimePerServerPerClass(s, c));
+						}
+					}
+				}
+			}
+		}
+
+		if (utilizationPerClass != null) {
+			for (int c = 0; c < numberOfJobClasses; ++c) {
+				Measure m = utilizationPerClass[c];
+				if (m != null) {
+					int mult = 1;
+					if (serverNumRequired != null) {
+						mult = serverNumRequired[c];
+					}
+					m.update(sample, getTime() - getLastModifyTimePerClass(jobClasses.get(c)));
+				}
+			}
+		}
+		if (utilization != null) {
+			utilization.update(sample, getTime() - getLastModifyTime());
+		}
+	}
 
 	protected void updateUtilizationJoin(JobInfo jobInfo) {
 		if (utilizationPerClassJoin != null) {
@@ -1976,6 +2023,20 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 		if (effectiveUtilization != null) {
 			effectiveUtilization.update((double) jobsInService / numberOfServers, getTime() - getLastServiceModifyTime());
+		}
+	}
+
+	protected void updateEffectiveUtilization(VacationJob vacationJob) {
+		if (effectiveUtilizationPerClass != null) {
+			for (int c = 0; c < numberOfJobClasses; ++c) {
+				Measure m = effectiveUtilizationPerClass[c];
+				if (m != null) {
+					m.update(0, getTime() - getLastServiceModifyTimePerClass(jobClasses.get(c)));
+				}
+			}
+		}
+		if (effectiveUtilization != null) {
+			effectiveUtilization.update(0, getTime() - getLastServiceModifyTime());
 		}
 	}
 
@@ -2567,5 +2628,25 @@ public class LinkedJobInfoList implements JobInfoList {
 		}
 		// we divide the hit and miss into two class, so only add to the classID corresponding class.
 		jobsCacheCountPerClass[jclass.getId()]++;
+	}
+
+	@Override
+	public void startsServerVacation(VacationJob vacationJob) {
+		updateUtilization(vacationJob, true);
+		updateEffectiveUtilization(vacationJob);
+		lastJobStartTime = getTime();
+		for (int c = 0; c < numberOfJobClasses; ++c) {
+			lastJobStartTimePerClass[c] = getTime();
+		}
+	}
+
+	@Override
+	public void endsServerVacation(VacationJob vacationJob) {
+		updateUtilization(vacationJob, false);
+		updateEffectiveUtilization(vacationJob);
+		lastJobEndTime = getTime();
+		for (int c = 0; c < numberOfJobClasses; ++c) {
+			lastJobEndTimePerClass[c] = getTime();
+		}
 	}
 }

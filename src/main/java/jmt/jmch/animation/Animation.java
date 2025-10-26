@@ -19,6 +19,8 @@
 package jmt.jmch.animation;
 import java.awt.Graphics;
 
+import javax.swing.JPanel;
+
 /**
  * Interface that must be implemented by the class that represent the Animation
  *
@@ -27,6 +29,12 @@ import java.awt.Graphics;
  * Time: 10.30
  */
 public interface Animation {
+
+	/**
+	 * Paint for the first time the model
+	 */
+	public void initGUI(JPanel container);
+
 	/**
 	 * Method for updating some values inside the class.
 	* It is crucial since when we call the repaint() method and start the chain of calls of the paint() methods of each JComponent, those paint() method use some local variables of the clasess.
@@ -72,6 +80,10 @@ public interface Animation {
 	*/
 	public void updatePause(long pause);
 
-	public Source getSource();
+	/**
+	 * Called by the animator each time is paused.
+	 * Update the results in the Result table for the ANIM row.
+	 */
+	public void updateAnimResults();
 }
  

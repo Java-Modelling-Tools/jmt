@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
@@ -23,7 +23,6 @@ import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
-import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 /**
  * This class implements the ConvolutionSolver object, which computes the
@@ -43,7 +42,7 @@ public class ConvolutionSolver extends RecursiveSolver {
 		super(qnm);
 	}
 
-	//TODO change back to private
+	// TODO change back to private
 	/**
 	 * Computes any normalising constant using a simple recursion and taking
 	 * advantage of any already computed and stored value.
@@ -51,11 +50,13 @@ public class ConvolutionSolver extends RecursiveSolver {
 	 * @param m The MultiplicitiesVector
 	 * @param p The PopulationVector
 	 * @return The normalising constant as a BigRational object
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	@Override
 	public BigRational compute(MultiplicitiesVector m, PopulationVector p) throws InternalErrorException {
-		// First we try to find if this value of G has been already computed and stored previously
+		// First we try to find if this value of G has been already computed and stored
+		// previously
 		BigRational toRet = recallG(m, p);
 		if (toRet == null) {
 			// This is the first time we computeNormalisingConstant this value
@@ -100,7 +101,8 @@ public class ConvolutionSolver extends RecursiveSolver {
 	/**
 	 * Computes the normalising constant for the specified QNModel.
 	 *
-	 * @throws InternalErrorException An exception is thrown if any internal error is encountered during computations.
+	 * @throws InternalErrorException An exception is thrown if any internal error
+	 *                                is encountered during computations.
 	 */
 	@Override
 	public void computeNormalisingConstant() throws InternalErrorException {

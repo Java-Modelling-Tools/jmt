@@ -233,7 +233,7 @@ public class MainPanel extends JMCHWizardPanel{
         parent = main;
 		help = parent.getHoverHelp();
 
-        openHelp = new Help(this, "JMCH");
+        openHelp = new Help(this);
 		about = new About(this);
 
         initGUI();
@@ -479,6 +479,10 @@ public class MainPanel extends JMCHWizardPanel{
 	public void gotFocus() { //this method is essential for controlling if the user tries to go back to the main panel from a panel like the Result one
 		if (parent.getNumbersPanel() > 0) {
 			if (JOptionPane.showConfirmDialog(this, "This operation resets the Results table only when a different algorithm group is selected (Scheduling or Routing, Single Station). \n Are you sure you want to go back to start screen?", "Back operation", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+				if(parent.getAnimationPanel() != null){
+					parent.getAnimationPanel().terminateThreads();
+				}
+				
 				parent.saveResults();
 				parent.resetScreen();
 			} else {

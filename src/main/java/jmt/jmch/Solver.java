@@ -9,11 +9,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.definitions.SimulationDefinition;
-import jmt.gui.common.distributions.Deterministic;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.distributions.Exponential;
-import jmt.gui.common.distributions.Hyperexponential;
-import jmt.gui.common.distributions.Uniform;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.jmch.simulation.Simulation;
 import jmt.jmch.simulation.SimulationType;
@@ -31,7 +27,7 @@ public class Solver implements CommonConstants{
     private CommonModel model;
     private Simulation simulation;
     private boolean isSingleQueue = true;
-    private double lambda;
+    private int maxSamples;
 
     private int classNameIndex = 1;
     private int serverNameIndex = 1;
@@ -39,26 +35,14 @@ public class Solver implements CommonConstants{
 
     private int nQueues = 1; //(for the probabilities, nQueues could be 1,2 or 3 based on the probabilities)
 
+    private Distribution interADistr;
+    private Distribution serviceDistr;
+
     //------------------- keys of the model --------------------------
     private Object classKey;
     private Object sourceKey;
     private Object sinkKey;
     private Object routerKey;
-
-    //----------- all changable fields of the simulation -------------
-    private static Distribution[] serviceDistributions = { 
-        new Exponential(),
-        new Deterministic(),
-        new Uniform(),
-        new Hyperexponential()
-    };
-
-    private static Distribution[] interArrivalDistributions = { 
-        new Exponential(),
-        new Deterministic(),
-        new Uniform(),
-        new Hyperexponential()
-    };
 
 
     //types of measures selectable
@@ -94,30 +78,33 @@ public class Solver implements CommonConstants{
 	};*/
 
     /**
+     * 
      * @param sim Simulation data Structure
-     * @param lambda parameter for the InterArrival Time
-     * @param mhu parameter for the Service Time
-     * @param indexInter index of the array of Distributions for InterArrival Time
-     * @param indexService index of the array of Distributions for Service Time
+     * @param interADistr Distribution for the inter arrival time
+     * @param serviceDistr Distribution for the service time
      * @param nservers number of servers in the simulation
      * @param prob array of probabilities (for Routing Probabilities)
      * @param maxSamples max samples for the animation
+     * @param seed the seed for the random generator used in the simulation
      */
-    public Solver(Simulation sim, double lambda, double mhu, int indexInter, int indexService, int nservers, double[] prob, int maxSamples){
+    public Solver(Simulation sim, Distribution interADistr, Distribution serviceDistr, int nservers, double[] prob, int maxSamples, long seed){
         model = new CommonModel();
-        simulation = sim;
-        servers = nservers;
-        this.lambda = lambda;
-        isSingleQueue = simulation.getType() != SimulationType.ROUTING;
-        setDistributionsParameters(serviceDistributions, mhu);
-        setDistributionsParameters(interArrivalDistributions, lambda);
-        addClass(indexInter);
-        model.setMaxSimulationSamples(maxSamples);
+        this.simulation = sim;
+        this.interADistr = interADistr;
+        this.serviceDistr = serviceDistr;
+        this.servers = nservers;
+        this.maxSamples = maxSamples;
         
-        addQueue(indexService, nservers);
+        isSingleQueue = simulation.getType() != SimulationType.ROUTING;
+
+        addClass();
+        //model.setMaxSimulationSamples(maxSamples); da problemi con alcuni modelli
+        model.setMaxSimulationEvents(maxSamples);
+        
+        addQueue();
         if(!isSingleQueue){
-            addQueue(indexService, nservers);
-            addQueue(indexService, nservers);
+            addQueue();
+            addQueue();
             addRouter();
         }
 
@@ -135,38 +122,18 @@ public class Solver implements CommonConstants{
 
         //same configuration = same result (remove randomness)
         model.setUseRandomSeed(false);
-        model.setSimulationSeed(23000l);
+        model.setSimulationSeed(seed);
     }
 
-    /** Set the parameters for all the distributions. Always keep the mean = 1/mhu, change the cv accordingly */
-    private void setDistributionsParameters(Distribution[] distributions, double mhu){
-        double mean = 1/mhu;
-        distributions[0].setMean(1/mhu);
-
-        distributions[1].setMean(1/mhu);
-
-        double min = mean - 1;
-        double max = mean + 1;
-        double ds = (max-min)/Math.sqrt(12);
-        distributions[2].setMean(mean);
-        distributions[2].setC(ds/mean);
-
-        double p = 0.5; 
-        double l1 = 1;
-        double l2 = 1/(mean*2 - 1); //l1 = 1, l2 can be retrieved with this formula to keep the mean = 1/mhu
-        double var = 2*p/(Math.pow(l1, 2)) + 2*p/(Math.pow(l2, 2)) - Math.pow(mean, 2);
-        distributions[3].setMean(mean);
-        distributions[3].setC(Math.sqrt(var)/mean);
-    }
 
     /** Add a class to the model (similar to the task you perform in JSIM when you click on the class button) */
-    private void addClass(int indexInter){
+    private void addClass(){
         classKey = model.addClass(Defaults.get("className") + (++classNameIndex),
             0,//Defaults.getAsInteger("classType").intValue(), 
             Defaults.getAsInteger("classPriority"),
             Defaults.getAsDouble("classSoftDeadline"),
             Defaults.getAsInteger("classPopulation"), 
-            interArrivalDistributions[indexInter]); 
+            interADistr); 
     }
 
     /** Add a source station to the model (like adding a Source cell to the JGraph of JSIM) */
@@ -178,20 +145,20 @@ public class Solver implements CommonConstants{
     
 
     /** Add a queue station to the model (like adding a Station cell to the JGraph in JSIM) */
-    private void addQueue(int indexService, int nservers){
+    private void addQueue(){
         Object serverKey = model.addStation("Queue "+(serverNameIndex), STATION_TYPE_SERVER, 1, new ArrayList<ServerType>());
         serverNameIndex++;
 
-        model.setStationQueueCapacity(serverKey, 5+nservers);
+        model.setStationQueueCapacity(serverKey, 5+servers);
         model.setDropRule(serverKey, classKey, "Drop");
         setStrategy(serverKey);
         //model.setServiceWeight(serverKey, classKey, Defaults.getAsDouble("serviceWeight"));
         //model.updateBalkingParameter(serverKey, classKey, STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
        
-        model.setStationNumberOfServers(serverKey, nservers);
-        model.updateNumOfServers(serverKey, nservers);
+        model.setStationNumberOfServers(serverKey, servers);
+        model.updateNumOfServers(serverKey, servers);
 
-        model.setServiceTimeDistribution(serverKey, classKey, serviceDistributions[indexService]);
+        model.setServiceTimeDistribution(serverKey, classKey, serviceDistr);
     }
 
     /* To change the type of simulation and the algorithm */
@@ -326,19 +293,19 @@ public class Solver implements CommonConstants{
     }
 
     public String getInterArrivalDistribution(){
-        return ((Distribution) model.getClassDistribution(classKey)).toString();
+        return interADistr.toString();
     }
 
     public double getInterArrivalTimeMean(){
-        return lambda;
+        return (1/(double) interADistr.getMean());
     }
 
     public String getServiceDistribution(){
-        return ((Distribution) model.getServiceTimeDistribution(model.getStationKeys().get(0), classKey)).toString();
+        return serviceDistr.toString();
     }
 
     public double getServiceTimeMean(){
-        return ((Distribution) model.getServiceTimeDistribution(model.getStationKeys().get(0), classKey)).getMean();
+        return serviceDistr.getMean();
     }
 
     public int getNumberServers(){  
@@ -347,5 +314,9 @@ public class Solver implements CommonConstants{
 
     public int getNumberQueues(){
         return nQueues;
+    }
+
+    public int getMaxSamples(){
+        return maxSamples;
     }
 }

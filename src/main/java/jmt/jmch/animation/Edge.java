@@ -124,6 +124,16 @@ public class Edge extends JComponent implements JobContainer{
 		
 		jobList = new ArrayList<>();
 	}
+
+	/**
+	 * Constructor for Edges with higher speed
+	 * @param speed
+	 */
+	public Edge(AnimationClass anim, JPanel container, boolean centered, boolean isArrow, Point[] points, JobContainer next, int speed){
+		this(anim, container, centered, isArrow, points, next);
+		this.speed = speed;
+
+	}
 	
 	public void paint(Graphics g) {
 		super.paint(g);
@@ -137,7 +147,7 @@ public class Edge extends JComponent implements JobContainer{
 			
 			if(centered) {
 				int heightPanel = parent.getHeight();	
-				start.y = parent.getY()+(heightPanel)/2;
+				start.y = parent.getY() +(heightPanel)/2;
 				finish.y = start.y;
 			}
 			
@@ -212,8 +222,15 @@ public class Edge extends JComponent implements JobContainer{
 
 	@Override
 	public void refresh() {
+		velocityFactor = animation.getVelocityFactor();
+
 		//check for each job if it is still in the edge, if not route it to the next element, otherwise update its position
 		for(int i = 0; i < jobList.size(); i++) {
+			/*if(nextEvent && animation instanceof MultipleQueueNetAnimation && nextContainer instanceof Station){ //in nextEvent the edges between router and stations must forward all the jobs to the next station
+				routeJob(i);
+				continue;
+			}*/
+
 			Job j = jobList.get(i);
 			if(checkFinish(j, j.getFinalPos())) {
 				if(j.getFinalPos() == points.length - 1) { //job travelled along all the edges 
@@ -226,7 +243,7 @@ public class Edge extends JComponent implements JobContainer{
 			else {
 				moveJob(j);
 			}			
-		}		
+		}	
 	}
 	
 	/**
@@ -297,6 +314,9 @@ public class Edge extends JComponent implements JobContainer{
 			animation.pause();
 			animation.resetNextEvent();
 		}
+		/*else if(nextEvent && (prec instanceof Router)){ //in next step move direclty the jobs from the router to the stations
+			routeJob(jobList.size() - 1);
+		}*/
 	}
 
 	/**
@@ -328,11 +348,6 @@ public class Edge extends JComponent implements JobContainer{
 	public void resetNextEvent() {
 		nextEvent = false;
 	}
-
-	/* Methods for the Next Step */
-	public void setVelocityFactor(int value) {
-    	velocityFactor = value;
-    }
 
 	public double getSpeed() {
 		return speed;

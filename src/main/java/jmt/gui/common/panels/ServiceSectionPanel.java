@@ -101,7 +101,7 @@ public class ServiceSectionPanel extends WizardPanel implements CommonConstants 
 				Object service = data.getServiceTimeDistribution(stationKey, key, serverTypeKey);
 				// If it is a Distribution, shows Distribution Editor
 				if (service instanceof Distribution) {
-					DistributionsEditor editor = DistributionsEditor.getInstance(ServiceSectionPanel.this.getParent(), (Distribution) service);
+					DistributionsEditor editor = DistributionsEditor.getInstanceWithoutBatch(ServiceSectionPanel.this.getParent(), (Distribution) service);
 					// Sets editor window title
 					editor.setTitle("Editing " + classData.getClassName(key) + " Service Time Distribution...");
 					// Shows editor window

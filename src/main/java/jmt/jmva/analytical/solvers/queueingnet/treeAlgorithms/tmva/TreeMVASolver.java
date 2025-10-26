@@ -1,16 +1,16 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ComplexityEvaluator;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Config;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePlanter;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePrinter;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ComplexityEvaluator;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePrinter;
 
 /**
  * Tree MVA implementation based on Hoyme and Tucci papers from 1985.

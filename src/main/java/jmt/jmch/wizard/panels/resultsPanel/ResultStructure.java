@@ -15,6 +15,8 @@ public class ResultStructure{
 	protected SimulationType type;
 	
 	/* data structures common to all the types of simulations */
+	protected String[] typeOfResult;
+	protected int[] generatedJobs;
 	protected String[] algorithms;
     protected String[] arrivalDistibutions;
     protected double[] lambdas;
@@ -33,6 +35,8 @@ public class ResultStructure{
 
 	
 	public ResultStructure(){
+		typeOfResult = new String[0];
+		generatedJobs = new int[0];
 		algorithms = new String[0];
 		arrivalDistibutions = new String[0];
 		lambdas = new double[0];
@@ -51,8 +55,10 @@ public class ResultStructure{
 	/**
 	 * Save the results of previous simulations in this data structure.
 	 * If you need to save Routing simulations, than nservs, S, Q should be equal to arrays of size = 0.
-	 * If you need to save Scheduling simulations, than queueN should be equal to an array of size = 0.
+	 * If you need to save Scheduling simulations, then queueN should be equal to an array of size = 0.
 	 * @param simType the type of the simulation to save
+	 * @param types if the result is the one from JSIM or from the Animation
+	 * @param genJobs number of jobs used for the simulation
 	 * @param algo algorithms used
 	 * @param arrivalD inter arrival distributions
 	 * @param lamb lambdas
@@ -65,9 +71,11 @@ public class ResultStructure{
 	 * @param S service times (only for Scheduling)
 	 * @param Q queue times (only for Scheduling)
 	 */
-	public void setAll(SimulationType simType, String[] algo, String[] arrivalD, double[] lamb, String[] serviceD, double[] R,  double[] X, double[] N, int[] queueN, int[] nservs, double[] S, double[] Q){
+	public void setAll(SimulationType simType, String[] types, int[] genJobs, String[] algo, String[] arrivalD, double[] lamb, String[] serviceD, double[] R,  double[] X, double[] N, int[] queueN, int[] nservs, double[] S, double[] Q){
 		type = simType;
 
+		typeOfResult = Arrays.copyOf(types, types.length);
+		generatedJobs = Arrays.copyOf(genJobs, genJobs.length);
 		algorithms = Arrays.copyOf(algo, algo.length);
 		arrivalDistibutions = Arrays.copyOf(arrivalD, arrivalD.length);
 		lambdas = Arrays.copyOf(lamb, lamb.length);
@@ -84,8 +92,17 @@ public class ResultStructure{
 	}
 
     /* get methods */
+	
 	public SimulationType getPreviousSimulationType(){
 		return type;
+	}
+
+	public String[] getTypeOfResult(){
+		return typeOfResult;
+	}
+
+	public int[] getGeneratedJobs(){
+		return generatedJobs;
 	}
 
     public String[] getAlgorithms() {
@@ -126,10 +143,6 @@ public class ResultStructure{
 
     public double[] getThoughputs() {
         return thoughputs;
-    }
-
-    public SimulationType getType() {
-        return type;
     }
 
     public double[] getnCustomers() {

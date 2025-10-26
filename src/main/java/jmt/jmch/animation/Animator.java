@@ -27,6 +27,7 @@ public class Animator extends Thread{
 	private boolean isPaused = false;
 	private long startPause;
 
+
 	//number of millisecs between two frames of the animation
 	private long sleepTime;
 
@@ -40,7 +41,7 @@ public class Animator extends Thread{
 	 * @param a: Animation to be updated by this animator.{@see animation}
 	 */
 	public Animator(Animation a) {
-		this(30, a);
+		this(60, a);
 	}
 
 	/**Creates a new instance of Animator with explicit definition of framerate.
@@ -57,8 +58,8 @@ public class Animator extends Thread{
 	@Override
 	public void start() {
 		if(!isPaused) {
-			super.start();
 			isWorking = true;
+			super.start();
 		}
 		else {
 			restart();
@@ -70,39 +71,38 @@ public class Animator extends Thread{
 		if(!isPaused){
 			isPaused = true;
 			startPause = System.currentTimeMillis();
+			animation.updateAnimResults();
 		}	
 	}
 	
 	/** Restart the animation, update also the components of animation to let them know the animation was paused for a certain period of time */
 	public void restart() {
+		long pausedTime = System.currentTimeMillis()- startPause;
+		animation.updatePause(pausedTime);
 		isPaused = false;
-		animation.updatePause(System.currentTimeMillis()-startPause);
 	}
 
 	/**Performs update of the handled animation as far as terminate() method has not been called.*/
 	@Override
 	public void run() {
-		synchronized (mutex) {
-			while (isWorking) {
-					try {
-						mutex.wait(sleepTime);
-					} catch (InterruptedException e) {
-						this.terminate();
-					}
-					
-					if (isWorking && !isPaused) {
-						animation.refresh();
-					}
+		while (isWorking) {
+			try {
+				Thread.sleep(sleepTime);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+				break;
+			}
+	
+			if (isWorking && !isPaused) {
+				animation.refresh();
 			}
 		}
 	}
 
 	/**Terminates current animation*/
 	public void terminate() {
+		//animation.updateAnimResults();
 		isWorking = false;
-		synchronized (mutex) {
-			mutex.notifyAll();
-		}
 	}
 
 	/** To know if the animator is paused */

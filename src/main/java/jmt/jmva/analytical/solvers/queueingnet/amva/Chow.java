@@ -1,7 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
- * This class implements the AQL (Aggregated Queue Length) algorithm for solving multi-closed models
+ * This class implements the AQL (Aggregated Queue Length) algorithm for solving
+ * multi-closed models
  * 
  * @author Abhimanyu Chugh
  *
