@@ -1,8 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration;
-
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration;
 
 import java.math.BigDecimal;
+
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 
 /**
  * Abstract class that implements the Function interface. Requires that dimensionality and the location of

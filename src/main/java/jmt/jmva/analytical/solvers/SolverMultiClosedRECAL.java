@@ -17,18 +17,20 @@
 
 package jmt.jmva.analytical.solvers;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.RECALSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RECALSolver;
 
 /**
  * This class implements the API to allow use by other applications. One can
- * define the queueing network model details, call the solvers transparently and,
- * afterwards, read the results.
+ * define the queueing network model details, call the solvers transparently
+ * and, afterwards, read the results.
  *
  * @author Michail Makaronidis, 2010
  */
@@ -50,10 +52,12 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	 */
 	protected int nThreads;
 
-	/** Creates new MoMSolverDispatcher
-	 *  @param  stations    number of service centers
-	 *  @param  classes     number of classes
-	 *  @param  population  array of class populations
+	/**
+	 * Creates new MoMSolverDispatcher
+	 * 
+	 * @param stations   number of service centers
+	 * @param classes    number of classes
+	 * @param population array of class populations
 	 */
 	public SolverMultiClosedRECAL(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -62,13 +66,15 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		this.population = population;
 	}
 
-	/** Initializes the solver with the system parameters.
-	 * It must be called before trying to solve the model.
-	 *  @param  t   array of the types (LD or LI) of service centers
-	 *  @param  s   matrix of service times of the service centers
-	 *  @param  v   array of visits to the service centers
-	 *  @param  nThr The number of threads the solver should use
-	 *  @return True if the operation is completed with success
+	/**
+	 * Initializes the solver with the system parameters. It must be called before
+	 * trying to solve the model.
+	 * 
+	 * @param t    array of the types (LD or LI) of service centers
+	 * @param s    matrix of service times of the service centers
+	 * @param v    array of visits to the service centers
+	 * @param nThr The number of threads the solver should use
+	 * @return True if the operation is completed with success
 	 */
 	public boolean input(int[] t, double[][][] s, double[][] v, int nThr) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
@@ -123,8 +129,10 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 			// Now D contains service demands
 
 			// Create queue multiplicities array
-			// All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
-			// If this array is instantiated properly, the rest of the MoMSolver can support them
+			// All multiplicities are set to 1, as JMT does not seem to use queue
+			// multiplicities
+			// If this array is instantiated properly, the rest of the MoMSolver can support
+			// them
 			Integer[] multiplicities = new Integer[M];
 			for (int m = 0; m < M; m++) {
 				multiplicities[m] = 1;
@@ -147,13 +155,13 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 	}
 
 	/**
-	 * Solves the system through the MoM algorithm.
-	 * input(...) must have been called first.
+	 * Solves the system through the MoM algorithm. input(...) must have been called
+	 * first.
 	 *
 	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException 
-	 * @throws InconsistentLinearSystemException 
-	 * @throws OperationNotSupportedException 
+	 * @throws BTFMatrixErrorException
+	 * @throws InconsistentLinearSystemException
+	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {
@@ -188,8 +196,8 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 				for (int r = 0; r < classes; r++) {
 					throughput[m][r] = clsThroughput[r] * visits[m][r] * scale;
 					utilization[m][r] = throughput[m][r] * servTime[m][r][0] / scale; // Umc=Xmc*Smc
-					residenceTime[m][r] = queueLen[m-shift][r] / clsThroughput[r] / scale;
-					clsQueueLen[m][r] = queueLen[m-shift][r];
+					residenceTime[m][r] = queueLen[m - shift][r] / clsThroughput[r] / scale;
+					clsQueueLen[m][r] = queueLen[m - shift][r];
 				}
 			} else if (qnm.getQueueType(m) == QueueType.DELAY) {
 				shift = shift + 1;
@@ -209,22 +217,22 @@ public class SolverMultiClosedRECAL extends SolverMulti {
 		}
 		queueLen = clsQueueLen;
 
-		//NEW
-		//@author Stefano Omini
-		//compute system parameters
+		// NEW
+		// @author Stefano Omini
+		// compute system parameters
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//for (c = 0; c < classes; c++) {
-		//	for (m = 0; m < stations; m++) {
-		//		clsRespTime[c] += residenceTime[m][c];
-		//		sysNumJobs += queueLen[m][c];
-		//	}
-		//	sysResponseTime += clsRespTime[c];
-		//}
+		// for (c = 0; c < classes; c++) {
+		// for (m = 0; m < stations; m++) {
+		// clsRespTime[c] += residenceTime[m][c];
+		// sysNumJobs += queueLen[m][c];
+		// }
+		// sysResponseTime += clsRespTime[c];
+		// }
 
 		sysThroughput = sysNumJobs / sysResponseTime;
-		//end NEW
+		// end NEW
 	}
 
 	@Override

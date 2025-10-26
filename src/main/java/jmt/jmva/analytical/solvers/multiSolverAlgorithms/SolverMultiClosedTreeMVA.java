@@ -1,13 +1,15 @@
 package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.jmva.analytical.solvers.SolverMulti;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel.QueueType;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva.TreeMVASolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva.TreeMVASolver;
 
 /**
  * Created by gcasale on 15 Aug 2018.

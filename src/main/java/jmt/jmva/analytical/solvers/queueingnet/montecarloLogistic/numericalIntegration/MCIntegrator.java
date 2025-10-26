@@ -1,13 +1,17 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration;
 
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.distributions.MultiVariateRealDistribution;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-
-import java.math.MathContext;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions.MultiVariateRealDistribution;
 
 /**
  * Monte Carlo Integrator object. Takes in a function, a distribution, and a maximum number of samples to

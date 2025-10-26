@@ -1,8 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.treeConvolution;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
 import jmt.jmva.analytical.solvers.utilities.Timer;
 
 /**

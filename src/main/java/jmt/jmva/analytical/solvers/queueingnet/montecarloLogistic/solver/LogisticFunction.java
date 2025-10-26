@@ -1,20 +1,20 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
-import cern.colt.matrix.DoubleMatrix2D;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import cern.colt.matrix.linalg.Algebra;
 import cern.jet.math.Functions;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.Function;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
-
-import java.math.BigDecimal;
-import java.math.MathContext;
-
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.check_inputs;
 
 /**
  * Extends the SafeFunction abstract class. This is the logistic function under the

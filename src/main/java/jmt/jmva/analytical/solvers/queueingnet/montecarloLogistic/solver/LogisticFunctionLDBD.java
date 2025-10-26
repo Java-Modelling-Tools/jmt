@@ -1,13 +1,17 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
-import cern.colt.matrix.*;
-import cern.colt.matrix.impl.DenseDoubleMatrix1D;
-import cern.colt.matrix.impl.DenseDoubleMatrix2D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.Function;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils;
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.checkMatrixNonnegative;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ListIterator;
+
 import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
@@ -17,17 +21,17 @@ import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
 import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.ListIterator;
-
-import static jmt.engine.math.GammaFun.lnGamma;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.checkMatrixNonnegative;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.check_inputs;
-import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
-import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
+import cern.colt.matrix.DoubleFactory1D;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
 
 /**
  * Implementation of the Multiserver Logistic Function, as given in Ong 2018:

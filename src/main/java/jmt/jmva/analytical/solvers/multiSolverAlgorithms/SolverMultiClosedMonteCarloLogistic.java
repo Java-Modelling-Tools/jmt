@@ -3,13 +3,13 @@ package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 import jmt.jmva.analytical.solvers.SolverMulti;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver.MonteCarloLogisticSolver;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.MonteCarloLogisticSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.arrays2qnm;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.arrays2qnm;
 
 /**
  * Solves a multiclass closed model, using Monte Carlo Logistic algorithm.

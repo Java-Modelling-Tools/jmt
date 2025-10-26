@@ -1,4 +1,7 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.distributions;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.distributions;
+
+import java.util.Arrays;
+import java.util.Date;
 
 import cern.colt.matrix.DoubleMatrix1D;
 import cern.colt.matrix.DoubleMatrix2D;
@@ -11,11 +14,9 @@ import cern.jet.random.engine.MersenneTwister64;
 import jmt.engine.math.Gamma;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 
-import java.util.Arrays;
-import java.util.Date;
-
 /**
- * Multivariate student t. Implemented with an embedded MVG and a chi-squared multiplier
+ * Multivariate student t. Implemented with an embedded MVG and a chi-squared
+ * multiplier
  */
 public class MultiVariateStudentT implements MultiVariateRealDistribution {
 
@@ -30,11 +31,13 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 	private MultiVariateGaussian MVG;
 
 	/**
-	 * Multivariate student t constructor. Covariance matrix needs to be square. Length of mean vector needs
-	 * to be the same size as of covariance. degree of freedom needs to be positive integer
+	 * Multivariate student t constructor. Covariance matrix needs to be square.
+	 * Length of mean vector needs to be the same size as of covariance. degree of
+	 * freedom needs to be positive integer
+	 * 
 	 * @param mean double vector representing the mean
-	 * @param cov covariance matrix
-	 * @param df degree of freedom
+	 * @param cov  covariance matrix
+	 * @param df   degree of freedom
 	 * @param seed integer seed
 	 * @throws InternalErrorException
 	 */
@@ -47,24 +50,25 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 
 		this.ndim = this.mean.size();
 		Date date = new Date();
-		this.ScalarX2 = new ChiSquare(df,  new MersenneTwister64(date.hashCode() + seed));
+		this.ScalarX2 = new ChiSquare(df, new MersenneTwister64(date.hashCode() + seed));
 		A = new Algebra();
 
 		this.cov = new DenseDoubleMatrix2D(cov);
 		this.covInv = this.A.inverse(this.cov);
 
 		this.NC = this.A.det(this.cov);
-		this.NC *= Math.pow(Math.PI*df, ndim);
+		this.NC *= Math.pow(Math.PI * df, ndim);
 		this.NC = Math.pow(this.NC, 0.5);
-		this.NC *= Gamma.gamma(0.5*df);
-		this.NC /= Gamma.gamma(0.5*(df+ndim));
+		this.NC *= Gamma.gamma(0.5 * df);
+		this.NC /= Gamma.gamma(0.5 * (df + ndim));
 	}
 
 	/**
 	 * Constructor with default seed = 0
+	 * 
 	 * @param mean mean vector
-	 * @param cov covariance square array
-	 * @param df degree of freedom
+	 * @param cov  covariance square array
+	 * @param df   degree of freedom
 	 * @throws InternalErrorException
 	 */
 	public MultiVariateStudentT(double[] mean, double[][] cov, int df) throws InternalErrorException {
@@ -73,6 +77,7 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 
 	/**
 	 * Copy constructor with default seed = 0
+	 * 
 	 * @param MVST
 	 * @throws InternalErrorException
 	 */
@@ -82,6 +87,7 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 
 	/**
 	 * Copy constructor with specified seed
+	 * 
 	 * @param MVST
 	 * @param seed
 	 * @throws InternalErrorException
@@ -103,7 +109,7 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 	public double[] getSample() {
 		DoubleMatrix1D x = new DenseDoubleMatrix1D(MVG.getSample());
 		double u = this.ScalarX2.nextDouble();
-		u = u/df;
+		u = u / df;
 		u = Math.sqrt(u);
 		x.assign(Functions.div(u));
 		x.assign(this.mean, Functions.plus);
@@ -127,13 +133,13 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 	}
 
 	public double pdf(double[] point) throws InternalErrorException {
-		if (ndim==0)
+		if (ndim == 0)
 			return 1.0;
 
 		DoubleMatrix1D x = new DenseDoubleMatrix1D(point);
 
-		for (int i=0; i<this.ndim; i++) {
-			x.set(i, x.get(i)-this.mean.get(i));
+		for (int i = 0; i < this.ndim; i++) {
+			x.set(i, x.get(i) - this.mean.get(i));
 		}
 
 		if (x.size() != this.ndim)
@@ -141,10 +147,10 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 
 		DoubleMatrix1D e = this.A.mult(this.covInv, x);
 
-		double p = this.A.mult(x,e);
+		double p = this.A.mult(x, e);
 		p /= df;
 		p += 1;
-		p = Math.pow(p, -.5*(df+ndim));
+		p = Math.pow(p, -.5 * (df + ndim));
 		p /= this.NC;
 		return p;
 	}

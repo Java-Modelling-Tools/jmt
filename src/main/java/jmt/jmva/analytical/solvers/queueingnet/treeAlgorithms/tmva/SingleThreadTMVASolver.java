@@ -1,10 +1,10 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.tmva;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.tmva;
 
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Config;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreeTraverser;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreeTraverser;
 
 /**
  * Single-threaded TMVA solver implementation.

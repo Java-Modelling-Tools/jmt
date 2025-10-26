@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import javax.naming.OperationNotSupportedException;
 

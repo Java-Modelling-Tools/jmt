@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import jmt.jmva.analytical.solvers.basis.BTFCoMoMBasis;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;

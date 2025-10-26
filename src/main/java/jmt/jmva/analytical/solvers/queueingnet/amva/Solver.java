@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
  * Solver is an abstract class, which contains the methods to

@@ -15,7 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet;
+package jmt.jmva.analytical.solvers.queueingnet;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import javax.naming.OperationNotSupportedException;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
@@ -31,13 +39,6 @@ import jmt.jmva.analytical.solvers.utilities.CanonicalMultiplicitiesVectorCalcul
 import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
 import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 import jmt.jmva.analytical.solvers.utilities.Timer;
-
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import javax.naming.OperationNotSupportedException;
 
 /**
  * This class implements the MoMSolver object, which computes the

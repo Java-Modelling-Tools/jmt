@@ -1,8 +1,8 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
-
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
 import java.math.MathContext;
+
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
 
 /**
  * Additive logistic transformed version of the Logistic Core.

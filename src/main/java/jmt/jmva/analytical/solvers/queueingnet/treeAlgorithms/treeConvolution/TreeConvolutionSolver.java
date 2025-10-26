@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.treeConvolution;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -25,13 +25,13 @@ import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ClassCoverageUtils;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.ComplexityEvaluator;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Config;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePlanter;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePrinter;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ClassCoverageUtils;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.ComplexityEvaluator;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePrinter;
 
 /**
  * Class that implements the Tree Convolution algorithm outlined in the paper

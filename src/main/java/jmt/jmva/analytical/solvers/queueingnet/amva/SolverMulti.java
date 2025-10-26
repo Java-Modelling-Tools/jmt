@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 import java.io.PrintWriter;
 

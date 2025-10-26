@@ -1,13 +1,15 @@
 package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.engine.random.engine.RandomEngine;
 import jmt.jmva.analytical.solvers.SolverMulti;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
-import jmt.jmva.analytical.solvers.queueingNet.RGFSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.RGFSolver;
 
 /**
  * Solves a multiclass closed model, using RGF algorithm.

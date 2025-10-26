@@ -1,13 +1,17 @@
-package jmt.jmva.analytical.solvers.queueingNet;
-
-import jmt.jmva.analytical.solvers.dataStructures.*;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
-import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
+package jmt.jmva.analytical.solvers.queueingnet;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+
+import jmt.jmva.analytical.solvers.dataStructures.BigRational;
+import jmt.jmva.analytical.solvers.dataStructures.EnhancedVector;
+import jmt.jmva.analytical.solvers.dataStructures.MultiplicitiesVector;
+import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
+import jmt.jmva.analytical.solvers.dataStructures.QNModel;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.utilities.MemoryUsageUtils;
+import jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions;
 
 public class RGFSolver extends QNSolver {
 

@@ -1,13 +1,15 @@
 package jmt.jmva.analytical.solvers.multiSolverAlgorithms;
 
+import javax.naming.OperationNotSupportedException;
+
 import jmt.engine.random.engine.RandomEngine;
 import jmt.jmva.analytical.solvers.SolverMulti;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
 import jmt.jmva.analytical.solvers.exceptions.BTFMatrixErrorException;
 import jmt.jmva.analytical.solvers.exceptions.InconsistentLinearSystemException;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.MonteCarloSolver;
-import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
+import jmt.jmva.analytical.solvers.queueingnet.MonteCarloSolver;
+import jmt.jmva.analytical.solvers.queueingnet.QNSolver;
 
 /**
  * Created by ellasu on 25 Jun 2016.
@@ -15,7 +17,7 @@ import jmt.jmva.analytical.solvers.queueingNet.QNSolver;
 public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 	public static final int DEFAULT_MAX_SAMPLES = 1000;
-	//Array containing population for each class
+	// Array containing population for each class
 	protected int[] population;
 	protected Integer scale = 1000000;
 
@@ -28,10 +30,12 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
 	private RandomEngine engine = RandomEngine.makeDefault();
 
-	/** Creates new SolverMultiClosedMonteCarlo
-	 *  @param  stations    number of service centers
-	 *  @param  classes     number of classes
-	 *  @param  population  array of class populations
+	/**
+	 * Creates new SolverMultiClosedMonteCarlo
+	 * 
+	 * @param stations   number of service centers
+	 * @param classes    number of classes
+	 * @param population array of class populations
 	 */
 	public SolverMultiClosedMonteCarlo(int classes, int stations, int[] population) {
 		super(classes, stations);
@@ -40,12 +44,14 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 		this.population = population;
 	}
 
-	/** Initializes the solver with the system parameters.
-	 * It must be called before trying to solve the model.
-	 *  @param  t   array of the types (LD or LI) of service centers
-	 *  @param  s   matrix of service times of the service centers
-	 *  @param  v   array of visits to the service centers
-	 *  @return True if the operation is completed with success
+	/**
+	 * Initializes the solver with the system parameters. It must be called before
+	 * trying to solve the model.
+	 * 
+	 * @param t array of the types (LD or LI) of service centers
+	 * @param s matrix of service times of the service centers
+	 * @param v array of visits to the service centers
+	 * @return True if the operation is completed with success
 	 */
 	public boolean input(int[] t, double[][][] s, double[][] v) {
 		if ((t.length > stations) || (s.length > stations) || (v.length > stations)) {
@@ -100,7 +106,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 			// Now D contains service demands
 
 			// Create queue multiplicities array
-			// All multiplicities are set to 1, as JMT does not seem to use queue multiplicities
+			// All multiplicities are set to 1, as JMT does not seem to use queue
+			// multiplicities
 
 			Integer[] multiplicities = new Integer[M];
 			for (int m = 0; m < M; m++) {
@@ -124,8 +131,8 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 	}
 
 	/**
-	 * Solves the system through the MonteCarlo algorithm.
-	 * input(...) must have been called first.
+	 * Solves the system through the MonteCarlo algorithm. input(...) must have been
+	 * called first.
 	 *
 	 * @throws InternalErrorException
 	 * @throws BTFMatrixErrorException
@@ -139,21 +146,23 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 			c = new MonteCarloSolver(qnm, tolerance, maxSamples);
 			c.computeNormalisingConstant();
 		} catch (Exception e) {
-			double D[][]=new double[qnm.M][qnm.R];
-			int T[]=new int[qnm.M];
-			double Z[]=new double[qnm.R];
-			Integer mi[]=new Integer[qnm.M];
-			Integer N[]=new Integer[qnm.R];
+			double D[][] = new double[qnm.M][qnm.R];
+			int T[] = new int[qnm.M];
+			double Z[] = new double[qnm.R];
+			Integer mi[] = new Integer[qnm.M];
+			Integer N[] = new Integer[qnm.R];
 			Integer pert = 1;
-			Integer newscale = scale  * pert;
-			for (int r=0; r<qnm.R; r++) {
+			Integer newscale = scale * pert;
+			for (int r = 0; r < qnm.R; r++) {
 				Z[r] = qnm.getDelay(r) * pert;
 				N[r] = qnm.getPopulationVector().get(r);
-				for (int i=0; i<qnm.M; i++) {
+				for (int i = 0; i < qnm.M; i++) {
 					T[i] = qnm.getQueueType(i).ordinal();
 					mi[i] = qnm.getMultiplicitiesVector().get(i);
 					// Replaced Math.random
-					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1) + (Integer) (int) Math.round((int)100*engine.raw2())); // i is a perturbation of 10^-6 magnitude
+					D[i][r] = (qnm.getDemand(i, r) * pert + (Integer) (i + 1)
+							+ (Integer) (int) Math.round((int) 100 * engine.raw2())); // i is a perturbation of 10^-6
+																						// magnitude
 				}
 			}
 			scale = newscale;
@@ -200,22 +209,22 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 			}
 		}
 
-		//NEW
-		//@author Stefano Omini
-		//compute system parameters
+		// NEW
+		// @author Stefano Omini
+		// compute system parameters
 		sysResponseTime = 0;
 		sysNumJobs = 0;
 
-		//for (c = 0; c < classes; c++) {
-		//	for (m = 0; m < stations; m++) {
-		//		clsRespTime[c] += residenceTime[m][c];
-		//		sysNumJobs += queueLen[m][c];
-		//	}
-		//	sysResponseTime += clsRespTime[c];
-		//}
+		// for (c = 0; c < classes; c++) {
+		// for (m = 0; m < stations; m++) {
+		// clsRespTime[c] += residenceTime[m][c];
+		// sysNumJobs += queueLen[m][c];
+		// }
+		// sysResponseTime += clsRespTime[c];
+		// }
 
 		sysThroughput = sysNumJobs / sysResponseTime;
-		//end NEW
+		// end NEW
 	}
 
 	public void setMaxSamples(int maxSamples) {

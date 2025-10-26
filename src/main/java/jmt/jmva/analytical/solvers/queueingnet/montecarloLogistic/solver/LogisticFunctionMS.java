@@ -1,14 +1,9 @@
-package jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.solver;
+package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver;
 
-import cern.colt.matrix.*;
-import cern.colt.matrix.impl.DenseDoubleMatrix1D;
-import cern.colt.matrix.impl.DenseDoubleMatrix2D;
-import cern.colt.matrix.impl.DenseDoubleMatrix3D;
-import cern.colt.matrix.linalg.Algebra;
-import cern.jet.math.Functions;
-import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.Function;
-import jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.numericalIntegration.SafeFunction;
+import static jmt.engine.math.GammaFun.lnGamma;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.checkMatrixNonnegative;
+import static jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.Utils.check_inputs;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -16,10 +11,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.ListIterator;
 
-import static jmt.engine.math.GammaFun.lnGamma;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.checkMatrixNonnegative;
-import static jmt.jmva.analytical.solvers.queueingNet.monteCarloLogistic.Utils.check_inputs;
-import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.exp;
+import cern.colt.matrix.DoubleFactory1D;
+import cern.colt.matrix.DoubleFactory2D;
+import cern.colt.matrix.DoubleMatrix1D;
+import cern.colt.matrix.DoubleMatrix2D;
+import cern.colt.matrix.DoubleMatrix3D;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import cern.colt.matrix.impl.DenseDoubleMatrix3D;
+import cern.colt.matrix.linalg.Algebra;
+import cern.jet.math.Functions;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.Function;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.numericalIntegration.SafeFunction;
 
 public class LogisticFunctionMS extends SafeFunction {
 

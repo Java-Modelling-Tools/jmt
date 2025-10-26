@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
  * This class implements the Linearizer and De Souza-Muntz Linearizer algorithms for solving multi-closed models

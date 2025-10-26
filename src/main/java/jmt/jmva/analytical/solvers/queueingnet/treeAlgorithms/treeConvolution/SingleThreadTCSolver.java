@@ -1,15 +1,15 @@
-package jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.treeConvolution;
+package jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.treeConvolution;
 
 import java.math.BigDecimal;
 
 import jmt.jmva.analytical.solvers.dataStructures.BigRational;
 import jmt.jmva.analytical.solvers.dataStructures.PopulationVector;
 import jmt.jmva.analytical.solvers.dataStructures.QNModel;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Config;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Node;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.Printer;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreePlanter;
-import jmt.jmva.analytical.solvers.queueingNet.treeAlgorithms.TreeTraverser;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Config;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Node;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.Printer;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreePlanter;
+import jmt.jmva.analytical.solvers.queueingnet.treeAlgorithms.TreeTraverser;
 
 /**
  * Tree Convolution solver that uses a single thread.

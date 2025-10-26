@@ -1,4 +1,4 @@
-package jmt.jmva.analytical.solvers.queueingNet.amva;
+package jmt.jmva.analytical.solvers.queueingnet.amva;
 
 /**
  * This class implements the Bard-Schweitzer algorithm for solving multi-closed models
