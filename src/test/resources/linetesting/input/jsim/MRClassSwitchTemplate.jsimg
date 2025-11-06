@@ -1,568 +1,701 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="MRClassSwitchTemplate.jsimg" timestamp="Sun Apr 03 08:39:31 PDT 2016" xsi:noNamespaceSchemaLocation="Archive.xsd">
-<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="/home/user/JMT/" logReplaceMode="0" maxSamples="10000000" name="MRClassSwitchTemplate.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
-<userClass customers="5" name="ClassA" priority="0" referenceSource="Delay 1" type="closed"/>
-<userClass customers="0" name="ClassB" priority="1" referenceSource="Delay 1" type="closed"/>
-<node name="Fork 1">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="ServiceTunnel"/>
-<section className="Fork">
-<parameter classPath="java.lang.Integer" name="jobsPerLink">
-<value>4</value>
-</parameter>
-<parameter classPath="java.lang.Integer" name="block">
-<value>-1</value>
-</parameter>
-<parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
-<value>true</value>
-</parameter>
-<parameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategy" name="ForkStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ClassSwitchFork" name="Class Switch">
-<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.ClassJobNum" name="ClassJobNumArray">
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ClassJobNum" name="OutPathEntry">
-<subParameter classPath="java.lang.String" name="stationName">
-<value>Queue 1</value>
-</subParameter>
-<subParameter array="true" classPath="java.lang.String" name="Classes">
-<subParameter classPath="java.lang.String" name="class">
-<value>ClassA</value>
-</subParameter>
-<subParameter classPath="java.lang.String" name="class">
-<value>ClassB</value>
-</subParameter>
-</subParameter>
-<subParameter array="true" classPath="java.lang.String" name="Numbers">
-<subParameter classPath="java.lang.String" name="numberOfJobs">
-<value>1</value>
-</subParameter>
-<subParameter classPath="java.lang.String" name="numberOfJobs">
-<value>0</value>
-</subParameter>
-</subParameter>
-</subParameter>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
-<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray"/>
-</subParameter>
-</parameter>
-</section>
-</node>
-<node name="Join 1">
-<section className="Join">
-<parameter array="true" classPath="jmt.engine.NetStrategies.JoinStrategy" name="JoinStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
-<subParameter classPath="java.lang.Integer" name="numRequired">
-<value>-1</value>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
-<subParameter classPath="java.lang.Integer" name="numRequired">
-<value>-1</value>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="ServiceTunnel"/>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="Delay 1">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="Delay">
-<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
-<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="t">
-<value>10000.0</value>
-</subParameter>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
-<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="t">
-<value>1.0</value>
-</subParameter>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="Queue 1">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="Server">
-<parameter classPath="java.lang.Integer" name="maxJobs">
-<value>20</value>
-</parameter>
-<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Integer" name="numberOfVisits">
-<value>1</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Integer" name="numberOfVisits">
-<value>1</value>
-</subParameter>
-</parameter>
-<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.Replayer" name="Replayer"/>
-<subParameter classPath="jmt.engine.random.ReplayerPar" name="distrPar">
-<subParameter classPath="java.lang.String" name="fileName">
-<value>/home/user/Desktop/task-durations/capacity-tasks/R2_5_20/Map 1.txt</value>
-</subParameter>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
-<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="t">
-<value>1.5</value>
-</subParameter>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="CS1">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="ClassSwitch">
-<parameter array="true" classPath="java.lang.Object" name="matrix">
-<refClass>ClassA</refClass>
-<subParameter array="true" classPath="java.lang.Float" name="row">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>0.0</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>1.0</value>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter array="true" classPath="java.lang.Float" name="row">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>1.0</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>0.0</value>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="Fork2">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="ServiceTunnel"/>
-<section className="Fork">
-<parameter classPath="java.lang.Integer" name="jobsPerLink">
-<value>4</value>
-</parameter>
-<parameter classPath="java.lang.Integer" name="block">
-<value>-1</value>
-</parameter>
-<parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
-<value>true</value>
-</parameter>
-<parameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategy" name="ForkStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
-<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
-<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
-<subParameter classPath="java.lang.String" name="stationName">
-<value>Queue 2</value>
-</subParameter>
-<subParameter classPath="java.lang.Double" name="probability">
-<value>1.0</value>
-</subParameter>
-</subParameter>
-<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
-<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
-<subParameter classPath="java.lang.String" name="numbers">
-<value>1</value>
-</subParameter>
-<subParameter classPath="java.lang.Double" name="probability">
-<value>1.0</value>
-</subParameter>
-</subParameter>
-</subParameter>
-</subParameter>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
-<subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray"/>
-</subParameter>
-</parameter>
-</section>
-</node>
-<node name="Queue 2">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="Server">
-<parameter classPath="java.lang.Integer" name="maxJobs">
-<value>20</value>
-</parameter>
-<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Integer" name="numberOfVisits">
-<value>1</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Integer" name="numberOfVisits">
-<value>1</value>
-</subParameter>
-</parameter>
-<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
-<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
-<subParameter classPath="java.lang.Double" name="t">
-<value>3.0</value>
-</subParameter>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
-<subParameter classPath="jmt.engine.random.Replayer" name="Replayer"/>
-<subParameter classPath="jmt.engine.random.ReplayerPar" name="distrPar">
-<subParameter classPath="java.lang.String" name="fileName">
-<value>/home/user/Desktop/task-durations/capacity-tasks/R2_5_20/rs 2.txt</value>
-</subParameter>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="Join2">
-<section className="Join">
-<parameter array="true" classPath="jmt.engine.NetStrategies.JoinStrategy" name="JoinStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
-<subParameter classPath="java.lang.Integer" name="numRequired">
-<value>-1</value>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
-<subParameter classPath="java.lang.Integer" name="numRequired">
-<value>-1</value>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="ServiceTunnel"/>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<node name="CS2">
-<section className="Queue">
-<parameter classPath="java.lang.Integer" name="size">
-<value>-1</value>
-</parameter>
-<parameter array="true" classPath="java.lang.String" name="dropStrategies">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.String" name="dropStrategy">
-<value>drop</value>
-</subParameter>
-</parameter>
-<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
-</parameter>
-</section>
-<section className="ClassSwitch">
-<parameter array="true" classPath="java.lang.Object" name="matrix">
-<refClass>ClassA</refClass>
-<subParameter array="true" classPath="java.lang.Float" name="row">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>0.0</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>1.0</value>
-</subParameter>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter array="true" classPath="java.lang.Float" name="row">
-<refClass>ClassA</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>1.0</value>
-</subParameter>
-<refClass>ClassB</refClass>
-<subParameter classPath="java.lang.Float" name="cell">
-<value>0.0</value>
-</subParameter>
-</subParameter>
-</parameter>
-</section>
-<section className="Router">
-<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
-<refClass>ClassA</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-<refClass>ClassB</refClass>
-<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
-</parameter>
-</section>
-</node>
-<measure alpha="0.01" name="Delay 1_ClassA_Throughput" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="ClassA" type="Throughput" verbose="false"/>
-<connection source="Fork 1" target="Queue 1"/>
-<connection source="Join 1" target="CS1"/>
-<connection source="Delay 1" target="Fork 1"/>
-<connection source="Queue 1" target="Join 1"/>
-<connection source="CS1" target="Fork2"/>
-<connection source="Fork2" target="Queue 2"/>
-<connection source="Queue 2" target="Join2"/>
-<connection source="Join2" target="CS2"/>
-<connection source="CS2" target="Delay 1"/>
-<blockingRegion name="FCRegion0" type="default">
-<regionNode nodeName="Queue 1"/>
-<regionNode nodeName="Queue 2"/>
-<globalConstraint maxJobs="20"/>
-<globalMemoryConstraint maxMemory="-1"/>
-<classConstraint jobClass="ClassA" maxJobsPerClass="20"/>
-<classConstraint jobClass="ClassB" maxJobsPerClass="20"/>
-<dropRules dropThisClass="false" jobClass="ClassA"/>
-<dropRules dropThisClass="false" jobClass="ClassB"/>
-<classMemorySize jobClass="ClassA" size="1"/>
-<classMemorySize jobClass="ClassB" size="1"/>
-<classWeight jobClass="ClassA" weight="1"/>
-<classWeight jobClass="ClassB" weight="1"/>
-</blockingRegion>
-<preload>
-<stationPopulations stationName="Delay 1">
-<classPopulation population="5" refClass="ClassA"/>
-</stationPopulations>
-</preload>
-</sim>
-<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
-<userClass color="#FF0000FF" name="ClassA"/>
-<userClass color="#FFFF0000" name="ClassB"/>
-<station name="Fork 1">
-<position rotate="false" x="165.0" y="94.0"/>
-</station>
-<station name="Join 1">
-<position rotate="false" x="346.0" y="77.0"/>
-</station>
-<station name="Delay 1">
-<position rotate="false" x="52.0" y="61.0"/>
-</station>
-<station name="Queue 1">
-<position rotate="false" x="219.0" y="232.0"/>
-</station>
-<station name="CS1">
-<position rotate="false" x="438.0" y="52.0"/>
-</station>
-<station name="Fork2">
-<position rotate="false" x="514.0" y="73.0"/>
-</station>
-<station name="Queue 2">
-<position rotate="false" x="602.0" y="244.0"/>
-</station>
-<station name="Join2">
-<position rotate="false" x="732.0" y="80.0"/>
-</station>
-<station name="CS2">
-<position rotate="false" x="821.0" y="80.0"/>
-</station>
-</jmodel>
-<results logDecimalSeparator="." logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-<measure alpha="0.99" analyzedSamples="51200" discardedSamples="1605" finalValue="4.411163413449179E-5" name="Delay 1_ClassA_Throughput" nodeType="station" precision="0.03" referenceClass="ClassA" referenceStation="Delay 1" state="1" type="3">
-<sample lastIntervalAvgValue="4.412610436449282E-5" meanValue="4.412610436449282E-5" simulationTime="1.73593389E8"/>
-<sample lastIntervalAvgValue="4.4099372599271416E-5" lowerBound="4.2867850970292226E-5" meanValue="4.4111996803353975E-5" simulationTime="6.19359368E8" upperBound="4.54305184685922E-5"/>
-<sample lastIntervalAvgValue="4.4113512098999656E-5" lowerBound="4.2867850970292226E-5" meanValue="4.4111996803353975E-5" simulationTime="1.115352522E9" upperBound="4.54305184685922E-5"/>
-<sample lastIntervalAvgValue="4.406486411523489E-5" lowerBound="4.355574286239276E-5" meanValue="4.411163413449179E-5" simulationTime="1.197209123E9" upperBound="4.4681898251843405E-5"/>
-</measure>
-</results>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="MRClassSwitchTemplate.jsimg" timestamp="Wed Nov 05 21:27:16 CET 2025" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="MRClassSwitchTemplate.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass customers="5" name="ClassA" priority="0" referenceSource="Delay 1" softDeadline="0.0" type="closed"/>
+        <userClass customers="0" name="ClassB" priority="1" referenceSource="Delay 1" softDeadline="0.0" type="closed"/>
+        <node name="Fork 1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Fork">
+                <parameter classPath="java.lang.Integer" name="jobsPerLink">
+                    <value>4</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="block">
+                    <value>-1</value>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
+                    <value>true</value>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategy" name="ForkStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ClassSwitchFork" name="Class Switch">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.ClassJobNum" name="ClassJobNumArray">
+                            <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ClassJobNum" name="OutPathEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Queue 1</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.String" name="Classes">
+                                    <subParameter classPath="java.lang.String" name="class">
+                                        <value>ClassA</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.String" name="class">
+                                        <value>ClassB</value>
+                                    </subParameter>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.String" name="Numbers">
+                                    <subParameter classPath="java.lang.String" name="numberOfJobs">
+                                        <value>1</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.String" name="numberOfJobs">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+                                <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+                                    <subParameter classPath="java.lang.String" name="stationName">
+                                        <value>Queue 1</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.Double" name="probability">
+                                        <value>1.0</value>
+                                    </subParameter>
+                                </subParameter>
+                                <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+                                    <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                        <subParameter classPath="java.lang.String" name="numbers">
+                                            <value>1</value>
+                                        </subParameter>
+                                        <subParameter classPath="java.lang.Double" name="probability">
+                                            <value>1.0</value>
+                                        </subParameter>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Join 1">
+            <section className="Join">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.JoinStrategy" name="JoinStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Delay 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>10000.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Queue 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>20</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Replayer" name="Replayer"/>
+                        <subParameter classPath="jmt.engine.random.ReplayerPar" name="distrPar">
+                            <subParameter classPath="java.lang.String" name="fileName">
+                                <value>/home/user/Desktop/task-durations/capacity-tasks/R2_5_20/Map 1.txt</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>1.5</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue 1 - Server Type 1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="CS1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ClassSwitch">
+                <parameter array="true" classPath="java.lang.Object" name="matrix">
+                    <refClass>ClassA</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>ClassA</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                        <refClass>ClassB</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>ClassA</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                        <refClass>ClassB</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Fork2">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Fork">
+                <parameter classPath="java.lang.Integer" name="jobsPerLink">
+                    <value>4</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="block">
+                    <value>-1</value>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
+                    <value>true</value>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategy" name="ForkStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+                                <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+                                    <subParameter classPath="java.lang.String" name="stationName">
+                                        <value>Queue 2</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.Double" name="probability">
+                                        <value>1.0</value>
+                                    </subParameter>
+                                </subParameter>
+                                <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+                                    <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                        <subParameter classPath="java.lang.String" name="numbers">
+                                            <value>1</value>
+                                        </subParameter>
+                                        <subParameter classPath="java.lang.Double" name="probability">
+                                            <value>1.0</value>
+                                        </subParameter>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+                                <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="outUnitProbability">
+                                    <subParameter classPath="java.lang.String" name="stationName">
+                                        <value>Queue 2</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.Double" name="probability">
+                                        <value>1.0</value>
+                                    </subParameter>
+                                </subParameter>
+                                <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="JobsPerLinkDis">
+                                    <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                        <subParameter classPath="java.lang.String" name="numbers">
+                                            <value>1</value>
+                                        </subParameter>
+                                        <subParameter classPath="java.lang.Double" name="probability">
+                                            <value>1.0</value>
+                                        </subParameter>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Queue 2">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Server">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>20</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>3.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Replayer" name="Replayer"/>
+                        <subParameter classPath="jmt.engine.random.ReplayerPar" name="distrPar">
+                            <subParameter classPath="java.lang.String" name="fileName">
+                                <value>/home/user/Desktop/task-durations/capacity-tasks/R2_5_20/rs 2.txt</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue 2 - Server Type 1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Join2">
+            <section className="Join">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.JoinStrategy" name="JoinStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="CS2">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ClassSwitch">
+                <parameter array="true" classPath="java.lang.Object" name="matrix">
+                    <refClass>ClassA</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>ClassA</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                        <refClass>ClassB</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>ClassB</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>ClassA</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                        <refClass>ClassB</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClassA</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>ClassB</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <measure alpha="0.01" name="Delay 1_ClassA_Throughput" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="ClassA" type="Throughput" verbose="false"/>
+        <connection source="Fork 1" target="Queue 1"/>
+        <connection source="Join 1" target="CS1"/>
+        <connection source="Delay 1" target="Fork 1"/>
+        <connection source="Queue 1" target="Join 1"/>
+        <connection source="CS1" target="Fork2"/>
+        <connection source="Fork2" target="Queue 2"/>
+        <connection source="Queue 2" target="Join2"/>
+        <connection source="Join2" target="CS2"/>
+        <connection source="CS2" target="Delay 1"/>
+        <blockingRegion name="FCRegion0" type="default">
+            <regionNode nodeName="Queue 1"/>
+            <regionNode nodeName="Queue 2"/>
+            <globalConstraint maxJobs="20"/>
+            <globalMemoryConstraint maxMemory="-1"/>
+            <classConstraint jobClass="ClassA" maxJobsPerClass="20"/>
+            <classConstraint jobClass="ClassB" maxJobsPerClass="20"/>
+            <classMemoryConstraint jobClass="ClassA" maxMemoryPerClass="-1"/>
+            <classMemoryConstraint jobClass="ClassB" maxMemoryPerClass="-1"/>
+            <dropRules dropThisClass="false" jobClass="ClassA"/>
+            <dropRules dropThisClass="false" jobClass="ClassB"/>
+            <classWeight jobClass="ClassA" weight="1"/>
+            <classWeight jobClass="ClassB" weight="1"/>
+            <classSize jobClass="ClassA" size="1"/>
+            <classSize jobClass="ClassB" size="1"/>
+            <classSoftDeadline jobClass="ClassA" softDeadline="0.0"/>
+            <classSoftDeadline jobClass="ClassB" softDeadline="0.0"/>
+        </blockingRegion>
+        <preload>
+            <stationPopulations stationName="Delay 1">
+                <classPopulation population="5" refClass="ClassA"/>
+            </stationPopulations>
+        </preload>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="ClassA"/>
+        <userClass color="#FFFF0000" name="ClassB"/>
+        <station name="Fork 1">
+            <position angle="0.0" rotate="false" x="165.0" y="94.0"/>
+        </station>
+        <station name="Join 1">
+            <position angle="0.0" rotate="false" x="346.0" y="77.0"/>
+        </station>
+        <station name="Delay 1">
+            <position angle="0.0" rotate="false" x="52.0" y="61.0"/>
+        </station>
+        <station name="Queue 1">
+            <position angle="0.0" rotate="false" x="219.0" y="232.0"/>
+        </station>
+        <station name="CS1">
+            <position angle="0.0" rotate="false" x="438.0" y="52.0"/>
+        </station>
+        <station name="Fork2">
+            <position angle="0.0" rotate="false" x="514.0" y="73.0"/>
+        </station>
+        <station name="Queue 2">
+            <position angle="0.0" rotate="false" x="602.0" y="244.0"/>
+        </station>
+        <station name="Join2">
+            <position angle="0.0" rotate="false" x="732.0" y="80.0"/>
+        </station>
+        <station name="CS2">
+            <position angle="0.0" rotate="false" x="821.0" y="80.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="9" logDecimalSeparator="." logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="5" discardedSamples="0" finalValue="5.0E-4" name="Delay 1_ClassA_Throughput" nodeType="station" precision="0.03" referenceClass="ClassA" referenceStation="Delay 1" state="0" type="5">
+            <sample lastIntervalAvgValue="5.0E-4" meanValue="5.0E-4" simulationTime="10000.0"/>
+        </measure>
+    </results>
 </archive>
