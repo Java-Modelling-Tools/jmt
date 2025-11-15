@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Tu1QueueOnly.jsimg" timestamp="Tue Jul 30 19:49:04 CEST 2024" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Giuseppe Serazzi\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="Tu1QueueOnly.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass customers="1" name="Class1" priority="0" referenceSource="Queue 1" type="closed"/>
+<userClass customers="1" name="Token" priority="0" referenceSource="OFF" type="closed"/>
+<node name="Queue 1">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>Token</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="resourceConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="resourceCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="resourceVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="resourceVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="resourceEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="resourceEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="resourceEntry">
+<value>0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="t">
+<value>1.5</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>Infinity</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Queue 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>Queue 1</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="OFF">
+<section className="Storage">
+<parameter classPath="java.lang.Integer" name="totalCapacity">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="capacities">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="capacity">
+<value>-1</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="capacity">
+<value>-1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropRules">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropRule">
+<value>drop</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.String" name="dropRule">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+<refClass>Token</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+</parameter>
+</section>
+<section className="ServiceTunnel"/>
+<section className="Linkage"/>
+</node>
+<node name="ON">
+<section className="Storage">
+<parameter classPath="java.lang.Integer" name="totalCapacity">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="capacities">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="capacity">
+<value>-1</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="capacity">
+<value>-1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropRules">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropRule">
+<value>drop</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.String" name="dropRule">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="putStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+<refClass>Token</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+</parameter>
+</section>
+<section className="ServiceTunnel"/>
+<section className="Linkage"/>
+</node>
+<node name="Transition 1">
+<section className="Enabling">
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Timing">
+<parameter array="true" classPath="java.lang.String" name="modeNames">
+<subParameter classPath="java.lang.String" name="modeName">
+<value>Mode1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+<subParameter classPath="java.lang.Integer" name="numberOfServers">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="timingStrategies">
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="t">
+<value>100.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+<subParameter classPath="java.lang.Integer" name="firingPriority">
+<value>-1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Double" name="firingWeights">
+<subParameter classPath="java.lang.Double" name="firingWeight">
+<value>1.0</value>
+</subParameter>
+</parameter>
+</section>
+<section className="Firing">
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ON</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="firingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="firingEntry">
+<value>1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<node name="Transition 2">
+<section className="Enabling">
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ON</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="enablingEntry">
+<value>1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>ON</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+<value>0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Timing">
+<parameter array="true" classPath="java.lang.String" name="modeNames">
+<subParameter classPath="java.lang.String" name="modeName">
+<value>Mode1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+<subParameter classPath="java.lang.Integer" name="numberOfServers">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="timingStrategies">
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+<subParameter classPath="jmt.engine.random.DeterministicDistr" name="Deterministic"/>
+<subParameter classPath="jmt.engine.random.DeterministicDistrPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="t">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+<subParameter classPath="java.lang.Integer" name="firingPriority">
+<value>-1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="java.lang.Double" name="firingWeights">
+<subParameter classPath="java.lang.Double" name="firingWeight">
+<value>1.0</value>
+</subParameter>
+</parameter>
+</section>
+<section className="Firing">
+<parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+<subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+<subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>OFF</value>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="firingEntry">
+<value>0</value>
+</subParameter>
+<refClass>Token</refClass>
+<subParameter classPath="java.lang.Integer" name="firingEntry">
+<value>1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+</node>
+<measure alpha="0.01" name="OFF_Token_Number of Customers" nodeType="station" precision="0.03" referenceNode="OFF" referenceUserClass="Token" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="ON_Token_Number of Customers" nodeType="station" precision="0.03" referenceNode="ON" referenceUserClass="Token" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Class1_Residence Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Class1" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Class1_Throughput" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Class1" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="OFF_Token_Residence Time" nodeType="station" precision="0.03" referenceNode="OFF" referenceUserClass="Token" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="ON_Token_Residence Time" nodeType="station" precision="0.03" referenceNode="ON" referenceUserClass="Token" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="OFF_Token_Throughput" nodeType="station" precision="0.03" referenceNode="OFF" referenceUserClass="Token" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="ON_Token_Throughput" nodeType="station" precision="0.03" referenceNode="ON" referenceUserClass="Token" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Class1_Utilization" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Class1" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Class1_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Class1_Response Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Class1" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Token_Response Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="Token" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="Token_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Token" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Token_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Token" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="Queue 1_Queue Time" nodeType="station" precision="0.03" referenceNode="Queue 1" referenceUserClass="" type="Queue Time" verbose="false"/>
+<connection source="Queue 1" target="Queue 1"/>
+<connection source="OFF" target="Queue 1"/>
+<connection source="OFF" target="Transition 1"/>
+<connection source="ON" target="Transition 2"/>
+<connection source="Transition 1" target="ON"/>
+<connection source="Transition 2" target="OFF"/>
+<preload>
+<stationPopulations stationName="Queue 1">
+<classPopulation population="1" refClass="Class1"/>
+</stationPopulations>
+<stationPopulations stationName="OFF">
+<classPopulation population="1" refClass="Token"/>
+</stationPopulations>
+</preload>
+</sim>
+<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+<userClass color="#FF0000FF" name="Class1"/>
+<userClass color="#FFFF0000" name="Token"/>
+<station name="Queue 1">
+<position angle="0.0" rotate="false" x="221.0" y="91.0"/>
+</station>
+<station name="OFF">
+<position angle="0.0" rotate="false" x="41.0" y="98.0"/>
+</station>
+<station name="ON">
+<position angle="0.0" rotate="false" x="207.0" y="164.0"/>
+</station>
+<station name="Transition 1">
+<position angle="0.0" rotate="false" x="116.0" y="165.0"/>
+</station>
+<station name="Transition 2">
+<position angle="0.0" rotate="false" x="282.0" y="165.0"/>
+</station>
+<connectionShape source="Queue 1" target="Queue 1">
+<arc>
+<source x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="57.0" y="2.0"/>
+</arc>
+<arc>
+<source x="57.0" y="2.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="50.0" y="40.34"/>
+</arc>
+<arc>
+<source x="50.0" y="40.34"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="-150.0" y="45.34"/>
+</arc>
+<arc>
+<source x="-150.0" y="45.34"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="-153.0" y="9.0"/>
+</arc>
+<arc>
+<source x="-153.0" y="9.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="0.0" y="6.340000000000003"/>
+</arc>
+</connectionShape>
+<connectionShape source="OFF" target="Queue 1">
+<arc>
+<source x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="0.0" y="0.0"/>
+</arc>
+</connectionShape>
+</jmodel>
+<results elapsedTime="11260" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="0" finalValue="0.9900990099009901" name="OFF_Token_Number of Customers" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="OFF" state="1" type="0">
+<sample lastIntervalAvgValue="0.9900990099009901" lowerBound="0.8969349774857451" meanValue="0.9900990099009901" simulationTime="463085.0" upperBound="1.083263042316235"/>
+<sample lastIntervalAvgValue="0.9900990099009901" lowerBound="0.9617342246220751" meanValue="0.9900990099009901" simulationTime="646400.0" upperBound="1.0184637951799052"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10240" discardedSamples="0" finalValue="0.009900990099009901" name="ON_Token_Number of Customers" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="ON" state="1" type="0">
+<sample lastIntervalAvgValue="0.009900990099009901" lowerBound="0.008969349774857452" meanValue="0.009900990099009901" simulationTime="463085.0" upperBound="0.01083263042316235"/>
+<sample lastIntervalAvgValue="0.009882700655767988" lowerBound="0.009617342246220755" meanValue="0.009900990099009901" simulationTime="517220.0" upperBound="0.010184637951799047"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="1.0" name="Queue 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Queue 1" state="1" type="0">
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="1515000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68815" finalValue="378.73418106590617" name="Queue 1_Class1_Residence Time" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Queue 1" state="1" type="3">
+<sample lastIntervalAvgValue="378.8243862520458" meanValue="378.8243862520458" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="378.78778054862846" meanValue="378.78778054862846" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="378.8331399103099" meanValue="378.799651635743" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="378.7334103861481" meanValue="378.77626560332874" simulationTime="1748007.0"/>
+<sample lastIntervalAvgValue="378.7652834756877" meanValue="378.7652834756877" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="378.76262009218635" meanValue="378.76262009218635" simulationTime="2728212.0"/>
+<sample lastIntervalAvgValue="378.76064153594007" meanValue="378.76064153594007" simulationTime="3235434.0"/>
+<sample lastIntervalAvgValue="378.80494522690526" meanValue="378.7676145761441" simulationTime="3681348.5"/>
+<sample lastIntervalAvgValue="378.7481306958857" meanValue="378.7505112221848" simulationTime="6247254.0"/>
+<sample lastIntervalAvgValue="378.75346148573516" meanValue="378.75346148573516" simulationTime="9946278.0"/>
+<sample lastIntervalAvgValue="378.7537125073515" lowerBound="367.76859177754625" meanValue="378.73418106590617" simulationTime="1.2365127E7" upperBound="389.69977035426615"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68815" finalValue="0.006601000464132845" name="Queue 1_Class1_Throughput" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Queue 1" state="1" type="5">
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="0.0065998239202447375" meanValue="0.006600407386239441" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="0.0066014069573895814" meanValue="0.006600660066006601" simulationTime="1748007.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="2728212.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="3235434.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="3681450.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600747201098108" simulationTime="6247254.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="9946278.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" lowerBound="0.006415257834836061" meanValue="0.006601000464132845" simulationTime="1.2365127E7" upperBound="0.006797819500886634"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="100.01000200040009" name="OFF_Token_Residence Time" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="OFF" state="1" type="3">
+<sample lastIntervalAvgValue="100.021815008726" meanValue="100.021815008726" simulationTime="463084.0"/>
+<sample lastIntervalAvgValue="100.01108156028369" meanValue="100.01108156028369" simulationTime="911524.0"/>
+<sample lastIntervalAvgValue="100.01000200040009" meanValue="100.01000200040009" simulationTime="1009999.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="1.000100020004001" name="ON_Token_Residence Time" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="ON" state="1" type="3">
+<sample lastIntervalAvgValue="1.00021815008726" meanValue="1.00021815008726" simulationTime="463085.0"/>
+<sample lastIntervalAvgValue="1.0001108278842956" meanValue="1.0001108278842956" simulationTime="911525.0"/>
+<sample lastIntervalAvgValue="1.000100020004001" meanValue="1.000100020004001" simulationTime="1010000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68815" finalValue="151.4921875" name="Class1_System Response Time" nodeType="" precision="0.03" referenceClass="Class1" referenceStation="" state="1" type="15">
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="151.51919385796546" meanValue="151.50579979120752" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.50433388229175" simulationTime="1747905.5"/>
+<sample lastIntervalAvgValue="151.48499849984998" meanValue="151.5" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="2728212.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="3235434.0"/>
+<sample lastIntervalAvgValue="151.51698946653076" meanValue="151.50205769784765" simulationTime="3681348.5"/>
+<sample lastIntervalAvgValue="151.49704788333236" meanValue="151.4980000799968" simulationTime="6247254.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="9946278.0"/>
+<sample lastIntervalAvgValue="151.5" lowerBound="147.10599477811536" meanValue="151.4921875" simulationTime="1.2365127E7" upperBound="155.87838022188464"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="71380" finalValue="0.009900990099009901" name="OFF_Token_Throughput" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="OFF" state="1" type="5">
+<sample lastIntervalAvgValue="0.009901011479558785" meanValue="0.009901011479558785" simulationTime="463084.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009901000961027905" simulationTime="911524.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900997678819688" simulationTime="1306232.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900995763172438" simulationTime="1748006.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900994493775813" simulationTime="2252905.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="2728413.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="3235433.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="3681449.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="6247354.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" lowerBound="0.009625241997274513" meanValue="0.009900990099009901" simulationTime="8502280.0" upperBound="0.010193003683446326"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.009900990099009901" name="ON_Token_Throughput" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="ON" state="1" type="5">
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="463085.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="911525.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="1010000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="15360" discardedSamples="185" finalValue="0.009901324131307673" name="Queue 1_Class1_Utilization" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Queue 1" state="1" type="6">
+<sample lastIntervalAvgValue="0.009900990099009901" lowerBound="0.008994399089395602" meanValue="0.009899604950334095" simulationTime="463085.0" upperBound="0.010804810811272589"/>
+<sample lastIntervalAvgValue="0.009900990099009901" lowerBound="0.009617996573364344" meanValue="0.009901324131307673" simulationTime="672862.0" upperBound="0.010184651689251001"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="1.0" name="Class1_System Number of Customers" nodeType="" precision="0.03" referenceClass="Class1" referenceStation="" state="1" type="14">
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="1.0" meanValue="1.0" simulationTime="1515000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68815" finalValue="0.006601000464132845" name="Class1_System Throughput" nodeType="" precision="0.03" referenceClass="Class1" referenceStation="" state="1" type="16">
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="0.0065998239202447375" meanValue="0.006600407386239441" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600471249732895" simulationTime="1747905.5"/>
+<sample lastIntervalAvgValue="0.006601313726791173" meanValue="0.006600660066006601" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="2728212.0"/>
+<sample lastIntervalAvgValue="0.006600009268014209" meanValue="0.006600558057015779" simulationTime="3235332.5"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.0066005704159766455" simulationTime="3681348.5"/>
+<sample lastIntervalAvgValue="0.006600788688437668" meanValue="0.006600747201098108" simulationTime="6247254.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" meanValue="0.006600660066006601" simulationTime="9946278.0"/>
+<sample lastIntervalAvgValue="0.006600660066006601" lowerBound="0.006415257834836061" meanValue="0.006601000464132845" simulationTime="1.2365127E7" upperBound="0.006797819500886634"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68815" finalValue="151.4921875" name="Queue 1_Class1_Response Time" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Queue 1" state="1" type="2">
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="462984.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="151.51919385796546" meanValue="151.50579979120752" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="151.48285910181693" meanValue="151.5" simulationTime="1748007.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="2728212.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="3235434.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="3681450.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.4980000799968" simulationTime="6247254.0"/>
+<sample lastIntervalAvgValue="151.5" meanValue="151.5" simulationTime="9946278.0"/>
+<sample lastIntervalAvgValue="151.5" lowerBound="147.10599477811536" meanValue="151.4921875" simulationTime="1.2365127E7" upperBound="155.87838022188464"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="Queue 1_Token_Response Time" nodeType="station" precision="0.03" referenceClass="Token" referenceStation="Queue 1" state="3" type="2">
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+<sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="101.0" name="Token_System Response Time" nodeType="" precision="0.03" referenceClass="Token" referenceStation="" state="1" type="15">
+<sample lastIntervalAvgValue="101.0" meanValue="101.0" simulationTime="463085.0"/>
+<sample lastIntervalAvgValue="101.0" meanValue="101.0" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="101.0" meanValue="101.0" simulationTime="1010000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.009900990099009901" name="Token_System Throughput" nodeType="" precision="0.03" referenceClass="Token" referenceStation="" state="1" type="16">
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="463085.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="911424.0"/>
+<sample lastIntervalAvgValue="0.009900990099009901" meanValue="0.009900990099009901" simulationTime="1010000.0"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="72660" finalValue="60.0" name="Queue 1_Queue Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="1">
+<sample lastIntervalAvgValue="60.005234916895695" meanValue="60.005234916895695" simulationTime="463084.0"/>
+<sample lastIntervalAvgValue="60.0" meanValue="60.00265939764643" simulationTime="911524.0"/>
+<sample lastIntervalAvgValue="59.996928746928745" meanValue="60.000927945065655" simulationTime="1306131.5"/>
+<sample lastIntervalAvgValue="60.0054862158826" meanValue="60.00239961606143" simulationTime="1748006.0"/>
+<sample lastIntervalAvgValue="59.99279798343536" meanValue="60.0" simulationTime="2252805.0"/>
+<sample lastIntervalAvgValue="60.010194978972855" meanValue="60.00319974402048" simulationTime="2728413.0"/>
+<sample lastIntervalAvgValue="59.99760965698578" meanValue="60.00239961606143" simulationTime="3235433.0"/>
+<sample lastIntervalAvgValue="60.0" meanValue="60.00239961606143" simulationTime="3681449.0"/>
+<sample lastIntervalAvgValue="60.0" lowerBound="58.28109401209771" meanValue="60.0" simulationTime="5179178.0" upperBound="61.71890598790229"/>
+</measure>
+</results>
+</archive>
