@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Sec2_4_OptPower.jsimg" timestamp="Sun Nov 05 16:28:01 CET 2023" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Giuseppe Serazzi\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="Sec2_4_OptPower.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass name="Requests" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
+<node name="Source">
+<section className="RandomSource">
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Requests</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.1</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="ServiceTunnel"/>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Requests</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="System">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Requests</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Requests</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Requests</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Requests</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Requests</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="Sink">
+<section className="JobSink"/>
+</node>
+<measure alpha="0.01" name="System_Requests_Response Time" nodeType="station" precision="0.03" referenceNode="System" referenceUserClass="Requests" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="Requests_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Requests" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="Requests_System Power" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Requests" type="System Power" verbose="false"/>
+<connection source="Source" target="System"/>
+<connection source="System" target="Sink"/>
+</sim>
+<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+<userClass color="#FF0000FF" name="Requests"/>
+<station name="Source">
+<position angle="0.0" rotate="false" x="42.0" y="84.0"/>
+</station>
+<station name="System">
+<position angle="0.0" rotate="false" x="141.0" y="81.0"/>
+</station>
+<station name="Sink">
+<position angle="0.0" rotate="false" x="277.0" y="84.0"/>
+</station>
+<connectionShape source="Source" target="System">
+<arc>
+<source x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="0.0" y="0.0"/>
+</arc>
+</connectionShape>
+<connectionShape source="System" target="Sink">
+<arc>
+<source x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<point x="0.0" y="0.0"/>
+<target x="0.0" y="0.0"/>
+</arc>
+</connectionShape>
+<parametric classPath="jmt.gui.common.definitions.parametric.ArrivalRateParametricAnalysis" enabled="true">
+<field name="Class" value="Requests"/>
+<field name="From" value="0.1"/>
+<field name="Is single class" value="true"/>
+<field name="Steps" value="9"/>
+<field name="To" value="0.9"/>
+<field name="Type" value="Arrival rates"/>
+</parametric>
+</jmodel>
+<results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="9" name="System_Requests_Response Time" nodeType="station" precision="0.03" referenceClass="Requests" referenceStation="System" type="2">
+<sample lowerBound="1.0878273050254592" meanValue="1.1133115107108342" upperBound="1.1387957163962092" validity="true"/>
+<sample lowerBound="1.2129535374881129" meanValue="1.2388954737809361" upperBound="1.2648374100737594" validity="true"/>
+<sample lowerBound="1.3910015173119614" meanValue="1.4331311793857133" upperBound="1.4752608414594652" validity="true"/>
+<sample lowerBound="1.6355042592890134" meanValue="1.6642122142302787" upperBound="1.6929201691715439" validity="true"/>
+<sample lowerBound="1.9637992349771245" meanValue="2.0032723788554674" upperBound="2.0427455227338105" validity="true"/>
+<sample lowerBound="2.421701776999604" meanValue="2.4906498869708726" upperBound="2.5595979969421414" validity="true"/>
+<sample lowerBound="3.3066086419806386" meanValue="3.3859379122644095" upperBound="3.4652671825481804" validity="true"/>
+<sample lowerBound="4.960915442920797" meanValue="5.108941780317222" upperBound="5.256968117713647" validity="true"/>
+<sample lowerBound="9.296278563386364" meanValue="9.798588329806" upperBound="10.300898096225636" validity="false"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="9" name="Network_Requests_System Throughput" nodeType="" precision="0.03" referenceClass="Requests" referenceStation="Network" type="16">
+<sample lowerBound="0.0968648318748502" meanValue="0.09971938930338872" upperBound="0.10274730008422445" validity="true"/>
+<sample lowerBound="0.1963180200653889" meanValue="0.19913514645716437" upperBound="0.2020343003885193" validity="true"/>
+<sample lowerBound="0.29711525843089603" meanValue="0.30325943901021124" upperBound="0.3096631021145249" validity="true"/>
+<sample lowerBound="0.39437308166687673" meanValue="0.4024612936205249" upperBound="0.4108882150486379" validity="true"/>
+<sample lowerBound="0.49355865255290027" meanValue="0.5026681513081325" upperBound="0.5121202369661224" validity="true"/>
+<sample lowerBound="0.5870968308748826" meanValue="0.5967785474782634" upperBound="0.6067849373853781" validity="true"/>
+<sample lowerBound="0.6807135612324137" meanValue="0.6976621879854011" upperBound="0.7154763499117324" validity="true"/>
+<sample lowerBound="0.7798975874482987" meanValue="0.7948791295284238" upperBound="0.8104475245173292" validity="true"/>
+<sample lowerBound="0.8880286642848908" meanValue="0.9058746261557631" upperBound="0.9244525684583612" validity="true"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="9" name="Network_Requests_System Power" nodeType="" precision="0.03" referenceClass="Requests" referenceStation="Network" type="21">
+<sample lowerBound="0.08837670354335672" meanValue="0.08949934334746902" upperBound="0.0906508716657838" validity="true"/>
+<sample lowerBound="0.15864069340381665" meanValue="0.16061628989060173" upperBound="0.16264171217209675" validity="true"/>
+<sample lowerBound="0.20697128739749626" meanValue="0.20953665387637652" upperBound="0.21216641286542853" validity="true"/>
+<sample lowerBound="0.23369924049386337" meanValue="0.2403533084319992" upperBound="0.2473974011359288" validity="true"/>
+<sample lowerBound="0.24354069157963523" meanValue="0.25054868821546317" upperBound="0.2579719510525192" validity="true"/>
+<sample lowerBound="0.23947118451814278" meanValue="0.2423726279607594" upperBound="0.24534524173997468" validity="true"/>
+<sample lowerBound="0.20948463290245767" meanValue="0.2120039379565895" upperBound="0.21458457596945177" validity="true"/>
+<sample lowerBound="0.15196354044936705" meanValue="0.15625940977325858" upperBound="0.16080522538677866" validity="true"/>
+<sample lowerBound="0.09233713507238829" meanValue="0.0951032701855715" upperBound="0.0980402530835929" validity="true"/>
+</measure>
+</results>
+</archive>

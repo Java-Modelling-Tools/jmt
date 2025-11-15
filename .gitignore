@@ -181,3 +181,13 @@ nb-configuration.xml
 *.log
 # Remove test output folder
 /src/test/resources/linetesting/output
+
+# Environments
+.env
+.envrc
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
