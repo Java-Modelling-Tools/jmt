@@ -26,10 +26,13 @@ import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
+import jmt.jmva.analytical.ExactModel;
+import jmt.jmva.gui.JMVAWizard;
 
 public class TestUtil {
 
 	final static String JSIM_TESTS_FOLDER_NAME = "jsim"; // must be same as in LineTest
+	final static String JMVA_TESTS_FOLDER_NAME = "jmva"; // must be same as in LineTest
 
 	private static List<String> testJSIMGraph(File testModel) {
 
@@ -136,6 +139,116 @@ public class TestUtil {
 			return new ArrayList<String>();
 		}
 
+	}
+	
+	private static List<String> testJMVA(File testModel) {
+
+		try {
+
+			JMVAWizard jmvaWizard = new JMVAWizard();
+
+			// Get ModelLoader
+			Field modelLoaderField = JMVAWizard.class.getDeclaredField("modelLoader");
+			modelLoaderField.setAccessible(true);
+			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jmvaWizard);
+
+			ExactModel newdata = new ExactModel();
+			modelLoader.loadModel(newdata, jmvaWizard, testModel);
+
+			// Get data
+			Field dataField = JMVAWizard.class.getDeclaredField("data");
+			dataField.setAccessible(true);
+			// Set data
+			dataField.set(jmvaWizard, newdata);
+			
+			// Get tempFile
+			Field tempFileField = JMVAWizard.class.getDeclaredField("tempFile");
+			tempFileField.setAccessible(true);
+			// Set tempFile
+			tempFileField.set(jmvaWizard, modelLoader.getSelectedFile());
+			
+			// Solve the model
+			Method solve = JMVAWizard.class.getDeclaredMethod("solve");
+			solve.setAccessible(true);
+			solve.invoke(jmvaWizard);
+			
+			// solve() is synchronous from the caller’s point of view, even though it internally uses a background thread.
+			
+			// Get the model file parent folder name
+			String parentFolderName = FileUtil.getParentFolderName(testModel);
+
+			if (parentFolderName == null) {
+				throw new RuntimeException("Line test model does not have parent folder");
+			}
+
+			List<String> folderHierarchy = new ArrayList<String>();
+			folderHierarchy.add("linetesting");
+			folderHierarchy.add("output");
+			folderHierarchy.add(JMVA_TESTS_FOLDER_NAME);
+			if (!parentFolderName.equals(JMVA_TESTS_FOLDER_NAME)) {
+				folderHierarchy.add(parentFolderName);
+			}
+			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
+
+			if (!modelOutputFile.exists()) {
+				throw new FileNotFoundException("Could not create model output file");
+			}
+
+			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
+
+			// Get data
+			ExactModel data = (ExactModel) dataField.get(jmvaWizard);
+			
+			// Save model
+			modelLoader.saveModel(data, jmvaWizard, modelOutputFile);
+
+			// Closes everything gui (sadly it opens automatically)
+			Method doClose = JMVAWizard.class.getDeclaredMethod("doClose");
+			doClose.setAccessible(true);
+			doClose.invoke(jmvaWizard);
+			jmvaWizard.dispose();
+
+			return getJMVAModelFinalValues(modelOutputFile);
+
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException
+				| NoSuchFieldException | IOException | NoSuchMethodException | InvocationTargetException e) {
+			e.printStackTrace();
+			System.exit(0);
+			return new ArrayList<String>();
+		}
+
+	}
+	
+	private static List<String> getJMVAModelFinalValues(File jmvaGraphModelFile) {
+		
+		//TODO: check how the results are saved in JMVA
+
+		try {
+			// Parse file
+			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jmvaGraphModelFile);
+
+			// Normalize the XML structure
+			measuresDoc.getDocumentElement().normalize();
+
+			// Use XPath to find the <results> element
+			XPath xPath = XPathFactory.newInstance().newXPath();
+			NodeList measureNodes = (NodeList) xPath.evaluate("//results/measure", measuresDoc, XPathConstants.NODESET);
+
+			List<String> finalValues = new ArrayList<String>();
+			for (int i = 0; i < measureNodes.getLength(); i++) {
+				Element measure = (Element) measureNodes.item(i);
+				String finalValue = measure.getAttribute("finalValue");
+				finalValues.add(finalValue);
+			}
+
+			// System.out.println("finalValues: " + finalValues);
+			return finalValues;
+		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
+				| ParserConfigurationException e) {
+			e.printStackTrace();
+			System.exit(0);
+			return new ArrayList<String>();
+		}
 	}
 
 	private static List<String> getJSIMGraphModelFinalValues(File jsimGraphModelFile) {
