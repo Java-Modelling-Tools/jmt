@@ -1971,8 +1971,8 @@ public class ExactModel implements ExactConstants  {
 			for (int i = 0; i < classes; i++) {
 				//throughput is ratio of specific throughput on specific num of visits
 				if (classTypes[i] == CLASS_OPEN) {
-					//retVal[i][k] = throughput[0][i][k] / visits[0][i];
-					retVal[i][k] = classData[i];
+					retVal[i][k] = throughput[0][i][k] / visits[0][i];
+					// retVal[i][k] = classData[i];
 				} else {
 					// Added by Cerotti
 					retVal[i][k] = throughput[referenceStation[i]][i][k];
