@@ -23,8 +23,8 @@ def parse_measures(xml_path):
 
     return measures
 
-def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", output_folder=None):
-    """Compare .jsimg files between old and new folders, write CSV, copy changed files."""
+def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", summary_output="summary_output.csv", stability_threshold=5, output_folder=None):
+    """Compare .jsimg files, write detailed and summary CSVs, copy changed files."""
     if not os.path.exists(old_folder):
         raise FileNotFoundError(f"Old folder not found: {old_folder}")
     if not os.path.exists(new_folder):
@@ -34,7 +34,8 @@ def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", 
     new_files = {f for f in os.listdir(new_folder) if f.endswith(".jsimg")}
     all_files = sorted(old_files.union(new_files))
 
-    rows = []
+    detailed_rows = []
+    summary_rows = []
     changed_files = set()
 
     for filename in all_files:
@@ -46,35 +47,78 @@ def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", 
 
         all_measure_names = sorted(set(old_measures.keys()).union(new_measures.keys()))
 
+        # Summary stats for this file
+        file_max_diff = 0.0
+        file_issues_count = 0
+        file_status = "Unchanged"
+
+        file_has_diff = False
+
         for name in all_measure_names:
             old_val = old_measures.get(name)
             new_val = new_measures.get(name)
 
             if old_val is None:
-                rows.append([filename, name, "", new_val, "ADDED", ""])
-                changed_files.add(filename)
+                # Metric Added
+                detailed_rows.append([filename, name, "", new_val, "ADDED", ""])
+                file_has_diff = True
+                file_status = "Metrics Added"
             elif new_val is None:
-                rows.append([filename, name, old_val, "", "REMOVED", ""])
-                changed_files.add(filename)
+                # Metric Removed
+                detailed_rows.append([filename, name, old_val, "", "REMOVED", ""])
+                file_has_diff = True
+                file_status = "Metrics Removed"
             else:
                 if old_val != new_val:
-                    change = new_val - old_val
-                    pct = (change / old_val * 100) if old_val != 0 else ""
-                    rows.append([filename, name, old_val, new_val, change, pct])
-                    changed_files.add(filename)
+                    denom = (new_val + old_val) / 2
 
-    # Write CSV
+                    if denom == 0:
+                        # Avoid crash if both are 0.0 (though inequality check usually catches this)
+                        ratio = 0.0 
+                    else:
+                        # 1. Calculate the decimal ratio (e.g., 0.048)
+                        ratio = abs(new_val - old_val) / denom
+                    
+                    smape = ratio * 100
+                    
+                    # 2. Check against the decimal threshold (e.g., 0.05)
+                    is_stable = smape < stability_threshold
+                    
+                    detailed_rows.append([filename, name, old_val, new_val, f"{smape:.6f}", is_stable])
+                    
+                    # Track max deviation (store as percentage or ratio, just be consistent)
+                    file_max_diff = max(file_max_diff, smape)
+                    file_has_diff = True
+                    
+                    if not is_stable:
+                        file_issues_count += 1
+                        file_status = "Unstable"
+
+        if file_has_diff:
+            changed_files.add(filename)
+            if file_status == "Unchanged": # Caught by simple inequality but passed stable check
+                file_status = "Changed (Stable)"
+        
+        # Add single row for the summary CSV
+        summary_rows.append([filename, file_status, len(all_measure_names), f"{file_max_diff:.6f}", file_issues_count])
+
+    # 1. Write Detailed CSV
     with open(csv_output, "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["Filename", "Measure Name", "Old Value", "New Value", "Change", "% Change"])
-        writer.writerows(rows)
+        writer.writerow(["Filename", "Measure Name", "Old Value", "New Value", "SMAPE (%)", f"Is Stable (< {stability_threshold}%)"])
+        writer.writerows(detailed_rows)
 
-    print(f"\nCSV written to {csv_output}")
-    print("\nFiles with at least one change:")
-    for f in sorted(changed_files):
-        print(f)
+    print(f"\nDetailed report written to {csv_output}")
 
-    # Copy changed files to output folders
+    # 2. Write Summary CSV (One row per file)
+    with open(summary_output, "w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Filename", "Overall Status", "Total Metrics", "Max SMAPE (%)", "Unstable Metrics Count"])
+        writer.writerows(summary_rows)
+
+    print(f"Summary report written to {summary_output}")
+
+    # Copy changed files
     if output_folder:
         prev_out = os.path.join(output_folder, "previous")
         latest_out = os.path.join(output_folder, "latest")
@@ -89,47 +133,22 @@ def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", 
 
         print(f"\nChanged files copied to:\nPrevious: {prev_out}\nLatest: {latest_out}")
 
-def print_csv_clean(csv_path):
-    """Print a CSV in a clean, aligned table format."""
-    if not os.path.exists(csv_path):
-        print(f"CSV file not found: {csv_path}")
-        return
-
-    with open(csv_path, newline='') as f:
-        reader = csv.reader(f)
-        rows = list(reader)
-
-    if not rows:
-        print("CSV is empty")
-        return
-
-    # Calculate max width for each column
-    col_widths = [max(len(str(row[i])) for row in rows) for i in range(len(rows[0]))]
-
-    # Print header
-    header = rows[0]
-    header_line = " | ".join(str(header[i]).ljust(col_widths[i]) for i in range(len(header)))
-    print(header_line)
-    print("-" * len(header_line))
-
-    # Print rows
-    for row in rows[1:]:
-        print(" | ".join(str(row[i]).ljust(col_widths[i]) for i in range(len(row))))
-
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    previous_jmt_version_runs_folder_path = os.path.join(script_dir, "jmt-previous-runs")
-    latest_jmt_version_runs_folder_path = os.path.join(script_dir, "jmt-1.3.0-stable-runs")
-    output_file_path = os.path.join(script_dir, "comparison_report.csv")
+    previous_jmt_runs = os.path.join(script_dir, "jmt-previous-runs")
+    latest_jmt_runs = os.path.join(script_dir, "jmt-1.3.0-stable-runs")
+    
+    # Output file paths
+    detailed_report = os.path.join(script_dir, "comparison_detailed.csv")
+    summary_report = os.path.join(script_dir, "comparison_summary.csv")
     output_folder = os.path.join(script_dir, "changed_files")
 
     compare_jsimg_folders(
-        previous_jmt_version_runs_folder_path,
-        latest_jmt_version_runs_folder_path,
-        csv_output=output_file_path,
+        previous_jmt_runs,
+        latest_jmt_runs,
+        csv_output=detailed_report,
+        summary_output=summary_report,
+        # stability_threshold=3,
         output_folder=output_folder
     )
-
-    # print("\nCSV preview:\n")
-    # print_csv_clean(output_file_path)
