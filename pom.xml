@@ -35,7 +35,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.19.1</version>
+            <version>3.5.4</version>
             <configuration>
               <excludes>
                 <exclude>**/JabaGuiTest.class</exclude>
@@ -57,7 +57,8 @@
                 <exclude>**/RandomMVAModelGenerator.class</exclude>
                 <exclude>**/ResultsCheck.class</exclude>
               </excludes>
-              <skipTests>true</skipTests>
+              <skipTests>false</skipTests>
+              <useFile>false</useFile>
             </configuration>
           </plugin>
           <!-- Reading properties -->
@@ -208,6 +209,26 @@
               </altDeploymentRepository>
             </configuration>
           </plugin>
+          <!-- JaCoCo -->
+          <plugin>
+		    <groupId>org.jacoco</groupId>
+		    <artifactId>jacoco-maven-plugin</artifactId>
+		    <version>0.8.10</version>
+		    <executions>
+		        <execution>
+		            <goals>
+		                <goal>prepare-agent</goal>
+		            </goals>
+		        </execution>
+		        <execution>
+		            <id>report</id>
+		            <phase>test</phase>
+		            <goals>
+		                <goal>report</goal>
+		            </goals>
+		        </execution>
+		    </executions>
+		</plugin>
         </plugins>
       </build>
     </profile>
@@ -521,11 +542,16 @@
       <artifactId>jbig2-imageio</artifactId>
       <version>3.0.3</version>
     </dependency>
-      <dependency>
-          <groupId>org.junit.jupiter</groupId>
-          <artifactId>junit-jupiter</artifactId>
-          <version>RELEASE</version>
-          <scope>compile</scope>
-      </dependency>
+	<dependency>
+	  <groupId>org.junit.jupiter</groupId>
+	  <artifactId>junit-jupiter</artifactId>
+	  <version>5.10.2</version>
+	  <scope>test</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.jacoco</groupId>
+	    <artifactId>org.jacoco.core</artifactId>
+	    <version>0.8.10</version> <scope>test</scope>
+	</dependency>
   </dependencies>
 </project>
