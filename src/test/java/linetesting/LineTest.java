@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -74,6 +76,10 @@ public class LineTest {
 
 		try {
 
+			// Define the format you want (e.g., 2023-10-25 14:30:00)
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+			String timestamp = LocalDateTime.now().format(formatter);
+
 			if (jsimTestFile.isDirectory()) {
 
 				// Check if it's a line test
@@ -81,12 +87,12 @@ public class LineTest {
 				File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
 						JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
 				if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
-					System.out.println("Running test on JSIMGraph line test: " + jsimTestFile.getAbsolutePath());
+					System.out.println("[" + timestamp + "] Running test on JSIMGraph line test: " + jsimTestFile.getAbsolutePath());
 					assertTrue(TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
 				}
 
 			} else {
-				System.out.println("Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
+				System.out.println("[" + timestamp + "] Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
 				assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
 			}
 
