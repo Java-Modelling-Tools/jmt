@@ -9,12 +9,8 @@ import java.io.PrintWriter;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,11 +31,11 @@ public class LineTest {
 	final static String OUTPUT_CSV_NAME = "full_detailed_coverage.csv";
 	final static String TIMEOUT_CSV_NAME = "timeouts.csv";
 
-	// Thread-safe list to collect timed-out files
-	static List<String> timedOutFiles = Collections.synchronizedList(new ArrayList<>());
+	final static int TEST_TIMEOUT = 5; // Minutes
 
 	// We will build the full path dynamically in setup
 	static String FULL_CSV_PATH;
+	static String TIMEOUT_CSV_PATH;
 
 	final static String[] EXCLUDED_PACKAGES = { "jmt/framework/gui", "jmt/gui", "jmt/jmva/gui", "jmt/commandline" };
 
@@ -58,9 +54,9 @@ public class LineTest {
 			}
 		}
 
+		// --- Setup Coverage CSV ---
 		// Set the full path variable
 		FULL_CSV_PATH = new File(outputFolder, OUTPUT_CSV_NAME).getAbsolutePath();
-
 		// Initialize the CSV
 		try (PrintWriter writer = new PrintWriter(new FileWriter(FULL_CSV_PATH))) {
 			writer.println(
@@ -68,31 +64,14 @@ public class LineTest {
 		}
 
 		System.out.println("Coverage report will be written to: " + FULL_CSV_PATH);
-	}
 
-	@AfterAll
-	static void saveTimeoutReport() {
-		// Even if the list is empty, we check to ensure we don't create an empty file
-		// unnecessarily
-		// (or you can create an empty one to show 0 timeouts, logic below creates it
-		// only if timeouts exist)
-		if (!timedOutFiles.isEmpty()) {
-			File timeoutFile = new File(OUTPUT_FOLDER_PATH, TIMEOUT_CSV_NAME);
-			try (PrintWriter writer = new PrintWriter(new FileWriter(timeoutFile))) {
-				// CSV Header
-				writer.println("FILE_NAME,STATUS");
-
-				for (String fileName : timedOutFiles) {
-					writer.println(fileName + ",TIMEOUT");
-				}
-				System.out.println("Timeout report saved to: " + timeoutFile.getAbsolutePath());
-			} catch (IOException e) {
-				System.err.println("Failed to save timeout report.");
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("No timeouts detected. No timeout CSV generated.");
+		// --- Setup Timeout CSV ---
+		// Create the file and write the header immediately so it's ready for appending
+		TIMEOUT_CSV_PATH = new File(outputFolder, TIMEOUT_CSV_NAME).getAbsolutePath();
+		try (PrintWriter writer = new PrintWriter(new FileWriter(TIMEOUT_CSV_PATH))) {
+			writer.println("FILE_NAME,STATUS,TIMESTAMP");
 		}
+		System.out.println("Timeout report will be written to: " + TIMEOUT_CSV_PATH);
 	}
 
 	static Stream<File> jsimTestProvider() {
@@ -112,7 +91,7 @@ public class LineTest {
 
 		try {
 
-			Assertions.assertTimeoutPreemptively(Duration.ofMinutes(5), () -> {
+			Assertions.assertTimeoutPreemptively(Duration.ofMinutes(TEST_TIMEOUT), () -> {
 
 				// Define the format you want (e.g., 2023-10-25 14:30:00)
 				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -143,7 +122,16 @@ public class LineTest {
 			// Check if this error was caused by a timeout
 			if (e.getMessage() != null && e.getMessage().contains("execution timed out")) {
 				System.err.println("!!! TIMEOUT DETECTED for file: " + jsimTestFile.getName());
-				timedOutFiles.add(jsimTestFile.getName());
+
+				// --- WRITE TO CSV IMMEDIATELY ---
+				// We use synchronized block or just open/append/close safely
+				// Since tests run sequentially in this setup, simple append is fine.
+				try (PrintWriter writer = new PrintWriter(new FileWriter(TIMEOUT_CSV_PATH, true))) {
+					String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+					writer.println(jsimTestFile.getName() + ",TIMEOUT," + timestamp);
+				} catch (IOException ioException) {
+					System.err.println("Failed to write timeout to CSV: " + ioException.getMessage());
+				}
 			}
 			throw e; // Rethrow to ensure the test is marked as failed in JUnit
 
