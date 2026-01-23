@@ -135,12 +135,12 @@ public class TestUtil {
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
 				| NoSuchFieldException | IOException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
-			System.exit(0);
-			return new ArrayList<String>();
+			// System.exit(0);
+			throw new RuntimeException("Error executing JSIMGraph test", e);
 		}
 
 	}
-	
+
 	private static List<String> testJMVA(File testModel) {
 
 		try {
@@ -160,20 +160,21 @@ public class TestUtil {
 			dataField.setAccessible(true);
 			// Set data
 			dataField.set(jmvaWizard, newdata);
-			
+
 			// Get tempFile
 			Field tempFileField = JMVAWizard.class.getDeclaredField("tempFile");
 			tempFileField.setAccessible(true);
 			// Set tempFile
 			tempFileField.set(jmvaWizard, modelLoader.getSelectedFile());
-			
+
 			// Solve the model
 			Method solve = JMVAWizard.class.getDeclaredMethod("solve");
 			solve.setAccessible(true);
 			solve.invoke(jmvaWizard);
-			
-			// solve() is synchronous from the caller’s point of view, even though it internally uses a background thread.
-			
+
+			// solve() is synchronous from the caller’s point of view, even though it
+			// internally uses a background thread.
+
 			// Get the model file parent folder name
 			String parentFolderName = FileUtil.getParentFolderName(testModel);
 
@@ -198,7 +199,7 @@ public class TestUtil {
 
 			// Get data
 			ExactModel data = (ExactModel) dataField.get(jmvaWizard);
-			
+
 			// Save model
 			modelLoader.saveModel(data, jmvaWizard, modelOutputFile);
 
@@ -210,18 +211,18 @@ public class TestUtil {
 
 			return getJMVAModelFinalValues(modelOutputFile);
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException
-				| NoSuchFieldException | IOException | NoSuchMethodException | InvocationTargetException e) {
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
+				| IOException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
-			System.exit(0);
-			return new ArrayList<String>();
+			// System.exit(0);
+			throw new RuntimeException("Error executing JMVA test", e);
 		}
 
 	}
-	
+
 	private static List<String> getJMVAModelFinalValues(File jmvaGraphModelFile) {
-		
-		//TODO: check how the results are saved in JMVA
+
+		// TODO: check how the results are saved in JMVA
 
 		try {
 			// Parse file
@@ -246,8 +247,8 @@ public class TestUtil {
 		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
 				| ParserConfigurationException e) {
 			e.printStackTrace();
-			System.exit(0);
-			return new ArrayList<String>();
+			// System.exit(0);
+			throw new RuntimeException("Error parsing JMVA results", e);
 		}
 	}
 
@@ -276,8 +277,8 @@ public class TestUtil {
 		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
 				| ParserConfigurationException e) {
 			e.printStackTrace();
-			System.exit(0);
-			return new ArrayList<String>();
+			// System.exit(0);
+			throw new RuntimeException("Error parsing JSIM results", e);
 		}
 	}
 
@@ -314,8 +315,9 @@ public class TestUtil {
 		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
 				| ParserConfigurationException e) {
 			e.printStackTrace();
-			System.exit(0);
-			return false;
+			// System.exit(0); 
+	        // Returning false causes the assertTrue() in LineTest to fail gracefully
+	        return false;
 		}
 
 	}

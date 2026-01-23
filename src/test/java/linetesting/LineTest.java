@@ -6,13 +6,20 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 
 public class LineTest {
 
@@ -26,11 +33,15 @@ public class LineTest {
 	final static File CLASSES_DIRECTORY = new File("target/classes");
 	final static String OUTPUT_FOLDER_PATH = "src/test/resources/linetesting/output";
 	final static String OUTPUT_CSV_NAME = "full_detailed_coverage.csv";
+	final static String TIMEOUT_CSV_NAME = "timeouts.csv";
+
+	// Thread-safe list to collect timed-out files
+	static List<String> timedOutFiles = Collections.synchronizedList(new ArrayList<>());
 
 	// We will build the full path dynamically in setup
 	static String FULL_CSV_PATH;
 
-	final static String[] EXCLUDED_PACKAGES = { "jmt/framework/gui", "jmt/gui", "jmt/jmva/gui" };
+	final static String[] EXCLUDED_PACKAGES = { "jmt/framework/gui", "jmt/gui", "jmt/jmva/gui", "jmt/commandline" };
 
 	@BeforeAll
 	static void setupCsv() throws IOException {
@@ -59,6 +70,31 @@ public class LineTest {
 		System.out.println("Coverage report will be written to: " + FULL_CSV_PATH);
 	}
 
+	@AfterAll
+	static void saveTimeoutReport() {
+		// Even if the list is empty, we check to ensure we don't create an empty file
+		// unnecessarily
+		// (or you can create an empty one to show 0 timeouts, logic below creates it
+		// only if timeouts exist)
+		if (!timedOutFiles.isEmpty()) {
+			File timeoutFile = new File(OUTPUT_FOLDER_PATH, TIMEOUT_CSV_NAME);
+			try (PrintWriter writer = new PrintWriter(new FileWriter(timeoutFile))) {
+				// CSV Header
+				writer.println("FILE_NAME,STATUS");
+
+				for (String fileName : timedOutFiles) {
+					writer.println(fileName + ",TIMEOUT");
+				}
+				System.out.println("Timeout report saved to: " + timeoutFile.getAbsolutePath());
+			} catch (IOException e) {
+				System.err.println("Failed to save timeout report.");
+				e.printStackTrace();
+			}
+		} else {
+			System.out.println("No timeouts detected. No timeout CSV generated.");
+		}
+	}
+
 	static Stream<File> jsimTestProvider() {
 		String jsimTestsFolder = TEST_FILES_BASE_FOLDER_PATH + "/" + JSIM_TESTS_FOLDER_NAME;
 		File[] entries = FileUtil.listAllFilesAndFoldersInFolder(jsimTestsFolder);
@@ -76,25 +112,40 @@ public class LineTest {
 
 		try {
 
-			// Define the format you want (e.g., 2023-10-25 14:30:00)
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-			String timestamp = LocalDateTime.now().format(formatter);
+			Assertions.assertTimeoutPreemptively(Duration.ofMinutes(5), () -> {
 
-			if (jsimTestFile.isDirectory()) {
+				// Define the format you want (e.g., 2023-10-25 14:30:00)
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+				String timestamp = LocalDateTime.now().format(formatter);
 
-				// Check if it's a line test
-				File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIM_LINE_TEST_MODEL_FILE_NAME);
-				File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
-						JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
-				if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
-					System.out.println("[" + timestamp + "] Running test on JSIMGraph line test: " + jsimTestFile.getAbsolutePath());
-					assertTrue(TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
+				if (jsimTestFile.isDirectory()) {
+
+					// Check if it's a line test
+					File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIM_LINE_TEST_MODEL_FILE_NAME);
+					File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
+							JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
+					if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
+						System.out.println("[" + timestamp + "] Running test on JSIMGraph line test: "
+								+ jsimTestFile.getAbsolutePath());
+						assertTrue(
+								TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
+					}
+
+				} else {
+					System.out.println(
+							"[" + timestamp + "] Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
+					assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
 				}
 
-			} else {
-				System.out.println("[" + timestamp + "] Running test on JSIMGraph test: " + jsimTestFile.getAbsolutePath());
-				assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
+			}, "Timeout exceeded for file: " + jsimTestFile.getName());
+
+		} catch (AssertionFailedError e) {
+			// Check if this error was caused by a timeout
+			if (e.getMessage() != null && e.getMessage().contains("execution timed out")) {
+				System.err.println("!!! TIMEOUT DETECTED for file: " + jsimTestFile.getName());
+				timedOutFiles.add(jsimTestFile.getName());
 			}
+			throw e; // Rethrow to ensure the test is marked as failed in JUnit
 
 		} finally {
 			if (FULL_CSV_PATH != null) {
