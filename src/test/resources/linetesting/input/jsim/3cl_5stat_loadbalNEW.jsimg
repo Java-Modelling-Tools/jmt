@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="3cl_5stat_loadbal.jsimg" timestamp="Sun Oct 26 10:32:06 CET 2025" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="500000" name="3cl_5stat_loadbal.jsimg" polling="2.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="3cl_5stat_loadbalNEW.jsimg" timestamp="Tue Jan 06 17:23:42 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Serazzi\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="500000" name="3cl_5stat_loadbalNEW.jsimg" polling="2.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass name="Class0" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
         <userClass name="Class1" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
         <userClass name="Class2" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
@@ -162,45 +162,48 @@
                         </subParameter>
                     </subParameter>
                 </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
-                    <refClass>Class0</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class1</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class2</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.String" name="serverNames">
-                    <subParameter classPath="java.lang.String" name="serverTypesNames">
-                        <value>Server0 - Server Type 1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
-                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
-                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>Class0</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class1</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class2</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
                     </subParameter>
-                </parameter>
-                <parameter classPath="java.lang.String" name="schedulingPolicy">
-                    <value>ALIS (Assign Longest Idle Server)</value>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>Server0 - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
                 </parameter>
             </section>
             <section className="Router">
@@ -301,45 +304,48 @@
                         </subParameter>
                     </subParameter>
                 </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
-                    <refClass>Class0</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class1</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class2</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.String" name="serverNames">
-                    <subParameter classPath="java.lang.String" name="serverTypesNames">
-                        <value>Server1 - Server Type 1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
-                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
-                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>Class0</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class1</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class2</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
                     </subParameter>
-                </parameter>
-                <parameter classPath="java.lang.String" name="schedulingPolicy">
-                    <value>ALIS (Assign Longest Idle Server)</value>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>Server1 - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
                 </parameter>
             </section>
             <section className="Router">
@@ -440,45 +446,48 @@
                         </subParameter>
                     </subParameter>
                 </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
-                    <refClass>Class0</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class1</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                    <refClass>Class2</refClass>
-                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.String" name="serverNames">
-                    <subParameter classPath="java.lang.String" name="serverTypesNames">
-                        <value>Server2 - Server Type 1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
-                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
-                        <value>1</value>
-                    </subParameter>
-                </parameter>
-                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
-                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>Class0</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class1</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
-                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                            <value>true</value>
+                        <refClass>Class2</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
                         </subParameter>
                     </subParameter>
-                </parameter>
-                <parameter classPath="java.lang.String" name="schedulingPolicy">
-                    <value>ALIS (Assign Longest Idle Server)</value>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>Server2 - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
                 </parameter>
             </section>
             <section className="Router">
@@ -535,58 +544,58 @@
             <position angle="0.0" rotate="false" x="474.0" y="143.0"/>
         </station>
     </jmodel>
-    <results elapsedTime="824" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-        <measure alpha="0.9" analyzedSamples="6400" discardedSamples="1490" finalValue="1.5060163852001642" name="Server0_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server0" state="1" type="2">
-            <sample lastIntervalAvgValue="1.5436831815584022" lowerBound="1.3714392220274885" meanValue="1.5060163852001642" simulationTime="20100.355218918172" upperBound="1.64059354837284"/>
-            <sample lastIntervalAvgValue="1.5436831815584022" lowerBound="1.3714392220274885" meanValue="1.5060163852001642" simulationTime="20100.355218918172" upperBound="1.64059354837284"/>
+    <results elapsedTime="1773" logDecimalSeparator="." logDelimiter="," pollingInterval="2.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.9" analyzedSamples="7680" discardedSamples="0" finalValue="1.5125118030925422" name="Server0_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server0" state="1" type="2">
+            <sample lastIntervalAvgValue="1.3902931767517932" meanValue="1.3902931767517932" simulationTime="7969.127035960945"/>
+            <sample lastIntervalAvgValue="1.5558776906728367" lowerBound="1.4022281142468433" meanValue="1.5125118030925422" simulationTime="19068.2729355904" upperBound="1.622795491938241"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="7040" discardedSamples="210" finalValue="2.3629666589206133" name="Server1_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server1" state="1" type="2">
-            <sample lastIntervalAvgValue="2.332987077542366" lowerBound="2.0084087257595833" meanValue="2.2775123529895502" simulationTime="23456.10070524171" upperBound="2.546615980219517"/>
-            <sample lastIntervalAvgValue="2.8662940815271103" lowerBound="2.1840464265161885" meanValue="2.3629666589206133" simulationTime="24537.283181660125" upperBound="2.541886891325038"/>
+        <measure alpha="0.9" analyzedSamples="7680" discardedSamples="65" finalValue="2.345831518186186" name="Server1_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server1" state="1" type="2">
+            <sample lastIntervalAvgValue="2.2800637768997962" lowerBound="2.0083520977315747" meanValue="2.3087650035419265" simulationTime="7970.247635059769" upperBound="2.6091779093522782"/>
+            <sample lastIntervalAvgValue="2.3744982710384206" lowerBound="2.1805675382036407" meanValue="2.345831518186186" simulationTime="25751.346722614966" upperBound="2.5110954981687312"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="7040" discardedSamples="435" finalValue="2.3474431418325117" name="Server2_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server2" state="1" type="2">
-            <sample lastIntervalAvgValue="2.3831450988760112" lowerBound="2.107598261489129" meanValue="2.3778187534663218" simulationTime="23455.623573117846" upperBound="2.6480392454435147"/>
-            <sample lastIntervalAvgValue="2.2737922119839284" lowerBound="2.1820881229272" meanValue="2.3474431418325117" simulationTime="24959.24221195709" upperBound="2.5127981607378236"/>
+        <measure alpha="0.9" analyzedSamples="20480" discardedSamples="11350" finalValue="2.372879799093804" name="Server2_Class0_Response Time" nodeType="station" precision="0.1" referenceClass="Class0" referenceStation="Server2" state="1" type="2">
+            <sample lastIntervalAvgValue="2.437394915532898" meanValue="2.437394915532898" simulationTime="7956.651513370847"/>
+            <sample lastIntervalAvgValue="2.3919230075891837" lowerBound="2.3065683803442067" meanValue="2.372879799093804" simulationTime="105039.71976052148" upperBound="2.4391912178434016"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="4480" discardedSamples="15" finalValue="1.587885106757283" name="Server0_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server0" state="1" type="2">
-            <sample lastIntervalAvgValue="1.590679488144157" lowerBound="1.5141894737335027" meanValue="1.587885106757283" simulationTime="13528.035021015938" upperBound="1.6615807397810634"/>
-            <sample lastIntervalAvgValue="1.590679488144157" lowerBound="1.5141894737335027" meanValue="1.587885106757283" simulationTime="13528.035021015938" upperBound="1.6615807397810634"/>
+        <measure alpha="0.9" analyzedSamples="1280" discardedSamples="5" finalValue="1.5076387186747262" name="Server0_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server0" state="1" type="2">
+            <sample lastIntervalAvgValue="1.50265822338596" lowerBound="1.4141005650074738" meanValue="1.5076387186747262" simulationTime="3795.165141836797" upperBound="1.6011768723419786"/>
+            <sample lastIntervalAvgValue="1.50265822338596" lowerBound="1.4141005650074738" meanValue="1.5076387186747262" simulationTime="3795.165141836797" upperBound="1.6011768723419786"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="3840" discardedSamples="890" finalValue="0.7877653389992179" name="Server1_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server1" state="1" type="2">
-            <sample lastIntervalAvgValue="0.807756671986031" lowerBound="0.7527086154316611" meanValue="0.7877653389992179" simulationTime="13202.93295218253" upperBound="0.8228220625667746"/>
-            <sample lastIntervalAvgValue="0.807756671986031" lowerBound="0.7527086154316611" meanValue="0.7877653389992179" simulationTime="13202.93295218253" upperBound="0.8228220625667746"/>
+        <measure alpha="0.9" analyzedSamples="1920" discardedSamples="0" finalValue="0.7281667062762099" name="Server1_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server1" state="1" type="2">
+            <sample lastIntervalAvgValue="0.7281667062762099" lowerBound="0.663463202569317" meanValue="0.7281667062762099" simulationTime="5428.895175133138" upperBound="0.7928702099831029"/>
+            <sample lastIntervalAvgValue="0.7281667062762099" lowerBound="0.663463202569317" meanValue="0.7281667062762099" simulationTime="5428.895175133138" upperBound="0.7928702099831029"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="3200" discardedSamples="45" finalValue="1.580684088841151" name="Server2_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server2" state="1" type="2">
-            <sample lastIntervalAvgValue="1.592733789410398" lowerBound="1.5071971071967385" meanValue="1.580684088841151" simulationTime="10426.92384007111" upperBound="1.6541710704855637"/>
-            <sample lastIntervalAvgValue="1.592733789410398" lowerBound="1.5071971071967385" meanValue="1.580684088841151" simulationTime="10426.92384007111" upperBound="1.6541710704855637"/>
+        <measure alpha="0.9" analyzedSamples="1600" discardedSamples="125" finalValue="1.6848206328038986" name="Server2_Class1_Response Time" nodeType="station" precision="0.1" referenceClass="Class1" referenceStation="Server2" state="1" type="2">
+            <sample lastIntervalAvgValue="1.7047201080217105" lowerBound="1.5560703855275362" meanValue="1.6848206328038986" simulationTime="5719.22936632681" upperBound="1.813570880080261"/>
+            <sample lastIntervalAvgValue="1.7047201080217105" lowerBound="1.5560703855275362" meanValue="1.6848206328038986" simulationTime="5719.22936632681" upperBound="1.813570880080261"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="12800" discardedSamples="765" finalValue="2.0586765158982336" name="Server0_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server0" state="1" type="2">
-            <sample lastIntervalAvgValue="2.122936626888762" lowerBound="1.7724861355539179" meanValue="2.0913424779252283" simulationTime="23453.305551608366" upperBound="2.410198820296539"/>
-            <sample lastIntervalAvgValue="2.061147581096777" lowerBound="1.9466687786261032" meanValue="2.0586765158982336" simulationTime="49465.14752430437" upperBound="2.170684253170364"/>
+        <measure alpha="0.9" analyzedSamples="4480" discardedSamples="535" finalValue="2.100627843947573" name="Server0_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server0" state="1" type="2">
+            <sample lastIntervalAvgValue="2.010374028881253" meanValue="2.010374028881253" simulationTime="7961.59868367162"/>
+            <sample lastIntervalAvgValue="2.123523607671198" lowerBound="2.0063428894818935" meanValue="2.100627843947573" simulationTime="18098.91486313158" upperBound="2.1949127984132524"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="3780" discardedSamples="35" finalValue="2.0039661401627806" name="Server1_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server1" state="1" type="2">
-            <sample lastIntervalAvgValue="1.9989842498493697" lowerBound="1.8403024039285436" meanValue="2.0039661401627806" simulationTime="12782.00114836801" upperBound="2.1676298763970174"/>
-            <sample lastIntervalAvgValue="1.9989842498493697" lowerBound="1.8403024039285436" meanValue="2.0039661401627806" simulationTime="12782.00114836801" upperBound="2.1676298763970174"/>
+        <measure alpha="0.9" analyzedSamples="3520" discardedSamples="135" finalValue="1.9765134387367602" name="Server1_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server1" state="1" type="2">
+            <sample lastIntervalAvgValue="1.910322558244448" meanValue="1.910322558244448" simulationTime="7968.662136914632"/>
+            <sample lastIntervalAvgValue="2.1549176037509024" lowerBound="1.7910818571237632" meanValue="1.9765134387367602" simulationTime="12124.49987765209" upperBound="2.161945020349757"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="4160" discardedSamples="575" finalValue="1.2221471431006685" name="Server2_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server2" state="1" type="2">
-            <sample lastIntervalAvgValue="1.2331941363447627" lowerBound="1.1034333617124206" meanValue="1.2221471431006685" simulationTime="10900.085834456131" upperBound="1.3408609244889165"/>
-            <sample lastIntervalAvgValue="1.2331941363447627" lowerBound="1.1034333617124206" meanValue="1.2221471431006685" simulationTime="10900.085834456131" upperBound="1.3408609244889165"/>
+        <measure alpha="0.9" analyzedSamples="8320" discardedSamples="1025" finalValue="1.3004636650575379" name="Server2_Class2_Response Time" nodeType="station" precision="0.1" referenceClass="Class2" referenceStation="Server2" state="1" type="2">
+            <sample lastIntervalAvgValue="1.1869589103373135" meanValue="1.1869589103373135" simulationTime="7967.097775541478"/>
+            <sample lastIntervalAvgValue="1.3507605227160855" lowerBound="1.2033079210931414" meanValue="1.3004636650575379" simulationTime="21567.655358818716" upperBound="1.3976194090219343"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="8960" discardedSamples="1070" finalValue="1.759757780242289" name="System Response Time" nodeType="" precision="0.1" referenceClass="" referenceStation="" state="1" type="15">
-            <sample lastIntervalAvgValue="1.7563460892979184" lowerBound="1.6107259969816932" meanValue="1.759757780242289" simulationTime="3323.213947878983" upperBound="1.9087895635028849"/>
-            <sample lastIntervalAvgValue="1.7563460892979184" lowerBound="1.6107259969816932" meanValue="1.759757780242289" simulationTime="3323.213947878983" upperBound="1.9087895635028849"/>
+        <measure alpha="0.9" analyzedSamples="11520" discardedSamples="1345" finalValue="1.5634458696649838" name="System Response Time" nodeType="" precision="0.1" referenceClass="" referenceStation="" state="1" type="15">
+            <sample lastIntervalAvgValue="1.5917942675508072" lowerBound="1.4401880442859603" meanValue="1.5634458696649838" simulationTime="4273.877645058259" upperBound="1.6867036950440073"/>
+            <sample lastIntervalAvgValue="1.5917942675508072" lowerBound="1.4401880442859603" meanValue="1.5634458696649838" simulationTime="4273.877645058259" upperBound="1.6867036950440073"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="4480" discardedSamples="1005" finalValue="0.7238178124942705" name="Server0_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server0" state="1" type="6">
-            <sample lastIntervalAvgValue="0.7177796278793114" lowerBound="0.6916604147718604" meanValue="0.7238178124942705" simulationTime="3757.9582215207215" upperBound="0.7559752102166806"/>
-            <sample lastIntervalAvgValue="0.7177796278793114" lowerBound="0.6916604147718604" meanValue="0.7238178124942705" simulationTime="3757.9582215207215" upperBound="0.7559752102166806"/>
+        <measure alpha="0.9" analyzedSamples="960" discardedSamples="140" finalValue="0.7261745371615882" name="Server0_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server0" state="1" type="6">
+            <sample lastIntervalAvgValue="0.7048521006088367" lowerBound="0.6617173617169817" meanValue="0.7261745371615882" simulationTime="738.8299373525995" upperBound="0.7906317126061947"/>
+            <sample lastIntervalAvgValue="0.7048521006088367" lowerBound="0.6617173617169817" meanValue="0.7261745371615882" simulationTime="738.8299373525995" upperBound="0.7906317126061947"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="1600" discardedSamples="30" finalValue="0.6760264475636854" name="Server1_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server1" state="1" type="6">
-            <sample lastIntervalAvgValue="0.6743119672984469" lowerBound="0.6318450755120345" meanValue="0.6760264475636854" simulationTime="1120.865189859582" upperBound="0.7202078196153362"/>
-            <sample lastIntervalAvgValue="0.6743119672984469" lowerBound="0.6318450755120345" meanValue="0.6760264475636854" simulationTime="1120.865189859582" upperBound="0.7202078196153362"/>
+        <measure alpha="0.9" analyzedSamples="17920" discardedSamples="3445" finalValue="0.6913985977772528" name="Server1_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server1" state="1" type="6">
+            <sample lastIntervalAvgValue="0.6810708793987871" meanValue="0.6810708793987871" simulationTime="7970.247635059769"/>
+            <sample lastIntervalAvgValue="0.6952617532692638" lowerBound="0.6752195920289666" meanValue="0.6913985977772528" simulationTime="14679.033915565607" upperBound="0.7075776035255389"/>
         </measure>
-        <measure alpha="0.9" analyzedSamples="3200" discardedSamples="45" finalValue="0.737812882757698" name="Server2_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server2" state="1" type="6">
-            <sample lastIntervalAvgValue="0.7355645253287462" lowerBound="0.6982135306286779" meanValue="0.737812882757698" simulationTime="2149.218979430041" upperBound="0.7774122348867181"/>
-            <sample lastIntervalAvgValue="0.7355645253287462" lowerBound="0.6982135306286779" meanValue="0.737812882757698" simulationTime="2149.218979430041" upperBound="0.7774122348867181"/>
+        <measure alpha="0.9" analyzedSamples="2240" discardedSamples="130" finalValue="0.7244235021484806" name="Server2_Utilization" nodeType="station" precision="0.1" referenceClass="" referenceStation="Server2" state="1" type="6">
+            <sample lastIntervalAvgValue="0.7139614993929748" lowerBound="0.6649268773084229" meanValue="0.7244235021484806" simulationTime="1562.7337037131927" upperBound="0.7839201269885383"/>
+            <sample lastIntervalAvgValue="0.7139614993929748" lowerBound="0.6649268773084229" meanValue="0.7244235021484806" simulationTime="1562.7337037131927" upperBound="0.7839201269885383"/>
         </measure>
     </results>
 </archive>
