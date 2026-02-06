@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="tp31bd10f7.jsimg" timestamp="Fri Feb 06 20:57:48 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Calogero\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="10000" name="tp31bd10f7.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass customers="2" name="ClosedClass" priority="0" referenceSource="Delay" softDeadline="0.0" type="closed"/>
+        <userClass name="OpenClass" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
+        <node name="Delay">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Erlang" name="Erlang"/>
+                        <subParameter classPath="jmt.engine.random.ErlangPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="alpha">
+                                <value>3.0</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Long" name="r">
+                                <value>2</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
+                        <subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="p">
+                                <value>0.5</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Double" name="lambda1">
+                                <value>3.0</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Double" name="lambda2">
+                                <value>10.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Queue1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Queue1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Queue1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>waiting queue</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>waiting queue</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
+                        <subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="p">
+                                <value>0.1</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Double" name="lambda1">
+                                <value>1.0</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Double" name="lambda2">
+                                <value>10.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue1 - Server Type 1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Delay</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Delay</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Source">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <value>null</value>
+                    </subParameter>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.1</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>ClosedClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.DisabledRoutingStrategy" name="Disabled"/>
+                    <refClass>OpenClass</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Delay</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink">
+            <section className="JobSink"/>
+        </node>
+        <measure alpha="0.01" name="Delay_ClosedClass_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="ClosedClass" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay_OpenClass_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="OpenClass" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_ClosedClass_Number of Customers" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="ClosedClass" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_OpenClass_Number of Customers" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="OpenClass" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay_ClosedClass_Utilization" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="ClosedClass" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Delay_OpenClass_Utilization" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="OpenClass" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_ClosedClass_Utilization" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="ClosedClass" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_OpenClass_Utilization" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="OpenClass" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Delay_ClosedClass_Response Time" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="ClosedClass" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Delay_OpenClass_Response Time" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="OpenClass" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_ClosedClass_Response Time" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="ClosedClass" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_OpenClass_Response Time" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="OpenClass" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Delay_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="ClosedClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Delay_OpenClass_Throughput" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="OpenClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="ClosedClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_OpenClass_Throughput" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="OpenClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Source_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceNode="Source" referenceUserClass="ClosedClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Source_OpenClass_Throughput" nodeType="station" precision="0.03" referenceNode="Source" referenceUserClass="OpenClass" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Delay_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="ClosedClass" type="Arrival Rate" verbose="false"/>
+        <measure alpha="0.01" name="Delay_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Delay" referenceUserClass="OpenClass" type="Arrival Rate" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="ClosedClass" type="Arrival Rate" verbose="false"/>
+        <measure alpha="0.01" name="Queue1_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Queue1" referenceUserClass="OpenClass" type="Arrival Rate" verbose="false"/>
+        <measure alpha="0.01" name="Source_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Source" referenceUserClass="ClosedClass" type="Arrival Rate" verbose="false"/>
+        <measure alpha="0.01" name="Source_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceNode="Source" referenceUserClass="OpenClass" type="Arrival Rate" verbose="false"/>
+        <connection source="Delay" target="Queue1"/>
+        <connection source="Queue1" target="Delay"/>
+        <connection source="Queue1" target="Sink"/>
+        <connection source="Source" target="Delay"/>
+        <preload>
+            <stationPopulations stationName="Delay">
+                <classPopulation population="2" refClass="ClosedClass"/>
+            </stationPopulations>
+        </preload>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="ClosedClass"/>
+        <userClass color="#FFFF0000" name="OpenClass"/>
+        <station name="Delay">
+            <position angle="0.0" rotate="false" x="164.0" y="70.0"/>
+        </station>
+        <station name="Queue1">
+            <position angle="0.0" rotate="false" x="283.0" y="90.0"/>
+        </station>
+        <station name="Source">
+            <position angle="0.0" rotate="false" x="25.0" y="93.0"/>
+        </station>
+        <station name="Sink">
+            <position angle="0.0" rotate="false" x="452.0" y="93.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="977" logDecimalSeparator="." logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="1035" finalValue="1.4528306118166412" name="Delay_ClosedClass_Number of Customers" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Delay" state="2" type="0">
+            <sample lastIntervalAvgValue="1.4505168261001202" lowerBound="1.3900825131253696" meanValue="1.4528306118166412" simulationTime="2536.5599665494" upperBound="1.5155787105079128"/>
+            <sample lastIntervalAvgValue="1.4505168261001202" lowerBound="1.3900825131253696" meanValue="1.4528306118166412" simulationTime="2536.5599665494" upperBound="1.5155787105079128"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.02196069355781146" name="Delay_OpenClass_Number of Customers" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Delay" state="2" type="0">
+            <sample lastIntervalAvgValue="0.022206192566488786" lowerBound="0.01699552724272163" meanValue="0.02196069355781146" simulationTime="49561.46502979363" upperBound="0.02692585987290129"/>
+            <sample lastIntervalAvgValue="0.022206192566488786" lowerBound="0.01699552724272163" meanValue="0.02196069355781146" simulationTime="49561.46502979363" upperBound="0.02692585987290129"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="1035" finalValue="0.5471693881833589" name="Queue1_ClosedClass_Number of Customers" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Queue1" state="2" type="0">
+            <sample lastIntervalAvgValue="0.5494831738998786" lowerBound="0.4830296873598074" meanValue="0.5471693881833589" simulationTime="2536.5599665494" upperBound="0.6113090890069105"/>
+            <sample lastIntervalAvgValue="0.5494831738998786" lowerBound="0.4830296873598074" meanValue="0.5471693881833589" simulationTime="2536.5599665494" upperBound="0.6113090890069105"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.16390738729320414" name="Queue1_OpenClass_Number of Customers" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Queue1" state="2" type="0">
+            <sample lastIntervalAvgValue="0.17149752156437106" lowerBound="0.12898413620214866" meanValue="0.16390738729320414" simulationTime="49564.192341458365" upperBound="0.19883063838425963"/>
+            <sample lastIntervalAvgValue="0.17149752156437106" lowerBound="0.12898413620214866" meanValue="0.16390738729320414" simulationTime="49564.192341458365" upperBound="0.19883063838425963"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="1035" finalValue="1.4528306118166412" name="Delay_ClosedClass_Utilization" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Delay" state="2" type="6">
+            <sample lastIntervalAvgValue="1.4505168261001202" lowerBound="1.3900825131253696" meanValue="1.4528306118166412" simulationTime="2536.5599665494" upperBound="1.5155787105079128"/>
+            <sample lastIntervalAvgValue="1.4505168261001202" lowerBound="1.3900825131253696" meanValue="1.4528306118166412" simulationTime="2536.5599665494" upperBound="1.5155787105079128"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.02196069355781146" name="Delay_OpenClass_Utilization" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Delay" state="2" type="6">
+            <sample lastIntervalAvgValue="0.022206192566488786" lowerBound="0.01699552724272163" meanValue="0.02196069355781146" simulationTime="49561.46502979363" upperBound="0.02692585987290129"/>
+            <sample lastIntervalAvgValue="0.022206192566488786" lowerBound="0.01699552724272163" meanValue="0.02196069355781146" simulationTime="49561.46502979363" upperBound="0.02692585987290129"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="15" finalValue="0.40215662358729604" name="Queue1_ClosedClass_Utilization" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Queue1" state="2" type="6">
+            <sample lastIntervalAvgValue="0.4058436436774971" lowerBound="0.32881750336724236" meanValue="0.40215662358729604" simulationTime="2199.8967435055456" upperBound="0.4754957438073497"/>
+            <sample lastIntervalAvgValue="0.4058436436774971" lowerBound="0.32881750336724236" meanValue="0.40215662358729604" simulationTime="2199.8967435055456" upperBound="0.4754957438073497"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.09578098846855662" name="Queue1_OpenClass_Utilization" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Queue1" state="2" type="6">
+            <sample lastIntervalAvgValue="0.09578040352537769" meanValue="0.09578098846855662" simulationTime="2201.1789280600988"/>
+            <sample lastIntervalAvgValue="0.09578040352537769" meanValue="0.09578098846855662" simulationTime="2201.1789280600988"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="35" finalValue="0.6664371791764866" name="Delay_ClosedClass_Response Time" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Delay" state="2" type="2">
+            <sample lastIntervalAvgValue="0.6666172321535231" lowerBound="0.601983907379755" meanValue="0.6664371791764866" simulationTime="4599.641886789229" upperBound="0.7308904509732181"/>
+            <sample lastIntervalAvgValue="0.6666172321535231" lowerBound="0.601983907379755" meanValue="0.6664371791764866" simulationTime="4599.641886789229" upperBound="0.7308904509732181"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="435" finalValue="0.21581381850173853" name="Delay_OpenClass_Response Time" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Delay" state="2" type="2">
+            <sample lastIntervalAvgValue="0.21945628493647062" lowerBound="0.18561448716448462" meanValue="0.2221785123407118" simulationTime="50674.55206160362" upperBound="0.25874253751693893"/>
+            <sample lastIntervalAvgValue="0.2178849392331697" lowerBound="0.1862344769036573" meanValue="0.21581381850173853" simulationTime="105070.34847283683" upperBound="0.24539316009981976"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="515" finalValue="0.2598299921670995" name="Queue1_ClosedClass_Response Time" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Queue1" state="2" type="2">
+            <sample lastIntervalAvgValue="0.25364592904529765" lowerBound="0.1929893355044493" meanValue="0.2598299921670995" simulationTime="4832.634579239803" upperBound="0.3266706488297497"/>
+            <sample lastIntervalAvgValue="0.25364592904529765" lowerBound="0.1929893355044493" meanValue="0.2598299921670995" simulationTime="4832.634579239803" upperBound="0.3266706488297497"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="1.7110183376346144" name="Queue1_OpenClass_Response Time" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Queue1" state="2" type="2">
+            <sample lastIntervalAvgValue="1.7021644856643592" lowerBound="1.4042789520095291" meanValue="1.6661862007403891" simulationTime="50675.65200195464" upperBound="1.9280934494712492"/>
+            <sample lastIntervalAvgValue="1.7017669940503937" lowerBound="1.556081013475325" meanValue="1.7110183376346144" simulationTime="100107.70006774752" upperBound="1.865955661793904"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="60" finalValue="2.153603625672908" name="Delay_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Delay" state="2" type="5">
+            <sample lastIntervalAvgValue="2.1831736188444504" lowerBound="1.903585019155338" meanValue="2.153603625672908" simulationTime="4608.428717329989" upperBound="2.479227666755725"/>
+            <sample lastIntervalAvgValue="2.1831736188444504" lowerBound="1.903585019155338" meanValue="2.153603625672908" simulationTime="4608.428717329989" upperBound="2.479227666755725"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000584273344208" name="Delay_OpenClass_Throughput" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Delay" state="2" type="5">
+            <sample lastIntervalAvgValue="0.10070143281772727" lowerBound="0.0880758976423617" meanValue="0.10136616022326268" simulationTime="50674.55206160362" upperBound="0.11938008609388866"/>
+            <sample lastIntervalAvgValue="0.09818355882638692" lowerBound="0.09032295053784235" meanValue="0.10000584273344208" simulationTime="107588.35786366242" upperBound="0.11201409042106511"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="585" finalValue="2.160203795192455" name="Queue1_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Queue1" state="2" type="5">
+            <sample lastIntervalAvgValue="2.1774891816443467" lowerBound="1.9855282762024093" meanValue="2.160203795192455" simulationTime="4861.562614977451" upperBound="2.3685778430252453"/>
+            <sample lastIntervalAvgValue="2.1774891816443467" lowerBound="1.9855282762024093" meanValue="2.160203795192455" simulationTime="4861.562614977451" upperBound="2.3685778430252453"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000573489819406" name="Queue1_OpenClass_Throughput" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Queue1" state="2" type="5">
+            <sample lastIntervalAvgValue="0.1006992470428041" lowerBound="0.08806902099567698" meanValue="0.101367015458934" simulationTime="50675.65200195464" upperBound="0.1193950949550116"/>
+            <sample lastIntervalAvgValue="0.09817165198320295" lowerBound="0.09030436807253357" meanValue="0.10000573489819406" simulationTime="107596.36064966182" upperBound="0.11204241224157992"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="Source_ClosedClass_Throughput" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Source" state="3" type="5">
+            <sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000601147505178" name="Source_OpenClass_Throughput" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Source" state="2" type="5">
+            <sample lastIntervalAvgValue="0.10070163583130662" lowerBound="0.08809073155863119" meanValue="0.10136632633778184" simulationTime="50674.44990216886" upperBound="0.1193533050514346"/>
+            <sample lastIntervalAvgValue="0.09818365620840466" lowerBound="0.09031826056157535" meanValue="0.10000601147505178" simulationTime="107588.19925510505" upperBound="0.11202172777461271"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="760" finalValue="2.168035778723199" name="Delay_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Delay" state="2" type="4">
+            <sample lastIntervalAvgValue="2.173925889178185" lowerBound="1.9542425645858865" meanValue="2.168035778723199" simulationTime="4950.03075015957" upperBound="2.4343528291897707"/>
+            <sample lastIntervalAvgValue="2.173925889178185" lowerBound="1.9542425645858865" meanValue="2.168035778723199" simulationTime="4950.03075015957" upperBound="2.4343528291897707"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000601147505178" name="Delay_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Delay" state="2" type="4">
+            <sample lastIntervalAvgValue="0.10070163583130662" lowerBound="0.08809073155863119" meanValue="0.10136632633778184" simulationTime="50674.44990216886" upperBound="0.1193533050514346"/>
+            <sample lastIntervalAvgValue="0.09818365620840466" lowerBound="0.09031826056157535" meanValue="0.10000601147505178" simulationTime="107588.19925510505" upperBound="0.11202172777461271"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="60" finalValue="2.153603625672908" name="Queue1_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Queue1" state="2" type="4">
+            <sample lastIntervalAvgValue="2.1831736188444504" lowerBound="1.903585019155338" meanValue="2.153603625672908" simulationTime="4608.428717329989" upperBound="2.479227666755725"/>
+            <sample lastIntervalAvgValue="2.1831736188444504" lowerBound="1.903585019155338" meanValue="2.153603625672908" simulationTime="4608.428717329989" upperBound="2.479227666755725"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000584273344208" name="Queue1_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Queue1" state="2" type="4">
+            <sample lastIntervalAvgValue="0.10070143281772727" lowerBound="0.0880758976423617" meanValue="0.10136616022326268" simulationTime="50674.55206160362" upperBound="0.11938008609388866"/>
+            <sample lastIntervalAvgValue="0.09818355882638692" lowerBound="0.09032295053784235" meanValue="0.10000584273344208" simulationTime="107588.35786366242" upperBound="0.11201409042106511"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="Source_ClosedClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="ClosedClass" referenceStation="Source" state="3" type="4">
+            <sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="690" finalValue="0.10000601147505178" name="Source_OpenClass_Arrival Rate" nodeType="station" precision="0.03" referenceClass="OpenClass" referenceStation="Source" state="2" type="4">
+            <sample lastIntervalAvgValue="0.10070163583130662" lowerBound="0.08809073155863119" meanValue="0.10136632633778184" simulationTime="50674.44990216886" upperBound="0.1193533050514346"/>
+            <sample lastIntervalAvgValue="0.09818365620840466" lowerBound="0.09031826056157535" meanValue="0.10000601147505178" simulationTime="107588.19925510505" upperBound="0.11202172777461271"/>
+        </measure>
+    </results>
+</archive>
