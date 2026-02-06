@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="simple_cpn.jsimg" timestamp="Thu Nov 06 20:39:45 CET 2025" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="simple_cpn.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="simple_cpn.jsimg" timestamp="Fri Feb 06 20:55:15 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="simple_cpn.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass customers="30" name="Class1" priority="0" referenceSource="Place 1" softDeadline="0.0" type="closed"/>
         <userClass customers="0" name="Class2" priority="0" referenceSource="Place 1" softDeadline="0.0" type="closed"/>
         <node name="Place 1">
@@ -317,38 +317,32 @@
             <position angle="0.0" rotate="false" x="25.0" y="93.0"/>
         </station>
     </jmodel>
-    <results elapsedTime="7376" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-        <measure alpha="0.99" analyzedSamples="48640" discardedSamples="12265" finalValue="16.85863617065562" name="Place 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Place 1" state="1" type="0">
-            <sample lastIntervalAvgValue="17.04715632982149" meanValue="17.04715632982149" simulationTime="398.6068783716225"/>
-            <sample lastIntervalAvgValue="16.996819052511626" meanValue="17.033936539671238" simulationTime="844.8381787670376"/>
-            <sample lastIntervalAvgValue="16.82860187727931" lowerBound="16.522227268533108" meanValue="16.85863617065562" simulationTime="1757.0608562161817" upperBound="17.19504507277813"/>
+    <results elapsedTime="5333" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="56320" discardedSamples="3405" finalValue="16.770283529427065" name="Place 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Place 1" state="1" type="0">
+            <sample lastIntervalAvgValue="16.551105673360333" lowerBound="15.961015071770932" meanValue="16.566311510552826" simulationTime="606.7447052260839" upperBound="17.17160794933472"/>
+            <sample lastIntervalAvgValue="16.795446806601813" lowerBound="16.44342337464749" meanValue="16.770283529427065" simulationTime="1687.4504647359734" upperBound="17.09714368420664"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="48640" discardedSamples="12265" finalValue="13.14136382934437" name="Place 1_Class2_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class2" referenceStation="Place 1" state="1" type="0">
-            <sample lastIntervalAvgValue="12.952901388284868" meanValue="12.952901388284868" simulationTime="398.6144287784616"/>
-            <sample lastIntervalAvgValue="13.003065675858265" meanValue="12.966022172051945" simulationTime="844.8092804380676"/>
-            <sample lastIntervalAvgValue="13.171424371192225" lowerBound="12.813643766965114" meanValue="13.14136382934437" simulationTime="1757.0608562161817" upperBound="13.469083891723624"/>
+        <measure alpha="0.99" analyzedSamples="56320" discardedSamples="3405" finalValue="13.229716470572939" name="Place 1_Class2_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class2" referenceStation="Place 1" state="1" type="0">
+            <sample lastIntervalAvgValue="13.448894326639623" lowerBound="12.816313962036581" meanValue="13.433688489447174" simulationTime="606.7447052260839" upperBound="14.051063016857768"/>
+            <sample lastIntervalAvgValue="13.204553193398242" lowerBound="12.971208509806932" meanValue="13.229716470572939" simulationTime="1687.4504647359734" upperBound="13.488224431338946"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="105" finalValue="2.9289524917133756" name="Transition 1_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="Transition 1" state="1" type="28">
-            <sample lastIntervalAvgValue="2.8501812122183985" meanValue="2.8696517119940173" simulationTime="398.57114878524175"/>
-            <sample lastIntervalAvgValue="2.984953336610639" lowerBound="2.554921971333971" meanValue="2.867901374536614" simulationTime="844.8092804380676" upperBound="3.2682658055463962"/>
-            <sample lastIntervalAvgValue="2.9127725753743294" lowerBound="2.6688580881814024" meanValue="2.969450573103496" simulationTime="3333.160091372401" upperBound="3.3463485550672107"/>
-            <sample lastIntervalAvgValue="2.9488294825690864" lowerBound="2.7900939681334416" meanValue="2.9190851074890065" simulationTime="5325.476037319051" upperBound="3.0605813735554315"/>
-            <sample lastIntervalAvgValue="2.905379134388162" lowerBound="2.831973870268426" meanValue="2.9208106653658157" simulationTime="7636.706238059823" upperBound="3.0154014391721864"/>
-            <sample lastIntervalAvgValue="2.9550668685334687" lowerBound="2.831973870268426" meanValue="2.9208106653658157" simulationTime="10147.64772605477" upperBound="3.0154014391721864"/>
-            <sample lastIntervalAvgValue="2.9064769724266273" lowerBound="2.831973870268426" meanValue="2.9208106653658157" simulationTime="12209.594218958317" upperBound="3.0154014391721864"/>
-            <sample lastIntervalAvgValue="2.9364690566149436" lowerBound="2.8882826825840575" meanValue="2.9289524917133756" simulationTime="14030.148053148103" upperBound="2.9707839990426375"/>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="50" finalValue="2.9148059416330465" name="Transition 1_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="Transition 1" state="1" type="28">
+            <sample lastIntervalAvgValue="3.0098738135659957" lowerBound="2.8283864486487182" meanValue="2.9882303436997684" simulationTime="606.6699513348094" upperBound="3.1672233212720213"/>
+            <sample lastIntervalAvgValue="2.966367665062854" lowerBound="2.863118879849378" meanValue="2.965801819003806" simulationTime="5197.806835815185" upperBound="3.0761239761802526"/>
+            <sample lastIntervalAvgValue="2.91428009091972" lowerBound="2.863118879849378" meanValue="2.965801819003806" simulationTime="9464.040558077708" upperBound="3.0761239761802526"/>
+            <sample lastIntervalAvgValue="2.892248138634978" lowerBound="2.8287345668839206" meanValue="2.9309837481591763" simulationTime="13751.36287816477" upperBound="3.040902066504922"/>
+            <sample lastIntervalAvgValue="2.8974930460016033" lowerBound="2.8287345668839206" meanValue="2.9309837481591763" simulationTime="17980.881225727775" upperBound="3.040902066504922"/>
+            <sample lastIntervalAvgValue="2.935992688933697" lowerBound="2.8721153194611433" meanValue="2.9148059416330465" simulationTime="21031.978741659736" upperBound="2.958784803936006"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="595" finalValue="5.7653822189930874" name="Transition 1_Mode2_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode2" referenceStation="Transition 1" state="1" type="28">
-            <sample lastIntervalAvgValue="5.853144319142442" meanValue="5.853144319142442" simulationTime="398.58918092452114"/>
-            <sample lastIntervalAvgValue="5.552714010194599" lowerBound="4.973470173523751" meanValue="5.778887153087985" simulationTime="844.497253167058" upperBound="6.895574877426057"/>
-            <sample lastIntervalAvgValue="5.693134519761111" lowerBound="5.400479725017064" meanValue="5.626393464338987" simulationTime="3333.1087466812673" upperBound="5.872033309291992"/>
-            <sample lastIntervalAvgValue="5.794670774716563" lowerBound="5.467622982573323" meanValue="5.67461804794535" simulationTime="5325.111476217633" upperBound="5.897902787387755"/>
-            <sample lastIntervalAvgValue="5.806590724264663" lowerBound="5.654380292085698" meanValue="5.7653822189930874" simulationTime="7225.538167888321" upperBound="5.880829603874102"/>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="20" finalValue="5.802955215449242" name="Transition 1_Mode2_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode2" referenceStation="Transition 1" state="1" type="28">
+            <sample lastIntervalAvgValue="5.825502790425549" lowerBound="5.394726000432239" meanValue="5.926487636394985" simulationTime="606.1279390001052" upperBound="6.5745447729161155"/>
+            <sample lastIntervalAvgValue="5.818019553337376" lowerBound="5.573227363243337" meanValue="5.809847623112546" simulationTime="5197.896625077405" upperBound="6.0674509331842605"/>
+            <sample lastIntervalAvgValue="5.791200715276203" lowerBound="5.621338460878966" meanValue="5.82142269211317" simulationTime="9464.36936791025" upperBound="6.036276088523088"/>
+            <sample lastIntervalAvgValue="5.788404723722386" lowerBound="5.710676233288048" meanValue="5.802955215449242" simulationTime="10588.340532769667" upperBound="5.898265457298241"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="0" finalValue="26.129022447346582" name="Transition 1_Mode3_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode3" referenceStation="Transition 1" state="1" type="28">
-            <sample lastIntervalAvgValue="25.91727557795373" lowerBound="24.599493120833976" meanValue="25.877961530617927" simulationTime="398.6144287784616" upperBound="27.296602295181906"/>
-            <sample lastIntervalAvgValue="26.027016325658995" lowerBound="24.9634585113959" meanValue="25.96672114601642" simulationTime="844.8046433883171" upperBound="27.05400111665557"/>
-            <sample lastIntervalAvgValue="26.248992310387916" lowerBound="25.504911468293628" meanValue="26.129022447346582" simulationTime="1569.2895979011846" upperBound="26.784443875140354"/>
+        <measure alpha="0.99" analyzedSamples="46080" discardedSamples="1405" finalValue="26.580729049096245" name="Transition 1_Mode3_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode3" referenceStation="Transition 1" state="1" type="28">
+            <sample lastIntervalAvgValue="26.678436351526855" lowerBound="25.49726908437729" meanValue="26.82588945103993" simulationTime="606.7447052260839" upperBound="28.3005860091627"/>
+            <sample lastIntervalAvgValue="26.570977560182623" lowerBound="26.064920938051845" meanValue="26.580729049096245" simulationTime="1784.6464188198267" upperBound="27.117364341829553"/>
         </measure>
     </results>
 </archive>
