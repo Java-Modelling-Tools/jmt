@@ -20,7 +20,6 @@ package jmt.engine.NodeSections;
 
 import java.util.*;
 
-import jmt.common.exception.IncorrectDistributionParameterException;
 import jmt.common.exception.NetException;
 import jmt.engine.NetStrategies.ImpatienceStrategies.Balking;
 import jmt.engine.NetStrategies.ImpatienceStrategies.Impatience;
@@ -31,10 +30,8 @@ import jmt.engine.NetStrategies.QueueGetStrategies.PollingGetStrategy;
 import jmt.engine.NetStrategies.QueueGetStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.PreemptiveStrategy;
 import jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy;
-import jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix;
 import jmt.engine.NetStrategies.TransitionUtilities.TransitionVector;
-import jmt.engine.NetStrategies.VacationStrategies.QueueIdleAckBody;
 import jmt.engine.QueueNet.*;
 import jmt.engine.NetStrategies.QueuePutStrategy;
 import jmt.engine.NetStrategies.ServiceStrategy;
@@ -95,7 +92,6 @@ public class Queue extends InputSection {
 	private boolean[] block;
 	private boolean[] waiting;
 	private boolean[] retrial;
-	private boolean delayOffEnabled;
 
 	private JobClassList jobClasses;
 
@@ -118,8 +114,6 @@ public class Queue extends InputSection {
 	private QueuePutStrategy[] putStrategies;
 	// Class soft deadlines for the overall station
 	private double[] softDeadlines;
-	private ServiceTimeStrategy[] delayOffDistributions;
-	private ServiceTimeStrategy[] setUpDistributions;
 	private boolean workingAsTransition;
 	private TransitionMatrix[] enablingConditions;
 	private TransitionMatrix[] inhibitingConditions;
@@ -349,7 +343,7 @@ public class Queue extends InputSection {
 	 * @throws NetException
 	 */
 	@Override
-	protected int process(NetMessage message) throws NetException, IncorrectDistributionParameterException {
+	protected int process(NetMessage message) throws NetException {
 		NetSystem netSystem = getOwnerNode().getNetSystem();
 		Job job = message.getJob();
 		JobInfo jobInfo = null;
@@ -357,7 +351,7 @@ public class Queue extends InputSection {
 		Job jobSent = null;
 		boolean isRetrialJob = false;
 		int mode = 0;
-		NetNode sourceNode = message.getSource();
+        NetNode sourceNode = message.getSource();
 		int sourceSection = message.getSourceSection();
 		boolean comingFromStorageSection = sourceNode != null && sourceSection > 0 && (sourceNode.getSection(sourceSection) instanceof Linkage);
 
@@ -386,7 +380,7 @@ public class Queue extends InputSection {
 							if (getOwnerNode().getServer() != null) {
 								jobSent = getStrategy.get(jobsList, getOwnerNode());
 								if (jobSent != null) {
-									sendForward(jobSent, 0.0);
+							sendForward(jobSent, 0.0);
 								}
 							} else{
 								sendForward(jobSent, 0.0);
@@ -496,7 +490,7 @@ public class Queue extends InputSection {
 						addJobToBuffer(job, message, BufferType.FJ_LIST);
 					}
 
-					if (softDeadlines != null) {
+			if (softDeadlines != null) {
 						job.setCurrentStationSoftDeadline(softDeadlines[job.getJobClass().getId()]
 								+ getOwnerNode().getNetSystem().getTime());
 					}
@@ -507,8 +501,8 @@ public class Queue extends InputSection {
 
 					if(!(workingAsTransition && savedEnablingDegree == 0)) {
 						if (coolStart) {
+							jobSent = getStrategy.get(jobsList);
 							if (getStrategy instanceof PollingGetStrategy) {
-								jobSent = getStrategy.get(jobsList);
 								if (!switchOverRequest) {
 									if (jobSent == null) {
 										sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);
@@ -519,24 +513,13 @@ public class Queue extends InputSection {
 									}
 								}
 							} else {
-								if (server != null) {
-									jobSent = getStrategy.get(jobsList, getOwnerNode());
-									if (jobSent != null) {
-										sendForward(jobSent, 0.0);
-									}
-								} else {
-									jobSent = getStrategy.get(jobsList);
-									sendForward(jobSent, 0.0);
-								}
+								sendForward(jobSent, 0.0);
 								isJobInQueue = false;
 							}
 
 							coolStart = false;
 						} else {
-							// coolStart is false: the server is not idle
-							if (server != null && server.isInVacation()) {
-								// do nothing
-							} else if (putStrategies[jobClass] instanceof PreemptiveStrategy) {
+							if (putStrategies[jobClass] instanceof PreemptiveStrategy) {
 								PreemptiveStrategy preemptiveStrategy = (PreemptiveStrategy) putStrategies[jobClass];
 								Job lastJobInService = ((PreemptiveServer) getOwnerNode().getSection(NodeSection.SERVICE)).getLastJobInfo().getJob();
 								if (preemptiveStrategy.compare(job, lastJobInService) > 0) {
@@ -554,15 +537,6 @@ public class Queue extends InputSection {
 										sendForward(jobSent, 0.0);
 										isJobInQueue = false;
 									}
-								}
-							} else if (server != null && server.hasFreeServers()) {
-								if (jobsList.size() > 0) {
-									jobSent = getStrategy.get(jobsList, getOwnerNode());
-									if (jobSent != null) {
-										sendForward(jobSent, 0.0);
-									}
-								} else if (server.getNumOfFreeServersForClass(job.getJobClass().getId()) > 0) {
-									sendForward(job, 0.0);
 								}
 							}
 						}
@@ -660,22 +634,22 @@ public class Queue extends InputSection {
 							coolStart = true;
 						}
 					} else {
-						jobSent = getStrategy.get(jobsList);
-						if (getStrategy instanceof PollingGetStrategy) {
-							if (!switchOverRequest) {
-								if (jobSent == null) {
-									sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);
-									switchOverRequest = true;
-								} else {
-									sendForward(jobSent, 0.0);
-									cancelRenegingEvent(jobSent);
-								}
+					jobSent = getStrategy.get(jobsList);
+					if (getStrategy instanceof PollingGetStrategy) {
+						if (!switchOverRequest) {
+							if (jobSent == null) {
+								sendForward(NetEvent.EVENT_POLLING_SERVER_NEXT, null, 0.0);
+								switchOverRequest = true;
+							} else {
+								sendForward(jobSent, 0.0);
+								cancelRenegingEvent(jobSent);
 							}
-						} else {
-							sendForward(jobSent, 0.0);
-							cancelRenegingEvent(jobSent);
 						}
-						coolStart = false;
+					} else {
+						sendForward(jobSent, 0.0);
+						cancelRenegingEvent(jobSent);
+					}
+					coolStart = false;
 					}
 				} else {
 					// GC: new section, if it is not execute then it will be "wait-and-see" polling
@@ -685,24 +659,9 @@ public class Queue extends InputSection {
 							switchOverRequest = true;
 						}
 					}
-
-					// The queue notifies the server that it became idle
-					// so that the server could choose to start a vacation.
-					// Sets coolStart to true if the downstream is not a server
-					// or the server replies to not start a vacation
-					if(getOwnerNode().getServer() != null) {
-						sendForward(NetEvent.EVENT_QUEUE_IDLE, null, 0.0);
-					} else {
-						coolStart = true;
-					}
-				}
-				break;
-
-			case NetEvent.EVENT_QUEUE_IDLE_ACK:
-				QueueIdleAckBody body = (QueueIdleAckBody) message.getData();
-				if (!body.isServerStartsVacation()) {
 					coolStart = true;
 				}
+
 				break;
 
 			case NetEvent.EVENT_PREEMPTED_JOB:
@@ -794,7 +753,7 @@ public class Queue extends InputSection {
 					if(enablingJobNumberFromNode - resourceJobNumberFromNode > 0){
 						send(NetEvent.EVENT_JOB_REQUEST_FROM_SERVER, new RequestToPlace(
 								enablingConditions[mode].getVector(nodeName),
-										resourceConditions[mode].getVector(nodeName)),
+								resourceConditions[mode].getVector(nodeName)),
 								0.0, NodeSection.OUTPUT, netSystem.getNode(nodeName)
 						);
 
@@ -991,7 +950,7 @@ public class Queue extends InputSection {
 
 	public boolean isStationWorkingAsATransition(){ return workingAsTransition; }
 
-	public void setSoftDeadlines(double[] softDeadlines) {
+public void setSoftDeadlines(double[] softDeadlines) {
 		this.softDeadlines = softDeadlines;
 	}
 
