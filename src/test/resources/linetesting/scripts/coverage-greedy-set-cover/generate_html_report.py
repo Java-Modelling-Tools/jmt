@@ -1,86 +1,130 @@
 import os
 import csv
 import json
+import html
 
-KEEP_CSV_NAME = "detailed_suite_keep.csv"
-DISCARD_CSV_NAME = "detailed_suite_discard.csv"
-GOLDEN_CSV_NAME = "class_golden_standard.csv"
-HTML_NAME = "coverage_dashboard.html"
+# --- CONFIGURATION ---
+KEEP_CSV = "optimized_suite_KEEP.csv"
+DISCARD_CSV = "optimized_suite_DISCARD.csv"
+OUTPUT_HTML = "coverage_dashboard.html"
 
-def read_csv_detailed(file_path):
+# Path to actual Java source code root (src/main/java)
+# Adjust ".." depth based on where this script runs relative to 'src'
+SOURCE_CODE_ROOT = os.path.join("..", "..", "..", "..", "..", "main", "java")
+
+def read_csv_data(file_path):
     if not os.path.exists(file_path):
         print(f"Warning: {file_path} not found.")
         return []
 
-    grouped_data = {}
-
-    with open(file_path, 'r') as f:
+    data = []
+    with open(file_path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            test_id = row['TEST_ID']
-            pkg = row['PACKAGE']
-            cls = row['CLASS']
-            full_class_name = f"{pkg}.{cls}"
+            # Basic stats
+            try:
+                i_cov = int(row.get('INSTRUCTION_COVERED', 0))
+                i_miss = int(row.get('INSTRUCTION_MISSED', 0))
+            except: 
+                continue
+
+            pkg = row.get('PACKAGE', '')
+            cls_raw = row.get('CLASS', '')
             
-            if test_id not in grouped_data:
-                grouped_data[test_id] = {
-                    'name': test_id,
-                    'justification': row.get('DECISION_JUSTIFICATION', 'N/A'),
-                    'total_instructions': 0,
-                    'classes_touched': 0,
-                    'details': []
+            # --- ROBUST CLASS NAME EXTRACTION ---
+            # Handle "jmt/pkg/MyClass" or "jmt.pkg.MyClass"
+            cls_clean = cls_raw.replace('\\', '/').replace('.', '/')
+            if '/' in cls_clean:
+                cls_simple = cls_clean.split('/')[-1]
+            else:
+                cls_simple = cls_clean
+
+            # Parse line numbers
+            cov_str = row.get('SPECIFIC_LINES_COVERED', '')
+            miss_str = row.get('SPECIFIC_LINES_MISSED', '')
+            
+            cov_lines = set()
+            if cov_str and cov_str.strip():
+                try: cov_lines = set(int(x) for x in cov_str.split())
+                except ValueError: pass
+
+            miss_lines = set()
+            if miss_str and miss_str.strip():
+                try: miss_lines = set(int(x) for x in miss_str.split())
+                except ValueError: pass
+
+            # Find existing entry for this test file or create new
+            test_id = row.get('TEST_ID', 'Unknown')
+            
+            entry = next((item for item in data if item["name"] == test_id), None)
+            if not entry:
+                entry = {
+                    "name": test_id,
+                    "justification": row.get('OPTIMIZER_DECISION', 'N/A'),
+                    "total_instructions": 0,
+                    "classes_touched": 0,
+                    "details": []
                 }
+                data.append(entry)
             
-            try:
-                i_cov = int(row['INSTRUCTION_COVERED'])
-                i_miss = int(row['INSTRUCTION_MISSED'])
-                b_cov = int(row['BRANCH_COVERED'])
-                b_miss = int(row['BRANCH_MISSED'])
-                l_cov = int(row['LINE_COVERED'])
-                l_miss = int(row['LINE_MISSED'])
-                c_cov = int(row['COMPLEXITY_COVERED'])
-                c_miss = int(row['COMPLEXITY_MISSED'])
-                m_cov = int(row['METHOD_COVERED'])
-                m_miss = int(row['METHOD_MISSED'])
-            except ValueError:
-                continue
+            entry["total_instructions"] += i_cov
+            entry["classes_touched"] += 1
+            
+            # Read Source Code & Generate HTML View
+            source_html = generate_source_view(pkg, cls_simple, cov_lines, miss_lines)
 
-            grouped_data[test_id]['classes_touched'] += 1
-            grouped_data[test_id]['total_instructions'] += i_cov
-
-            grouped_data[test_id]['details'].append({
-                'class_name': full_class_name,
-                'inst_cov': i_cov, 'inst_miss': i_miss,
-                'br_cov': b_cov,   'br_miss': b_miss,
-                'ln_cov': l_cov,   'ln_miss': l_miss,
-                'cx_cov': c_cov,   'cx_miss': c_miss,
-                'mt_cov': m_cov,   'mt_miss': m_miss
+            entry["details"].append({
+                "class_name": f"{pkg}.{cls_simple}",
+                "inst_cov": i_cov,
+                "inst_miss": i_miss,
+                "source_html": source_html
             })
+            
+    # Sort by coverage contribution
+    data.sort(key=lambda x: x["total_instructions"], reverse=True)
+    return data
 
-    result_list = list(grouped_data.values())
-    result_list.sort(key=lambda x: x['total_instructions'], reverse=True)
-    return result_list
-
-def read_golden_standard(file_path):
-    if not os.path.exists(file_path):
-        print(f"Warning: {file_path} not found.")
-        return []
-
-    golden_data = []
-    with open(file_path, 'r') as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                row['INSTRUCTION_COVERED'] = int(row['INSTRUCTION_COVERED'])
-                row['INSTRUCTION_MISSED'] = int(row['INSTRUCTION_MISSED'])
-                golden_data.append(row)
-            except ValueError:
-                continue
+def generate_source_view(pkg, cls_simple, cov_lines, miss_lines):
+    """
+    Reads the .java file and returns an HTML string with colored lines.
+    """
+    pkg_path = pkg.replace('.', os.sep).replace('/', os.sep)
+    rel_path = os.path.join(pkg_path, f"{cls_simple}.java")
+    full_path = os.path.join(SOURCE_CODE_ROOT, rel_path)
+    full_path = os.path.normpath(full_path)
     
-    golden_data.sort(key=lambda x: x['CLASS_FULL_NAME'])
-    return golden_data
+    if not os.path.exists(full_path):
+        return f"<div style='padding:15px; color:#999; font-style:italic;'>Source file not found.<br><small>{full_path}</small></div>"
 
-def generate_html(keep_data, discard_data, golden_data, output_path):
+    html_lines = []
+    try:
+        with open(full_path, 'r', encoding='utf-8') as f:
+            lines = f.readlines()
+            
+        html_lines.append("<table class='code-table'>")
+        for i, raw_line in enumerate(lines, start=1):
+            line_content = html.escape(raw_line.rstrip())
+            
+            row_class = ""
+            if i in cov_lines:
+                row_class = "cov-line"
+            elif i in miss_lines:
+                row_class = "miss-line"
+                
+            html_lines.append(
+                f"<tr class='{row_class}'>"
+                f"<td class='line-num'>{i}</td>"
+                f"<td class='code-text'><pre>{line_content}</pre></td>"
+                f"</tr>"
+            )
+        html_lines.append("</table>")
+        
+    except Exception as e:
+        return f"Error reading source: {str(e)}"
+
+    return "".join(html_lines)
+
+def generate_html(keep_data, discard_data, output_path):
     total_keep = len(keep_data)
     total_discard = len(discard_data)
     total_files = total_keep + total_discard
@@ -88,7 +132,11 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
     
     json_keep = json.dumps(keep_data)
     json_discard = json.dumps(discard_data)
-    json_golden = json.dumps(golden_data)
+    
+    # Chart Data
+    top_files = keep_data[:10]
+    chart_labels = json.dumps([f["name"][:20] + "..." for f in top_files])
+    chart_values = json.dumps([f["total_instructions"] for f in top_files])
 
     html_content = f"""
 <!DOCTYPE html>
@@ -96,83 +144,78 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JMT Detailed Coverage Report</title>
+    <title>JMT Coverage Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root {{ --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --bg: #f4f4f9; }}
+        :root {{ --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --bg: #f4f4f9; --green-bg: #d4edda; --red-bg: #f8d7da; }}
         body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; color: #333; }}
         .container {{ max-width: 1400px; margin: 0 auto; }}
         
+        /* CARDS */
         .stats-grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }}
         .card {{ background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }}
         .card h2 {{ margin: 0; font-size: 2.5em; color: #3498db; }}
+        .card p {{ margin: 5px 0 0; color: #7f8c8d; font-weight: 600; }}
         
+        /* CHARTS */
         .charts-row {{ display: flex; gap: 20px; margin-bottom: 30px; height: 350px; }}
-        .chart-box {{ flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }}
+        .chart-box {{ flex: 1; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }}
 
-        .table-container {{ background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; margin-top: 20px; }}
-        
-        table {{ width: 100%; border-collapse: collapse; }} 
-        th, td {{ padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; word-wrap: break-word; vertical-align: middle; }}
-        th {{ background-color: var(--primary); color: white; }}
-        
-        /* Tabs */
+        /* TABS */
         .tab-nav {{ display: flex; margin-bottom: 20px; border-bottom: 2px solid #ddd; }}
-        .tab-btn {{ padding: 10px 20px; cursor: pointer; border: none; background: none; font-size: 1.1em; color: #777; font-weight: 600; }}
+        .tab-btn {{ padding: 12px 24px; cursor: pointer; border: none; background: none; font-size: 1.1em; color: #7f8c8d; font-weight: 600; transition: color 0.2s; }}
+        .tab-btn:hover {{ color: var(--primary); }}
         .tab-btn.active {{ color: var(--primary); border-bottom: 3px solid var(--primary); }}
         .tab-content {{ display: none; }}
         .tab-content.active {{ display: block; }}
 
-        tr.parent-row {{ cursor: pointer; transition: background 0.1s; }}
-        tr.parent-row:hover {{ background-color: #f1f1f1; }}
-        tr.parent-row td {{ font-weight: 500; }}
-        .expand-btn {{ font-weight: bold; margin-right: 10px; display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: #eee; border-radius: 50%; }}
+        /* TABLES & LISTS */
+        .table-container {{ background: white; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow: hidden; }}
+        
+        /* SEARCH */
+        .search-box {{ float: right; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px; margin-bottom: 10px; }}
+        .section-header {{ margin-bottom: 15px; overflow: hidden; }}
 
-        tr.child-row {{ background-color: #f9f9f9; display: none; }}
-        tr.child-row td {{ padding: 0; }}
+        /* HIERARCHY STYLES */
+        table {{ width: 100%; border-collapse: collapse; table-layout: fixed; }}
+        th, td {{ padding: 12px 15px; text-align: left; border-bottom: 1px solid #eee; word-wrap: break-word; vertical-align: middle; }}
+        th {{ background-color: var(--primary); color: white; }}
         
-        .detail-table {{ margin: 15px; width: calc(100% - 30px); border: 1px solid #ddd; font-size: 0.9em; background: white; }}
-        .detail-table th {{ background-color: #ecf0f1; color: #2c3e50; font-weight: 600; padding: 8px; }}
-        .detail-table td {{ padding: 6px 8px; border-bottom: 1px solid #ddd; }}
+        /* Level 1: File Row */
+        tr.parent-row {{ cursor: pointer; background: white; }}
+        tr.parent-row:hover {{ background-color: #f1f1f1; }}
+        .expand-btn {{ font-weight: bold; display: inline-block; width: 24px; height: 24px; line-height: 24px; text-align: center; background: #eee; border-radius: 50%; margin-right: 10px; }}
+
+        /* Level 2: Classes List */
+        tr.child-row {{ display: none; background-color: #f9f9f9; }}
+        .inner-table {{ width: 95%; margin: 10px auto; border: 1px solid #ddd; background: white; }}
+        .inner-table th {{ background: #ecf0f1; color: #2c3e50; font-size: 0.9em; }}
         
-        .highlight-row {{ background-color: #fffacd !important; }} 
-        .cov-val {{ color: var(--success); font-weight: bold; }}
-        .miss-val {{ color: #e67e22; font-size: 0.9em; }}
-        .zero-val {{ color: #bdc3c7; }}
+        /* Level 3: Source Code */
+        tr.code-row {{ display: none; }}
+        .code-container {{ padding: 0; background: #fff; border-top: 1px solid #eee; }}
+        
+        /* CODE VIEW STYLING */
+        .code-table {{ width: 100%; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; border-collapse: collapse; }}
+        .code-table td {{ padding: 2px 5px; border: none; }}
+        .line-num {{ width: 40px; text-align: right; color: #999; border-right: 1px solid #ddd; background: #fafafa; user-select: none; }}
+        .code-text pre {{ margin: 0; tab-size: 4; white-space: pre-wrap; }}
+        
+        .cov-line {{ background-color: var(--green-bg); }}
+        .miss-line {{ background-color: var(--red-bg); }}
+
         .badge {{ padding: 4px 8px; border-radius: 4px; font-size: 0.85em; font-weight: bold; }}
         .badge-keep {{ background-color: #d5f5e3; color: var(--success); }}
         .badge-discard {{ background-color: #fadbd8; color: var(--danger); }}
-        .search-box {{ float: right; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 250px; }}
-        h2.section-header {{ margin-top: 10px; border-bottom: 2px solid #ddd; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }}
-
-        /* SPINNER */
-        .spinner-overlay {{
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 255, 255, 0.7);
-            z-index: 9999;
-            display: none; /* Hidden by default */
-            justify-content: center; align-items: center; flex-direction: column;
-        }}
-        .spinner {{
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
-            border-radius: 50%;
-            width: 60px; height: 60px;
-            animation: spin 1s linear infinite;
-        }}
-        .loading-text {{ margin-top: 15px; font-weight: bold; color: #2c3e50; font-size: 1.2em; }}
-        @keyframes spin {{ 0% {{ transform: rotate(0deg); }} 100% {{ transform: rotate(360deg); }} }}
+        
+        .cov-val {{ color: var(--success); font-weight: bold; }}
+        .miss-val {{ color: #e67e22; font-size: 0.9em; }}
     </style>
 </head>
 <body>
 
-<div id="loadingSpinner" class="spinner-overlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Searching...</div>
-</div>
-
 <div class="container">
-    <h1 style="text-align:center;">Detailed Coverage Optimization Report</h1>
+    <h1 style="text-align:center;">Coverage Optimization Dashboard</h1>
     
     <div class="stats-grid">
         <div class="card"><h2>{total_files}</h2><p>Total Files</p></div>
@@ -183,26 +226,25 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
 
     <div class="charts-row">
         <div class="chart-box"><canvas id="splitChart"></canvas></div>
-        <div class="chart-box"><canvas id="coverageChart"></canvas></div>
+        <div class="chart-box"><canvas id="barChart"></canvas></div>
     </div>
 
     <div class="tab-nav">
-        <button class="tab-btn active" onclick="openTab('tabFiles')">File Analysis</button>
-        <button class="tab-btn" onclick="openTab('tabGolden')">Golden Standard (Per Class)</button>
+        <button class="tab-btn active" onclick="openTab('tabKeep')">Optimized Suite (Keep)</button>
+        <button class="tab-btn" onclick="openTab('tabDiscard')">Redundant Files (Discard)</button>
     </div>
 
-    <div id="tabFiles" class="tab-content active">
-        <h2 class="section-header">
-            Selected Test Suite (Keep)
-            <input type="text" id="keepSearch" class="search-box" placeholder="Search file or class..." onkeyup="triggerSearch('keepTableBody', 'keepSearch', false)">
-        </h2>
+    <div id="tabKeep" class="tab-content active">
+        <div class="section-header">
+            <input type="text" id="searchKeep" class="search-box" placeholder="Search file..." onkeyup="filterTable('keepTableBody', 'searchKeep')">
+        </div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th style="width: 50px"></th>
                         <th style="width: 30%">Test File</th>
-                        <th style="width: 30%">Role / Justification</th>
+                        <th style="width: 30%">Decision / Justification</th>
                         <th style="width: 15%">Classes</th>
                         <th style="width: 15%">Instr. Covered</th>
                     </tr>
@@ -210,11 +252,12 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
                 <tbody id="keepTableBody"></tbody>
             </table>
         </div>
+    </div>
 
-        <h2 class="section-header">
-            Redundant Files (Discard)
-            <input type="text" id="discardSearch" class="search-box" placeholder="Search file or class..." onkeyup="triggerSearch('discardTableBody', 'discardSearch', false)">
-        </h2>
+    <div id="tabDiscard" class="tab-content">
+        <div class="section-header">
+            <input type="text" id="searchDiscard" class="search-box" placeholder="Search file..." onkeyup="filterTable('discardTableBody', 'searchDiscard')">
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -231,228 +274,93 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
         </div>
     </div>
 
-    <div id="tabGolden" class="tab-content">
-        <h2 class="section-header">
-            Golden Standard Coverage Per Class
-            <input type="text" id="goldenSearch" class="search-box" placeholder="Search class name..." onkeyup="triggerSearch('goldenTableBody', 'goldenSearch', true)">
-        </h2>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 35%">Class Full Name</th>
-                        <th style="width: 25%">Best Test File</th>
-                        <th>Instructions (Cov/Miss)</th>
-                        <th>Branches (Cov/Miss)</th>
-                        <th>Lines (Cov/Miss)</th>
-                    </tr>
-                </thead>
-                <tbody id="goldenTableBody"></tbody>
-            </table>
-        </div>
-    </div>
-
 </div>
 
 <script>
     const keepData = {json_keep};
     const discardData = {json_discard};
-    const goldenData = {json_golden};
 
-    // --- RENDER FUNCTIONS ---
-    function renderTable(tableBodyId, data, isKeep) {{
-        const tbody = document.getElementById(tableBodyId);
+    // --- RENDER TABLE ---
+    function renderTable(tbodyId, data, isKeep) {{
+        const tbody = document.getElementById(tbodyId);
         let html = "";
         
-        data.forEach((file, index) => {{
-            const uniqueId = tableBodyId + '_' + index;
+        data.forEach((file, fIdx) => {{
+            const fileId = tbodyId + '_f_' + fIdx;
             
-            let childRowsHtml = "";
-            file.details.forEach(det => {{
-                childRowsHtml += `
-                <tr class="inner-row" data-class-name="${{det.class_name.toLowerCase()}}">
-                    <td title="${{det.class_name}}" style="word-break: break-all;">${{det.class_name}}</td>
-                    <td><span class="cov-val">${{det.inst_cov}}</span> / <span class="${{det.inst_miss > 0 ? 'miss-val' : 'zero-val'}}">${{det.inst_miss}}</span></td>
-                    <td><span class="cov-val">${{det.br_cov}}</span> / <span class="${{det.br_miss > 0 ? 'miss-val' : 'zero-val'}}">${{det.br_miss}}</span></td>
-                    <td><span class="cov-val">${{det.ln_cov}}</span> / <span class="${{det.ln_miss > 0 ? 'miss-val' : 'zero-val'}}">${{det.ln_miss}}</span></td>
-                    <td><span class="cov-val">${{det.cx_cov}}</span> / <span class="${{det.cx_miss > 0 ? 'miss-val' : 'zero-val'}}">${{det.cx_miss}}</span></td>
-                    <td><span class="cov-val">${{det.mt_cov}}</span> / <span class="${{det.mt_miss > 0 ? 'miss-val' : 'zero-val'}}">${{det.mt_miss}}</span></td>
-                </tr>`;
+            // Build Inner Classes Rows
+            let classesHtml = "";
+            file.details.forEach((det, cIdx) => {{
+                const codeId = fileId + '_c_' + cIdx;
+                classesHtml += `
+                <tr style="cursor:pointer;" onclick="toggleDisplay('${{codeId}}')">
+                    <td style="width:30px; text-align:center; color:#7f8c8d;">&#9654;</td>
+                    <td><b>${{det.class_name}}</b></td>
+                    <td colspan="3"><span class="cov-val">${{det.inst_cov}}</span> / <span class="miss-val">${{det.inst_miss}}</span> (Instructions)</td>
+                </tr>
+                <tr id="${{codeId}}" class="code-row">
+                    <td colspan="5">
+                        <div class="code-container">
+                            ${{det.source_html}}
+                        </div>
+                    </td>
+                </tr>
+                `;
             }});
 
+            // Build Parent File Row
             html += `
-            <tr class="parent-row" id="parent_${{uniqueId}}" data-file-name="${{file.name.toLowerCase()}}" onclick="toggleDetails('${{uniqueId}}', this)">
+            <tr class="parent-row" onclick="toggleFile('${{fileId}}', this)">
                 <td style="text-align:center;"><span class="expand-btn">+</span></td>
-                <td style="word-break: break-all;"><b>${{file.name}}</b></td>
+                <td title="${{file.name}}">${{file.name}}</td>
                 <td><span class="badge ${{isKeep ? 'badge-keep' : 'badge-discard'}}">${{file.justification}}</span></td>
                 <td>${{file.classes_touched}}</td>
-                <td>${{file.total_instructions.toLocaleString()}}</td>
+                <td>${{file.total_instructions}}</td>
             </tr>
-            <tr id="${{uniqueId}}" class="child-row">
-                <td colspan="5">
-                    <table class="detail-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 30%">Class Name</th>
-                                <th>Instructions</th>
-                                <th>Branches</th>
-                                <th>Lines</th>
-                                <th>Complexity</th>
-                                <th>Methods</th>
-                            </tr>
-                        </thead>
-                        <tbody>${{childRowsHtml}}</tbody>
+            <tr id="${{fileId}}" class="child-row">
+                <td colspan="5" style="padding:10px 20px;">
+                    <table class="inner-table">
+                        ${{classesHtml}}
                     </table>
                 </td>
-            </tr>`;
+            </tr>
+            `;
         }});
         tbody.innerHTML = html;
     }}
 
-    function renderGoldenTable(tableBodyId, data) {{
-        const tbody = document.getElementById(tableBodyId);
-        let html = "";
-        data.forEach(item => {{
-            html += `
-            <tr>
-                <td style="word-break: break-all;"><b>${{item.CLASS_FULL_NAME}}</b></td>
-                <td style="word-break: break-all;">${{item.GOLDEN_TEST_FILE}}</td>
-                <td><span class="cov-val">${{item.INSTRUCTION_COVERED}}</span> / <span class="${{item.INSTRUCTION_MISSED > 0 ? 'miss-val' : 'zero-val'}}">${{item.INSTRUCTION_MISSED}}</span></td>
-                <td><span class="cov-val">${{item.BRANCH_COVERED}}</span> / <span class="${{item.BRANCH_MISSED > 0 ? 'miss-val' : 'zero-val'}}">${{item.BRANCH_MISSED}}</span></td>
-                <td><span class="cov-val">${{item.LINE_COVERED}}</span> / <span class="${{item.LINE_MISSED > 0 ? 'miss-val' : 'zero-val'}}">${{item.LINE_MISSED}}</span></td>
-            </tr>`;
-        }});
-        tbody.innerHTML = html;
+    // --- UI INTERACTIONS ---
+    function toggleFile(id, row) {{
+        const el = document.getElementById(id);
+        const btn = row.querySelector('.expand-btn');
+        const isHidden = (el.style.display === "none" || el.style.display === "");
+        
+        el.style.display = isHidden ? "table-row" : "none";
+        btn.innerText = isHidden ? "-" : "+";
+        btn.style.backgroundColor = isHidden ? "#2c3e50" : "#eee";
+        btn.style.color = isHidden ? "white" : "#333";
     }}
 
-    // --- UI LOGIC ---
-    function toggleDetails(rowId, btnElement) {{
-        const icon = btnElement.querySelector('.expand-btn');
-        const row = document.getElementById(rowId);
-        
-        if (row.style.display !== "table-row") {{
-            row.style.display = "table-row";
-            icon.innerText = "-";
-            icon.style.backgroundColor = "#27ae60";
-            icon.style.color = "white";
-        }} else {{
-            row.style.display = "none";
-            icon.innerText = "+";
-            icon.style.backgroundColor = "#eee";
-            icon.style.color = "#333";
-        }}
-    }}
-
-    function expandRow(rowId) {{
-        const row = document.getElementById(rowId);
-        const parentId = "parent_" + rowId;
-        const parentRow = document.getElementById(parentId);
-        
-        if (row.style.display !== "table-row") {{
-            row.style.display = "table-row";
-            const icon = parentRow.querySelector('.expand-btn');
-            icon.innerText = "-";
-            icon.style.backgroundColor = "#27ae60";
-            icon.style.color = "white";
-        }}
-    }}
-
-    function collapseRow(rowId) {{
-        const row = document.getElementById(rowId);
-        const parentId = "parent_" + rowId;
-        const parentRow = document.getElementById(parentId);
-        
-        if (row.style.display === "table-row") {{
-            row.style.display = "none";
-            const icon = parentRow.querySelector('.expand-btn');
-            icon.innerText = "+";
-            icon.style.backgroundColor = "#eee";
-            icon.style.color = "#333";
-        }}
-    }}
-
-    // --- ASYNC SEARCH TRIGGER ---
-    let searchTimeout;
-    function triggerSearch(tbodyId, inputId, isGolden) {{
-        // 1. Show Spinner
-        document.getElementById('loadingSpinner').style.display = 'flex';
-
-        // 2. Debounce & Async Execution
-        clearTimeout(searchTimeout);
-        
-        // We use a small timeout to allow the UI thread to paint the spinner
-        // before the heavy filtering loop starts.
-        searchTimeout = setTimeout(() => {{
-            if (isGolden) {{
-                filterGoldenTable(tbodyId, inputId);
-            }} else {{
-                filterTable(tbodyId, inputId);
-            }}
-            
-            // 3. Hide Spinner immediately after work is done
-            document.getElementById('loadingSpinner').style.display = 'none';
-        }}, 50); 
+    function toggleDisplay(id) {{
+        const el = document.getElementById(id);
+        el.style.display = (el.style.display === "none" || el.style.display === "") ? "table-row" : "none";
     }}
 
     function filterTable(tbodyId, inputId) {{
-        const filter = document.getElementById(inputId).value.toLowerCase().trim();
-        const tbody = document.getElementById(tbodyId);
-        const rows = tbody.children; 
-        
-        for (let i = 0; i < rows.length; i += 2) {{
-            const parentRow = rows[i];
-            const childRow = rows[i+1];
-            const uniqueId = childRow.id;
-            const fileName = parentRow.getAttribute('data-file-name') || "";
-            
-            const innerRows = childRow.querySelectorAll('.inner-row');
-            let hasClassMatch = false;
-
-            innerRows.forEach(inner => {{
-                const className = inner.getAttribute('data-class-name');
-                if (filter) {{
-                    if (className.includes(filter)) {{
-                        inner.style.display = ""; 
-                        inner.classList.add('highlight-row');
-                        hasClassMatch = true;
-                    }} else {{
-                        inner.style.display = "none"; 
-                        inner.classList.remove('highlight-row');
-                    }}
-                }} else {{
-                    inner.style.display = ""; 
-                    inner.classList.remove('highlight-row');
-                }}
-            }});
-            
-            if (!filter) {{
-                parentRow.style.display = "";
-                collapseRow(uniqueId);
-            }} 
-            else if (hasClassMatch) {{
-                parentRow.style.display = "";
-                expandRow(uniqueId);
-            }} 
-            else if (fileName.includes(filter)) {{
-                // Reset inner rows to visible if file name matches
-                innerRows.forEach(inner => inner.style.display = "");
-                parentRow.style.display = "";
-                collapseRow(uniqueId);
-            }} 
-            else {{
-                parentRow.style.display = "none";
-                collapseRow(uniqueId); // Ensure closed if hidden
-            }}
-        }}
-    }}
-    
-    function filterGoldenTable(tbodyId, inputId) {{
         const filter = document.getElementById(inputId).value.toLowerCase();
-        const rows = document.getElementById(tbodyId).rows;
-        for (let i = 0; i < rows.length; i++) {{
-            const txt = rows[i].innerText.toLowerCase();
-            rows[i].style.display = txt.includes(filter) ? "" : "none";
-        }}
+        const rows = document.getElementById(tbodyId).querySelectorAll('.parent-row');
+        
+        rows.forEach(row => {{
+            const txt = row.innerText.toLowerCase();
+            const childRow = row.nextElementSibling;
+            
+            if (txt.includes(filter)) {{
+                row.style.display = "";
+            }} else {{
+                row.style.display = "none";
+                if(childRow) childRow.style.display = "none";
+            }}
+        }});
     }}
 
     function openTab(tabName) {{
@@ -462,33 +370,32 @@ def generate_html(keep_data, discard_data, golden_data, output_path):
         event.currentTarget.classList.add('active');
     }}
 
-    // --- INIT ---
-    renderTable('keepTableBody', keepData, true);
-    renderTable('discardTableBody', discardData, false);
-    renderGoldenTable('goldenTableBody', goldenData);
-
+    // --- CHARTS ---
     new Chart(document.getElementById('splitChart'), {{
         type: 'doughnut',
         data: {{ labels: ['Keep', 'Discard'], datasets: [{{ data: [{total_keep}, {total_discard}], backgroundColor: ['#2ecc71', '#e74c3c'] }}] }},
         options: {{ maintainAspectRatio: false, plugins: {{ title: {{ display: true, text: 'Test Suite Composition' }} }} }}
     }});
-    
-    const topFiles = keepData.slice(0, 10);
-    new Chart(document.getElementById('coverageChart'), {{
+
+    new Chart(document.getElementById('barChart'), {{
         type: 'bar',
-        data: {{ labels: topFiles.map(d => d.name.length > 20 ? d.name.substring(0, 20) + '...' : d.name), datasets: [{{ label: 'Instr. Covered', data: topFiles.map(d => d.total_instructions), backgroundColor: '#3498db' }}] }},
-        options: {{ maintainAspectRatio: false, plugins: {{ title: {{ display: true, text: 'Top 10 Contributors' }} }} }}
+        data: {{ labels: {chart_labels}, datasets: [{{ label: 'Instr. Covered', data: {chart_values}, backgroundColor: '#3498db' }}] }},
+        options: {{ maintainAspectRatio: false, indexAxis: 'y', plugins: {{ title: {{ display: true, text: 'Top 10 Contributors' }} }} }}
     }});
+
+    // INIT
+    renderTable('keepTableBody', keepData, true);
+    renderTable('discardTableBody', discardData, false);
 
 </script>
 </body>
 </html>
     """
     
-    with open(output_path, "w") as f:
+    with open(output_path, "w", encoding='utf-8') as f:
         f.write(html_content)
     
-    print(f"Success! Detailed Dashboard generated at: {os.path.abspath(output_path)}")
+    print(f"Success! Dashboard generated at: {os.path.abspath(output_path)}")
 
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -498,22 +405,20 @@ def main():
         print(f"Error: Output directory not found at {output_dir}")
         return
 
-    keep_path = os.path.join(output_dir, KEEP_CSV_NAME)
-    discard_path = os.path.join(output_dir, DISCARD_CSV_NAME)
-    golden_path = os.path.join(output_dir, GOLDEN_CSV_NAME)
-    html_path = os.path.join(output_dir, HTML_NAME)
+    keep_path = os.path.join(output_dir, KEEP_CSV)
+    discard_path = os.path.join(output_dir, DISCARD_CSV)
+    html_path = os.path.join(output_dir, OUTPUT_HTML)
     
-    print("Reading detailed CSV data...")
-    keep_data = read_csv_detailed(keep_path)
-    discard_data = read_csv_detailed(discard_path)
-    golden_data = read_golden_standard(golden_path)
+    print("Reading data...")
+    k_data = read_csv_data(keep_path)
+    d_data = read_csv_data(discard_path)
     
-    if not keep_data and not discard_data:
-        print("Error: No data found in CSV files.")
+    if not k_data and not d_data:
+        print("Error: No data found.")
         return
 
     print("Generating HTML Report...")
-    generate_html(keep_data, discard_data, golden_data, html_path)
+    generate_html(k_data, d_data, html_path)
 
 if __name__ == "__main__":
     main()
