@@ -1,5 +1,8 @@
 package linetesting;
 
+import static linetesting.TestConstants.JMVA_TESTS_FOLDER_NAME;
+import static linetesting.TestConstants.JSIM_TESTS_FOLDER_NAME;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,8 +34,30 @@ import jmt.jmva.gui.JMVAWizard;
 
 public class TestUtil {
 
-	final static String JSIM_TESTS_FOLDER_NAME = "jsim"; // must be same as in LineTest
-	final static String JMVA_TESTS_FOLDER_NAME = "jmva"; // must be same as in LineTest
+	private static File createOutputFile(File testModel, String toolFolderName) throws IOException {
+		String parentFolderName = FileUtil.getParentFolderName(testModel);
+
+		if (parentFolderName == null) {
+			throw new RuntimeException("Line test model does not have parent folder");
+		}
+
+		List<String> folderHierarchy = new ArrayList<>();
+		folderHierarchy.add("linetesting");
+		folderHierarchy.add("output");
+		folderHierarchy.add(toolFolderName);
+
+		if (!parentFolderName.equals(toolFolderName)) {
+			folderHierarchy.add(parentFolderName);
+		}
+
+		File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
+
+		if (!modelOutputFile.exists()) {
+			throw new FileNotFoundException("Could not create model output file");
+		}
+
+		return modelOutputFile;
+	}
 
 	private static List<String> testJSIMGraph(File testModel) {
 
@@ -92,25 +117,7 @@ public class TestUtil {
 
 			// System.out.println("Simulation truly finished");
 
-			// Get the model file parent folder name
-			String parentFolderName = FileUtil.getParentFolderName(testModel);
-
-			if (parentFolderName == null) {
-				throw new RuntimeException("Line test model does not have parent folder");
-			}
-
-			List<String> folderHierarchy = new ArrayList<String>();
-			folderHierarchy.add("linetesting");
-			folderHierarchy.add("output");
-			folderHierarchy.add(JSIM_TESTS_FOLDER_NAME);
-			if (!parentFolderName.equals(JSIM_TESTS_FOLDER_NAME)) {
-				folderHierarchy.add(parentFolderName);
-			}
-			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
-
-			if (!modelOutputFile.exists()) {
-				throw new FileNotFoundException("Could not create model output file");
-			}
+			File modelOutputFile = createOutputFile(testModel, JSIM_TESTS_FOLDER_NAME);
 
 			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 
@@ -175,25 +182,7 @@ public class TestUtil {
 			// solve() is synchronous from the caller’s point of view, even though it
 			// internally uses a background thread.
 
-			// Get the model file parent folder name
-			String parentFolderName = FileUtil.getParentFolderName(testModel);
-
-			if (parentFolderName == null) {
-				throw new RuntimeException("Line test model does not have parent folder");
-			}
-
-			List<String> folderHierarchy = new ArrayList<String>();
-			folderHierarchy.add("linetesting");
-			folderHierarchy.add("output");
-			folderHierarchy.add(JMVA_TESTS_FOLDER_NAME);
-			if (!parentFolderName.equals(JMVA_TESTS_FOLDER_NAME)) {
-				folderHierarchy.add(parentFolderName);
-			}
-			File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
-
-			if (!modelOutputFile.exists()) {
-				throw new FileNotFoundException("Could not create model output file");
-			}
+			File modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
 
 			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 
@@ -282,67 +271,69 @@ public class TestUtil {
 		}
 	}
 
+	private static List<String> getExpectedMeanValues(File testResults) throws Exception {
+		Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResults);
+		solutionDoc.getDocumentElement().normalize();
+
+		XPath xPath = XPathFactory.newInstance().newXPath();
+		NodeList solutionNodes = (NodeList) xPath.evaluate("//solutions/measure", solutionDoc, XPathConstants.NODESET);
+
+		List<String> meanValues = new ArrayList<>();
+		for (int i = 0; i < solutionNodes.getLength(); i++) {
+			Element solution = (Element) solutionNodes.item(i);
+			meanValues.add(solution.getAttribute("meanValue"));
+		}
+		return meanValues;
+	}
+
+	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+
+		// Bulletproof size check
+		if (testModelFinalValues.size() != simulatedModelFinalValues.size()) {
+			System.err.println("Mismatch in number of results! Expected: " + testModelFinalValues.size() + ", Got: "
+					+ simulatedModelFinalValues.size());
+			return false;
+		}
+
+		int i = 0;
+
+		for (String testModelFinalValue : testModelFinalValues) {
+			String simulatedModelFinalValue = simulatedModelFinalValues.get(i);
+//			System.out.println("testModelFinalValue: " + testModelFinalValue);
+//			System.out.println("simulatedModelFinalValue: " + simulatedModelFinalValue);
+//			System.out.println("match: " + testModelFinalValue.equals(simulatedModelFinalValue));
+			if (!testModelFinalValue.equals(simulatedModelFinalValue)) {
+				return false;
+			}
+			i++;
+		}
+
+		return true;
+
+	}
+
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
 
 		try {
+			return checkResults(getExpectedMeanValues(testResults), testJSIMGraph(testModel));
 
-			List<String> finalValues = testJSIMGraph(testModel);
-
-			// === Parse second file: model.jsim-result.jsim ===
-			Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResults);
-			solutionDoc.getDocumentElement().normalize();
-
-			XPath xPath = XPathFactory.newInstance().newXPath();
-			NodeList solutionNodes = (NodeList) xPath.evaluate("//solutions/measure", solutionDoc,
-					XPathConstants.NODESET);
-
-			boolean isDoResultsMatch = true;
-			int i = 0;
-
-			while (isDoResultsMatch && i < solutionNodes.getLength()) {
-				Element solution = (Element) solutionNodes.item(i);
-				String meanValue = solution.getAttribute("meanValue");
-				String finalValue = finalValues.get(i);
-//				System.out.println("finalValue: " + finalValue);
-//				System.out.println("meanValue: " + meanValue);
-//				System.out.println("match: " + finalValue.equals(meanValue));
-				isDoResultsMatch = finalValue.equals(meanValue);
-				i++;
-			}
-
-			return isDoResultsMatch;
-
-		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
-				| ParserConfigurationException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			// System.exit(0); 
-	        // Returning false causes the assertTrue() in LineTest to fail gracefully
-	        return false;
+			// Returning false causes the assertTrue() in LineTest to fail gracefully
+			return false;
 		}
 
 	}
 
 	public static boolean testJSIMGraphModel(File testModel) {
 
-		List<String> testModelFinalValues = getJSIMGraphModelFinalValues(testModel); // get sim results first before
-																						// running simulation, otherwise
-																						// results will be overwritten
-		List<String> simulatedModelFinalValues = testJSIMGraph(testModel);
+		return checkResults(getJSIMGraphModelFinalValues(testModel), testJSIMGraph(testModel));
 
-		boolean isDoResultsMatch = true;
-		int i = 0;
+	}
 
-		while (isDoResultsMatch && i < testModelFinalValues.size()) {
-			String testModelFinalValue = testModelFinalValues.get(i);
-			String simulatedModelFinalValue = simulatedModelFinalValues.get(i);
-//			System.out.println("testModelFinalValue: " + testModelFinalValue);
-//			System.out.println("simulatedModelFinalValue: " + simulatedModelFinalValue);
-//			System.out.println("match: " + testModelFinalValue.equals(simulatedModelFinalValue));
-			isDoResultsMatch = testModelFinalValue.equals(simulatedModelFinalValue);
-			i++;
-		}
+	public static boolean testJMVAModel(File testModel) {
 
-		return isDoResultsMatch;
+		return checkResults(getJMVAModelFinalValues(testModel), testJMVA(testModel));
 
 	}
 
