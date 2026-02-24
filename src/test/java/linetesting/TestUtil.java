@@ -114,16 +114,10 @@ public class TestUtil {
 			mediator.updateStationPositions();
 			modelLoader.saveModel(model, jsimGraphMain, modelOutputFile);
 
-			// Closes everything gui (sadly it opens automatically)
-			Method doClose = JSIMGraphMain.class.getDeclaredMethod("doClose");
-			doClose.setAccessible(true);
-			doClose.invoke(jsimGraphMain);
-			jsimGraphMain.dispose();
-
 			return modelOutputFile;
 
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
-				| IOException | NoSuchMethodException | InvocationTargetException e) {
+				| IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
@@ -174,12 +168,6 @@ public class TestUtil {
 
 			// Save model
 			modelLoader.saveModel(data, jmvaWizard, modelOutputFile);
-
-			// Closes everything gui (sadly it opens automatically)
-			Method doClose = JMVAWizard.class.getDeclaredMethod("doClose");
-			doClose.setAccessible(true);
-			doClose.invoke(jmvaWizard);
-			jmvaWizard.dispose();
 
 			return modelOutputFile;
 
@@ -249,21 +237,24 @@ public class TestUtil {
 
 			modelLoader.saveModel(model, jsimWizMain, modelOutputFile);
 
-			// Closes everything gui (sadly it opens automatically)
-			Method doClose = JSIMWizMain.class.getDeclaredMethod("doClose");
-			doClose.setAccessible(true);
-			doClose.invoke(jsimWizMain);
-			jsimWizMain.dispose();
-
 			return modelOutputFile;
 
 		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
-				| IOException | NoSuchMethodException | InvocationTargetException e) {
+				| IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
 		}
 
+	}
+
+	// Aggressively dispose ALL open Swing windows tied to the JVM.
+	public static void closeGUI() {
+		for (java.awt.Window window : java.awt.Window.getWindows()) {
+			if (window.isDisplayable()) {
+				window.dispose();
+			}
+		}
 	}
 
 	private static void awaitSimulationEnd(Thread pollerThread) {
@@ -302,7 +293,7 @@ public class TestUtil {
 			// Parse file
 			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jmvaGraphModelFile);
 
-			// Normalize the XML structure
+			// Normalise the XML structure
 			measuresDoc.getDocumentElement().normalize();
 
 			// Use XPath to find the <measure> elements within <solutions>
@@ -355,7 +346,8 @@ public class TestUtil {
 	}
 
 	private static List<String> getJSIMWizModelFinalValues(File jsimwModelFile) {
-		// the results structure of the .jsimw XML is exactly the same as the .jsim (JSIMGraph) structure
+		// the results structure of the .jsimw XML is exactly the same as the .jsim
+		// (JSIMGraph) structure
 		return getJSIMGraphModelFinalValues(jsimwModelFile);
 	}
 
@@ -390,7 +382,7 @@ public class TestUtil {
 		}
 	}
 
-	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+	private static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
 
 		// Bulletproof size check
 		if (testModelFinalValues.size() != simulatedModelFinalValues.size()) {
