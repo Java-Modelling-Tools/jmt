@@ -8,22 +8,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.definitions.CommonModel;
@@ -37,6 +33,10 @@ import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.JMVAWizard;
 
 public class TestUtil {
+
+	private static final ThreadLocal<DocumentBuilderFactory> DB_FACTORY = ThreadLocal
+			.withInitial(DocumentBuilderFactory::newInstance);
+	private static final ThreadLocal<XPathFactory> XPATH_FACTORY = ThreadLocal.withInitial(XPathFactory::newInstance);
 
 	private static File createOutputFile(File testModel, String toolFolderName) throws IOException {
 		String parentFolderName = FileUtil.getParentFolderName(testModel);
@@ -116,8 +116,7 @@ public class TestUtil {
 
 			return modelOutputFile;
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
-				| IOException e) {
+		} catch (SecurityException | ReflectiveOperationException | IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
@@ -171,8 +170,7 @@ public class TestUtil {
 
 			return modelOutputFile;
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
-				| IOException | NoSuchMethodException | InvocationTargetException e) {
+		} catch (SecurityException | ReflectiveOperationException | IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JMVA test", e);
@@ -239,8 +237,7 @@ public class TestUtil {
 
 			return modelOutputFile;
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
-				| IOException e) {
+		} catch (SecurityException | ReflectiveOperationException | IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
@@ -288,90 +285,47 @@ public class TestUtil {
 		}
 	}
 
-	private static List<String> getJMVAModelFinalValues(File jmvaGraphModelFile) {
+	private static List<String> extractXmlAttributes(File xmlFile, String xpathExpression, String attributeName) {
 		try {
-			// Parse file
-			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jmvaGraphModelFile);
+			Document doc = DB_FACTORY.get().newDocumentBuilder().parse(xmlFile);
+			doc.getDocumentElement().normalize();
 
-			// Normalise the XML structure
-			measuresDoc.getDocumentElement().normalize();
+			XPath xPath = XPATH_FACTORY.get().newXPath();
+			NodeList nodes = (NodeList) xPath.evaluate(xpathExpression, doc, XPathConstants.NODESET);
 
-			// Use XPath to find the <measure> elements within <solutions>
-			XPath xPath = XPathFactory.newInstance().newXPath();
-			NodeList measureNodes = (NodeList) xPath.evaluate("//solutions//measure", measuresDoc,
-					XPathConstants.NODESET);
-
-			List<String> finalValues = new ArrayList<>();
-			for (int i = 0; i < measureNodes.getLength(); i++) {
-				Element measure = (Element) measureNodes.item(i);
-				// JMVA uses 'meanValue', not 'finalValue'
-				String finalValue = measure.getAttribute("meanValue");
-				finalValues.add(finalValue);
+			List<String> values = new ArrayList<>();
+			for (int i = 0; i < nodes.getLength(); i++) {
+				Element element = (Element) nodes.item(i);
+				values.add(element.getAttribute(attributeName));
 			}
-
-			return finalValues;
+			return values;
 		} catch (Exception e) {
-			throw new RuntimeException("Error parsing JMVA results from file: " + jmvaGraphModelFile.getName(), e);
+			throw new RuntimeException("Error parsing XML from file: " + xmlFile.getName(), e);
 		}
+	}
+
+	private static List<String> getJMVAModelFinalValues(File jmvaGraphModelFile) {
+		return extractXmlAttributes(jmvaGraphModelFile, "//solutions//measure", "meanValue");
 	}
 
 	private static List<String> getJSIMGraphModelFinalValues(File jsimGraphModelFile) {
+		return extractXmlAttributes(jsimGraphModelFile, "//results/measure", "finalValue");
+	}
 
-		try {
-			// Parse file
-			Document measuresDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(jsimGraphModelFile);
-
-			// Normalize the XML structure
-			measuresDoc.getDocumentElement().normalize();
-
-			// Use XPath to find the <results> element
-			XPath xPath = XPathFactory.newInstance().newXPath();
-			NodeList measureNodes = (NodeList) xPath.evaluate("//results/measure", measuresDoc, XPathConstants.NODESET);
-
-			List<String> finalValues = new ArrayList<String>();
-			for (int i = 0; i < measureNodes.getLength(); i++) {
-				Element measure = (Element) measureNodes.item(i);
-				String finalValue = measure.getAttribute("finalValue");
-				finalValues.add(finalValue);
-			}
-
-			// System.out.println("finalValues: " + finalValues);
-			return finalValues;
-		} catch (SecurityException | IllegalArgumentException | IOException | XPathExpressionException | SAXException
-				| ParserConfigurationException e) {
-			e.printStackTrace();
-			// System.exit(0);
-			throw new RuntimeException("Error parsing JSIM results", e);
-		}
+	private static List<String> getExpectedMeanValues(File testResults) {
+		return extractXmlAttributes(testResults, "//solutions/measure", "meanValue");
 	}
 
 	private static List<String> getJSIMWizModelFinalValues(File jsimwModelFile) {
-		// the results structure of the .jsimw XML is exactly the same as the .jsim
-		// (JSIMGraph) structure
-		return getJSIMGraphModelFinalValues(jsimwModelFile);
-	}
-
-	private static List<String> getExpectedMeanValues(File testResults) throws Exception {
-		Document solutionDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(testResults);
-		solutionDoc.getDocumentElement().normalize();
-
-		XPath xPath = XPathFactory.newInstance().newXPath();
-		NodeList solutionNodes = (NodeList) xPath.evaluate("//solutions/measure", solutionDoc, XPathConstants.NODESET);
-
-		List<String> meanValues = new ArrayList<>();
-		for (int i = 0; i < solutionNodes.getLength(); i++) {
-			Element solution = (Element) solutionNodes.item(i);
-			meanValues.add(solution.getAttribute("meanValue"));
-		}
-		return meanValues;
+		return extractXmlAttributes(jsimwModelFile, "//results/measure", "finalValue");
 	}
 
 	private static String getAlgorithmName(File modelFile) {
 		try {
-			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(modelFile);
+			Document doc = DB_FACTORY.get().newDocumentBuilder().parse(modelFile);
 			doc.getDocumentElement().normalize();
 
-			XPath xPath = XPathFactory.newInstance().newXPath();
+			XPath xPath = XPATH_FACTORY.get().newXPath();
 			// Fetches the 'name' attribute from <algorithm> inside <solutions>
 			String algName = (String) xPath.evaluate("//solutions/algorithm/@name", doc, XPathConstants.STRING);
 
@@ -383,29 +337,13 @@ public class TestUtil {
 	}
 
 	private static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
-
-		// Bulletproof size check
 		if (testModelFinalValues.size() != simulatedModelFinalValues.size()) {
 			System.err.println("Mismatch in number of results! Expected: " + testModelFinalValues.size() + ", Got: "
 					+ simulatedModelFinalValues.size());
 			return false;
 		}
-
-		int i = 0;
-
-		for (String testModelFinalValue : testModelFinalValues) {
-			String simulatedModelFinalValue = simulatedModelFinalValues.get(i);
-//			System.out.println("testModelFinalValue: " + testModelFinalValue);
-//			System.out.println("simulatedModelFinalValue: " + simulatedModelFinalValue);
-//			System.out.println("match: " + testModelFinalValue.equals(simulatedModelFinalValue));
-			if (!testModelFinalValue.equals(simulatedModelFinalValue)) {
-				return false;
-			}
-			i++;
-		}
-
-		return true;
-
+		// Java handles the element-by-element and order comparison automatically!
+		return testModelFinalValues.equals(simulatedModelFinalValues);
 	}
 
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
@@ -427,41 +365,57 @@ public class TestUtil {
 
 	public static boolean testJSIMGraphModel(File testModel) {
 
-		File simulatedModelFile = testJSIMGraph(testModel);
+		try {
+			File simulatedModelFile = testJSIMGraph(testModel);
 
-		List<String> expectedValues = getJSIMGraphModelFinalValues(testModel);
-		List<String> actualValues = getJSIMGraphModelFinalValues(simulatedModelFile);
+			List<String> expectedValues = getJSIMGraphModelFinalValues(testModel);
+			List<String> actualValues = getJSIMGraphModelFinalValues(simulatedModelFile);
 
-		return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Returning false causes the assertTrue() in LineTest to fail gracefully
+			return false;
+		}
 	}
 
 	public static boolean testJMVAModel(File testModel) {
+		try {
+			File simulatedModelFile = testJMVA(testModel);
 
-		File simulatedModelFile = testJMVA(testModel);
+			String expectedAlg = getAlgorithmName(testModel);
+			String actualAlg = getAlgorithmName(simulatedModelFile);
 
-		String expectedAlg = getAlgorithmName(testModel);
-		String actualAlg = getAlgorithmName(simulatedModelFile);
+			if (expectedAlg != null && actualAlg != null && !expectedAlg.equals(actualAlg)) {
+				System.err.println("Algorithm mismatch! Expected: " + expectedAlg + ", Got: " + actualAlg);
+				return false;
+			}
 
-		if (expectedAlg != null && actualAlg != null && !expectedAlg.equals(actualAlg)) {
-			System.err.println("Algorithm mismatch! Expected: " + expectedAlg + ", Got: " + actualAlg);
+			List<String> expectedValues = getJMVAModelFinalValues(testModel);
+			List<String> actualValues = getJMVAModelFinalValues(simulatedModelFile);
+
+			return checkResults(expectedValues, actualValues);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Returning false causes the assertTrue() in LineTest to fail gracefully
 			return false;
 		}
-
-		List<String> expectedValues = getJMVAModelFinalValues(testModel);
-		List<String> actualValues = getJMVAModelFinalValues(simulatedModelFile);
-
-		return checkResults(expectedValues, actualValues);
 
 	}
 
 	public static boolean testJSIMWizModel(File testModel) {
+		try {
+			File simulatedModelFile = testJSIMWiz(testModel);
 
-		File simulatedModelFile = testJSIMWiz(testModel);
+			List<String> expectedValues = getJSIMWizModelFinalValues(testModel);
+			List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
 
-		List<String> expectedValues = getJSIMWizModelFinalValues(testModel);
-		List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
-
-		return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Returning false causes the assertTrue() in LineTest to fail gracefully
+			return false;
+		}
 
 	}
 
