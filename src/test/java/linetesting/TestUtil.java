@@ -21,9 +21,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import jmt.framework.gui.wizard.Wizard;
 import jmt.gui.common.controller.DispatcherThread;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.ModelLoader;
+import jmt.gui.jaba.JabaModel;
+import jmt.gui.jaba.JabaResults;
+import jmt.gui.jaba.JabaWizard;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
@@ -162,11 +166,8 @@ public class TestUtil {
 
 			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 
-			// Get data
-			ExactModel data = (ExactModel) dataField.get(jmvaWizard);
-
 			// Save model
-			modelLoader.saveModel(data, jmvaWizard, modelOutputFile);
+			modelLoader.saveModel(jmvaWizard.getData(), jmvaWizard, modelOutputFile);
 
 			return modelOutputFile;
 
@@ -233,14 +234,63 @@ public class TestUtil {
 
 			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 
-			modelLoader.saveModel(model, jsimWizMain, modelOutputFile);
+			modelLoader.saveModel(jsimWizMain.getModel(), jsimWizMain, modelOutputFile);
 
 			return modelOutputFile;
 
 		} catch (SecurityException | ReflectiveOperationException | IOException e) {
 			e.printStackTrace();
 			// System.exit(0);
-			throw new RuntimeException("Error executing JSIMGraph test", e);
+			throw new RuntimeException("Error executing JSIMWiz test", e);
+		}
+
+	}
+
+	private static JabaResults testJABA(File testModel) {
+
+		try {
+
+			// Create test instance with overridden checkForSave
+			JabaWizard jabaWizard = new JabaWizard();
+
+			// Get Mediator
+			Field modelLoaderField = JabaWizard.class.getDeclaredField("modelLoader");
+			modelLoaderField.setAccessible(true);
+			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jabaWizard);
+
+			JabaModel newdata = new JabaModel();
+
+			Field dataField = JabaWizard.class.getDeclaredField("data");
+			dataField.setAccessible(true);
+
+			int retval = modelLoader.loadModel(newdata, jabaWizard, testModel);
+
+			if (retval == ModelLoader.SUCCESS || retval == ModelLoader.WARNING) {
+
+				dataField.set(jabaWizard, newdata);
+
+			} else {
+				throw new RuntimeException("Error loading JABA test");
+			}
+
+			Method checkFinish = Wizard.class.getDeclaredMethod("checkFinish");
+			checkFinish.setAccessible(true);
+			boolean isFinished = (boolean) checkFinish.invoke(jabaWizard);
+
+			if (!isFinished) {
+				throw new RuntimeException("Error executing JABA test: Panels failed validation.");
+			}
+
+			// solve() is synchronous from the caller’s point of view, even though it
+			// internally uses a background thread.
+			jabaWizard.solve();
+
+			return jabaWizard.getData().getResults();
+
+		} catch (SecurityException | ReflectiveOperationException e) {
+			e.printStackTrace();
+			// System.exit(0);
+			throw new RuntimeException("Error executing JABA test", e);
 		}
 
 	}
@@ -411,6 +461,21 @@ public class TestUtil {
 			List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
 
 			return checkResults(expectedValues, actualValues);
+		} catch (Exception e) {
+			e.printStackTrace();
+			// Returning false causes the assertTrue() in LineTest to fail gracefully
+			return false;
+		}
+
+	}
+
+	public static boolean testJABAModel(File testModel) {
+		try {
+			JabaResults simulatedJABAModelResults = testJABA(testModel);
+			System.out.println(simulatedJABAModelResults);
+
+			// TODO: Create oracle to compare results to
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			// Returning false causes the assertTrue() in LineTest to fail gracefully

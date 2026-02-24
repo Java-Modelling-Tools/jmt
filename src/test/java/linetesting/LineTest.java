@@ -2,6 +2,7 @@ package linetesting;
 
 import static linetesting.TestConstants.CLASSES_DIRECTORY;
 import static linetesting.TestConstants.EXCLUDED_PACKAGES;
+import static linetesting.TestConstants.JABA_TESTS_FOLDER_NAME;
 import static linetesting.TestConstants.JMVA_TESTS_FOLDER_NAME;
 import static linetesting.TestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static linetesting.TestConstants.JSIM_LINE_TEST_MODEL_FILE_NAME;
@@ -36,6 +37,7 @@ public class LineTest {
 	static String JSIM_CSV_PATH;
 	static String JMVA_CSV_PATH;
 	static String JSIMWIZ_CSV_PATH;
+	static String JABA_CSV_PATH;
 	static String TIMEOUT_CSV_PATH;
 
 	@BeforeAll
@@ -53,6 +55,7 @@ public class LineTest {
 		JSIM_CSV_PATH = initCoverageCsv(outputFolder, "jsim_coverage.csv");
 		JMVA_CSV_PATH = initCoverageCsv(outputFolder, "jmva_coverage.csv");
 		JSIMWIZ_CSV_PATH = initCoverageCsv(outputFolder, "jsimwiz_coverage.csv");
+		JABA_CSV_PATH = initCoverageCsv(outputFolder, "jaba_coverage.csv");
 
 		// Setup Timeout CSV
 		TIMEOUT_CSV_PATH = new File(outputFolder, TIMEOUT_CSV_NAME).getAbsolutePath();
@@ -99,6 +102,10 @@ public class LineTest {
 
 	static Stream<File> jsimWizTestProvider() {
 		return testProvider(JSIMWIZ_TESTS_FOLDER_NAME);
+	}
+
+	static Stream<File> jabaTestProvider() {
+		return testProvider(JABA_TESTS_FOLDER_NAME);
 	}
 
 	private void runWithCoverage(File testFile, String csvPath, Executable testLogic) {
@@ -168,6 +175,18 @@ public class LineTest {
 
 			// --- Your JSIMWiz specific logic goes here ---
 			assertTrue(TestUtil.testJSIMWizModel(jsimWizTestFile));
+
+		});
+	}
+
+	@ParameterizedTest
+	@MethodSource("jabaTestProvider")
+	void testJABA(File jabaTestFile) {
+		// Call the generic runner, passing the JABA CSV path
+		runWithCoverage(jabaTestFile, JABA_CSV_PATH, () -> {
+
+			// --- Your JABA specific logic goes here ---
+			assertTrue(TestUtil.testJABAModel(jabaTestFile));
 
 		});
 	}
