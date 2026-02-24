@@ -13,6 +13,7 @@ public final class TestConstants {
 	// Folder Names
 	public static final String JSIM_TESTS_FOLDER_NAME = "jsim";
 	public static final String JMVA_TESTS_FOLDER_NAME = "jmva";
+	public static final String JSIMWIZ_TESTS_FOLDER_NAME = "jsimw";
 
 	// Paths
 	public static final String TEST_FILES_BASE_FOLDER_PATH = "src/test/resources/linetesting/input";

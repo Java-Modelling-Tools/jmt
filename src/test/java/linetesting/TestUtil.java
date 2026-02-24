@@ -1,6 +1,7 @@
 package linetesting;
 
 import static linetesting.TestConstants.JMVA_TESTS_FOLDER_NAME;
+import static linetesting.TestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static linetesting.TestConstants.JSIM_TESTS_FOLDER_NAME;
 
 import java.io.File;
@@ -25,10 +26,13 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import jmt.gui.common.controller.DispatcherThread;
+import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.ModelLoader;
 import jmt.gui.jsimgraph.controller.Mediator;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
 import jmt.gui.jsimgraph.mainGui.JSIMGraphMain;
+import jmt.gui.jsimwiz.JSIMWizMain;
+import jmt.gui.jsimwiz.definitions.JSIMModel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.JMVAWizard;
 
@@ -84,8 +88,6 @@ public class TestUtil {
 
 			mediator.startSimulation();
 
-			// System.out.println("Simulation truly started");
-
 			// Get Dispatcher
 			Field dispatcherField = Mediator.class.getDeclaredField("dispatcher");
 			dispatcherField.setAccessible(true);
@@ -96,26 +98,7 @@ public class TestUtil {
 			pollerField.setAccessible(true);
 			Thread pollerThread = (Thread) pollerField.get(dispatcherThread);
 
-			while (pollerThread.getState() == Thread.State.NEW) {
-				Thread.sleep(10); // Wait until it starts
-			}
-
-//					System.out.println("dispatcherThread: " + dispatcherThread);
-//					System.out.println("pollerThread: " + pollerThread);
-//					System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
-//					System.out.println("pollerThread state: " + pollerThread.getState());
-
-			// Now join on the real simulation thread
-			if (pollerThread.isAlive()) {
-//						long startTime = System.currentTimeMillis();
-				pollerThread.join();
-//						long endTime = System.currentTimeMillis();
-//						System.out.println("Time taken: " + (endTime - startTime) + " ms");
-			} else {
-				System.out.println("pollerThread already finished, join returns immediately.");
-			}
-
-			// System.out.println("Simulation truly finished");
+			awaitSimulationEnd(pollerThread);
 
 			File modelOutputFile = createOutputFile(testModel, JSIM_TESTS_FOLDER_NAME);
 
@@ -139,8 +122,8 @@ public class TestUtil {
 
 			return modelOutputFile;
 
-		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | InterruptedException
-				| NoSuchFieldException | IOException | NoSuchMethodException | InvocationTargetException e) {
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
+				| IOException | NoSuchMethodException | InvocationTargetException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
@@ -209,6 +192,111 @@ public class TestUtil {
 
 	}
 
+	private static File testJSIMWiz(File testModel) {
+
+		try {
+
+			// Create test instance with overridden checkForSave
+			JSIMWizMain jsimWizMain = new JSIMWizMain();
+
+			// Get Mediator
+			Field modelLoaderField = JSIMWizMain.class.getDeclaredField("modelLoader");
+			modelLoaderField.setAccessible(true);
+			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jsimWizMain);
+
+			JSIMModel tmpmodel = new JSIMModel();
+
+			Field currentFileField = JSIMWizMain.class.getDeclaredField("currentFile");
+			currentFileField.setAccessible(true);
+
+			Field jsimWizModelField = JSIMWizMain.class.getDeclaredField("model");
+			jsimWizModelField.setAccessible(true);
+			CommonModel model = (CommonModel) jsimWizModelField.get(jsimWizMain);
+
+			int state = modelLoader.loadModel(tmpmodel, jsimWizMain, testModel);
+
+			if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
+
+				currentFileField.set(jsimWizMain, modelLoader.getSelectedFile());
+
+				jsimWizModelField.set(jsimWizMain, tmpmodel);
+
+				model.resetSaveState();
+			} else {
+				throw new RuntimeException("Error loading JSIMWIZ test");
+			}
+
+			// Corrects eventual problems on preloading for closed classes
+			model.manageJobs();
+
+			jsimWizMain.launchSimulation();
+
+			// Get Dispatcher
+			Field dispatcherField = JSIMWizMain.class.getDeclaredField("dispatcher");
+			dispatcherField.setAccessible(true);
+			DispatcherThread dispatcherThread = (DispatcherThread) dispatcherField.get(jsimWizMain);
+
+			// Get the poller thread
+			Field pollerField = DispatcherThread.class.getDeclaredField("poller");
+			pollerField.setAccessible(true);
+			Thread pollerThread = (Thread) pollerField.get(dispatcherThread);
+
+			awaitSimulationEnd(pollerThread);
+
+			File modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
+
+			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
+
+			modelLoader.saveModel(model, jsimWizMain, modelOutputFile);
+
+			// Closes everything gui (sadly it opens automatically)
+			Method doClose = JSIMWizMain.class.getDeclaredMethod("doClose");
+			doClose.setAccessible(true);
+			doClose.invoke(jsimWizMain);
+			jsimWizMain.dispose();
+
+			return modelOutputFile;
+
+		} catch (SecurityException | IllegalAccessException | IllegalArgumentException | NoSuchFieldException
+				| IOException | NoSuchMethodException | InvocationTargetException e) {
+			e.printStackTrace();
+			// System.exit(0);
+			throw new RuntimeException("Error executing JSIMGraph test", e);
+		}
+
+	}
+
+	private static void awaitSimulationEnd(Thread pollerThread) {
+		try {
+			// System.out.println("Simulation truly started");
+
+			while (pollerThread.getState() == Thread.State.NEW) {
+				Thread.sleep(10); // Wait until it starts
+			}
+
+//							System.out.println("dispatcherThread: " + dispatcherThread);
+//							System.out.println("pollerThread: " + pollerThread);
+//							System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
+//							System.out.println("pollerThread state: " + pollerThread.getState());
+
+			// Now join on the real simulation thread
+			if (pollerThread.isAlive()) {
+//								long startTime = System.currentTimeMillis();
+				pollerThread.join();
+//								long endTime = System.currentTimeMillis();
+//								System.out.println("Time taken: " + (endTime - startTime) + " ms");
+			} else {
+				System.out.println("pollerThread already finished, join returns immediately.");
+			}
+
+			// System.out.println("Simulation truly finished");
+		} catch (SecurityException | IllegalArgumentException | InterruptedException e) {
+			e.printStackTrace();
+			// System.exit(0);
+			throw new RuntimeException("Error waiting for simulation to end", e);
+		}
+	}
+
 	private static List<String> getJMVAModelFinalValues(File jmvaGraphModelFile) {
 		try {
 			// Parse file
@@ -264,6 +352,11 @@ public class TestUtil {
 			// System.exit(0);
 			throw new RuntimeException("Error parsing JSIM results", e);
 		}
+	}
+
+	private static List<String> getJSIMWizModelFinalValues(File jsimwModelFile) {
+		// the results structure of the .jsimw XML is exactly the same as the .jsim (JSIMGraph) structure
+		return getJSIMGraphModelFinalValues(jsimwModelFile);
 	}
 
 	private static List<String> getExpectedMeanValues(File testResults) throws Exception {
@@ -364,6 +457,17 @@ public class TestUtil {
 
 		List<String> expectedValues = getJMVAModelFinalValues(testModel);
 		List<String> actualValues = getJMVAModelFinalValues(simulatedModelFile);
+
+		return checkResults(expectedValues, actualValues);
+
+	}
+
+	public static boolean testJSIMWizModel(File testModel) {
+
+		File simulatedModelFile = testJSIMWiz(testModel);
+
+		List<String> expectedValues = getJSIMWizModelFinalValues(testModel);
+		List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
 
 		return checkResults(expectedValues, actualValues);
 
