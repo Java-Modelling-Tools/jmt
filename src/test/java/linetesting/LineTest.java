@@ -22,6 +22,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.function.Executable;
@@ -71,6 +72,13 @@ public class LineTest {
 		}
 		System.out.println("Coverage report ready at: " + absolutePath);
 		return absolutePath;
+	}
+
+	@AfterEach
+	void tearDown() {
+		// This automatically runs after EVERY single parameterized test finishes,
+		// regardless of whether the test passed or failed!
+		TestUtil.closeGUI();
 	}
 
 	private static Stream<File> testProvider(String testFolderName) {
