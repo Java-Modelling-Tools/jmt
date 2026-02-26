@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="conBeta13fescNEW.jsimg" timestamp="Fri Feb 06 20:41:01 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="D:\JMT\." logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="conBeta13fescNEW.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="conBeta13fesc.jsimg" timestamp="Wed Nov 05 20:29:05 CET 2025" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="D:\JMT\." logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="conBeta13fesc.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass customers="3" name="Class0" priority="0" referenceSource="CPU" softDeadline="0.0" type="closed"/>
         <node name="CPU">
             <classSoftDeadlines>
@@ -225,30 +225,30 @@
             <position angle="0.0" rotate="false" x="368.0" y="139.0"/>
         </station>
     </jmodel>
-    <results elapsedTime="1006" logDecimalSeparator="," logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
-        <measure alpha="0.95" analyzedSamples="61440" discardedSamples="55" finalValue="0.2187875138655763" name="CPU_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="0">
-            <sample lastIntervalAvgValue="0.21789585498034644" lowerBound="0.21385598393881752" meanValue="0.2187875138655763" simulationTime="67468.78149188013" upperBound="0.22371904379233506"/>
-            <sample lastIntervalAvgValue="0.21789585498034644" lowerBound="0.21385598393881752" meanValue="0.2187875138655763" simulationTime="67468.78149188013" upperBound="0.22371904379233506"/>
+    <results elapsedTime="1267" logDecimalSeparator="," logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.95" analyzedSamples="81920" discardedSamples="275" finalValue="0.21938889935909486" name="CPU_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="0">
+            <sample lastIntervalAvgValue="0.22043973973251726" lowerBound="0.2133274772256153" meanValue="0.22027996153872692" simulationTime="51538.94813584833" upperBound="0.22723244585183855"/>
+            <sample lastIntervalAvgValue="0.21859033903556188" lowerBound="0.213985153226036" meanValue="0.21938889935909486" simulationTime="89906.59934545122" upperBound="0.22479264549215372"/>
         </measure>
-        <measure alpha="0.95" analyzedSamples="15360" discardedSamples="55" finalValue="2.787409632997685" name="FlowEq_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="FlowEq" state="1" type="0">
-            <sample lastIntervalAvgValue="2.787286539196667" lowerBound="2.732582880573372" meanValue="2.787409632997685" simulationTime="17178.073537797056" upperBound="2.8422363854219985"/>
-            <sample lastIntervalAvgValue="2.787286539196667" lowerBound="2.732582880573372" meanValue="2.787409632997685" simulationTime="17178.073537797056" upperBound="2.8422363854219985"/>
+        <measure alpha="0.95" analyzedSamples="10240" discardedSamples="275" finalValue="2.778452581088729" name="FlowEq_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="FlowEq" state="1" type="0">
+            <sample lastIntervalAvgValue="2.7791733859583134" lowerBound="2.7275394570743625" meanValue="2.778452581088729" simulationTime="11571.136430139872" upperBound="2.829365705103095"/>
+            <sample lastIntervalAvgValue="2.7791733859583134" lowerBound="2.7275394570743625" meanValue="2.778452581088729" simulationTime="11571.136430139872" upperBound="2.829365705103095"/>
         </measure>
-        <measure alpha="0.95" analyzedSamples="61440" discardedSamples="235" finalValue="0.1826183198254864" name="CPU_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="6">
-            <sample lastIntervalAvgValue="0.181927097890817" lowerBound="0.17928362310701376" meanValue="0.1826183198254864" simulationTime="74218.98313547659" upperBound="0.18595301654395904"/>
-            <sample lastIntervalAvgValue="0.181927097890817" lowerBound="0.17928362310701376" meanValue="0.1826183198254864" simulationTime="74218.98313547659" upperBound="0.18595301654395904"/>
+        <measure alpha="0.95" analyzedSamples="61440" discardedSamples="435" finalValue="0.18390075395221012" name="CPU_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="6">
+            <sample lastIntervalAvgValue="0.18374639923762237" lowerBound="0.17332425328745357" meanValue="0.18258854989531578" simulationTime="51538.252632839685" upperBound="0.191852846503178"/>
+            <sample lastIntervalAvgValue="0.18433364270022884" lowerBound="0.18030851181291205" meanValue="0.18390075395221012" simulationTime="74141.05809691908" upperBound="0.18749299609150819"/>
         </measure>
-        <measure alpha="0.95" analyzedSamples="11520" discardedSamples="2280" finalValue="0.9962952875304778" name="FlowEq_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="FlowEq" state="1" type="6">
-            <sample lastIntervalAvgValue="0.9962064192852446" lowerBound="0.9769114482439236" meanValue="0.9962952875304778" simulationTime="29989.700886086976" upperBound="1.015679126817032"/>
-            <sample lastIntervalAvgValue="0.9962064192852446" lowerBound="0.9769114482439236" meanValue="0.9962952875304778" simulationTime="29989.700886086976" upperBound="1.015679126817032"/>
+        <measure alpha="0.95" analyzedSamples="9600" discardedSamples="5" finalValue="0.9959116297909812" name="FlowEq_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="FlowEq" state="1" type="6">
+            <sample lastIntervalAvgValue="0.9958047247053086" lowerBound="0.975898999078089" meanValue="0.9959116297909812" simulationTime="20402.561964679535" upperBound="1.0159242605038734"/>
+            <sample lastIntervalAvgValue="0.9958047247053086" lowerBound="0.975898999078089" meanValue="0.9959116297909812" simulationTime="20402.561964679535" upperBound="1.0159242605038734"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="163840" discardedSamples="130" finalValue="0.45873688037081156" name="System Throughput" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="16">
-            <sample lastIntervalAvgValue="0.4586875947907373" lowerBound="0.4542589987182609" meanValue="0.4591276213103" simulationTime="223001.45275711213" upperBound="0.46410173564049356"/>
-            <sample lastIntervalAvgValue="0.45775923370904587" lowerBound="0.45561576833653034" meanValue="0.45873688037081156" simulationTime="357749.14424596453" upperBound="0.46190104856142467"/>
+        <measure alpha="0.99" analyzedSamples="184320" discardedSamples="315" finalValue="0.4586505872885924" name="System Throughput" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="16">
+            <sample lastIntervalAvgValue="0.45794493007092313" lowerBound="0.4425743363685972" meanValue="0.4579138304739386" simulationTime="51538.94813584833" upperBound="0.47435482687324687"/>
+            <sample lastIntervalAvgValue="0.45835842514157893" lowerBound="0.45546595929491235" meanValue="0.4586505872885924" simulationTime="402870.986922435" upperBound="0.4618800628351395"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="245760" discardedSamples="130" finalValue="6.5473972772194005" name="System Response Time" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="15">
-            <sample lastIntervalAvgValue="6.540311463733048" lowerBound="6.451580614499357" meanValue="6.5239353849878094" simulationTime="223001.45275711213" upperBound="6.596290155476262"/>
-            <sample lastIntervalAvgValue="6.554922219607875" lowerBound="6.500295455240902" meanValue="6.5473972772194005" simulationTime="536768.3478499326" upperBound="6.594499099197899"/>
+        <measure alpha="0.99" analyzedSamples="194560" discardedSamples="21865" finalValue="6.539168571303732" name="System Response Time" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="15">
+            <sample lastIntervalAvgValue="6.550904363826203" meanValue="6.550904363826203" simulationTime="51538.94813584833"/>
+            <sample lastIntervalAvgValue="6.5474371195544245" lowerBound="6.485183561302049" meanValue="6.539168571303732" simulationTime="472377.75975578337" upperBound="6.593153581305415"/>
         </measure>
     </results>
 </archive>
