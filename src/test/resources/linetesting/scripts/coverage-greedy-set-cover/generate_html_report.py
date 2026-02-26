@@ -2,14 +2,8 @@ import os
 import csv
 import json
 import html
+import sys
 
-# --- CONFIGURATION ---
-KEEP_CSV = "optimized_suite_KEEP.csv"
-DISCARD_CSV = "optimized_suite_DISCARD.csv"
-OUTPUT_HTML = "coverage_dashboard.html"
-
-# Path to actual Java source code root (src/main/java)
-# Adjust ".." depth based on where this script runs relative to 'src'
 SOURCE_CODE_ROOT = os.path.join("..", "..", "..", "..", "..", "main", "java")
 
 def read_csv_data(file_path):
@@ -124,7 +118,7 @@ def generate_source_view(pkg, cls_simple, cov_lines, miss_lines):
 
     return "".join(html_lines)
 
-def generate_html(keep_data, discard_data, output_path):
+def generate_html(keep_data, discard_data, output_path, base_name):
     total_keep = len(keep_data)
     total_discard = len(discard_data)
     total_files = total_keep + total_discard
@@ -138,13 +132,15 @@ def generate_html(keep_data, discard_data, output_path):
     chart_labels = json.dumps([f["name"][:20] + "..." for f in top_files])
     chart_values = json.dumps([f["total_instructions"] for f in top_files])
 
+    title = f"{base_name.upper()} Coverage Dashboard"
+
     html_content = f"""
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JMT Coverage Dashboard</title>
+    <title>{title}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {{ --primary: #2c3e50; --success: #27ae60; --danger: #e74c3c; --bg: #f4f4f9; --green-bg: #d4edda; --red-bg: #f8d7da; }}
@@ -215,7 +211,11 @@ def generate_html(keep_data, discard_data, output_path):
 <body>
 
 <div class="container">
-    <h1 style="text-align:center;">Coverage Optimization Dashboard</h1>
+    <h1 style="text-align:center; margin-bottom: 5px;">Coverage Optimization Dashboard</h1>
+
+    <p style="text-align:center; color:#7f8c8d; font-size:1.2em; margin-top:0; margin-bottom:30px;">
+        Generated from: <strong style="color:var(--primary);">{base_name}</strong>
+    </p>
     
     <div class="stats-grid">
         <div class="card"><h2>{total_files}</h2><p>Total Files</p></div>
@@ -398,6 +398,15 @@ def generate_html(keep_data, discard_data, output_path):
     print(f"Success! Dashboard generated at: {os.path.abspath(output_path)}")
 
 def main():
+    if len(sys.argv) < 2:
+        print("Error: Input CSV path must be provided as an argument.")
+        sys.exit(1)
+        
+    target_csv = sys.argv[1]
+    
+    # This automatically grabs "jsim" from "jsim_coverage.csv", etc.
+    base_name = os.path.basename(target_csv).replace('_coverage.csv', '')
+
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(script_dir, 'output')
     
@@ -405,11 +414,11 @@ def main():
         print(f"Error: Output directory not found at {output_dir}")
         return
 
-    keep_path = os.path.join(output_dir, KEEP_CSV)
-    discard_path = os.path.join(output_dir, DISCARD_CSV)
-    html_path = os.path.join(output_dir, OUTPUT_HTML)
+    keep_path = os.path.join(output_dir, f"{base_name}_optimized_suite_KEEP.csv")
+    discard_path = os.path.join(output_dir, f"{base_name}_optimized_suite_DISCARD.csv")
+    html_path = os.path.join(output_dir, f"{base_name}_dashboard.html")
     
-    print("Reading data...")
+    print(f"Reading data for {base_name}...")
     k_data = read_csv_data(keep_path)
     d_data = read_csv_data(discard_path)
     
@@ -418,7 +427,8 @@ def main():
         return
 
     print("Generating HTML Report...")
-    generate_html(k_data, d_data, html_path)
+    # Passing base_name directly to generate_html
+    generate_html(k_data, d_data, html_path, base_name)
 
 if __name__ == "__main__":
     main()
