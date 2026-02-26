@@ -2,8 +2,11 @@ import os
 import csv
 import sys
 
-# Increase CSV field size limit for large line-coverage strings
-csv.field_size_limit(sys.maxsize)
+# Safely increase CSV field size limit
+try:
+    csv.field_size_limit(sys.maxsize)
+except OverflowError:
+    csv.field_size_limit(2147483647) # Fallback to standard 32-bit max integer
 
 """
 SCRIPT: Exact Line-Level Coverage Optimizer (Set Cover)
@@ -138,11 +141,12 @@ def run_set_cover_optimization(test_map, universe):
             
     return decision_reasons, discard_reasons
 
-def write_reports(input_csv, output_dir, keep_map, discard_map):
+def write_reports(input_csv, output_dir, keep_map, discard_map, base_name):
     print("Phase 3: Writing reports...")
     
-    keep_csv = os.path.join(output_dir, 'optimized_suite_KEEP.csv')
-    discard_csv = os.path.join(output_dir, 'optimized_suite_DISCARD.csv')
+    # PREFIX OUTPUT FILES WITH THE SUITE NAME
+    keep_csv = os.path.join(output_dir, f'{base_name}_optimized_suite_KEEP.csv')
+    discard_csv = os.path.join(output_dir, f'{base_name}_optimized_suite_DISCARD.csv')
     
     # We copy the original CSV structure but add the Decision Column
     with open(input_csv, 'r') as fin, \
@@ -177,34 +181,34 @@ def write_reports(input_csv, output_dir, keep_map, discard_map):
     print(f"Success! Reports written to:\n -> {keep_csv}\n -> {discard_csv}")
 
 def main():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Adjust paths as needed
-    input_csv = os.path.join(script_dir, '..', '..', 'output', 'full_detailed_coverage.csv')
-    input_csv = os.path.abspath(input_csv)
-    
-    output_dir = os.path.join(script_dir, 'output')
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    if len(sys.argv) < 2:
+        print("Error: Input CSV path must be provided as an argument.")
+        sys.exit(1)
 
+    input_csv = os.path.abspath(sys.argv[1])
+    
     if not os.path.exists(input_csv):
         print(f"Error: Input file not found: {input_csv}")
         return
 
-    # Parse
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    output_dir = os.path.join(script_dir, 'output')
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # Extract base name (e.g., "jsim" from "jsim_coverage.csv")
+    base_name = os.path.basename(input_csv).replace('_coverage.csv', '')
+
     test_map, universe = parse_csv_line_data(input_csv)
     
     if not test_map:
         print("No valid data found in CSV.")
         return
 
-    # Optimize
     keep_reasons, discard_reasons = run_set_cover_optimization(test_map, universe)
-    
     print(f"RESULTS: Kept {len(keep_reasons)} files. Discarded {len(discard_reasons)} files.")
 
-    # Write
-    write_reports(input_csv, output_dir, keep_reasons, discard_reasons)
+    write_reports(input_csv, output_dir, keep_reasons, discard_reasons, base_name)
 
 if __name__ == "__main__":
     main()
