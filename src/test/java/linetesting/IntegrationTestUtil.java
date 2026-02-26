@@ -1,8 +1,8 @@
 package linetesting;
 
-import static linetesting.TestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.JSIM_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -36,7 +36,7 @@ import jmt.gui.jsimwiz.definitions.JSIMModel;
 import jmt.jmva.analytical.ExactModel;
 import jmt.jmva.gui.JMVAWizard;
 
-public class TestUtil {
+public class IntegrationTestUtil {
 
 	private static final ThreadLocal<DocumentBuilderFactory> DB_FACTORY = ThreadLocal
 			.withInitial(DocumentBuilderFactory::newInstance);
@@ -104,7 +104,7 @@ public class TestUtil {
 
 			awaitSimulationEnd(pollerThread);
 
-			File modelOutputFile = createOutputFile(testModel, JSIM_TESTS_FOLDER_NAME);
+			File modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
 
 			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
 

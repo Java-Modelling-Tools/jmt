@@ -1,18 +1,18 @@
 package linetesting;
 
-import static linetesting.TestConstants.CLASSES_DIRECTORY;
-import static linetesting.TestConstants.EXCLUDED_PACKAGES;
-import static linetesting.TestConstants.JABA_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.JSIM_LINE_TEST_MODEL_FILE_NAME;
-import static linetesting.TestConstants.JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME;
-import static linetesting.TestConstants.JSIM_TESTS_FOLDER_NAME;
-import static linetesting.TestConstants.OUTPUT_FOLDER_PATH;
-import static linetesting.TestConstants.TEST_FILES_BASE_FOLDER_PATH;
-import static linetesting.TestConstants.TEST_TIMEOUT;
-import static linetesting.TestConstants.TIMEOUT_CSV_NAME;
-import static linetesting.TestConstants.TIMESTAMP_FORMATTER;
+import static linetesting.IntegrationTestConstants.CLASSES_DIRECTORY;
+import static linetesting.IntegrationTestConstants.EXCLUDED_PACKAGES;
+import static linetesting.IntegrationTestConstants.JABA_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME;
+import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME;
+import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.OUTPUT_FOLDER_PATH;
+import static linetesting.IntegrationTestConstants.TEST_FILES_BASE_FOLDER_PATH;
+import static linetesting.IntegrationTestConstants.TEST_TIMEOUT;
+import static linetesting.IntegrationTestConstants.TIMEOUT_CSV_NAME;
+import static linetesting.IntegrationTestConstants.TIMESTAMP_FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
@@ -31,7 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 
-public class LineTest {
+public class IntegrationTest {
 
 	// We will build the full path dynamically in setup
 	static String JSIM_CSV_PATH;
@@ -81,7 +81,7 @@ public class LineTest {
 	void tearDown() {
 		// This automatically runs after EVERY single parameterized test finishes,
 		// regardless of whether the test passed or failed!
-		TestUtil.closeGUI();
+		IntegrationTestUtil.closeGUI();
 	}
 
 	private static Stream<File> testProvider(String testFolderName) {
@@ -92,8 +92,8 @@ public class LineTest {
 		return Stream.of(entries);
 	}
 
-	static Stream<File> jsimTestProvider() {
-		return testProvider(JSIM_TESTS_FOLDER_NAME);
+	static Stream<File> jsimGraphTestProvider() {
+		return testProvider(JSIMGRAPH_TESTS_FOLDER_NAME);
 	}
 
 	static Stream<File> jmvaTestProvider() {
@@ -135,21 +135,21 @@ public class LineTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("jsimTestProvider")
-	void testLineJSIM(File jsimTestFile) {
+	@MethodSource("jsimGraphTestProvider")
+	void testJSIMGraph(File jsimTestFile) {
 		// Call the generic runner, passing the JSIM CSV path
 		runWithCoverage(jsimTestFile, JSIM_CSV_PATH, () -> {
 
 			// --- Your JSIM specific logic goes here ---
 			if (jsimTestFile.isDirectory()) {
-				File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIM_LINE_TEST_MODEL_FILE_NAME);
+				File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME);
 				File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
-						JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME);
+						JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME);
 				if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
-					assertTrue(TestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
+					assertTrue(IntegrationTestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
 				}
 			} else {
-				assertTrue(TestUtil.testJSIMGraphModel(jsimTestFile));
+				assertTrue(IntegrationTestUtil.testJSIMGraphModel(jsimTestFile));
 			}
 
 		});
@@ -157,12 +157,12 @@ public class LineTest {
 
 	@ParameterizedTest
 	@MethodSource("jmvaTestProvider")
-	void testLineJMVA(File jmvaTestFile) {
+	void testJMVA(File jmvaTestFile) {
 		// Call the generic runner, passing the JMVA CSV path
 		runWithCoverage(jmvaTestFile, JMVA_CSV_PATH, () -> {
 
 			// --- Your JMVA specific logic goes here ---
-			assertTrue(TestUtil.testJMVAModel(jmvaTestFile));
+			assertTrue(IntegrationTestUtil.testJMVAModel(jmvaTestFile));
 
 		});
 	}
@@ -174,7 +174,7 @@ public class LineTest {
 		runWithCoverage(jsimWizTestFile, JSIMWIZ_CSV_PATH, () -> {
 
 			// --- Your JSIMWiz specific logic goes here ---
-			assertTrue(TestUtil.testJSIMWizModel(jsimWizTestFile));
+			assertTrue(IntegrationTestUtil.testJSIMWizModel(jsimWizTestFile));
 
 		});
 	}
@@ -186,7 +186,7 @@ public class LineTest {
 		runWithCoverage(jabaTestFile, JABA_CSV_PATH, () -> {
 
 			// --- Your JABA specific logic goes here ---
-			assertTrue(TestUtil.testJABAModel(jabaTestFile));
+			assertTrue(IntegrationTestUtil.testJABAModel(jabaTestFile));
 
 		});
 	}

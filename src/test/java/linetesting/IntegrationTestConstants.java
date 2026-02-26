@@ -3,15 +3,15 @@ package linetesting;
 import java.io.File;
 import java.time.format.DateTimeFormatter;
 
-public final class TestConstants {
+public final class IntegrationTestConstants {
 
 	// Private constructor to prevent instantiation
-	private TestConstants() {
+	private IntegrationTestConstants() {
 		throw new UnsupportedOperationException("This is a utility class and cannot be instantiated");
 	}
 
 	// Folder Names
-	public static final String JSIM_TESTS_FOLDER_NAME = "jsim";
+	public static final String JSIMGRAPH_TESTS_FOLDER_NAME = "jsim";
 	public static final String JMVA_TESTS_FOLDER_NAME = "jmva";
 	public static final String JSIMWIZ_TESTS_FOLDER_NAME = "jsimw";
 	public static final String JABA_TESTS_FOLDER_NAME = "jaba";
@@ -22,8 +22,8 @@ public final class TestConstants {
 	public static final File CLASSES_DIRECTORY = new File("target/classes");
 
 	// File Names
-	public static final String JSIM_LINE_TEST_MODEL_FILE_NAME = "model.jsim";
-	public static final String JSIM_LINE_TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
+	public static final String JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME = "model.jsim";
+	public static final String JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME = "model.jsim-result.jsim";
 	public static final String TIMEOUT_CSV_NAME = "timeouts.csv";
 
 	// Execution Configs
