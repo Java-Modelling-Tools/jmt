@@ -31,6 +31,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
 import java.time.Instant;
+import org.junit.jupiter.params.provider.Arguments;
+import java.util.stream.IntStream;
 
 public class IntegrationTest {
 
@@ -85,34 +87,40 @@ public class IntegrationTest {
 		IntegrationTestUtil.closeGUI();
 	}
 
-	private static Stream<File> testProvider(String testFolderName) {
+	private static Stream<Arguments> testProvider(String testFolderName) {
 		String jsimTestsFolder = TEST_FILES_BASE_FOLDER_PATH + "/" + testFolderName;
 		File[] entries = FileUtil.listAllFilesAndFoldersInFolder(jsimTestsFolder);
 		if (entries == null)
 			return Stream.empty();
-		return Stream.of(entries);
+		
+		int totalTests = entries.length;
+    
+		// Create a stream of Arguments: (File, currentIndex, totalTests)
+		return IntStream.range(0, totalTests)
+				.mapToObj(i -> Arguments.of(entries[i], i + 1, totalTests));
 	}
 
-	static Stream<File> jsimGraphTestProvider() {
+	static Stream<Arguments> jsimGraphTestProvider() {
 		return testProvider(JSIMGRAPH_TESTS_FOLDER_NAME);
 	}
 
-	static Stream<File> jmvaTestProvider() {
+	static Stream<Arguments> jmvaTestProvider() {
 		return testProvider(JMVA_TESTS_FOLDER_NAME);
 	}
 
-	static Stream<File> jsimWizTestProvider() {
+	static Stream<Arguments> jsimWizTestProvider() {
 		return testProvider(JSIMWIZ_TESTS_FOLDER_NAME);
 	}
 
-	static Stream<File> jabaTestProvider() {
+	static Stream<Arguments> jabaTestProvider() {
 		return testProvider(JABA_TESTS_FOLDER_NAME);
 	}
 
-	private void runWithCoverage(File testFile, String csvPath, Executable testLogic) {
+	private void runWithCoverage(File testFile, String csvPath, int currentIndex, int totalTests, Executable testLogic) {
 		Instant startInstant = Instant.now(); 
         String startTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
-        System.out.println("\n[INFO] Starting test file: " + testFile.getName() + " | Timestamp: " + startTimeStr);
+        
+		System.out.println("\n[INFO] [" + currentIndex + "/" + totalTests + "] Starting test file: " + testFile.getName() + " | Timestamp: " + startTimeStr);
 
 		CoverageTracker.reset(); // Clear previous data
 
@@ -143,17 +151,17 @@ public class IntegrationTest {
 			// Using toMillis() divided by 1000.0 gives us precise decimals (e.g., "1.453s")
             double durationSeconds = Duration.between(startInstant, endInstant).toMillis() / 1000.0;
             
-            System.out.println("[INFO] Finished test file: " + testFile.getName() 
-                             + " | Timestamp: " + endTimeStr 
-                             + " | Duration: " + durationSeconds + "s");
+            System.out.println("[INFO] [" + currentIndex + "/" + totalTests + "] Finished test file: " + testFile.getName() 
+                         + " | Timestamp: " + endTimeStr 
+                         + " | Duration: " + durationSeconds + "s");
 		}
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "[{1}/{2}] {0}")
 	@MethodSource("jsimGraphTestProvider")
-	void testJSIMGraph(File jsimTestFile) {
+	void testJSIMGraph(File jsimTestFile, int currentIndex, int totalTests) {
 		// Call the generic runner, passing the JSIM CSV path
-		runWithCoverage(jsimTestFile, JSIM_CSV_PATH, () -> {
+		runWithCoverage(jsimTestFile, JSIM_CSV_PATH, currentIndex, totalTests, () -> {
 
 			// --- Your JSIM specific logic goes here ---
 			if (jsimTestFile.isDirectory()) {
@@ -170,11 +178,11 @@ public class IntegrationTest {
 		});
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "[{1}/{2}] {0}")
 	@MethodSource("jmvaTestProvider")
-	void testJMVA(File jmvaTestFile) {
+	void testJMVA(File jmvaTestFile, int currentIndex, int totalTests) {
 		// Call the generic runner, passing the JMVA CSV path
-		runWithCoverage(jmvaTestFile, JMVA_CSV_PATH, () -> {
+		runWithCoverage(jmvaTestFile, JMVA_CSV_PATH, currentIndex, totalTests, () -> {
 
 			// --- Your JMVA specific logic goes here ---
 			assertTrue(IntegrationTestUtil.testJMVAModel(jmvaTestFile));
@@ -182,11 +190,11 @@ public class IntegrationTest {
 		});
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "[{1}/{2}] {0}")
 	@MethodSource("jsimWizTestProvider")
-	void testJSIMWiz(File jsimWizTestFile) {
+	void testJSIMWiz(File jsimWizTestFile, int currentIndex, int totalTests) {
 		// Call the generic runner, passing the JSIMWiz CSV path
-		runWithCoverage(jsimWizTestFile, JSIMWIZ_CSV_PATH, () -> {
+		runWithCoverage(jsimWizTestFile, JSIMWIZ_CSV_PATH, currentIndex, totalTests, () -> {
 
 			// --- Your JSIMWiz specific logic goes here ---
 			assertTrue(IntegrationTestUtil.testJSIMWizModel(jsimWizTestFile));
@@ -194,11 +202,11 @@ public class IntegrationTest {
 		});
 	}
 
-	@ParameterizedTest
+	@ParameterizedTest(name = "[{1}/{2}] {0}")
 	@MethodSource("jabaTestProvider")
-	void testJABA(File jabaTestFile) {
+	void testJABA(File jabaTestFile, int currentIndex, int totalTests) {
 		// Call the generic runner, passing the JABA CSV path
-		runWithCoverage(jabaTestFile, JABA_CSV_PATH, () -> {
+		runWithCoverage(jabaTestFile, JABA_CSV_PATH, currentIndex, totalTests, () -> {
 
 			// --- Your JABA specific logic goes here ---
 			assertTrue(IntegrationTestUtil.testJABAModel(jabaTestFile));
