@@ -30,6 +30,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
+import java.time.Instant;
 
 public class IntegrationTest {
 
@@ -109,6 +110,10 @@ public class IntegrationTest {
 	}
 
 	private void runWithCoverage(File testFile, String csvPath, Executable testLogic) {
+		Instant startInstant = Instant.now(); 
+        String startTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+        System.out.println("\n[INFO] Starting test file: " + testFile.getName() + " | Timestamp: " + startTimeStr);
+
 		CoverageTracker.reset(); // Clear previous data
 
 		try {
@@ -131,6 +136,16 @@ public class IntegrationTest {
 			if (csvPath != null) {
 				CoverageTracker.calculateAndAppend(testFile.getName(), CLASSES_DIRECTORY, csvPath, EXCLUDED_PACKAGES);
 			}
+
+			Instant endInstant = Instant.now();
+            String endTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+
+			// Using toMillis() divided by 1000.0 gives us precise decimals (e.g., "1.453s")
+            double durationSeconds = Duration.between(startInstant, endInstant).toMillis() / 1000.0;
+            
+            System.out.println("[INFO] Finished test file: " + testFile.getName() 
+                             + " | Timestamp: " + endTimeStr 
+                             + " | Duration: " + durationSeconds + "s");
 		}
 	}
 
