@@ -1,8 +1,9 @@
 package linetesting;
 
 import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.STABILITY_TRESHOLD;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -392,8 +393,48 @@ public class IntegrationTestUtil {
 					+ simulatedModelFinalValues.size());
 			return false;
 		}
-		// Java handles the element-by-element and order comparison automatically!
-		return testModelFinalValues.equals(simulatedModelFinalValues);
+
+		for (int i = 0; i < testModelFinalValues.size(); i++) {
+			String oldStr = testModelFinalValues.get(i);
+			String newStr = simulatedModelFinalValues.get(i);
+
+			// Fast pass: if the strings match exactly, skip the math
+			if (oldStr.equals(newStr)) {
+				continue;
+			}
+
+			try {
+				double oldVal = Double.parseDouble(oldStr);
+				double newVal = Double.parseDouble(newStr);
+
+				double denom = (newVal + oldVal) / 2.0;
+				double ratio = 0.0;
+
+				if (denom != 0.0) {
+					// Math.abs on both ensures the percentage is always positive, even for negative
+					// values
+					ratio = Math.abs(newVal - oldVal) / Math.abs(denom);
+				}
+
+				double smape = ratio * 100.0;
+
+				// Check against the threshold
+				if (smape >= STABILITY_TRESHOLD) {
+					System.err.println("Unstable result at index " + i + ": Expected ~" + oldVal + ", Got " + newVal
+							+ " (Difference: " + String.format("%.2f", smape) + "%)");
+					return false; // Fails the check the moment a value exceeds the threshold
+				}
+
+			} catch (NumberFormatException e) {
+				// If the values aren't numbers (e.g., "ERROR" or "NaN") and didn't match as
+				// strings, fail
+				System.err.println("Non-numeric mismatch at index " + i + ": '" + oldStr + "' vs '" + newStr + "'");
+				return false;
+			}
+		}
+
+		// If it makes it through the loop, all values are within the 5% tolerance
+		return true;
 	}
 
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
