@@ -27,6 +27,7 @@ public final class IntegrationTestConstants {
 	public static final String TIMEOUT_CSV_NAME = "timeouts.csv";
 
 	// Execution Configs
+	public static final double STABILITY_TRESHOLD = 5.0;
 	public static final int TEST_TIMEOUT = 5; // Minutes
 	public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	public static final String[] EXCLUDED_PACKAGES = { "jmt/framework/gui", "jmt/gui", "jmt/jmva/gui",
