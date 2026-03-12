@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="SEED1test_3Job2Cl2CS2FJ_2NEWparameters.jsimg" timestamp="Tue Jan 13 18:31:24 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Serazzi\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="SEED1test_3Job2Cl2CS2FJ_2NEWparameters.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="SEED1test_3Job2Cl2CS2FJ_2NEWparameters.jsimg" timestamp="Thu Mar 12 12:20:39 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="SEED1test_3Job2Cl2CS2FJ_2NEWparameters.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass customers="30" name="Class1" priority="0" referenceSource="Delay 1" softDeadline="0.0" type="closed"/>
         <userClass customers="0" name="Class2" priority="0" referenceSource="Delay 1" softDeadline="0.0" type="closed"/>
         <node name="Fork 1">
@@ -263,41 +263,38 @@
                         </subParameter>
                     </subParameter>
                 </parameter>
-                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
-                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
-                        <refClass>Class1</refClass>
-                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                            <value>1</value>
-                        </subParameter>
-                        <refClass>Class2</refClass>
-                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                            <value>1</value>
-                        </subParameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
-                        <subParameter classPath="java.lang.String" name="serverTypesNames">
-                            <value>Queue 1 - Server Type 1</value>
-                        </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
-                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
-                            <value>1</value>
-                        </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue 1 - Server Type 1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
-                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
-                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                                <value>true</value>
-                            </subParameter>
-                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                                <value>true</value>
-                            </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
                         </subParameter>
                     </subParameter>
-                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
-                        <value>ALIS (Assign Longest Idle Server)</value>
-                    </subParameter>
-                    <subParameter classPath="jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
                 </parameter>
             </section>
             <section className="Router">
@@ -533,41 +530,38 @@
                         </subParameter>
                     </subParameter>
                 </parameter>
-                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
-                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
-                        <refClass>Class1</refClass>
-                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                            <value>1</value>
-                        </subParameter>
-                        <refClass>Class2</refClass>
-                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
-                            <value>1</value>
-                        </subParameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
-                        <subParameter classPath="java.lang.String" name="serverTypesNames">
-                            <value>Queue 2 - Server Type 1</value>
-                        </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
-                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
-                            <value>1</value>
-                        </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>Queue 2 - Server Type 1</value>
                     </subParameter>
-                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
-                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
-                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                                <value>true</value>
-                            </subParameter>
-                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
-                                <value>true</value>
-                            </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
                         </subParameter>
                     </subParameter>
-                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
-                        <value>ALIS (Assign Longest Idle Server)</value>
-                    </subParameter>
-                    <subParameter classPath="jmt.engine.NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
                 </parameter>
             </section>
             <section className="Router">
@@ -809,7 +803,7 @@
             </arc>
         </connectionShape>
     </jmodel>
-    <results elapsedTime="22" logDecimalSeparator="." logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+    <results elapsedTime="78" logDecimalSeparator="." logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
         <measure alpha="0.99" analyzedSamples="37" discardedSamples="0" finalValue="0.23357201606214106" name="Delay 1_Class1_Throughput" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Delay 1" state="0" type="5">
             <sample lastIntervalAvgValue="0.23357201606214106" meanValue="0.23357201606214106" simulationTime="158.40938749338994"/>
         </measure>

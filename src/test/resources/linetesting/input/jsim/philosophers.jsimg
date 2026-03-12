@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="philosophers.jsimg" timestamp="Sun Jan 18 22:08:38 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Serazzi\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="philosophers.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="philosophers.jsimg" timestamp="Thu Mar 12 08:45:49 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="philosophers.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass customers="8" name="Class1" priority="0" referenceSource="thinking_1" softDeadline="0.0" type="closed"/>
         <node name="thinking_1">
             <section className="Storage">
@@ -1908,7 +1908,7 @@
             <position angle="0.0" rotate="true" x="157.0" y="400.0"/>
         </station>
     </jmodel>
-    <results elapsedTime="98" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+    <results elapsedTime="25" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
         <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="t3_1_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="t3_1" state="0" type="28">
             <sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
         </measure>
