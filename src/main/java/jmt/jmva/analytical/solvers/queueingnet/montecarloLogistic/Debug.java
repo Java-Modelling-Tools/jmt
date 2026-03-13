@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
 import cern.colt.matrix.impl.DenseDoubleMatrix1D;
 import cern.colt.matrix.impl.DenseDoubleMatrix2D;
 import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
