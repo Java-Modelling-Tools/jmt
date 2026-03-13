@@ -6,9 +6,13 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
 
-import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateFunction;
-import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
+import cern.colt.matrix.impl.DenseDoubleMatrix1D;
+import cern.colt.matrix.impl.DenseDoubleMatrix2D;
+import jmt.jmva.analytical.solvers.exceptions.InternalErrorException;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMS;
+import jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic.solver.LogisticFunctionMSBD;
+import org.apache.commons.math3.analysis.*;
 import org.apache.commons.math3.optimization.GoalType;
 import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.direct.BOBYQAOptimizer;
