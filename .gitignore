@@ -89,6 +89,7 @@ nb-configuration.xml
 ##############################
 *.log
 jacoco.exec
+.github
 
 # Remove test output folder
 /src/test/resources/linetesting/output
