@@ -75,4 +75,3 @@ public class MeasureDescriptor {
         this.verbose = verbose;
     }
 }
-

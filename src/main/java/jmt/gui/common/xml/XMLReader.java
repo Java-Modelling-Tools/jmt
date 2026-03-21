@@ -96,6 +96,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
             return;
         }
 
+        // Preserve the original DOM root so ModelPopulator can use legacy parity fallback.
+        ModelPopulator.setSourceRoot(root);
         SimParser parser = new SimParser();
         SimDescriptor descriptor = parser.parse(root);
         ModelPopulator.populate(descriptor, model);

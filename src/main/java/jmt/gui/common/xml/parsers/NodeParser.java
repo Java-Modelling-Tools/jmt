@@ -33,4 +33,3 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
         return element.hasAttribute(attributeName) ? element.getAttribute(attributeName) : null;
     }
 }
-
