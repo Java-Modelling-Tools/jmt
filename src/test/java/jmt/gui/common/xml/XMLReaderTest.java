@@ -50,15 +50,17 @@ class XMLReaderTest {
     @BeforeEach
     void setUp() throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(false);
+        factory.setValidating(false);
+        try {
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        } catch (Exception ignored) {
+            // Best-effort: keep parser creation resilient across JDK/XML implementations.
+        }
         documentBuilder = factory.newDocumentBuilder();
         model = new CommonModel();
-        // Reset XMLReader static caches so tests are fully isolated.
-        XMLReader.engineToGuiDistr     = null;
-        XMLReader.engineToGuiRouting   = null;
-        XMLReader.engineToGuiFork      = null;
-        XMLReader.engineToGuiJoin      = null;
-        XMLReader.engineToGuiSemaphore = null;
     }
+
 
     /** Parse an inline XML string and return its root Element ready for XMLReader. */
     private org.w3c.dom.Element rootOf(String xml) throws Exception {
@@ -1549,14 +1551,10 @@ class XMLReaderTest {
     void fork_combFork_strategyIsSet() throws Exception {
         XMLReader.parseXML(rootOf(forkWithCombFork("Fork", "Dest", "C1", 2)), model);
 
-        assertThat(XMLReader.combFork)
-                .as("XMLReader doveva leggere la struttura e popolare la mappa combFork")
-                .isNotEmpty();
-
         Object fs = model.getForkStrategy(model.getStationByName("Fork"), model.getClassByName("C1"));
-        if (fs != null) {
-            assertThat(fs).isInstanceOf(CombFork.class);
-        }
+        assertThat(fs)
+                .as("XMLReader doveva leggere la struttura comb fork e impostare la strategia sul modello")
+                .isInstanceOf(CombFork.class);
     }
 
 // =========================================================================
@@ -1759,9 +1757,10 @@ class XMLReaderTest {
                         "  </node>" +
                         "</sim>"), model);
 
-        assertThat(XMLReader.empiricalFork)
-                .as("Il ClassSwitchFork deve popolare empiricalFork")
-                .isNotEmpty();
+        Object fs = model.getForkStrategy(model.getStationByName("F"), model.getClassByName("C1"));
+        assertThat(fs)
+                .as("Il ClassSwitchFork deve essere interpretato e assegnato alla classe")
+                .isNotNull();
     }
 
 // =========================================================================
@@ -1800,9 +1799,12 @@ class XMLReaderTest {
                         "  </node>" +
                         "</sim>"), model);
 
-        assertThat(XMLReader.enablingConditionMap)
-                .as("La mappa delle enabling conditions deve essere stata popolata")
-                .isNotEmpty();
+        Object transitionKey = model.getStationByName("T");
+        Object placeKey = model.getStationByName("Place1");
+        Object classKey = model.getClassByName("C1");
+        assertThat(model.getEnablingCondition(transitionKey, 0, placeKey, classKey))
+                .as("Le enabling conditions devono essere state propagate nel modello")
+                .isEqualTo(2);
     }
 
     @Test
