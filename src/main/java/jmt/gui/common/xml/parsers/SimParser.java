@@ -102,10 +102,9 @@ public class SimParser implements XmlEntityParser<SimDescriptor> {
     }
 
     private String firstNonEmpty(String first, String second) {
-        if (first != null && !first.isEmpty()) {
+        if (first != null && first.length() > 0) {
             return first;
         }
         return second;
     }
 }
-
