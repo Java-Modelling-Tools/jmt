@@ -31,20 +31,7 @@ class XMLReaderTest {
     // -------------------------------------------------------------------------
 
     private DocumentBuilder documentBuilder;
-    private CommonModel model;
-
-    @BeforeEach
-    void setUp() throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        documentBuilder = factory.newDocumentBuilder();
-        model = new CommonModel();
-        // Reset XMLReader static caches so tests are fully isolated.
-        XMLReader.engineToGuiDistr = null;
-        XMLReader.engineToGuiRouting = null;
-        XMLReader.engineToGuiFork = null;
-        XMLReader.engineToGuiJoin = null;
-        XMLReader.engineToGuiSemaphore = null;
-    }
+   
 
     // -------------------------------------------------------------------------
     // Tests
@@ -109,26 +96,25 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_parseStationDeadlinesAndQuanta_branches_fullcoverage() throws Exception {
+    void test_parseStationDeadlinesAndQuanta_branches_fullcoverage() {
+        File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseStationDeadlinesAndQuanta_branches.xml");
         CommonModel model = new CommonModel();
-        Object class1 = model.addClass("Class1", CommonConstants.CLASS_TYPE_CLOSED, 0, 0.0, 1, null);
-        Object class2 = model.addClass("Class2", CommonConstants.CLASS_TYPE_CLOSED, 0, 0.0, 1, null);
-        Object station = model.addStation("ServerWithQuanta", CommonConstants.STATION_TYPE_SERVER, 1,
-                new java.util.ArrayList<jmt.gui.common.definitions.ServerType>());
 
-        File fixtureFile = new File("src/test/resources/jmt/gui/common/xml/parseStationDeadlinesAndQuanta_branches.xml");
-        Document fixtureDoc = documentBuilder.parse(fixtureFile);
-        org.w3c.dom.Element fixtureRoot = fixtureDoc.getDocumentElement();
-        org.w3c.dom.Element emptyCase = (org.w3c.dom.Element) fixtureRoot.getElementsByTagName("emptyCase").item(0);
-        org.w3c.dom.Element populatedCase = (org.w3c.dom.Element) fixtureRoot.getElementsByTagName("populatedCase").item(0);
+        XMLArchiver.loadModel(xmlFile, model);
 
-        XMLReader.parseClassStationSoftDeadlines(emptyCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_DUE_DATES), model, station);
-        XMLReader.parseQuantaSize(emptyCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_QUANTUM_SIZE), model, station);
-        XMLReader.parseQuantumSwitchoverTime(emptyCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_QUANTUM_SWITCHOVER_TIME), model, station);
+        Object station = model.getStationByName("ServerWithQuanta");
+        Object class1 = model.getClassByName("Class1");
+        Object class2 = model.getClassByName("Class2");
 
-        XMLReader.parseClassStationSoftDeadlines(populatedCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_DUE_DATES), model, station);
-        XMLReader.parseQuantaSize(populatedCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_QUANTUM_SIZE), model, station);
-        XMLReader.parseQuantumSwitchoverTime(populatedCase.getElementsByTagName(XMLConstantNames.XML_E_STATION_QUANTUM_SWITCHOVER_TIME), model, station);
+        assertThat(station)
+                .as("ServerWithQuanta station must exist")
+                .isNotNull();
+        assertThat(class1).as("Class1 must exist").isNotNull();
+        assertThat(class2).as("Class2 must exist").isNotNull();
+
+        assertThat(model.getStationType(station))
+                .as("ServerWithQuanta should be parsed as SERVER station")
+                .isEqualTo(CommonConstants.STATION_TYPE_SERVER);
 
         assertThat(model.getClassStationSoftDeadline(station, class1))
                 .as("First class soft deadline should be parsed from classSoftDeadlines")
