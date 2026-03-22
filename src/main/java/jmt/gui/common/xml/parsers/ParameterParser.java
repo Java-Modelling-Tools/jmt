@@ -14,25 +14,31 @@ public class ParameterParser implements XmlEntityParser<ParameterDescriptor> {
         descriptor.setClassPath(readAttribute(element, "classPath"));
         descriptor.setArray(Boolean.parseBoolean(readAttribute(element, "array")));
 
+        String pendingRefClass = null;
         NodeList children = element.getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
-            if (node.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
+            if (node.getNodeType() != Node.ELEMENT_NODE) continue;
 
             Element child = (Element) node;
             String tagName = child.getTagName();
+
             if ("value".equals(tagName)) {
                 descriptor.setValue(child.getTextContent());
             } else if ("refClass".equals(tagName)) {
-                descriptor.setRefClass(child.getTextContent());
+                pendingRefClass = child.getTextContent();
             } else if ("subParameter".equals(tagName)) {
                 ParameterDescriptor subParameter = parse(child);
+                if (pendingRefClass != null) {
+                    subParameter.setRefClass(pendingRefClass);
+                    pendingRefClass = null;
+                }
                 descriptor.addSubParameter(subParameter);
             }
         }
-
+        if (pendingRefClass != null && descriptor.getRefClass() == null) {
+            descriptor.setRefClass(pendingRefClass);
+        }
         return descriptor;
     }
 
@@ -40,4 +46,3 @@ public class ParameterParser implements XmlEntityParser<ParameterDescriptor> {
         return element.hasAttribute(attributeName) ? element.getAttribute(attributeName) : null;
     }
 }
-

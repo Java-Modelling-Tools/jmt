@@ -19,11 +19,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Vector;
 import java.util.stream.Stream;
@@ -33,7 +38,7 @@ import static org.assertj.core.api.Assertions.within;
 
 /**
  * Integration test suite for {@link XMLReader#parseXML(org.w3c.dom.Element, CommonModel)}.
- *
+ * <p>
  * Purpose: verify that the public contract of parseXML is preserved across refactoring.
  * Every test targets one specific behaviour of the method; no test is "omnibus".
  * Each test is fully self-contained via an inline XML string.
@@ -62,7 +67,9 @@ class XMLReaderTest {
     }
 
 
-    /** Parse an inline XML string and return its root Element ready for XMLReader. */
+    /**
+     * Parse an inline XML string and return its root Element ready for XMLReader.
+     */
     private org.w3c.dom.Element rootOf(String xml) throws Exception {
         Document doc = documentBuilder.parse(new InputSource(new StringReader(xml)));
         return doc.getDocumentElement();
@@ -108,7 +115,8 @@ class XMLReaderTest {
 
     /**
      * Controlla che i valori di deafult vengano impostati
-     * */
+     *
+     */
     @Test
     void root_withoutOptionalAttributes_setsDefaults() throws Exception {
         XMLReader.parseXML(rootOf("<sim/>"), model);
@@ -174,7 +182,7 @@ class XMLReaderTest {
                         "</sim>");
         XMLReader.parseXML(root, model);
 
-        Object classKey   = model.getClassByName("OC");
+        Object classKey = model.getClassByName("OC");
         Object stationKey = model.getStationByName("MySrc");
         assertThat(classKey).isNotNull();
         assertThat(stationKey).isNotNull();
@@ -339,11 +347,11 @@ class XMLReaderTest {
 
     private static Stream<Arguments> putStrategyMappingProvider() {
         return Stream.of(
-                Arguments.of("TailStrategy",         CommonConstants.QUEUE_STRATEGY_FCFS,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("TailStrategyPriority", null,                                   CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("HeadStrategy",         CommonConstants.QUEUE_STRATEGY_LCFS,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("RandStrategy",         CommonConstants.QUEUE_STRATEGY_RAND,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("FCFSPRStrategy",       CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE)
+                Arguments.of("TailStrategy", CommonConstants.QUEUE_STRATEGY_FCFS, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("TailStrategyPriority", null, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("HeadStrategy", CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("RandStrategy", CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("FCFSPRStrategy", CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE)
         );
     }
 
@@ -437,8 +445,8 @@ class XMLReaderTest {
                         "</sim>"), model);
 
         Object routerKey = model.getStationByName("Router");
-        Object destKey   = model.getStationByName("Dest");
-        Object classKey  = model.getClassByName("C1");
+        Object destKey = model.getStationByName("Dest");
+        Object classKey = model.getClassByName("C1");
 
         Object rs = model.getRoutingStrategy(routerKey, classKey);
         assertThat(rs).isInstanceOf(ProbabilityRouting.class);
@@ -526,8 +534,8 @@ class XMLReaderTest {
                         "  </node>" +
                         "</sim>"), model);
 
-        Object wrrKey   = model.getStationByName("WRR");
-        Object destKey  = model.getStationByName("Dest");
+        Object wrrKey = model.getStationByName("WRR");
+        Object destKey = model.getStationByName("Dest");
         Object classKey = model.getClassByName("C1");
 
         Object rs = model.getRoutingStrategy(wrrKey, classKey);
@@ -570,8 +578,8 @@ class XMLReaderTest {
                         "  </node>" +
                         "</sim>"), model);
 
-        Object sk      = model.getStationByName("S");
-        Object ck      = model.getClassByName("C1");
+        Object sk = model.getStationByName("S");
+        Object ck = model.getClassByName("C1");
         Object destKey = model.getStationByName("Dest");
 
         Object rs = model.getRoutingStrategy(sk, ck);
@@ -619,10 +627,10 @@ class XMLReaderTest {
                         "  </node>" +
                         "</sim>"), model);
 
-        Object sk      = model.getStationByName("S");
-        Object ck      = model.getClassByName("C1");
+        Object sk = model.getStationByName("S");
+        Object ck = model.getClassByName("C1");
         Object destKey = model.getStationByName("Dest");
-        Object c2Key   = model.getClassByName("C2");
+        Object c2Key = model.getClassByName("C2");
 
         Object rs = model.getRoutingStrategy(sk, ck);
         assertThat(rs).isInstanceOf(ClassSwitchRouting.class);
@@ -667,8 +675,8 @@ class XMLReaderTest {
     void fork_probabilitiesFork_outPathsAreResolvedToStationKeys() throws Exception {
         XMLReader.parseXML(rootOf(minimalForkWithDest("F", "Dest", "C1", 1)), model);
 
-        Object forkKey  = model.getStationByName("F");
-        Object destKey  = model.getStationByName("Dest");
+        Object forkKey = model.getStationByName("F");
+        Object destKey = model.getStationByName("Dest");
         Object classKey = model.getClassByName("C1");
 
         Object fs = model.getForkStrategy(forkKey, classKey);
@@ -1072,7 +1080,7 @@ class XMLReaderTest {
                         "</sim>"), model);
 
         Object s1 = model.getStationByName("S1"), s2 = model.getStationByName("S2");
-        Object c1 = model.getClassByName("C1"),  c2 = model.getClassByName("C2");
+        Object c1 = model.getClassByName("C1"), c2 = model.getClassByName("C2");
         assertThat(model.getPreloadedJobs(s1, c1)).isEqualTo(5);
         assertThat(model.getPreloadedJobs(s1, c2)).isEqualTo(3);
         assertThat(model.getPreloadedJobs(s2, c1)).isEqualTo(7);
@@ -1137,7 +1145,9 @@ class XMLReaderTest {
     // Helpers — minimal XML fragments
     // =========================================================================
 
-    /** Minimal complete <sim> XML with an open-class Source station. */
+    /**
+     * Minimal complete <sim> XML with an open-class Source station.
+     */
     private static String minimalSource(String name, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"open\" referenceSource=\"" + name + "\"/>" +
@@ -1154,7 +1164,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Just the inner <section> elements for a Source (for embedding in larger XML). */
+    /**
+     * Just the inner <section> elements for a Source (for embedding in larger XML).
+     */
     private String minimalSourceSections(String className) {
         return "<section className=\"RandomSource\">" +
                 "  <parameter name=\"ServiceStrategy\">" +
@@ -1166,7 +1178,9 @@ class XMLReaderTest {
                 "<section className=\"Router\"><parameter name=\"RoutingStrategy\"/></section>";
     }
 
-    /** Minimal complete <sim> XML with a Delay station. */
+    /**
+     * Minimal complete <sim> XML with a Delay station.
+     */
     private static String minimalDelay(String name, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1174,14 +1188,18 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Just the inner <section> elements for a Delay (for embedding in larger XML). */
+    /**
+     * Just the inner <section> elements for a Delay (for embedding in larger XML).
+     */
     private static String minimalDelaySections() {
         return "<section className=\"Queue\"/>" +
                 "<section className=\"Delay\"><parameter name=\"ServiceStrategy\"/></section>" +
                 "<section className=\"Router\"><parameter name=\"RoutingStrategy\"/></section>";
     }
 
-    /** Minimal complete <sim> XML with a Server station with {@code servers} servers. */
+    /**
+     * Minimal complete <sim> XML with a Server station with {@code servers} servers.
+     */
     private static String minimalServer(String name, String className, int servers) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1230,7 +1248,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal complete <sim> XML with a Join station (NormalJoin). */
+    /**
+     * Minimal complete <sim> XML with a Join station (NormalJoin).
+     */
     private static String minimalJoin(String name, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1247,7 +1267,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal complete <sim> XML with a Semaphore station with a given threshold. */
+    /**
+     * Minimal complete <sim> XML with a Semaphore station with a given threshold.
+     */
     private static String minimalSemaphore(String name, String className, int threshold) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1266,7 +1288,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal complete <sim> XML with a Place station. */
+    /**
+     * Minimal complete <sim> XML with a Place station.
+     */
     private static String minimalPlace(String name, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1290,7 +1314,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal complete <sim> XML with a Transition station (single mode named FastMode). */
+    /**
+     * Minimal complete <sim> XML with a Transition station (single mode named FastMode).
+     */
     private static String minimalTransition(String name) {
         return "<sim>" +
                 "  <userClass name=\"C1\" type=\"closed\"/>" +
@@ -1347,7 +1373,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal complete <sim> XML with one blocking region containing one station. */
+    /**
+     * Minimal complete <sim> XML with one blocking region containing one station.
+     */
     private String minimalBlockingRegion(String regionName, String stationName, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1419,28 +1447,28 @@ class XMLReaderTest {
 
     private static Stream<Arguments> namedPutStrategyMappingProvider() {
         return Stream.of(
-                Arguments.of("HeadStrategy",             CommonConstants.QUEUE_STRATEGY_LCFS,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("HeadStrategyPriority",     CommonConstants.QUEUE_STRATEGY_LCFS,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("RandStrategy",             CommonConstants.QUEUE_STRATEGY_RAND,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("RandStrategyPriority",     CommonConstants.QUEUE_STRATEGY_RAND,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("SJFStrategy",              CommonConstants.QUEUE_STRATEGY_SJF,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("SJFStrategyPriority",      CommonConstants.QUEUE_STRATEGY_SJF,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("LJFStrategy",              CommonConstants.QUEUE_STRATEGY_LJF,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("LJFStrategyPriority",      CommonConstants.QUEUE_STRATEGY_LJF,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("SEPTStrategy",             CommonConstants.QUEUE_STRATEGY_SEPT,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("SEPTStrategyPriority",     CommonConstants.QUEUE_STRATEGY_SEPT,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("LEPTStrategy",             CommonConstants.QUEUE_STRATEGY_LEPT,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("LEPTStrategyPriority",     CommonConstants.QUEUE_STRATEGY_LEPT,    CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("FCFSPRStrategyPriority",   CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
-                Arguments.of("LCFSPRStrategy",           CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
-                Arguments.of("LCFSPRStrategyPriority",   CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
-                Arguments.of("SRPTStrategy",             CommonConstants.QUEUE_STRATEGY_SRPT,    CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
-                Arguments.of("SRPTStrategyPriority",     CommonConstants.QUEUE_STRATEGY_SRPT,    CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
-                Arguments.of("EDDStrategy",              CommonConstants.QUEUE_STRATEGY_EDD,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
-                Arguments.of("EDDStrategyPriority",      CommonConstants.QUEUE_STRATEGY_EDD,     CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
-                Arguments.of("EDFStrategy",              CommonConstants.QUEUE_STRATEGY_EDF,     CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
-                Arguments.of("EDFStrategyPriority",      CommonConstants.QUEUE_STRATEGY_EDF,     CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
-                Arguments.of("TBSStrategyPriority",      CommonConstants.QUEUE_STRATEGY_TBS,     CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)
+                Arguments.of("HeadStrategy", CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("HeadStrategyPriority", CommonConstants.QUEUE_STRATEGY_LCFS, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("RandStrategy", CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("RandStrategyPriority", CommonConstants.QUEUE_STRATEGY_RAND, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("SJFStrategy", CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("SJFStrategyPriority", CommonConstants.QUEUE_STRATEGY_SJF, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("LJFStrategy", CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("LJFStrategyPriority", CommonConstants.QUEUE_STRATEGY_LJF, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("SEPTStrategy", CommonConstants.QUEUE_STRATEGY_SEPT, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("SEPTStrategyPriority", CommonConstants.QUEUE_STRATEGY_SEPT, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("LEPTStrategy", CommonConstants.QUEUE_STRATEGY_LEPT, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("LEPTStrategyPriority", CommonConstants.QUEUE_STRATEGY_LEPT, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("FCFSPRStrategyPriority", CommonConstants.QUEUE_STRATEGY_FCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
+                Arguments.of("LCFSPRStrategy", CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
+                Arguments.of("LCFSPRStrategyPriority", CommonConstants.QUEUE_STRATEGY_LCFS_PR, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
+                Arguments.of("SRPTStrategy", CommonConstants.QUEUE_STRATEGY_SRPT, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
+                Arguments.of("SRPTStrategyPriority", CommonConstants.QUEUE_STRATEGY_SRPT, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
+                Arguments.of("EDDStrategy", CommonConstants.QUEUE_STRATEGY_EDD, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE),
+                Arguments.of("EDDStrategyPriority", CommonConstants.QUEUE_STRATEGY_EDD, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY),
+                Arguments.of("EDFStrategy", CommonConstants.QUEUE_STRATEGY_EDF, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE),
+                Arguments.of("EDFStrategyPriority", CommonConstants.QUEUE_STRATEGY_EDF, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY),
+                Arguments.of("TBSStrategyPriority", CommonConstants.QUEUE_STRATEGY_TBS, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)
         );
     }
 
@@ -1523,9 +1551,9 @@ class XMLReaderTest {
 
     private static Stream<Arguments> psStrategyMappingProvider() {
         return Stream.of(
-                Arguments.of("jmt.engine.NetStrategies.PSStrategies.EPSStrategy",  CommonConstants.QUEUE_STRATEGY_PS),
-                Arguments.of("jmt.engine.NetStrategies.PSStrategies.GPSStrategy",  CommonConstants.QUEUE_STRATEGY_GPS),
-                Arguments.of("jmt.engine.NetStrategies.PSStrategies.DPSStrategy",  CommonConstants.QUEUE_STRATEGY_DPS),
+                Arguments.of("jmt.engine.NetStrategies.PSStrategies.EPSStrategy", CommonConstants.QUEUE_STRATEGY_PS),
+                Arguments.of("jmt.engine.NetStrategies.PSStrategies.GPSStrategy", CommonConstants.QUEUE_STRATEGY_GPS),
+                Arguments.of("jmt.engine.NetStrategies.PSStrategies.DPSStrategy", CommonConstants.QUEUE_STRATEGY_DPS),
                 Arguments.of("jmt.engine.NetStrategies.PSStrategies.QBPSStrategy", CommonConstants.QUEUE_STRATEGY_QBPS)
         );
     }
@@ -1549,7 +1577,13 @@ class XMLReaderTest {
 
     @Test
     void fork_combFork_strategyIsSet() throws Exception {
-        XMLReader.parseXML(rootOf(forkWithCombFork("Fork", "Dest", "C1", 2)), model);
+
+        String stringXML = forkWithCombFork("Fork", "Dest", "C1", 2);
+
+        Element xml = rootOf(stringXML);
+
+
+        XMLReader.parseXML(xml, model);
 
         Object fs = model.getForkStrategy(model.getStationByName("Fork"), model.getClassByName("C1"));
         assertThat(fs)
@@ -1574,8 +1608,8 @@ class XMLReaderTest {
 
     private static Stream<Arguments> pollingServerTypeProvider() {
         return Stream.of(
-                Arguments.of("LimitedPollingServer",   CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED),
-                Arguments.of("GatedPollingServer",     CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED),
+                Arguments.of("LimitedPollingServer", CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED),
+                Arguments.of("GatedPollingServer", CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED),
                 Arguments.of("ExhaustivePollingServer", CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE)
         );
     }
@@ -1617,7 +1651,7 @@ class XMLReaderTest {
 
     @Test
     void serviceStrategy_zeroAndDisabled_areParsedCorrectly() throws Exception {
-        String zeroPath     = jmt.gui.common.serviceStrategies.ZeroStrategy.getEngineClassPath();
+        String zeroPath = jmt.gui.common.serviceStrategies.ZeroStrategy.getEngineClassPath();
         String disabledPath = jmt.gui.common.serviceStrategies.DisabledStrategy.getEngineClassPath();
 
         XMLReader.parseXML(rootOf(
@@ -1878,7 +1912,9 @@ class XMLReaderTest {
     // XML builder helpers (sections 20-26)
     // =========================================================================
 
-    /** Helper: the two-child ServiceTimeStrategy subParameter block for a class. */
+    /**
+     * Helper: the two-child ServiceTimeStrategy subParameter block for a class.
+     */
     private static String expServiceStrategy(String className) {
         return "<subParameter name=\"" + className + "\"" +
                 "              classPath=\"jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy\">" +
@@ -1889,7 +1925,9 @@ class XMLReaderTest {
                 "</subParameter>";
     }
 
-    /** Helper: Queue section with TailStrategy for one class. */
+    /**
+     * Helper: Queue section with TailStrategy for one class.
+     */
     private static String tailQueueSection(String className) {
         return "<section className=\"Queue\">" +
                 "  <parameter name=\"size\"><value>-1</value></parameter>" +
@@ -1900,7 +1938,9 @@ class XMLReaderTest {
                 "</section>";
     }
 
-    /** Helper: Queue section with a named put strategy for one class. */
+    /**
+     * Helper: Queue section with a named put strategy for one class.
+     */
     private String namedPutQueueSection(String strategyName, String className) {
         return "<section className=\"Queue\">" +
                 "  <parameter name=\"size\"><value>-1</value></parameter>" +
@@ -1911,7 +1951,9 @@ class XMLReaderTest {
                 "</section>";
     }
 
-    /** Helper: Server section with standard Exponential service for one class. */
+    /**
+     * Helper: Server section with standard Exponential service for one class.
+     */
     private String expServerSection(String className) {
         return "<section className=\"Server\">" +
                 "  <parameter name=\"maxJobs\"><value>1</value></parameter>" +
@@ -1923,7 +1965,9 @@ class XMLReaderTest {
                 "</section>";
     }
 
-    /** Helper: PSServer section with standard Exponential service for one class. */
+    /**
+     * Helper: PSServer section with standard Exponential service for one class.
+     */
     private String expPSServerSection(String className) {
         return "<section className=\"PSServer\">" +
                 "  <parameter name=\"maxJobs\"><value>1</value></parameter>" +
@@ -1935,12 +1979,16 @@ class XMLReaderTest {
                 "</section>";
     }
 
-    /** Helper: minimal Router section. */
+    /**
+     * Helper: minimal Router section.
+     */
     private static String minimalRouterSection() {
         return "<section className=\"Router\"><parameter name=\"RoutingStrategy\"/></section>";
     }
 
-    /** Server station with a named put strategy — for queue strategy mapping tests. */
+    /**
+     * Server station with a named put strategy — for queue strategy mapping tests.
+     */
     private String serverWithNamedPutStrategy(String strategyName, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1952,7 +2000,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Place (Storage+Tunnel+Linkage) with a named put strategy for one class. */
+    /**
+     * Place (Storage+Tunnel+Linkage) with a named put strategy for one class.
+     */
     private String placeWithNamedPutStrategy(String strategyName, String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -1973,8 +2023,9 @@ class XMLReaderTest {
 
     /**
      * Server station with an Impatience block for the given class.
-     * @param impatienceName  the impatience type name (e.g. "Reneging", "None")
-     * @param innerXml        XML children inside the impatience subParameter
+     *
+     * @param impatienceName the impatience type name (e.g. "Reneging", "None")
+     * @param innerXml       XML children inside the impatience subParameter
      */
     private String serverWithImpatience(String className, String impatienceName, String innerXml) {
         return "<sim>" +
@@ -2000,7 +2051,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Server with PowerOfKRouting for the given class. */
+    /**
+     * Server with PowerOfKRouting for the given class.
+     */
     private String serverWithPowerOfKRouting(String className, String destName, int k, boolean withMemory) {
         // FIX: Iniettiamo la stringa esatta dall'oggetto GUI per evitare il ClassCastException
         String enginePath = new PowerOfKRouting().getClassPath();
@@ -2025,7 +2078,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Minimal PS server XML. */
+    /**
+     * Minimal PS server XML.
+     */
     private String psServerXml(String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -2037,7 +2092,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** PS server with a specific PS strategy for the given class. */
+    /**
+     * PS server with a specific PS strategy for the given class.
+     */
     private static String psServerWithPsStrategy(String className, String psStrategyClassPath) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -2062,7 +2119,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** PS server with serviceWeights for the given class and weight. */
+    /**
+     * PS server with serviceWeights for the given class and weight.
+     */
     private String psServerWithServiceWeights(String className, double weight) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -2087,7 +2146,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** PS server with PSPriorityUsed parameter. */
+    /**
+     * PS server with PSPriorityUsed parameter.
+     */
     private String psServerWithPriorityUsed(String className, boolean priorityUsed) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -2109,7 +2170,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Polling server XML with the correct polling section classname. */
+    /**
+     * Polling server XML with the correct polling section classname.
+     */
     private String pollingServerXml(String className, String pollingClassName) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
@@ -2128,7 +2191,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Fork station XML with CombFork strategy. */
+    /**
+     * Fork station XML with CombFork strategy.
+     */
     private String forkWithCombFork(String forkName, String destName, String className, int jobsPerLink) {
         // Usiamo la stringa hardcoded dell'engine per evitare ClassCast o mancate inizializzazioni
         String enginePath = "jmt.engine.NetStrategies.ForkStrategies.CombFork";
@@ -2161,7 +2226,9 @@ class XMLReaderTest {
                 "</sim>";
     }
 
-    /** Server with a ServiceStrategy that has no subParameters → parseServiceStrategy returns null. */
+    /**
+     * Server with a ServiceStrategy that has no subParameters → parseServiceStrategy returns null.
+     */
     private String serverWithEmptyServiceStrategy(String className) {
         return "<sim>" +
                 "  <userClass name=\"" + className + "\" type=\"closed\"/>" +
