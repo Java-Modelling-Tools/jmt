@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ParseLoggerBranches.jsimg" timestamp="Sun Mar 22 20:35:00 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="${user.home}/jmt-logger-test" logReplaceMode="1" maxSamples="1000000" name="ParseLoggerBranches" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+
+        <userClass name="Class1" priority="0" referenceSource="Source1" type="open"/>
+
+        <node name="Source1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+
+        <node name="Logger1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+            </section>
+            <section className="LogTunnel">
+                <parameter classPath="java.lang.String" name="logfileName"><value>logger-branch.csv</value></parameter>
+                <parameter classPath="java.lang.String" name="logfilePath"><value>/this/path/must/be/ignored/by-parser</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logExecTimestamp"><value>true</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logLoggerName"><value>false</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logTimeStamp"><value>true</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logJobID"><value>false</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logJobClass"><value>true</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logTimeSameClass"><value>false</value></parameter>
+                <parameter classPath="java.lang.Boolean" name="logTimeAnyClass"><value>true</value></parameter>
+                <parameter classPath="java.lang.Integer" name="numClasses"><value>999</value></parameter>
+                <parameter classPath="java.lang.String" name="unknownLoggerParam"><value>unexpected</value></parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+
+        <node name="Sink1">
+            <section className="JobSink"/>
+        </node>
+
+        <measure alpha="0.01" name="System Response Time" nodeType="station" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <connection source="Source1" target="Logger1"/>
+        <connection source="Logger1" target="Sink1"/>
+    </sim>
+</archive>
+

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ParseEnablingBranches.jsimg" timestamp="Sun Mar 22 23:59:00 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," maxSamples="1000000" name="ParseEnablingBranches" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+
+        <userClass name="Class1" priority="0" referenceSource="Source1" type="open"/>
+        <userClass name="Class2" priority="0" referenceSource="Source1" type="open"/>
+
+        <node name="Source1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+
+        <node name="PlaceA">
+            <section className="Storage"/>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+
+        <node name="PlaceB">
+            <section className="Storage"/>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+
+        <node name="TransitionBoth">
+            <section className="Enabling">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName"><value>PlaceA</value></subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry"><value>2</value></subParameter>
+                                    <refClass>Class2</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry"><value>3</value></subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName"><value>PlaceA</value></subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry"><value>4</value></subParameter>
+                                    <refClass>Class2</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry"><value>5</value></subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing"/>
+            <section className="Firing"/>
+        </node>
+
+        <node name="TransitionOnlyEnabling">
+            <section className="Enabling">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName"><value>PlaceB</value></subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry"><value>6</value></subParameter>
+                                    <refClass>Class2</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry"><value>7</value></subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing"/>
+            <section className="Firing"/>
+        </node>
+
+        <node name="TransitionOnlyInhibiting">
+            <section className="Enabling">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="jmt.engine.NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName"><value>PlaceB</value></subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry"><value>8</value></subParameter>
+                                    <refClass>Class2</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry"><value>9</value></subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing"/>
+            <section className="Firing"/>
+        </node>
+
+        <connection source="Source1" target="PlaceA"/>
+        <connection source="Source1" target="PlaceB"/>
+    </sim>
+</archive>
+
