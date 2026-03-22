@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testCases>
+    <emptyCase/>
+    <populatedCase>
+        <classSoftDeadlines>
+            <softDeadline>10.5</softDeadline>
+            <softDeadline>20.75</softDeadline>
+        </classSoftDeadlines>
+        <quantumSize>
+            <quantaSize>0.25</quantaSize>
+        </quantumSize>
+        <quantumSwitchoverTime>
+            <quantumSwitchoverTime>1.5</quantumSwitchoverTime>
+        </quantumSwitchoverTime>
+    </populatedCase>
+</testCases>
+

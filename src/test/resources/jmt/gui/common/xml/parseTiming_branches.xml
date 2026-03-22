@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="ParseTimingBranches.jsimg" timestamp="Mon Mar 23 00:00:00 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," maxSamples="1000000" name="ParseTimingBranches" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+
+        <userClass name="Class1" priority="0" referenceSource="Source1" type="open"/>
+
+        <node name="Source1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>1.0</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+
+        <node name="TransitionFull">
+            <section className="Enabling"/>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName"><value>Alpha</value></subParameter>
+                    <subParameter classPath="java.lang.String" name="modeName"><value>Beta</value></subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers"><value>3</value></subParameter>
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers"><value>5</value></subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>2.5</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda"><value>7.5</value></subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority"><value>9</value></subParameter>
+                    <subParameter classPath="java.lang.Integer" name="firingPriority"><value>4</value></subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight"><value>1.25</value></subParameter>
+                    <subParameter classPath="java.lang.Double" name="firingWeight"><value>0.75</value></subParameter>
+                </parameter>
+            </section>
+            <section className="Firing"/>
+        </node>
+
+        <node name="TransitionFallback">
+            <section className="Enabling"/>
+            <section className="Timing"/>
+            <section className="Firing"/>
+        </node>
+
+        <node name="Sink1">
+            <section className="JobSink"/>
+            <section className="ServiceTunnel"/>
+            <section className="Router"/>
+        </node>
+
+        <connection source="Source1" target="TransitionFull"/>
+        <connection source="Source1" target="TransitionFallback"/>
+        <connection source="TransitionFull" target="Sink1"/>
+        <connection source="TransitionFallback" target="Sink1"/>
+    </sim>
+</archive>
+
