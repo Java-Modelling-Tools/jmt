@@ -4,12 +4,8 @@ import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
 import jmt.engine.NetStrategies.ImpatienceStrategies.RenegingParameter;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Document;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +26,6 @@ class XMLReaderTest {
     // Infrastructure
     // -------------------------------------------------------------------------
 
-    private DocumentBuilder documentBuilder;
-   
 
     // -------------------------------------------------------------------------
     // Tests
