@@ -542,7 +542,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 			save = true;
 			if (cd.type == CLASS_TYPE_OPEN) {
 				if (cd.distribution == null && (refStation == null
-						|| getStationType(refStation).equals(STATION_TYPE_SOURCE))) {
+						|| STATION_TYPE_SOURCE.equals(getStationType(refStation)))) {
 					cd.distribution = Defaults.getAsNewInstance("classDistribution");
 				}
 				if (cd.distribution != null && (STATION_TYPE_FORK.equals(refStation)

@@ -2639,4 +2639,22 @@ class XMLReaderTest {
                 .isInstanceOf(jmt.gui.common.routingStrategies.RandomRouting.class);
     }
 
+    @Test
+    void test_referenceSource_classSwitch_without_source_distribution_does_not_fail() {
+        File xmlFile = new File("src/test/resources/linetesting/input/jsim/Sec6_3_Obj2_SingleFact_Wif0,5-1,2_JSIMg.jsimg");
+        CommonModel model = new CommonModel();
+
+        XMLArchiver.loadModel(xmlFile, model);
+
+        Object class2 = model.getClassByName("Class2");
+        Object class3 = model.getClassByName("Class3");
+        assertThat(class2).isNotNull();
+        assertThat(class3).isNotNull();
+
+        assertThat(model.getClassRefStation(class2)).isEqualTo(CommonConstants.STATION_TYPE_CLASSSWITCH);
+        assertThat(model.getClassRefStation(class3)).isEqualTo(CommonConstants.STATION_TYPE_CLASSSWITCH);
+        assertThat(model.getClassDistribution(class2)).isNull();
+        assertThat(model.getClassDistribution(class3)).isNull();
+    }
+
 }

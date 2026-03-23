@@ -3,10 +3,12 @@ package jmt.gui.common.xml.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class NodeDescriptor {
 
     private String name;
     private List<SectionDescriptor> sections = new ArrayList<SectionDescriptor>();
+    private List<ParameterDescriptor> parameters = new ArrayList<ParameterDescriptor>();
 
     public String getName() {
         return name;
@@ -27,6 +29,20 @@ public class NodeDescriptor {
     public void addSection(SectionDescriptor section) {
         if (section != null) {
             sections.add(section);
+        }
+    }
+
+    public List<ParameterDescriptor> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<ParameterDescriptor> parameters) {
+        this.parameters = parameters != null ? parameters : new ArrayList<ParameterDescriptor>();
+    }
+
+    public void addParameter(ParameterDescriptor parameter) {
+        if (parameter != null) {
+            parameters.add(parameter);
         }
     }
 }
