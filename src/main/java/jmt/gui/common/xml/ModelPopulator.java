@@ -1,7 +1,6 @@
 package jmt.gui.common.xml;
 
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +12,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
+import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.VacationParameters;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ClassSwitchFork;
@@ -54,21 +54,11 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
     private static final String SERVICE_STRATEGY = "jmt.engine.NetStrategies.ServiceStrategy";
     private static final String PS_STRATEGY = "jmt.engine.NetStrategies.PSStrategy";
     private static final String DISTR_CONTAINER = "jmt.engine.random.DistributionContainer";
-    private static final ThreadLocal<Object> SOURCE_ROOT = new ThreadLocal<Object>();
 
     private ModelPopulator() {}
 
-    public static void setSourceRoot(Object rootElement) {
-        if (rootElement == null) SOURCE_ROOT.remove();
-        else SOURCE_ROOT.set(rootElement);
-    }
-
     public static void populate(SimDescriptor descriptor, CommonModel model) {
         if (descriptor == null || model == null) return;
-
-        Object sourceRoot = SOURCE_ROOT.get();
-        SOURCE_ROOT.remove();
-        if (sourceRoot != null && populateViaLegacyParser(sourceRoot, model)) return;
 
         Map<String, Object> classKeys = new HashMap<String, Object>();
         Map<String, Object> stationKeys = new HashMap<String, Object>();
@@ -85,15 +75,6 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         applyPreloads(descriptor, model, classKeys, stationKeys);
     }
 
-    private static boolean populateViaLegacyParser(Object sourceRoot, CommonModel model) {
-        try {
-            Class<?> elementClass = Class.forName("org.w3c.dom.Element");
-            if (!elementClass.isInstance(sourceRoot)) return false;
-            Method parseXml = OLDXMLReader.class.getMethod("parseXML", elementClass, CommonModel.class);
-            parseXml.invoke(null, sourceRoot, model);
-            return true;
-        } catch (Exception ignored) { return false; }
-    }
 
     private static Object getClassKey(String className, Map<String, Object> classKeys, CommonModel model) {
         if (!hasText(className)) return null;
@@ -177,17 +158,6 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
             if (sourceKey != null && targetKey != null) model.setConnected(sourceKey, targetKey, true);
         }
 
-        for (MeasureDescriptor measure : safeList(descriptor.getMeasures())) {
-            Object stationKey = NODETYPE_REGION.equalsIgnoreCase(measure.getNodeType()) ? regionKeys.get(measure.getReferenceNode()) : getStationKey(measure.getReferenceNode(), stationKeys, model);
-            Object classKey = getClassKey(measure.getReferenceUserClass(), classKeys, model);
-            Double alpha = parseDouble(measure.getAlpha());
-            alpha = (alpha != null) ? Double.valueOf(1.0d - alpha.doubleValue()) : Defaults.getAsDouble("measureAlpha");
-            Double precision = parseDouble(measure.getPrecision());
-            precision = (precision != null) ? precision : Defaults.getAsDouble("measurePrecision");
-            boolean verbose = Boolean.TRUE.equals(parseBoolean(measure.getVerbose()));
-            model.addMeasure(measure.getType(), stationKey, classKey, alpha, precision, verbose);
-        }
-
         for (BlockingRegionDescriptor region : safeList(descriptor.getBlockingRegions())) {
             String type = hasText(region.getType()) ? region.getType() : Defaults.get("blockingRegionType");
             Object regionKey = model.addBlockingRegion(region.getName(), type);
@@ -198,9 +168,9 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                 if (stationKey != null) model.addRegionStation(regionKey, stationKey);
             }
 
-            Integer maxJobs = parseInteger(region.getGlobalConstraints().get(XML_A_GLOBALCONSTRAINT_MAXJOBS));
+            Integer maxJobs = parseInteger(firstNonBlank(region.getGlobalConstraints().get(XML_A_GLOBALCONSTRAINT_MAXJOBS), region.getGlobalConstraints().get("maxJobs")));
             if (maxJobs != null) model.setRegionCustomerConstraint(regionKey, maxJobs);
-            Integer maxMem = parseInteger(region.getGlobalConstraints().get(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY));
+            Integer maxMem = parseInteger(firstNonBlank(region.getGlobalConstraints().get(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY), region.getGlobalConstraints().get("maxMemory")));
             if (maxMem != null) model.setRegionMemorySize(regionKey, maxMem);
 
             for (Map.Entry<String, ? extends Map<String, String>> classEntry : region.getClassConstraints().entrySet()) {
@@ -208,11 +178,11 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                 Map<String, String> constraints = classEntry.getValue();
                 if (classKey == null || constraints == null) continue;
 
-                Integer classMaxJobs = parseInteger(constraints.get(XML_A_CLASSCONSTRAINT_MAXJOBS));
+                Integer classMaxJobs = parseInteger(firstNonBlank(constraints.get(XML_A_CLASSCONSTRAINT_MAXJOBS), constraints.get("maxJobsPerClass"), constraints.get("maxJobs")));
                 if (classMaxJobs != null) model.setRegionClassCustomerConstraint(regionKey, classKey, classMaxJobs);
-                Integer classMaxMemory = parseInteger(constraints.get(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY));
+                Integer classMaxMemory = parseInteger(firstNonBlank(constraints.get(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY), constraints.get("maxMemoryPerClass"), constraints.get("maxMemory")));
                 if (classMaxMemory != null) model.setRegionClassMemorySize(regionKey, classKey, classMaxMemory);
-                Double softDeadline = parseDouble(constraints.get(XML_A_CLASSDUEDATE_DUEDATE));
+                Double softDeadline = parseDouble(firstNonBlank(constraints.get(XML_A_CLASSDUEDATE_DUEDATE), constraints.get("softDeadline"), constraints.get("dueDate")));
                 if (softDeadline != null) model.setRegionClassSoftDeadline(regionKey, classKey, softDeadline);
             }
 
@@ -231,6 +201,38 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                 Boolean drop = parseDropRule(entry.getValue());
                 if (classKey != null && drop != null) model.setRegionClassDropRule(regionKey, classKey, drop);
             }
+
+            int groupIndex = 0;
+            for (Map.Entry<String, String> entry : region.getGroupConstraints().entrySet()) {
+                model.addRegionGroup(regionKey, entry.getKey());
+
+                Integer maxJobsPerGroup = parseInteger(entry.getValue());
+                if (maxJobsPerGroup != null) model.setRegionGroupCustomerConstraint(regionKey, groupIndex, maxJobsPerGroup);
+
+                Integer maxMemoryPerGroup = parseInteger(region.getGroupMemoryConstraints().get(entry.getKey()));
+                if (maxMemoryPerGroup != null) model.setRegionGroupMemorySize(regionKey, groupIndex, maxMemoryPerGroup);
+
+                for (String className : safeList(region.getGroupClassLists().get(entry.getKey()))) {
+                    Object classKey = getClassKey(className, classKeys, model);
+                    if (classKey != null) model.addClassIntoRegionGroup(regionKey, groupIndex, classKey);
+                }
+
+                groupIndex++;
+            }
+        }
+
+        for (MeasureDescriptor measure : safeList(descriptor.getMeasures())) {
+            Object stationKey = NODETYPE_REGION.equalsIgnoreCase(measure.getNodeType()) ? regionKeys.get(measure.getReferenceNode()) : getStationKey(measure.getReferenceNode(), stationKeys, model);
+            Object classKey;
+            if (SimulationDefinition.MEASURE_FX.equals(measure.getType())) classKey = measure.getReferenceUserClass();
+            else classKey = getClassKey(measure.getReferenceUserClass(), classKeys, model);
+
+            Double alpha = parseDouble(measure.getAlpha());
+            alpha = (alpha != null) ? Double.valueOf(1.0d - alpha.doubleValue()) : Defaults.getAsDouble("measureAlpha");
+            Double precision = parseDouble(measure.getPrecision());
+            precision = (precision != null) ? precision : Defaults.getAsDouble("measurePrecision");
+            boolean verbose = Boolean.TRUE.equals(parseBoolean(measure.getVerbose()));
+            model.addMeasure(measure.getType(), stationKey, classKey, alpha, precision, verbose);
         }
     }
 

@@ -15,6 +15,9 @@ public class BlockingRegionDescriptor {
     private LinkedHashMap<String, String> classWeights = new LinkedHashMap<String, String>();
     private LinkedHashMap<String, String> classSizes = new LinkedHashMap<String, String>();
     private LinkedHashMap<String, String> dropRules = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, String> groupConstraints = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, String> groupMemoryConstraints = new LinkedHashMap<String, String>();
+    private LinkedHashMap<String, List<String>> groupClassLists = new LinkedHashMap<String, List<String>>();
 
     public String getName() {
         return name;
@@ -125,5 +128,41 @@ public class BlockingRegionDescriptor {
         if (className != null) {
             dropRules.put(className, dropRule);
         }
+    }
+
+    public LinkedHashMap<String, String> getGroupConstraints() {
+        return groupConstraints;
+    }
+
+    public void addGroupConstraint(String groupName, String maxJobs) {
+        if (groupName != null) {
+            groupConstraints.put(groupName, maxJobs);
+        }
+    }
+
+    public LinkedHashMap<String, String> getGroupMemoryConstraints() {
+        return groupMemoryConstraints;
+    }
+
+    public void addGroupMemoryConstraint(String groupName, String maxMemory) {
+        if (groupName != null) {
+            groupMemoryConstraints.put(groupName, maxMemory);
+        }
+    }
+
+    public LinkedHashMap<String, List<String>> getGroupClassLists() {
+        return groupClassLists;
+    }
+
+    public void addGroupClass(String groupName, String className) {
+        if (groupName == null || className == null) {
+            return;
+        }
+        List<String> classes = groupClassLists.get(groupName);
+        if (classes == null) {
+            classes = new ArrayList<String>();
+            groupClassLists.put(groupName, classes);
+        }
+        classes.add(className);
     }
 }
