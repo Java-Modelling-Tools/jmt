@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class XMLReaderPhaseDiagnosisTest {
 
     private enum Phase {
+        RESOLVED,
         PARSING,
         POPULATION,
         MIXED
@@ -89,7 +90,7 @@ class XMLReaderPhaseDiagnosisTest {
                 new DiagnosisCase(
                         "test_parseBlockingRegions_branches",
                         "src/test/resources/jmt/gui/common/xml/parseBlockingRegions_branches.xml",
-                        Phase.PARSING,
+                        Phase.RESOLVED,
                         context -> {
                             if (context.descriptor.getBlockingRegions().isEmpty()) return true;
                             BlockingRegionDescriptor region = context.descriptor.getBlockingRegions().get(0);
@@ -100,16 +101,38 @@ class XMLReaderPhaseDiagnosisTest {
                 new DiagnosisCase(
                         "test_parseStationDeadlinesAndQuanta_branches_fullcoverage",
                         "src/test/resources/jmt/gui/common/xml/parseStationDeadlinesAndQuanta_branches.xml",
-                        Phase.PARSING,
-                        context -> context.simRoot.getElementsByTagName("classSoftDeadlines").getLength() > 0
-                                || context.simRoot.getElementsByTagName("quantumSize").getLength() > 0
-                                || context.simRoot.getElementsByTagName("quantumSwitchoverTime").getLength() > 0,
-                        context -> false
+                        Phase.RESOLVED,
+                        context -> {
+                            if (context.descriptor.getNodes().isEmpty()) return true;
+                            for (NodeDescriptor node : context.descriptor.getNodes()) {
+                                if (!"ServerWithQuanta".equals(node.getName())) continue;
+                                boolean hasDeadlines = false;
+                                boolean hasQuantumSize = false;
+                                boolean hasSwitchover = false;
+                                for (ParameterDescriptor parameter : node.getParameters()) {
+                                    if ("classSoftDeadlines".equals(parameter.getName()) && !parameter.getSubParameters().isEmpty()) hasDeadlines = true;
+                                    if ("quantumSize".equals(parameter.getName()) && !parameter.getSubParameters().isEmpty()) hasQuantumSize = true;
+                                    if ("quantumSwitchoverTime".equals(parameter.getName()) && !parameter.getSubParameters().isEmpty()) hasSwitchover = true;
+                                }
+                                return !(hasDeadlines && hasQuantumSize && hasSwitchover);
+                            }
+                            return true;
+                        },
+                        context -> {
+                            Object station = context.model.getStationByName("ServerWithQuanta");
+                            Object class1 = context.model.getClassByName("Class1");
+                            Object class2 = context.model.getClassByName("Class2");
+                            if (station == null || class1 == null || class2 == null) return true;
+                            return Math.abs(context.model.getClassStationSoftDeadline(station, class1) - 10.5) > 1.0e-9
+                                    || Math.abs(context.model.getClassStationSoftDeadline(station, class2) - 20.75) > 1.0e-9
+                                    || Math.abs(context.model.getQuantumSize(station) - 0.25) > 1.0e-9
+                                    || Math.abs(context.model.getQuantumSwitchoverTime(station) - 1.5) > 1.0e-9;
+                        }
                 ),
                 new DiagnosisCase(
                         "test_parseMeasures_branches_fullcoverage",
                         "src/test/resources/jmt/gui/common/xml/parseMeasures_branches.xml",
-                        Phase.MIXED,
+                        Phase.RESOLVED,
                         context -> {
                             for (BlockingRegionDescriptor region : context.descriptor.getBlockingRegions()) {
                                 if ("RegionForMeasure".equals(region.getName())) {
@@ -343,6 +366,7 @@ class XMLReaderPhaseDiagnosisTest {
     }
 
     private static Phase classify(boolean parsingBroken, boolean populationBroken) {
+        if (!parsingBroken && !populationBroken) return Phase.RESOLVED;
         if (parsingBroken && populationBroken) return Phase.MIXED;
         if (parsingBroken) return Phase.PARSING;
         return Phase.POPULATION;
