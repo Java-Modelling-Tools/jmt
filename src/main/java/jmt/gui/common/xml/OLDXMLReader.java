@@ -1279,6 +1279,8 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
      * @param key station's key
      */
     protected static void parseRouterSection(Element section, CommonModel model, Object key) {
+        final String legacyClassSwitchStrategyPath = "jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchStrategy";
+        final String classSwitchRoutingStrategyPath = "jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchRoutingStrategy";
         Element parameter = (Element) section.getElementsByTagName(XML_E_PARAMETER).item(0);
         Map<String, Node> routing = parseParameterRefclassArray(parameter);
         Object[] classNames = routing.keySet().toArray();
@@ -1297,7 +1299,10 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
             String classPath = ((Element) routing.get(name)).getAttribute(XML_A_PARAMETER_CLASSPATH);
             // Searches all available routing strategy to find the one saved
             for (Object routStratKey : routStratKeys) {
-                if (classPath.equals(engineToGuiRouting.get(routStratKey).getClassPath())) {
+                String guiClassPath = engineToGuiRouting.get(routStratKey).getClassPath();
+                boolean classSwitchAlias = classPath.equals(legacyClassSwitchStrategyPath)
+                        && guiClassPath.equals(classSwitchRoutingStrategyPath);
+                if (classPath.equals(guiClassPath) || classSwitchAlias) {
                     model.setRoutingStrategy(key, classes.get(name), engineToGuiRouting.get(routStratKey).clone());
                 }
             }
