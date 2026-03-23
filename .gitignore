@@ -90,6 +90,7 @@ nb-configuration.xml
 *.log
 jacoco.exec
 .github
+sonarqube
 
 # Remove test output folder
 /src/test/resources/linetesting/output
@@ -103,3 +104,4 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+

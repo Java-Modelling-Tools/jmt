@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import jmt.framework.data.MacroReplacer;
 import jmt.gui.common.CommonConstants;
@@ -64,15 +65,81 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         Map<String, Object> stationKeys = new HashMap<String, Object>();
         Map<String, Object> regionKeys = new HashMap<String, Object>();
         Map<Object, String> refStationsPending = new HashMap<Object, String>();
+        Map<StationClassPair, Map<String, OutPath>> pendingProbabilityForkOutPaths = new HashMap<StationClassPair, Map<String, OutPath>>();
+        Map<StationClassPair, Map<String, OutPath>> pendingClassSwitchForkOutPaths = new HashMap<StationClassPair, Map<String, OutPath>>();
+        List<PendingTransitionCondition> pendingTransitionConditions = new ArrayList<PendingTransitionCondition>();
+        List<PendingFiringOutcome> pendingFiringOutcomes = new ArrayList<PendingFiringOutcome>();
 
         applyGlobalParameters(descriptor, model);
         createBaseClasses(descriptor, model, classKeys, refStationsPending);
         createBaseStations(descriptor, model, stationKeys);
 
         resolveReferenceStationsPass3(model, stationKeys, refStationsPending);
-        processNodeSectionsPass4(descriptor, model, classKeys, stationKeys);
+        processNodeSectionsPass4(descriptor, model, classKeys, stationKeys, pendingProbabilityForkOutPaths, pendingClassSwitchForkOutPaths, pendingTransitionConditions, pendingFiringOutcomes);
         applyTopologyPass5(descriptor, model, classKeys, stationKeys, regionKeys);
+        reapplyRouterSectionsPass6(descriptor, model, classKeys, stationKeys);
+        applyPendingProbabilityForkOutPaths(model, stationKeys, pendingProbabilityForkOutPaths);
+        applyPendingClassSwitchForkOutPaths(model, stationKeys, pendingClassSwitchForkOutPaths);
+        applyPendingTransitionConditions(model, stationKeys, pendingTransitionConditions);
+        applyPendingFiringOutcomes(model, stationKeys, pendingFiringOutcomes);
         applyPreloads(descriptor, model, classKeys, stationKeys);
+    }
+
+    private static final class StationClassPair {
+        private final Object stationKey;
+        private final Object classKey;
+
+        private StationClassPair(Object stationKey, Object classKey) {
+            this.stationKey = stationKey;
+            this.classKey = classKey;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) return true;
+            if (!(other instanceof StationClassPair)) return false;
+            StationClassPair that = (StationClassPair) other;
+            return Objects.equals(stationKey, that.stationKey) && Objects.equals(classKey, that.classKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(stationKey, classKey);
+        }
+    }
+
+    private static final class PendingTransitionCondition {
+        private final String conditionType;
+        private final Object stationKey;
+        private final int modeIndex;
+        private final String targetStationName;
+        private final Object classKey;
+        private final int value;
+
+        private PendingTransitionCondition(String conditionType, Object stationKey, int modeIndex, String targetStationName, Object classKey, int value) {
+            this.conditionType = conditionType;
+            this.stationKey = stationKey;
+            this.modeIndex = modeIndex;
+            this.targetStationName = targetStationName;
+            this.classKey = classKey;
+            this.value = value;
+        }
+    }
+
+    private static final class PendingFiringOutcome {
+        private final Object stationKey;
+        private final int modeIndex;
+        private final String targetStationName;
+        private final Object classKey;
+        private final int value;
+
+        private PendingFiringOutcome(Object stationKey, int modeIndex, String targetStationName, Object classKey, int value) {
+            this.stationKey = stationKey;
+            this.modeIndex = modeIndex;
+            this.targetStationName = targetStationName;
+            this.classKey = classKey;
+            this.value = value;
+        }
     }
 
 
@@ -125,30 +192,82 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
     }
 
-    private static void processNodeSectionsPass4(SimDescriptor descriptor, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void processNodeSectionsPass4(SimDescriptor descriptor, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, Map<StationClassPair, Map<String, OutPath>> pendingProbabilityForkOutPaths, Map<StationClassPair, Map<String, OutPath>> pendingClassSwitchForkOutPaths, List<PendingTransitionCondition> pendingTransitionConditions, List<PendingFiringOutcome> pendingFiringOutcomes) {
         for (NodeDescriptor node : safeList(descriptor.getNodes())) {
             Object stationKey = getStationKey(node.getName(), stationKeys, model);
             if (stationKey == null) continue;
+
+            applyStationNodeParameters(node, stationKey, model);
 
             for (SectionDescriptor section : safeList(node.getSections())) {
                 String className = section.getClassName();
                 if (!hasText(className)) continue;
 
-                if (CLASSNAME_QUEUE.equals(className)) buildQueueSection(section, stationKey, model, classKeys, stationKeys);
+                if (CLASSNAME_SOURCE.equals(className)) buildSourceSection(section, stationKey, model, classKeys);
+                else if (CLASSNAME_QUEUE.equals(className)) buildQueueSection(section, stationKey, model, classKeys, stationKeys, pendingTransitionConditions);
                 else if (CLASSNAME_SERVER.equals(className) || CLASSNAME_PREEMPTIVESERVER.equals(className) || CLASSNAME_PSSERVER.equals(className) || CLASSNAME_PSSERVER_PRIORITY.equals(className) || CLASSNAME_LKPSERVER.equals(className) || CLASSNAME_GATEDPSERVER.equals(className) || CLASSNAME_EXHAUSTIVEPSERVER.equals(className)) buildServerSection(section, stationKey, model, classKeys, stationKeys);
-                else if (CLASSNAME_DELAY.equals(className)) buildDelaySection(section, stationKey, model, classKeys, stationKeys);
+                else if (CLASSNAME_DELAY.equals(className)) buildDelaySection(section, stationKey, model, classKeys, stationKeys, pendingTransitionConditions);
                 else if (CLASSNAME_ROUTER.equals(className) || CLASSNAME_LINKAGE.equals(className)) buildRouterSection(section, stationKey, model, classKeys, stationKeys);
-                else if (CLASSNAME_FORK.equals(className)) buildForkSection(section, stationKey, model, classKeys, stationKeys);
+                else if (CLASSNAME_FORK.equals(className)) buildForkSection(section, stationKey, model, classKeys, stationKeys, pendingProbabilityForkOutPaths, pendingClassSwitchForkOutPaths);
                 else if (CLASSNAME_JOIN.equals(className)) buildJoinSection(section, stationKey, model, classKeys);
                 else if (CLASSNAME_LOGGER.equals(className)) buildLoggerSection(section, stationKey, model);
                 else if (CLASSNAME_CLASSSWITCH.equals(className)) buildClassSwitchSection(section, stationKey, model, classKeys);
                 else if (CLASSNAME_SEMAPHORE.equals(className)) buildSemaphoreSection(section, stationKey, model, classKeys);
                 else if (CLASSNAME_STORAGE.equals(className)) buildStorageSection(section, stationKey, model, classKeys);
-                else if (CLASSNAME_ENABLING.equals(className)) buildEnablingSection(section, stationKey, model, classKeys, stationKeys);
+                else if (CLASSNAME_ENABLING.equals(className)) buildEnablingSection(section, stationKey, model, classKeys, stationKeys, pendingTransitionConditions);
                 else if (CLASSNAME_TIMING.equals(className)) buildTimingSection(section, stationKey, model);
-                else if (CLASSNAME_FIRING.equals(className)) buildFiringSection(section, stationKey, model, classKeys, stationKeys);
+                else if (CLASSNAME_FIRING.equals(className)) buildFiringSection(section, stationKey, model, classKeys, stationKeys, pendingFiringOutcomes);
             }
         }
+    }
+
+    private static void applyStationNodeParameters(NodeDescriptor node, Object stationKey, CommonModel model) {
+        String stationType = model.getStationType(stationKey);
+
+        if (STATION_TYPE_DELAY.equals(stationType) || STATION_TYPE_SERVER.equals(stationType)) {
+            ParameterDescriptor stationDeadlines = findNodeParameter(node, XML_E_STATION_DUE_DATES);
+            if (stationDeadlines != null) {
+                List<Double> deadlines = new ArrayList<Double>();
+                for (ParameterDescriptor softDeadlineParam : safeList(stationDeadlines.getSubParameters())) {
+                    Double deadline = parseDouble(getParamValue(softDeadlineParam));
+                    if (deadline != null) {
+                        deadlines.add(deadline);
+                    }
+                }
+
+                List<Object> classOrder = model.getClassKeys();
+                int bound = Math.min(deadlines.size(), classOrder.size());
+                for (int i = 0; i < bound; i++) {
+                    model.setClassStationSoftDeadline(stationKey, classOrder.get(i), deadlines.get(i));
+                }
+            }
+        }
+
+        if (STATION_TYPE_SERVER.equals(stationType)) {
+            ParameterDescriptor quantumSize = findNodeParameter(node, XML_E_STATION_QUANTUM_SIZE);
+            Double quanta = parseDouble(getParamValue(quantumSize));
+            if (quanta != null) {
+                model.setQuantumSize(stationKey, quanta);
+            }
+
+            ParameterDescriptor quantumSwitchover = findNodeParameter(node, XML_E_STATION_QUANTUM_SWITCHOVER_TIME);
+            Double switchover = parseDouble(getParamValue(quantumSwitchover));
+            if (switchover != null) {
+                model.setQuantumSwitchoverTime(stationKey, switchover);
+            }
+        }
+    }
+
+    private static ParameterDescriptor findNodeParameter(NodeDescriptor node, String parameterName) {
+        if (node == null || !hasText(parameterName)) {
+            return null;
+        }
+        for (ParameterDescriptor parameter : safeList(node.getParameters())) {
+            if (parameterName.equals(parameter.getName())) {
+                return parameter;
+            }
+        }
+        return null;
     }
 
     private static void applyTopologyPass5(SimDescriptor descriptor, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, Map<String, Object> regionKeys) {
@@ -252,7 +371,26 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
     }
 
-    private static void buildQueueSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void buildSourceSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys) {
+        for (ParameterDescriptor param : safeList(sec.getParameters())) {
+            if (!(SERVICE_STRATEGY.equals(param.getClassPath()) || "ServiceStrategy".equals(param.getName()))) {
+                continue;
+            }
+            for (ParameterDescriptor sub : safeList(param.getSubParameters())) {
+                Object classKey = resolveClassKey(sub, param, classKeys, model);
+                if (classKey == null || model.getClassType(classKey) != CLASS_TYPE_OPEN) continue;
+                Object currentRefStation = model.getClassRefStation(classKey);
+                if (currentRefStation == null || !currentRefStation.equals(stationKey)) continue;
+
+                Object dist = parseServiceStrategy(sub);
+                if (dist != null) {
+                    model.setClassDistribution(classKey, dist);
+                }
+            }
+        }
+    }
+
+    private static void buildQueueSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, List<PendingTransitionCondition> pendingTransitionConditions) {
         ParameterDescriptor retrialDistributions = null;
 
         for (ParameterDescriptor param : safeList(sec.getParameters())) {
@@ -272,7 +410,7 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
             } else if ("Impatience".equals(name)) {
                 parseAndSetImpatienceParameters(param, stationKey, model, classKeys);
             } else if ("enablingConditions".equals(name) || "inhibitingConditions".equals(name) || "resourceConditions".equals(name)) {
-                extractTransitionConditions(param, stationKey, model, classKeys, stationKeys);
+                collectTransitionConditions(param, stationKey, classKeys, model, pendingTransitionConditions);
             } else if (QUEUE_PUT_STRATEGY.equals(param.getClassPath())) {
                 for (ParameterDescriptor sub : safeList(param.getSubParameters())) {
                     applyQueuePutStrategy(sub.getClassPath(), stationKey, resolveClassKey(sub, param, classKeys, model), model);
@@ -303,11 +441,11 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
     }
 
-    private static void buildDelaySection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void buildDelaySection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, List<PendingTransitionCondition> pendingTransitionConditions) {
         for (ParameterDescriptor param : safeList(sec.getParameters())) {
             String name = param.getName();
             if ("enablingConditions".equals(name) || "inhibitingConditions".equals(name) || "resourceConditions".equals(name)) {
-                extractTransitionConditions(param, stationKey, model, classKeys, stationKeys);
+                collectTransitionConditions(param, stationKey, classKeys, model, pendingTransitionConditions);
             } else if (SERVICE_STRATEGY.equals(param.getClassPath()) || "ServiceStrategy".equals(name)) {
                 for (ParameterDescriptor sub : safeList(param.getSubParameters())) {
                     Object classKey = resolveClassKey(sub, param, classKeys, model);
@@ -415,13 +553,13 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                     String type = getParamValue(subps.get(0));
                     if ("0".equals(type)) model.setStationVacationPolicy(stationKey, STATION_VACATION_POLICY_SINGLE);
                     else if ("1".equals(type)) model.setStationVacationPolicy(stationKey, STATION_VACATION_POLICY_MULTIPLE);
-                    Object vt = parseServiceStrategy(subps.get(1));
+                    Object vt = parseServiceStrategy(param);
                     if (vt instanceof Distribution) vp.setVacationTimeDistribution((Distribution) vt);
                 } else if (classpath != null && classpath.endsWith("BernoulliVacationStrategy") && subps.size() >= 3) {
                     model.setStationVacationPolicy(stationKey, STATION_VACATION_POLICY_BERNOULLI);
                     Double p = parseDouble(getParamValue(subps.get(0)));
                     if (p != null) vp.setBernoulliP(p);
-                    Object vt = parseServiceStrategy(subps.get(1));
+                    Object vt = parseServiceStrategy(param);
                     if (vt instanceof Distribution) vp.setVacationTimeDistribution((Distribution) vt);
                 }
             } else if ("RoutingStrategy".equals(name)) {
@@ -501,35 +639,29 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                 }
             } else if (strategy instanceof ClassSwitchRouting) {
                 ClassSwitchRouting classSwitch = (ClassSwitchRouting) model.getRoutingStrategy(stationKey, classKey);
-                for (ParameterDescriptor branch : safeList(classRouting.getSubParameters())) {
-                    List<ParameterDescriptor> branchParams = safeList(branch.getSubParameters());
-                    if (branchParams.size() >= 3) {
-                        String stationName = getParamValue(branchParams.get(0));
-                        Object targetStationKey = getStationKey(stationName, stationKeys, model);
-                        if (targetStationKey != null) {
-                            Double branchProb = parseDouble(getParamValue(branchParams.get(1)));
-                            if (branchProb != null) classSwitch.getValues().put(targetStationKey, branchProb);
+                for (ClassSwitchBranch branch : extractClassSwitchBranches(classRouting)) {
+                    Object targetStationKey = getStationKey(branch.stationName, stationKeys, model);
+                    if (targetStationKey == null) continue;
+                    if (branch.probability != null) {
+                        classSwitch.getValues().put(targetStationKey, branch.probability);
+                    }
 
-                            ParameterDescriptor empArray = branchParams.get(2);
-                            Map<Object, Double> outPath = new HashMap<>();
-                            for (ParameterDescriptor empEntry : safeList(empArray.getSubParameters())) {
-                                List<ParameterDescriptor> empValues = safeList(empEntry.getSubParameters());
-                                if (empValues.size() >= 2) {
-                                    String className = getParamValue(empValues.get(0));
-                                    Double prob = parseDouble(getParamValue(empValues.get(1)));
-                                    Object targetClassKey = getClassKey(className, classKeys, model);
-                                    if (targetClassKey != null && prob != null) outPath.put(targetClassKey, prob);
-                                }
-                            }
-                            classSwitch.getOutPaths().put(targetStationKey, outPath);
+                    Map<Object, Double> outPath = new HashMap<Object, Double>();
+                    for (Map.Entry<String, Double> classEntry : branch.classSwitchProbabilities.entrySet()) {
+                        Object targetClassKey = getClassKey(classEntry.getKey(), classKeys, model);
+                        if (targetClassKey != null && classEntry.getValue() != null) {
+                            outPath.put(targetClassKey, classEntry.getValue());
                         }
+                    }
+                    if (!outPath.isEmpty()) {
+                        classSwitch.getOutPaths().put(targetStationKey, outPath);
                     }
                 }
             }
         }
     }
 
-    private static void buildForkSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void buildForkSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, Map<StationClassPair, Map<String, OutPath>> pendingProbabilityForkOutPaths, Map<StationClassPair, Map<String, OutPath>> pendingClassSwitchForkOutPaths) {
         for (ParameterDescriptor param : safeList(sec.getParameters())) {
             String name = param.getName();
             if ("jobsPerLink".equals(name)) {
@@ -557,28 +689,42 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                         List<ParameterDescriptor> entries = safeList(arrayWrapper.get(0).getSubParameters());
 
                         if (fs instanceof ProbabilitiesFork) {
-                            Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
+                            Map<String, OutPath> stationOutPaths = new HashMap<String, OutPath>();
                             for (ParameterDescriptor entry : entries) {
                                 List<ParameterDescriptor> vals = safeList(entry.getSubParameters());
-                                if (vals.size() >= 2) {
-                                    Object targetKey = getStationKey(getParamValue(vals.get(0)), stationKeys, model);
+                                if (vals.size() >= 1) {
+                                    ParameterDescriptor outUnitProbability = findDirectSubParameter(entry, "outUnitProbability");
+                                    if (outUnitProbability == null && !vals.isEmpty()) outUnitProbability = vals.get(0);
+
+                                    String stationName = null;
+                                    Double branchProbability = null;
+                                    for (ParameterDescriptor outUnitValue : safeList(outUnitProbability != null ? outUnitProbability.getSubParameters() : null)) {
+                                        if ("stationName".equals(outUnitValue.getName())) stationName = getParamValue(outUnitValue);
+                                        else if ("probability".equals(outUnitValue.getName())) branchProbability = parseDouble(getParamValue(outUnitValue));
+                                    }
+                                    if (!hasText(stationName) && !vals.isEmpty()) stationName = getParamValue(vals.get(0));
+                                    if (branchProbability == null && vals.size() >= 2) branchProbability = parseDouble(getParamValue(vals.get(1)));
+
+                                    Object targetKey = getStationKey(stationName, stationKeys, model);
                                     if (targetKey != null) {
                                         OutPath op = new OutPath();
-                                        op.setProbability(parseDouble(getParamValue(vals.get(1))));
-                                        if (vals.size() > 2) {
-                                            Map<Object, Object> tempMap = new HashMap<>();
-                                            List<ParameterDescriptor> probWrapper = safeList(vals.get(2).getSubParameters());
-                                            if (!probWrapper.isEmpty()) {
-                                                for (ParameterDescriptor probEntry : safeList(probWrapper.get(0).getSubParameters())) {
-                                                    List<ParameterDescriptor> res = safeList(probEntry.getSubParameters());
-                                                    if (res.size() >= 2) tempMap.put(parseInteger(getParamValue(res.get(0))), parseDouble(getParamValue(res.get(1))));
-                                                }
-                                            }
+                                        op.setProbability(branchProbability);
+
+                                        Map<Object, Object> tempMap = new HashMap<>();
+                                        ParameterDescriptor jobsPerLink = findDirectSubParameter(entry, "JobsPerLinkDis");
+                                        if (jobsPerLink == null && vals.size() > 2) jobsPerLink = vals.get(2);
+                                        if (jobsPerLink != null) {
+                                            collectIntegerDoubleEmpiricalEntries(jobsPerLink, tempMap);
+                                        }
+                                        if (!tempMap.isEmpty()) {
                                             op.setOutParameters(tempMap);
                                         }
-                                        outPaths.put(targetKey, op);
+                                        stationOutPaths.put(stationName, op);
                                     }
                                 }
+                            }
+                            if (!stationOutPaths.isEmpty()) {
+                                pendingProbabilityForkOutPaths.put(new StationClassPair(stationKey, classKey), stationOutPaths);
                             }
                         } else if (fs instanceof CombFork) {
                             Map<Object, Double> combMap = (Map<Object, Double>) fs.getOutDetails();
@@ -589,32 +735,78 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                                 }
                             }
                         } else if (fs instanceof ClassSwitchFork || fs instanceof MultiBranchClassSwitchFork) {
-                            Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
+                            Map<String, OutPath> stationOutPaths = new HashMap<String, OutPath>();
                             for (ParameterDescriptor entry : entries) {
                                 List<ParameterDescriptor> vals = safeList(entry.getSubParameters());
                                 if (vals.size() >= 3) {
-                                    Object targetKey = getStationKey(getParamValue(vals.get(0)), stationKeys, model);
-                                    if (targetKey != null) {
-                                        OutPath op = new OutPath();
-                                        List<String> cStr = new ArrayList<>();
-                                        List<ParameterDescriptor> classWrapper = safeList(vals.get(1).getSubParameters());
-                                        if (!classWrapper.isEmpty()) {
-                                            for (ParameterDescriptor c : safeList(classWrapper.get(0).getSubParameters())) cStr.add(getParamValue(c));
-                                        }
-                                        List<Integer> nums = new ArrayList<>();
-                                        List<ParameterDescriptor> numWrapper = safeList(vals.get(2).getSubParameters());
-                                        if (!numWrapper.isEmpty()) {
-                                            for (ParameterDescriptor n : safeList(numWrapper.get(0).getSubParameters())) nums.add(parseInteger(getParamValue(n)));
-                                        }
-                                        Map<Object, Object> tempMap = new HashMap<>();
-                                        for (int k = 0; k < cStr.size() && k < nums.size(); k++) tempMap.put(model.getClassByName(cStr.get(k)), nums.get(k));
-                                        op.setOutParameters(tempMap);
-                                        outPaths.put(targetKey, op);
+                                    String stationName = getParamValue(vals.get(0));
+                                    if (!hasText(stationName)) continue;
+
+                                    OutPath op = new OutPath();
+                                    List<String> cStr = new ArrayList<String>();
+                                    List<Integer> nums = new ArrayList<Integer>();
+                                    collectNamedValues(vals.get(1), "class", cStr);
+                                    collectNamedIntegerValues(vals.get(2), "numberOfJobs", nums);
+
+                                    Map<Object, Object> tempMap = new HashMap<Object, Object>();
+                                    for (int k = 0; k < cStr.size() && k < nums.size(); k++) {
+                                        Object outClassKey = model.getClassByName(cStr.get(k));
+                                        if (outClassKey != null && nums.get(k) != null) tempMap.put(outClassKey, nums.get(k));
                                     }
+                                    op.setOutParameters(tempMap);
+                                    stationOutPaths.put(stationName, op);
                                 }
+                            }
+                            if (!stationOutPaths.isEmpty()) {
+                                pendingClassSwitchForkOutPaths.put(new StationClassPair(stationKey, classKey), stationOutPaths);
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private static void applyPendingProbabilityForkOutPaths(CommonModel model, Map<String, Object> stationKeys, Map<StationClassPair, Map<String, OutPath>> pendingProbabilityForkOutPaths) {
+        for (Map.Entry<StationClassPair, Map<String, OutPath>> pendingEntry : pendingProbabilityForkOutPaths.entrySet()) {
+            StationClassPair pair = pendingEntry.getKey();
+            Object strategy = model.getForkStrategy(pair.stationKey, pair.classKey);
+            if (!(strategy instanceof ProbabilitiesFork)) continue;
+
+            Map<Object, OutPath> outPaths = (Map<Object, OutPath>) ((ProbabilitiesFork) strategy).getOutDetails();
+            for (Map.Entry<String, OutPath> outEntry : pendingEntry.getValue().entrySet()) {
+                Object targetStationKey = getStationKey(outEntry.getKey(), stationKeys, model);
+                if (targetStationKey != null) {
+                    outPaths.put(targetStationKey, (OutPath) outEntry.getValue().clone());
+                }
+            }
+        }
+    }
+
+    private static void applyPendingClassSwitchForkOutPaths(CommonModel model, Map<String, Object> stationKeys, Map<StationClassPair, Map<String, OutPath>> pendingClassSwitchForkOutPaths) {
+        for (Map.Entry<StationClassPair, Map<String, OutPath>> pendingEntry : pendingClassSwitchForkOutPaths.entrySet()) {
+            StationClassPair pair = pendingEntry.getKey();
+            Object strategy = model.getForkStrategy(pair.stationKey, pair.classKey);
+            if (!(strategy instanceof ClassSwitchFork) && !(strategy instanceof MultiBranchClassSwitchFork)) continue;
+
+            Map<Object, OutPath> outPaths = (Map<Object, OutPath>) ((ForkStrategy) strategy).getOutDetails();
+            for (Map.Entry<String, OutPath> outEntry : pendingEntry.getValue().entrySet()) {
+                Object targetStationKey = getStationKey(outEntry.getKey(), stationKeys, model);
+                if (targetStationKey != null) {
+                    outPaths.put(targetStationKey, (OutPath) outEntry.getValue().clone());
+                }
+            }
+        }
+    }
+
+    private static void reapplyRouterSectionsPass6(SimDescriptor descriptor, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+        for (NodeDescriptor node : safeList(descriptor.getNodes())) {
+            Object stationKey = getStationKey(node.getName(), stationKeys, model);
+            if (stationKey == null) continue;
+            for (SectionDescriptor section : safeList(node.getSections())) {
+                String className = section.getClassName();
+                if (CLASSNAME_ROUTER.equals(className) || CLASSNAME_LINKAGE.equals(className)) {
+                    buildRouterSection(section, stationKey, model, classKeys, stationKeys);
                 }
             }
         }
@@ -678,13 +870,10 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                 }
                 if (ss != null) {
                     model.setSemaphoreStrategy(stationKey, classKey, ss);
-                    if (ss instanceof NormalSemaphore) {
-                        for (ParameterDescriptor sub : safeList(classSem.getSubParameters())) {
-                            if ("threshold".equals(sub.getName()) || "threshold".equals(sub.getRefClass())) {
-                                Integer th = parseInteger(getParamValue(sub));
-                                if (th != null) ((NormalSemaphore)ss).setThreshold(th);
-                            }
-                        }
+                    Object modelStrategy = model.getSemaphoreStrategy(stationKey, classKey);
+                    if (modelStrategy instanceof NormalSemaphore) {
+                        Integer th = findNamedInteger(classSem, "threshold");
+                        if (th != null) ((NormalSemaphore) modelStrategy).setThreshold(th);
                     }
                 }
             }
@@ -720,10 +909,10 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
     }
 
-    private static void buildEnablingSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void buildEnablingSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, List<PendingTransitionCondition> pendingTransitionConditions) {
         for (ParameterDescriptor param : safeList(sec.getParameters())) {
             if ("enablingConditions".equals(param.getName()) || "inhibitingConditions".equals(param.getName()) || "resourceConditions".equals(param.getName())) {
-                extractTransitionConditions(param, stationKey, model, classKeys, stationKeys);
+                collectTransitionConditions(param, stationKey, classKeys, model, pendingTransitionConditions);
             }
         }
     }
@@ -766,7 +955,7 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
     }
 
-    private static void buildFiringSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static void buildFiringSection(SectionDescriptor sec, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys, List<PendingFiringOutcome> pendingFiringOutcomes) {
         for (ParameterDescriptor param : safeList(sec.getParameters())) {
             if ("firingOutcomes".equals(param.getName())) {
                 List<ParameterDescriptor> outcomes = safeList(param.getSubParameters());
@@ -776,12 +965,14 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                     for (ParameterDescriptor vector : safeList(outElements.get(0).getSubParameters())) {
                         List<ParameterDescriptor> vecElements = safeList(vector.getSubParameters());
                         if (vecElements.size() < 2) continue;
-                        Object targetKey = getStationKey(getParamValue(vecElements.get(0)), stationKeys, model);
-                        if (targetKey == null) continue;
+                        String targetStationName = getParamValue(vecElements.get(0));
+                        if (!hasText(targetStationName)) continue;
                         for (ParameterDescriptor entry : safeList(vecElements.get(1).getSubParameters())) {
                             Object classKey = resolveClassKey(entry, vecElements.get(1), classKeys, model);
                             Integer val = parseInteger(getParamValue(entry));
-                            if (classKey != null && val != null) model.setFiringOutcome(stationKey, i, targetKey, classKey, val);
+                            if (classKey != null && val != null) {
+                                pendingFiringOutcomes.add(new PendingFiringOutcome(stationKey, i, targetStationName, classKey, val.intValue()));
+                            }
                         }
                     }
                 }
@@ -828,28 +1019,22 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
             }
         }
 
-        String classPath = param.getClassPath();
-        if (!hasText(classPath) && !param.getSubParameters().isEmpty()) {
-            classPath = param.getSubParameters().get(0).getClassPath();
-        }
+        String classPath = resolveServiceStrategyClassPath(param);
         if (!hasText(classPath)) return null;
 
         if (classPath.endsWith("ZeroStrategy")) return new ZeroStrategy();
         if (classPath.endsWith("DisabledStrategy")) return new DisabledStrategy();
-        if (classPath.endsWith("LDStrategy")) {
+        if (classPath.endsWith("LDStrategy") || classPath.endsWith("LoadDependentStrategy")) {
             LDStrategy lds = new LDStrategy();
-            for (ParameterDescriptor rangeParam : safeList(param.getSubParameters())) {
-                List<ParameterDescriptor> subParams = safeList(rangeParam.getSubParameters());
-                if (subParams.size() >= 4) {
-                    Integer from = parseInteger(getParamValue(subParams.get(0)));
-                    Object distrObj = parseServiceStrategy(subParams.get(1));
-                    String mean = getParamValue(subParams.get(3));
-                    if (from != null && distrObj instanceof Distribution) {
-                        Object key = (from == 1) ? lds.getAllRanges()[0] : lds.addRange();
-                        if (from != 1) lds.setRangeFrom(key, from);
-                        lds.setRangeDistributionNoCheck(key, (Distribution)distrObj);
-                        lds.setRangeDistributionMeanNoCheck(key, mean);
-                    }
+            for (ParameterDescriptor rangeParam : extractLdRangeParameters(param)) {
+                Integer from = findDirectNamedInteger(rangeParam, "from");
+                String mean = findDirectNamedValue(rangeParam, "function");
+                Object distrObj = parseServiceStrategy(rangeParam);
+                if (from != null && distrObj instanceof Distribution) {
+                    Object key = (from.intValue() == 1) ? lds.getAllRanges()[0] : lds.addRange();
+                    if (from.intValue() != 1) lds.setRangeFrom(key, from);
+                    lds.setRangeDistributionNoCheck(key, (Distribution)distrObj);
+                    lds.setRangeDistributionMeanNoCheck(key, mean);
                 }
             }
             return lds;
@@ -866,39 +1051,92 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
         }
         if (dist == null) return null;
 
-        List<ParameterDescriptor> distParams = new ArrayList<>(safeList(param.getSubParameters()));
-        for (ParameterDescriptor dp : safeList(param.getSubParameters())) {
-            if ("distrPar".equals(dp.getName())) distParams.addAll(safeList(dp.getSubParameters()));
-        }
-
-        for (ParameterDescriptor p : distParams) {
-            if ("distrPar".equals(p.getName()) || p.getName() == null) continue;
-
-            if (p.isArray()) {
-                List<ParameterDescriptor> vectors = safeList(p.getSubParameters());
-                Object[][] param_value = new Object[vectors.size()][];
-                for (int j = 0; j < vectors.size(); j++) {
-                    List<ParameterDescriptor> entries = safeList(vectors.get(j).getSubParameters());
-                    param_value[j] = new Object[entries.size()];
-                    for (int k = 0; k < entries.size(); k++) {
-                        param_value[j][k] = dist.getParameter(p.getName()).parseValue(getParamValue(entries.get(k)));
-                        if (param_value[j][k] == null) param_value[j][k] = dist.getParameter(p.getName()).parseValue("0");
-                    }
-                }
-                dist.getParameter(p.getName()).setValue(param_value);
-            } else if (DISTR_CONTAINER.equals(p.getClassPath())) {
-                List<ParameterDescriptor> nestedDistr = safeList(p.getSubParameters());
-                if (!nestedDistr.isEmpty()) dist.getParameter(p.getName()).setValue(parseServiceStrategy(nestedDistr.get(0)));
-            } else {
-                String val = getParamValue(p);
-                if (val != null) dist.getParameter(p.getName()).setValue(val);
-            }
-        }
+        applyDistributionParameters(dist, param);
         dist.updateCM();
         return dist;
     }
 
-    private static void extractTransitionConditions(ParameterDescriptor param, Object stationKey, CommonModel model, Map<String, Object> classKeys, Map<String, Object> stationKeys) {
+    private static String resolveServiceStrategyClassPath(ParameterDescriptor param) {
+        if (param == null) return null;
+        if (isKnownServiceClassPath(param.getClassPath())) return param.getClassPath();
+        for (ParameterDescriptor child : safeList(param.getSubParameters())) {
+            String childPath = resolveServiceStrategyClassPath(child);
+            if (isKnownServiceClassPath(childPath)) return childPath;
+        }
+        return null;
+    }
+
+    private static void applyDistributionParameters(Distribution dist, ParameterDescriptor node) {
+        if (dist == null || node == null) return;
+
+        String name = node.getName();
+        if (hasText(name) && !"distrPar".equals(name) && dist.getParameter(name) != null) {
+            if (node.isArray()) {
+                List<ParameterDescriptor> vectors = safeList(node.getSubParameters());
+                Object[][] paramValue = new Object[vectors.size()][];
+                for (int j = 0; j < vectors.size(); j++) {
+                    List<ParameterDescriptor> entries = safeList(vectors.get(j).getSubParameters());
+                    paramValue[j] = new Object[entries.size()];
+                    for (int k = 0; k < entries.size(); k++) {
+                        Object parsed = dist.getParameter(name).parseValue(getParamValue(entries.get(k)));
+                        if (parsed == null) parsed = dist.getParameter(name).parseValue("0");
+                        paramValue[j][k] = parsed;
+                    }
+                }
+                dist.getParameter(name).setValue(paramValue);
+            } else if (DISTR_CONTAINER.equals(node.getClassPath())) {
+                Object nested = parseDistributionFromContainer(node);
+                if (nested != null) dist.getParameter(name).setValue(nested);
+            } else {
+                String val = getParamValue(node);
+                if (val != null) dist.getParameter(name).setValue(val);
+            }
+        }
+
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            applyDistributionParameters(dist, child);
+        }
+    }
+
+    private static Object parseDistributionFromContainer(ParameterDescriptor container) {
+        if (container == null) return null;
+        ParameterDescriptor synthetic = new ParameterDescriptor();
+        synthetic.setSubParameters(new ArrayList<ParameterDescriptor>(safeList(container.getSubParameters())));
+        return parseServiceStrategy(synthetic);
+    }
+
+    private static List<ParameterDescriptor> extractLdRangeParameters(ParameterDescriptor root) {
+        List<ParameterDescriptor> result = new ArrayList<ParameterDescriptor>();
+        collectLdRangeParameters(root, result);
+        return result;
+    }
+
+    private static void collectLdRangeParameters(ParameterDescriptor node, List<ParameterDescriptor> output) {
+        if (node == null || output == null) return;
+        if ("LDParameter".equals(node.getName()) && findDirectNamedInteger(node, "from") != null) {
+            output.add(node);
+            return;
+        }
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            collectLdRangeParameters(child, output);
+        }
+    }
+
+    private static boolean isKnownServiceClassPath(String classPath) {
+        if (!hasText(classPath)) return false;
+        if (classPath.endsWith("ZeroStrategy") || classPath.endsWith("DisabledStrategy") || classPath.endsWith("LDStrategy") || classPath.endsWith("LoadDependentStrategy")) {
+            return true;
+        }
+        for (Distribution d : Distribution.findAll()) {
+            if (robustMatch(classPath, d.getClassPath(), d.getClass())) return true;
+        }
+        for (Distribution d : Distribution.findAllDiscrete()) {
+            if (robustMatch(classPath, d.getClassPath(), d.getClass())) return true;
+        }
+        return false;
+    }
+
+    private static void collectTransitionConditions(ParameterDescriptor param, Object stationKey, Map<String, Object> classKeys, CommonModel model, List<PendingTransitionCondition> pendingTransitionConditions) {
         List<ParameterDescriptor> conditions = safeList(param.getSubParameters());
         for (int i = 0; i < conditions.size(); i++) {
             List<ParameterDescriptor> condElements = safeList(conditions.get(i).getSubParameters());
@@ -906,18 +1144,35 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
             for (ParameterDescriptor vector : safeList(condElements.get(0).getSubParameters())) {
                 List<ParameterDescriptor> vecElements = safeList(vector.getSubParameters());
                 if (vecElements.size() < 2) continue;
-                Object targetKey = getStationKey(getParamValue(vecElements.get(0)), stationKeys, model);
-                if (targetKey == null) continue;
+                String targetStationName = getParamValue(vecElements.get(0));
+                if (!hasText(targetStationName)) continue;
 
                 for (ParameterDescriptor entry : safeList(vecElements.get(1).getSubParameters())) {
                     Object classKey = resolveClassKey(entry, vecElements.get(1), classKeys, model);
                     Integer val = parseInteger(getParamValue(entry));
                     if (classKey != null && val != null) {
-                        if ("enablingConditions".equals(param.getName())) model.setEnablingCondition(stationKey, i, targetKey, classKey, val);
-                        else if ("inhibitingConditions".equals(param.getName())) model.setInhibitingCondition(stationKey, i, targetKey, classKey, val);
-                        else if ("resourceConditions".equals(param.getName())) model.setResourceCondition(stationKey, i, targetKey, classKey, val);
+                        pendingTransitionConditions.add(new PendingTransitionCondition(param.getName(), stationKey, i, targetStationName, classKey, val.intValue()));
                     }
                 }
+            }
+        }
+    }
+
+    private static void applyPendingTransitionConditions(CommonModel model, Map<String, Object> stationKeys, List<PendingTransitionCondition> pendingTransitionConditions) {
+        for (PendingTransitionCondition condition : pendingTransitionConditions) {
+            Object targetKey = getStationKey(condition.targetStationName, stationKeys, model);
+            if (targetKey == null) continue;
+            if ("enablingConditions".equals(condition.conditionType)) model.setEnablingCondition(condition.stationKey, condition.modeIndex, targetKey, condition.classKey, condition.value);
+            else if ("inhibitingConditions".equals(condition.conditionType)) model.setInhibitingCondition(condition.stationKey, condition.modeIndex, targetKey, condition.classKey, condition.value);
+            else if ("resourceConditions".equals(condition.conditionType)) model.setResourceCondition(condition.stationKey, condition.modeIndex, targetKey, condition.classKey, condition.value);
+        }
+    }
+
+    private static void applyPendingFiringOutcomes(CommonModel model, Map<String, Object> stationKeys, List<PendingFiringOutcome> pendingFiringOutcomes) {
+        for (PendingFiringOutcome outcome : pendingFiringOutcomes) {
+            Object targetKey = getStationKey(outcome.targetStationName, stationKeys, model);
+            if (targetKey != null) {
+                model.setFiringOutcome(outcome.stationKey, outcome.modeIndex, targetKey, outcome.classKey, outcome.value);
             }
         }
     }
@@ -935,16 +1190,14 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
                     model.setImpatienceType(stationKey, classKey, impatienceType);
                 }
             } else if (impatienceType == ImpatienceType.BALKING) {
-                List<ParameterDescriptor> balkParams = safeList(sub.getSubParameters());
-                if (balkParams.size() >= 4) {
-                    Object ldObj = parseServiceStrategy(balkParams.get(1));
-                    if (ldObj instanceof LDStrategy) {
-                        BalkingParameter bp = new BalkingParameter((LDStrategy)ldObj);
-                        Boolean priority = parseBoolean(getParamValue(balkParams.get(3)));
-                        if (priority != null) bp.setPriorityActivated(priority);
-                        model.setImpatienceParameter(stationKey, classKey, bp);
-                        model.setImpatienceType(stationKey, classKey, impatienceType);
-                    }
+                ParameterDescriptor ldParam = findFirstByClassPathSuffix(sub, "LoadDependentStrategy");
+                Object ldObj = parseServiceStrategy(ldParam != null ? ldParam : sub);
+                if (ldObj instanceof LDStrategy) {
+                    BalkingParameter bp = new BalkingParameter((LDStrategy)ldObj);
+                    Boolean priority = parseBoolean(findNamedValue(sub, "priorityActivated"));
+                    if (priority != null) bp.setPriorityActivated(priority);
+                    model.setImpatienceParameter(stationKey, classKey, bp);
+                    model.setImpatienceType(stationKey, classKey, impatienceType);
                 }
             } else {
                 model.setImpatienceParameter(stationKey, classKey, null);
@@ -955,6 +1208,9 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
 
     private static RoutingStrategy instantiateRoutingStrategy(String classPath) {
         if (!hasText(classPath)) return null;
+        if (classPath.endsWith(".ClassSwitchStrategy")) {
+            classPath = classPath.substring(0, classPath.length() - "ClassSwitchStrategy".length()) + "ClassSwitchRoutingStrategy";
+        }
         for (RoutingStrategy strategy : RoutingStrategy.findAll()) {
             if (robustMatch(classPath, strategy.getClassPath(), strategy.getClass())) return strategy.clone();
         }
@@ -997,14 +1253,195 @@ public final class ModelPopulator implements CommonConstants, XMLConstantNames {
 
     private static Map<Integer, Map<String, Double>> extractLoadDependentMap(ParameterDescriptor parameter) {
         Map<Integer, Map<String, Double>> result = new HashMap<>();
-        for (ParameterDescriptor fromEntry : safeList(parameter.getSubParameters())) {
-            Integer from = parseInteger(getParamValue(fromEntry));
-            if (from == null) continue;
-            Map<String, Double> stationProbabilities = new HashMap<>();
-            collectStationDoublePairs(fromEntry, stationProbabilities);
-            if (!stationProbabilities.isEmpty()) result.put(from, stationProbabilities);
-        }
+        collectLoadDependentEntries(parameter, result);
         return result;
+    }
+
+    private static void collectLoadDependentEntries(ParameterDescriptor parameter, Map<Integer, Map<String, Double>> output) {
+        if (parameter == null || output == null) return;
+
+        Integer from = null;
+        for (ParameterDescriptor child : safeList(parameter.getSubParameters())) {
+            if ("from".equals(child.getName())) {
+                from = parseInteger(getParamValue(child));
+                break;
+            }
+        }
+        if (from != null) {
+            Map<String, Double> stationProbabilities = new HashMap<String, Double>();
+            collectEmpiricalStationProbabilities(parameter, stationProbabilities);
+            if (!stationProbabilities.isEmpty()) {
+                output.put(from, stationProbabilities);
+            }
+        }
+
+        for (ParameterDescriptor child : safeList(parameter.getSubParameters())) {
+            collectLoadDependentEntries(child, output);
+        }
+    }
+
+    private static void collectEmpiricalStationProbabilities(ParameterDescriptor parameter, Map<String, Double> output) {
+        if (parameter == null || output == null) return;
+        List<ParameterDescriptor> children = safeList(parameter.getSubParameters());
+
+        String stationName = null;
+        Double probability = null;
+        for (ParameterDescriptor child : children) {
+            if ("stationName".equals(child.getName())) stationName = getParamValue(child);
+            else if ("probability".equals(child.getName())) probability = parseDouble(getParamValue(child));
+        }
+        if (hasText(stationName) && probability != null) {
+            output.put(stationName, probability);
+        }
+
+        for (ParameterDescriptor child : children) {
+            collectEmpiricalStationProbabilities(child, output);
+        }
+    }
+
+    private static final class ClassSwitchBranch {
+        private final String stationName;
+        private final Double probability;
+        private final Map<String, Double> classSwitchProbabilities;
+
+        private ClassSwitchBranch(String stationName, Double probability, Map<String, Double> classSwitchProbabilities) {
+            this.stationName = stationName;
+            this.probability = probability;
+            this.classSwitchProbabilities = classSwitchProbabilities;
+        }
+    }
+
+    private static List<ClassSwitchBranch> extractClassSwitchBranches(ParameterDescriptor parameter) {
+        List<ClassSwitchBranch> branches = new ArrayList<ClassSwitchBranch>();
+        collectClassSwitchBranches(parameter, branches);
+        return branches;
+    }
+
+    private static void collectClassSwitchBranches(ParameterDescriptor parameter, List<ClassSwitchBranch> output) {
+        if (parameter == null || output == null) return;
+        List<ParameterDescriptor> children = safeList(parameter.getSubParameters());
+
+        String stationName = null;
+        Double branchProbability = null;
+        Map<String, Double> classProbs = new HashMap<String, Double>();
+        for (ParameterDescriptor child : children) {
+            if ("stationName".equals(child.getName())) stationName = getParamValue(child);
+            else if ("probability".equals(child.getName())) branchProbability = parseDouble(getParamValue(child));
+            else {
+                collectClassProbabilityPairs(child, classProbs);
+            }
+        }
+        if (hasText(stationName) && branchProbability != null) {
+            output.add(new ClassSwitchBranch(stationName, branchProbability, classProbs));
+        }
+
+        for (ParameterDescriptor child : children) {
+            collectClassSwitchBranches(child, output);
+        }
+    }
+
+    private static void collectClassProbabilityPairs(ParameterDescriptor parameter, Map<String, Double> output) {
+        if (parameter == null || output == null) return;
+        List<ParameterDescriptor> children = safeList(parameter.getSubParameters());
+
+        String className = null;
+        Double probability = null;
+        for (ParameterDescriptor child : children) {
+            if ("className".equals(child.getName()) || "class".equals(child.getName())) className = getParamValue(child);
+            else if ("probability".equals(child.getName()) || "classProb".equals(child.getName())) probability = parseDouble(getParamValue(child));
+        }
+        if (hasText(className) && probability != null) {
+            output.put(className, probability);
+        }
+
+        for (ParameterDescriptor child : children) {
+            collectClassProbabilityPairs(child, output);
+        }
+    }
+
+    private static ParameterDescriptor findDirectSubParameter(ParameterDescriptor parent, String name) {
+        if (parent == null || !hasText(name)) return null;
+        for (ParameterDescriptor child : safeList(parent.getSubParameters())) {
+            if (name.equals(child.getName())) return child;
+        }
+        return null;
+    }
+
+    private static void collectIntegerDoubleEmpiricalEntries(ParameterDescriptor parameter, Map<Object, Object> output) {
+        if (parameter == null || output == null) return;
+        List<ParameterDescriptor> children = safeList(parameter.getSubParameters());
+        if (children.size() >= 2) {
+            Integer jobs = parseInteger(getParamValue(children.get(0)));
+            Double probability = parseDouble(getParamValue(children.get(1)));
+            if (jobs != null && probability != null) output.put(jobs, probability);
+        }
+        for (ParameterDescriptor child : children) {
+            collectIntegerDoubleEmpiricalEntries(child, output);
+        }
+    }
+
+    private static String findNamedValue(ParameterDescriptor node, String parameterName) {
+        if (node == null || !hasText(parameterName)) return null;
+        if (parameterName.equals(node.getName())) {
+            String value = getParamValue(node);
+            if (hasText(value)) return value;
+        }
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            String value = findNamedValue(child, parameterName);
+            if (hasText(value)) return value;
+        }
+        return null;
+    }
+
+    private static Integer findNamedInteger(ParameterDescriptor node, String parameterName) {
+        return parseInteger(findNamedValue(node, parameterName));
+    }
+
+    private static String findDirectNamedValue(ParameterDescriptor node, String parameterName) {
+        if (node == null || !hasText(parameterName)) return null;
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            if (parameterName.equals(child.getName())) {
+                String value = getParamValue(child);
+                if (hasText(value)) return value;
+            }
+        }
+        return null;
+    }
+
+    private static Integer findDirectNamedInteger(ParameterDescriptor node, String parameterName) {
+        return parseInteger(findDirectNamedValue(node, parameterName));
+    }
+
+    private static ParameterDescriptor findFirstByClassPathSuffix(ParameterDescriptor node, String classPathSuffix) {
+        if (node == null || !hasText(classPathSuffix)) return null;
+        if (hasText(node.getClassPath()) && node.getClassPath().endsWith(classPathSuffix)) return node;
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            ParameterDescriptor found = findFirstByClassPathSuffix(child, classPathSuffix);
+            if (found != null) return found;
+        }
+        return null;
+    }
+
+    private static void collectNamedValues(ParameterDescriptor node, String parameterName, List<String> output) {
+        if (node == null || output == null || !hasText(parameterName)) return;
+        if (parameterName.equals(node.getName())) {
+            String value = getParamValue(node);
+            if (hasText(value)) output.add(value);
+        }
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            collectNamedValues(child, parameterName, output);
+        }
+    }
+
+    private static void collectNamedIntegerValues(ParameterDescriptor node, String parameterName, List<Integer> output) {
+        if (node == null || output == null || !hasText(parameterName)) return;
+        if (parameterName.equals(node.getName())) {
+            Integer value = parseInteger(getParamValue(node));
+            if (value != null) output.add(value);
+        }
+        for (ParameterDescriptor child : safeList(node.getSubParameters())) {
+            collectNamedIntegerValues(child, parameterName, output);
+        }
     }
 
     private static String resolveRoutingClassPath(ParameterDescriptor parameter) {
