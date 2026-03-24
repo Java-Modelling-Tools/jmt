@@ -16,29 +16,36 @@ import jmt.gui.common.xml.mapper.XMLMapperConstants;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
 
     private static final Map<String, String> DROP_RULES = new HashMap<>();
     static {
-        DROP_RULES.put(DROP_XML_DROP, CommonConstants.FINITE_DROP);
-        DROP_RULES.put(DROP_XML_BAS_BLOCKING, CommonConstants.FINITE_BLOCK);
-        DROP_RULES.put(DROP_XML_WAITING_QUEUE, CommonConstants.FINITE_WAITING);
-        DROP_RULES.put(DROP_XML_RETRIAL, CommonConstants.FINITE_RETRIAL);
+        DROP_RULES.put("drop", CommonConstants.FINITE_DROP);
+        DROP_RULES.put("BAS blocking", CommonConstants.FINITE_BLOCK);
+        DROP_RULES.put("waiting queue", CommonConstants.FINITE_WAITING);
+        DROP_RULES.put("retrial", CommonConstants.FINITE_RETRIAL);
     }
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
 
-        if (CommonConstants.STATION_TYPE_DELAY.equals(stationType)) {
-            extractTransitionConditions(key, getParam(sec, PARAM_ENABLING_CONDITIONS), getParam(sec, PARAM_INHIBITING_CONDITIONS), getParam(sec, PARAM_RESOURCE_CONDITIONS), ctx);
-            return;
+        ParameterDescriptor size = getParam(sec, PARAM_SIZE);
+        if (size != null) {
+            Integer sVal = valI(size);
+            if (sVal != null) model.setStationQueueCapacity(key, sVal);
         }
 
         ParameterDescriptor putStrategy = getParam(sec, PARAM_QUEUE_PUT_STRATEGY);
+        AtomicBoolean isPreemptive = new AtomicBoolean(false);
+        AtomicBoolean isPriority = new AtomicBoolean(false);
+
         if (putStrategy != null) {
             getRefClassMap(putStrategy).forEach((className, subP) -> {
-                String strategy = subP.getClassPath().substring(subP.getClassPath().lastIndexOf(".") + 1);
+                String cp = subP.getClassPath();
+                if (cp == null) return;
+                String strategy = cp.substring(cp.lastIndexOf(".") + 1);
                 Object classKey = ctx.classes.get(className);
 
                 if (strategy.contains(STRAT_TAIL)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_FCFS);
@@ -55,39 +62,35 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
                 else if (strategy.contains(STRAT_EDF)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_EDF);
                 else if (strategy.contains(STRAT_TBS)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_TBS);
 
-                boolean preemptive = strategy.contains(STRAT_PR) || strategy.contains(STRAT_SRPT) || strategy.contains(STRAT_EDF) || strategy.contains(STRAT_TBS);
-                boolean priority = strategy.contains(STRAT_PRIORITY);
-
-                if (preemptive) {
-                    model.setStationQueueStrategy(key, priority ? CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
-                } else {
-                    model.setStationQueueStrategy(key, priority ? CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
-                }
+                if (strategy.contains("PR") || strategy.contains("SRPT") || strategy.contains("EDF") || strategy.contains("TBS")) isPreemptive.set(true);
+                if (strategy.contains("Priority")) isPriority.set(true);
             });
         }
 
+        boolean isPolling = false;
         ParameterDescriptor fcfs = getParam(sec, PARAM_FCFS_STRATEGY);
-        if (fcfs != null) {
-            String getStrategy = fcfs.getClassPath().substring(fcfs.getClassPath().lastIndexOf(".") + 1);
-            model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
+        if (fcfs != null && fcfs.getClassPath() != null) {
+            String cp = fcfs.getClassPath();
+            if (cp.contains("Polling")) {
+                isPolling = true;
+                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
+                if (cp.contains("Limited")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
+                else if (cp.contains("Gated")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
+                else if (cp.contains("Exhaustive")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
 
-            if (getStrategy.equals(STRAT_LIMITED_POLLING)) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
-            else if (getStrategy.equals(STRAT_GATED_POLLING)) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
-            else if (getStrategy.equals(STRAT_EXHAUSTIVE_POLLING)) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
-
-            getSubParams(fcfs).stream()
-                    .filter(p -> PARAM_POLLING_K_VALUE.equals(p.getName()))
-                    .findFirst()
-                    .ifPresent(p -> {
-                        Integer kVal = valI(p);
-                        if (kVal != null) model.setStationPollingServerKValue(key, kVal);
-                    });
+                getSubParams(fcfs).stream()
+                        .filter(p -> "pollingKValue".equals(p.getName()))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            Integer kVal = valI(p);
+                            if (kVal != null) model.setStationPollingServerKValue(key, kVal);
+                        });
+            }
         }
 
-        ParameterDescriptor size = getParam(sec, PARAM_SIZE);
-        if (size != null) {
-            Integer sVal = valI(size);
-            if (sVal != null) model.setStationQueueCapacity(key, sVal);
+        if (!isPolling) {
+            if (isPreemptive.get()) model.setStationQueueStrategy(key, isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+            else model.setStationQueueStrategy(key, isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
         }
 
         ParameterDescriptor drops = getParam(sec, PARAM_DROP_STRATEGIES);
@@ -96,9 +99,10 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
             Map<String, ParameterDescriptor> retrialMap = getRefClassMap(retrials);
             getRefClassMap(drops).forEach((className, subP) -> {
                 String rule = val(subP);
+                debug("Queue %s -> Drop rule per %s: %s", node.getName(), className, rule);
                 if (rule != null) {
                     model.setDropRule(key, ctx.classes.get(className), DROP_RULES.get(rule));
-                    if (DROP_XML_RETRIAL.equals(rule) && retrialMap.containsKey(className)) {
+                    if ("retrial".equals(rule) && retrialMap.containsKey(className)) {
                         model.setRetrialDistribution(key, ctx.classes.get(className), parseServiceStrategy(retrialMap.get(className), ctx));
                     }
                 }
@@ -107,29 +111,26 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
 
         ParameterDescriptor impatience = getParam(sec, PARAM_IMPATIENCE);
         if (impatience != null) {
-            parseImpatience(model, key, getRefClassMap(impatience), ctx);
+            getRefClassMap(impatience).forEach((cName, p) -> {
+                Object classKey = ctx.classes.get(cName);
+                String impName = p.getName();
+                ImpatienceType type = ImpatienceType.NONE;
+                if (impName != null && impName.contains("Reneging")) type = ImpatienceType.RENEGING;
+                else if (impName != null && impName.contains("Balking")) type = ImpatienceType.BALKING;
+
+                if (type == ImpatienceType.RENEGING) {
+                    model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
+                } else if (type == ImpatienceType.BALKING) {
+                    List<ParameterDescriptor> subs = getSubParams(p);
+                    BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
+                    String bVal = val(getAt(subs, 3));
+                    if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
+                    model.setImpatienceParameter(key, classKey, bp);
+                } else {
+                    model.setImpatienceParameter(key, classKey, null);
+                }
+                model.setImpatienceType(key, classKey, type);
+            });
         }
-
-        extractTransitionConditions(key, getParam(sec, PARAM_ENABLING_CONDITIONS), getParam(sec, PARAM_INHIBITING_CONDITIONS), getParam(sec, PARAM_RESOURCE_CONDITIONS), ctx);
-    }
-
-    private void parseImpatience(CommonModel model, Object key, Map<String, ParameterDescriptor> map, MappingContext ctx) {
-        map.forEach((cName, p) -> {
-            Object classKey = ctx.classes.get(cName);
-            ImpatienceType type = ImpatienceType.getType(p.getName());
-
-            if (type == ImpatienceType.RENEGING) {
-                model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
-            } else if (type == ImpatienceType.BALKING) {
-                List<ParameterDescriptor> subs = getSubParams(p);
-                BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
-                String bVal = val(getAt(subs, 3));
-                if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
-                model.setImpatienceParameter(key, classKey, bp);
-            } else {
-                model.setImpatienceParameter(key, classKey, null);
-            }
-            model.setImpatienceType(key, classKey, type);
-        });
     }
 }

@@ -4,12 +4,13 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.dto.MeasureDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 
+import java.util.List;
+
 public class MeasuresMapper implements ModelElementMapper {
 
     @Override
     public void map(SimDescriptor dto, MappingContext context) {
         if (dto.getMeasures() == null || dto.getMeasures().isEmpty()) return;
-
         CommonModel model = context.getModel();
 
         for (MeasureDescriptor m : dto.getMeasures()) {
@@ -21,12 +22,15 @@ public class MeasuresMapper implements ModelElementMapper {
 
             Object classKey = null;
             if (m.getReferenceUserClass() != null && !m.getReferenceUserClass().isEmpty()) {
-                classKey = context.classes.get(m.getReferenceUserClass());
+                if (m.getType() != null && (m.getType().equals("Fire Frequency") || m.getType().endsWith("FX"))) {
+                    classKey = m.getReferenceUserClass();
+                } else {
+                    classKey = context.classes.get(m.getReferenceUserClass());
+                }
             }
 
             Double alpha = 0.05;
             if (m.getAlpha() != null && !m.getAlpha().isEmpty()) {
-                // FIX: L'OLDXMLReader fa "1 - alpha" incondizionatamente su tutto
                 alpha = 1.0 - Double.parseDouble(m.getAlpha());
             }
 

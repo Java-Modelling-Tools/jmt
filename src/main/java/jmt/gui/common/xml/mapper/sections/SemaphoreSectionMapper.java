@@ -14,6 +14,7 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper implements XML
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing SemaphoreSection per la stazione: %s", node.getName());
         ParameterDescriptor p = getFirst(sec.getParameters());
 
         if (p != null) {
@@ -21,20 +22,20 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper implements XML
 
             getRefClassMap(p).forEach((className, sP) -> {
                 Object classKey = ctx.classes.get(className);
+                String cp = sP.getClassPath();
+
                 ctx.engineToGuiSemaphore.values().stream()
-                        .filter(ss -> sP.getClassPath().equals(ss.getClassPath()))
+                        .filter(ss -> cp != null && cp.equals(ss.getClassPath()))
                         .findFirst()
                         .ifPresent(ss -> model.setSemaphoreStrategy(key, classKey, ss.clone()));
 
                 SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key, classKey);
                 if (ss instanceof NormalSemaphore) {
-                    getSubParams(sP).stream()
-                            .filter(sub -> PARAM_THRESHOLD.equals(sub.getName()))
-                            .findFirst()
-                            .ifPresent(sub -> {
-                                Integer val = valI(sub);
-                                if (val != null) ((NormalSemaphore) ss).setThreshold(val);
-                            });
+                    ParameterDescriptor thresParam = getFirst(getSubParams(sP));
+                    if (thresParam != null) {
+                        Integer val = valI(thresParam);
+                        if (val != null) ((NormalSemaphore) ss).setThreshold(val);
+                    }
                 }
             });
         } else {
