@@ -2,8 +2,8 @@ package jmt.gui.common.xml.mapper.sections;
 
 import jmt.engine.log.LoggerParameters;
 import jmt.framework.data.MacroReplacer;
-import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;

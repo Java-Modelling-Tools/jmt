@@ -6,7 +6,7 @@ import java.util.List;
 public class SectionDescriptor {
 
     private String className;
-    private List<ParameterDescriptor> parameters = new ArrayList<ParameterDescriptor>();
+    private List<ParameterDescriptor> parameters = new ArrayList<>();
 
     public String getClassName() {
         return className;
@@ -21,7 +21,7 @@ public class SectionDescriptor {
     }
 
     public void setParameters(List<ParameterDescriptor> parameters) {
-        this.parameters = parameters != null ? parameters : new ArrayList<ParameterDescriptor>();
+        this.parameters = parameters != null ? parameters : new ArrayList<>();
     }
 
     public void addParameter(ParameterDescriptor parameter) {

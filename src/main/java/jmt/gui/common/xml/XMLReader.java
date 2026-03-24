@@ -1,9 +1,5 @@
 package jmt.gui.common.xml;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
@@ -15,6 +11,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class XMLReader implements XMLConstantNames, CommonConstants {
     private XMLReader() {

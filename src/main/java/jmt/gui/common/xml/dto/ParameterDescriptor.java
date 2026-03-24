@@ -10,7 +10,7 @@ public class ParameterDescriptor {
     private String value;
     private String refClass;
     private boolean isArray;
-    private List<ParameterDescriptor> subParameters = new ArrayList<ParameterDescriptor>();
+    private List<ParameterDescriptor> subParameters = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -57,7 +57,7 @@ public class ParameterDescriptor {
     }
 
     public void setSubParameters(List<ParameterDescriptor> subParameters) {
-        this.subParameters = subParameters != null ? subParameters : new ArrayList<ParameterDescriptor>();
+        this.subParameters = subParameters != null ? subParameters : new ArrayList<>();
     }
 
     public void addSubParameter(ParameterDescriptor subParameter) {

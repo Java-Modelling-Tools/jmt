@@ -1,14 +1,14 @@
 package jmt.gui.common.xml.mapper.sections;
 
-import jmt.gui.common.serviceStrategies.DisabledStrategy;
-import jmt.gui.common.serviceStrategies.LDStrategy;
-import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.forkStrategies.ForkStrategy;
 import jmt.gui.common.joinStrategies.JoinStrategy;
 import jmt.gui.common.routingStrategies.RoutingStrategy;
 import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
 import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;

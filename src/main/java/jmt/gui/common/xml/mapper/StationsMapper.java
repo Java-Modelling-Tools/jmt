@@ -2,18 +2,13 @@ package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.mapper.sections.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class StationsMapper implements ModelElementMapper {

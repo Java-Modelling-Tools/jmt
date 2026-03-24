@@ -3,21 +3,21 @@ package jmt.gui.common.xml.dto;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BlockingRegionDescriptor {
 
     private String name;
     private String type;
     private List<String> regionNodes = new ArrayList<>();
-    private LinkedHashMap<String, String> globalConstraints = new LinkedHashMap<>();
-    private LinkedHashMap<String, LinkedHashMap<String, String>> classConstraints =
-            new LinkedHashMap<>();
-    private LinkedHashMap<String, String> classWeights = new LinkedHashMap<>();
-    private LinkedHashMap<String, String> classSizes = new LinkedHashMap<>();
-    private LinkedHashMap<String, String> dropRules = new LinkedHashMap<>();
-    private LinkedHashMap<String, String> groupConstraints = new LinkedHashMap<>();
-    private LinkedHashMap<String, String> groupMemoryConstraints = new LinkedHashMap<>();
-    private LinkedHashMap<String, List<String>> groupClassLists = new LinkedHashMap<>();
+    private Map<String, String> globalConstraints = new LinkedHashMap<>();
+    private Map<String, Map<String, String>> classConstraints = new LinkedHashMap<>();
+    private Map<String, String> classWeights = new LinkedHashMap<>();
+    private Map<String, String> classSizes = new LinkedHashMap<>();
+    private Map<String, String> dropRules = new LinkedHashMap<>();
+    private final Map<String, String> groupConstraints = new LinkedHashMap<>();
+    private final Map<String, String> groupMemoryConstraints = new LinkedHashMap<>();
+    private final Map<String, List<String>> groupClassLists = new LinkedHashMap<>();
 
     public String getName() {
         return name;
@@ -40,7 +40,7 @@ public class BlockingRegionDescriptor {
     }
 
     public void setRegionNodes(List<String> regionNodes) {
-        this.regionNodes = regionNodes != null ? regionNodes : new ArrayList<String>();
+        this.regionNodes = regionNodes != null ? regionNodes : new ArrayList<>();
     }
 
     public void addRegionNode(String nodeName) {
@@ -49,14 +49,14 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, String> getGlobalConstraints() {
+    public Map<String, String> getGlobalConstraints() {
         return globalConstraints;
     }
 
-    public void setGlobalConstraints(LinkedHashMap<String, String> globalConstraints) {
+    public void setGlobalConstraints(Map<String, String> globalConstraints) {
         this.globalConstraints = globalConstraints != null
                 ? globalConstraints
-                : new LinkedHashMap<String, String>();
+                : new LinkedHashMap<>();
     }
 
     public void addGlobalConstraint(String key, String value) {
@@ -65,12 +65,12 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, LinkedHashMap<String, String>> getClassConstraints() {
+    public Map<String, Map<String, String>> getClassConstraints() {
         return classConstraints;
     }
 
     public void setClassConstraints(
-            LinkedHashMap<String, LinkedHashMap<String, String>> classConstraints) {
+            Map<String, Map<String, String>> classConstraints) {
         this.classConstraints = classConstraints != null
                 ? classConstraints
                 : new LinkedHashMap<>();
@@ -80,20 +80,15 @@ public class BlockingRegionDescriptor {
         if (className == null || key == null) {
             return;
         }
-        LinkedHashMap<String, String> constraints = classConstraints.get(className);
-        if (constraints == null) {
-            constraints = new LinkedHashMap<String, String>();
-            classConstraints.put(className, constraints);
-        }
-        constraints.put(key, value);
+        classConstraints.computeIfAbsent(className, k -> new LinkedHashMap<>()).put(key, value);
     }
 
-    public LinkedHashMap<String, String> getClassWeights() {
+    public Map<String, String> getClassWeights() {
         return classWeights;
     }
 
-    public void setClassWeights(LinkedHashMap<String, String> classWeights) {
-        this.classWeights = classWeights != null ? classWeights : new LinkedHashMap<String, String>();
+    public void setClassWeights(Map<String, String> classWeights) {
+        this.classWeights = classWeights != null ? classWeights : new LinkedHashMap<>();
     }
 
     public void addClassWeight(String className, String weight) {
@@ -102,12 +97,12 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, String> getClassSizes() {
+    public Map<String, String> getClassSizes() {
         return classSizes;
     }
 
-    public void setClassSizes(LinkedHashMap<String, String> classSizes) {
-        this.classSizes = classSizes != null ? classSizes : new LinkedHashMap<String, String>();
+    public void setClassSizes(Map<String, String> classSizes) {
+        this.classSizes = classSizes != null ? classSizes : new LinkedHashMap<>();
     }
 
     public void addClassSize(String className, String size) {
@@ -116,12 +111,12 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, String> getDropRules() {
+    public Map<String, String> getDropRules() {
         return dropRules;
     }
 
-    public void setDropRules(LinkedHashMap<String, String> dropRules) {
-        this.dropRules = dropRules != null ? dropRules : new LinkedHashMap<String, String>();
+    public void setDropRules(Map<String, String> dropRules) {
+        this.dropRules = dropRules != null ? dropRules : new LinkedHashMap<>();
     }
 
     public void addDropRule(String className, String dropRule) {
@@ -130,7 +125,7 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, String> getGroupConstraints() {
+    public Map<String, String> getGroupConstraints() {
         return groupConstraints;
     }
 
@@ -140,7 +135,7 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, String> getGroupMemoryConstraints() {
+    public Map<String, String> getGroupMemoryConstraints() {
         return groupMemoryConstraints;
     }
 
@@ -150,7 +145,7 @@ public class BlockingRegionDescriptor {
         }
     }
 
-    public LinkedHashMap<String, List<String>> getGroupClassLists() {
+    public Map<String, List<String>> getGroupClassLists() {
         return groupClassLists;
     }
 
@@ -158,11 +153,6 @@ public class BlockingRegionDescriptor {
         if (groupName == null || className == null) {
             return;
         }
-        List<String> classes = groupClassLists.get(groupName);
-        if (classes == null) {
-            classes = new ArrayList<String>();
-            groupClassLists.put(groupName, classes);
-        }
-        classes.add(className);
+        groupClassLists.computeIfAbsent(groupName, k -> new ArrayList<>()).add(className);
     }
 }
