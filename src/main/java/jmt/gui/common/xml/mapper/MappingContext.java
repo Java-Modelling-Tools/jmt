@@ -48,16 +48,69 @@ public class MappingContext {
 
     // --- Lookup caches for GUI vs Engine strategies ---
     // Lazily initialized as in OLDXMLReader to save memory if not used
-    public Map<String, Distribution> engineToGuiDistr = null;
-    public Map<String, RoutingStrategy> engineToGuiRouting = null;
-    public Map<String, ForkStrategy> engineToGuiFork = null;
-    public Map<String, JoinStrategy> engineToGuiJoin = null;
-    public Map<String, SemaphoreStrategy> engineToGuiSemaphore = null;
+    private Map<String, Distribution> engineToGuiDistr = null;
+    private Map<String, RoutingStrategy> engineToGuiRouting = null;
+    private Map<String, ForkStrategy> engineToGuiFork = null;
+    private Map<String, JoinStrategy> engineToGuiJoin = null;
+    private Map<String, SemaphoreStrategy> engineToGuiSemaphore = null;
 
     /**
      * Returns the CommonModel instance that the various Mappers must enrich.
      */
     public CommonModel getModel() {
         return model;
+    }
+
+    public Map<String, Distribution> getEngineToGuiDistr() {
+        if (engineToGuiDistr == null) {
+            engineToGuiDistr = new TreeMap<>();
+            for (Distribution d : Distribution.findAll()) {
+                engineToGuiDistr.put(d.getClassPath(), d);
+            }
+            for (Distribution d : Distribution.findAllDiscrete()) {
+                engineToGuiDistr.put(d.getClassPath(), d);
+            }
+        }
+        return engineToGuiDistr;
+    }
+
+    public Map<String, RoutingStrategy> getEngineToGuiRouting() {
+        if (engineToGuiRouting == null) {
+            engineToGuiRouting = new TreeMap<>();
+            for (RoutingStrategy rs : RoutingStrategy.findAll()) {
+                engineToGuiRouting.put(rs.getClass().getName(), rs);
+            }
+        }
+        return engineToGuiRouting;
+    }
+
+    public Map<String, ForkStrategy> getEngineToGuiFork() {
+        if (engineToGuiFork == null) {
+            engineToGuiFork = new TreeMap<>();
+            for (ForkStrategy fs : ForkStrategy.findAll()) {
+                engineToGuiFork.put(fs.getClass().getName(), fs);
+            }
+        }
+        return engineToGuiFork;
+    }
+
+    public Map<String, JoinStrategy> getEngineToGuiJoin() {
+        if (engineToGuiJoin == null) {
+            engineToGuiJoin = new TreeMap<>();
+            for (JoinStrategy js : JoinStrategy.findAll()) {
+                engineToGuiJoin.put(js.getClass().getName(), js);
+            }
+        }
+        return engineToGuiJoin;
+    }
+
+    public Map<String, SemaphoreStrategy> getEngineToGuiSemaphore() {
+        if (engineToGuiSemaphore == null) {
+            engineToGuiSemaphore = new TreeMap<>();
+            for (SemaphoreStrategy ss : SemaphoreStrategy.findAll()) {
+                engineToGuiSemaphore.put(ss.getClass().getName(), ss);
+            }
+        }
+        return engineToGuiSemaphore;
     }
 }

@@ -2,10 +2,6 @@ package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.distributions.Distribution;
-import jmt.gui.common.forkStrategies.ForkStrategy;
-import jmt.gui.common.joinStrategies.JoinStrategy;
-import jmt.gui.common.routingStrategies.RoutingStrategy;
-import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
 import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
@@ -98,13 +94,12 @@ public abstract class AbstractSectionMapper {
 
     protected Distribution parseDistribution(ParameterDescriptor distr, ParameterDescriptor distrPar, MappingContext ctx) {
         if (distr == null) return null;
-        if (ctx.engineToGuiDistr == null) initGuiDistrCache(ctx);
 
         String cp = distr.getClassPath();
-        Distribution template = ctx.engineToGuiDistr.get(cp);
+        Distribution template = ctx.getEngineToGuiDistr().get(cp);
         if (template == null && cp != null) {
-            for (String key : ctx.engineToGuiDistr.keySet()) {
-                if (cp.endsWith(key) || key.endsWith(cp)) { template = ctx.engineToGuiDistr.get(key); break; }
+            for (String key : ctx.getEngineToGuiDistr().keySet()) {
+                if (cp.endsWith(key) || key.endsWith(cp)) { template = ctx.getEngineToGuiDistr().get(key); break; }
             }
         }
         if (template == null) return null;
@@ -198,11 +193,4 @@ public abstract class AbstractSectionMapper {
             }
         }
     }
-
-    // --- CACHE ---
-    protected void initGuiRoutingCache(MappingContext ctx) { ctx.engineToGuiRouting = new TreeMap<>(); for (RoutingStrategy rs : RoutingStrategy.findAll()) ctx.engineToGuiRouting.put(rs.getClass().getName(), rs); }
-    protected void initGuiForkCache(MappingContext ctx) { ctx.engineToGuiFork = new TreeMap<>(); for (ForkStrategy fs : ForkStrategy.findAll()) ctx.engineToGuiFork.put(fs.getClass().getName(), fs); }
-    protected void initGuiJoinCache(MappingContext ctx) { ctx.engineToGuiJoin = new TreeMap<>(); for (JoinStrategy js : JoinStrategy.findAll()) ctx.engineToGuiJoin.put(js.getClass().getName(), js); }
-    protected void initGuiSemaphoreCache(MappingContext ctx) { ctx.engineToGuiSemaphore = new TreeMap<>(); for (SemaphoreStrategy ss : SemaphoreStrategy.findAll()) ctx.engineToGuiSemaphore.put(ss.getClass().getName(), ss); }
-    private void initGuiDistrCache(MappingContext ctx) { ctx.engineToGuiDistr = new TreeMap<>(); for (Distribution d : Distribution.findAll()) ctx.engineToGuiDistr.put(d.getClassPath(), d); for (Distribution d : Distribution.findAllDiscrete()) ctx.engineToGuiDistr.put(d.getClassPath(), d); }
 }
