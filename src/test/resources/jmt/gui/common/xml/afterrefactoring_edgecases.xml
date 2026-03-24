@@ -27,11 +27,13 @@
             </section>
         </node>
 
+        <connection source="Source1" target="Delay1"/>
+
         <blockingRegion name="Region1" type="SJF">
             <regionNode nodeName="Delay1"/>
             <globalConstraint maxJobs="15"/>
-            <classConstraint class="ClassOpen" maxJobsPerClass="5"/>
-            <dropRules class="ClassClosed" drop="drop"/>
+            <classConstraint jobClass="ClassOpen" maxJobsPerClass="5"/>
+            <dropRules jobClass="ClassClosed" dropThisClass="true"/>
         </blockingRegion>
 
     </sim>
