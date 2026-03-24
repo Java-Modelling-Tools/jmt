@@ -88,7 +88,7 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
             }
         }
 
-        if (!isPolling) {
+        if (!isPolling && putStrategy != null) {
             if (isPreemptive.get()) model.setStationQueueStrategy(key, isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
             else model.setStationQueueStrategy(key, isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
         }
@@ -99,7 +99,6 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
             Map<String, ParameterDescriptor> retrialMap = getRefClassMap(retrials);
             getRefClassMap(drops).forEach((className, subP) -> {
                 String rule = val(subP);
-                debug("Queue %s -> Drop rule per %s: %s", node.getName(), className, rule);
                 if (rule != null) {
                     model.setDropRule(key, ctx.classes.get(className), DROP_RULES.get(rule));
                     if ("retrial".equals(rule) && retrialMap.containsKey(className)) {
@@ -131,6 +130,14 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
                 }
                 model.setImpatienceType(key, classKey, type);
             });
+        }
+
+        ParameterDescriptor en = getParam(sec, "enablingConditions");
+        ParameterDescriptor in = getParam(sec, "inhibitingConditions");
+        ParameterDescriptor res = getParam(sec, "resourceConditions");
+
+        if (en != null || in != null || res != null) {
+            extractTransitionConditions(key, en, in, res, ctx);
         }
     }
 }
