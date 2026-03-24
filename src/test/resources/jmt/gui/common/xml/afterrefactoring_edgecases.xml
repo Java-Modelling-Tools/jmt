@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="afterrefactoring_edgecases.jsimg" timestamp="Tue Mar 24 11:12:00 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," maxSamples="1000000" name="Test_EdgeCases" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+
+        <userClass name="ClassOpen" priority="0" referenceSource="Source1" type="open"/>
+        <userClass name="ClassClosed" priority="0" referenceSource="Delay1" type="closed" customers="42"/>
+
+        <node name="Source1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy"/>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/>
+            </section>
+        </node>
+
+        <node name="Delay1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size"><value>-1</value></parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy"/>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy"/>
+            </section>
+        </node>
+
+        <blockingRegion name="Region1" type="SJF">
+            <regionNode nodeName="Delay1"/>
+            <globalConstraint maxJobs="15"/>
+            <classConstraint class="ClassOpen" maxJobsPerClass="5"/>
+            <dropRules class="ClassClosed" drop="drop"/>
+        </blockingRegion>
+
+    </sim>
+</archive>
