@@ -7,29 +7,23 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
 import jmt.gui.common.xml.mapper.XMLMapperConstants;
 
-import java.util.Map;
-
 public class DelaySectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing DelaySection per la stazione: %s", node.getName());
 
-        ParameterDescriptor serviceStrategyParam = getParam(sec, PARAM_SERVICE_STRATEGY);
-        if (serviceStrategyParam == null) {
-            return;
+        ParameterDescriptor serviceStrategyParam = getParam(sec, "ServiceStrategy");
+        if (serviceStrategyParam != null) {
+            getRefClassMap(serviceStrategyParam).forEach((className, subParam) -> {
+                Object classKey = ctx.classes.get(className);
+                if (classKey != null) {
+                    Object parsedDistribution = parseServiceStrategy(subParam, ctx);
+                    model.setServiceTimeDistribution(key, classKey, parsedDistribution);
+                }
+            });
         }
 
-        Map<String, ParameterDescriptor> strategyMap = getRefClassMap(serviceStrategyParam);
-
-        for (Map.Entry<String, ParameterDescriptor> entry : strategyMap.entrySet()) {
-            String className = entry.getKey();
-            ParameterDescriptor subParam = entry.getValue();
-
-            Object classKey = ctx.classes.get(className);
-            if (classKey != null) {
-                Object parsedDistribution = parseServiceStrategy(subParam, ctx);
-                model.setServiceTimeDistribution(key, classKey, parsedDistribution);
-            }
-        }
+        extractTransitionConditions(key, getParam(sec, "enablingConditions"), getParam(sec, "inhibitingConditions"), getParam(sec, "resourceConditions"), ctx);
     }
 }

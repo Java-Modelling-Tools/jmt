@@ -16,6 +16,7 @@ public class SimDescriptorMapper {
         this.context = new MappingContext(model);
         this.pipeline = new ArrayList<>();
 
+
         // Assembliamo la pipeline rispettando RIGOROSAMENTE l'ordine di OLDXMLReader
         pipeline.add(new GlobalSettingsMapper()); // setup path, maxTime, seed...
         pipeline.add(new ClassesMapper());        // parseClasses

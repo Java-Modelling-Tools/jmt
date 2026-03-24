@@ -8,39 +8,23 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
 import jmt.gui.common.xml.mapper.XMLMapperConstants;
 
-import java.util.Map;
-
 public class SourceSectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-
         ParameterDescriptor serviceStrategyParam = getParam(sec, PARAM_SERVICE_STRATEGY);
-        if (serviceStrategyParam == null) {
-            return;
-        }
+        if (serviceStrategyParam == null) return;
 
-        Map<String, ParameterDescriptor> distributions = getRefClassMap(serviceStrategyParam);
-        String stationName = node.getName();
-
-        for (Map.Entry<String, ParameterDescriptor> entry : distributions.entrySet()) {
-            String className = entry.getKey();
-            ParameterDescriptor strategyParam = entry.getValue();
-
+        getRefClassMap(serviceStrategyParam).forEach((className, p) -> {
             Object classKey = ctx.classes.get(className);
+            debug("Source %s -> Class: %s, ServiceStrategy: %s", node.getName(), className, p.getClassPath());
 
-            if (classKey != null) {
-                if (stationName.equals(ctx.refStations.get(classKey)) &&
-                        model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {
-
-                    Object distributionStrategy = parseServiceStrategy(strategyParam, ctx);
-
-                    model.setClassDistribution(classKey, distributionStrategy);
-                    model.setClassRefStation(classKey, key);
-
-                    ctx.refStations.remove(classKey);
-                }
+            if (classKey != null && node.getName().equals(ctx.refStations.get(classKey)) && model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {
+                Object distributionStrategy = parseServiceStrategy(p, ctx);
+                model.setClassDistribution(classKey, distributionStrategy);
+                model.setClassRefStation(classKey, key);
+                ctx.refStations.remove(classKey);
             }
-        }
+        });
     }
 }

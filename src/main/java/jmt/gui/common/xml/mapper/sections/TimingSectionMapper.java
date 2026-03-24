@@ -14,6 +14,7 @@ public class TimingSectionMapper extends AbstractSectionMapper implements XMLMap
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing TimingSection per la stazione: %s", node.getName());
 
         ParameterDescriptor modes = getParam(sec, PARAM_MODE_NAMES);
         if (modes != null) {

@@ -10,6 +10,7 @@ public class EnablingSectionMapper extends AbstractSectionMapper implements XMLM
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing EnablingSection per la stazione: %s", node.getName());
         extractTransitionConditions(key, getParam(sec, PARAM_ENABLING_CONDITIONS), getParam(sec, PARAM_INHIBITING_CONDITIONS), null, ctx);
     }
 }

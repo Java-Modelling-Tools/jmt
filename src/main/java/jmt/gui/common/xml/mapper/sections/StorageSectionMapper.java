@@ -15,14 +15,16 @@ public class StorageSectionMapper extends AbstractSectionMapper implements XMLMa
 
     private static final Map<String, String> DROP_RULES = new HashMap<>();
     static {
-        DROP_RULES.put(DROP_XML_DROP, CommonConstants.FINITE_DROP);
-        DROP_RULES.put(DROP_XML_BAS_BLOCKING, CommonConstants.FINITE_BLOCK);
-        DROP_RULES.put(DROP_XML_WAITING_QUEUE, CommonConstants.FINITE_WAITING);
-        DROP_RULES.put(DROP_XML_RETRIAL, CommonConstants.FINITE_RETRIAL);
+        DROP_RULES.put("drop", CommonConstants.FINITE_DROP);
+        DROP_RULES.put("BAS blocking", CommonConstants.FINITE_BLOCK);
+        DROP_RULES.put("waiting queue", CommonConstants.FINITE_WAITING);
+        DROP_RULES.put("retrial", CommonConstants.FINITE_RETRIAL);
     }
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing StorageSection per la stazione: %s", node.getName());
+
         ParameterDescriptor tc = getParam(sec, PARAM_TOTAL_CAPACITY);
         if (tc != null) {
             Integer tVal = valI(tc);
@@ -48,10 +50,13 @@ public class StorageSectionMapper extends AbstractSectionMapper implements XMLMa
         ParameterDescriptor puts = getParam(sec, PARAM_PUT_STRATEGIES);
         if (puts != null) {
             getRefClassMap(puts).forEach((c, subP) -> {
-                String ps = subP.getClassPath().substring(subP.getClassPath().lastIndexOf(".") + 1);
-                if (STRAT_TAIL_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_FCFS);
-                else if (STRAT_HEAD_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_LCFS);
-                else if (STRAT_RAND_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_RAND);
+                String cp = subP.getClassPath();
+                if (cp != null) {
+                    String ps = cp.substring(cp.lastIndexOf(".") + 1);
+                    if (STRAT_TAIL_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_FCFS);
+                    else if (STRAT_HEAD_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_LCFS);
+                    else if (STRAT_RAND_STRATEGY.equals(ps)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_RAND);
+                }
             });
         }
     }

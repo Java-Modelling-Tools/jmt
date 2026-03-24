@@ -18,8 +18,18 @@ import java.util.*;
 
 public abstract class AbstractSectionMapper {
 
+    // --- LOGGER ---
+    protected static final boolean DEBUG = true; // Metti a true per loggare i dettagli
+
+    protected void debug(String msg, Object... args) {
+        if (DEBUG) {
+            System.out.printf("[DEBUG - %s] %s%n", this.getClass().getSimpleName(), args.length > 0 ? String.format(msg, args) : msg);
+        }
+    }
+
     public abstract void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
 
+    // --- UTILITY ---
     protected ParameterDescriptor getParam(SectionDescriptor sec, String name) {
         if (sec == null || sec.getParameters() == null) return null;
         return sec.getParameters().stream().filter(p -> name.equals(p.getName())).findFirst().orElse(null);
@@ -29,18 +39,15 @@ public abstract class AbstractSectionMapper {
         return (p != null && p.getSubParameters() != null) ? p.getSubParameters() : Collections.emptyList();
     }
 
-    // FIX: Accoppia correttamente i tag XML <refClass> e <subParameter> adiacenti
+    // FIX CRITICO RIPRISTINATO: Utilizza getRefClass() nativo del DTO!
     protected Map<String, ParameterDescriptor> getRefClassMap(ParameterDescriptor p) {
         Map<String, ParameterDescriptor> map = new LinkedHashMap<>();
         if (p == null || p.getSubParameters() == null) return map;
 
-        String currentRefClass = null;
         for (ParameterDescriptor sub : p.getSubParameters()) {
-            if ("refClass".equals(sub.getName())) {
-                currentRefClass = sub.getValue();
-            } else if ("subParameter".equals(sub.getName()) && currentRefClass != null) {
-                map.put(currentRefClass, sub);
-                currentRefClass = null;
+            String refClass = sub.getRefClass();
+            if (refClass != null && !refClass.isEmpty()) {
+                map.put(refClass, sub);
             }
         }
         return map;
@@ -54,72 +61,66 @@ public abstract class AbstractSectionMapper {
         return (list != null && index >= 0 && index < list.size()) ? list.get(index) : null;
     }
 
-    // FIX: Cerca il valore anche se incapsulato in tag <value> figli
     protected String val(ParameterDescriptor p) {
         if (p == null) return null;
-        if (p.getValue() != null && !p.getValue().isEmpty()) return p.getValue();
-        if (p.getSubParameters() != null) {
-            for (ParameterDescriptor sub : p.getSubParameters()) {
-                if ("value".equals(sub.getName()) && sub.getValue() != null && !sub.getValue().isEmpty()) {
-                    return sub.getValue();
-                }
-            }
-            if (!p.getSubParameters().isEmpty()) {
-                return p.getSubParameters().get(0).getValue();
-            }
+        if (p.getValue() != null && !p.getValue().trim().isEmpty()) return p.getValue().trim();
+        for (ParameterDescriptor sub : getSubParams(p)) {
+            if ("value".equals(sub.getName()) && sub.getValue() != null) return sub.getValue().trim();
         }
         return null;
     }
 
     protected Double valD(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v) : null; }
-    protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Integer.valueOf(v) : null; }
+    protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v).intValue() : null; }
 
+    // --- PARSING CONDIVISO ---
     protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
         if (p == null) return null;
         String cp = p.getClassPath();
 
-        if (ZeroStrategy.getEngineClassPath().equals(cp)) return new ZeroStrategy();
-        if (DisabledStrategy.getEngineClassPath().equals(cp)) return new DisabledStrategy();
+        if (cp != null && (cp.contains("ZeroStrategy") || ZeroStrategy.getEngineClassPath().equals(cp))) return new ZeroStrategy();
+        if (cp != null && (cp.contains("DisabledStrategy") || DisabledStrategy.getEngineClassPath().equals(cp))) return new DisabledStrategy();
 
-        if (LDStrategy.getEngineClassPath().equals(cp)) {
+        if (cp != null && (cp.contains("LDStrategy") || LDStrategy.getEngineClassPath().equals(cp))) {
             LDStrategy strategy = new LDStrategy();
-            ParameterDescriptor firstSub = getFirst(getSubParams(p));
-            if (firstSub != null) {
-                getSubParams(firstSub).forEach(range -> {
+            ParameterDescriptor ldArray = getFirst(getSubParams(p));
+            if (ldArray != null) {
+                getSubParams(ldArray).forEach(range -> {
                     List<ParameterDescriptor> rParams = getSubParams(range);
-
-                    // FIX: Protezione contro l'auto-unboxing null
-                    Integer fromVal = valI(getFirst(getSubParams(getAt(rParams, 0))));
-                    int from = (fromVal != null) ? fromVal : 1;
-
+                    int from = valI(getAt(rParams, 0));
                     Distribution distr = parseDistribution(getAt(rParams, 1), getAt(rParams, 2), ctx);
-                    String mean = val(getFirst(getSubParams(getAt(rParams, 3))));
+                    String mean = val(getAt(rParams, 3));
 
                     Object rKey = (from == 1) ? strategy.getAllRanges()[0] : strategy.addRange();
-                    if (from != 1) {
-                        strategy.setRangeFrom(rKey, from);
-                        rKey = strategy.getAllRanges()[strategy.getRangeNumber() - 1];
-                    }
-                    strategy.setRangeDistributionNoCheck(rKey, distr);
-                    strategy.setRangeDistributionMeanNoCheck(rKey, mean);
+                    if (from != 1) strategy.setRangeFrom(rKey, from);
+                    strategy.setRangeDistributionNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, distr);
+                    strategy.setRangeDistributionMeanNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, mean);
                 });
             }
             return strategy;
         }
 
-        List<ParameterDescriptor> dp = getSubParams(p);
-        return dp.isEmpty() ? null : parseDistribution(getAt(dp, 0), getAt(dp, 1), ctx);
+        List<ParameterDescriptor> distribution = getSubParams(p);
+        if (distribution.isEmpty()) return null;
+        return parseDistribution(distribution.get(0), distribution.size() > 1 ? distribution.get(1) : null, ctx);
     }
 
     protected Distribution parseDistribution(ParameterDescriptor distr, ParameterDescriptor distrPar, MappingContext ctx) {
         if (distr == null) return null;
         if (ctx.engineToGuiDistr == null) initGuiDistrCache(ctx);
-        Distribution template = ctx.engineToGuiDistr.get(distr.getClassPath());
-        if (template == null) return null;
-        Distribution dist = template.clone();
 
+        String cp = distr.getClassPath();
+        Distribution template = ctx.engineToGuiDistr.get(cp);
+        if (template == null && cp != null) {
+            for (String key : ctx.engineToGuiDistr.keySet()) {
+                if (cp.endsWith(key) || key.endsWith(cp)) { template = ctx.engineToGuiDistr.get(key); break; }
+            }
+        }
+        if (template == null) return null;
+
+        Distribution dist = template.clone();
         List<ParameterDescriptor> params = new ArrayList<>(getSubParams(distr));
-        params.addAll(getSubParams(distrPar));
+        if (distrPar != null) params.addAll(getSubParams(distrPar));
 
         for (ParameterDescriptor p : params) {
             String name = p.getName();
@@ -133,23 +134,21 @@ public abstract class AbstractSectionMapper {
                     List<ParameterDescriptor> entries = getSubParams(getAt(vectors, j));
                     val[j] = new Object[entries.size()];
                     for (int k = 0; k < entries.size(); k++) {
-                        String valueStr = val(getFirst(getSubParams(getAt(entries, k))));
-                        Object parsed = (valueStr != null) ? dist.getParameter(name).parseValue(valueStr) : null;
-                        val[j][k] = parsed != null ? parsed : dist.getParameter(name).parseValue("0");
+                        String valueStr = val(getAt(entries, k));
+                        val[j][k] = (valueStr != null) ? dist.getParameter(name).parseValue(valueStr) : dist.getParameter(name).parseValue("0");
                     }
                 }
                 dist.getParameter(name).setValue(val);
             } else {
                 String valStr = val(p);
-                if (valStr != null) {
-                    dist.getParameter(name).setValue(valStr);
-                }
+                if (valStr != null) dist.getParameter(name).setValue(valStr);
             }
         }
         dist.updateCM();
         return dist;
     }
 
+    // --- METODI PER RETI DI PETRI E CONDIZIONI RIPRISTINATI ---
     protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
         if (en != null) populateConditionMap(key, en, ctx.enablingConditionMap, ctx);
         if (in != null) populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);
@@ -165,16 +164,21 @@ public abstract class AbstractSectionMapper {
                 for (ParameterDescriptor vector : vectors) {
                     List<ParameterDescriptor> els = getSubParams(vector);
                     if (!els.isEmpty()) {
-                        String sName = val(getFirst(getSubParams(getAt(els, 0))));
+                        String sName = val(getAt(els, 0));
                         final int index = i;
-                        getRefClassMap(getAt(els, 1)).forEach((cName, entry) ->
-                                targetMap.put(new Object[]{key, index, sName, ctx.classes.get(cName)}, valI(entry)));
+                        getRefClassMap(getAt(els, 1)).forEach((cName, entry) -> {
+                            Double vVal = valD(entry);
+                            if (sName != null && vVal != null) {
+                                targetMap.put(new Object[]{key, index, sName, ctx.classes.get(cName)}, vVal.intValue());
+                            }
+                        });
                     }
                 }
             }
         }
     }
 
+    // --- CACHE ---
     protected void initGuiRoutingCache(MappingContext ctx) { ctx.engineToGuiRouting = new TreeMap<>(); for (RoutingStrategy rs : RoutingStrategy.findAll()) ctx.engineToGuiRouting.put(rs.getClass().getName(), rs); }
     protected void initGuiForkCache(MappingContext ctx) { ctx.engineToGuiFork = new TreeMap<>(); for (ForkStrategy fs : ForkStrategy.findAll()) ctx.engineToGuiFork.put(fs.getClass().getName(), fs); }
     protected void initGuiJoinCache(MappingContext ctx) { ctx.engineToGuiJoin = new TreeMap<>(); for (JoinStrategy js : JoinStrategy.findAll()) ctx.engineToGuiJoin.put(js.getClass().getName(), js); }
