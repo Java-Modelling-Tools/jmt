@@ -23,14 +23,10 @@ public class JoinSectionMapper extends AbstractSectionMapper implements XMLMappe
         ParameterDescriptor p = sec.getParameters() != null && !sec.getParameters().isEmpty() ? sec.getParameters().get(0) : null;
 
         if (p != null) {
-            if (ctx.engineToGuiJoin == null) {
-                initGuiJoinCache(ctx);
-            }
-
             getRefClassMap(p).forEach((className, jP) -> {
                 Object classKey = ctx.classes.get(className);
 
-                ctx.engineToGuiJoin.values().stream()
+                ctx.getEngineToGuiJoin().values().stream()
                         .filter(js -> jP.getClassPath().equals(js.getClassPath()))
                         .findFirst()
                         .ifPresent(js -> model.setJoinStrategy(key, classKey, js.clone()));

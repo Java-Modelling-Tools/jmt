@@ -31,14 +31,12 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                 if (bVal != null) model.setIsSimplifiedFork(key, Boolean.parseBoolean(bVal));
             } else if (PARAM_FORK_STRATEGY.equals(p.getName())) {
 
-                if (ctx.engineToGuiFork == null) initGuiForkCache(ctx);
-
                 getRefClassMap(p).forEach((className, fP) -> {
                     Object classKey = ctx.classes.get(className);
                     String cp = fP.getClassPath();
 
                     // Identical to the Oracle: clones from the registry based on the classPath
-                    for (ForkStrategy strat : ctx.engineToGuiFork.values()) {
+                    for (ForkStrategy strat : ctx.getEngineToGuiFork().values()) {
                         if (cp != null && cp.equals(strat.getClassPath())) {
                             model.setForkStrategy(key, classKey, strat.clone());
                         }

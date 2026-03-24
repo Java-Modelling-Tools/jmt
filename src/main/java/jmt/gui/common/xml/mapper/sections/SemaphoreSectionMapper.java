@@ -17,13 +17,11 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper implements XML
         ParameterDescriptor p = getFirst(sec.getParameters());
 
         if (p != null) {
-            if (ctx.engineToGuiSemaphore == null) initGuiSemaphoreCache(ctx);
-
             getRefClassMap(p).forEach((className, sP) -> {
                 Object classKey = ctx.classes.get(className);
                 String cp = sP.getClassPath();
 
-                ctx.engineToGuiSemaphore.values().stream()
+                ctx.getEngineToGuiSemaphore().values().stream()
                         .filter(ss -> cp != null && cp.equals(ss.getClassPath()))
                         .findFirst()
                         .ifPresent(ss -> model.setSemaphoreStrategy(key, classKey, ss.clone()));
@@ -33,7 +31,7 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper implements XML
                     ParameterDescriptor thresParam = getFirst(getSubParams(sP));
                     if (thresParam != null) {
                         Integer val = valI(thresParam);
-                        if (val != null) ((NormalSemaphore) ss).setThreshold(val);
+                        if (val != null) ss.setThreshold(val);
                     }
                 }
             });
