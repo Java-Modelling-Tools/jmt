@@ -4,8 +4,8 @@ import jmt.gui.common.xml.dto.SimDescriptor;
 
 public interface ModelElementMapper {
     /**
-     * @param dto L'oggetto DTO radice contenente tutti i dati parsati dall'XML
-     * @param context Il contesto condiviso contenente il CommonModel e le mappe di supporto
+     * @param dto The root DTO object containing all data parsed from the XML
+     * @param context The shared context containing the CommonModel and support maps
      */
     void map(SimDescriptor dto, MappingContext context);
 }

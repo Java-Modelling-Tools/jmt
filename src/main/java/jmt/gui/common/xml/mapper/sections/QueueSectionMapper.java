@@ -80,8 +80,8 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
                 }
             }
 
-            // FIX: ESTRAZIONE DEL POLLING_K_VALUE GENERALIZZATA
-            // Rimosso il vincolo al "Polling" per far fronte a nodi configurati in modo misto
+            // FIX: GENERALIZED EXTRACTION OF POLLING_K_VALUE
+            // Removed the "Polling" constraint to deal with mixed-configured nodes
             getSubParams(fcfs).stream()
                     .filter(p -> "pollingKValue".equals(p.getName()))
                     .findFirst()
@@ -137,7 +137,7 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
             });
         }
 
-        // --- RETI DI PETRI ---
+        // --- PETRI NETS ---
         ParameterDescriptor en = getParam(sec, "enablingConditions");
         ParameterDescriptor in = getParam(sec, "inhibitingConditions");
         ParameterDescriptor res = getParam(sec, "resourceConditions");

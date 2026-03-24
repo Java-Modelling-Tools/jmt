@@ -37,7 +37,7 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                     Object classKey = ctx.classes.get(className);
                     String cp = fP.getClassPath();
 
-                    // Identico all'Oracolo: clona dal registry in base al classPath
+                    // Identical to the Oracle: clones from the registry based on the classPath
                     for (ForkStrategy strat : ctx.engineToGuiFork.values()) {
                         if (cp != null && cp.equals(strat.getClassPath())) {
                             model.setForkStrategy(key, classKey, strat.clone());
@@ -54,7 +54,7 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                                 OutPath op = new OutPath();
                                 List<ParameterDescriptor> entryParams = getSubParams(entry);
 
-                                // FIX ORACLE: entryParams.get(0) è "outUnitProbability", che contiene stationName e probability!
+                                // FIX ORACLE: entryParams.get(0) is "outUnitProbability", which contains stationName and probability!
                                 ParameterDescriptor outUnitProb = getAt(entryParams, 0);
                                 List<ParameterDescriptor> outUnitSub = getSubParams(outUnitProb);
 
@@ -64,7 +64,7 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                                 if (pVal != null) op.setProbability(pVal);
 
                                 Map<Object, Object> opMap = new HashMap<>();
-                                // entryParams.get(1) è "JobsPerLinkDis"
+                                // entryParams.get(1) is "JobsPerLinkDis"
                                 ParameterDescriptor jobsPerLinkDis = getAt(entryParams, 1);
                                 if (jobsPerLinkDis != null) {
                                     for (ParameterDescriptor res : getSubParams(jobsPerLinkDis)) {

@@ -30,7 +30,7 @@ public abstract class AbstractSectionMapper {
         return (p != null && p.getSubParameters() != null) ? p.getSubParameters() : Collections.emptyList();
     }
 
-    // FIX CRITICO RIPRISTINATO: Utilizza getRefClass() nativo del DTO!
+    // CRITICAL FIX RESTORED: Use the native getRefClass() of the DTO!
     protected Map<String, ParameterDescriptor> getRefClassMap(ParameterDescriptor p) {
         Map<String, ParameterDescriptor> map = new LinkedHashMap<>();
         if (p == null || p.getSubParameters() == null) return map;
@@ -64,7 +64,7 @@ public abstract class AbstractSectionMapper {
     protected Double valD(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v) : null; }
     protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v).intValue() : null; }
 
-    // --- PARSING CONDIVISO ---
+    // --- SHARED PARSING ---
     protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
         if (p == null) return null;
         String cp = p.getClassPath();
@@ -140,7 +140,7 @@ public abstract class AbstractSectionMapper {
     }
 
 
-// --- METODI PER RETI DI PETRI E CONDIZIONI RIPRISTINATI ---
+// --- METHODS FOR PETRI NETS AND RESTORED CONDITIONS ---
 
     protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
         if (en != null) {
@@ -159,23 +159,23 @@ public abstract class AbstractSectionMapper {
             return;
         }
 
-        // Livello 1: i figli diretti sono le singole condizioni per modalità (es. "enablingCondition")
+        // Level 1: the direct children are the individual conditions for mode (e.g. "enablingCondition")
         List<ParameterDescriptor> modes = getSubParams(condParam);
 
         for (int i = 0; i < modes.size(); i++) {
             ParameterDescriptor condition = modes.get(i);
 
-            // Livello 2: dentro "enablingCondition" c'è un contenitore (es. "enablingVectors")
+            // Level 2: inside "enablingCondition" there is a container (e.g. "enablingVectors")
             List<ParameterDescriptor> conditionElements = getSubParams(condition);
             if (conditionElements.isEmpty()) continue;
 
             ParameterDescriptor vectorsArray = conditionElements.get(0);
 
-            // Livello 3: i figli del contenitore sono i singoli vettori (es. "enablingVector")
+            // Level 3: the children of the container are the individual vectors (e.g. "enablingVector")
             List<ParameterDescriptor> vectors = getSubParams(vectorsArray);
 
             for (ParameterDescriptor vector : vectors) {
-                // Livello 4: dentro al vettore ci sono stationName e la mappa refClass (es. "enablingEntries")
+                // Level 4: inside the vector there are stationName and the refClass map (e.g. "enablingEntries")
                 List<ParameterDescriptor> vectorElements = getSubParams(vector);
 
                 if (vectorElements.size() < 2) continue;

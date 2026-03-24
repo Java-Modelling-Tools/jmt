@@ -506,7 +506,7 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
         // Initialize stations and modeNameLists data structure
         stations = new TreeMap<String, Object>();
         modeNameLists = new HashMap<Object, List<String>>();
-        NodeList nodestations = root.getElementsByTagName(XML_E_STATION);
+        NodeList nodestations = root.getElementsByTagName(XML_NODE);
         Object key;
         Element station;
         String type, name;

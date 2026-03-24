@@ -355,7 +355,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		Vector<Object> stations = model.getStationKeys();
 		Element elem;
 		for (int i = 0; i < stations.size(); i++) {
-			elem = doc.createElement(XML_E_STATION);
+			elem = doc.createElement(XML_NODE);
 			elem.setAttribute(XML_A_STATION_NAME,
 					model.getStationName(stations.get(i)));
 			Object stationKey = stations.get(i);

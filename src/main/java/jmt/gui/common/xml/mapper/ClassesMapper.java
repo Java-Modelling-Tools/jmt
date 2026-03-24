@@ -16,20 +16,20 @@ public class ClassesMapper implements ModelElementMapper {
             return;
         }
 
-        // Scansiona tutti gli elementi (UserClassDescriptor)
+        // Scan all elements (UserClassDescriptor)
         for (UserClassDescriptor currclass : dto.getUserClasses()) {
             String name = currclass.getName();
 
-            // Determina il tipo di classe: "open" o "closed"
+            // Determines the class type: "open" or "closed"
             int type = "open".equals(currclass.getType()) ?
                     CommonConstants.CLASS_TYPE_OPEN : CommonConstants.CLASS_TYPE_CLOSED;
 
-            // Imposta i parametri di default (poiché non sono obbligatori)
+            // Set default parameters (since they are not mandatory)
             Integer priority = Defaults.getAsInteger("classPriority");
             Double softDeadline = Defaults.getAsDouble("classSoftDeadline");
             Integer customers = Defaults.getAsInteger("classPopulation");
 
-            // Tenta il parsing degli attributi effettivi (se presenti e non vuoti)
+            // Try parsing the actual attributes (if present and not empty)
             String tmpCustomers = currclass.getCustomers();
             if (tmpCustomers != null && !tmpCustomers.isEmpty()) {
                 customers = Integer.valueOf(tmpCustomers);
@@ -45,15 +45,15 @@ public class ClassesMapper implements ModelElementMapper {
                 softDeadline = Double.valueOf(tmpSoftDeadline);
             }
 
-            // Aggiunge la User Class al CommonModel.
-            // Nota: la distribuzione verrà settata più tardi.
+            // Adds the User Class to the CommonModel.
+            // Note: the distribution will be set later.
             Object key = model.addClass(name, type, priority, softDeadline, customers,
                     Defaults.getAsNewInstance("classDistribution"));
 
-            // Memorizza la sorgente di riferimento nel context, verrà usata nel Post-Processing
+            // Stores the reference source in the context, it will be used in Post-Processing
             context.refStations.put(key, currclass.getReferenceSource());
 
-            // Popola la mappa che associa il nome della classe alla sua chiave generata
+            // Populates the map that associates the class name with its generated key
             context.classes.put(name, key);
         }
     }

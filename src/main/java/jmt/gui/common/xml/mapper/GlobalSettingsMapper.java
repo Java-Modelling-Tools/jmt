@@ -15,10 +15,10 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     public void map(SimDescriptor dto, MappingContext context) {
         CommonModel model = context.getModel();
 
-        // Recuperiamo la mappa degli attributi estratti dal nodo root <sim>
+        // We retrieve the map of attributes extracted from the root <sim> node
         Map<String, String> globals = dto.getGlobalAttributes();
 
-        // --- Simulazione e Seed ---
+        // --- Simulation and Seed ---
         String seed = globals.get(XMLConstantNames.XML_A_ROOT_SEED);
         if (seed != null && !seed.isEmpty()) {
             model.setUseRandomSeed(Boolean.FALSE);
@@ -27,7 +27,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
             model.setUseRandomSeed(Boolean.TRUE);
         }
 
-        // --- Limiti di Tempo ---
+        // --- Time Limits ---
         String maxTime = globals.get(XMLConstantNames.XML_A_ROOT_DURATION);
         if (maxTime != null && !maxTime.isEmpty()) {
             model.setMaximumDuration(Double.valueOf(maxTime));
@@ -42,7 +42,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
             model.setMaxSimulatedTime(Double.valueOf(-1));
         }
 
-        // --- Intervalli e Campioni ---
+        // --- Intervals and Samples ---
         String polling = globals.get(XMLConstantNames.XML_A_ROOT_POLLING);
         if (polling != null && !polling.isEmpty()) {
             model.setPollingInterval(Double.valueOf(polling));
@@ -53,7 +53,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
             model.setMaxSimulationSamples(Integer.valueOf(maxSamples));
         }
 
-        // --- Statistiche ed Eventi ---
+        // --- Statistics and Events ---
         String disableStatistic = globals.get(XMLConstantNames.XML_A_ROOT_DISABLESTATISTIC);
         if (disableStatistic != null && !disableStatistic.isEmpty()) {
             model.setDisableStatistic(Boolean.valueOf(disableStatistic));
@@ -66,7 +66,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
             model.setMaxSimulationEvents(Integer.valueOf(-1));
         }
 
-        // --- Parametri Globali del Logger ---
+        // --- Global Logger Parameters ---
         String logPath = globals.get(XMLConstantNames.XML_A_ROOT_LOGPATH);
         if (logPath != null && !logPath.isEmpty()) {
             File dir = new File(logPath);
