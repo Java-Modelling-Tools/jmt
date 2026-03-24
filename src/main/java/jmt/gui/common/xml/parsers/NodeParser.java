@@ -34,7 +34,11 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
 
     private ParameterDescriptor parseGenericParameter(Element element) {
         ParameterDescriptor descriptor = new ParameterDescriptor();
-        descriptor.setName(element.getTagName());
+
+        // FIX: Recupera il vero nome del parametro, fallendo sul tag name solo se assente
+        String nameAttr = readAttribute(element, "name");
+        descriptor.setName((nameAttr != null && !nameAttr.isEmpty()) ? nameAttr : element.getTagName());
+
         descriptor.setClassPath(readAttribute(element, "classPath"));
         descriptor.setArray(Boolean.parseBoolean(readAttribute(element, "array")));
 

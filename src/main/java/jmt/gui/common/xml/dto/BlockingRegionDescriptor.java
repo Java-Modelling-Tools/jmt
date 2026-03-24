@@ -8,16 +8,16 @@ public class BlockingRegionDescriptor {
 
     private String name;
     private String type;
-    private List<String> regionNodes = new ArrayList<String>();
-    private LinkedHashMap<String, String> globalConstraints = new LinkedHashMap<String, String>();
+    private List<String> regionNodes = new ArrayList<>();
+    private LinkedHashMap<String, String> globalConstraints = new LinkedHashMap<>();
     private LinkedHashMap<String, LinkedHashMap<String, String>> classConstraints =
-            new LinkedHashMap<String, LinkedHashMap<String, String>>();
-    private LinkedHashMap<String, String> classWeights = new LinkedHashMap<String, String>();
-    private LinkedHashMap<String, String> classSizes = new LinkedHashMap<String, String>();
-    private LinkedHashMap<String, String> dropRules = new LinkedHashMap<String, String>();
-    private LinkedHashMap<String, String> groupConstraints = new LinkedHashMap<String, String>();
-    private LinkedHashMap<String, String> groupMemoryConstraints = new LinkedHashMap<String, String>();
-    private LinkedHashMap<String, List<String>> groupClassLists = new LinkedHashMap<String, List<String>>();
+            new LinkedHashMap<>();
+    private LinkedHashMap<String, String> classWeights = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> classSizes = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> dropRules = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> groupConstraints = new LinkedHashMap<>();
+    private LinkedHashMap<String, String> groupMemoryConstraints = new LinkedHashMap<>();
+    private LinkedHashMap<String, List<String>> groupClassLists = new LinkedHashMap<>();
 
     public String getName() {
         return name;
@@ -73,7 +73,7 @@ public class BlockingRegionDescriptor {
             LinkedHashMap<String, LinkedHashMap<String, String>> classConstraints) {
         this.classConstraints = classConstraints != null
                 ? classConstraints
-                : new LinkedHashMap<String, LinkedHashMap<String, String>>();
+                : new LinkedHashMap<>();
     }
 
     public void addClassConstraint(String className, String key, String value) {

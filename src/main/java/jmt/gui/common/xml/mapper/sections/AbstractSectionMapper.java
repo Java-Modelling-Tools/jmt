@@ -1,0 +1,183 @@
+package jmt.gui.common.xml.mapper.sections;
+
+import jmt.gui.common.serviceStrategies.DisabledStrategy;
+import jmt.gui.common.serviceStrategies.LDStrategy;
+import jmt.gui.common.serviceStrategies.ZeroStrategy;
+import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.distributions.Distribution;
+import jmt.gui.common.forkStrategies.ForkStrategy;
+import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.routingStrategies.RoutingStrategy;
+import jmt.gui.common.semaphoreStrategies.SemaphoreStrategy;
+import jmt.gui.common.xml.dto.NodeDescriptor;
+import jmt.gui.common.xml.dto.ParameterDescriptor;
+import jmt.gui.common.xml.dto.SectionDescriptor;
+import jmt.gui.common.xml.mapper.MappingContext;
+
+import java.util.*;
+
+public abstract class AbstractSectionMapper {
+
+    public abstract void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
+
+    protected ParameterDescriptor getParam(SectionDescriptor sec, String name) {
+        if (sec == null || sec.getParameters() == null) return null;
+        return sec.getParameters().stream().filter(p -> name.equals(p.getName())).findFirst().orElse(null);
+    }
+
+    protected List<ParameterDescriptor> getSubParams(ParameterDescriptor p) {
+        return (p != null && p.getSubParameters() != null) ? p.getSubParameters() : Collections.emptyList();
+    }
+
+    // FIX: Accoppia correttamente i tag XML <refClass> e <subParameter> adiacenti
+    protected Map<String, ParameterDescriptor> getRefClassMap(ParameterDescriptor p) {
+        Map<String, ParameterDescriptor> map = new LinkedHashMap<>();
+        if (p == null || p.getSubParameters() == null) return map;
+
+        String currentRefClass = null;
+        for (ParameterDescriptor sub : p.getSubParameters()) {
+            if ("refClass".equals(sub.getName())) {
+                currentRefClass = sub.getValue();
+            } else if ("subParameter".equals(sub.getName()) && currentRefClass != null) {
+                map.put(currentRefClass, sub);
+                currentRefClass = null;
+            }
+        }
+        return map;
+    }
+
+    protected ParameterDescriptor getFirst(List<ParameterDescriptor> list) {
+        return (list != null && !list.isEmpty()) ? list.get(0) : null;
+    }
+
+    protected ParameterDescriptor getAt(List<ParameterDescriptor> list, int index) {
+        return (list != null && index >= 0 && index < list.size()) ? list.get(index) : null;
+    }
+
+    // FIX: Cerca il valore anche se incapsulato in tag <value> figli
+    protected String val(ParameterDescriptor p) {
+        if (p == null) return null;
+        if (p.getValue() != null && !p.getValue().isEmpty()) return p.getValue();
+        if (p.getSubParameters() != null) {
+            for (ParameterDescriptor sub : p.getSubParameters()) {
+                if ("value".equals(sub.getName()) && sub.getValue() != null && !sub.getValue().isEmpty()) {
+                    return sub.getValue();
+                }
+            }
+            if (!p.getSubParameters().isEmpty()) {
+                return p.getSubParameters().get(0).getValue();
+            }
+        }
+        return null;
+    }
+
+    protected Double valD(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v) : null; }
+    protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Integer.valueOf(v) : null; }
+
+    protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
+        if (p == null) return null;
+        String cp = p.getClassPath();
+
+        if (ZeroStrategy.getEngineClassPath().equals(cp)) return new ZeroStrategy();
+        if (DisabledStrategy.getEngineClassPath().equals(cp)) return new DisabledStrategy();
+
+        if (LDStrategy.getEngineClassPath().equals(cp)) {
+            LDStrategy strategy = new LDStrategy();
+            ParameterDescriptor firstSub = getFirst(getSubParams(p));
+            if (firstSub != null) {
+                getSubParams(firstSub).forEach(range -> {
+                    List<ParameterDescriptor> rParams = getSubParams(range);
+
+                    // FIX: Protezione contro l'auto-unboxing null
+                    Integer fromVal = valI(getFirst(getSubParams(getAt(rParams, 0))));
+                    int from = (fromVal != null) ? fromVal : 1;
+
+                    Distribution distr = parseDistribution(getAt(rParams, 1), getAt(rParams, 2), ctx);
+                    String mean = val(getFirst(getSubParams(getAt(rParams, 3))));
+
+                    Object rKey = (from == 1) ? strategy.getAllRanges()[0] : strategy.addRange();
+                    if (from != 1) {
+                        strategy.setRangeFrom(rKey, from);
+                        rKey = strategy.getAllRanges()[strategy.getRangeNumber() - 1];
+                    }
+                    strategy.setRangeDistributionNoCheck(rKey, distr);
+                    strategy.setRangeDistributionMeanNoCheck(rKey, mean);
+                });
+            }
+            return strategy;
+        }
+
+        List<ParameterDescriptor> dp = getSubParams(p);
+        return dp.isEmpty() ? null : parseDistribution(getAt(dp, 0), getAt(dp, 1), ctx);
+    }
+
+    protected Distribution parseDistribution(ParameterDescriptor distr, ParameterDescriptor distrPar, MappingContext ctx) {
+        if (distr == null) return null;
+        if (ctx.engineToGuiDistr == null) initGuiDistrCache(ctx);
+        Distribution template = ctx.engineToGuiDistr.get(distr.getClassPath());
+        if (template == null) return null;
+        Distribution dist = template.clone();
+
+        List<ParameterDescriptor> params = new ArrayList<>(getSubParams(distr));
+        params.addAll(getSubParams(distrPar));
+
+        for (ParameterDescriptor p : params) {
+            String name = p.getName();
+            if ("jmt.engine.random.DistributionContainer".equals(p.getClassPath())) {
+                List<ParameterDescriptor> nested = getSubParams(p);
+                if (!nested.isEmpty()) dist.getParameter(name).setValue(parseDistribution(getAt(nested, 0), getAt(nested, 1), ctx));
+            } else if (p.isArray()) {
+                List<ParameterDescriptor> vectors = getSubParams(p);
+                Object[][] val = new Object[vectors.size()][];
+                for (int j = 0; j < vectors.size(); j++) {
+                    List<ParameterDescriptor> entries = getSubParams(getAt(vectors, j));
+                    val[j] = new Object[entries.size()];
+                    for (int k = 0; k < entries.size(); k++) {
+                        String valueStr = val(getFirst(getSubParams(getAt(entries, k))));
+                        Object parsed = (valueStr != null) ? dist.getParameter(name).parseValue(valueStr) : null;
+                        val[j][k] = parsed != null ? parsed : dist.getParameter(name).parseValue("0");
+                    }
+                }
+                dist.getParameter(name).setValue(val);
+            } else {
+                String valStr = val(p);
+                if (valStr != null) {
+                    dist.getParameter(name).setValue(valStr);
+                }
+            }
+        }
+        dist.updateCM();
+        return dist;
+    }
+
+    protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
+        if (en != null) populateConditionMap(key, en, ctx.enablingConditionMap, ctx);
+        if (in != null) populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);
+        if (res != null) populateConditionMap(key, res, ctx.resourceConditionMap, ctx);
+    }
+
+    private void populateConditionMap(Object key, ParameterDescriptor cond, Map<Object[], Integer> targetMap, MappingContext ctx) {
+        List<ParameterDescriptor> conds = getSubParams(cond);
+        for (int i = 0; i < conds.size(); i++) {
+            ParameterDescriptor firstSub = getFirst(getSubParams(getAt(conds, i)));
+            if (firstSub != null) {
+                List<ParameterDescriptor> vectors = getSubParams(firstSub);
+                for (ParameterDescriptor vector : vectors) {
+                    List<ParameterDescriptor> els = getSubParams(vector);
+                    if (!els.isEmpty()) {
+                        String sName = val(getFirst(getSubParams(getAt(els, 0))));
+                        final int index = i;
+                        getRefClassMap(getAt(els, 1)).forEach((cName, entry) ->
+                                targetMap.put(new Object[]{key, index, sName, ctx.classes.get(cName)}, valI(entry)));
+                    }
+                }
+            }
+        }
+    }
+
+    protected void initGuiRoutingCache(MappingContext ctx) { ctx.engineToGuiRouting = new TreeMap<>(); for (RoutingStrategy rs : RoutingStrategy.findAll()) ctx.engineToGuiRouting.put(rs.getClass().getName(), rs); }
+    protected void initGuiForkCache(MappingContext ctx) { ctx.engineToGuiFork = new TreeMap<>(); for (ForkStrategy fs : ForkStrategy.findAll()) ctx.engineToGuiFork.put(fs.getClass().getName(), fs); }
+    protected void initGuiJoinCache(MappingContext ctx) { ctx.engineToGuiJoin = new TreeMap<>(); for (JoinStrategy js : JoinStrategy.findAll()) ctx.engineToGuiJoin.put(js.getClass().getName(), js); }
+    protected void initGuiSemaphoreCache(MappingContext ctx) { ctx.engineToGuiSemaphore = new TreeMap<>(); for (SemaphoreStrategy ss : SemaphoreStrategy.findAll()) ctx.engineToGuiSemaphore.put(ss.getClass().getName(), ss); }
+    private void initGuiDistrCache(MappingContext ctx) { ctx.engineToGuiDistr = new TreeMap<>(); for (Distribution d : Distribution.findAll()) ctx.engineToGuiDistr.put(d.getClassPath(), d); for (Distribution d : Distribution.findAllDiscrete()) ctx.engineToGuiDistr.put(d.getClassPath(), d); }
+}
