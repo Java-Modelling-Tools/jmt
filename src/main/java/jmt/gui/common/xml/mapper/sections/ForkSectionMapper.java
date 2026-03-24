@@ -18,7 +18,6 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         if (sec.getParameters() == null) return;
-        debug("Parsing ForkSection per la stazione: %s", node.getName());
 
         for (ParameterDescriptor p : sec.getParameters()) {
             if (PARAM_JOBS_PER_LINK.equals(p.getName())) {
@@ -37,7 +36,6 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                 getRefClassMap(p).forEach((className, fP) -> {
                     Object classKey = ctx.classes.get(className);
                     String cp = fP.getClassPath();
-                    debug("  -> Fork strategy per Class: %s (ClassPath: %s)", className, cp);
 
                     // Identico all'Oracolo: clona dal registry in base al classPath
                     for (ForkStrategy strat : ctx.engineToGuiFork.values()) {
@@ -62,7 +60,6 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
 
                                 String sName = val(getAt(outUnitSub, 0));
                                 Double pVal = valD(getAt(outUnitSub, 1));
-                                debug("    - ProbabilitiesFork OutPath: Sink='%s', Prob='%s'", sName, pVal);
 
                                 if (pVal != null) op.setProbability(pVal);
 
@@ -91,7 +88,6 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                                 List<ParameterDescriptor> eParams = getSubParams(e);
                                 String cName = val(getAt(eParams, 0));
                                 Double cVal = valD(getAt(eParams, 1));
-                                debug("    - CombFork: NumBranches='%s', Prob='%s'", cName, cVal);
                                 if (cName != null && cVal != null) tmp.put(cName, cVal);
                             }
                         }
@@ -108,8 +104,6 @@ public class ForkSectionMapper extends AbstractSectionMapper implements XMLMappe
                                 String sName = val(getAt(entryParams, 0));
                                 List<ParameterDescriptor> classParams = getSubParams(getAt(entryParams, 1));
                                 List<ParameterDescriptor> numParams = getSubParams(getAt(entryParams, 2));
-
-                                debug("    - ClassSwitchFork OutPath: Sink='%s'", sName);
 
                                 Map<Object, Object> opMap = new HashMap<>();
                                 for (int k = 0; k < classParams.size(); k++) {

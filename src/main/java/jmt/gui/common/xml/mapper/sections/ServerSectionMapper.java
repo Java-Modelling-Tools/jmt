@@ -19,7 +19,6 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing ServerSection per la stazione: %s", node.getName());
         String secName = sec.getClassName();
 
         if (XMLConstantNames.CLASSNAME_PSSERVER.equals(secName)) {
@@ -52,13 +51,11 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
 
             if (PARAM_MAX_JOBS.equals(name)) {
                 Integer v = valI(p);
-                debug("  -> Trovato maxJobs: %d", v);
                 if (v != null) model.setStationNumberOfServers(key, v);
 
             } else if ("maxRunning".equals(name)) {
                 // FIX ORACLE: Aggiunto il branch mancante per maxRunning!
                 Integer v = valI(p);
-                debug("  -> Trovato maxRunning: %d", v);
                 if (v != null) model.setStationMaxRunningJobs(key, v);
 
             } else if (ENGINE_SERVICE_STRATEGY.equals(cp)) {

@@ -30,8 +30,6 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing QueueSection per la stazione: %s", node.getName());
-
         ParameterDescriptor size = getParam(sec, PARAM_SIZE);
         if (size != null) {
             Integer sVal = valI(size);
@@ -91,7 +89,6 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
                         Integer kVal = valI(p);
                         if (kVal != null) {
                             model.setStationPollingServerKValue(key, kVal);
-                            debug("  -> Estratto pollingKValue: %d", kVal);
                         }
                     });
         }

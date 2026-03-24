@@ -11,8 +11,6 @@ public class ClassSwitchSectionMapper extends AbstractSectionMapper implements X
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing ClassSwitchSection per la stazione: %s", node.getName());
-
         ParameterDescriptor matrixParam = getFirst(sec.getParameters());
         if (matrixParam == null) return;
 

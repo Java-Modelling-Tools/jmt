@@ -14,7 +14,6 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper implements XML
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing SemaphoreSection per la stazione: %s", node.getName());
         ParameterDescriptor p = getFirst(sec.getParameters());
 
         if (p != null) {
