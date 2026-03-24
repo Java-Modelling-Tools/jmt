@@ -19,6 +19,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing ServerSection per la stazione: %s", node.getName());
         String secName = sec.getClassName();
 
         if (XMLConstantNames.CLASSNAME_PSSERVER.equals(secName)) {
@@ -40,6 +41,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
         List<List<Boolean>> compatibilities = new ArrayList<>();
         List<Object> heterogeneous = new ArrayList<>();
 
+        // Costruiamo la lista appiattendo advancedFeatures come faceva l'Oracolo
         List<ParameterDescriptor> params = sec.getParameters() != null ? new ArrayList<>(sec.getParameters()) : new ArrayList<>();
         ParameterDescriptor adv = getParam(sec, CommonConstants.SERVER_PARAMETER_ADVANCED_FEATURES);
         if (adv != null) params.addAll(getSubParams(adv));
@@ -50,7 +52,15 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
 
             if (PARAM_MAX_JOBS.equals(name)) {
                 Integer v = valI(p);
+                debug("  -> Trovato maxJobs: %d", v);
                 if (v != null) model.setStationNumberOfServers(key, v);
+
+            } else if ("maxRunning".equals(name)) {
+                // FIX ORACLE: Aggiunto il branch mancante per maxRunning!
+                Integer v = valI(p);
+                debug("  -> Trovato maxRunning: %d", v);
+                if (v != null) model.setStationMaxRunningJobs(key, v);
+
             } else if (ENGINE_SERVICE_STRATEGY.equals(cp)) {
                 Map<String, ParameterDescriptor> dists = getRefClassMap(p);
                 if (dists.isEmpty()) {
@@ -77,7 +87,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                     });
                     compatibilities.add(comp);
                 });
-            } else if (CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES.equals(name)) {
+            } else if (CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES.equals(name) || "switchoverTimes".equals(name) || "SwitchoverStrategy".equals(name) || "switchoverStrategy".equals(name)) {
                 if (model.getStationQueueStrategy(key) == CommonConstants.STATION_QUEUE_STRATEGY_POLLING) {
                     getRefClassMap(p).forEach((c, sP) -> model.setPollingSwitchoverDistribution(key, ctx.classes.get(c), parseServiceStrategy(sP, ctx)));
                 } else {
@@ -85,7 +95,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                     getRefClassMap(p).forEach((fromC, sP) -> getRefClassMap(sP).forEach((toC, sSP) ->
                             model.setSwitchoverTimeDistribution(key, ctx.classes.get(fromC), ctx.classes.get(toC), parseServiceStrategy(sSP, ctx))));
                 }
-            } else if (CommonConstants.SERVER_FEATURE_DELAY_OFF_STRATEGIES.equals(name)) {
+            } else if (CommonConstants.SERVER_FEATURE_DELAY_OFF_STRATEGIES.equals(name) || "delayOffTimes".equals(name) || "delayOffTime".equals(name)) {
                 model.setDelayOffTimesEnabled(key, Boolean.TRUE);
                 getRefClassMap(p).forEach((c, sP) -> getRefClassMap(sP).forEach((innerC, sSP) ->
                         model.setDelayOffTimeDistribution(key, ctx.classes.get(innerC), parseServiceStrategy(sSP, ctx))));
@@ -107,7 +117,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                 if (bVal != null && Boolean.parseBoolean(bVal)) {
                     model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY);
                 }
-            } else if (CommonConstants.SERVER_FEATURE_CLASS_PARALLELISM.equals(name)) {
+            } else if (CommonConstants.SERVER_FEATURE_CLASS_PARALLELISM.equals(name) || "serversNumRequired".equals(name) || "numRequired".equals(name)) {
                 getRefClassMap(p).forEach((c, sP) -> model.setServerNumRequired(key, ctx.classes.get(c), valI(sP)));
             } else if (CommonConstants.SERVER_FEATURE_VACATION_STRATEGY.equals(name)) {
                 model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_NONE);
@@ -128,9 +138,8 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
             }
         }
 
-        // FIX CRITICO: Aggiunta del numero corretto di stazioni server con padding delle compatibilità
         int numClasses = model.getClassKeys().size();
-        int numServersToCreate = Math.max(1, serverNames.size()); // Se la lista è vuota, default a 1.
+        int numServersToCreate = Math.max(1, serverNames.size());
 
         for (int i = 0; i < numServersToCreate; i++) {
             Integer sCount = (i < serversPerType.size()) ? serversPerType.get(i) : null;
@@ -138,7 +147,6 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
 
             List<Boolean> comp = (i < compatibilities.size()) ? new ArrayList<>(compatibilities.get(i)) : new ArrayList<>();
 
-            // Riempie la lista di compatibilità con "true" per ogni classe mancante (evita la IndexOutOfBoundsException)
             while (comp.size() < numClasses) {
                 comp.add(Boolean.TRUE);
             }
