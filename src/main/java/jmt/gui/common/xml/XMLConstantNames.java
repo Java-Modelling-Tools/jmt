@@ -188,7 +188,9 @@ public interface XMLConstantNames {
 	public static final String NODETYPE_REGION = "region";
 	public static final String NODETYPE_STATION = "station";
 	public static final String XML_GROUP = "group";
+	public static final String XML_REFNODE = "refNode";
 	public static final String XML_DROP = "drop";
+	public static final String XML_CLASS = "class";
 
 	/**
 	 * Parser features
