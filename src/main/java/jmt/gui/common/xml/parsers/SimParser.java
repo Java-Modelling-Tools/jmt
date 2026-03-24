@@ -1,5 +1,6 @@
 package jmt.gui.common.xml.parsers;
 
+import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.*;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -25,7 +26,7 @@ public class SimParser implements XmlEntityParser<SimDescriptor> {
 
             Element child = (Element) node;
             String tagName = child.getTagName();
-            if ("node".equals(tagName)) {
+            if (XMLConstantNames.XML_NODE.equals(tagName)) {
                 descriptor.addNode(nodeParser.parse(child));
             } else if ("userClass".equals(tagName)) {
                 UserClassDescriptor uc = new UserClassDescriptor();

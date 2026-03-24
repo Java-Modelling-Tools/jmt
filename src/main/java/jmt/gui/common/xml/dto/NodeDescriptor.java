@@ -51,7 +51,7 @@ public class NodeDescriptor {
     }
 
     public void setSections(List<SectionDescriptor> sections) {
-        this.sections = sections != null ? sections : new ArrayList<SectionDescriptor>();
+        this.sections = sections != null ? sections : new ArrayList<>();
     }
 
     public void addSection(SectionDescriptor section) {
@@ -65,7 +65,7 @@ public class NodeDescriptor {
     }
 
     public void setParameters(List<ParameterDescriptor> parameters) {
-        this.parameters = parameters != null ? parameters : new ArrayList<ParameterDescriptor>();
+        this.parameters = parameters != null ? parameters : new ArrayList<>();
     }
 
     public void addParameter(ParameterDescriptor parameter) {

@@ -1,7 +1,8 @@
 package jmt.gui.common.xml.mapper;
 
-import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.dto.SimDescriptor;
+
 import java.util.ArrayList;
 import java.util.List;
 
