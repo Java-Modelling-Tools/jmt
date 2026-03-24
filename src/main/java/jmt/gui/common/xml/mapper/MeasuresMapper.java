@@ -15,20 +15,42 @@ public class MeasuresMapper implements ModelElementMapper {
 
         for (MeasureDescriptor m : dto.getMeasures()) {
             Object stationKey = null;
-            if (m.getReferenceNode() != null && !m.getReferenceNode().isEmpty()) {
-                stationKey = context.stations.get(m.getReferenceNode());
-                if (stationKey == null) stationKey = context.regions.get(m.getReferenceNode());
-            }
+            String nodeType = m.getNodeType();
+            String refNode = m.getReferenceNode();
 
-            Object classKey = null;
-            if (m.getReferenceUserClass() != null && !m.getReferenceUserClass().isEmpty()) {
-                if (m.getType() != null && (m.getType().equals("Fire Frequency") || m.getType().endsWith("FX"))) {
-                    classKey = m.getReferenceUserClass();
+            // Identifica la stazione o la regione di riferimento
+            if (refNode != null && !refNode.isEmpty()) {
+                if ("region".equals(nodeType)) {
+                    stationKey = context.regions.get(refNode);
                 } else {
-                    classKey = context.classes.get(m.getReferenceUserClass());
+                    stationKey = context.stations.get(refNode);
                 }
             }
 
+            Object classKey = null;
+            String className = m.getReferenceUserClass();
+            String type = m.getType();
+
+            if (className != null && !className.isEmpty()) {
+                // FIX ORACLE: Se è una misura FX (Firing Throughput), la "classe" in realtà è un Transition Mode.
+                if (type != null && (type.equals("Firing Throughput") || type.equals("Fire Frequency") || type.endsWith("FX"))) {
+                    if (stationKey != null && context.modeNameLists != null) {
+                        List<String> modeNameList = context.modeNameLists.get(stationKey);
+                        if (modeNameList != null && modeNameList.contains(className)) {
+                            // Come l'Oracolo: la pesca dalla modeNameLists
+                            classKey = modeNameList.get(modeNameList.indexOf(className));
+                        } else {
+                            classKey = className; // Fallback di sicurezza
+                        }
+                    } else {
+                        classKey = className;
+                    }
+                } else {
+                    classKey = context.classes.get(className);
+                }
+            }
+
+            // Inverts alpha (es: 0.10 -> 0.90) come in OLDXMLReader
             Double alpha = 0.05;
             if (m.getAlpha() != null && !m.getAlpha().isEmpty()) {
                 alpha = 1.0 - Double.parseDouble(m.getAlpha());
@@ -40,7 +62,9 @@ public class MeasuresMapper implements ModelElementMapper {
             }
 
             boolean verbose = Boolean.parseBoolean(m.getVerbose());
-            model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);
+
+            // Aggiunge la misura al modello
+            model.addMeasure(type, stationKey, classKey, alpha, precision, verbose);
         }
     }
 }

@@ -30,6 +30,7 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        debug("Parsing QueueSection per la stazione: %s", node.getName());
 
         ParameterDescriptor size = getParam(sec, PARAM_SIZE);
         if (size != null) {
@@ -69,23 +70,30 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
 
         boolean isPolling = false;
         ParameterDescriptor fcfs = getParam(sec, PARAM_FCFS_STRATEGY);
-        if (fcfs != null && fcfs.getClassPath() != null) {
-            String cp = fcfs.getClassPath();
-            if (cp.contains("Polling")) {
-                isPolling = true;
-                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
-                if (cp.contains("Limited")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
-                else if (cp.contains("Gated")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
-                else if (cp.contains("Exhaustive")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
-
-                getSubParams(fcfs).stream()
-                        .filter(p -> "pollingKValue".equals(p.getName()))
-                        .findFirst()
-                        .ifPresent(p -> {
-                            Integer kVal = valI(p);
-                            if (kVal != null) model.setStationPollingServerKValue(key, kVal);
-                        });
+        if (fcfs != null) {
+            if (fcfs.getClassPath() != null) {
+                String cp = fcfs.getClassPath();
+                if (cp.contains("Polling")) {
+                    isPolling = true;
+                    model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
+                    if (cp.contains("Limited")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
+                    else if (cp.contains("Gated")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
+                    else if (cp.contains("Exhaustive")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
+                }
             }
+
+            // FIX: ESTRAZIONE DEL POLLING_K_VALUE GENERALIZZATA
+            // Rimosso il vincolo al "Polling" per far fronte a nodi configurati in modo misto
+            getSubParams(fcfs).stream()
+                    .filter(p -> "pollingKValue".equals(p.getName()))
+                    .findFirst()
+                    .ifPresent(p -> {
+                        Integer kVal = valI(p);
+                        if (kVal != null) {
+                            model.setStationPollingServerKValue(key, kVal);
+                            debug("  -> Estratto pollingKValue: %d", kVal);
+                        }
+                    });
         }
 
         if (!isPolling && putStrategy != null) {
@@ -132,6 +140,7 @@ public class QueueSectionMapper extends AbstractSectionMapper implements XMLMapp
             });
         }
 
+        // --- RETI DI PETRI ---
         ParameterDescriptor en = getParam(sec, "enablingConditions");
         ParameterDescriptor in = getParam(sec, "inhibitingConditions");
         ParameterDescriptor res = getParam(sec, "resourceConditions");
