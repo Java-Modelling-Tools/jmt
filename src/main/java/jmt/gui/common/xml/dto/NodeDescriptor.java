@@ -7,8 +7,36 @@ import java.util.List;
 public class NodeDescriptor {
 
     private String name;
-    private List<SectionDescriptor> sections = new ArrayList<SectionDescriptor>();
-    private List<ParameterDescriptor> parameters = new ArrayList<ParameterDescriptor>();
+    private List<SectionDescriptor> sections = new ArrayList<>();
+    private List<ParameterDescriptor> parameters = new ArrayList<>();
+    private List<Double> classSoftDeadlines = new ArrayList<>();
+    private Double quantumSize;
+    private Double quantumSwitchoverTime;
+
+    // Getter e Setter
+    public List<Double> getClassSoftDeadlines() {
+        return classSoftDeadlines;
+    }
+
+    public void setClassSoftDeadlines(List<Double> classSoftDeadlines) {
+        this.classSoftDeadlines = classSoftDeadlines;
+    }
+
+    public Double getQuantumSize() {
+        return quantumSize;
+    }
+
+    public void setQuantumSize(Double quantumSize) {
+        this.quantumSize = quantumSize;
+    }
+
+    public Double getQuantumSwitchoverTime() {
+        return quantumSwitchoverTime;
+    }
+
+    public void setQuantumSwitchoverTime(Double quantumSwitchoverTime) {
+        this.quantumSwitchoverTime = quantumSwitchoverTime;
+    }
 
     public String getName() {
         return name;

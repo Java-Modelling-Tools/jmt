@@ -5,7 +5,6 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
-import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.mapper.sections.*;
@@ -20,8 +19,6 @@ import java.util.stream.Collectors;
 public class StationsMapper implements ModelElementMapper {
 
     private static final Map<List<String>, String> STATION_SIGNATURES = new HashMap<>();
-
-    // Il nostro Registry delle classi che estendono AbstractSectionMapper
     private final Map<String, AbstractSectionMapper> SECTION_MAPPERS = new HashMap<>();
 
     public StationsMapper() {
@@ -30,7 +27,6 @@ public class StationsMapper implements ModelElementMapper {
     }
 
     private void initSignatures() {
-        //
         STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_SOURCE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SOURCE);
         STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_TERMINAL, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_TERMINAL);
         STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_ROUTER);
@@ -45,13 +41,8 @@ public class StationsMapper implements ModelElementMapper {
         STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_ENABLING, XMLConstantNames.CLASSNAME_TIMING, XMLConstantNames.CLASSNAME_FIRING), CommonConstants.STATION_TYPE_TRANSITION);
 
         List<String> serverMiddleSections = Arrays.asList(
-                XMLConstantNames.CLASSNAME_SERVER,
-                XMLConstantNames.CLASSNAME_PREEMPTIVESERVER,
-                XMLConstantNames.CLASSNAME_PSSERVER,
-                XMLConstantNames.CLASSNAME_PSSERVER_PRIORITY,
-                XMLConstantNames.CLASSNAME_EXHAUSTIVEPSERVER,
-                XMLConstantNames.CLASSNAME_LKPSERVER,
-                XMLConstantNames.CLASSNAME_GATEDPSERVER
+                XMLConstantNames.CLASSNAME_SERVER, XMLConstantNames.CLASSNAME_PREEMPTIVESERVER, XMLConstantNames.CLASSNAME_PSSERVER,
+                XMLConstantNames.CLASSNAME_PSSERVER_PRIORITY, XMLConstantNames.CLASSNAME_EXHAUSTIVEPSERVER, XMLConstantNames.CLASSNAME_LKPSERVER, XMLConstantNames.CLASSNAME_GATEDPSERVER
         );
         for (String middle : serverMiddleSections) {
             STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, middle, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SERVER);
@@ -59,7 +50,6 @@ public class StationsMapper implements ModelElementMapper {
     }
 
     private void initSectionMappers() {
-        //
         SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_SOURCE, new SourceSectionMapper());
         SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_ROUTER, new RouterSectionMapper());
         SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_QUEUE, new QueueSectionMapper());
@@ -96,7 +86,7 @@ public class StationsMapper implements ModelElementMapper {
             String type = getStationType(node);
             String name = node.getName();
 
-            Object stationKey = model.addStation(name, type, 1, new ArrayList<ServerType>());
+            Object stationKey = model.addStation(name, type, 1, new ArrayList<>());
             context.stations.put(name, stationKey);
 
             List<SectionDescriptor> sections = node.getSections();
@@ -109,27 +99,31 @@ public class StationsMapper implements ModelElementMapper {
                 }
             }
 
-            // --- ATTRIBUTI A LIVELLO DI STAZIONE ---
             if (CommonConstants.STATION_TYPE_DELAY.equals(type) || CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-                parseClassStationSoftDeadlines(node, model, stationKey);
+                List<Double> deadlines = node.getClassSoftDeadlines();
+                if (deadlines != null && !deadlines.isEmpty()) {
+                    List<Object> classKeys = model.getClassKeys();
+                    for (int i = 0; i < deadlines.size() && i < classKeys.size(); i++) {
+                        model.setClassStationSoftDeadline(stationKey, classKeys.get(i), deadlines.get(i));
+                    }
+                }
             }
+
             if (CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-                parseQuantaSize(node, model, stationKey);
-                parseQuantumSwitchoverTime(node, model, stationKey);
+                if (node.getQuantumSize() != null) {
+                    model.setQuantumSize(stationKey, node.getQuantumSize());
+                }
+                if (node.getQuantumSwitchoverTime() != null) {
+                    model.setQuantumSwitchoverTime(stationKey, node.getQuantumSwitchoverTime());
+                }
             }
         }
     }
 
     private String getStationType(NodeDescriptor node) {
         List<SectionDescriptor> sections = node.getSections();
-        if (sections == null || sections.isEmpty()) {
-            return "UNKNOWN";
-        }
-
-        //
-        if (XMLConstantNames.CLASSNAME_SINK.equals(sections.get(0).getClassName())) {
-            return CommonConstants.STATION_TYPE_SINK;
-        }
+        if (sections == null || sections.isEmpty()) return "UNKNOWN";
+        if (XMLConstantNames.CLASSNAME_SINK.equals(sections.get(0).getClassName())) return CommonConstants.STATION_TYPE_SINK;
 
         List<String> signature = sections.stream()
                 .map(SectionDescriptor::getClassName)
@@ -137,47 +131,5 @@ public class StationsMapper implements ModelElementMapper {
                 .collect(Collectors.toList());
 
         return STATION_SIGNATURES.getOrDefault(signature, "UNKNOWN");
-    }
-
-    // --- UTILITY PER RECUPERARE PARAMETRI DAL NODO ---
-    private ParameterDescriptor getNodeParameter(NodeDescriptor node, String name) {
-        if (node.getParameters() == null) return null;
-        return node.getParameters().stream()
-                .filter(p -> name.equals(p.getName()))
-                .findFirst().orElse(null);
-    }
-
-    // --- METODI SPECIFICI PER LA STAZIONE AGGIORNATI ---
-
-    private void parseClassStationSoftDeadlines(NodeDescriptor node, CommonModel model, Object key) {
-        //
-        ParameterDescriptor deadlinesParam = getNodeParameter(node, XMLConstantNames.XML_E_STATION_DUE_DATES);
-        if (deadlinesParam != null && deadlinesParam.getSubParameters() != null) {
-            List<Object> classKeys = model.getClassKeys();
-            List<ParameterDescriptor> subParams = deadlinesParam.getSubParameters();
-
-            for (int i = 0; i < subParams.size() && i < classKeys.size(); i++) {
-                String val = subParams.get(i).getValue();
-                if (val != null) {
-                    model.setClassStationSoftDeadline(key, classKeys.get(i), Double.parseDouble(val));
-                }
-            }
-        }
-    }
-
-    private void parseQuantaSize(NodeDescriptor node, CommonModel model, Object key) {
-        //
-        ParameterDescriptor param = getNodeParameter(node, XMLConstantNames.XML_E_STATION_QUANTUM_SIZE);
-        if (param != null && param.getValue() != null) {
-            model.setQuantumSize(key, Double.parseDouble(param.getValue()));
-        }
-    }
-
-    private void parseQuantumSwitchoverTime(NodeDescriptor node, CommonModel model, Object key) {
-        //
-        ParameterDescriptor param = getNodeParameter(node, XMLConstantNames.XML_E_STATION_QUANTUM_SWITCHOVER_TIME);
-        if (param != null && param.getValue() != null) {
-            model.setQuantumSwitchoverTime(key, Double.parseDouble(param.getValue()));
-        }
     }
 }
