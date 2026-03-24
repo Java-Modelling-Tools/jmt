@@ -480,7 +480,7 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
                 priority = Integer.valueOf(tmp);
             }
 
-            tmp = currclass.getAttribute(XML_A_CLASS_DUE_DATE);
+            tmp = currclass.getAttribute(XML_A_CLASS_SOFT_DEADLINE);
             if (tmp != null && tmp != "") {
                 softDeadline = Double.valueOf(tmp);
             }
