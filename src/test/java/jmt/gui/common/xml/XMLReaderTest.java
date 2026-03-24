@@ -489,7 +489,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseBlockingRegions_branches()  {
+    void test_parseBlockingRegions_branches() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseBlockingRegions_branches.xml");
         CommonModel model = new CommonModel();
@@ -584,7 +584,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseDistribution_branches_fullcoverage()  {
+    void test_parseDistribution_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseDistribution_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -658,7 +658,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseSemaphore_branches_fullcoverage()  {
+    void test_parseSemaphore_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseSemaphore_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -715,7 +715,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseLogger_branches_fullcoverage()  {
+    void test_parseLogger_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseLogger_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -753,7 +753,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseClassSwitch_branches_fullcoverage()  {
+    void test_parseClassSwitch_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseClassSwitch_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -815,7 +815,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseRouter_branches_fullcoverage()  {
+    void test_parseRouter_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseRouter_branches.xml");
         CommonModel model = new CommonModel();
         XMLArchiver.loadModel(xmlFile, model);
@@ -903,7 +903,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_parseFork_branches_fullcoverage()  {
+    void test_parseFork_branches_fullcoverage() {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseFork_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -1027,7 +1027,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_serverfeature_fullcoverage()  {
+    void test_serverfeature_fullcoverage() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/serverfeature_fullcoverage.xml");
         CommonModel model = new CommonModel();
@@ -1531,7 +1531,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_Workcopy3_onoff()  {
+    void test_Workcopy3_onoff() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/792_Workcopy3_onoff.xml");
         CommonModel model = new CommonModel();
@@ -1687,7 +1687,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_Sec5_3_FastTask_Quorum1_Wif_JSIMg()  {
+    void test_Sec5_3_FastTask_Quorum1_Wif_JSIMg() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/520_Sec5_3_FastTask_Quorum1_Wif_JSIMg.xml");
         CommonModel model = new CommonModel();
@@ -1829,7 +1829,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_2FJ_2tasks_nestedOK()  {
+    void test_2FJ_2tasks_nestedOK() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/641_2FJ_2tasks_nestedOK.xml"); // Assicurati di rinominare/aggiustare il percorso!
         CommonModel model = new CommonModel();
@@ -1987,7 +1987,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_conBeta13fesc()  {
+    void test_conBeta13fesc() {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/225_conBeta13fesc.xml");
         CommonModel model = new CommonModel();
@@ -2113,7 +2113,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_240415_FCFS_QD()  {
+    void test_240415_FCFS_QD() {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/4039_240415_FCFS_QD.xml");
@@ -2121,7 +2121,6 @@ class XMLReaderTest {
 
         // Parse using the XML archiver facade
         XMLArchiver.loadModel(xmlFile, model);
-
 
 
         // ---------------------------------------------------------
@@ -2274,7 +2273,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_ForkJoin_4Stat_2_SEED1()  {
+    void test_ForkJoin_4Stat_2_SEED1() {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/10089_ForkJoin_4Stat_2 - SEED1.xml");
@@ -2282,7 +2281,6 @@ class XMLReaderTest {
 
         // Parse using the XML archiver facade
         XMLArchiver.loadModel(xmlFile, model);
-
 
 
         // ---------------------------------------------------------
@@ -2420,7 +2418,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_10190_220423_2RotNogen_2Q()  {
+    void test_10190_220423_2RotNogen_2Q() {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/10190_220423_2RotNogen_2Q.xml");
@@ -2544,7 +2542,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_SjAS04Model_6AS_L5()  {
+    void test_SjAS04Model_6AS_L5() {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/23985_SjAS04Model_6AS-L5.xml");
@@ -2655,6 +2653,55 @@ class XMLReaderTest {
         assertThat(model.getClassRefStation(class3)).isEqualTo(CommonConstants.STATION_TYPE_CLASSSWITCH);
         assertThat(model.getClassDistribution(class2)).isNull();
         assertThat(model.getClassDistribution(class3)).isNull();
+    }
+
+
+    @Test
+    void test_edgeCases_ClosedClasses_BlockingRegions() {
+        File xmlFile = new File("src/test/resources/jmt/gui/common/xml/afterrefactoring_edgecases.xml");
+        CommonModel model = new CommonModel();
+
+        // Caricamento del modello
+        XMLArchiver.loadModel(xmlFile, model);
+
+        // --- PREPARAZIONE CHIAVI ---
+        Object classOpen = model.getClassByName("ClassOpen");
+        Object classClosed = model.getClassByName("ClassClosed");
+
+        // Ricerca manuale della regione (visto che getRegionByName non esiste in CommonModel)
+        Object region = null;
+        for (Object rKey : model.getRegionKeys()) {
+            if ("Region1".equals(model.getRegionName(rKey))) {
+                region = rKey;
+                break;
+            }
+        }
+
+        assertThat(classOpen).as("ClassOpen deve esistere").isNotNull();
+        assertThat(classClosed).as("ClassClosed deve esistere").isNotNull();
+        assertThat(region).as("Region1 deve esistere").isNotNull();
+
+        // --- TEST 1: Classi Chiuse ---
+        assertThat(model.getClassType(classClosed))
+                .as("ClassClosed deve essere di tipo chiuso")
+                .isEqualTo(CommonConstants.CLASS_TYPE_CLOSED);
+
+        assertThat(model.getClassPopulation(classClosed))
+                .as("La popolazione della classe chiusa deve essere estratta dall'attributo 'customers'")
+                .isEqualTo(42);
+
+        // --- TEST 2: Blocking Regions ---
+        assertThat(model.getRegionCustomerConstraint(region))
+                .as("Il globalConstraint maxJobs della regione deve essere 15")
+                .isEqualTo(15);
+
+        assertThat(model.getRegionClassCustomerConstraint(region, classOpen))
+                .as("Il classConstraint maxJobsPerClass per ClassOpen deve essere 5")
+                .isEqualTo(5);
+
+        assertThat(model.getRegionClassDropRule(region, classClosed))
+                .as("La dropRule per ClassClosed deve essere convertita in Boolean (true)")
+                .isTrue();
     }
 
 }
