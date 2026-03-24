@@ -312,7 +312,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 					"open" : "closed";
 			Element userClass = doc.createElement(XML_E_CLASS);
 			String[] attrsNames = new String[] { XML_A_CLASS_NAME,
-					XML_A_CLASS_TYPE, XML_A_CLASS_PRIORITY, XML_A_CLASS_DUE_DATE,
+					XML_A_CLASS_TYPE, XML_A_CLASS_PRIORITY, XML_A_CLASS_SOFT_DEADLINE,
 					XML_A_CLASS_CUSTOMERS, XML_A_CLASS_REFSOURCE };
 			String[] attrsValues = new String[] { model.getClassName(classKey),
 					classType,

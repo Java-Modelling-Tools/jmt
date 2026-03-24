@@ -46,7 +46,8 @@ public interface XMLConstantNames {
 	public static final String XML_A_CLASS_NAME = "name";
 	public static final String XML_A_CLASS_TYPE = "type";
 	public static final String XML_A_CLASS_PRIORITY = "priority";
-	public static final String XML_A_CLASS_DUE_DATE = "softDeadline";
+	public static final String XML_A_CLASS_SOFT_DEADLINE = "softDeadline";
+	public static final String XML_A_CLASS_DUE_DATE = "dueDate";
 	public static final String XML_A_CLASS_REFSOURCE = "referenceSource";
 	public static final String XML_A_CLASS_CUSTOMERS = "customers";
 
@@ -77,7 +78,6 @@ public interface XMLConstantNames {
 	public static final String XML_A_SUBPARAMETER_CLASSPATH = "classPath";
 	public static final String XML_A_SUBPARAMETER_ARRAY = "array";
 	public static final String XML_E_SUBPARAMETER_VALUE = "value";
-	public static final String XML_E_SUBPARAMETER_REFCLASS = "refClass";
 
 	public static final String XML_E_MEASURE = "measure";
 	public static final String XML_A_MEASURE_NAME = "name";
@@ -187,6 +187,8 @@ public interface XMLConstantNames {
 
 	public static final String NODETYPE_REGION = "region";
 	public static final String NODETYPE_STATION = "station";
+	public static final String XML_GROUP = "group";
+	public static final String XML_DROP = "drop";
 
 	/**
 	 * Parser features
