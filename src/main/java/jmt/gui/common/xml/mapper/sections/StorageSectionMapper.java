@@ -23,8 +23,6 @@ public class StorageSectionMapper extends AbstractSectionMapper implements XMLMa
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing StorageSection per la stazione: %s", node.getName());
-
         ParameterDescriptor tc = getParam(sec, PARAM_TOTAL_CAPACITY);
         if (tc != null) {
             Integer tVal = valI(tc);

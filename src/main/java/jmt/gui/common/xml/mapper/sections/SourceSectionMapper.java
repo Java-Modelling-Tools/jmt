@@ -17,7 +17,6 @@ public class SourceSectionMapper extends AbstractSectionMapper implements XMLMap
 
         getRefClassMap(serviceStrategyParam).forEach((className, p) -> {
             Object classKey = ctx.classes.get(className);
-            debug("Source %s -> Class: %s, ServiceStrategy: %s", node.getName(), className, p.getClassPath());
 
             if (classKey != null && node.getName().equals(ctx.refStations.get(classKey)) && model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {
                 Object distributionStrategy = parseServiceStrategy(p, ctx);

@@ -11,8 +11,6 @@ public class DelaySectionMapper extends AbstractSectionMapper implements XMLMapp
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing DelaySection per la stazione: %s", node.getName());
-
         ParameterDescriptor serviceStrategyParam = getParam(sec, "ServiceStrategy");
         if (serviceStrategyParam != null) {
             getRefClassMap(serviceStrategyParam).forEach((className, subParam) -> {

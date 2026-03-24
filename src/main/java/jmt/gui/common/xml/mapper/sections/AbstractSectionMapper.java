@@ -18,15 +18,6 @@ import java.util.*;
 
 public abstract class AbstractSectionMapper {
 
-    // --- LOGGER ---
-    protected static final boolean DEBUG = true; // Metti a true per loggare i dettagli
-
-    protected void debug(String msg, Object... args) {
-        if (DEBUG) {
-            System.out.printf("[DEBUG - %s] %s%n", this.getClass().getSimpleName(), args.length > 0 ? String.format(msg, args) : msg);
-        }
-    }
-
     public abstract void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
 
     // --- UTILITY ---
@@ -153,71 +144,55 @@ public abstract class AbstractSectionMapper {
 
     protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
         if (en != null) {
-            System.out.println("[DEBUG - Conditions] Inizio estrazione Enabling Conditions...");
             populateConditionMap(key, en, ctx.enablingConditionMap, ctx);
         }
         if (in != null) {
-            System.out.println("[DEBUG - Conditions] Inizio estrazione Inhibiting Conditions...");
             populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);
         }
         if (res != null) {
-            System.out.println("[DEBUG - Conditions] Inizio estrazione Resource Conditions...");
             populateConditionMap(key, res, ctx.resourceConditionMap, ctx);
         }
     }
 
     private void populateConditionMap(Object key, ParameterDescriptor condParam, Map<Object[], Integer> targetMap, MappingContext ctx) {
         if (condParam == null) {
-            System.out.println("[DEBUG - Conditions] Parametro condizione nullo!");
             return;
         }
 
         // Livello 1: i figli diretti sono le singole condizioni per modalità (es. "enablingCondition")
         List<ParameterDescriptor> modes = getSubParams(condParam);
-        System.out.println("[DEBUG - Conditions] Trovate " + modes.size() + " modalità (conditions)");
 
         for (int i = 0; i < modes.size(); i++) {
             ParameterDescriptor condition = modes.get(i);
 
             // Livello 2: dentro "enablingCondition" c'è un contenitore (es. "enablingVectors")
             List<ParameterDescriptor> conditionElements = getSubParams(condition);
-            if (conditionElements.isEmpty()) {
-                System.out.println("[DEBUG - Conditions] Modalità " + i + " vuota. Salto.");
-                continue;
-            }
+            if (conditionElements.isEmpty()) continue;
 
             ParameterDescriptor vectorsArray = conditionElements.get(0);
 
             // Livello 3: i figli del contenitore sono i singoli vettori (es. "enablingVector")
             List<ParameterDescriptor> vectors = getSubParams(vectorsArray);
-            System.out.println("[DEBUG - Conditions] Modalità " + i + " ha " + vectors.size() + " vettori");
 
             for (ParameterDescriptor vector : vectors) {
                 // Livello 4: dentro al vettore ci sono stationName e la mappa refClass (es. "enablingEntries")
                 List<ParameterDescriptor> vectorElements = getSubParams(vector);
 
-                if (vectorElements.size() < 2) {
-                    System.out.println("[DEBUG - Conditions] Vettore scartato (trovato " + vectorElements.size() + " elementi invece di 2)");
-                    continue;
-                }
+                if (vectorElements.size() < 2) continue;
 
                 String stationName = val(vectorElements.get(0));
                 ParameterDescriptor entriesParam = vectorElements.get(1);
 
                 Map<String, ParameterDescriptor> refMap = getRefClassMap(entriesParam);
-                System.out.println("[DEBUG - Conditions] Stazione Target: '" + stationName + "'. Trovate " + refMap.size() + " entries per la mappa refClass.");
 
                 for (Map.Entry<String, ParameterDescriptor> entry : refMap.entrySet()) {
                     String className = entry.getKey();
                     Integer vVal = valI(entry.getValue());
 
-                    System.out.println("[DEBUG - Conditions] Analizzo entry -> Classe: '" + className + "', Valore estratto: " + vVal);
-
                     if (stationName != null && vVal != null) {
                         Object classKey = ctx.classes.get(className);
                         Object[] quadKey = new Object[]{key, i, stationName, classKey};
                         targetMap.put(quadKey, vVal);
-                        System.out.println("[DEBUG - Conditions] Inserito con successo nella mappa!");
                     }
                 }
             }

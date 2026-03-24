@@ -13,8 +13,6 @@ public class FiringSectionMapper extends AbstractSectionMapper implements XMLMap
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        debug("Parsing FiringSection per la stazione: %s", node.getName());
-
         ParameterDescriptor fo = getParam(sec, PARAM_FIRING_OUTCOMES);
         if (fo != null) {
             List<ParameterDescriptor> outcomes = getSubParams(fo);

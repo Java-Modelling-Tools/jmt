@@ -22,7 +22,6 @@ public class RouterSectionMapper extends AbstractSectionMapper implements XMLMap
         getRefClassMap(routingParam).forEach((className, p) -> {
             String cp = p.getClassPath();
             Object classKey = ctx.classes.get(className);
-            debug("Router %s -> Class: %s, Strategy: %s", node.getName(), className, cp);
 
             // Mappatura sicura indipendente dal classpath di default
             if (cp != null && (cp.contains("Empirical") || cp.contains("Probabilities"))) model.setRoutingStrategy(key, classKey, new ProbabilityRouting());
