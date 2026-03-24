@@ -6,6 +6,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NodeParser implements XmlEntityParser<NodeDescriptor> {
 
     @Override
@@ -15,6 +18,7 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
 
         SectionParser sectionParser = new SectionParser();
         NodeList children = element.getChildNodes();
+
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
@@ -22,8 +26,37 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
             }
 
             Element child = (Element) node;
-            if ("section".equals(child.getTagName())) {
+            String tagName = child.getTagName();
+
+            if ("section".equals(tagName)) {
                 descriptor.addSection(sectionParser.parse(child));
+
+            } else if ("classSoftDeadlines".equals(tagName)) {
+                List<Double> deadlines = new ArrayList<>();
+                NodeList sdNodes = child.getChildNodes();
+                for (int j = 0; j < sdNodes.getLength(); j++) {
+                    Node sdNode = sdNodes.item(j);
+                    if (sdNode.getNodeType() == Node.ELEMENT_NODE && "softDeadline".equals(((Element) sdNode).getTagName())) {
+                        String text = sdNode.getTextContent();
+                        if (text != null && !text.trim().isEmpty()) {
+                            deadlines.add(Double.parseDouble(text.trim()));
+                        }
+                    }
+                }
+                descriptor.setClassSoftDeadlines(deadlines);
+
+            } else if ("quantumSize".equals(tagName)) {
+                String text = child.getTextContent();
+                if (text != null && !text.trim().isEmpty()) {
+                    descriptor.setQuantumSize(Double.parseDouble(text.trim()));
+                }
+
+            } else if ("quantumSwitchoverTime".equals(tagName)) {
+                String text = child.getTextContent();
+                if (text != null && !text.trim().isEmpty()) {
+                    descriptor.setQuantumSwitchoverTime(Double.parseDouble(text.trim()));
+                }
+
             } else {
                 descriptor.addParameter(parseGenericParameter(child));
             }
@@ -35,7 +68,6 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
     private ParameterDescriptor parseGenericParameter(Element element) {
         ParameterDescriptor descriptor = new ParameterDescriptor();
 
-        // FIX: Recupera il vero nome del parametro, fallendo sul tag name solo se assente
         String nameAttr = readAttribute(element, "name");
         descriptor.setName((nameAttr != null && !nameAttr.isEmpty()) ? nameAttr : element.getTagName());
 
@@ -44,6 +76,7 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
 
         NodeList children = element.getChildNodes();
         boolean hasElementChildren = false;
+
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
             if (node.getNodeType() != Node.ELEMENT_NODE) {
