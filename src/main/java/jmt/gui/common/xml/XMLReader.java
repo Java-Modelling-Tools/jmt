@@ -8,6 +8,7 @@ import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.dto.SimDescriptor;
+import jmt.gui.common.xml.mapper.SimDescriptorMapper;
 import jmt.gui.common.xml.parsers.SimParser;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
@@ -55,7 +56,10 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
             SimParser parser = new SimParser();
             descriptor = parser.parse(root);
         }
-        ModelPopulator.populate(descriptor, model);
+
+        // In-Place mapping on model
+        SimDescriptorMapper mapper = new SimDescriptorMapper(descriptor, model);
+        mapper.map();
     }
 
     public static Document loadXML(String filename, String schemaSource) {

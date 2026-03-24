@@ -285,10 +285,10 @@ class XMLReaderTest {
                 .isEqualTo(7);
         assertThat(model.getInhibitingCondition(transitionOnlyEnabling, 0, placeB, class1))
                 .as("TransitionOnlyEnabling inhibiting condition for PlaceB/Class1 should remain default")
-                .isEqualTo(0);
+                .isZero();
         assertThat(model.getInhibitingCondition(transitionOnlyEnabling, 0, placeB, class2))
                 .as("TransitionOnlyEnabling inhibiting condition for PlaceB/Class2 should remain default")
-                .isEqualTo(0);
+                .isZero();
 
         assertThat(model.getInhibitingCondition(transitionOnlyInhibiting, 0, placeB, class1))
                 .as("TransitionOnlyInhibiting inhibiting condition for PlaceB/Class1 should be parsed")
@@ -298,10 +298,10 @@ class XMLReaderTest {
                 .isEqualTo(9);
         assertThat(model.getEnablingCondition(transitionOnlyInhibiting, 0, placeB, class1))
                 .as("TransitionOnlyInhibiting enabling condition for PlaceB/Class1 should remain default")
-                .isEqualTo(0);
+                .isZero();
         assertThat(model.getEnablingCondition(transitionOnlyInhibiting, 0, placeB, class2))
                 .as("TransitionOnlyInhibiting enabling condition for PlaceB/Class2 should remain default")
-                .isEqualTo(0);
+                .isZero();
     }
 
     @Test
@@ -489,7 +489,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseBlockingRegions_branches() throws Exception {
+    void test_parseBlockingRegions_branches()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseBlockingRegions_branches.xml");
         CommonModel model = new CommonModel();
@@ -584,7 +584,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseDistribution_branches_fullcoverage() throws Exception {
+    void test_parseDistribution_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseDistribution_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -644,21 +644,21 @@ class XMLReaderTest {
         assertThat(d0.length)
                 .as("D0 matrix should have expected row size")
                 .isEqualTo(2);
-        assertThat(d0[0].length).isEqualTo(2);
+        assertThat(d0[0]).hasSize(2);
         assertThat((Double) d0[0][0]).isCloseTo(-1.0, within(1e-9));
         assertThat((Double) d0[1][0]).isCloseTo(0.6, within(1e-9));
 
         assertThat(d1.length)
                 .as("D1 matrix should have expected row size")
                 .isEqualTo(2);
-        assertThat(d1[1].length).isEqualTo(2);
+        assertThat(d1[1]).hasSize(2);
         assertThat((Double) d1[0][1]).isCloseTo(0.2, within(1e-9));
         assertThat((Double) d1[1][1]).isCloseTo(0.4, within(1e-9));
     }
 
 
     @Test
-    void test_parseSemaphore_branches_fullcoverage() throws Exception {
+    void test_parseSemaphore_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseSemaphore_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -715,7 +715,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseLogger_branches_fullcoverage() throws Exception {
+    void test_parseLogger_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseLogger_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -753,7 +753,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseClassSwitch_branches_fullcoverage() throws Exception {
+    void test_parseClassSwitch_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseClassSwitch_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -815,7 +815,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_parseRouter_branches_fullcoverage() throws Exception {
+    void test_parseRouter_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseRouter_branches.xml");
         CommonModel model = new CommonModel();
         XMLArchiver.loadModel(xmlFile, model);
@@ -903,7 +903,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_parseFork_branches_fullcoverage() throws Exception {
+    void test_parseFork_branches_fullcoverage()  {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/parseFork_branches.xml");
         CommonModel model = new CommonModel();
 
@@ -1027,7 +1027,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_serverfeature_fullcoverage() throws Exception {
+    void test_serverfeature_fullcoverage()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/serverfeature_fullcoverage.xml");
         CommonModel model = new CommonModel();
@@ -1531,7 +1531,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_Workcopy3_onoff() throws Exception {
+    void test_Workcopy3_onoff()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/792_Workcopy3_onoff.xml");
         CommonModel model = new CommonModel();
@@ -1615,7 +1615,7 @@ class XMLReaderTest {
         // Enabling / Inhibiting / Resource conditions on Queue 1!
         assertThat(model.getEnablingCondition(queue1, 0, offPlace, class1))
                 .as("Queue 1 should have an enabling condition requiring 0 tokens from OFF")
-                .isEqualTo(0);
+                .isZero();
 
         assertThat(model.getInhibitingCondition(queue1, 0, offPlace, class1))
                 .as("Queue 1 should have an inhibiting condition of 1 token from OFF")
@@ -1623,7 +1623,7 @@ class XMLReaderTest {
 
         assertThat(model.getResourceCondition(queue1, 0, offPlace, class1))
                 .as("Queue 1 should have a resource condition requiring 0 tokens from OFF")
-                .isEqualTo(0);
+                .isZero();
 
         // ---------------------------------------------------------
         // BLOCK E: Routing Strategies
@@ -1647,7 +1647,7 @@ class XMLReaderTest {
         assertThat(t1Lambda).as("Transition 1 firing rate (lambda) should be 0.1").isCloseTo(0.1, within(1e-9));
 
         assertThat(model.getEnablingCondition(trans1, 0, offPlace, class1)).isEqualTo(1);
-        assertThat(model.getInhibitingCondition(trans1, 0, offPlace, class1)).isEqualTo(0);
+        assertThat(model.getInhibitingCondition(trans1, 0, offPlace, class1)).isZero();
         assertThat(model.getFiringOutcome(trans1, 0, onPlace, class1)).isEqualTo(1);
 
         // Transition 2
@@ -1657,7 +1657,7 @@ class XMLReaderTest {
         assertThat(t2Lambda).as("Transition 2 firing rate (lambda) should be 0.1").isCloseTo(0.1, within(1e-9));
 
         assertThat(model.getEnablingCondition(trans2, 0, onPlace, class1)).isEqualTo(1);
-        assertThat(model.getInhibitingCondition(trans2, 0, onPlace, class1)).isEqualTo(0);
+        assertThat(model.getInhibitingCondition(trans2, 0, onPlace, class1)).isZero();
         assertThat(model.getFiringOutcome(trans2, 0, offPlace, class1)).isEqualTo(1);
 
         // ---------------------------------------------------------
@@ -1687,7 +1687,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_Sec5_3_FastTask_Quorum1_Wif_JSIMg() throws Exception {
+    void test_Sec5_3_FastTask_Quorum1_Wif_JSIMg()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/520_Sec5_3_FastTask_Quorum1_Wif_JSIMg.xml");
         CommonModel model = new CommonModel();
@@ -1829,7 +1829,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_2FJ_2tasks_nestedOK() throws Exception {
+    void test_2FJ_2tasks_nestedOK()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/641_2FJ_2tasks_nestedOK.xml"); // Assicurati di rinominare/aggiustare il percorso!
         CommonModel model = new CommonModel();
@@ -1875,7 +1875,7 @@ class XMLReaderTest {
         Object delay5 = model.getStationByName("Delay 5");
         Object join2 = model.getStationByName("Join 2");
         Object join1 = model.getStationByName("Join 1");
-        Object delay1_1 = model.getStationByName("Delay 1_1");
+        Object delay11 = model.getStationByName("Delay 1_1");
         Object sink = model.getStationByName("Sink 1");
 
         assertThat(model.getStationType(source)).isEqualTo(CommonConstants.STATION_TYPE_SOURCE);
@@ -1911,9 +1911,9 @@ class XMLReaderTest {
         assertThat(delay5T).as("Delay 5 deterministic time should be 0.6").isCloseTo(0.6, within(1e-9));
 
         // Delay 1_1
-        Object delay1_1Dist = model.getServiceTimeDistribution(delay1_1, class1);
-        Double delay1_1T = (Double) ((jmt.gui.common.distributions.Distribution) delay1_1Dist).getParameter("t").getValue();
-        assertThat(delay1_1T).as("Delay 1_1 deterministic time should be 1.0").isCloseTo(1.0, within(1e-9));
+        Object delay11Dist = model.getServiceTimeDistribution(delay11, class1);
+        Double delay11T = (Double) ((jmt.gui.common.distributions.Distribution) delay11Dist).getParameter("t").getValue();
+        assertThat(delay11T).as("Delay 1_1 deterministic time should be 1.0").isCloseTo(1.0, within(1e-9));
 
         // ---------------------------------------------------------
         // BLOCK D: Fork and Join Settings
@@ -1982,12 +1982,12 @@ class XMLReaderTest {
         assertThat(model.areConnected(delay2, join1)).isTrue();
 
         // Join 1 goes to final Delay and Sink
-        assertThat(model.areConnected(join1, delay1_1)).isTrue();
-        assertThat(model.areConnected(delay1_1, sink)).isTrue();
+        assertThat(model.areConnected(join1, delay11)).isTrue();
+        assertThat(model.areConnected(delay11, sink)).isTrue();
     }
 
     @Test
-    void test_conBeta13fesc() throws Exception {
+    void test_conBeta13fesc()  {
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/225_conBeta13fesc.xml");
         CommonModel model = new CommonModel();
@@ -2113,7 +2113,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_240415_FCFS_QD() throws Exception {
+    void test_240415_FCFS_QD()  {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/4039_240415_FCFS_QD.xml");
@@ -2274,7 +2274,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_ForkJoin_4Stat_2_SEED1() throws Exception {
+    void test_ForkJoin_4Stat_2_SEED1()  {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/10089_ForkJoin_4Stat_2 - SEED1.xml");
@@ -2420,7 +2420,7 @@ class XMLReaderTest {
     }
 
     @Test
-    void test_10190_220423_2RotNogen_2Q() throws Exception {
+    void test_10190_220423_2RotNogen_2Q()  {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/10190_220423_2RotNogen_2Q.xml");
@@ -2544,7 +2544,7 @@ class XMLReaderTest {
 
 
     @Test
-    void test_SjAS04Model_6AS_L5() throws Exception {
+    void test_SjAS04Model_6AS_L5()  {
 
         // 1. Load the file
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/23985_SjAS04Model_6AS-L5.xml");
@@ -2627,9 +2627,9 @@ class XMLReaderTest {
         assertThat(lambdaB).isCloseTo(1.0, within(1e-9));
 
         // Class 'b' in L-Q has lambda equal to 0.3979307.
-        Object dist_b = model.getServiceTimeDistribution(lq, classb);
-        Double lambda_b = (Double) ((jmt.gui.common.distributions.Distribution) dist_b).getParameter("lambda").getValue();
-        assertThat(lambda_b).isCloseTo(0.3979307, within(1e-9));
+        Object distb = model.getServiceTimeDistribution(lq, classb);
+        Double lambdab = (Double) ((jmt.gui.common.distributions.Distribution) distb).getParameter("lambda").getValue();
+        assertThat(lambdab).isCloseTo(0.3979307, within(1e-9));
 
         // ---------------------------------------------------------
         // BLOCK F: Routing Strategies

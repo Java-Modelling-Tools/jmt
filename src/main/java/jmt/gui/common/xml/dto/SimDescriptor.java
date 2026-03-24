@@ -3,17 +3,18 @@ package jmt.gui.common.xml.dto;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SimDescriptor {
-    private LinkedHashMap<String, String> globalAttributes = new LinkedHashMap<String, String>();
-    private List<UserClassDescriptor> userClasses = new ArrayList<UserClassDescriptor>();
-    private List<NodeDescriptor> nodes = new ArrayList<NodeDescriptor>();
-    private List<ConnectionDescriptor> connections = new ArrayList<ConnectionDescriptor>();
-    private List<MeasureDescriptor> measures = new ArrayList<MeasureDescriptor>();
-    private List<BlockingRegionDescriptor> blockingRegions = new ArrayList<BlockingRegionDescriptor>();
-    private List<NodeDescriptor> preloads = new ArrayList<NodeDescriptor>();
+    private Map<String, String> globalAttributes = new LinkedHashMap<>();
+    private List<UserClassDescriptor> userClasses = new ArrayList<>();
+    private List<NodeDescriptor> nodes = new ArrayList<>();
+    private List<ConnectionDescriptor> connections = new ArrayList<>();
+    private List<MeasureDescriptor> measures = new ArrayList<>();
+    private List<BlockingRegionDescriptor> blockingRegions = new ArrayList<>();
+    private List<NodeDescriptor> preloads = new ArrayList<>();
 
-    public LinkedHashMap<String, String> getGlobalAttributes() {
+    public Map<String, String> getGlobalAttributes() {
         return globalAttributes;
     }
 
