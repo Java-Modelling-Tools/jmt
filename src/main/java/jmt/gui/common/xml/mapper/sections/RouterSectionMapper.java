@@ -23,7 +23,7 @@ public class RouterSectionMapper extends AbstractSectionMapper implements XMLMap
             String cp = p.getClassPath();
             Object classKey = ctx.classes.get(className);
 
-            // Mappatura sicura indipendente dal classpath di default
+            // Safe mapping independent of the default classpath
             if (cp != null && (cp.contains("Empirical") || cp.contains("Probabilities"))) model.setRoutingStrategy(key, classKey, new ProbabilityRouting());
             else if (cp != null && cp.contains("LoadDependent")) model.setRoutingStrategy(key, classKey, new LoadDependentRouting());
             else if (cp != null && cp.contains("PowerOfK")) model.setRoutingStrategy(key, classKey, new PowerOfKRouting());

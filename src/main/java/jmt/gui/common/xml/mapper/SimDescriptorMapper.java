@@ -17,19 +17,19 @@ public class SimDescriptorMapper {
         this.pipeline = new ArrayList<>();
 
 
-        // Assembliamo la pipeline rispettando RIGOROSAMENTE l'ordine di OLDXMLReader
+        // We assemble the pipeline STRICTLY respecting the order of OLDXMLReader
         pipeline.add(new GlobalSettingsMapper()); // setup path, maxTime, seed...
         pipeline.add(new ClassesMapper());        // parseClasses
-        pipeline.add(new StationsMapper());       // parseStations (qui dentro useremo l'architettura a sezioni che abbiamo discusso prima!)
+        pipeline.add(new StationsMapper());       // parseStations (inside here we will use the section architecture we discussed before!)
         pipeline.add(new ConnectionsMapper());    // parseConnections
         pipeline.add(new BlockingRegionsMapper());// parseBlockingRegions
         pipeline.add(new MeasuresMapper());       // parseMeasures
         pipeline.add(new PreloadMapper());        // parsePreloading
-        pipeline.add(new PostProcessingMapper()); // Risolve refStations, empiricalRouting, fork, condizioni (l'ultimo blocco di parseXML)
+        pipeline.add(new PostProcessingMapper()); // Resolves refStations, empiricalRouting, fork, conditions (the last block of parseXML)
     }
 
     public CommonModel map() {
-        // Eseguiamo la pipeline: ogni mapper arricchisce il context e il CommonModel
+        // We execute the pipeline: each mapper enriches the context and the CommonModel
         for (ModelElementMapper mapper : pipeline) {
             mapper.map(dto, context);
         }

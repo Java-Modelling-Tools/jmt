@@ -18,7 +18,7 @@ public class MeasuresMapper implements ModelElementMapper {
             String nodeType = m.getNodeType();
             String refNode = m.getReferenceNode();
 
-            // Identifica la stazione o la regione di riferimento
+            // Identify the reference station or region
             if (refNode != null && !refNode.isEmpty()) {
                 if ("region".equals(nodeType)) {
                     stationKey = context.regions.get(refNode);
@@ -32,15 +32,15 @@ public class MeasuresMapper implements ModelElementMapper {
             String type = m.getType();
 
             if (className != null && !className.isEmpty()) {
-                // FIX ORACLE: Se è una misura FX (Firing Throughput), la "classe" in realtà è un Transition Mode.
+                // FIX ORACLE: If it is an FX measure (Firing Throughput), the "class" is actually a Transition Mode.
                 if (type != null && (type.equals("Firing Throughput") || type.equals("Fire Frequency") || type.endsWith("FX"))) {
                     if (stationKey != null && context.modeNameLists != null) {
                         List<String> modeNameList = context.modeNameLists.get(stationKey);
                         if (modeNameList != null && modeNameList.contains(className)) {
-                            // Come l'Oracolo: la pesca dalla modeNameLists
+                            // Like the Oracle: it gets it from the modeNameLists
                             classKey = modeNameList.get(modeNameList.indexOf(className));
                         } else {
-                            classKey = className; // Fallback di sicurezza
+                            classKey = className; // Safety fallback
                         }
                     } else {
                         classKey = className;
@@ -50,7 +50,7 @@ public class MeasuresMapper implements ModelElementMapper {
                 }
             }
 
-            // Inverts alpha (es: 0.10 -> 0.90) come in OLDXMLReader
+            // Inverts alpha (e.g.: 0.10 -> 0.90) as in OLDXMLReader
             Double alpha = 0.05;
             if (m.getAlpha() != null && !m.getAlpha().isEmpty()) {
                 alpha = 1.0 - Double.parseDouble(m.getAlpha());
@@ -63,7 +63,7 @@ public class MeasuresMapper implements ModelElementMapper {
 
             boolean verbose = Boolean.parseBoolean(m.getVerbose());
 
-            // Aggiunge la misura al modello
+            // Adds the measure to the model
             model.addMeasure(type, stationKey, classKey, alpha, precision, verbose);
         }
     }

@@ -17,6 +17,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XMLReader implements XMLConstantNames, CommonConstants {
+    private XMLReader() {
+        /* This utility class should not be instantiated */
+    }
 
     public static boolean loadModel(String fileName, CommonModel model) {
         Document doc = loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));
@@ -48,7 +51,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
         SimDescriptor descriptor;
         String tagName = root.getTagName();
 
-        if ("node".equals(tagName)) {
+        if (XML_NODE.equals(tagName)) {
             descriptor = new SimDescriptor();
             jmt.gui.common.xml.parsers.NodeParser nodeParser = new jmt.gui.common.xml.parsers.NodeParser();
             descriptor.addNode(nodeParser.parse(root));

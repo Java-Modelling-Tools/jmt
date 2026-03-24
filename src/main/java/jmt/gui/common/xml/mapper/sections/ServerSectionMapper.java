@@ -10,10 +10,7 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
 import jmt.gui.common.xml.mapper.XMLMapperConstants;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class ServerSectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
 
@@ -40,7 +37,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
         List<List<Boolean>> compatibilities = new ArrayList<>();
         List<Object> heterogeneous = new ArrayList<>();
 
-        // Costruiamo la lista appiattendo advancedFeatures come faceva l'Oracolo
+        // We build the list by flattening advancedFeatures as the Oracle did
         List<ParameterDescriptor> params = sec.getParameters() != null ? new ArrayList<>(sec.getParameters()) : new ArrayList<>();
         ParameterDescriptor adv = getParam(sec, CommonConstants.SERVER_PARAMETER_ADVANCED_FEATURES);
         if (adv != null) params.addAll(getSubParams(adv));
@@ -54,7 +51,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                 if (v != null) model.setStationNumberOfServers(key, v);
 
             } else if ("maxRunning".equals(name)) {
-                // FIX ORACLE: Aggiunto il branch mancante per maxRunning!
+                // FIX ORACLE: Added the missing branch for maxRunning!
                 Integer v = valI(p);
                 if (v != null) model.setStationMaxRunningJobs(key, v);
 
@@ -80,19 +77,19 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                     List<Boolean> comp = new ArrayList<>();
                     getSubParams(sP).forEach(sSP -> {
                         String bVal = val(sSP);
-                        comp.add(bVal != null ? Boolean.parseBoolean(bVal) : true);
+                        comp.add(bVal == null || Boolean.parseBoolean(bVal));
                     });
                     compatibilities.add(comp);
                 });
-            } else if (CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES.equals(name) || "switchoverTimes".equals(name) || "SwitchoverStrategy".equals(name) || "switchoverStrategy".equals(name)) {
-                if (model.getStationQueueStrategy(key) == CommonConstants.STATION_QUEUE_STRATEGY_POLLING) {
+            } else if (CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES.equals(name) || "switchoverTimes".equals(name) || "switchoverStrategy".equals(name)) {
+                if (Objects.equals(model.getStationQueueStrategy(key), CommonConstants.STATION_QUEUE_STRATEGY_POLLING)) {
                     getRefClassMap(p).forEach((c, sP) -> model.setPollingSwitchoverDistribution(key, ctx.classes.get(c), parseServiceStrategy(sP, ctx)));
                 } else {
                     model.setSwitchoverTimesEnabled(key, Boolean.TRUE);
                     getRefClassMap(p).forEach((fromC, sP) -> getRefClassMap(sP).forEach((toC, sSP) ->
                             model.setSwitchoverTimeDistribution(key, ctx.classes.get(fromC), ctx.classes.get(toC), parseServiceStrategy(sSP, ctx))));
                 }
-            } else if (CommonConstants.SERVER_FEATURE_DELAY_OFF_STRATEGIES.equals(name) || "delayOffTimes".equals(name) || "delayOffTime".equals(name)) {
+            } else if (CommonConstants.SERVER_FEATURE_DELAY_OFF_STRATEGIES.equals(name) || "delayOffTimes".equals(name)) {
                 model.setDelayOffTimesEnabled(key, Boolean.TRUE);
                 getRefClassMap(p).forEach((c, sP) -> getRefClassMap(sP).forEach((innerC, sSP) ->
                         model.setDelayOffTimeDistribution(key, ctx.classes.get(innerC), parseServiceStrategy(sSP, ctx))));
@@ -111,7 +108,7 @@ public class ServerSectionMapper extends AbstractSectionMapper implements XMLMap
                 getRefClassMap(p).forEach((c, sP) -> model.setServiceWeight(key, ctx.classes.get(c), valD(sP)));
             } else if (PARAM_PS_PRIORITY_USED.equals(name)) {
                 String bVal = val(p);
-                if (bVal != null && Boolean.parseBoolean(bVal)) {
+                if (Boolean.parseBoolean(bVal)) {
                     model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY);
                 }
             } else if (CommonConstants.SERVER_FEATURE_CLASS_PARALLELISM.equals(name) || "serversNumRequired".equals(name) || "numRequired".equals(name)) {

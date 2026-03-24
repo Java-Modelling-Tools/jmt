@@ -52,7 +52,7 @@ public interface XMLConstantNames {
 
 	public static final String XML_E_SERVER_TYPE = "serverTypes";
 
-	public static final String XML_E_STATION = "node";
+	public static final String XML_NODE = "node";
 	public static final String XML_A_STATION_NAME = "name";
 	public static final String XML_E_STATION_SECTION = "section";
 	public static final String XML_E_STATION_DUE_DATES = "classSoftDeadlines";

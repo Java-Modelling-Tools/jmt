@@ -20,14 +20,14 @@ public class PostProcessingMapper implements ModelElementMapper {
     public void map(SimDescriptor dto, MappingContext context) {
         CommonModel model = context.getModel();
 
-        // --- 1. Risoluzione delle stazioni di riferimento per ogni classe ---
+        // --- 1. Resolution of reference stations for each class ---
         for (Map.Entry<Object, String> entry : context.refStations.entrySet()) {
             Object classKey = entry.getKey();
             String stationName = entry.getValue();
             if (stationName == null) continue;
 
-            // Per nodi speciali (Fork, ClassSwitch, Scaler, Transition), OLDXMLReader
-            // setta direttamente la stringa del tipo, anziché la chiave dell'oggetto
+            // For special nodes (Fork, ClassSwitch, Scaler, Transition), OLDXMLReader
+            // directly sets the type string, instead of the object key
             if (CommonConstants.STATION_TYPE_FORK.equals(stationName)
                     || CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationName)
                     || CommonConstants.STATION_TYPE_SCALER.equals(stationName)
@@ -41,7 +41,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 2. Risoluzione Routing Probabilistico ---
+        // --- 2. Probabilistic Routing Resolution ---
         for (Map.Entry<Object[], Map<String, Double>> entry : context.empiricalRouting.entrySet()) {
             Object[] dualkey = entry.getKey(); // [stationKey, classKey]
             ProbabilityRouting rs = (ProbabilityRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -54,7 +54,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 3. Risoluzione Routing Load Dependent ---
+        // --- 3. Load Dependent Routing Resolution ---
         for (Map.Entry<Object[], Map<String, Double>> entry : context.empiricalLDRouting.entrySet()) {
             Object[] triplekey = entry.getKey(); // [stationKey, classKey, fromValue]
             LoadDependentRouting ldr = (LoadDependentRouting) model.getRoutingStrategy(triplekey[0], triplekey[1]);
@@ -66,8 +66,8 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 4. Risoluzione Routing Round Robin ---
-        // FIX: Corretta la firma del Map.Entry e implementato il ciclo per risolvere le destinazioni
+        // --- 4. Round Robin Routing Resolution ---
+        // FIX: Corrected the signature of Map.Entry and implemented the loop to resolve destinations
         for (Map.Entry<Object[], Map<String, Integer>> entry : context.wrrRouting.entrySet()) {
             Object[] dualkey = entry.getKey(); // [stationKey, classKey]
             WeightedRoundRobinRouting rs = (WeightedRoundRobinRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -80,7 +80,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 5. Risoluzione Routing Class Switch (Branch Probabilities) ---
+        // --- 5. Class Switch Routing Resolution (Branch Probabilities) ---
         for (Map.Entry<Object[], Map<String, Double>> entry : context.csBranchRouting.entrySet()) {
             Object[] dualkey = entry.getKey();
             ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -93,7 +93,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 6. Risoluzione Routing Class Switch (Class Probabilities) ---
+        // --- 6. Class Switch Routing Resolution (Class Probabilities) ---
         for (Map.Entry<Object[], Map<String, Map<String, Double>>> entry : context.csClassRouting.entrySet()) {
             Object[] dualkey = entry.getKey();
             ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -114,7 +114,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 7. Risoluzione Fork Probabilistici e ClassSwitch Fork ---
+        // --- 7. Probabilistic Fork and ClassSwitch Fork Resolution ---
         for (Map.Entry<Object[], Map<String, OutPath>> entry : context.empiricalFork.entrySet()) {
             Object[] dualkey = entry.getKey();
             ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
@@ -127,19 +127,19 @@ public class PostProcessingMapper implements ModelElementMapper {
             }
         }
 
-        // --- 8. Risoluzione Fork Combinati (CombFork) ---
+        // --- 8. Combined Fork Resolution (CombFork) ---
         for (Map.Entry<Object[], Map<String, Double>> entry : context.combFork.entrySet()) {
             Object[] dualkey = entry.getKey();
             ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
             Map<Object, Double> fork = (Map<Object, Double>) fs.getOutDetails();
             for (Map.Entry<String, Double> valEntry : entry.getValue().entrySet()) {
-                // CombFork salva il nome (String) anziché la chiave dell'oggetto stazione
+                // CombFork saves the name (String) instead of the station object key
                 fork.put(valEntry.getKey(), valEntry.getValue());
             }
         }
 
 
-        // --- 9. Risoluzione Condizioni Reti di Petri ---
+        // --- 9. Petri Net Conditions Resolution ---
 
         context.enablingConditionMap.forEach((k, v) -> {
             if (k[0] == null || k[2] == null || k[3] == null) return;
@@ -165,7 +165,7 @@ public class PostProcessingMapper implements ModelElementMapper {
             if (sKey != null) model.setFiringOutcome(k[0], (Integer) k[1], sKey, k[3], v);
         });
 
-        // --- 10. Salva ---
+        // --- 10. Save ---
         model.resetSaveState();
     }
 }

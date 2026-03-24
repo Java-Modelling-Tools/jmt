@@ -2,7 +2,7 @@ package jmt.gui.common.xml.mapper;
 
 public interface XMLMapperConstants {
 
-    // --- Nomi Parametri XML (Queue, Server, Delay) ---
+    // --- XML Parameter Names (Queue, Server, Delay) ---
     String PARAM_QUEUE_PUT_STRATEGY = "QueuePutStrategy";
     String PARAM_FCFS_STRATEGY = "FCFSstrategy";
     String PARAM_POLLING_K_VALUE = "pollingKValue";
@@ -17,7 +17,7 @@ public interface XMLMapperConstants {
     String PARAM_SERVER_TYPES_COMPATIBILITIES = "serverTypesCompatibilities";
     String PARAM_SERVICE_STRATEGY = "ServiceStrategy";
 
-    // --- Nomi Parametri XML (Reti di Petri) ---
+    // --- XML Parameter Names (Petri Nets) ---
     String PARAM_ENABLING_CONDITIONS = "enablingConditions";
     String PARAM_INHIBITING_CONDITIONS = "inhibitingConditions";
     String PARAM_RESOURCE_CONDITIONS = "resourceConditions";
@@ -28,7 +28,7 @@ public interface XMLMapperConstants {
     String PARAM_FIRING_WEIGHTS = "firingWeights";
     String PARAM_FIRING_OUTCOMES = "firingOutcomes";
 
-    // --- Nomi Parametri XML (Fork, Join, Storage, ecc.) ---
+    // --- XML Parameter Names (Fork, Join, Storage, etc.) ---
     String PARAM_JOBS_PER_LINK = "jobsPerLink";
     String PARAM_BLOCK = "block";
     String PARAM_IS_SIMPLIFIED_FORK = "isSimplifiedFork";
@@ -42,7 +42,7 @@ public interface XMLMapperConstants {
     String PARAM_DROP_RULES = "dropRules";
     String PARAM_PUT_STRATEGIES = "putStrategies";
 
-    // --- Suffissi e Nomi Strategie (Queue & Server) ---
+    // --- Suffixes and Strategy Names (Queue & Server) ---
     String STRAT_TAIL = "Tail";
     String STRAT_HEAD = "Head";
     String STRAT_RAND = "Rand";
@@ -82,11 +82,11 @@ public interface XMLMapperConstants {
     String DROP_XML_WAITING_QUEUE = "waiting queue";
     String DROP_XML_RETRIAL = "retrial";
 
-    // --- Valori Letterali Comuni ---
+    // --- Common Literal Values ---
     String VAL_ZERO = "0";
     String VAL_ONE = "1";
 
-    // --- Aggiunte per Router, Storage e altre utility ---
+    // --- Additions for Router, Storage and other utilities ---
     String PARAM_EMPIRICAL_ENTRY = "EmpiricalEntry";
     String STRAT_TAIL_STRATEGY = "TailStrategy";
     String STRAT_HEAD_STRATEGY = "HeadStrategy";

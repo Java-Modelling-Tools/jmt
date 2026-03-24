@@ -13,7 +13,7 @@ public class NodeDescriptor {
     private Double quantumSize;
     private Double quantumSwitchoverTime;
 
-    // Getter e Setter
+    // Getters and Setters
     public List<Double> getClassSoftDeadlines() {
         return classSoftDeadlines;
     }

@@ -21,11 +21,11 @@ public class BlockingRegionsMapper implements ModelElementMapper {
 
         for (BlockingRegionDescriptor region : dto.getBlockingRegions()) {
 
-            // 1. Creazione della regione
+            // 1. Region creation
             Object regionKey = model.addBlockingRegion(region.getName(), region.getType());
             context.regions.put(region.getName(), regionKey);
 
-            // 2. Parametri globali della regione
+            // 2. Global parameters of the region
             Map<String, String> glob = region.getGlobalConstraints();
             if (glob != null) {
                 if (glob.get("maxJobs") != null) {
@@ -36,7 +36,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 }
             }
 
-            // 3. Nodi (Stazioni) appartenenti alla regione
+            // 3. Nodes (Stations) belonging to the region
             if (region.getRegionNodes() != null) {
                 for (String nodeName : region.getRegionNodes()) {
                     Object stationKey = context.stations.get(nodeName);
@@ -46,12 +46,12 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 }
             }
 
-            // 4. Limiti multipli per Classe (maxJobs, maxMemory, softDeadline)
+            // 4. Multiple limits per Class (maxJobs, maxMemory, softDeadline)
             if (region.getClassConstraints() != null) {
                 region.getClassConstraints().forEach((className, constraintsMap) -> {
                     Object classKey = context.classes.get(className);
                     if (classKey != null) {
-                        // FIX: Utilizzo delle chiavi esatte iniettate da SimParser
+                        // FIX: Using the exact keys injected by SimParser
                         if (constraintsMap.get("maxJobsPerClass") != null) {
                             model.setRegionClassCustomerConstraint(regionKey, classKey, Integer.parseInt(constraintsMap.get("maxJobsPerClass")));
                         }
@@ -65,7 +65,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 });
             }
 
-            // 5. Pesi (Weights) per Classe
+            // 5. Weights per Class
             if (region.getClassWeights() != null) {
                 region.getClassWeights().forEach((className, weight) -> {
                     Object classKey = context.classes.get(className);
@@ -75,7 +75,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 });
             }
 
-            // 6. Dimensioni (Sizes) per Classe
+            // 6. Sizes per Class
             if (region.getClassSizes() != null) {
                 region.getClassSizes().forEach((className, size) -> {
                     Object classKey = context.classes.get(className);
@@ -85,7 +85,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 });
             }
 
-            // 7. Regole di Drop per Classe
+            // 7. Drop Rules per Class
             if (region.getDropRules() != null) {
                 region.getDropRules().forEach((className, dropRule) -> {
                     Object classKey = context.classes.get(className);
@@ -95,7 +95,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 });
             }
 
-            // 8. Gruppi di blocco e relative classi
+            // 8. Blocking groups and related classes
             Set<String> groupNames = new LinkedHashSet<>();
             if (region.getGroupConstraints() != null) groupNames.addAll(region.getGroupConstraints().keySet());
             if (region.getGroupMemoryConstraints() != null) groupNames.addAll(region.getGroupMemoryConstraints().keySet());

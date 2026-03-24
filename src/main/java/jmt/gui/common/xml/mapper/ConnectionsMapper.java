@@ -18,19 +18,19 @@ public class ConnectionsMapper implements ModelElementMapper {
             String sourceName = conn.getSource();
             String targetName = conn.getTarget();
 
-            // 1. Cerca il nodo sorgente: prima tra le stazioni, poi tra le regioni
+            // 1. Search for the source node: first among the stations, then among the regions
             Object sourceKey = context.stations.get(sourceName);
             if (sourceKey == null) {
                 sourceKey = context.regions.get(sourceName);
             }
 
-            // 2. Cerca il nodo di destinazione: prima tra le stazioni, poi tra le regioni
+            // 2. Search for the destination node: first among the stations, then among the regions
             Object targetKey = context.stations.get(targetName);
             if (targetKey == null) {
                 targetKey = context.regions.get(targetName);
             }
 
-            // 3. Se entrambi i nodi esistono nel modello, attiva la connessione tramite setConnected
+            // 3. If both nodes exist in the model, activate the connection via setConnected
             if (sourceKey != null && targetKey != null) {
                 model.setConnected(sourceKey, targetKey, true);
             }
