@@ -148,30 +148,76 @@ public abstract class AbstractSectionMapper {
         return dist;
     }
 
-    // --- METODI PER RETI DI PETRI E CONDIZIONI RIPRISTINATI ---
+
+// --- METODI PER RETI DI PETRI E CONDIZIONI RIPRISTINATI ---
+
     protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
-        if (en != null) populateConditionMap(key, en, ctx.enablingConditionMap, ctx);
-        if (in != null) populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);
-        if (res != null) populateConditionMap(key, res, ctx.resourceConditionMap, ctx);
+        if (en != null) {
+            System.out.println("[DEBUG - Conditions] Inizio estrazione Enabling Conditions...");
+            populateConditionMap(key, en, ctx.enablingConditionMap, ctx);
+        }
+        if (in != null) {
+            System.out.println("[DEBUG - Conditions] Inizio estrazione Inhibiting Conditions...");
+            populateConditionMap(key, in, ctx.inhibitingConditionMap, ctx);
+        }
+        if (res != null) {
+            System.out.println("[DEBUG - Conditions] Inizio estrazione Resource Conditions...");
+            populateConditionMap(key, res, ctx.resourceConditionMap, ctx);
+        }
     }
 
-    private void populateConditionMap(Object key, ParameterDescriptor cond, Map<Object[], Integer> targetMap, MappingContext ctx) {
-        List<ParameterDescriptor> conds = getSubParams(cond);
-        for (int i = 0; i < conds.size(); i++) {
-            ParameterDescriptor firstSub = getFirst(getSubParams(getAt(conds, i)));
-            if (firstSub != null) {
-                List<ParameterDescriptor> vectors = getSubParams(firstSub);
-                for (ParameterDescriptor vector : vectors) {
-                    List<ParameterDescriptor> els = getSubParams(vector);
-                    if (!els.isEmpty()) {
-                        String sName = val(getAt(els, 0));
-                        final int index = i;
-                        getRefClassMap(getAt(els, 1)).forEach((cName, entry) -> {
-                            Double vVal = valD(entry);
-                            if (sName != null && vVal != null) {
-                                targetMap.put(new Object[]{key, index, sName, ctx.classes.get(cName)}, vVal.intValue());
-                            }
-                        });
+    private void populateConditionMap(Object key, ParameterDescriptor condParam, Map<Object[], Integer> targetMap, MappingContext ctx) {
+        if (condParam == null) {
+            System.out.println("[DEBUG - Conditions] Parametro condizione nullo!");
+            return;
+        }
+
+        // Livello 1: i figli diretti sono le singole condizioni per modalità (es. "enablingCondition")
+        List<ParameterDescriptor> modes = getSubParams(condParam);
+        System.out.println("[DEBUG - Conditions] Trovate " + modes.size() + " modalità (conditions)");
+
+        for (int i = 0; i < modes.size(); i++) {
+            ParameterDescriptor condition = modes.get(i);
+
+            // Livello 2: dentro "enablingCondition" c'è un contenitore (es. "enablingVectors")
+            List<ParameterDescriptor> conditionElements = getSubParams(condition);
+            if (conditionElements.isEmpty()) {
+                System.out.println("[DEBUG - Conditions] Modalità " + i + " vuota. Salto.");
+                continue;
+            }
+
+            ParameterDescriptor vectorsArray = conditionElements.get(0);
+
+            // Livello 3: i figli del contenitore sono i singoli vettori (es. "enablingVector")
+            List<ParameterDescriptor> vectors = getSubParams(vectorsArray);
+            System.out.println("[DEBUG - Conditions] Modalità " + i + " ha " + vectors.size() + " vettori");
+
+            for (ParameterDescriptor vector : vectors) {
+                // Livello 4: dentro al vettore ci sono stationName e la mappa refClass (es. "enablingEntries")
+                List<ParameterDescriptor> vectorElements = getSubParams(vector);
+
+                if (vectorElements.size() < 2) {
+                    System.out.println("[DEBUG - Conditions] Vettore scartato (trovato " + vectorElements.size() + " elementi invece di 2)");
+                    continue;
+                }
+
+                String stationName = val(vectorElements.get(0));
+                ParameterDescriptor entriesParam = vectorElements.get(1);
+
+                Map<String, ParameterDescriptor> refMap = getRefClassMap(entriesParam);
+                System.out.println("[DEBUG - Conditions] Stazione Target: '" + stationName + "'. Trovate " + refMap.size() + " entries per la mappa refClass.");
+
+                for (Map.Entry<String, ParameterDescriptor> entry : refMap.entrySet()) {
+                    String className = entry.getKey();
+                    Integer vVal = valI(entry.getValue());
+
+                    System.out.println("[DEBUG - Conditions] Analizzo entry -> Classe: '" + className + "', Valore estratto: " + vVal);
+
+                    if (stationName != null && vVal != null) {
+                        Object classKey = ctx.classes.get(className);
+                        Object[] quadKey = new Object[]{key, i, stationName, classKey};
+                        targetMap.put(quadKey, vVal);
+                        System.out.println("[DEBUG - Conditions] Inserito con successo nella mappa!");
                     }
                 }
             }
