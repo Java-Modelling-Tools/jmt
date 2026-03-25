@@ -141,27 +141,29 @@ public class QueueSectionMapper extends AbstractSectionMapper {
     private void mapImpatienceStrategies(SectionDescriptor sec, Object key, CommonModel model, MappingContext ctx) {
         ParameterDescriptor impatience = getParam(sec, XMLConstantNames.PARAM_IMPATIENCE);
         if (impatience != null) {
-            getRefClassMap(impatience).forEach((cName, p) -> {
-                Object classKey = ctx.classes.get(cName);
-                String impName = p.getName();
-                ImpatienceType type = ImpatienceType.NONE;
-                if (impName != null && impName.contains("Reneging")) type = ImpatienceType.RENEGING;
-                else if (impName != null && impName.contains("Balking")) type = ImpatienceType.BALKING;
-
-                if (type == ImpatienceType.RENEGING) {
-                    model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
-                } else if (type == ImpatienceType.BALKING) {
-                    List<ParameterDescriptor> subs = getSubParams(p);
-                    BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
-                    String bVal = val(getAt(subs, 3));
-                    if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
-                    model.setImpatienceParameter(key, classKey, bp);
-                } else {
-                    model.setImpatienceParameter(key, classKey, null);
-                }
-                model.setImpatienceType(key, classKey, type);
-            });
+            getRefClassMap(impatience).forEach((cName, p) -> mapSingleImpatienceStrategy(cName, p, key, model, ctx));
         }
+    }
+
+    private void mapSingleImpatienceStrategy(String cName, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        Object classKey = ctx.classes.get(cName);
+        String impName = p.getName();
+        ImpatienceType type = ImpatienceType.NONE;
+        if (impName != null && impName.contains("Reneging")) type = ImpatienceType.RENEGING;
+        else if (impName != null && impName.contains("Balking")) type = ImpatienceType.BALKING;
+
+        if (type == ImpatienceType.RENEGING) {
+            model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
+        } else if (type == ImpatienceType.BALKING) {
+            List<ParameterDescriptor> subs = getSubParams(p);
+            BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
+            String bVal = val(getAt(subs, 3));
+            if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
+            model.setImpatienceParameter(key, classKey, bp);
+        } else {
+            model.setImpatienceParameter(key, classKey, null);
+        }
+        model.setImpatienceType(key, classKey, type);
     }
 
     private void mapPetriNetConditions(SectionDescriptor sec, Object key, MappingContext ctx) {

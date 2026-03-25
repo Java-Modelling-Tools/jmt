@@ -52,16 +52,8 @@ public class RouterSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapProbabilityRouting(Object key, Object classKey, ParameterDescriptor p, MappingContext ctx) {
-        Map<String, Double> tmp = new TreeMap<>();
         ParameterDescriptor entryArray = getFirst(getSubParams(p));
-        if (entryArray != null) {
-            for (ParameterDescriptor entry : getSubParams(entryArray)) {
-                List<ParameterDescriptor> subEntries = getSubParams(entry);
-                String sName = val(getAt(subEntries, 0));
-                Double dVal = valD(getAt(subEntries, 1));
-                if (sName != null && dVal != null) tmp.put(sName, dVal);
-            }
-        }
+        Map<String, Double> tmp = mapDoubleValueMap(entryArray);
         ctx.empiricalRouting.put(new Object[]{key, classKey}, tmp);
     }
 
@@ -74,16 +66,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
             Integer fromValue = valI(getAt(subFrom, 0));
             if (fromValue == null) continue;
 
-            Map<String, Double> tmp = new TreeMap<>();
-            ParameterDescriptor destArray = getAt(subFrom, 1);
-            if (destArray != null) {
-                for (ParameterDescriptor e : getSubParams(destArray)) {
-                    List<ParameterDescriptor> eSub = getSubParams(e);
-                    String sName = val(getAt(eSub, 0));
-                    Double dVal = valD(getAt(eSub, 1));
-                    if (sName != null && dVal != null) tmp.put(sName, dVal);
-                }
-            }
+            Map<String, Double> tmp = mapDoubleValueMap(getAt(subFrom, 1));
             ctx.empiricalLDRouting.put(new Object[]{key, classKey, fromValue}, tmp);
         }
     }
@@ -97,16 +80,8 @@ public class RouterSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapWeightedRoundRobinRouting(Object key, Object classKey, ParameterDescriptor p, MappingContext ctx) {
-        Map<String, Integer> tmp = new TreeMap<>();
         ParameterDescriptor entryArray = getFirst(getSubParams(p));
-        if (entryArray != null) {
-            for (ParameterDescriptor entry : getSubParams(entryArray)) {
-                List<ParameterDescriptor> subEntries = getSubParams(entry);
-                String sName = val(getAt(subEntries, 0));
-                Integer iVal = valI(getAt(subEntries, 1));
-                if (sName != null && iVal != null) tmp.put(sName, iVal);
-            }
-        }
+        Map<String, Integer> tmp = mapIntegerValueMap(entryArray);
         ctx.wrrRouting.put(new Object[]{key, classKey}, tmp);
     }
 
@@ -124,26 +99,39 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         ctx.csClassRouting.put(new Object[]{key, classKey}, classTmp);
     }
 
+    private Map<String, Double> mapDoubleValueMap(ParameterDescriptor entryArray) {
+        Map<String, Double> tmp = new TreeMap<>();
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                List<ParameterDescriptor> subEntries = getSubParams(entry);
+                String sName = val(getAt(subEntries, 0));
+                Double dVal = valD(getAt(subEntries, 1));
+                if (sName != null && dVal != null) tmp.put(sName, dVal);
+            }
+        }
+        return tmp;
+    }
+
+    private Map<String, Integer> mapIntegerValueMap(ParameterDescriptor entryArray) {
+        Map<String, Integer> tmp = new TreeMap<>();
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                List<ParameterDescriptor> subEntries = getSubParams(entry);
+                String sName = val(getAt(subEntries, 0));
+                Integer iVal = valI(getAt(subEntries, 1));
+                if (sName != null && iVal != null) tmp.put(sName, iVal);
+            }
+        }
+        return tmp;
+    }
+
     private void processClassSwitchParameter(ParameterDescriptor csp, Map<String, Double> branchTmp, Map<String, Map<String, Double>> classTmp) {
         List<ParameterDescriptor> subCsp = getSubParams(csp);
         String sName = val(getAt(subCsp, 0));
         Double dVal = valD(getAt(subCsp, 1));
         if (sName != null && dVal != null) branchTmp.put(sName, dVal);
 
-        Map<String, Double> innerMap = mapInnerClassSwitchRouting(getAt(subCsp, 2));
+        Map<String, Double> innerMap = mapDoubleValueMap(getAt(subCsp, 2));
         if (sName != null) classTmp.put(sName, innerMap);
-    }
-
-    private Map<String, Double> mapInnerClassSwitchRouting(ParameterDescriptor entryArray) {
-        Map<String, Double> innerMap = new TreeMap<>();
-        if (entryArray != null) {
-            for (ParameterDescriptor e : getSubParams(entryArray)) {
-                List<ParameterDescriptor> eSub = getSubParams(e);
-                String iName = val(getAt(eSub, 0));
-                Double iDVal = valD(getAt(eSub, 1));
-                if (iName != null && iDVal != null) innerMap.put(iName, iDVal);
-            }
-        }
-        return innerMap;
     }
 }

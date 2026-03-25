@@ -20,18 +20,22 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         if (sec.getParameters() == null) return;
 
         for (ParameterDescriptor p : sec.getParameters()) {
-            if (XMLConstantNames.PARAM_JOBS_PER_LINK.equals(p.getName())) {
-                Integer v = valI(p);
-                if (v != null) model.setStationNumberOfServers(key, v);
-            } else if (XMLConstantNames.PARAM_BLOCK.equals(p.getName())) {
-                Integer v = valI(p);
-                if (v != null) model.setForkBlock(key, v);
-            } else if (XMLConstantNames.PARAM_IS_SIMPLIFIED_FORK.equals(p.getName())) {
-                String bVal = val(p);
-                if (bVal != null) model.setIsSimplifiedFork(key, Boolean.parseBoolean(bVal));
-            } else if (XMLConstantNames.PARAM_FORK_STRATEGY.equals(p.getName())) {
-                getRefClassMap(p).forEach((className, fP) -> mapForkStrategy(className, fP, key, model, ctx));
-            }
+            mapForkParameter(p, key, model, ctx);
+        }
+    }
+
+    private void mapForkParameter(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        if (XMLConstantNames.PARAM_JOBS_PER_LINK.equals(p.getName())) {
+            Integer v = valI(p);
+            if (v != null) model.setStationNumberOfServers(key, v);
+        } else if (XMLConstantNames.PARAM_BLOCK.equals(p.getName())) {
+            Integer v = valI(p);
+            if (v != null) model.setForkBlock(key, v);
+        } else if (XMLConstantNames.PARAM_IS_SIMPLIFIED_FORK.equals(p.getName())) {
+            String bVal = val(p);
+            if (bVal != null) model.setIsSimplifiedFork(key, Boolean.parseBoolean(bVal));
+        } else if (XMLConstantNames.PARAM_FORK_STRATEGY.equals(p.getName())) {
+            getRefClassMap(p).forEach((className, fP) -> mapForkStrategy(className, fP, key, model, ctx));
         }
     }
 
@@ -62,34 +66,42 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor entryArray = getFirst(getSubParams(fP));
         if (entryArray != null) {
             for (ParameterDescriptor entry : getSubParams(entryArray)) {
-                OutPath op = new OutPath();
-                List<ParameterDescriptor> entryParams = getSubParams(entry);
-
-                // FIX ORACLE: entryParams.get(0) is "outUnitProbability", which contains stationName and probability!
-                ParameterDescriptor outUnitProb = getAt(entryParams, 0);
-                List<ParameterDescriptor> outUnitSub = getSubParams(outUnitProb);
-
-                String sName = val(getAt(outUnitSub, 0));
-                Double pVal = valD(getAt(outUnitSub, 1));
-
-                if (pVal != null) op.setProbability(pVal);
-
-                Map<Object, Object> opMap = new HashMap<>();
-                // entryParams.get(1) is "JobsPerLinkDis"
-                ParameterDescriptor jobsPerLinkDis = getAt(entryParams, 1);
-                if (jobsPerLinkDis != null) {
-                    for (ParameterDescriptor res : getSubParams(jobsPerLinkDis)) {
-                        List<ParameterDescriptor> resParams = getSubParams(res);
-                        Integer rKey = valI(getAt(resParams, 0));
-                        Double rVal = valD(getAt(resParams, 1));
-                        if (rKey != null && rVal != null) opMap.put(rKey, rVal);
-                    }
-                }
-                op.setOutParameters(opMap);
-                if (sName != null) map.put(sName, op);
+                parseProbabilitiesOutPath(entry, map);
             }
         }
         ctx.empiricalFork.put(new Object[]{key, classKey}, map);
+    }
+
+    private void parseProbabilitiesOutPath(ParameterDescriptor entry, Map<String, OutPath> map) {
+        OutPath op = new OutPath();
+        List<ParameterDescriptor> entryParams = getSubParams(entry);
+
+        // FIX ORACLE: entryParams.get(0) is "outUnitProbability", which contains stationName and probability!
+        ParameterDescriptor outUnitProb = getAt(entryParams, 0);
+        List<ParameterDescriptor> outUnitSub = getSubParams(outUnitProb);
+
+        String sName = val(getAt(outUnitSub, 0));
+        Double pVal = valD(getAt(outUnitSub, 1));
+
+        if (pVal != null) op.setProbability(pVal);
+
+        // entryParams.get(1) is "JobsPerLinkDis"
+        ParameterDescriptor jobsPerLinkDis = getAt(entryParams, 1);
+        op.setOutParameters(mapJobsPerLinkDis(jobsPerLinkDis));
+        if (sName != null) map.put(sName, op);
+    }
+
+    private Map<Object, Object> mapJobsPerLinkDis(ParameterDescriptor jobsPerLinkDis) {
+        Map<Object, Object> opMap = new HashMap<>();
+        if (jobsPerLinkDis != null) {
+            for (ParameterDescriptor res : getSubParams(jobsPerLinkDis)) {
+                List<ParameterDescriptor> resParams = getSubParams(res);
+                Integer rKey = valI(getAt(resParams, 0));
+                Double rVal = valD(getAt(resParams, 1));
+                if (rKey != null && rVal != null) opMap.put(rKey, rVal);
+            }
+        }
+        return opMap;
     }
 
     private void mapCombFork(Object key, Object classKey, ParameterDescriptor fP, MappingContext ctx) {
