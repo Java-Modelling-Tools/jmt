@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping {@link ConnectionDescriptor} objects from the DTO to the {@link CommonModel}.
+ * It iterates through the connections defined in the {@link SimDescriptor} and establishes the links between nodes in the model.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;

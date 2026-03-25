@@ -1,3 +1,10 @@
+/**
+ * This class is a Data Transfer Object (DTO) that represents a user class in the simulation model.
+ * User classes are used to differentiate jobs and apply different behaviors or priorities.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.dto;
 
 public class UserClassDescriptor {
@@ -57,4 +64,3 @@ public class UserClassDescriptor {
         this.customers = customers;
     }
 }
-

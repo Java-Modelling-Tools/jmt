@@ -1,3 +1,10 @@
+/**
+ * This class holds the context for the mapping process. It contains the {@link CommonModel} being built and various caches
+ * and temporary data structures needed by the different mapper classes.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;

@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping {@link NodeDescriptor} objects representing stations from the DTO to the {@link CommonModel}.
+ * It determines the station type based on its section signature and then uses specialized section mappers to configure the station.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.CommonConstants;

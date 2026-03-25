@@ -16,6 +16,15 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+/**
+ * <p>Title: XML Reader</p>
+ * <p>Description: New version of {@link OLDXMLReader}. Reads model information from an XML file. This class provides
+ * methods for model load.</p>
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ *
+ */
 public class XMLReader implements XMLConstantNames, CommonConstants {
     private XMLReader() {
         /* This utility class should not be instantiated */

@@ -1,3 +1,10 @@
+/**
+ * This class is a Data Transfer Object (DTO) that represents a section within a node.
+ * A section typically defines a specific behavior or configuration, like a routing strategy or a server's properties.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.dto;
 
 import java.util.ArrayList;
@@ -30,4 +37,3 @@ public class SectionDescriptor {
         }
     }
 }
-

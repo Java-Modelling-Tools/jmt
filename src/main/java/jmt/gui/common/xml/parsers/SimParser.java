@@ -7,6 +7,14 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * <p>Title: XML Sim Parser</p>
+ * <p>Description: parser for the {@link SimDescriptor}</p>
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ *
+ */
 public class SimParser implements XmlEntityParser<SimDescriptor> {
 
     @Override

@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping {@link BlockingRegionDescriptor} objects from the DTO to the {@link CommonModel}.
+ * It iterates through the blocking regions defined in the {@link SimDescriptor} and configures their properties and constraints.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;

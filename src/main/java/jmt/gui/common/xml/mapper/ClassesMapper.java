@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping {@link UserClassDescriptor} objects from the DTO to the {@link CommonModel}.
+ * It iterates through the user classes defined in the {@link SimDescriptor} and adds them to the model.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.CommonConstants;

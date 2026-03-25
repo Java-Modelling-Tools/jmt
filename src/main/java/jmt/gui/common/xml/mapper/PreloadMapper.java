@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping the preload information from the {@link SimDescriptor} to the {@link CommonModel}.
+ * It sets the initial number of jobs in each station for each class.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;

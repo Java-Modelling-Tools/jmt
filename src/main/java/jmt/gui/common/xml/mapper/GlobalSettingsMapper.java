@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping the global settings from the {@link SimDescriptor} to the {@link CommonModel}.
+ * This includes simulation parameters like seed, duration, and logging configurations.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.framework.data.MacroReplacer;

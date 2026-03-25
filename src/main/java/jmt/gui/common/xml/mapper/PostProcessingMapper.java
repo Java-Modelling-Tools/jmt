@@ -1,3 +1,11 @@
+/**
+ * This class is responsible for performing post-processing steps after the initial mapping.
+ * It resolves references between different model elements, such as reference stations for classes and routing strategies
+ * that depend on other elements being fully defined.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.CommonConstants;
