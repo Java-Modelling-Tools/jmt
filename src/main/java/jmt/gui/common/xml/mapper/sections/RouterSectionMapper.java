@@ -117,25 +117,33 @@ public class RouterSectionMapper extends AbstractSectionMapper {
 
         if (paramArray != null) {
             for (ParameterDescriptor csp : getSubParams(paramArray)) {
-                List<ParameterDescriptor> subCsp = getSubParams(csp);
-                String sName = val(getAt(subCsp, 0));
-                Double dVal = valD(getAt(subCsp, 1));
-                if (sName != null && dVal != null) branchTmp.put(sName, dVal);
-
-                Map<String, Double> innerMap = new TreeMap<>();
-                ParameterDescriptor entryArray = getAt(subCsp, 2);
-                if (entryArray != null) {
-                    for (ParameterDescriptor e : getSubParams(entryArray)) {
-                        List<ParameterDescriptor> eSub = getSubParams(e);
-                        String iName = val(getAt(eSub, 0));
-                        Double iDVal = valD(getAt(eSub, 1));
-                        if (iName != null && iDVal != null) innerMap.put(iName, iDVal);
-                    }
-                }
-                if (sName != null) classTmp.put(sName, innerMap);
+                processClassSwitchParameter(csp, branchTmp, classTmp);
             }
         }
         ctx.csBranchRouting.put(new Object[]{key, classKey}, branchTmp);
         ctx.csClassRouting.put(new Object[]{key, classKey}, classTmp);
+    }
+
+    private void processClassSwitchParameter(ParameterDescriptor csp, Map<String, Double> branchTmp, Map<String, Map<String, Double>> classTmp) {
+        List<ParameterDescriptor> subCsp = getSubParams(csp);
+        String sName = val(getAt(subCsp, 0));
+        Double dVal = valD(getAt(subCsp, 1));
+        if (sName != null && dVal != null) branchTmp.put(sName, dVal);
+
+        Map<String, Double> innerMap = mapInnerClassSwitchRouting(getAt(subCsp, 2));
+        if (sName != null) classTmp.put(sName, innerMap);
+    }
+
+    private Map<String, Double> mapInnerClassSwitchRouting(ParameterDescriptor entryArray) {
+        Map<String, Double> innerMap = new TreeMap<>();
+        if (entryArray != null) {
+            for (ParameterDescriptor e : getSubParams(entryArray)) {
+                List<ParameterDescriptor> eSub = getSubParams(e);
+                String iName = val(getAt(eSub, 0));
+                Double iDVal = valD(getAt(eSub, 1));
+                if (iName != null && iDVal != null) innerMap.put(iName, iDVal);
+            }
+        }
+        return innerMap;
     }
 }
