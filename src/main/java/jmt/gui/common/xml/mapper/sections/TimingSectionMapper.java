@@ -1,20 +1,28 @@
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
-import jmt.gui.common.xml.mapper.XMLMapperConstants;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TimingSectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
+public class TimingSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        ParameterDescriptor modes = getParam(sec, PARAM_MODE_NAMES);
+        mapTransitionModes(sec, model, key, ctx);
+        mapNumberOfServers(sec, model, key);
+        mapTimingStrategies(sec, model, key, ctx);
+        mapFiringPriorities(sec, model, key);
+        mapFiringWeights(sec, model, key);
+    }
+
+    private void mapTransitionModes(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
+        ParameterDescriptor modes = getParam(sec, XMLConstantNames.PARAM_MODE_NAMES);
         if (modes != null) {
             List<ParameterDescriptor> subModes = getSubParams(modes);
             if (!subModes.isEmpty()) {
@@ -30,8 +38,10 @@ public class TimingSectionMapper extends AbstractSectionMapper implements XMLMap
                 ctx.modeNameLists.put(key, nl);
             }
         }
+    }
 
-        ParameterDescriptor nos = getParam(sec, PARAM_NUMBERS_OF_SERVERS);
+    private void mapNumberOfServers(SectionDescriptor sec, CommonModel model, Object key) {
+        ParameterDescriptor nos = getParam(sec, XMLConstantNames.PARAM_NUMBERS_OF_SERVERS);
         if (nos != null) {
             List<ParameterDescriptor> sp = getSubParams(nos);
             for (int i = 0; i < sp.size(); i++) {
@@ -41,8 +51,10 @@ public class TimingSectionMapper extends AbstractSectionMapper implements XMLMap
                 }
             }
         }
+    }
 
-        ParameterDescriptor ts = getParam(sec, PARAM_TIMING_STRATEGIES);
+    private void mapTimingStrategies(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
+        ParameterDescriptor ts = getParam(sec, XMLConstantNames.PARAM_TIMING_STRATEGIES);
         if (ts != null) {
             List<ParameterDescriptor> sp = getSubParams(ts);
             for (int i = 0; i < sp.size(); i++) {
@@ -52,8 +64,10 @@ public class TimingSectionMapper extends AbstractSectionMapper implements XMLMap
                 }
             }
         }
+    }
 
-        ParameterDescriptor fp = getParam(sec, PARAM_FIRING_PRIORITIES);
+    private void mapFiringPriorities(SectionDescriptor sec, CommonModel model, Object key) {
+        ParameterDescriptor fp = getParam(sec, XMLConstantNames.PARAM_FIRING_PRIORITIES);
         if (fp != null) {
             List<ParameterDescriptor> sp = getSubParams(fp);
             for (int i = 0; i < sp.size(); i++) {
@@ -63,8 +77,10 @@ public class TimingSectionMapper extends AbstractSectionMapper implements XMLMap
                 }
             }
         }
+    }
 
-        ParameterDescriptor fw = getParam(sec, PARAM_FIRING_WEIGHTS);
+    private void mapFiringWeights(SectionDescriptor sec, CommonModel model, Object key) {
+        ParameterDescriptor fw = getParam(sec, XMLConstantNames.PARAM_FIRING_WEIGHTS);
         if (fw != null) {
             List<ParameterDescriptor> sp = getSubParams(fw);
             for (int i = 0; i < sp.size(); i++) {
