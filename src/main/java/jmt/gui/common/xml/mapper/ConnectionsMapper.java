@@ -12,28 +12,25 @@ public class ConnectionsMapper implements ModelElementMapper {
             return;
         }
 
-        CommonModel model = context.getModel();
-
         for (ConnectionDescriptor conn : dto.getConnections()) {
-            String sourceName = conn.getSource();
-            String targetName = conn.getTarget();
+            mapConnection(conn, context);
+        }
+    }
 
-            // 1. Search for the source node: first among the stations, then among the regions
-            Object sourceKey = context.stations.get(sourceName);
-            if (sourceKey == null) {
-                sourceKey = context.regions.get(sourceName);
-            }
+    private void mapConnection(ConnectionDescriptor conn, MappingContext context) {
+        CommonModel model = context.getModel();
+        String sourceName = conn.getSource();
+        String targetName = conn.getTarget();
 
-            // 2. Search for the destination node: first among the stations, then among the regions
-            Object targetKey = context.stations.get(targetName);
-            if (targetKey == null) {
-                targetKey = context.regions.get(targetName);
-            }
+        // 1. Search for the source node: first among the stations, then among the regions
+        Object sourceKey = resolveStationOrRegion(sourceName, context);
 
-            // 3. If both nodes exist in the model, activate the connection via setConnected
-            if (sourceKey != null && targetKey != null) {
-                model.setConnected(sourceKey, targetKey, true);
-            }
+        // 2. Search for the destination node: first among the stations, then among the regions
+        Object targetKey = resolveStationOrRegion(targetName, context);
+
+        // 3. If both nodes exist in the model, activate the connection via setConnected
+        if (sourceKey != null && targetKey != null) {
+            model.setConnected(sourceKey, targetKey, true);
         }
     }
 }

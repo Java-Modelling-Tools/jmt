@@ -11,60 +11,62 @@ public class MeasuresMapper implements ModelElementMapper {
     @Override
     public void map(SimDescriptor dto, MappingContext context) {
         if (dto.getMeasures() == null || dto.getMeasures().isEmpty()) return;
-        CommonModel model = context.getModel();
 
         for (MeasureDescriptor m : dto.getMeasures()) {
-            Object stationKey = null;
-            String nodeType = m.getNodeType();
-            String refNode = m.getReferenceNode();
-
-            // Identify the reference station or region
-            if (refNode != null && !refNode.isEmpty()) {
-                if ("region".equals(nodeType)) {
-                    stationKey = context.regions.get(refNode);
-                } else {
-                    stationKey = context.stations.get(refNode);
-                }
-            }
-
-            Object classKey = null;
-            String className = m.getReferenceUserClass();
-            String type = m.getType();
-
-            if (className != null && !className.isEmpty()) {
-                // FIX ORACLE: If it is an FX measure (Firing Throughput), the "class" is actually a Transition Mode.
-                if (type != null && (type.equals("Firing Throughput") || type.equals("Fire Frequency") || type.endsWith("FX"))) {
-                    if (stationKey != null && context.modeNameLists != null) {
-                        List<String> modeNameList = context.modeNameLists.get(stationKey);
-                        if (modeNameList != null && modeNameList.contains(className)) {
-                            // Like the Oracle: it gets it from the modeNameLists
-                            classKey = modeNameList.get(modeNameList.indexOf(className));
-                        } else {
-                            classKey = className; // Safety fallback
-                        }
-                    } else {
-                        classKey = className;
-                    }
-                } else {
-                    classKey = context.classes.get(className);
-                }
-            }
-
-            // Inverts alpha (e.g.: 0.10 -> 0.90) as in OLDXMLReader
-            Double alpha = 0.05;
-            if (m.getAlpha() != null && !m.getAlpha().isEmpty()) {
-                alpha = 1.0 - Double.parseDouble(m.getAlpha());
-            }
-
-            Double precision = 0.03;
-            if (m.getPrecision() != null && !m.getPrecision().isEmpty()) {
-                precision = Double.parseDouble(m.getPrecision());
-            }
-
-            boolean verbose = Boolean.parseBoolean(m.getVerbose());
-
-            // Adds the measure to the model
-            model.addMeasure(type, stationKey, classKey, alpha, precision, verbose);
+            mapMeasure(m, context);
         }
+    }
+
+    private void mapMeasure(MeasureDescriptor m, MappingContext context) {
+        CommonModel model = context.getModel();
+        Object stationKey = resolveStationKey(m, context);
+        Object classKey = resolveClassKey(m, stationKey, context);
+
+        Double alpha = 1.0 - getDouble(m.getAlpha(), 0.95); // Default alpha in XML is 0.05, so 1-0.05 = 0.95
+        Double precision = getDouble(m.getPrecision(), 0.03);
+        boolean verbose = Boolean.parseBoolean(m.getVerbose());
+
+        model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);
+    }
+
+    private Object resolveStationKey(MeasureDescriptor m, MappingContext context) {
+        String refNode = m.getReferenceNode();
+        if (isPresent(refNode)) {
+            if ("region".equals(m.getNodeType())) {
+                return context.regions.get(refNode);
+            } else {
+                return context.stations.get(refNode);
+            }
+        }
+        return null;
+    }
+
+    private Object resolveClassKey(MeasureDescriptor m, Object stationKey, MappingContext context) {
+        String className = m.getReferenceUserClass();
+        String type = m.getType();
+
+        if (!isPresent(className)) {
+            return null;
+        }
+
+        if (isFiringMeasure(type)) {
+            return resolveFiringClassKey(className, stationKey, context);
+        } else {
+            return context.classes.get(className);
+        }
+    }
+
+    private boolean isFiringMeasure(String type) {
+        return type != null && (type.equals("Firing Throughput") || type.equals("Fire Frequency") || type.endsWith("FX"));
+    }
+
+    private Object resolveFiringClassKey(String className, Object stationKey, MappingContext context) {
+        if (stationKey != null && context.modeNameLists != null) {
+            List<String> modeNameList = context.modeNameLists.get(stationKey);
+            if (modeNameList != null && modeNameList.contains(className)) {
+                return modeNameList.get(modeNameList.indexOf(className));
+            }
+        }
+        return className; // Safety fallback
     }
 }

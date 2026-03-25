@@ -20,18 +20,24 @@ public class PostProcessingMapper implements ModelElementMapper {
     public void map(SimDescriptor dto, MappingContext context) {
         CommonModel model = context.getModel();
 
-        // --- 1. Resolution of reference stations for each class ---
+        resolveReferenceStations(model, context);
+        resolveProbabilisticRouting(model, context);
+        resolveLoadDependentRouting(model, context);
+        resolveWeightedRoundRobinRouting(model, context);
+        resolveClassSwitchRouting(model, context);
+        resolveForkStrategies(model, context);
+        resolvePetriNetConditions(model, context);
+
+        model.resetSaveState();
+    }
+
+    private void resolveReferenceStations(CommonModel model, MappingContext context) {
         for (Map.Entry<Object, String> entry : context.refStations.entrySet()) {
             Object classKey = entry.getKey();
             String stationName = entry.getValue();
             if (stationName == null) continue;
 
-            // For special nodes (Fork, ClassSwitch, Scaler, Transition), OLDXMLReader
-            // directly sets the type string, instead of the object key
-            if (CommonConstants.STATION_TYPE_FORK.equals(stationName)
-                    || CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationName)
-                    || CommonConstants.STATION_TYPE_SCALER.equals(stationName)
-                    || CommonConstants.STATION_TYPE_TRANSITION.equals(stationName)) {
+            if (isSpecialNode(stationName)) {
                 model.setClassRefStation(classKey, stationName);
             } else {
                 Object sKey = context.stations.get(stationName);
@@ -40,8 +46,16 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 2. Probabilistic Routing Resolution ---
+    private boolean isSpecialNode(String stationName) {
+        return CommonConstants.STATION_TYPE_FORK.equals(stationName)
+                || CommonConstants.STATION_TYPE_CLASSSWITCH.equals(stationName)
+                || CommonConstants.STATION_TYPE_SCALER.equals(stationName)
+                || CommonConstants.STATION_TYPE_TRANSITION.equals(stationName);
+    }
+
+    private void resolveProbabilisticRouting(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Double>> entry : context.empiricalRouting.entrySet()) {
             Object[] dualkey = entry.getKey(); // [stationKey, classKey]
             ProbabilityRouting rs = (ProbabilityRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -53,8 +67,9 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 3. Load Dependent Routing Resolution ---
+    private void resolveLoadDependentRouting(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Double>> entry : context.empiricalLDRouting.entrySet()) {
             Object[] triplekey = entry.getKey(); // [stationKey, classKey, fromValue]
             LoadDependentRouting ldr = (LoadDependentRouting) model.getRoutingStrategy(triplekey[0], triplekey[1]);
@@ -65,9 +80,9 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 4. Round Robin Routing Resolution ---
-        // FIX: Corrected the signature of Map.Entry and implemented the loop to resolve destinations
+    private void resolveWeightedRoundRobinRouting(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Integer>> entry : context.wrrRouting.entrySet()) {
             Object[] dualkey = entry.getKey(); // [stationKey, classKey]
             WeightedRoundRobinRouting rs = (WeightedRoundRobinRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -79,8 +94,14 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 5. Class Switch Routing Resolution (Branch Probabilities) ---
+    private void resolveClassSwitchRouting(CommonModel model, MappingContext context) {
+        resolveClassSwitchBranchRouting(model, context);
+        resolveClassSwitchClassRouting(model, context);
+    }
+
+    private void resolveClassSwitchBranchRouting(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Double>> entry : context.csBranchRouting.entrySet()) {
             Object[] dualkey = entry.getKey();
             ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
@@ -92,29 +113,42 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 6. Class Switch Routing Resolution (Class Probabilities) ---
+    private void resolveClassSwitchClassRouting(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Map<String, Double>>> entry : context.csClassRouting.entrySet()) {
             Object[] dualkey = entry.getKey();
             ClassSwitchRouting rs = (ClassSwitchRouting) model.getRoutingStrategy(dualkey[0], dualkey[1]);
             Map<Object, Map<Object, Double>> outPaths = rs.getOutPaths();
 
             for (Map.Entry<String, Map<String, Double>> stationEntry : entry.getValue().entrySet()) {
-                Object sKey = context.stations.get(stationEntry.getKey());
-                if (sKey == null) continue;
-
-                Map<Object, Double> outPath = new HashMap<>();
-                for (Map.Entry<String, Double> classEntry : stationEntry.getValue().entrySet()) {
-                    Object cKey = context.classes.get(classEntry.getKey());
-                    if (cKey != null) {
-                        outPath.put(cKey, classEntry.getValue());
-                    }
-                }
-                outPaths.put(sKey, outPath);
+                resolveOutPath(outPaths, stationEntry, context);
             }
         }
+    }
 
-        // --- 7. Probabilistic Fork and ClassSwitch Fork Resolution ---
+    private void resolveOutPath(Map<Object, Map<Object, Double>> outPaths, Map.Entry<String, Map<String, Double>> stationEntry, MappingContext context) {
+        Object sKey = context.stations.get(stationEntry.getKey());
+        if (sKey == null) return;
+
+        Map<Object, Double> outPath = new HashMap<>();
+        for (Map.Entry<String, Double> classEntry : stationEntry.getValue().entrySet()) {
+            Object cKey = context.classes.get(classEntry.getKey());
+            if (cKey != null) {
+                outPath.put(cKey, classEntry.getValue());
+            }
+        }
+        outPaths.put(sKey, outPath);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void resolveForkStrategies(CommonModel model, MappingContext context) {
+        resolveEmpiricalFork(model, context);
+        resolveCombinedFork(model, context);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void resolveEmpiricalFork(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, OutPath>> entry : context.empiricalFork.entrySet()) {
             Object[] dualkey = entry.getKey();
             ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
@@ -126,46 +160,35 @@ public class PostProcessingMapper implements ModelElementMapper {
                 }
             }
         }
+    }
 
-        // --- 8. Combined Fork Resolution (CombFork) ---
+    @SuppressWarnings("unchecked")
+    private void resolveCombinedFork(CommonModel model, MappingContext context) {
         for (Map.Entry<Object[], Map<String, Double>> entry : context.combFork.entrySet()) {
             Object[] dualkey = entry.getKey();
             ForkStrategy fs = (ForkStrategy) model.getForkStrategy(dualkey[0], dualkey[1]);
             Map<Object, Double> fork = (Map<Object, Double>) fs.getOutDetails();
             for (Map.Entry<String, Double> valEntry : entry.getValue().entrySet()) {
-                // CombFork saves the name (String) instead of the station object key
                 fork.put(valEntry.getKey(), valEntry.getValue());
             }
         }
+    }
 
+    private void resolvePetriNetConditions(CommonModel model, MappingContext context) {
+        context.enablingConditionMap.forEach((k, v) -> setCondition(model::setEnablingCondition, k, v, context));
+        context.inhibitingConditionMap.forEach((k, v) -> setCondition(model::setInhibitingCondition, k, v, context));
+        context.resourceConditionMap.forEach((k, v) -> setCondition(model::setResourceCondition, k, v, context));
+        context.firingOutcomeMap.forEach((k, v) -> setCondition(model::setFiringOutcome, k, v, context));
+    }
 
-        // --- 9. Petri Net Conditions Resolution ---
+    private void setCondition(ConditionSetter setter, Object[] k, Integer v, MappingContext context) {
+        if (k[0] == null || k[2] == null || k[3] == null) return;
+        Object sKey = context.stations.get(k[2]);
+        if (sKey != null) setter.set(k[0], (Integer) k[1], sKey, k[3], v);
+    }
 
-        context.enablingConditionMap.forEach((k, v) -> {
-            if (k[0] == null || k[2] == null || k[3] == null) return;
-            Object sKey = context.stations.get(k[2]);
-            if (sKey != null) model.setEnablingCondition(k[0], (Integer) k[1], sKey, k[3], v);
-        });
-
-        context.inhibitingConditionMap.forEach((k, v) -> {
-            if (k[0] == null || k[2] == null || k[3] == null) return;
-            Object sKey = context.stations.get(k[2]);
-            if (sKey != null) model.setInhibitingCondition(k[0], (Integer) k[1], sKey, k[3], v);
-        });
-
-        context.resourceConditionMap.forEach((k, v) -> {
-            if (k[0] == null || k[2] == null || k[3] == null) return;
-            Object sKey = context.stations.get(k[2]);
-            if (sKey != null) model.setResourceCondition(k[0], (Integer) k[1], sKey, k[3], v);
-        });
-
-        context.firingOutcomeMap.forEach((k, v) -> {
-            if (k[0] == null || k[2] == null || k[3] == null) return;
-            Object sKey = context.stations.get(k[2]);
-            if (sKey != null) model.setFiringOutcome(k[0], (Integer) k[1], sKey, k[3], v);
-        });
-
-        // --- 10. Save ---
-        model.resetSaveState();
+    @FunctionalInterface
+    private interface ConditionSetter {
+        void set(Object stationKey, int modeIndex, Object stationInOutKey, Object classKey, Integer value);
     }
 }

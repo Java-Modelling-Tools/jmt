@@ -8,9 +8,8 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
-import jmt.gui.common.xml.mapper.XMLMapperConstants;
 
-public class SemaphoreSectionMapper extends AbstractSectionMapper implements XMLMapperConstants {
+public class SemaphoreSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {

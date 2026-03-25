@@ -18,20 +18,23 @@ public class BlockingRegionsMapper implements ModelElementMapper {
             return;
         }
 
-        CommonModel model = context.getModel();
-
         for (BlockingRegionDescriptor region : dto.getBlockingRegions()) {
-            Object regionKey = model.addBlockingRegion(region.getName(), region.getType());
-            context.regions.put(region.getName(), regionKey);
-
-            applyGlobalConstraints(model, regionKey, region.getGlobalConstraints());
-            applyRegionNodes(model, regionKey, region, context);
-            applyClassConstraints(model, regionKey, region, context);
-            applyClassWeights(model, regionKey, region, context);
-            applyClassSizes(model, regionKey, region, context);
-            applyDropRules(model, regionKey, region, context);
-            applyGroups(model, regionKey, region, context);
+            mapBlockingRegion(region, context);
         }
+    }
+
+    private void mapBlockingRegion(BlockingRegionDescriptor region, MappingContext context) {
+        CommonModel model = context.getModel();
+        Object regionKey = model.addBlockingRegion(region.getName(), region.getType());
+        context.regions.put(region.getName(), regionKey);
+
+        applyGlobalConstraints(model, regionKey, region.getGlobalConstraints());
+        applyRegionNodes(model, regionKey, region, context);
+        applyClassConstraints(model, regionKey, region, context);
+        applyClassWeights(model, regionKey, region, context);
+        applyClassSizes(model, regionKey, region, context);
+        applyDropRules(model, regionKey, region, context);
+        applyGroups(model, regionKey, region, context);
     }
 
     private void applyGlobalConstraints(CommonModel model, Object regionKey, Map<String, String> glob) {

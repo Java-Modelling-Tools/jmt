@@ -10,45 +10,38 @@ public class PreloadMapper implements ModelElementMapper {
 
     @Override
     public void map(SimDescriptor dto, MappingContext context) {
-        // If there is no preload section, we exit immediately
         if (dto.getPreloads() == null || dto.getPreloads().isEmpty()) {
             return;
         }
 
-        CommonModel model = context.getModel();
-
-        // Iterate over each "stationPopulations" block mapped as NodeDescriptor by the Parser
         for (NodeDescriptor stationPopNode : dto.getPreloads()) {
+            mapStationPreload(stationPopNode, context);
+        }
+    }
 
-            String stationName = stationPopNode.getName();
-            Object stationKey = context.stations.get(stationName);
+    private void mapStationPreload(NodeDescriptor stationPopNode, MappingContext context) {
+        String stationName = stationPopNode.getName();
+        Object stationKey = resolveStationOrRegion(stationName, context);
 
-            // Also search among the regions if the station is not found, as the old XMLReader did
-            if (stationKey == null) {
-                stationKey = context.regions.get(stationName);
+        if (stationKey != null && stationPopNode.getSections() != null) {
+            for (SectionDescriptor classPopSection : stationPopNode.getSections()) {
+                mapClassPreload(classPopSection, stationKey, context);
             }
+        }
+    }
 
-            if (stationKey != null && stationPopNode.getSections() != null) {
+    private void mapClassPreload(SectionDescriptor classPopSection, Object stationKey, MappingContext context) {
+        CommonModel model = context.getModel();
+        String className = classPopSection.getClassName();
+        Object classKey = context.classes.get(className);
 
-                // The SimParser maps the "classPopulation" as SectionDescriptor
-                for (SectionDescriptor classPopSection : stationPopNode.getSections()) {
+        if (classKey != null && classPopSection.getParameters() != null && !classPopSection.getParameters().isEmpty()) {
+            ParameterDescriptor popParam = classPopSection.getParameters().get(0);
+            String popStr = popParam.getValue();
 
-                    // The SimParser saved the class name in the className attribute of the section
-                    String className = classPopSection.getClassName();
-                    Object classKey = context.classes.get(className);
-
-                    if (classKey != null && classPopSection.getParameters() != null && !classPopSection.getParameters().isEmpty()) {
-
-                        // The population is saved as "value" in the first (and only) ParameterDescriptor of the section
-                        ParameterDescriptor popParam = classPopSection.getParameters().get(0);
-                        String popStr = popParam.getValue();
-
-                        if (popStr != null && !popStr.trim().isEmpty()) {
-                            Integer preloadCount = Integer.valueOf(popStr.trim());
-                            model.setPreloadedJobs(stationKey, classKey, preloadCount);
-                        }
-                    }
-                }
+            if (isPresent(popStr)) {
+                Integer preloadCount = Integer.valueOf(popStr.trim());
+                model.setPreloadedJobs(stationKey, classKey, preloadCount);
             }
         }
     }

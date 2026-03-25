@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class StationsMapper implements ModelElementMapper {
 
     private static final Map<List<String>, String> STATION_SIGNATURES = new HashMap<>();
-    private final Map<String, AbstractSectionMapper> SECTION_MAPPERS = new HashMap<>();
+    private static final Map<String, AbstractSectionMapper> SECTION_MAPPERS = new HashMap<>();
 
     public StationsMapper() {
         initSignatures();
@@ -75,42 +75,55 @@ public class StationsMapper implements ModelElementMapper {
     public void map(SimDescriptor dto, MappingContext context) {
         if (dto.getNodes() == null || dto.getNodes().isEmpty()) return;
 
-        CommonModel model = context.getModel();
-
         for (NodeDescriptor node : dto.getNodes()) {
-            String type = getStationType(node);
-            String name = node.getName();
+            mapStation(node, context);
+        }
+    }
 
-            Object stationKey = model.addStation(name, type, 1, new ArrayList<>());
-            context.stations.put(name, stationKey);
+    private void mapStation(NodeDescriptor node, MappingContext context) {
+        CommonModel model = context.getModel();
+        String type = getStationType(node);
+        String name = node.getName();
 
-            List<SectionDescriptor> sections = node.getSections();
-            if (sections != null && !sections.isEmpty()) {
-                for (SectionDescriptor section : sections) {
-                    AbstractSectionMapper mapper = SECTION_MAPPERS.get(section.getClassName());
-                    if (mapper != null) {
-                        mapper.map(section, model, stationKey, node, type, context);
-                    }
+        Object stationKey = model.addStation(name, type, 1, new ArrayList<>());
+        context.stations.put(name, stationKey);
+
+        mapSections(node, model, stationKey, type, context);
+        mapSoftDeadlines(node, model, stationKey, type);
+        mapQuantumParameters(node, model, stationKey, type);
+    }
+
+    private void mapSections(NodeDescriptor node, CommonModel model, Object stationKey, String type, MappingContext context) {
+        List<SectionDescriptor> sections = node.getSections();
+        if (sections != null) {
+            for (SectionDescriptor section : sections) {
+                AbstractSectionMapper mapper = SECTION_MAPPERS.get(section.getClassName());
+                if (mapper != null) {
+                    mapper.map(section, model, stationKey, node, type, context);
                 }
             }
+        }
+    }
 
-            if (CommonConstants.STATION_TYPE_DELAY.equals(type) || CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-                List<Double> deadlines = node.getClassSoftDeadlines();
-                if (deadlines != null && !deadlines.isEmpty()) {
-                    List<Object> classKeys = model.getClassKeys();
-                    for (int i = 0; i < deadlines.size() && i < classKeys.size(); i++) {
-                        model.setClassStationSoftDeadline(stationKey, classKeys.get(i), deadlines.get(i));
-                    }
+    private void mapSoftDeadlines(NodeDescriptor node, CommonModel model, Object stationKey, String type) {
+        if (CommonConstants.STATION_TYPE_DELAY.equals(type) || CommonConstants.STATION_TYPE_SERVER.equals(type)) {
+            List<Double> deadlines = node.getClassSoftDeadlines();
+            if (deadlines != null && !deadlines.isEmpty()) {
+                List<Object> classKeys = model.getClassKeys();
+                for (int i = 0; i < deadlines.size() && i < classKeys.size(); i++) {
+                    model.setClassStationSoftDeadline(stationKey, classKeys.get(i), deadlines.get(i));
                 }
             }
+        }
+    }
 
-            if (CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-                if (node.getQuantumSize() != null) {
-                    model.setQuantumSize(stationKey, node.getQuantumSize());
-                }
-                if (node.getQuantumSwitchoverTime() != null) {
-                    model.setQuantumSwitchoverTime(stationKey, node.getQuantumSwitchoverTime());
-                }
+    private void mapQuantumParameters(NodeDescriptor node, CommonModel model, Object stationKey, String type) {
+        if (CommonConstants.STATION_TYPE_SERVER.equals(type)) {
+            if (node.getQuantumSize() != null) {
+                model.setQuantumSize(stationKey, node.getQuantumSize());
+            }
+            if (node.getQuantumSwitchoverTime() != null) {
+                model.setQuantumSwitchoverTime(stationKey, node.getQuantumSwitchoverTime());
             }
         }
     }
