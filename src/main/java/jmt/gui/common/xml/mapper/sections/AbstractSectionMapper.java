@@ -65,26 +65,11 @@ public abstract class AbstractSectionMapper {
         if (p == null) return null;
         String cp = p.getClassPath();
 
-        if (cp != null && (cp.contains("ZeroStrategy") || ZeroStrategy.getEngineClassPath().equals(cp))) return new ZeroStrategy();
-        if (cp != null && (cp.contains("DisabledStrategy") || DisabledStrategy.getEngineClassPath().equals(cp))) return new DisabledStrategy();
+        if (isZeroStrategy(cp)) return new ZeroStrategy();
+        if (isDisabledStrategy(cp)) return new DisabledStrategy();
 
-        if (cp != null && (cp.contains("LDStrategy") || LDStrategy.getEngineClassPath().equals(cp))) {
-            LDStrategy strategy = new LDStrategy();
-            ParameterDescriptor ldArray = getFirst(getSubParams(p));
-            if (ldArray != null) {
-                getSubParams(ldArray).forEach(range -> {
-                    List<ParameterDescriptor> rParams = getSubParams(range);
-                    int from = valI(getAt(rParams, 0));
-                    Distribution distr = parseDistribution(getAt(rParams, 1), getAt(rParams, 2), ctx);
-                    String mean = val(getAt(rParams, 3));
-
-                    Object rKey = (from == 1) ? strategy.getAllRanges()[0] : strategy.addRange();
-                    if (from != 1) strategy.setRangeFrom(rKey, from);
-                    strategy.setRangeDistributionNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, distr);
-                    strategy.setRangeDistributionMeanNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, mean);
-                });
-            }
-            return strategy;
+        if (isLDStrategy(cp)) {
+            return parseLDStrategy(p, ctx);
         }
 
         List<ParameterDescriptor> distribution = getSubParams(p);
@@ -92,16 +77,44 @@ public abstract class AbstractSectionMapper {
         return parseDistribution(distribution.get(0), distribution.size() > 1 ? distribution.get(1) : null, ctx);
     }
 
+    private boolean isZeroStrategy(String cp) {
+        return cp != null && (cp.contains("ZeroStrategy") || ZeroStrategy.getEngineClassPath().equals(cp));
+    }
+
+    private boolean isDisabledStrategy(String cp) {
+        return cp != null && (cp.contains("DisabledStrategy") || DisabledStrategy.getEngineClassPath().equals(cp));
+    }
+
+    private boolean isLDStrategy(String cp) {
+        return cp != null && (cp.contains("LDStrategy") || LDStrategy.getEngineClassPath().equals(cp));
+    }
+
+    private LDStrategy parseLDStrategy(ParameterDescriptor p, MappingContext ctx) {
+        LDStrategy strategy = new LDStrategy();
+        ParameterDescriptor ldArray = getFirst(getSubParams(p));
+        if (ldArray != null) {
+            getSubParams(ldArray).forEach(range -> parseLDRange(range, strategy, ctx));
+        }
+        return strategy;
+    }
+
+    private void parseLDRange(ParameterDescriptor range, LDStrategy strategy, MappingContext ctx) {
+        List<ParameterDescriptor> rParams = getSubParams(range);
+        int from = valI(getAt(rParams, 0));
+        Distribution distr = parseDistribution(getAt(rParams, 1), getAt(rParams, 2), ctx);
+        String mean = val(getAt(rParams, 3));
+
+        Object rKey = (from == 1) ? strategy.getAllRanges()[0] : strategy.addRange();
+        if (from != 1) strategy.setRangeFrom(rKey, from);
+        strategy.setRangeDistributionNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, distr);
+        strategy.setRangeDistributionMeanNoCheck((from != 1) ? strategy.getAllRanges()[strategy.getRangeNumber() - 1] : rKey, mean);
+    }
+
     protected Distribution parseDistribution(ParameterDescriptor distr, ParameterDescriptor distrPar, MappingContext ctx) {
         if (distr == null) return null;
 
         String cp = distr.getClassPath();
-        Distribution template = ctx.getEngineToGuiDistr().get(cp);
-        if (template == null && cp != null) {
-            for (String key : ctx.getEngineToGuiDistr().keySet()) {
-                if (cp.endsWith(key) || key.endsWith(cp)) { template = ctx.getEngineToGuiDistr().get(key); break; }
-            }
-        }
+        Distribution template = resolveTemplate(cp, ctx);
         if (template == null) return null;
 
         Distribution dist = template.clone();
@@ -109,29 +122,52 @@ public abstract class AbstractSectionMapper {
         if (distrPar != null) params.addAll(getSubParams(distrPar));
 
         for (ParameterDescriptor p : params) {
-            String name = p.getName();
-            if ("jmt.engine.random.DistributionContainer".equals(p.getClassPath())) {
-                List<ParameterDescriptor> nested = getSubParams(p);
-                if (!nested.isEmpty()) dist.getParameter(name).setValue(parseDistribution(getAt(nested, 0), getAt(nested, 1), ctx));
-            } else if (p.isArray()) {
-                List<ParameterDescriptor> vectors = getSubParams(p);
-                Object[][] val = new Object[vectors.size()][];
-                for (int j = 0; j < vectors.size(); j++) {
-                    List<ParameterDescriptor> entries = getSubParams(getAt(vectors, j));
-                    val[j] = new Object[entries.size()];
-                    for (int k = 0; k < entries.size(); k++) {
-                        String valueStr = val(getAt(entries, k));
-                        val[j][k] = (valueStr != null) ? dist.getParameter(name).parseValue(valueStr) : dist.getParameter(name).parseValue("0");
-                    }
-                }
-                dist.getParameter(name).setValue(val);
-            } else {
-                String valStr = val(p);
-                if (valStr != null) dist.getParameter(name).setValue(valStr);
-            }
+            applyParameterToDistribution(dist, p, ctx);
         }
         dist.updateCM();
         return dist;
+    }
+
+    private Distribution resolveTemplate(String cp, MappingContext ctx) {
+        Distribution template = ctx.getEngineToGuiDistr().get(cp);
+        if (template == null && cp != null) {
+            for (String key : ctx.getEngineToGuiDistr().keySet()) {
+                if (cp.endsWith(key) || key.endsWith(cp)) {
+                    template = ctx.getEngineToGuiDistr().get(key);
+                    break;
+                }
+            }
+        }
+        return template;
+    }
+
+    private void applyParameterToDistribution(Distribution dist, ParameterDescriptor p, MappingContext ctx) {
+        String name = p.getName();
+        if ("jmt.engine.random.DistributionContainer".equals(p.getClassPath())) {
+            List<ParameterDescriptor> nested = getSubParams(p);
+            if (!nested.isEmpty()) {
+                dist.getParameter(name).setValue(parseDistribution(getAt(nested, 0), getAt(nested, 1), ctx));
+            }
+        } else if (p.isArray()) {
+            dist.getParameter(name).setValue(parseArrayParameter(p, dist));
+        } else {
+            String valStr = val(p);
+            if (valStr != null) dist.getParameter(name).setValue(valStr);
+        }
+    }
+
+    private Object[][] parseArrayParameter(ParameterDescriptor p, Distribution dist) {
+        List<ParameterDescriptor> vectors = getSubParams(p);
+        Object[][] val = new Object[vectors.size()][];
+        for (int j = 0; j < vectors.size(); j++) {
+            List<ParameterDescriptor> entries = getSubParams(getAt(vectors, j));
+            val[j] = new Object[entries.size()];
+            for (int k = 0; k < entries.size(); k++) {
+                String valueStr = val(getAt(entries, k));
+                val[j][k] = (valueStr != null) ? dist.getParameter(p.getName()).parseValue(valueStr) : dist.getParameter(p.getName()).parseValue("0");
+            }
+        }
+        return val;
     }
 
 
@@ -150,47 +186,42 @@ public abstract class AbstractSectionMapper {
     }
 
     private void populateConditionMap(Object key, ParameterDescriptor condParam, Map<Object[], Integer> targetMap, MappingContext ctx) {
-        if (condParam == null) {
-            return;
-        }
+        if (condParam == null) return;
 
-        // Level 1: the direct children are the individual conditions for mode (e.g. "enablingCondition")
         List<ParameterDescriptor> modes = getSubParams(condParam);
-
         for (int i = 0; i < modes.size(); i++) {
-            ParameterDescriptor condition = modes.get(i);
-
-            // Level 2: inside "enablingCondition" there is a container (e.g. "enablingVectors")
-            List<ParameterDescriptor> conditionElements = getSubParams(condition);
-            if (conditionElements.isEmpty()) continue;
-
-            ParameterDescriptor vectorsArray = conditionElements.get(0);
-
-            // Level 3: the children of the container are the individual vectors (e.g. "enablingVector")
-            List<ParameterDescriptor> vectors = getSubParams(vectorsArray);
-
-            for (ParameterDescriptor vector : vectors) {
-                // Level 4: inside the vector there are stationName and the refClass map (e.g. "enablingEntries")
-                List<ParameterDescriptor> vectorElements = getSubParams(vector);
-
-                if (vectorElements.size() < 2) continue;
-
-                String stationName = val(vectorElements.get(0));
-                ParameterDescriptor entriesParam = vectorElements.get(1);
-
-                Map<String, ParameterDescriptor> refMap = getRefClassMap(entriesParam);
-
-                for (Map.Entry<String, ParameterDescriptor> entry : refMap.entrySet()) {
-                    String className = entry.getKey();
-                    Integer vVal = valI(entry.getValue());
-
-                    if (stationName != null && vVal != null) {
-                        Object classKey = ctx.classes.get(className);
-                        Object[] quadKey = new Object[]{key, i, stationName, classKey};
-                        targetMap.put(quadKey, vVal);
-                    }
-                }
-            }
+            populateModeConditions(key, i, modes.get(i), targetMap, ctx);
         }
+    }
+
+    private void populateModeConditions(Object key, int modeIndex, ParameterDescriptor modeParam, Map<Object[], Integer> targetMap, MappingContext ctx) {
+        List<ParameterDescriptor> conditionElements = getSubParams(modeParam);
+        if (conditionElements.isEmpty()) return;
+
+        ParameterDescriptor vectorsArray = conditionElements.get(0);
+        List<ParameterDescriptor> vectors = getSubParams(vectorsArray);
+
+        for (ParameterDescriptor vector : vectors) {
+            populateVectorConditions(key, modeIndex, vector, targetMap, ctx);
+        }
+    }
+
+    private void populateVectorConditions(Object key, int modeIndex, ParameterDescriptor vector, Map<Object[], Integer> targetMap, MappingContext ctx) {
+        List<ParameterDescriptor> vectorElements = getSubParams(vector);
+        if (vectorElements.size() < 2) return;
+
+        String stationName = val(vectorElements.get(0));
+        ParameterDescriptor entriesParam = vectorElements.get(1);
+
+        Map<String, ParameterDescriptor> refMap = getRefClassMap(entriesParam);
+
+        refMap.forEach((className, entryParam) -> {
+            Integer vVal = valI(entryParam);
+            if (stationName != null && vVal != null) {
+                Object classKey = ctx.classes.get(className);
+                Object[] quadKey = new Object[]{key, modeIndex, stationName, classKey};
+                targetMap.put(quadKey, vVal);
+            }
+        });
     }
 }

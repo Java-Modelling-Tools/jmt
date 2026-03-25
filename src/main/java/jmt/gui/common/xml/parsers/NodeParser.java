@@ -21,48 +21,50 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
 
         for (int i = 0; i < children.getLength(); i++) {
             Node node = children.item(i);
-            if (node.getNodeType() != Node.ELEMENT_NODE) {
-                continue;
-            }
+            if (node.getNodeType() != Node.ELEMENT_NODE) continue;
 
             Element child = (Element) node;
             String tagName = child.getTagName();
 
             if ("section".equals(tagName)) {
                 descriptor.addSection(sectionParser.parse(child));
-
             } else if ("classSoftDeadlines".equals(tagName)) {
-                List<Double> deadlines = new ArrayList<>();
-                NodeList sdNodes = child.getChildNodes();
-                for (int j = 0; j < sdNodes.getLength(); j++) {
-                    Node sdNode = sdNodes.item(j);
-                    if (sdNode.getNodeType() == Node.ELEMENT_NODE && "softDeadline".equals(((Element) sdNode).getTagName())) {
-                        String text = sdNode.getTextContent();
-                        if (text != null && !text.trim().isEmpty()) {
-                            deadlines.add(Double.parseDouble(text.trim()));
-                        }
-                    }
-                }
-                descriptor.setClassSoftDeadlines(deadlines);
-
+                descriptor.setClassSoftDeadlines(parseSoftDeadlines(child));
             } else if ("quantumSize".equals(tagName)) {
-                String text = child.getTextContent();
-                if (text != null && !text.trim().isEmpty()) {
-                    descriptor.setQuantumSize(Double.parseDouble(text.trim()));
-                }
-
+                descriptor.setQuantumSize(parseContentAsDouble(child));
             } else if ("quantumSwitchoverTime".equals(tagName)) {
-                String text = child.getTextContent();
-                if (text != null && !text.trim().isEmpty()) {
-                    descriptor.setQuantumSwitchoverTime(Double.parseDouble(text.trim()));
-                }
-
+                descriptor.setQuantumSwitchoverTime(parseContentAsDouble(child));
             } else {
                 descriptor.addParameter(parseGenericParameter(child));
             }
         }
 
         return descriptor;
+    }
+
+    private List<Double> parseSoftDeadlines(Element element) {
+        List<Double> deadlines = new ArrayList<>();
+        NodeList nodes = element.getChildNodes();
+        for (int j = 0; j < nodes.getLength(); j++) {
+            Node node = nodes.item(j);
+            if (node.getNodeType() == Node.ELEMENT_NODE && "softDeadline".equals(((Element) node).getTagName())) {
+                Double val = parseContentAsDouble((Element) node);
+                if (val != null) deadlines.add(val);
+            }
+        }
+        return deadlines;
+    }
+
+    private Double parseContentAsDouble(Element element) {
+        String text = element.getTextContent();
+        if (text != null && !text.trim().isEmpty()) {
+            try {
+                return Double.parseDouble(text.trim());
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 
     private ParameterDescriptor parseGenericParameter(Element element) {
