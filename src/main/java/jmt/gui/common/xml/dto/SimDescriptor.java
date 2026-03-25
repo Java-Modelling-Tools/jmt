@@ -1,3 +1,10 @@
+/**
+ * This class is a Data Transfer Object (DTO) that represents the entire simulation model.
+ * It holds all the parsed information from the XML file, including nodes, connections, user classes, and other simulation settings.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.dto;
 
 import java.util.ArrayList;

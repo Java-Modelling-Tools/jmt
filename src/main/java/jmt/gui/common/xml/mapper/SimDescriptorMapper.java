@@ -1,3 +1,10 @@
+/**
+ * This class orchestrates the entire mapping process from the {@link SimDescriptor} DTO to the {@link CommonModel}.
+ * It maintains a pipeline of {@link ModelElementMapper}s and executes them in a specific order to build the simulation model.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;

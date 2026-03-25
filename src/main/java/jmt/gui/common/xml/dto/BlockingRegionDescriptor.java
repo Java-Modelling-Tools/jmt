@@ -1,3 +1,10 @@
+/**
+ * This class is a Data Transfer Object (DTO) that represents a blocking region in the simulation model.
+ * A blocking region is a set of nodes that share a common constraint, such as a limited capacity.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.dto;
 
 import java.util.ArrayList;

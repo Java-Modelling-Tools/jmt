@@ -1,3 +1,10 @@
+/**
+ * This class is a section mapper responsible for mapping the "Fork" section of a station node.
+ * It configures the fork behavior, including the fork strategy and its parameters.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;

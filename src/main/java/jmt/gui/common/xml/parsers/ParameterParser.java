@@ -1,3 +1,9 @@
+/**
+ * This class is responsible for parsing an XML element representing a parameter and converting it into a {@link ParameterDescriptor} object.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.parsers;
 
 import jmt.gui.common.xml.dto.ParameterDescriptor;

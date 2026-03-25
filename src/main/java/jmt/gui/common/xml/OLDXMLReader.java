@@ -94,7 +94,10 @@ import org.xml.sax.SAXException;
  * @author Bertoli Marco
  *         Date: 27-lug-2005
  *         Time: 13.59.48
+ *
+ * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use XMLReader instead.
  */
+@Deprecated
 public class OLDXMLReader implements XMLConstantNames, CommonConstants {
 
     protected static TreeMap<String, Object> classes; // Data structure used to map between class name and its key
