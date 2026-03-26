@@ -13,7 +13,7 @@ import java.util.List;
 public class TimingSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         mapTransitionModes(sec, model, key, ctx);
         mapNumberOfServers(sec, model, key);
         mapTimingStrategies(sec, model, key, ctx);

@@ -9,7 +9,7 @@ import jmt.gui.common.xml.mapper.MappingContext;
 public class ClassSwitchSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
         ParameterDescriptor matrixParam = getFirst(sec.getParameters());
         if (matrixParam == null) return;
 

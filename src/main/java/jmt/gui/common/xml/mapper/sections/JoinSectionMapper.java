@@ -19,7 +19,7 @@ import java.util.Map;
 public class JoinSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         ParameterDescriptor p = getAt(sec.getParameters(), 0);
 
         if (p != null) {

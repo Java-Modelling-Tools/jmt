@@ -29,7 +29,7 @@ public class QueueSectionMapper extends AbstractSectionMapper {
     }
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         mapQueueSize(sec, model, key);
 
         AtomicBoolean isPreemptive = new AtomicBoolean(false);

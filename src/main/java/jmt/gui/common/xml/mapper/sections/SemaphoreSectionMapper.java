@@ -12,7 +12,7 @@ import jmt.gui.common.xml.mapper.MappingContext;
 public class SemaphoreSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         ParameterDescriptor p = getFirst(sec.getParameters());
 
         if (p != null) {

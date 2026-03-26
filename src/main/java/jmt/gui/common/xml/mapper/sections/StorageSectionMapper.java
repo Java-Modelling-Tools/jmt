@@ -22,7 +22,7 @@ public class StorageSectionMapper extends AbstractSectionMapper {
     }
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         mapTotalCapacity(sec, model, key);
         mapClassCapacities(sec, model, key, ctx);
         mapDropRules(sec, model, key, ctx);

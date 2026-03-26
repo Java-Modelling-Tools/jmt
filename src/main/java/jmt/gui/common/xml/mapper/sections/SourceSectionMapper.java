@@ -11,7 +11,7 @@ import jmt.gui.common.xml.mapper.MappingContext;
 public class SourceSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         ParameterDescriptor serviceStrategyParam = getParam(sec, XMLConstantNames.PARAM_SERVICE_STRATEGY);
         if (serviceStrategyParam == null) return;
 

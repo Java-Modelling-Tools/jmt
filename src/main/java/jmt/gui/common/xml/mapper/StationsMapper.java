@@ -106,7 +106,7 @@ public class StationsMapper implements ModelElementMapper {
             for (SectionDescriptor section : sections) {
                 AbstractSectionMapper mapper = SECTION_MAPPERS.get(section.getClassName());
                 if (mapper != null) {
-                    mapper.map(section, model, stationKey, node, type, context);
+                    mapper.mapDtoToCommonModel(section, model, stationKey, node, type, context);
                 }
             }
         }
