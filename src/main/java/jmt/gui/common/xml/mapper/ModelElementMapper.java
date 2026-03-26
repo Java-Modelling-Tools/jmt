@@ -14,10 +14,19 @@ public interface ModelElementMapper {
     /**
      * Maps a part of the data from the {@link SimDescriptor} to the {@link jmt.gui.common.definitions.CommonModel}.
      *
-     * @param dto The root DTO object containing all data parsed from the XML
+     * @param dto     The root DTO object containing all data parsed from the XML
      * @param context The shared context containing the CommonModel and support maps
      */
     void map(SimDescriptor dto, MappingContext context);
+
+    /**
+     * Maps the internal {@link jmt.gui.common.definitions.CommonModel} back to the {@link SimDescriptor} DTO.
+     * This is the inverse operation of {@link #map(SimDescriptor, MappingContext)}.
+     *
+     * @param dto     The root DTO object that will be populated with data from the model
+     * @param context The shared context containing the CommonModel and support maps
+     */
+    void mapCommonModelToDto(SimDescriptor dto, MappingContext context);
 
     default boolean isPresent(String value) {
         return value != null && !value.isEmpty();

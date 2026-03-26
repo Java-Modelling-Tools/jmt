@@ -21,6 +21,11 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         mapFiringWeights(sec, model, key);
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapTransitionModes(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
         ParameterDescriptor modes = getParam(sec, XMLConstantNames.PARAM_MODE_NAMES);
         if (modes != null) {

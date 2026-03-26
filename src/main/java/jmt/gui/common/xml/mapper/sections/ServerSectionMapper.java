@@ -28,6 +28,11 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         mapHeterogeneousServers(key, model, state.heterogeneous);
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private static class ServerMappingState {
         final List<String> serverNames = new ArrayList<>();
         final List<Integer> serversPerType = new ArrayList<>();

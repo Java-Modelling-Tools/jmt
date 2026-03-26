@@ -23,4 +23,9 @@ public class DelaySectionMapper extends AbstractSectionMapper {
 
         extractTransitionConditions(key, getParam(sec, "enablingConditions"), getParam(sec, "inhibitingConditions"), getParam(sec, "resourceConditions"), ctx);
     }
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
 }

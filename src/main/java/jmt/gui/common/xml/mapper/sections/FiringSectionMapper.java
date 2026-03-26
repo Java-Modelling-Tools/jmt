@@ -22,6 +22,11 @@ public class FiringSectionMapper extends AbstractSectionMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapOutcome(Object key, int outcomeIndex, ParameterDescriptor outcomeParam, MappingContext ctx) {
         ParameterDescriptor firstOutcomeSub = getFirst(getSubParams(outcomeParam));
         if (firstOutcomeSub == null) return;

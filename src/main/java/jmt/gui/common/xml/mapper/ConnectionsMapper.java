@@ -24,6 +24,11 @@ public class ConnectionsMapper implements ModelElementMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapConnection(ConnectionDescriptor conn, MappingContext context) {
         CommonModel model = context.getModel();
         String sourceName = conn.getSource();

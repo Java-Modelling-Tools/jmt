@@ -21,6 +21,11 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         getRefClassMap(routingParam).forEach((className, p) -> mapRoutingStrategy(className, p, key, model, ctx));
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapRoutingStrategy(String className, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         String cp = p.getClassPath();
         Object classKey = ctx.classes.get(className);

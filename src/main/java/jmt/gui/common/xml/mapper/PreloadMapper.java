@@ -26,6 +26,11 @@ public class PreloadMapper implements ModelElementMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapStationPreload(NodeDescriptor stationPopNode, MappingContext context) {
         String stationName = stationPopNode.getName();
         Object stationKey = resolveStationOrRegion(stationName, context);
