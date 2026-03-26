@@ -126,11 +126,11 @@ public class StationsMapper implements ModelElementMapper {
 
     private void mapQuantumParameters(NodeDescriptor node, CommonModel model, Object stationKey, String type) {
         if (CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-            if (node.getQuantumSize() != null) {
-                model.setQuantumSize(stationKey, node.getQuantumSize());
+            if (node.getQuantumSize() != null && !node.getQuantumSize().isEmpty()) {
+                model.setQuantumSize(stationKey, node.getQuantumSize().get(0));
             }
-            if (node.getQuantumSwitchoverTime() != null) {
-                model.setQuantumSwitchoverTime(stationKey, node.getQuantumSwitchoverTime());
+            if (node.getQuantumSwitchoverTime() != null && !node.getQuantumSwitchoverTime().isEmpty()) {
+                model.setQuantumSwitchoverTime(stationKey, node.getQuantumSwitchoverTime().get(0));
             }
         }
     }

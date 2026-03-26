@@ -33,7 +33,12 @@ public class MeasuresMapper implements ModelElementMapper {
         Double precision = getDouble(m.getPrecision(), 0.03);
         boolean verbose = Boolean.parseBoolean(m.getVerbose());
 
-        model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);
+        Object key = model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);
+
+        // Add server type to model if it exists
+        if (stationKey != null && isPresent(m.getServerType())) {
+            model.setMeasureServerTypeKey(model.getServerTypeKey(stationKey, m.getServerType()), key);
+        }
     }
 
     private Object resolveStationKey(MeasureDescriptor m, MappingContext context) {

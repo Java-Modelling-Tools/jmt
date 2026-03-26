@@ -69,6 +69,14 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
             descriptor = parser.parse(root);
         }
 
+        if (root.getParentNode() instanceof Element) {
+            Element parent = (Element) root.getParentNode();
+            if (GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT.equals(parent.getTagName())) {
+                descriptor.setArchiveName(parent.getAttribute(GuiXMLConstants.XML_ARCHIVE_A_NAME));
+                descriptor.setArchiveTimestamp(parent.getAttribute(GuiXMLConstants.XML_ARCHIVE_A_TIMESTAMP));
+            }
+        }
+
         // In-Place mapping on model
         SimDescriptorMapper mapper = new SimDescriptorMapper(descriptor, model);
         mapper.map();

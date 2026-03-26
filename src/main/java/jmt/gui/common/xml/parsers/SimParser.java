@@ -67,6 +67,8 @@ public class SimParser implements XmlEntityParser<SimDescriptor> {
         uc.setReferenceSource(firstNonEmpty(readAttribute(child, XMLConstantNames.XML_A_CLASS_REFSOURCE), readAttribute(child, XMLConstantNames.XML_A_CLASS_REFSOURCE)));
         uc.setSoftDeadline(readAttribute(child, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE));
         uc.setCustomers(readAttribute(child, XMLConstantNames.XML_A_CLASS_CUSTOMERS));
+        uc.setCacheMissClass(readAttribute(child, XMLConstantNames.XML_A_CLASS_CACHEMISSCLASS));
+        uc.setCacheHitClass(readAttribute(child, XMLConstantNames.XML_A_CLASS_CACHEHITCLASS));
         return uc;
     }
 
@@ -87,6 +89,7 @@ public class SimParser implements XmlEntityParser<SimDescriptor> {
         md.setAlpha(readAttribute(child, XMLConstantNames.XML_A_MEASURE_ALPHA));
         md.setPrecision(readAttribute(child, XMLConstantNames.XML_A_MEASURE_PRECISION));
         md.setVerbose(readAttribute(child, XMLConstantNames.XML_A_MEASURE_VERBOSE));
+        md.setServerType(readAttribute(child, XMLConstantNames.XML_A_MEASURE_SERVERTYPE));
         return md;
     }
 
