@@ -32,4 +32,7 @@ public final class IntegrationTestConstants {
 	public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	public static final String[] EXCLUDED_PACKAGES = { "jmt/framework/gui", "jmt/gui", "jmt/jmva/gui",
 			"jmt/commandline" };
+
+	public static final double THREAD_INITIALIZATION_WAIT_TIME = 50.0;
+	public static final long THREAD_INITIALIZATION_SLEEP_TIME = 100;
 }
