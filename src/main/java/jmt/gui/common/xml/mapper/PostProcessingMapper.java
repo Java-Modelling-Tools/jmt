@@ -25,7 +25,7 @@ public class PostProcessingMapper implements ModelElementMapper {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         CommonModel model = context.getModel();
 
         resolveReferenceStations(model, context);

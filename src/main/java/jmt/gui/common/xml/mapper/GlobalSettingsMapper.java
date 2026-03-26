@@ -19,7 +19,7 @@ import java.util.Map;
 public class GlobalSettingsMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         CommonModel model = context.getModel();
         Map<String, String> globals = dto.getGlobalAttributes();
 

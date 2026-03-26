@@ -24,7 +24,32 @@ public class LoggerSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+        LoggerParameters logParams = model.getLoggingParameters(key);
+        if (logParams == null) return;
+
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILENAME, "java.lang.String", logParams.name);
+
+        // temporary fix as in XMLWriter
+        logParams.path = MacroReplacer.replace(model.getLoggingGlbParameter("path"));
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILEPATH, "java.lang.String", logParams.path);
+
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_EXECTIMESTAMP, "java.lang.Boolean", logParams.boolExecTimestamp.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_LOGGERNAME, "java.lang.Boolean", logParams.boolLoggername.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESTAMP, "java.lang.Boolean", logParams.boolTimeStamp.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBID, "java.lang.Boolean", logParams.boolJobID.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBCLASS, "java.lang.Boolean", logParams.boolJobClass.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESAMECLS, "java.lang.Boolean", logParams.boolTimeSameClass.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMEANYCLS, "java.lang.Boolean", logParams.boolTimeAnyClass.toString());
+
+        addSimpleParameter(sec, "numClasses", "java.lang.Integer", String.valueOf(model.getClassKeys().size()));
+    }
+
+    private void addSimpleParameter(SectionDescriptor sec, String name, String classPath, String value) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(name);
+        p.setClassPath(classPath);
+        p.setValue(value);
+        sec.addParameter(p);
     }
 
     private void mapLoggerParameter(ParameterDescriptor p, LoggerParameters logParams, CommonModel model) {

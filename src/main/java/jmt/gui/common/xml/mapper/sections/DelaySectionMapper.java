@@ -26,6 +26,7 @@ public class DelaySectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+        addServiceStrategyParameter(sec, model, key, ctx);
+        mapTransitionConditions(key, sec, model, ctx);
     }
 }

@@ -63,6 +63,211 @@ public abstract class AbstractSectionMapper {
     protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v).intValue() : null; }
 
     // --- SHARED PARSING ---
+    protected void addServiceStrategyParameter(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
+        ParameterDescriptor serviceStrategy = new ParameterDescriptor();
+        serviceStrategy.setName("ServiceStrategy");
+        serviceStrategy.setClassPath("jmt.engine.random.ServiceStrategy");
+
+        for (Object classKey : model.getClassKeys()) {
+            Object serviceDist = model.getServiceTimeDistribution(key, classKey);
+            if (serviceDist != null) {
+                ParameterDescriptor stStrategy = getDistributionParameter(serviceDist, model, classKey, "ServiceTimeStrategy", "jmt.engine.random.ServiceTimeStrategy", ctx);
+                serviceStrategy.addSubParameter(stStrategy);
+            }
+        }
+        sec.addParameter(serviceStrategy);
+    }
+
+    protected ParameterDescriptor getDistributionParameter(Object distrObj, CommonModel model, Object classKey, String paramName, String classPath, MappingContext ctx) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(paramName);
+        p.setClassPath(classPath);
+        if (classKey != null) {
+            p.setRefClass(model.getClassName(classKey));
+        }
+
+        if (distrObj instanceof Distribution) {
+            Distribution dist = (Distribution) distrObj;
+            ParameterDescriptor distDesc = new ParameterDescriptor();
+            distDesc.setName(dist.getName());
+            distDesc.setClassPath(dist.getClassPath());
+
+            ParameterDescriptor distParDesc = new ParameterDescriptor();
+            distParDesc.setName("distrPar");
+            distParDesc.setClassPath(dist.getParameterClassPath());
+
+            for (int i = 0; i < dist.getNumberOfParameters(); i++) {
+                Distribution.Parameter param = dist.getParameter(i);
+                ParameterDescriptor paramDesc = createParameterDescriptor(param, ctx);
+                if (param.isDirectParameter()) {
+                    distDesc.addSubParameter(paramDesc);
+                } else {
+                    distParDesc.addSubParameter(paramDesc);
+                }
+            }
+            p.addSubParameter(distDesc);
+            p.addSubParameter(distParDesc);
+        } else if (distrObj instanceof ZeroStrategy) {
+            p.setName("ZeroServiceTimeStrategy");
+            p.setClassPath(ZeroStrategy.getEngineClassPath());
+        } else if (distrObj instanceof DisabledStrategy) {
+            p.setName("DisabledServiceTimeStrategy");
+            p.setClassPath(DisabledStrategy.getEngineClassPath());
+        } else if (distrObj instanceof LDStrategy) {
+            LDStrategy strategy = (LDStrategy) distrObj;
+            ParameterDescriptor ldArray = new ParameterDescriptor();
+            ldArray.setName("LDArray");
+            ldArray.setClassPath("jmt.engine.random.LDRange");
+            ldArray.setArray(true);
+
+            for (Object rKey : strategy.getAllRanges()) {
+                ParameterDescriptor range = new ParameterDescriptor();
+                range.setName("LDRange");
+                range.setClassPath("jmt.engine.random.LDRange");
+
+                ParameterDescriptor from = new ParameterDescriptor();
+                from.setName("from");
+                from.setClassPath("java.lang.Integer");
+                from.setValue(String.valueOf(strategy.getRangeFrom(rKey)));
+                range.addSubParameter(from);
+
+                Distribution d = (Distribution) strategy.getRangeDistribution(rKey);
+                ParameterDescriptor dP = getDistributionParameter(d, model, null, "distr", "jmt.engine.random.Distribution", ctx);
+                range.addSubParameter(dP.getSubParameters().get(0));
+                range.addSubParameter(dP.getSubParameters().get(1));
+
+                ParameterDescriptor mean = new ParameterDescriptor();
+                mean.setName("mean");
+                mean.setClassPath("java.lang.Double");
+                mean.setValue(String.valueOf(strategy.getRangeDistributionMean(rKey)));
+                range.addSubParameter(mean);
+
+                ldArray.addSubParameter(range);
+            }
+            p.addSubParameter(ldArray);
+        }
+
+        return p;
+    }
+
+    private ParameterDescriptor createParameterDescriptor(Distribution.Parameter param, MappingContext ctx) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(param.getName());
+        Object val = param.getValue();
+
+        if (val instanceof Distribution) {
+            p.setClassPath("jmt.engine.random.DistributionContainer");
+            ParameterDescriptor nested = getDistributionParameter(val, null, null, "distr", "jmt.engine.random.Distribution", ctx);
+            p.addSubParameter(nested.getSubParameters().get(0));
+            p.addSubParameter(nested.getSubParameters().get(1));
+        } else if (val instanceof Object[][]) {
+            p.setArray(true);
+            p.setClassPath(param.getValueClass().getName());
+            Object[][] matrix = (Object[][]) val;
+            for (Object[] row : matrix) {
+                ParameterDescriptor rowP = new ParameterDescriptor();
+                rowP.setName(param.getName());
+                rowP.setClassPath(param.getValueClass().getName());
+                for (Object cell : row) {
+                    ParameterDescriptor cellP = new ParameterDescriptor();
+                    cellP.setName(param.getName());
+                    cellP.setClassPath(param.getValueClass().getName());
+                    cellP.setValue(cell != null ? cell.toString() : "0");
+                    rowP.addSubParameter(cellP);
+                }
+                p.addSubParameter(rowP);
+            }
+        } else {
+            p.setClassPath(param.getValueClass().getName());
+            if (val != null) {
+                p.setValue(val.toString());
+            }
+        }
+        return p;
+    }
+
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, MappingContext ctx) {
+        mapTransitionConditions(key, sec, model, ctx, true);
+    }
+
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, MappingContext ctx, boolean includeResource) {
+        // Enabling Conditions
+        ParameterDescriptor enablingConditions = createConditionMatrix("enablingConditions", "enablingCondition", "enablingVector", "enablingEntry", key, model, ctx, (s, m, i, from, cl) -> model.getEnablingCondition(s, i, from, cl));
+        if (enablingConditions != null) sec.addParameter(enablingConditions);
+
+        // Inhibiting Conditions
+        ParameterDescriptor inhibitingConditions = createConditionMatrix("inhibitingConditions", "inhibitingCondition", "inhibitingVector", "inhibitingEntry", key, model, ctx, (s, m, i, from, cl) -> model.getInhibitingCondition(s, i, from, cl));
+        if (inhibitingConditions != null) sec.addParameter(inhibitingConditions);
+
+        // Resource Conditions
+        if (includeResource) {
+            ParameterDescriptor resourceConditions = createConditionMatrix("resourceConditions", "resourceCondition", "resourceVector", "resourceEntry", key, model, ctx, (s, m, i, from, cl) -> model.getResourceCondition(s, i, from, cl));
+            if (resourceConditions != null) sec.addParameter(resourceConditions);
+        }
+    }
+
+    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, MappingContext ctx, ConditionGetter getter) {
+        return createConditionMatrix(name, condName, vecName, entryName, key, model, ctx, getter, true);
+    }
+
+    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, MappingContext ctx, ConditionGetter getter, boolean backward) {
+        int modes = model.getTransitionModeListSize(key);
+        if (modes <= 0) return null;
+
+        ParameterDescriptor matrix = new ParameterDescriptor();
+        matrix.setName(name);
+        matrix.setClassPath("jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix");
+
+        Vector<Object> stationKeys = backward ? model.getBackwardConnections(key) : model.getForwardConnections(key);
+        Vector<Object> classKeys = model.getClassKeys();
+
+        for (int i = 0; i < modes; i++) {
+            ParameterDescriptor condition = new ParameterDescriptor();
+            condition.setName(condName);
+            condition.setClassPath("jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix");
+
+            ParameterDescriptor vectors = new ParameterDescriptor();
+            vectors.setName(vecName + "s");
+            vectors.setClassPath("jmt.engine.NetStrategies.TransitionUtilities.TransitionVector");
+
+            for (Object stationKey : stationKeys) {
+                ParameterDescriptor vector = new ParameterDescriptor();
+                vector.setName(vecName);
+                vector.setClassPath("jmt.engine.NetStrategies.TransitionUtilities.TransitionVector");
+
+                ParameterDescriptor stationName = new ParameterDescriptor();
+                stationName.setName("stationName");
+                stationName.setClassPath("java.lang.String");
+                stationName.setValue(model.getStationName(stationKey));
+                vector.addSubParameter(stationName);
+
+                ParameterDescriptor entries = new ParameterDescriptor();
+                entries.setName(entryName + "ies");
+                entries.setClassPath("java.lang.Integer");
+
+                for (Object classKey : classKeys) {
+                    Integer val = getter.get(key, model, i, stationKey, classKey);
+                    ParameterDescriptor entry = new ParameterDescriptor();
+                    entry.setName(entryName);
+                    entry.setClassPath("java.lang.Integer");
+                    entry.setRefClass(model.getClassName(classKey));
+                    entry.setValue(val.toString());
+                    entries.addSubParameter(entry);
+                }
+                vector.addSubParameter(entries);
+                vectors.addSubParameter(vector);
+            }
+            condition.addSubParameter(vectors);
+            matrix.addSubParameter(condition);
+        }
+        return matrix;
+    }
+
+    @FunctionalInterface
+    protected interface ConditionGetter {
+        Integer get(Object stationKey, CommonModel model, int modeIndex, Object fromStationKey, Object classKey);
+    }
+
     protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
         if (p == null) return null;
         String cp = p.getClassPath();

@@ -16,7 +16,7 @@ import java.util.List;
 public class MeasuresMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getMeasures() == null || dto.getMeasures().isEmpty()) return;
 
         for (MeasureDescriptor m : dto.getMeasures()) {

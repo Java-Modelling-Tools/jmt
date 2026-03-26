@@ -20,7 +20,7 @@ import java.util.Set;
 public class BlockingRegionsMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getBlockingRegions() == null || dto.getBlockingRegions().isEmpty()) {
             return;
         }

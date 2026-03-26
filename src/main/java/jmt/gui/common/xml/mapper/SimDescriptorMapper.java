@@ -39,7 +39,7 @@ public class SimDescriptorMapper {
     public CommonModel map() {
         // We execute the pipeline: each mapper enriches the context and the CommonModel
         for (ModelElementMapper mapper : pipeline) {
-            mapper.map(dto, context);
+            mapper.mapDtoToCommonModel(dto, context);
         }
 
         return context.getModel();

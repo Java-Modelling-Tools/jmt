@@ -79,7 +79,7 @@ public class StationsMapper implements ModelElementMapper {
     }
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getNodes() == null || dto.getNodes().isEmpty()) return;
 
         for (NodeDescriptor node : dto.getNodes()) {
