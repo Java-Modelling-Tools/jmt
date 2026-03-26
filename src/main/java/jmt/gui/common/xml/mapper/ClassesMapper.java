@@ -16,7 +16,7 @@ import jmt.gui.common.xml.dto.UserClassDescriptor;
 public class ClassesMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getUserClasses() == null) {
             return;
         }

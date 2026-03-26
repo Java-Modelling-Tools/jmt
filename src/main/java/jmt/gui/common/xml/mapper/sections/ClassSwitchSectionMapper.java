@@ -27,7 +27,29 @@ public class ClassSwitchSectionMapper extends AbstractSectionMapper {
     }
 
     @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
+        ParameterDescriptor matrixParam = new ParameterDescriptor();
+        matrixParam.setName("matrix");
+        matrixParam.setClassPath("java.lang.Object");
+
+        for (Object classInKey : model.getClassKeys()) {
+            ParameterDescriptor rowParam = new ParameterDescriptor();
+            rowParam.setName("row");
+            rowParam.setClassPath("java.lang.Float");
+            rowParam.setRefClass(model.getClassName(classInKey));
+            rowParam.setArray(true);
+
+            for (Object classOutKey : model.getClassKeys()) {
+                ParameterDescriptor cellParam = new ParameterDescriptor();
+                cellParam.setName("cell");
+                cellParam.setClassPath("java.lang.Float");
+                cellParam.setRefClass(model.getClassName(classOutKey));
+                cellParam.setValue(Float.toString(model.getClassSwitchMatrix(stationKey, classInKey, classOutKey)));
+                cellParam.setArray(true);
+                rowParam.addSubParameter(cellParam);
+            }
+            matrixParam.addSubParameter(rowParam);
+        }
+        sec.addParameter(matrixParam);
     }
 }

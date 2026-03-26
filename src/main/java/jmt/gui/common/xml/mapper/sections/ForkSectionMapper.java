@@ -33,7 +33,206 @@ public class ForkSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+        ParameterDescriptor jobsPerLink = new ParameterDescriptor();
+        jobsPerLink.setName(XMLConstantNames.PARAM_JOBS_PER_LINK);
+        jobsPerLink.setClassPath(Integer.class.getName());
+        jobsPerLink.setValue(String.valueOf(model.getStationNumberOfServers(key)));
+        sec.addParameter(jobsPerLink);
+
+        ParameterDescriptor block = new ParameterDescriptor();
+        block.setName(XMLConstantNames.PARAM_BLOCK);
+        block.setClassPath(Integer.class.getName());
+        block.setValue(String.valueOf(model.getForkBlock(key)));
+        sec.addParameter(block);
+
+        ParameterDescriptor isSim = new ParameterDescriptor();
+        isSim.setName(XMLConstantNames.PARAM_IS_SIMPLIFIED_FORK);
+        isSim.setClassPath(Boolean.class.getName());
+        isSim.setValue(String.valueOf(model.getIsSimplifiedFork(key)));
+        sec.addParameter(isSim);
+
+        ParameterDescriptor forkStrategy = new ParameterDescriptor();
+        forkStrategy.setName(XMLConstantNames.PARAM_FORK_STRATEGY);
+        forkStrategy.setClassPath("jmt.engine.random.ForkStrategy");
+
+        for (Object classKey : model.getClassKeys()) {
+            ForkStrategy fs = (ForkStrategy) model.getForkStrategy(key, classKey);
+            if (fs != null) {
+                ParameterDescriptor fsP = mapForkStrategyToDto(fs, key, classKey, model, ctx);
+                forkStrategy.addSubParameter(fsP);
+            }
+        }
+        sec.addParameter(forkStrategy);
+    }
+
+    private ParameterDescriptor mapForkStrategyToDto(ForkStrategy fs, Object key, Object classKey, CommonModel model, MappingContext ctx) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(fs.getName());
+        p.setClassPath(fs.getClassPath());
+        p.setRefClass(model.getClassName(classKey));
+
+        if (fs instanceof ProbabilitiesFork) {
+            mapProbabilitiesForkToDto(fs, p, key, model, ctx);
+        } else if (fs instanceof CombFork) {
+            mapCombForkToDto(fs, p, key, model, ctx);
+        } else if (fs instanceof ClassSwitchFork || fs instanceof MultiBranchClassSwitchFork) {
+            mapClassSwitchForkToDto(fs, p, key, model, ctx);
+        }
+        return p;
+    }
+
+    private void mapProbabilitiesForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
+        if (outPaths == null) return;
+
+        ParameterDescriptor arrayPar = new ParameterDescriptor();
+        arrayPar.setName("EmpiricalEntryArray");
+        arrayPar.setClassPath("jmt.engine.NetStrategies.ForkStrategies.OutPath");
+        arrayPar.setArray(true);
+
+        for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
+            ParameterDescriptor entryPar = new ParameterDescriptor();
+            entryPar.setName("OutPathEntry");
+            entryPar.setClassPath("jmt.engine.NetStrategies.ForkStrategies.OutPath");
+
+            // outUnitProbability
+            ParameterDescriptor outUnitProb = new ParameterDescriptor();
+            outUnitProb.setName("outUnitProbability");
+            outUnitProb.setClassPath("jmt.gui.common.xml.EmpiricalEntry");
+
+            ParameterDescriptor stationName = new ParameterDescriptor();
+            stationName.setName("stationName");
+            stationName.setClassPath(String.class.getName());
+            stationName.setValue(model.getStationName(entry.getKey()));
+            outUnitProb.addSubParameter(stationName);
+
+            ParameterDescriptor prob = new ParameterDescriptor();
+            prob.setName("probability");
+            prob.setClassPath(Double.class.getName());
+            prob.setValue(entry.getValue().getProbability().toString());
+            outUnitProb.addSubParameter(prob);
+
+            entryPar.addSubParameter(outUnitProb);
+
+            // JobsPerLinkDis
+            ParameterDescriptor jobsPerLinkDis = new ParameterDescriptor();
+            jobsPerLinkDis.setName("JobsPerLinkDis");
+            jobsPerLinkDis.setClassPath("jmt.gui.common.xml.EmpiricalEntry");
+            jobsPerLinkDis.setArray(true);
+
+            Map<Object, Object> map = entry.getValue().getOutParameters();
+            for (Map.Entry<Object, Object> subEntry : map.entrySet()) {
+                ParameterDescriptor numEntry = new ParameterDescriptor();
+                numEntry.setName("EmpiricalEntry");
+                numEntry.setClassPath("jmt.gui.common.xml.EmpiricalEntry");
+
+                ParameterDescriptor numbers = new ParameterDescriptor();
+                numbers.setName("numbers");
+                numbers.setClassPath(String.class.getName());
+                numbers.setValue(subEntry.getKey().toString());
+                numEntry.addSubParameter(numbers);
+
+                ParameterDescriptor numProb = new ParameterDescriptor();
+                numProb.setName("probability");
+                numProb.setClassPath(Double.class.getName());
+                numProb.setValue(subEntry.getValue().toString());
+                numEntry.addSubParameter(numProb);
+
+                jobsPerLinkDis.addSubParameter(numEntry);
+            }
+            entryPar.addSubParameter(jobsPerLinkDis);
+            arrayPar.addSubParameter(entryPar);
+        }
+        p.addSubParameter(arrayPar);
+    }
+
+    private void mapCombForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        Map<Object, Double> probs = (Map<Object, Double>) fs.getOutDetails();
+        if (probs == null) return;
+
+        ParameterDescriptor entryArray = new ParameterDescriptor();
+        entryArray.setName("EmpiricalEntry");
+        entryArray.setClassPath("jmt.gui.common.xml.EmpiricalEntry");
+        entryArray.setArray(true);
+
+        for (int i = 0; i < probs.size(); i++) {
+            String bKey = Integer.toString(i + 1);
+            Double val = probs.get(bKey);
+            if (val == null) continue;
+
+            ParameterDescriptor outUnitProb = new ParameterDescriptor();
+            outUnitProb.setName("outUnitProbability");
+            outUnitProb.setClassPath("jmt.gui.common.xml.EmpiricalEntry");
+
+            ParameterDescriptor branchNum = new ParameterDescriptor();
+            branchNum.setName("Number of Branches");
+            branchNum.setClassPath(String.class.getName());
+            branchNum.setValue(bKey);
+            outUnitProb.addSubParameter(branchNum);
+
+            ParameterDescriptor prob = new ParameterDescriptor();
+            prob.setName("probability");
+            prob.setClassPath(Double.class.getName());
+            prob.setValue(val.toString());
+            outUnitProb.addSubParameter(prob);
+
+            entryArray.addSubParameter(outUnitProb);
+        }
+        p.addSubParameter(entryArray);
+    }
+
+    private void mapClassSwitchForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
+        if (outPaths == null) return;
+
+        ParameterDescriptor classJobNumArray = new ParameterDescriptor();
+        classJobNumArray.setName("ClassJobNumArray");
+        classJobNumArray.setClassPath("jmt.engine.NetStrategies.ForkStrategies.ClassJobNum");
+        classJobNumArray.setArray(true);
+
+        for (Map.Entry<Object, OutPath> entry : outPaths.entrySet()) {
+            ParameterDescriptor entryPar = new ParameterDescriptor();
+            entryPar.setName("OutPathEntry");
+            entryPar.setClassPath("jmt.engine.NetStrategies.ForkStrategies.ClassJobNum");
+
+            ParameterDescriptor stationName = new ParameterDescriptor();
+            stationName.setName("stationName");
+            stationName.setClassPath(String.class.getName());
+            stationName.setValue(model.getStationName(entry.getKey()));
+            entryPar.addSubParameter(stationName);
+
+            ParameterDescriptor classesPar = new ParameterDescriptor();
+            classesPar.setName("Classes");
+            classesPar.setClassPath(String.class.getName());
+            classesPar.setArray(true);
+
+            ParameterDescriptor numbersPar = new ParameterDescriptor();
+            numbersPar.setName("Numbers");
+            numbersPar.setClassPath(String.class.getName());
+            numbersPar.setArray(true);
+
+            Map<Object, Integer> map = (Map) entry.getValue().getOutParameters();
+            for (Object cKey : model.getClassKeys()) {
+                Integer count = map.get(cKey);
+                if (count != null) {
+                    ParameterDescriptor jobClass = new ParameterDescriptor();
+                    jobClass.setName("class");
+                    jobClass.setClassPath(String.class.getName());
+                    jobClass.setValue(model.getClassName(cKey));
+                    classesPar.addSubParameter(jobClass);
+
+                    ParameterDescriptor jobNum = new ParameterDescriptor();
+                    jobNum.setName("numberOfJobs");
+                    jobNum.setClassPath(String.class.getName());
+                    jobNum.setValue(count.toString());
+                    numbersPar.addSubParameter(jobNum);
+                }
+            }
+            entryPar.addSubParameter(classesPar);
+            entryPar.addSubParameter(numbersPar);
+            classJobNumArray.addSubParameter(entryPar);
+        }
+        p.addSubParameter(classJobNumArray);
     }
 
     private void mapForkParameter(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {

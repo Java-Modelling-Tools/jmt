@@ -4,6 +4,7 @@ import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.joinStrategies.GuardJoin;
 import jmt.gui.common.joinStrategies.JoinStrategy;
+import jmt.gui.common.joinStrategies.NormalJoin;
 import jmt.gui.common.joinStrategies.PartialJoin;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
@@ -31,7 +32,82 @@ public class JoinSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+        List<ParameterDescriptor> joinStrats = new ArrayList<>();
+
+        for (Object classKey : model.getClassKeys()) {
+            JoinStrategy js = (JoinStrategy) model.getJoinStrategy(key, classKey);
+            if (js != null) {
+                joinStrats.add(createJoinStrategyParameter(js, model, classKey));
+            }
+        }
+
+        ParameterDescriptor globalJoin = new ParameterDescriptor();
+        globalJoin.setName("JoinStrategy");
+        globalJoin.setClassPath("jmt.engine.NetStrategies.JoinStrategy");
+        globalJoin.setSubParameters(joinStrats);
+        globalJoin.setArray(false);
+
+        sec.getParameters().add(globalJoin);
+    }
+
+    private ParameterDescriptor createJoinStrategyParameter(JoinStrategy js, CommonModel model, Object classKey) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(js.getName());
+        p.setClassPath(js.getClassPath());
+        p.setRefClass(model.getClassName(classKey));
+        p.setArray(false);
+
+        List<ParameterDescriptor> subParams = new ArrayList<>();
+        if (js instanceof PartialJoin || js instanceof NormalJoin) {
+            ParameterDescriptor numRequired = new ParameterDescriptor();
+            numRequired.setName(XMLConstantNames.PARAM_NUM_REQUIRED);
+            numRequired.setClassPath(Integer.class.getName());
+            numRequired.setValue(String.valueOf(js.getRequiredNum()));
+            numRequired.setArray(true);
+            subParams.add(numRequired);
+        } else if (js instanceof GuardJoin) {
+            GuardJoin gj = (GuardJoin) js;
+            Map<Object, Integer> guard = gj.getGuard();
+
+            ParameterDescriptor classesPar = new ParameterDescriptor();
+            classesPar.setName(XMLConstantNames.PARAM_CLASSES);
+            classesPar.setClassPath(String.class.getName());
+            classesPar.setArray(true);
+            List<ParameterDescriptor> classList = new ArrayList<>();
+
+            ParameterDescriptor numbersPar = new ParameterDescriptor();
+            numbersPar.setName(XMLConstantNames.PARAM_NUMBERS);
+            numbersPar.setClassPath(String.class.getName());
+            numbersPar.setArray(true);
+            List<ParameterDescriptor> numberList = new ArrayList<>();
+
+            for (Object c : model.getClassKeys()) {
+                Integer required = guard.get(c);
+                if (required != null) {
+                    ParameterDescriptor classSub = new ParameterDescriptor();
+                    classSub.setName("class");
+                    classSub.setClassPath(String.class.getName());
+                    classSub.setValue(model.getClassName(c));
+                    classSub.setArray(true);
+                    classList.add(classSub);
+
+                    ParameterDescriptor numSub = new ParameterDescriptor();
+                    numSub.setName("required");
+                    numSub.setClassPath(String.class.getName());
+                    numSub.setValue(required.toString());
+                    numSub.setArray(true);
+                    numberList.add(numSub);
+                }
+            }
+            classesPar.setSubParameters(classList);
+            numbersPar.setSubParameters(numberList);
+
+            subParams.add(classesPar);
+            subParams.add(numbersPar);
+        }
+
+        p.setSubParameters(subParams);
+        return p;
     }
 
     private void mapJoinStrategy(String className, ParameterDescriptor jP, Object key, CommonModel model, MappingContext ctx) {

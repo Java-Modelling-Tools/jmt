@@ -14,7 +14,7 @@ import jmt.gui.common.xml.dto.SimDescriptor;
 public class ConnectionsMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getConnections() == null || dto.getConnections().isEmpty()) {
             return;
         }

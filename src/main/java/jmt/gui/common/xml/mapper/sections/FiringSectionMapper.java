@@ -24,7 +24,10 @@ public class FiringSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
+        ParameterDescriptor firingOutcomes = createConditionMatrix(XMLConstantNames.PARAM_FIRING_OUTCOMES, "firingOutcome", "firingVector", "firingEntry", key, model, ctx, (s, m, i, to, cl) -> model.getFiringOutcome(s, i, to, cl), false);
+        if (firingOutcomes != null) {
+            sec.addParameter(firingOutcomes);
+        }
     }
 
     private void mapOutcome(Object key, int outcomeIndex, ParameterDescriptor outcomeParam, MappingContext ctx) {

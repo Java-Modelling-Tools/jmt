@@ -16,7 +16,7 @@ import jmt.gui.common.xml.dto.SimDescriptor;
 public class PreloadMapper implements ModelElementMapper {
 
     @Override
-    public void map(SimDescriptor dto, MappingContext context) {
+    public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
         if (dto.getPreloads() == null || dto.getPreloads().isEmpty()) {
             return;
         }
