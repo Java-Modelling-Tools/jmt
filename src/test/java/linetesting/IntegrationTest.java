@@ -4,10 +4,10 @@ import static linetesting.IntegrationTestConstants.CLASSES_DIRECTORY;
 import static linetesting.IntegrationTestConstants.EXCLUDED_PACKAGES;
 import static linetesting.IntegrationTestConstants.JABA_TESTS_FOLDER_NAME;
 import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME;
 import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME;
 import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static linetesting.IntegrationTestConstants.OUTPUT_FOLDER_PATH;
 import static linetesting.IntegrationTestConstants.TEST_FILES_BASE_FOLDER_PATH;
 import static linetesting.IntegrationTestConstants.TEST_TIMEOUT;
@@ -20,7 +20,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -28,11 +30,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
-import java.time.Instant;
-import org.junit.jupiter.params.provider.Arguments;
-import java.util.stream.IntStream;
 
 public class IntegrationTest {
 
@@ -92,12 +92,11 @@ public class IntegrationTest {
 		File[] entries = FileUtil.listAllFilesAndFoldersInFolder(jsimTestsFolder);
 		if (entries == null)
 			return Stream.empty();
-		
+
 		int totalTests = entries.length;
-    
+
 		// Create a stream of Arguments: (File, currentIndex, totalTests)
-		return IntStream.range(0, totalTests)
-				.mapToObj(i -> Arguments.of(entries[i], i + 1, totalTests));
+		return IntStream.range(0, totalTests).mapToObj(i -> Arguments.of(entries[i], i + 1, totalTests));
 	}
 
 	static Stream<Arguments> jsimGraphTestProvider() {
@@ -116,11 +115,13 @@ public class IntegrationTest {
 		return testProvider(JABA_TESTS_FOLDER_NAME);
 	}
 
-	private void runWithCoverage(File testFile, String csvPath, int currentIndex, int totalTests, Executable testLogic) {
-		Instant startInstant = Instant.now(); 
-        String startTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
-        
-		System.out.println("\n[INFO] [" + currentIndex + "/" + totalTests + "] Starting test file: " + testFile.getName() + " | Timestamp: " + startTimeStr);
+	private void runWithCoverage(File testFile, String csvPath, int currentIndex, int totalTests,
+			Executable testLogic) {
+		Instant startInstant = Instant.now();
+		String startTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+
+		System.out.println("\n[INFO] [" + currentIndex + "/" + totalTests + "] Starting test file: "
+				+ testFile.getName() + " | Timestamp: " + startTimeStr);
 
 		CoverageTracker.reset(); // Clear previous data
 
@@ -146,14 +147,13 @@ public class IntegrationTest {
 			}
 
 			Instant endInstant = Instant.now();
-            String endTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
+			String endTimeStr = LocalDateTime.now().format(TIMESTAMP_FORMATTER);
 
 			// Using toMillis() divided by 1000.0 gives us precise decimals (e.g., "1.453s")
-            double durationSeconds = Duration.between(startInstant, endInstant).toMillis() / 1000.0;
-            
-            System.out.println("[INFO] [" + currentIndex + "/" + totalTests + "] Finished test file: " + testFile.getName() 
-                         + " | Timestamp: " + endTimeStr 
-                         + " | Duration: " + durationSeconds + "s");
+			double durationSeconds = Duration.between(startInstant, endInstant).toMillis() / 1000.0;
+
+			System.out.println("[INFO] [" + currentIndex + "/" + totalTests + "] Finished test file: "
+					+ testFile.getName() + " | Timestamp: " + endTimeStr + " | Duration: " + durationSeconds + "s");
 		}
 	}
 
@@ -163,16 +163,20 @@ public class IntegrationTest {
 		// Call the generic runner, passing the JSIM CSV path
 		runWithCoverage(jsimTestFile, JSIM_CSV_PATH, currentIndex, totalTests, () -> {
 
-			// --- Your JSIM specific logic goes here ---
 			if (jsimTestFile.isDirectory()) {
-				File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile, JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME);
+				File jsimLineTestModelFile = FileUtil.getFileInFolder(jsimTestFile,
+						JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME);
 				File jsimLineTestModelResultsFile = FileUtil.getFileInFolder(jsimTestFile,
 						JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME);
 				if (jsimLineTestModelFile != null && jsimLineTestModelResultsFile != null) {
-					assertTrue(IntegrationTestUtil.testLineJSIMGraphModel(jsimLineTestModelFile, jsimLineTestModelResultsFile));
+					assertTrue(
+							IntegrationTestUtil.testLineJSIMGraphModel(jsimLineTestModelFile,
+									jsimLineTestModelResultsFile),
+							"JSIMGraph line test failed for file: " + jsimTestFile.getName());
 				}
 			} else {
-				assertTrue(IntegrationTestUtil.testJSIMGraphModel(jsimTestFile));
+				assertTrue(IntegrationTestUtil.testJSIMGraphModel(jsimTestFile),
+						"JSIMGraph test failed for file: " + jsimTestFile.getName());
 			}
 
 		});
@@ -184,8 +188,8 @@ public class IntegrationTest {
 		// Call the generic runner, passing the JMVA CSV path
 		runWithCoverage(jmvaTestFile, JMVA_CSV_PATH, currentIndex, totalTests, () -> {
 
-			// --- Your JMVA specific logic goes here ---
-			assertTrue(IntegrationTestUtil.testJMVAModel(jmvaTestFile));
+			assertTrue(IntegrationTestUtil.testJMVAModel(jmvaTestFile),
+					"JMVA test failed for file: " + jmvaTestFile.getName());
 
 		});
 	}
@@ -196,8 +200,8 @@ public class IntegrationTest {
 		// Call the generic runner, passing the JSIMWiz CSV path
 		runWithCoverage(jsimWizTestFile, JSIMWIZ_CSV_PATH, currentIndex, totalTests, () -> {
 
-			// --- Your JSIMWiz specific logic goes here ---
-			assertTrue(IntegrationTestUtil.testJSIMWizModel(jsimWizTestFile));
+			assertTrue(IntegrationTestUtil.testJSIMWizModel(jsimWizTestFile),
+					"JSIMWiz test failed for file: " + jsimWizTestFile.getName());
 
 		});
 	}
@@ -208,8 +212,8 @@ public class IntegrationTest {
 		// Call the generic runner, passing the JABA CSV path
 		runWithCoverage(jabaTestFile, JABA_CSV_PATH, currentIndex, totalTests, () -> {
 
-			// --- Your JABA specific logic goes here ---
-			assertTrue(IntegrationTestUtil.testJABAModel(jabaTestFile));
+			assertTrue(IntegrationTestUtil.testJABAModel(jabaTestFile),
+					"JABA test failed for file: " + jabaTestFile.getName());
 
 		});
 	}
