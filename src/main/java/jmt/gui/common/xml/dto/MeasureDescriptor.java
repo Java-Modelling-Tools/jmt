@@ -17,6 +17,7 @@ public class MeasureDescriptor {
     private String alpha;
     private String precision;
     private String verbose;
+    private String serverType;
 
     public String getName() {
         return name;
@@ -80,5 +81,13 @@ public class MeasureDescriptor {
 
     public void setVerbose(String verbose) {
         this.verbose = verbose;
+    }
+
+    public String getServerType() {
+        return serverType;
+    }
+
+    public void setServerType(String serverType) {
+        this.serverType = serverType;
     }
 }

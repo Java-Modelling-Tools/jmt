@@ -6,6 +6,7 @@
  */
 package jmt.gui.common.xml.parsers;
 
+import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -16,9 +17,10 @@ public class ParameterParser implements XmlEntityParser<ParameterDescriptor> {
     @Override
     public ParameterDescriptor parse(Element element) {
         ParameterDescriptor descriptor = new ParameterDescriptor();
-        descriptor.setName(readAttribute(element, "name"));
-        descriptor.setClassPath(readAttribute(element, "classPath"));
-        descriptor.setArray(Boolean.parseBoolean(readAttribute(element, "array")));
+        descriptor.setName(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_NAME));
+        descriptor.setClassPath(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_CLASSPATH));
+        descriptor.setArray(Boolean.parseBoolean(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_ARRAY)));
+        descriptor.setMap(Boolean.parseBoolean(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_MAP)));
 
         String pendingRefClass = null;
         NodeList children = element.getChildNodes();
@@ -29,11 +31,11 @@ public class ParameterParser implements XmlEntityParser<ParameterDescriptor> {
             Element child = (Element) node;
             String tagName = child.getTagName();
 
-            if ("value".equals(tagName)) {
+            if (XMLConstantNames.XML_E_PARAMETER_VALUE.equals(tagName)) {
                 descriptor.setValue(child.getTextContent());
-            } else if ("refClass".equals(tagName)) {
+            } else if (XMLConstantNames.XML_E_PARAMETER_REFCLASS.equals(tagName)) {
                 pendingRefClass = child.getTextContent();
-            } else if ("subParameter".equals(tagName)) {
+            } else if (XMLConstantNames.XML_E_SUBPARAMETER.equals(tagName)) {
                 ParameterDescriptor subParameter = parse(child);
                 if (pendingRefClass != null) {
                     subParameter.setRefClass(pendingRefClass);

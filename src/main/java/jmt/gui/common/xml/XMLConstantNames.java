@@ -70,6 +70,8 @@ public interface XMLConstantNames {
     String XML_E_CLASSWEIGHT = "classWeight";
     String XML_E_CONNECTION = "connection";
     String XML_A_CLASS_CUSTOMERS = "customers";
+    String XML_A_CLASS_CACHEMISSCLASS = "cacheMissClass";
+    String XML_A_CLASS_CACHEHITCLASS = "cacheHitClass";
     String CLASSNAME_DELAY = "Delay";
     String XML_E_STATION_DELAY_OFF = "delayOff";
     String XML_A_ROOT_DISABLESTATISTIC = "disableStatisticStop";
@@ -205,6 +207,7 @@ public interface XMLConstantNames {
     String PARAM_PUT_STRATEGIES = "putStrategies";
     String STRAT_QBPS = "QBPS";
     String XML_E_STATION_QUANTUM_SIZE = "quantumSize";
+    String XML_E_QUANTA_SIZE = "quantaSize";
     String XML_E_STATION_QUANTUM_SWITCHOVER_TIME = "quantumSwitchoverTime";
     String CLASSNAME_QUEUE = "Queue";
     String PARAM_QUEUE_PUT_STRATEGY = "QueuePutStrategy";
@@ -262,6 +265,7 @@ public interface XMLConstantNames {
     String XML_A_MEASURE_TYPE = "type";
     String XML_A_CLASS_TYPE = "type";
     String XML_A_REGION_TYPE = "type";
+    String XML_A_ARCHIVE_TIMESTAMP = "timestamp";
     String XML_E_CLASS = "userClass";
     String STRAT_VACATION_IDLE = "VacationWhenIdleStrategy";
     String XML_E_PARAMETER_VALUE = "value";

@@ -15,6 +15,8 @@ public class UserClassDescriptor {
     private String referenceSource;
     private String softDeadline;
     private String customers;
+    private String cacheMissClass;
+    private String cacheHitClass;
 
     public String getName() {
         return name;
@@ -62,5 +64,21 @@ public class UserClassDescriptor {
 
     public void setCustomers(String customers) {
         this.customers = customers;
+    }
+
+    public String getCacheMissClass() {
+        return cacheMissClass;
+    }
+
+    public void setCacheMissClass(String cacheMissClass) {
+        this.cacheMissClass = cacheMissClass;
+    }
+
+    public String getCacheHitClass() {
+        return cacheHitClass;
+    }
+
+    public void setCacheHitClass(String cacheHitClass) {
+        this.cacheHitClass = cacheHitClass;
     }
 }

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SimDescriptor {
+    private String archiveName;
+    private String archiveTimestamp;
     private Map<String, String> globalAttributes = new LinkedHashMap<>();
     private List<UserClassDescriptor> userClasses = new ArrayList<>();
     private List<NodeDescriptor> nodes = new ArrayList<>();
@@ -20,6 +22,22 @@ public class SimDescriptor {
     private List<MeasureDescriptor> measures = new ArrayList<>();
     private List<BlockingRegionDescriptor> blockingRegions = new ArrayList<>();
     private List<NodeDescriptor> preloads = new ArrayList<>();
+
+    public String getArchiveName() {
+        return archiveName;
+    }
+
+    public void setArchiveName(String archiveName) {
+        this.archiveName = archiveName;
+    }
+
+    public String getArchiveTimestamp() {
+        return archiveTimestamp;
+    }
+
+    public void setArchiveTimestamp(String archiveTimestamp) {
+        this.archiveTimestamp = archiveTimestamp;
+    }
 
     public Map<String, String> getGlobalAttributes() {
         return globalAttributes;

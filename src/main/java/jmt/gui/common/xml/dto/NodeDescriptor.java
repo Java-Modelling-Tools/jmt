@@ -17,8 +17,8 @@ public class NodeDescriptor {
     private List<SectionDescriptor> sections = new ArrayList<>();
     private List<ParameterDescriptor> parameters = new ArrayList<>();
     private List<Double> classSoftDeadlines = new ArrayList<>();
-    private Double quantumSize;
-    private Double quantumSwitchoverTime;
+    private List<Double> quantumSize = new ArrayList<>();
+    private List<Double> quantumSwitchoverTime = new ArrayList<>();
 
     // Getters and Setters
     public List<Double> getClassSoftDeadlines() {
@@ -29,20 +29,32 @@ public class NodeDescriptor {
         this.classSoftDeadlines = classSoftDeadlines;
     }
 
-    public Double getQuantumSize() {
+    public List<Double> getQuantumSize() {
         return quantumSize;
     }
 
-    public void setQuantumSize(Double quantumSize) {
-        this.quantumSize = quantumSize;
+    public void setQuantumSize(List<Double> quantumSize) {
+        this.quantumSize = quantumSize != null ? quantumSize : new ArrayList<>();
     }
 
-    public Double getQuantumSwitchoverTime() {
+    public void addQuantumSize(Double size) {
+        if (size != null) {
+            quantumSize.add(size);
+        }
+    }
+
+    public List<Double> getQuantumSwitchoverTime() {
         return quantumSwitchoverTime;
     }
 
-    public void setQuantumSwitchoverTime(Double quantumSwitchoverTime) {
-        this.quantumSwitchoverTime = quantumSwitchoverTime;
+    public void setQuantumSwitchoverTime(List<Double> quantumSwitchoverTime) {
+        this.quantumSwitchoverTime = quantumSwitchoverTime != null ? quantumSwitchoverTime : new ArrayList<>();
+    }
+
+    public void addQuantumSwitchoverTime(Double time) {
+        if (time != null) {
+            quantumSwitchoverTime.add(time);
+        }
     }
 
     public String getName() {

@@ -17,6 +17,7 @@ public class ParameterDescriptor {
     private String value;
     private String refClass;
     private boolean isArray;
+    private boolean map;
     private List<ParameterDescriptor> subParameters = new ArrayList<>();
 
     public String getName() {
@@ -57,6 +58,14 @@ public class ParameterDescriptor {
 
     public void setArray(boolean array) {
         isArray = array;
+    }
+
+    public boolean isMap() {
+        return map;
+    }
+
+    public void setMap(boolean map) {
+        this.map = map;
     }
 
     public List<ParameterDescriptor> getSubParameters() {
