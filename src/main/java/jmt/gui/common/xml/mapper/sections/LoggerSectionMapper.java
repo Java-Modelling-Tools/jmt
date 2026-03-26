@@ -12,7 +12,7 @@ import jmt.gui.common.xml.mapper.MappingContext;
 public class LoggerSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         if (sec.getParameters() == null) return;
 
         LoggerParameters logParams = new LoggerParameters();

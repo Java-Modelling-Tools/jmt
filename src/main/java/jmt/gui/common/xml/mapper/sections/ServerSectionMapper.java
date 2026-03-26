@@ -14,7 +14,7 @@ import java.util.*;
 public class ServerSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         mapQueueStrategyByClassName(sec.getClassName(), model, key, ctx);
 
         ServerMappingState state = new ServerMappingState();

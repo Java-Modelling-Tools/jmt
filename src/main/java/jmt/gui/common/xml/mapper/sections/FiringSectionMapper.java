@@ -12,7 +12,7 @@ import java.util.List;
 public class FiringSectionMapper extends AbstractSectionMapper {
 
     @Override
-    public void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         ParameterDescriptor fo = getParam(sec, XMLConstantNames.PARAM_FIRING_OUTCOMES);
         if (fo != null) {
             List<ParameterDescriptor> outcomes = getSubParams(fo);

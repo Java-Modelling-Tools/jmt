@@ -14,7 +14,7 @@ import java.util.*;
 
 public abstract class AbstractSectionMapper {
 
-    public abstract void map(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
+    public abstract void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
 
     // --- UTILITY ---
     protected ParameterDescriptor getParam(SectionDescriptor sec, String name) {
