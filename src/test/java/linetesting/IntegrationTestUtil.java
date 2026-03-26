@@ -91,19 +91,30 @@ public class IntegrationTestUtil {
 			// results. " confirm dialog
 			model.setSimulationResults(null);
 
+			// Check if this model is a Parametric Analysis
+			boolean isParametricAnalysis = model.isParametricAnalysisEnabled();
+
 			mediator.startSimulation();
 
-			// Get Dispatcher
-			Field dispatcherField = Mediator.class.getDeclaredField("dispatcher");
-			dispatcherField.setAccessible(true);
-			DispatcherThread dispatcherThread = (DispatcherThread) dispatcherField.get(mediator);
+			Thread threadToAwait = null;
 
-			// Get the poller thread
-			Field pollerField = DispatcherThread.class.getDeclaredField("poller");
-			pollerField.setAccessible(true);
-			Thread pollerThread = (Thread) pollerField.get(dispatcherThread);
+			if (!isParametricAnalysis) {
+				// NORMAL SIMULATION LOGIC
+				DispatcherThread dispatcherThread = (DispatcherThread) waitForThreadInitialization(mediator,
+						"dispatcher", "dispatcherThread");
 
-			awaitSimulationEnd(pollerThread);
+				// Get the poller thread
+				Field pollerField = DispatcherThread.class.getDeclaredField("poller");
+				pollerField.setAccessible(true);
+				threadToAwait = (Thread) pollerField.get(dispatcherThread);
+
+			} else {
+				// PARAMETRIC ANALYSIS LOGIC
+				threadToAwait = (Thread) waitForThreadInitialization(mediator, "batchThread",
+						"batchThread (Parametric Analysis)");
+			}
+
+			awaitSimulationEnd(threadToAwait);
 
 			File modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
 
@@ -121,7 +132,7 @@ public class IntegrationTestUtil {
 
 			return modelOutputFile;
 
-		} catch (SecurityException | ReflectiveOperationException | IOException e) {
+		} catch (SecurityException | ReflectiveOperationException | IOException | InterruptedException e) {
 			e.printStackTrace();
 			// System.exit(0);
 			throw new RuntimeException("Error executing JSIMGraph test", e);
@@ -448,9 +459,7 @@ public class IntegrationTestUtil {
 			return checkResults(expectedMeanValues, actualValues);
 
 		} catch (Exception e) {
-			e.printStackTrace();
-			// Returning false causes the assertTrue() in LineTest to fail gracefully
-			return false;
+			throw new RuntimeException("Simulation crashed for JSIMGraph line test: " + testModel.getName(), e);
 		}
 	}
 
@@ -464,9 +473,7 @@ public class IntegrationTestUtil {
 
 			return checkResults(expectedValues, actualValues);
 		} catch (Exception e) {
-			e.printStackTrace();
-			// Returning false causes the assertTrue() in LineTest to fail gracefully
-			return false;
+			throw new RuntimeException("Simulation crashed for JSIMGraph test: " + testModel.getName(), e);
 		}
 	}
 
@@ -487,9 +494,7 @@ public class IntegrationTestUtil {
 
 			return checkResults(expectedValues, actualValues);
 		} catch (Exception e) {
-			e.printStackTrace();
-			// Returning false causes the assertTrue() in LineTest to fail gracefully
-			return false;
+			throw new RuntimeException("Simulation crashed for JMVA test: " + testModel.getName(), e);
 		}
 
 	}
@@ -503,9 +508,7 @@ public class IntegrationTestUtil {
 
 			return checkResults(expectedValues, actualValues);
 		} catch (Exception e) {
-			e.printStackTrace();
-			// Returning false causes the assertTrue() in LineTest to fail gracefully
-			return false;
+			throw new RuntimeException("Simulation crashed for JSIMWiz test: " + testModel.getName(), e);
 		}
 
 	}
@@ -518,11 +521,40 @@ public class IntegrationTestUtil {
 			// TODO: Create oracle to compare results to
 			return true;
 		} catch (Exception e) {
-			e.printStackTrace();
-			// Returning false causes the assertTrue() in LineTest to fail gracefully
-			return false;
+			throw new RuntimeException("Simulation crashed for JABA test: " + testModel.getName(), e);
 		}
 
+	}
+
+	// Helper method to wait for async threads to spin up via reflection
+	private static Object waitForThreadInitialization(Object targetObj, String fieldName, String threadDisplayName)
+			throws ReflectiveOperationException, InterruptedException {
+
+		Field field = targetObj.getClass().getDeclaredField(fieldName);
+		field.setAccessible(true);
+
+		Object threadObj = null;
+		int retries = 0;
+
+		// Wait up to 5 seconds
+		// (IntegrationTestConstants.THREAD_INITIALIZATION_WAIT_TIME *
+		// IntegrationTestConstants.THREAD_INITIALIZATION_SLEEP_TIMEms) for the async
+		// GUI thread to initialize
+		while (threadObj == null && retries < IntegrationTestConstants.THREAD_INITIALIZATION_WAIT_TIME) {
+			threadObj = field.get(targetObj);
+			if (threadObj == null) {
+				Thread.sleep(IntegrationTestConstants.THREAD_INITIALIZATION_SLEEP_TIME);
+				retries++;
+			}
+		}
+
+		// If it's still null, the simulation GUI crashed and aborted startup
+		if (threadObj == null) {
+			throw new RuntimeException(
+					"Simulation aborted: " + threadDisplayName + " never initialized. Check AWT/GUI logs.");
+		}
+
+		return threadObj;
 	}
 
 }
