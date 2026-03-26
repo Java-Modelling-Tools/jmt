@@ -50,6 +50,11 @@ public class QueueSectionMapper extends AbstractSectionMapper {
         mapPetriNetConditions(sec, key, ctx);
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapQueueSize(SectionDescriptor sec, CommonModel model, Object key) {
         ParameterDescriptor size = getParam(sec, XMLConstantNames.PARAM_SIZE);
         if (size != null) {

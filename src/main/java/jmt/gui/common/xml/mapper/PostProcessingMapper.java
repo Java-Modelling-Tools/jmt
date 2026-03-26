@@ -39,6 +39,11 @@ public class PostProcessingMapper implements ModelElementMapper {
         model.resetSaveState();
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void resolveReferenceStations(CommonModel model, MappingContext context) {
         for (Map.Entry<Object, String> entry : context.refStations.entrySet()) {
             Object classKey = entry.getKey();

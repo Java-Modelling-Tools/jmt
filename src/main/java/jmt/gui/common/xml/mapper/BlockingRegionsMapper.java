@@ -30,6 +30,11 @@ public class BlockingRegionsMapper implements ModelElementMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapBlockingRegion(BlockingRegionDescriptor region, MappingContext context) {
         CommonModel model = context.getModel();
         Object regionKey = model.addBlockingRegion(region.getName(), region.getType());

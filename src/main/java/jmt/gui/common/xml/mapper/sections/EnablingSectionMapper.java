@@ -12,4 +12,9 @@ public class EnablingSectionMapper extends AbstractSectionMapper {
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
         extractTransitionConditions(key, getParam(sec, XMLConstantNames.PARAM_ENABLING_CONDITIONS), getParam(sec, XMLConstantNames.PARAM_INHIBITING_CONDITIONS), null, ctx);
     }
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
 }

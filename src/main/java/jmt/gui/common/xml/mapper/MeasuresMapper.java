@@ -24,6 +24,11 @@ public class MeasuresMapper implements ModelElementMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapMeasure(MeasureDescriptor m, MappingContext context) {
         CommonModel model = context.getModel();
         Object stationKey = resolveStationKey(m, context);

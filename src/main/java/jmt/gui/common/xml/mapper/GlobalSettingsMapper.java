@@ -30,6 +30,11 @@ public class GlobalSettingsMapper implements ModelElementMapper {
         mapLoggerParameters(model, globals);
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapSimulationAndSeed(CommonModel model, Map<String, String> globals) {
         String seed = globals.get(XMLConstantNames.XML_A_ROOT_SEED);
         if (isPresent(seed)) {

@@ -31,6 +31,11 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapForkParameter(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         if (XMLConstantNames.PARAM_JOBS_PER_LINK.equals(p.getName())) {
             Integer v = valI(p);

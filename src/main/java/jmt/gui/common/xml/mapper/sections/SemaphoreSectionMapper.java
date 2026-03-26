@@ -38,4 +38,9 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper {
             ctx.classes.values().forEach(o -> model.setSemaphoreStrategy(key, o, CommonConstants.SEMAPHORE_NORMAL.clone()));
         }
     }
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
 }

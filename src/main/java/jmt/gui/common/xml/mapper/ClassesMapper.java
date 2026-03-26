@@ -26,6 +26,11 @@ public class ClassesMapper implements ModelElementMapper {
         }
     }
 
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapUserClass(UserClassDescriptor currclass, MappingContext context) {
         CommonModel model = context.getModel();
         String name = currclass.getName();

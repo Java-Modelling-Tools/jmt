@@ -29,6 +29,11 @@ public class StorageSectionMapper extends AbstractSectionMapper {
         mapPutStrategies(sec, model, key, ctx);
     }
 
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        // TODO: implement logic to map common model to dto
+    }
+
     private void mapTotalCapacity(SectionDescriptor sec, CommonModel model, Object key) {
         ParameterDescriptor tc = getParam(sec, XMLConstantNames.PARAM_TOTAL_CAPACITY);
         if (tc != null) {
