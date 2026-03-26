@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
-<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Sec6_3_Obj3_NewServerB_Wif0,5-1,2_JSIMg.jsimg" timestamp="Thu Mar 12 12:08:20 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="2000000" name="Sec6_3_Obj3_NewServerB_Wif0,5-1,2_JSIMg.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Sec6_3_Obj3_NewServerB_Wif0,5-1,2_JSIMg.jsimg" timestamp="Thu Mar 26 23:02:52 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Calogero\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="2000000" name="Sec6_3_Obj3_NewServerB_Wif0,5-1,2_JSIMg.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass name="Class1" priority="0" referenceSource="Source" softDeadline="0.0" type="open"/>
         <userClass name="Class2" priority="0" referenceSource="ClassSwitch" softDeadline="0.0" type="open"/>
         <userClass name="Class3" priority="0" referenceSource="ClassSwitch" softDeadline="0.0" type="open"/>
