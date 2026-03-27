@@ -19,33 +19,7 @@ import java.util.Map;
 
 public abstract class AbstractSectionMapper implements ModelElementMapper {
 
-    // =========================================================================================
-    // --- TEMPORARY CONSTANTS (To be moved to XMLConstantNames) ---
-    // =========================================================================================
-    public static final String ZERO_SERVICE_TIME_STRATEGY = "ZeroServiceTimeStrategy";
-    public static final String DISABLED_SERVICE_TIME_STRATEGY = "DisabledServiceTimeStrategy";
-    public static final String LOAD_DEPENDENT_STRATEGY = "LoadDependentStrategy";
-    public static final String CP_LOAD_DEPENDENT_STRATEGY = "jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy";
-    public static final String LD_PARAMETER = "LDParameter";
-    public static final String CP_LD_PARAMETER = "jmt.engine.NetStrategies.ServiceStrategies.LDParameter";
-    public static final String PARAM_FROM = "from";
-    public static final String PARAM_MEAN = "mean";
-    public static final String PARAM_DISTR = "distr";
-    public static final String CP_DISTRIBUTION = "jmt.engine.random.Distribution";
-    public static final String CP_DISTRIBUTION_CONTAINER = "jmt.engine.random.DistributionContainer";
-    public static final String PARAM_DISTR_PAR = "distrPar";
 
-    public static final String PREFIX_ENABLING = "enabling";
-    public static final String PREFIX_INHIBITING = "inhibiting";
-    public static final String PREFIX_RESOURCE = "resource";
-    public static final String SUFFIX_CONDITION = "Condition";
-
-    public static final String CP_TRANSITION_MATRIX = "jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix";
-    public static final String CP_TRANSITION_VECTOR = "jmt.engine.NetStrategies.TransitionUtilities.TransitionVector";
-
-    public static final String STR_ZERO_STRATEGY = "ZeroStrategy";
-    public static final String STR_DISABLED_STRATEGY = "DisabledStrategy";
-    public static final String STR_LOAD_DEPENDENT = "LoadDependent";
     // =========================================================================================
 
     public abstract void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);

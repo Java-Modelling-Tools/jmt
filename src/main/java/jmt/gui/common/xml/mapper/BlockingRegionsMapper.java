@@ -21,7 +21,9 @@ import java.util.Set;
 
 public class BlockingRegionsMapper implements ModelElementMapper {
 
+    // =========================================================================================
     // --- READING PHASE (XML -> DTO -> Model) ---
+    // =========================================================================================
 
     @Override
     public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
@@ -156,7 +158,9 @@ public class BlockingRegionsMapper implements ModelElementMapper {
         }
     }
 
+    // =========================================================================================
     // --- WRITING PHASE (Model -> DTO -> XML) ---
+    // =========================================================================================
 
     @Override
     public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
@@ -175,11 +179,9 @@ public class BlockingRegionsMapper implements ModelElementMapper {
     }
 
     private void mapModelBlockingRegionToDto(CommonModel model, Object regionKey, BlockingRegionDescriptor regionDto) {
-        // Name and Type
         regionDto.setName(model.getRegionName(regionKey));
         regionDto.setType(model.getRegionType(regionKey));
 
-        // Global Constraints
         Integer maxJobs = model.getRegionCustomerConstraint(regionKey);
         if (maxJobs != null) {
             regionDto.addGlobalConstraint(XMLConstantNames.XML_A_GLOBALCONSTRAINT_MAXJOBS, maxJobs.toString());
@@ -190,7 +192,6 @@ public class BlockingRegionsMapper implements ModelElementMapper {
             regionDto.addGlobalConstraint(XMLConstantNames.XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY, maxMemory.toString());
         }
 
-        // Region Nodes
         Set<Object> stations = model.getBlockingRegionStations(regionKey);
         if (stations != null) {
             for (Object stationKey : stations) {
@@ -198,10 +199,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
             }
         }
 
-        // Constraints, Weights, Sizes, and Drop Rules mapped per User Class
         extractClassSpecificDataToDto(model, regionKey, regionDto);
-
-        // Group Constraints and Class Lists
         extractGroupsToDto(model, regionKey, regionDto);
     }
 
@@ -210,42 +208,42 @@ public class BlockingRegionsMapper implements ModelElementMapper {
         if (classKeys == null) return;
 
         for (Object classKey : classKeys) {
-            String className = model.getClassName(classKey);
-            if (className == null) continue;
+            extractSingleClassDataToDto(model, regionKey, classKey, regionDto);
+        }
+    }
 
-            // Class Constraints
-            Integer classMaxJobs = model.getRegionClassCustomerConstraint(regionKey, classKey);
-            if (classMaxJobs != null) {
-                regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASSCONSTRAINT_MAXJOBS, classMaxJobs.toString());
-            }
+    private void extractSingleClassDataToDto(CommonModel model, Object regionKey, Object classKey, BlockingRegionDescriptor regionDto) {
+        String className = model.getClassName(classKey);
+        if (className == null) return;
 
-            Integer classMaxMem = model.getRegionClassMemorySize(regionKey, classKey);
-            if (classMaxMem != null) {
-                regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY, classMaxMem.toString());
-            }
+        Integer classMaxJobs = model.getRegionClassCustomerConstraint(regionKey, classKey);
+        if (classMaxJobs != null) {
+            regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASSCONSTRAINT_MAXJOBS, classMaxJobs.toString());
+        }
 
-            Double classSoftDeadline = model.getRegionClassSoftDeadline(regionKey, classKey);
-            if (classSoftDeadline != null) {
-                regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE, classSoftDeadline.toString());
-            }
+        Integer classMaxMem = model.getRegionClassMemorySize(regionKey, classKey);
+        if (classMaxMem != null) {
+            regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY, classMaxMem.toString());
+        }
 
-            // Class Weight
-            Integer classWeight = model.getRegionClassWeight(regionKey, classKey);
-            if (classWeight != null) {
-                regionDto.addClassWeight(className, classWeight.toString());
-            }
+        Double classSoftDeadline = model.getRegionClassSoftDeadline(regionKey, classKey);
+        if (classSoftDeadline != null) {
+            regionDto.addClassConstraint(className, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE, classSoftDeadline.toString());
+        }
 
-            // Class Size
-            Integer classSize = model.getRegionClassSize(regionKey, classKey);
-            if (classSize != null) {
-                regionDto.addClassSize(className, classSize.toString());
-            }
+        Integer classWeight = model.getRegionClassWeight(regionKey, classKey);
+        if (classWeight != null) {
+            regionDto.addClassWeight(className, classWeight.toString());
+        }
 
-            // Class Drop Rule
-            Boolean dropRule = model.getRegionClassDropRule(regionKey, classKey);
-            if (dropRule != null) {
-                regionDto.addDropRule(className, dropRule.toString());
-            }
+        Integer classSize = model.getRegionClassSize(regionKey, classKey);
+        if (classSize != null) {
+            regionDto.addClassSize(className, classSize.toString());
+        }
+
+        Boolean dropRule = model.getRegionClassDropRule(regionKey, classKey);
+        if (dropRule != null) {
+            regionDto.addDropRule(className, dropRule.toString());
         }
     }
 
@@ -253,31 +251,31 @@ public class BlockingRegionsMapper implements ModelElementMapper {
         int index = 0;
         String groupName;
 
-        // Loop through all groups by index until we run out
         while ((groupName = model.getRegionGroupName(regionKey, index)) != null) {
+            extractSingleGroupToDto(model, regionKey, index, groupName, regionDto);
+            index++;
+        }
+    }
 
-            // Group Constraints
-            Integer groupMaxJobs = model.getRegionGroupCustomerConstraint(regionKey, index);
-            if (groupMaxJobs != null) {
-                regionDto.addGroupConstraint(groupName, groupMaxJobs.toString());
-            }
+    private void extractSingleGroupToDto(CommonModel model, Object regionKey, int index, String groupName, BlockingRegionDescriptor regionDto) {
+        Integer groupMaxJobs = model.getRegionGroupCustomerConstraint(regionKey, index);
+        if (groupMaxJobs != null) {
+            regionDto.addGroupConstraint(groupName, groupMaxJobs.toString());
+        }
 
-            Integer groupMaxMem = model.getRegionGroupMemorySize(regionKey, index);
-            if (groupMaxMem != null) {
-                regionDto.addGroupMemoryConstraint(groupName, groupMaxMem.toString());
-            }
+        Integer groupMaxMem = model.getRegionGroupMemorySize(regionKey, index);
+        if (groupMaxMem != null) {
+            regionDto.addGroupMemoryConstraint(groupName, groupMaxMem.toString());
+        }
 
-            // Group Class Lists
-            List<Object> groupClassKeys = model.getRegionGroupClassList(regionKey, index);
-            if (groupClassKeys != null) {
-                for (Object classKey : groupClassKeys) {
-                    String className = model.getClassName(classKey);
-                    if (className != null) {
-                        regionDto.addGroupClass(groupName, className);
-                    }
+        List<Object> groupClassKeys = model.getRegionGroupClassList(regionKey, index);
+        if (groupClassKeys != null) {
+            for (Object classKey : groupClassKeys) {
+                String className = model.getClassName(classKey);
+                if (className != null) {
+                    regionDto.addGroupClass(groupName, className);
                 }
             }
-            index++;
         }
     }
 }

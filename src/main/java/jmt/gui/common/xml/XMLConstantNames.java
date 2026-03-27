@@ -298,7 +298,30 @@ public interface XMLConstantNames {
     String STRAT_EDD_STRAT_PRI = "EDDStrategyPriority";
     String STRAT_EDF_STRAT_PRI = "EDFStrategyPriority";
     String STRAT_TBS_STRAT_PRI = "TBSStrategyPriority";
+    String ZERO_SERVICE_TIME_STRATEGY = "ZeroServiceTimeStrategy";
+    String DISABLED_SERVICE_TIME_STRATEGY = "DisabledServiceTimeStrategy";
+    String LOAD_DEPENDENT_STRATEGY = "LoadDependentStrategy";
+    String CP_LOAD_DEPENDENT_STRATEGY = "jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy";
+    String LD_PARAMETER = "LDParameter";
+    String CP_LD_PARAMETER = "jmt.engine.NetStrategies.ServiceStrategies.LDParameter";
+    String PARAM_FROM = "from";
+    String PARAM_MEAN = "mean";
+    String PARAM_DISTR = "distr";
+    String CP_DISTRIBUTION = "jmt.engine.random.Distribution";
+    String CP_DISTRIBUTION_CONTAINER = "jmt.engine.random.DistributionContainer";
+    String PARAM_DISTR_PAR = "distrPar";
 
+    String PREFIX_ENABLING = "enabling";
+    String PREFIX_INHIBITING = "inhibiting";
+    String PREFIX_RESOURCE = "resource";
+    String SUFFIX_CONDITION = "Condition";
+
+    String CP_TRANSITION_MATRIX = "jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix";
+    String CP_TRANSITION_VECTOR = "jmt.engine.NetStrategies.TransitionUtilities.TransitionVector";
+
+    String STR_ZERO_STRATEGY = "ZeroStrategy";
+    String STR_DISABLED_STRATEGY = "DisabledStrategy";
+    String STR_LOAD_DEPENDENT = "LoadDependent";
     String XML_DOUBLE_CLASS = "java.lang.Double";
     String CP_FORK_STRATEGY = "jmt.engine.random.ForkStrategy";
     String XML_E_EMPIRICAL_ENTRY_ARRAY = "EmpiricalEntryArray";
@@ -317,21 +340,21 @@ public interface XMLConstantNames {
     String STRAT_QBPS_STRAT_PRI = "QBPSStrategyPriority";
 
     String STRATEGIES_BASE = "jmt.engine.NetStrategies.";
-    String CP_PS             = STRATEGIES_BASE + "PSStrategies.";
-    String CP_QUEUE_PUT      = STRATEGIES_BASE + "QueuePutStrategies.";
-    String CP_SERVICE        = STRATEGIES_BASE + "ServiceStrategies.";
-    String CP_VACATION       = STRATEGIES_BASE + "VacationStrategies.";
-    String CP_TRANSITION     = STRATEGIES_BASE + "TransitionUtilities.";
-    String CP_SERVICE_STRAT  = STRATEGIES_BASE + "ServiceStrategy";
-    String CP_QUEUE_PUT_STRAT= STRATEGIES_BASE + "QueuePutStrategy";
+    String CP_PS = STRATEGIES_BASE + "PSStrategies.";
+    String CP_QUEUE_PUT = STRATEGIES_BASE + "QueuePutStrategies.";
+    String CP_SERVICE = STRATEGIES_BASE + "ServiceStrategies.";
+    String CP_VACATION = STRATEGIES_BASE + "VacationStrategies.";
+    String CP_TRANSITION = STRATEGIES_BASE + "TransitionUtilities.";
+    String CP_SERVICE_STRAT = STRATEGIES_BASE + "ServiceStrategy";
+    String CP_QUEUE_PUT_STRAT = STRATEGIES_BASE + "QueuePutStrategy";
 
 
-    String QUEUE_GET_SUFFIX   = "QueueGetStrategies.";
-    String QUEUE_PUT_SUFFIX   = "QueuePutStrategies.";
-    String PS_SUFFIX          = "PSStrategies.";
-    String SERVICE_SUFFIX     = "ServiceStrategies.";
-    String VACATION_SUFFIX    = "VacationStrategies.";
-    String TRANSITION_SUFFIX  = "TransitionUtilities.";
+    String QUEUE_GET_SUFFIX = "QueueGetStrategies.";
+    String QUEUE_PUT_SUFFIX = "QueuePutStrategies.";
+    String PS_SUFFIX = "PSStrategies.";
+    String SERVICE_SUFFIX = "ServiceStrategies.";
+    String VACATION_SUFFIX = "VacationStrategies.";
+    String TRANSITION_SUFFIX = "TransitionUtilities.";
 
     String ROUTING_SUFFIX = "RoutingStrategies.";
     String EMPIRICAL_ENTRY_CLASS = EmpiricalEntry.class.getName();
@@ -346,7 +369,8 @@ public interface XMLConstantNames {
 
     final class Maps {
 
-        private Maps() {}
+        private Maps() {
+        }
 
         public static final Map<String, String> DROP_RULES;
         public static final Map<String, String> DROP_RULES_REVERSE;
@@ -359,10 +383,10 @@ public interface XMLConstantNames {
         static {
             // --- Drop rules ---
             Map<String, String> drop = new HashMap<>();
-            drop.put(DROP_XML_DROP,          CommonConstants.FINITE_DROP);
-            drop.put(DROP_XML_BAS_BLOCKING,  CommonConstants.FINITE_BLOCK);
+            drop.put(DROP_XML_DROP, CommonConstants.FINITE_DROP);
+            drop.put(DROP_XML_BAS_BLOCKING, CommonConstants.FINITE_BLOCK);
             drop.put(DROP_XML_WAITING_QUEUE, CommonConstants.FINITE_WAITING);
-            drop.put(DROP_XML_RETRIAL,       CommonConstants.FINITE_RETRIAL);
+            drop.put(DROP_XML_RETRIAL, CommonConstants.FINITE_RETRIAL);
             DROP_RULES = Collections.unmodifiableMap(drop);
 
             Map<String, String> dropRev = new HashMap<>();
@@ -371,56 +395,56 @@ public interface XMLConstantNames {
 
             // --- Queue put strategies (standard) ---
             Map<String, String> qPut = new HashMap<>();
-            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS,    STRAT_TAIL_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS,    STRAT_HEAD_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_RAND,    STRAT_RAND_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_SJF,     STRAT_SJF_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_LJF,     STRAT_LJF_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_SEPT,    STRAT_SEPT_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_LEPT,    STRAT_LEPT_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS, STRAT_TAIL_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS, STRAT_HEAD_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_RAND, STRAT_RAND_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SJF, STRAT_SJF_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LJF, STRAT_LJF_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SEPT, STRAT_SEPT_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LEPT, STRAT_LEPT_STRAT);
             qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, STRAT_FCFSPR_STRAT);
             qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, STRAT_LCFSPR_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_SRPT,    STRAT_SRPT_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_EDD,     STRAT_EDD_STRAT);
-            qPut.put(CommonConstants.QUEUE_STRATEGY_EDF,     STRAT_EDF_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SRPT, STRAT_SRPT_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_EDD, STRAT_EDD_STRAT);
+            qPut.put(CommonConstants.QUEUE_STRATEGY_EDF, STRAT_EDF_STRAT);
             QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPut);
 
             // --- Queue put strategies (priority variants) ---
             Map<String, String> qPutPri = new HashMap<>();
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS,    STRAT_TAIL_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS,    STRAT_HEAD_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_RAND,    STRAT_RAND_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SJF,     STRAT_SJF_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LJF,     STRAT_LJF_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SEPT,    STRAT_SEPT_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LEPT,    STRAT_LEPT_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS, STRAT_TAIL_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS, STRAT_HEAD_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_RAND, STRAT_RAND_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SJF, STRAT_SJF_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LJF, STRAT_LJF_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SEPT, STRAT_SEPT_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LEPT, STRAT_LEPT_STRAT_PRI);
             qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, STRAT_FCFSPR_STRAT_PRI);
             qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, STRAT_LCFSPR_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SRPT,    STRAT_SRPT_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDD,     STRAT_EDD_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDF,     STRAT_EDF_STRAT_PRI);
-            qPutPri.put(CommonConstants.QUEUE_STRATEGY_TBS,     STRAT_TBS_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SRPT, STRAT_SRPT_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDD, STRAT_EDD_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDF, STRAT_EDF_STRAT_PRI);
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_TBS, STRAT_TBS_STRAT_PRI);
             PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPutPri);
 
             // --- PS strategies ---
             Map<String, String> ps = new HashMap<>();
-            ps.put(CommonConstants.QUEUE_STRATEGY_PS,   STRAT_EPS_STRAT);
+            ps.put(CommonConstants.QUEUE_STRATEGY_PS, STRAT_EPS_STRAT);
             ps.put(CommonConstants.QUEUE_STRATEGY_QBPS, STRAT_QBPS_STRAT);
-            ps.put(CommonConstants.QUEUE_STRATEGY_GPS,  STRAT_GPS_STRAT);
-            ps.put(CommonConstants.QUEUE_STRATEGY_DPS,  STRAT_DPS_STRAT);
+            ps.put(CommonConstants.QUEUE_STRATEGY_GPS, STRAT_GPS_STRAT);
+            ps.put(CommonConstants.QUEUE_STRATEGY_DPS, STRAT_DPS_STRAT);
             PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(ps);
 
             Map<String, String> psPri = new HashMap<>();
-            psPri.put(CommonConstants.QUEUE_STRATEGY_PS,   STRAT_EPS_STRAT_PRI);
-            psPri.put(CommonConstants.QUEUE_STRATEGY_GPS,  STRAT_GPS_STRAT_PRI);
-            psPri.put(CommonConstants.QUEUE_STRATEGY_DPS,  STRAT_DPS_STRAT_PRI);
+            psPri.put(CommonConstants.QUEUE_STRATEGY_PS, STRAT_EPS_STRAT_PRI);
+            psPri.put(CommonConstants.QUEUE_STRATEGY_GPS, STRAT_GPS_STRAT_PRI);
+            psPri.put(CommonConstants.QUEUE_STRATEGY_DPS, STRAT_DPS_STRAT_PRI);
             psPri.put(CommonConstants.QUEUE_STRATEGY_QBPS, STRAT_QBPS_STRAT_PRI);
             PRIORITY_PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(psPri);
 
             // --- Polling type ---
             Map<String, String> polling = new HashMap<>();
-            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED,    CLASSNAME_LKPSERVER);
-            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED,      CLASSNAME_GATEDPSERVER);
+            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED, CLASSNAME_LKPSERVER);
+            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED, CLASSNAME_GATEDPSERVER);
             polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE, CLASSNAME_EXHAUSTIVEPSERVER);
             POLLING_TYPE_MAPPING = Collections.unmodifiableMap(polling);
         }
