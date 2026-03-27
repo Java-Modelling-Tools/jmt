@@ -16,12 +16,12 @@ import org.w3c.dom.NodeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NodeParser implements XmlEntityParser<NodeDescriptor> {
+public class NodeParser implements XmlEntityParser<NodeDescriptor>, XMLConstantNames {
 
     @Override
     public NodeDescriptor parse(Element element) {
         NodeDescriptor descriptor = new NodeDescriptor();
-        descriptor.setName(readAttribute(element, "name"));
+        descriptor.setName(readAttribute(element, XML_A_STATION_NAME));
 
         SectionParser sectionParser = new SectionParser();
         NodeList children = element.getChildNodes();
@@ -33,14 +33,14 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
             Element child = (Element) node;
             String tagName = child.getTagName();
 
-            if (XMLConstantNames.XML_E_STATION_SECTION.equals(tagName)) {
+            if (XML_E_STATION_SECTION.equals(tagName)) {
                 descriptor.addSection(sectionParser.parse(child));
-            } else if (XMLConstantNames.XML_E_STATION_DUE_DATES.equals(tagName)) {
+            } else if (XML_E_STATION_DUE_DATES.equals(tagName)) {
                 descriptor.setClassSoftDeadlines(parseSoftDeadlines(child));
-            } else if (XMLConstantNames.XML_E_STATION_QUANTUM_SIZE.equals(tagName)) {
-                descriptor.setQuantumSize(parseListOfDoubles(child, XMLConstantNames.XML_E_QUANTA_SIZE));
-            } else if (XMLConstantNames.XML_E_STATION_QUANTUM_SWITCHOVER_TIME.equals(tagName)) {
-                descriptor.setQuantumSwitchoverTime(parseListOfDoubles(child, XMLConstantNames.XML_E_STATION_QUANTUM_SWITCHOVER_TIME));
+            } else if (XML_E_STATION_QUANTUM_SIZE.equals(tagName)) {
+                descriptor.setQuantumSize(parseListOfDoubles(child, XML_E_QUANTA_SIZE));
+            } else if (XML_E_STATION_QUANTUM_SWITCHOVER_TIME.equals(tagName)) {
+                descriptor.setQuantumSwitchoverTime(parseListOfDoubles(child, XML_E_STATION_QUANTUM_SWITCHOVER_TIME));
             } else {
                 descriptor.addParameter(parseGenericParameter(child));
             }
@@ -50,7 +50,7 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
     }
 
     private List<Double> parseSoftDeadlines(Element element) {
-        return parseListOfDoubles(element, XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE);
+        return parseListOfDoubles(element, XML_A_CLASS_SOFT_DEADLINE);
     }
 
     private List<Double> parseListOfDoubles(Element element, String childTagName) {
@@ -83,12 +83,12 @@ public class NodeParser implements XmlEntityParser<NodeDescriptor> {
     private ParameterDescriptor parseGenericParameter(Element element) {
         ParameterDescriptor descriptor = new ParameterDescriptor();
 
-        String nameAttr = readAttribute(element, XMLConstantNames.XML_A_PARAMETER_NAME);
+        String nameAttr = readAttribute(element, XML_A_PARAMETER_NAME);
         descriptor.setName((nameAttr != null && !nameAttr.isEmpty()) ? nameAttr : element.getTagName());
 
-        descriptor.setClassPath(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_CLASSPATH));
-        descriptor.setArray(Boolean.parseBoolean(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_ARRAY)));
-        descriptor.setMap(Boolean.parseBoolean(readAttribute(element, XMLConstantNames.XML_A_PARAMETER_MAP)));
+        descriptor.setClassPath(readAttribute(element, XML_A_PARAMETER_CLASSPATH));
+        descriptor.setArray(Boolean.parseBoolean(readAttribute(element, XML_A_PARAMETER_ARRAY)));
+        descriptor.setMap(Boolean.parseBoolean(readAttribute(element, XML_A_PARAMETER_MAP)));
 
         NodeList children = element.getChildNodes();
         boolean hasElementChildren = false;

@@ -6,17 +6,18 @@
  */
 package jmt.gui.common.xml.parsers;
 
+import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class SectionParser implements XmlEntityParser<SectionDescriptor> {
+public class SectionParser implements XmlEntityParser<SectionDescriptor>, XMLConstantNames {
 
     @Override
     public SectionDescriptor parse(Element element) {
         SectionDescriptor descriptor = new SectionDescriptor();
-        descriptor.setClassName(readAttribute(element, "className"));
+        descriptor.setClassName(readAttribute(element, XML_A_STATION_SECTION_CLASSNAME));
 
         ParameterParser parameterParser = new ParameterParser();
         NodeList children = element.getChildNodes();
@@ -27,7 +28,7 @@ public class SectionParser implements XmlEntityParser<SectionDescriptor> {
             }
 
             Element child = (Element) node;
-            if ("parameter".equals(child.getTagName())) {
+            if (XML_E_PARAMETER.equals(child.getTagName())) {
                 descriptor.addParameter(parameterParser.parse(child));
             }
         }

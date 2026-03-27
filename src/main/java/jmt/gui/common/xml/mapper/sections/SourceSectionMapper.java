@@ -1,10 +1,3 @@
-/**
- * This class is responsible for mapping the Source section of a node.
- * It configures the arrival distributions for open classes pointing to this source node.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.CommonConstants;
@@ -17,8 +10,6 @@ import jmt.gui.common.xml.mapper.MappingContext;
 import jmt.gui.common.xml.serializer.WritingContext;
 
 public class SourceSectionMapper extends AbstractSectionMapper {
-
-    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -37,16 +28,14 @@ public class SourceSectionMapper extends AbstractSectionMapper {
         });
     }
 
-    // --- WRITING PHASE (Model -> DTO -> XML) ---
-
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext ctx) {
         ParameterDescriptor serviceStrategy = new ParameterDescriptor();
         serviceStrategy.setName(XMLConstantNames.PARAM_SERVICE_STRATEGY);
         serviceStrategy.setClassPath("jmt.engine.NetStrategies.ServiceStrategy");
+        serviceStrategy.setArray(true);
 
         for (Object classKey : model.getClassKeys()) {
-            // Check that it is an Open class and that this station is its reference source
             if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN
                     && key.equals(model.getClassRefStation(classKey))) {
 
@@ -60,7 +49,6 @@ public class SourceSectionMapper extends AbstractSectionMapper {
             }
         }
 
-        // Add the parameter only if it contains at least one distribution (at least one Open class uses it)
         if (!serviceStrategy.getSubParameters().isEmpty()) {
             sec.addParameter(serviceStrategy);
         }

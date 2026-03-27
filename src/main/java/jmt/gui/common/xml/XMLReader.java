@@ -1,7 +1,6 @@
 package jmt.gui.common.xml;
 
 import jmt.common.xml.XSDSchemaLoader;
-import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.mapper.SimDescriptorMapper;
@@ -25,7 +24,7 @@ import java.io.IOException;
  *         Date: 25-mar-2026
  *
  */
-public class XMLReader implements XMLConstantNames, CommonConstants {
+public class XMLReader implements XMLConstantNames {
     private XMLReader() {
         /* This utility class should not be instantiated */
     }
@@ -36,7 +35,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
         if (doc.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() != 0) {
             parseXML(doc.getDocumentElement(), model);
             return true;
-        } else if (doc.getElementsByTagName(GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {
+        } else if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {
             Element simRoot = XMLArchiver.getSimFromArchiveDocument(doc);
             if (simRoot != null) {
                 parseXML(simRoot, model);
@@ -71,9 +70,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
         if (root.getParentNode() instanceof Element) {
             Element parent = (Element) root.getParentNode();
-            if (GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT.equals(parent.getTagName())) {
-                descriptor.setArchiveName(parent.getAttribute(GuiXMLConstants.XML_ARCHIVE_A_NAME));
-                descriptor.setArchiveTimestamp(parent.getAttribute(GuiXMLConstants.XML_ARCHIVE_A_TIMESTAMP));
+            if (XML_ARCHIVE_DOCUMENT_ROOT.equals(parent.getTagName())) {
+                descriptor.setArchiveName(parent.getAttribute(XML_A_ROOT_NAME));
+                descriptor.setArchiveTimestamp(parent.getAttribute(XML_A_ARCHIVE_TIMESTAMP));
             }
         }
 

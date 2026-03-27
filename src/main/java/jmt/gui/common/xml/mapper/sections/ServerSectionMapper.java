@@ -8,12 +8,6 @@
  */
 package jmt.gui.common.xml.mapper.sections;
 
-import jmt.engine.NetStrategies.ImpatienceStrategies.Balking;
-import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
-import jmt.engine.NetStrategies.ImpatienceStrategies.Impatience;
-import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;
-import jmt.engine.NetStrategies.ImpatienceStrategies.Reneging;
-import jmt.engine.NetStrategies.ImpatienceStrategies.RenegingParameter;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ServerType;
@@ -25,64 +19,12 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class ServerSectionMapper extends AbstractSectionMapper {
 
     // --- Engine classpaths (mirrored from XMLWriter constants) ---
-    private static final String CP_STRATEGIES     = "jmt.engine.NetStrategies.";
-    private static final String CP_PS             = CP_STRATEGIES + "PSStrategies.";
-    private static final String CP_QUEUE_PUT      = CP_STRATEGIES + "QueuePutStrategies.";
-    private static final String CP_SERVICE        = CP_STRATEGIES + "ServiceStrategies.";
-    private static final String CP_VACATION       = CP_STRATEGIES + "VacationStrategies.";
-    private static final String CP_TRANSITION     = CP_STRATEGIES + "TransitionUtilities.";
-    private static final String CP_SERVICE_STRAT  = CP_STRATEGIES + "ServiceStrategy";
-    private static final String CP_QUEUE_PUT_STRAT= CP_STRATEGIES + "QueuePutStrategy";
 
-    // PS strategy name mappings (mirrored from XMLWriter static maps)
-    private static final Map<String, String> PS_STRATEGIES_MAPPING = new HashMap<>();
-    private static final Map<String, String> PRIORITY_PS_STRATEGIES_MAPPING = new HashMap<>();
-    private static final Map<String, String> QUEUE_PUT_MAPPING = new HashMap<>();
-    private static final Map<String, String> PRIORITY_QUEUE_PUT_MAPPING = new HashMap<>();
-    private static final Map<String, String> POLLING_TYPE_MAPPING = new HashMap<>();
-
-    static {
-        PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_PS,   "EPSStrategy");
-        PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_QBPS, "QBPSStrategy");
-        PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_GPS,  "GPSStrategy");
-        PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_DPS,  "DPSStrategy");
-
-        PRIORITY_PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_PS,   "EPSStrategyPriority");
-        PRIORITY_PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_GPS,  "GPSStrategyPriority");
-        PRIORITY_PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_DPS,  "DPSStrategyPriority");
-        PRIORITY_PS_STRATEGIES_MAPPING.put(CommonConstants.QUEUE_STRATEGY_QBPS, "QBPSStrategyPriority");
-
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_FCFS,    "TailStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_LCFS,    "HeadStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_RAND,    "RandStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_SJF,     "SJFStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_LJF,     "LJFStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_SEPT,    "SEPTStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_LEPT,    "LEPTStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, "FCFSPRStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_SRPT,    "SRPTStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_EDD,     "EDDStrategy");
-        QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_EDF,     "EDFStrategy");
-
-        PRIORITY_QUEUE_PUT_MAPPING.putAll(QUEUE_PUT_MAPPING);
-        PRIORITY_QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_FCFS, "TailStrategyPriority");
-        PRIORITY_QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_LCFS, "HeadStrategyPriority");
-        PRIORITY_QUEUE_PUT_MAPPING.put(CommonConstants.QUEUE_STRATEGY_TBS,  "TBSStrategyPriority");
-
-        POLLING_TYPE_MAPPING.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED,   XMLConstantNames.CLASSNAME_LKPSERVER);
-        POLLING_TYPE_MAPPING.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED,     XMLConstantNames.CLASSNAME_GATEDPSERVER);
-        POLLING_TYPE_MAPPING.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE,XMLConstantNames.CLASSNAME_EXHAUSTIVEPSERVER);
-    }
 
     // -----------------------------------------------------------------------
     // READING PHASE (mapDtoToCommonModel)
@@ -158,7 +100,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             case CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY:
                 return XMLConstantNames.CLASSNAME_PREEMPTIVESERVER;
             case CommonConstants.STATION_QUEUE_STRATEGY_POLLING:
-                return POLLING_TYPE_MAPPING.get(model.getStationPollingServerType(key));
+                return Maps.POLLING_TYPE_MAPPING.get(model.getStationPollingServerType(key));
             default:
                 return XMLConstantNames.CLASSNAME_SERVER;
         }
@@ -175,6 +117,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private ParameterDescriptor buildServiceStrategy(CommonModel model, Object key, List<Object> classes, WritingContext ctx) {
         ParameterDescriptor container = makeContainer(XMLConstantNames.PARAM_SERVICE_STRATEGY, CP_SERVICE_STRAT);
+        container.setArray(true);
 
         Boolean heterogeneous = model.getHeterogeneousServersEnabled(key);
         if (Boolean.TRUE.equals(heterogeneous)) {
@@ -204,12 +147,12 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void addPsParams(SectionDescriptor sec, CommonModel model, Object key, List<Object> classes, boolean priority) {
         // PSPriorityUsed (emitted before PSStrategy, matching legacy writer order)
-        sec.addParameter(makeParam(XMLConstantNames.PARAM_PS_PRIORITY_USED,
-                Boolean.class.getName(), String.valueOf(priority)));
+        sec.addParameter(makeParam(XMLConstantNames.PARAM_PS_PRIORITY_USED, Boolean.class.getName(), String.valueOf(priority)));
 
         // PSStrategy
-        Map<String, String> psMap = priority ? PRIORITY_PS_STRATEGIES_MAPPING : PS_STRATEGIES_MAPPING;
+        Map<String, String> psMap = priority ? Maps.PRIORITY_PS_STRATEGIES_MAPPING : Maps.PS_STRATEGIES_MAPPING;
         ParameterDescriptor psStrategies = makeContainer("PSStrategy", CP_STRATEGIES + "PSStrategy");
+        psStrategies.setArray(true);
         for (Object classKey : classes) {
             String stratName = psMap.get(model.getQueueStrategy(key, classKey));
             ParameterDescriptor ps = makeRefParam(stratName, CP_PS + stratName,
@@ -220,6 +163,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
         // serviceWeights
         ParameterDescriptor serviceWeights = makeContainer(XMLConstantNames.PARAM_SERVICE_WEIGHTS, Double.class.getName());
+        serviceWeights.setArray(true);
         for (Object classKey : classes) {
             serviceWeights.addSubParameter(makeRefParam("serviceWeight", Double.class.getName(),
                     model.getClassName(classKey), model.getServiceWeight(key, classKey).toString()));
@@ -283,7 +227,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
                                                           List<Object> classes, String queueStrategy) {
         boolean priority = CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY.equals(queueStrategy)
                 || CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY.equals(queueStrategy);
-        Map<String, String> putMap = priority ? PRIORITY_QUEUE_PUT_MAPPING : QUEUE_PUT_MAPPING;
+        Map<String, String> putMap = priority ? Maps.PRIORITY_QUEUE_PUT_MAPPING : Maps.QUEUE_PUT_MAPPING;
 
         ParameterDescriptor container = makeContainer(CommonConstants.SERVER_FEATURE_PREEMPTIVE_STRATEGIES, CP_QUEUE_PUT_STRAT);
         container.setArray(true);

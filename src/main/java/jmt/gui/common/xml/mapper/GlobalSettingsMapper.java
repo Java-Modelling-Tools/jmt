@@ -34,7 +34,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     }
 
     private void mapSimulationAndSeed(CommonModel model, Map<String, String> globals) {
-        String seed = globals.get(XMLConstantNames.XML_A_ROOT_SEED);
+        String seed = globals.get(XML_A_ROOT_SEED);
         if (isPresent(seed)) {
             model.setUseRandomSeed(Boolean.FALSE);
             model.setSimulationSeed(Long.valueOf(seed));
@@ -44,42 +44,42 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     }
 
     private void mapTimeLimits(CommonModel model, Map<String, String> globals) {
-        model.setMaximumDuration(getDouble(globals.get(XMLConstantNames.XML_A_ROOT_DURATION), -1.0));
-        model.setMaxSimulatedTime(getDouble(globals.get(XMLConstantNames.XML_A_ROOT_SIMULATED), -1.0));
+        model.setMaximumDuration(getDouble(globals.get(XML_A_ROOT_DURATION), -1.0));
+        model.setMaxSimulatedTime(getDouble(globals.get(XML_A_ROOT_SIMULATED), -1.0));
     }
 
     private void mapIntervalsAndSamples(CommonModel model, Map<String, String> globals) {
-        String polling = globals.get(XMLConstantNames.XML_A_ROOT_POLLING);
+        String polling = globals.get(XML_A_ROOT_POLLING);
         if (isPresent(polling)) {
             model.setPollingInterval(Double.valueOf(polling));
         }
 
-        String maxSamples = globals.get(XMLConstantNames.XML_A_ROOT_MAXSAMPLES);
+        String maxSamples = globals.get(XML_A_ROOT_MAXSAMPLES);
         if (isPresent(maxSamples)) {
             model.setMaxSimulationSamples(Integer.valueOf(maxSamples));
         }
     }
 
     private void mapStatisticsAndEvents(CommonModel model, Map<String, String> globals) {
-        String disableStatistic = globals.get(XMLConstantNames.XML_A_ROOT_DISABLESTATISTIC);
+        String disableStatistic = globals.get(XML_A_ROOT_DISABLESTATISTIC);
         if (isPresent(disableStatistic)) {
             model.setDisableStatistic(Boolean.valueOf(disableStatistic));
         }
 
-        model.setMaxSimulationEvents(getInt(globals.get(XMLConstantNames.XML_A_ROOT_MAXEVENTS), -1));
+        model.setMaxSimulationEvents(getInt(globals.get(XML_A_ROOT_MAXEVENTS), -1));
     }
 
     private void mapLoggerParameters(CommonModel model, Map<String, String> globals) {
-        String logPath = globals.get(XMLConstantNames.XML_A_ROOT_LOGPATH);
+        String logPath = globals.get(XML_A_ROOT_LOGPATH);
         if (isPresent(logPath) && new File(logPath).isDirectory()) {
-            model.setLoggingGlbParameter("path", new File(logPath).getAbsolutePath());
+            model.setLoggingGlbParameter(LOGGER_PARAM_PATH, new File(logPath).getAbsolutePath());
         } else {
-            model.setLoggingGlbParameter("path", MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR));
+            model.setLoggingGlbParameter(LOGGER_PARAM_PATH, MacroReplacer.replace(MacroReplacer.MACRO_WORKDIR));
         }
 
-        model.setLoggingGlbParameter("autoAppend", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGREPLACE, Defaults.get("loggerAutoAppend")));
-        model.setLoggingGlbParameter("delim", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGDELIM, Defaults.get("loggerDelimiter")));
-        model.setLoggingGlbParameter("decimalSeparator", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGDECIMALSEPARATOR, Defaults.get("loggerDecimalSeparator")));
+        model.setLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND, globals.getOrDefault(XML_A_ROOT_LOGREPLACE, Defaults.get("loggerAutoAppend")));
+        model.setLoggingGlbParameter(LOGGER_PARAM_DELIM, globals.getOrDefault(XML_A_ROOT_LOGDELIM, Defaults.get("loggerDelimiter")));
+        model.setLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR, globals.getOrDefault(XML_A_ROOT_LOGDECIMALSEPARATOR, Defaults.get("loggerDecimalSeparator")));
     }
 
 
@@ -102,7 +102,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
         if (useRandomSeed != null && !useRandomSeed) {
             Long seed = model.getSimulationSeed();
             if (seed != null) {
-                dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_SEED, seed.toString());
+                dto.addGlobalAttribute(XML_A_ROOT_SEED, seed.toString());
             }
         }
     }
@@ -110,58 +110,58 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     private void mapModelTimeLimitsToDto(CommonModel model, SimDescriptor dto) {
         Double maxDuration = model.getMaximumDuration();
         if (maxDuration != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_DURATION, maxDuration.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_DURATION, maxDuration.toString());
         }
 
         Double maxSimulatedTime = model.getMaxSimulatedTime();
         if (maxSimulatedTime != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_SIMULATED, maxSimulatedTime.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_SIMULATED, maxSimulatedTime.toString());
         }
     }
 
     private void mapModelIntervalsAndSamplesToDto(CommonModel model, SimDescriptor dto) {
         Double pollingInterval = model.getPollingInterval();
         if (pollingInterval != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_POLLING, pollingInterval.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_POLLING, pollingInterval.toString());
         }
 
         Integer maxSamples = model.getMaxSimulationSamples();
         if (maxSamples != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_MAXSAMPLES, maxSamples.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_MAXSAMPLES, maxSamples.toString());
         }
     }
 
     private void mapModelStatisticsAndEventsToDto(CommonModel model, SimDescriptor dto) {
         Boolean disableStatistic = model.getDisableStatistic();
         if (disableStatistic != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_DISABLESTATISTIC, disableStatistic.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_DISABLESTATISTIC, disableStatistic.toString());
         }
 
         Integer maxEvents = model.getMaxSimulationEvents();
         if (maxEvents != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_MAXEVENTS, maxEvents.toString());
+            dto.addGlobalAttribute(XML_A_ROOT_MAXEVENTS, maxEvents.toString());
         }
     }
 
     private void mapModelLoggerParametersToDto(CommonModel model, SimDescriptor dto) {
-        String logPath = model.getLoggingGlbParameter("path");
+        String logPath = model.getLoggingGlbParameter(LOGGER_PARAM_PATH);
         if (logPath != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGPATH, logPath);
+            dto.addGlobalAttribute(XML_A_ROOT_LOGPATH, logPath);
         }
 
-        String autoAppend = model.getLoggingGlbParameter("autoAppend");
+        String autoAppend = model.getLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND);
         if (autoAppend != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGREPLACE, autoAppend);
+            dto.addGlobalAttribute(XML_A_ROOT_LOGREPLACE, autoAppend);
         }
 
-        String delim = model.getLoggingGlbParameter("delim");
+        String delim = model.getLoggingGlbParameter(LOGGER_PARAM_DELIM);
         if (delim != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGDELIM, delim);
+            dto.addGlobalAttribute(XML_A_ROOT_LOGDELIM, delim);
         }
 
-        String decimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
+        String decimalSeparator = model.getLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR);
         if (decimalSeparator != null) {
-            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGDECIMALSEPARATOR, decimalSeparator);
+            dto.addGlobalAttribute(XML_A_ROOT_LOGDECIMALSEPARATOR, decimalSeparator);
         }
     }
 }
