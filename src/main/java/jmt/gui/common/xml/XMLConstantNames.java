@@ -299,6 +299,18 @@ public interface XMLConstantNames {
     String STRAT_EDF_STRAT_PRI = "EDFStrategyPriority";
     String STRAT_TBS_STRAT_PRI = "TBSStrategyPriority";
 
+    String XML_DOUBLE_CLASS = "java.lang.Double";
+    String CP_FORK_STRATEGY = "jmt.engine.random.ForkStrategy";
+    String XML_E_EMPIRICAL_ENTRY_ARRAY = "EmpiricalEntryArray";
+    String CP_OUTPATH = "jmt.engine.NetStrategies.ForkStrategies.OutPath";
+    String XML_E_OUTPATH_ENTRY = "OutPathEntry";
+    String XML_E_OUT_UNIT_PROBABILITY = "outUnitProbability";
+    String XML_E_JOBS_PER_LINK_DIS = "JobsPerLinkDis";
+    String XML_E_NUMBER_OF_BRANCHES = "Number of Branches";
+    String XML_E_CLASS_JOB_NUM_ARRAY = "ClassJobNumArray";
+    String CP_CLASS_JOB_NUM = "jmt.engine.NetStrategies.ForkStrategies.ClassJobNum";
+    String XML_A_NUMBER_OF_JOBS = "numberOfJobs";
+
     String STRAT_EPS_STRAT_PRI = "EPSStrategyPriority";
     String STRAT_GPS_STRAT_PRI = "GPSStrategyPriority";
     String STRAT_DPS_STRAT_PRI = "DPSStrategyPriority";
