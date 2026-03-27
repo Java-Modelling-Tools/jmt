@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.sun.org.apache.xalan.internal.xsltc.compiler.Constants.BOOLEAN_CLASS;
+
 /**
  * Created by IntelliJ IDEA.
  * User: orsotronIII
@@ -131,6 +133,9 @@ public interface XMLConstantNames {
     String PARAM_IMPATIENCE = "Impatience";
     String PARAM_INHIBITING_CONDITIONS = "inhibitingConditions";
     String XML_A_MEASURE_ISSERVERTYPE = "isServerType";
+    String XML_BOOLEAN_CLASS = "java.lang.Boolean";
+    String XML_INTEGER_CLASS = "java.lang.Integer";
+    String XML_STRING_CLASS = "java.lang.String";
     String PARAM_IS_SIMPLIFIED_FORK = "isSimplifiedFork";
     String ENGINE_PS_STRATEGY = "jmt.engine.NetStrategies.PSStrategy";
     String ENGINE_ROUTING_CLASS_SWITCH_GUI = "jmt.engine.NetStrategies.RoutingStrategies.ClassSwitchRoutingStrategy";
