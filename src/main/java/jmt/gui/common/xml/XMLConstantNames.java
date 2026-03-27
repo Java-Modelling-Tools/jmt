@@ -18,6 +18,12 @@
 
 package jmt.gui.common.xml;
 
+import jmt.gui.common.CommonConstants;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Created by IntelliJ IDEA.
  * User: orsotronIII
@@ -29,7 +35,6 @@ public interface XMLConstantNames {
 
     // TODO the following constants have the same value
     /*
-        XML_A_PARAMETER_ARRAY - XML_A_SUBPARAMETER_ARRAY (Value: "array")
         XML_A_PARAMETER_CLASSPATH - XML_A_SUBPARAMETER_CLASSPATH (Value: "classPath")
         XML_DROP - DROP_XML_DROP (Value: "drop")
         PARAM_DROP_RULES - XML_E_DROPRULES (Value: "dropRules")
@@ -47,9 +52,13 @@ public interface XMLConstantNames {
 
     String VAL_ZERO = "0";
     String VAL_ONE = "1";
+    String VAL_TRUE_STRING = "true";
+    String VAL_NULL_STRING = "null";
+    String STATION_TYPE_UNKNOWN = "UNKNOWN";
     String XML_A_MEASURE_ALPHA = "alpha";
     String XML_A_PARAMETER_ARRAY = "array";
-    String XML_A_SUBPARAMETER_ARRAY = "array";
+    String XML_ARCHIVE_DOCUMENT_ROOT = "archive";
+    String XML_A_ARCHIVE_TIMESTAMP = "timestamp";
     String DROP_XML_BAS_BLOCKING = "BAS blocking";
     String STRAT_VACATION_BERNOULLI = "BernoulliVacationStrategy";
     String PARAM_BLOCK = "block";
@@ -72,6 +81,8 @@ public interface XMLConstantNames {
     String XML_A_CLASS_CUSTOMERS = "customers";
     String XML_A_CLASS_CACHEMISSCLASS = "cacheMissClass";
     String XML_A_CLASS_CACHEHITCLASS = "cacheHitClass";
+    String XML_A_CLASS_TYPE_OPEN = "open";
+    String XML_A_CLASS_TYPE_CLOSED = "closed";
     String CLASSNAME_DELAY = "Delay";
     String XML_E_STATION_DELAY_OFF = "delayOff";
     String XML_A_ROOT_DISABLESTATISTIC = "disableStatisticStop";
@@ -160,6 +171,10 @@ public interface XMLConstantNames {
     String XML_LOG_B_TIMESAMECLS = "logTimeSameClass";
     String XML_LOG_B_TIMESTAMP = "logTimeStamp";
     String CLASSNAME_LOGGER = "LogTunnel"; /* MF08 0.7.4 - extends ServiceTunnel */
+    String LOGGER_PARAM_PATH = "path";
+    String LOGGER_PARAM_AUTO_APPEND = "autoAppend";
+    String LOGGER_PARAM_DELIM = "delim";
+    String LOGGER_PARAM_DECIMAL_SEPARATOR = "decimalSeparator";
     String XML_A_PARAMETER_MAP = "map";
     String XML_A_ROOT_MAXEVENTS = "maxEvents";
     String XML_A_GLOBALCONSTRAINT_MAXJOBS = "maxJobs";
@@ -174,6 +189,9 @@ public interface XMLConstantNames {
     String XML_A_ROOT_SIMULATED = "maxSimulated";
     String XML_A_ROOT_DURATION = "maxTime";
     String XML_E_MEASURE = "measure";
+    String MEASURE_TYPE_FIRING_THROUGHPUT = "Firing Throughput";
+    String MEASURE_TYPE_FIRE_FREQUENCY = "Fire Frequency";
+    String MEASURE_TYPE_FX = "FX";
     String PARAM_MODE_NAMES = "modeNames";
     String XML_A_STATION_NAME = "name";
     String XML_A_MEASURE_NAME = "name";
@@ -209,6 +227,7 @@ public interface XMLConstantNames {
     String XML_E_STATION_QUANTUM_SIZE = "quantumSize";
     String XML_E_QUANTA_SIZE = "quantaSize";
     String XML_E_STATION_QUANTUM_SWITCHOVER_TIME = "quantumSwitchoverTime";
+    String XML_E_QUANTUM_SWITCHOVER_TIME_ELEMENT = "quantumSwitchoverTime";
     String CLASSNAME_QUEUE = "Queue";
     String PARAM_QUEUE_PUT_STRATEGY = "QueuePutStrategy";
     String STRAT_RAND = "Rand";
@@ -244,6 +263,7 @@ public interface XMLConstantNames {
     String XML_A_CLASSSIZE_SIZE = "size";
     String STRAT_SJF = "SJF";
     String XML_A_CLASS_SOFT_DEADLINE = "softDeadline";
+    String XML_E_SOFT_DEADLINE_ELEMENT = "softDeadline";
     String XML_A_CLASSDUEDATE_DUEDATE = "softDeadline";
     String XML_A_CONNECTION_SOURCE = "source";
     String STRAT_SRPT = "SRPT";
@@ -265,7 +285,6 @@ public interface XMLConstantNames {
     String XML_A_MEASURE_TYPE = "type";
     String XML_A_CLASS_TYPE = "type";
     String XML_A_REGION_TYPE = "type";
-    String XML_A_ARCHIVE_TIMESTAMP = "timestamp";
     String XML_E_CLASS = "userClass";
     String STRAT_VACATION_IDLE = "VacationWhenIdleStrategy";
     String XML_E_PARAMETER_VALUE = "value";
@@ -273,4 +292,134 @@ public interface XMLConstantNames {
     String XML_A_MEASURE_VERBOSE = "verbose";
     String DROP_XML_WAITING_QUEUE = "waiting queue";
     String XML_A_CLASSWEIGHT_WEIGHT = "weight";
+    String XML_XSI_NO_NAMESPACE_SCHEMA_LOCATION = "xsi:noNamespaceSchemaLocation";
+    String XML_XMLNS_XSI = "xmlns:xsi";
+    String XML_XSI_SCHEMA_LOCATION_URI = "http://www.w3.org/2001/XMLSchema-instance";
+
+    String CP_STRATEGIES     = "jmt.engine.NetStrategies.";
+    String CP_PS             = CP_STRATEGIES + "PSStrategies.";
+    String CP_QUEUE_PUT      = CP_STRATEGIES + "QueuePutStrategies.";
+    String CP_SERVICE        = CP_STRATEGIES + "ServiceStrategies.";
+    String CP_VACATION       = CP_STRATEGIES + "VacationStrategies.";
+    String CP_TRANSITION     = CP_STRATEGIES + "TransitionUtilities.";
+    String CP_SERVICE_STRAT  = CP_STRATEGIES + "ServiceStrategy";
+    String CP_QUEUE_PUT_STRAT= CP_STRATEGIES + "QueuePutStrategy";
+
+
+    String STRATEGIES_BASE    = "jmt.engine.NetStrategies.";
+    String QUEUE_GET_SUFFIX   = "QueueGetStrategies.";
+    String QUEUE_PUT_SUFFIX   = "QueuePutStrategies.";
+    String PS_SUFFIX          = "PSStrategies.";
+    String SERVICE_SUFFIX     = "ServiceStrategies.";
+    String VACATION_SUFFIX    = "VacationStrategies.";
+    String TRANSITION_SUFFIX  = "TransitionUtilities.";
+
+    // -----------------------------------------------------------------------
+    // Shared strategy maps — Java 8 compatible via nested initializer class
+    //
+    // Pattern: le interfacce Java 8 non ammettono blocchi static {}.
+    // La classe annidata Maps funge da holder di inizializzazione lazy;
+    // i campi sono costanti dell'interfaccia che delegano a Maps.INSTANCE.
+    // -----------------------------------------------------------------------
+
+    /**
+     * Holder per le mappe condivise tra XMLWriter e i mapper.
+     * Inizializzato alla prima classe che accede a XMLConstantNames.Maps.
+     */
+    final class Maps {
+
+        private Maps() {}
+
+        // XML engine value → GUI constant  (lettura: drop rule)
+        public static final Map<String, String> DROP_RULES;
+
+        // GUI constant → XML engine value  (scrittura: drop rule)
+        public static final Map<String, String> DROP_RULES_REVERSE;
+
+        // GUI queue strategy → engine put-strategy class name  (standard)
+        public static final Map<String, String> QUEUE_PUT_MAPPING;
+
+        // GUI queue strategy → engine put-strategy class name  (priority variants)
+        public static final Map<String, String> PRIORITY_QUEUE_PUT_MAPPING;
+
+        // GUI PS strategy → engine PS class name
+        public static final Map<String, String> PS_STRATEGIES_MAPPING;
+
+        // GUI PS strategy → engine PS class name  (priority variants)
+        public static final Map<String, String> PRIORITY_PS_STRATEGIES_MAPPING;
+
+        // GUI polling type → server section className
+        public static final Map<String, String> POLLING_TYPE_MAPPING;
+
+        static {
+            // --- Drop rules ---
+            Map<String, String> drop = new HashMap<>();
+            drop.put("drop",          CommonConstants.FINITE_DROP);
+            drop.put("BAS blocking",  CommonConstants.FINITE_BLOCK);
+            drop.put("waiting queue", CommonConstants.FINITE_WAITING);
+            drop.put("retrial",       CommonConstants.FINITE_RETRIAL);
+            DROP_RULES = Collections.unmodifiableMap(drop);
+
+            Map<String, String> dropRev = new HashMap<>();
+            drop.forEach((xmlVal, modelVal) -> dropRev.put(modelVal, xmlVal));
+            DROP_RULES_REVERSE = Collections.unmodifiableMap(dropRev);
+
+            // --- Queue put strategies (standard) ---
+            Map<String, String> qPut = new HashMap<>();
+            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS,    "TailStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS,    "HeadStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_RAND,    "RandStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SJF,     "SJFStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LJF,     "LJFStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SEPT,    "SEPTStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LEPT,    "LEPTStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, "FCFSPRStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_SRPT,    "SRPTStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_EDD,     "EDDStrategy");
+            qPut.put(CommonConstants.QUEUE_STRATEGY_EDF,     "EDFStrategy");
+            QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPut);
+
+            // --- Queue put strategies (priority variants) ---
+            // Solo le strategie che hanno effettivamente una variante Priority nell'engine.
+            Map<String, String> qPutPri = new HashMap<>();
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS,    "TailStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS,    "HeadStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_RAND,    "RandStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SJF,     "SJFStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LJF,     "LJFStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SEPT,    "SEPTStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LEPT,    "LEPTStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_FCFS_PR, "FCFSPRStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_LCFS_PR, "LCFSPRStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_SRPT,    "SRPTStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDD,     "EDDStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_EDF,     "EDFStrategyPriority");
+            qPutPri.put(CommonConstants.QUEUE_STRATEGY_TBS,     "TBSStrategyPriority"); // solo priority
+            PRIORITY_QUEUE_PUT_MAPPING = Collections.unmodifiableMap(qPutPri);
+
+            // --- PS strategies ---
+            Map<String, String> ps = new HashMap<>();
+            ps.put(CommonConstants.QUEUE_STRATEGY_PS,   "EPSStrategy");
+            ps.put(CommonConstants.QUEUE_STRATEGY_QBPS, "QBPSStrategy");
+            ps.put(CommonConstants.QUEUE_STRATEGY_GPS,  "GPSStrategy");
+            ps.put(CommonConstants.QUEUE_STRATEGY_DPS,  "DPSStrategy");
+            PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(ps);
+
+            Map<String, String> psPri = new HashMap<>();
+            psPri.put(CommonConstants.QUEUE_STRATEGY_PS,   "EPSStrategyPriority");
+            psPri.put(CommonConstants.QUEUE_STRATEGY_GPS,  "GPSStrategyPriority");
+            psPri.put(CommonConstants.QUEUE_STRATEGY_DPS,  "DPSStrategyPriority");
+            psPri.put(CommonConstants.QUEUE_STRATEGY_QBPS, "QBPSStrategyPriority");
+            PRIORITY_PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(psPri);
+
+            // --- Polling type → section className ---
+            Map<String, String> polling = new HashMap<>();
+            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED,    CLASSNAME_LKPSERVER);
+            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED,      CLASSNAME_GATEDPSERVER);
+            polling.put(CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE, CLASSNAME_EXHAUSTIVEPSERVER);
+            POLLING_TYPE_MAPPING = Collections.unmodifiableMap(polling);
+        }
+    }
+
 }

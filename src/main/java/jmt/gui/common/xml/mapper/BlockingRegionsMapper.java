@@ -14,11 +14,7 @@ import jmt.gui.common.xml.dto.BlockingRegionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 public class BlockingRegionsMapper implements ModelElementMapper {
 
@@ -162,7 +158,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
     @Override
     public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
         CommonModel model = context.model;
-        Vector<Object> regionKeys = model.getRegionKeys();
+        List<Object> regionKeys = model.getRegionKeys();
 
         if (regionKeys == null || regionKeys.isEmpty()) {
             return;

@@ -13,7 +13,9 @@ import jmt.gui.common.xml.dto.ConnectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+;
 
 public class ConnectionsMapper implements ModelElementMapper {
 
@@ -54,7 +56,7 @@ public class ConnectionsMapper implements ModelElementMapper {
         CommonModel model = context.model;
 
         // We need to check connections from all possible sources: stations and blocking regions
-        Vector<Object> allPossibleSources = new Vector<>();
+        List<Object> allPossibleSources = new ArrayList<>();
         if (model.getStationKeys() != null) {
             allPossibleSources.addAll(model.getStationKeys());
         }
@@ -73,7 +75,7 @@ public class ConnectionsMapper implements ModelElementMapper {
 
     private void mapModelConnectionsToDto(CommonModel model, Object sourceKey, SimDescriptor dto) {
         // Retrieve all forward connections for the current source node
-        Vector<Object> targetKeys = model.getForwardConnections(sourceKey);
+        List<Object> targetKeys = model.getForwardConnections(sourceKey);
 
         if (targetKeys == null || targetKeys.isEmpty()) {
             return;
@@ -96,16 +98,5 @@ public class ConnectionsMapper implements ModelElementMapper {
 
             dto.addConnection(connDto);
         }
-    }
-
-    /**
-     * Helper method to retrieve the string name of a node, checking both stations and blocking regions.
-     */
-    private String getNodeName(CommonModel model, Object nodeKey) {
-        String name = model.getStationName(nodeKey);
-        if (name == null) {
-            name = model.getRegionName(nodeKey);
-        }
-        return name;
     }
 }

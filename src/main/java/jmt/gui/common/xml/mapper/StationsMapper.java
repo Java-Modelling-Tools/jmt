@@ -33,72 +33,72 @@ public class StationsMapper implements ModelElementMapper {
 
     private void initSignatures() {
         // --- READING SIGNATURES ---
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_SOURCE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SOURCE);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_TERMINAL, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_TERMINAL);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_ROUTER);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_DELAY, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_DELAY);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_FORK), CommonConstants.STATION_TYPE_FORK);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_JOIN, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_JOIN);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_LOGGER, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_LOGGER);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_CLASSSWITCH, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_CLASSSWITCH);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_SEMAPHORE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SEMAPHORE);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_JOIN, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_FORK), CommonConstants.STATION_TYPE_SCALER);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_STORAGE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_LINKAGE), CommonConstants.STATION_TYPE_PLACE);
-        STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_ENABLING, XMLConstantNames.CLASSNAME_TIMING, XMLConstantNames.CLASSNAME_FIRING), CommonConstants.STATION_TYPE_TRANSITION);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_SOURCE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SOURCE);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_TERMINAL, CLASSNAME_TUNNEL, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_TERMINAL);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_ROUTER);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_DELAY, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_DELAY);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_TUNNEL, CLASSNAME_FORK), CommonConstants.STATION_TYPE_FORK);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_JOIN, CLASSNAME_TUNNEL, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_JOIN);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_LOGGER, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_LOGGER);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_CLASSSWITCH, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_CLASSSWITCH);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_SEMAPHORE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SEMAPHORE);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_JOIN, CLASSNAME_TUNNEL, CLASSNAME_FORK), CommonConstants.STATION_TYPE_SCALER);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_STORAGE, CLASSNAME_TUNNEL, CLASSNAME_LINKAGE), CommonConstants.STATION_TYPE_PLACE);
+        STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_ENABLING, CLASSNAME_TIMING, CLASSNAME_FIRING), CommonConstants.STATION_TYPE_TRANSITION);
 
         List<String> serverMiddleSections = Arrays.asList(
-                XMLConstantNames.CLASSNAME_SERVER, XMLConstantNames.CLASSNAME_PREEMPTIVESERVER, XMLConstantNames.CLASSNAME_PSSERVER,
-                XMLConstantNames.CLASSNAME_PSSERVER_PRIORITY, XMLConstantNames.CLASSNAME_EXHAUSTIVEPSERVER, XMLConstantNames.CLASSNAME_LKPSERVER, XMLConstantNames.CLASSNAME_GATEDPSERVER
+                CLASSNAME_SERVER, CLASSNAME_PREEMPTIVESERVER, CLASSNAME_PSSERVER,
+                CLASSNAME_PSSERVER_PRIORITY, CLASSNAME_EXHAUSTIVEPSERVER, CLASSNAME_LKPSERVER, CLASSNAME_GATEDPSERVER
         );
         for (String middle : serverMiddleSections) {
-            STATION_SIGNATURES.put(Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, middle, XMLConstantNames.CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SERVER);
+            STATION_SIGNATURES.put(Arrays.asList(CLASSNAME_QUEUE, middle, CLASSNAME_ROUTER), CommonConstants.STATION_TYPE_SERVER);
         }
 
         // --- WRITING SIGNATURES (Inverse Map) ---
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SOURCE, Arrays.asList(XMLConstantNames.CLASSNAME_SOURCE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_TERMINAL, Arrays.asList(XMLConstantNames.CLASSNAME_TERMINAL, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_ROUTER, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_DELAY, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_DELAY, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_FORK, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_FORK));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_JOIN, Arrays.asList(XMLConstantNames.CLASSNAME_JOIN, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_LOGGER, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_LOGGER, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_CLASSSWITCH, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_CLASSSWITCH, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SEMAPHORE, Arrays.asList(XMLConstantNames.CLASSNAME_SEMAPHORE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_ROUTER));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SCALER, Arrays.asList(XMLConstantNames.CLASSNAME_JOIN, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_FORK));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_PLACE, Arrays.asList(XMLConstantNames.CLASSNAME_STORAGE, XMLConstantNames.CLASSNAME_TUNNEL, XMLConstantNames.CLASSNAME_LINKAGE));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_TRANSITION, Arrays.asList(XMLConstantNames.CLASSNAME_ENABLING, XMLConstantNames.CLASSNAME_TIMING, XMLConstantNames.CLASSNAME_FIRING));
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SINK, Collections.singletonList(XMLConstantNames.CLASSNAME_SINK));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SOURCE, Arrays.asList(CLASSNAME_SOURCE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_TERMINAL, Arrays.asList(CLASSNAME_TERMINAL, CLASSNAME_TUNNEL, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_ROUTER, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_DELAY, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_DELAY, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_FORK, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_TUNNEL, CLASSNAME_FORK));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_JOIN, Arrays.asList(CLASSNAME_JOIN, CLASSNAME_TUNNEL, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_LOGGER, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_LOGGER, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_CLASSSWITCH, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_CLASSSWITCH, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SEMAPHORE, Arrays.asList(CLASSNAME_SEMAPHORE, CLASSNAME_TUNNEL, CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SCALER, Arrays.asList(CLASSNAME_JOIN, CLASSNAME_TUNNEL, CLASSNAME_FORK));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_PLACE, Arrays.asList(CLASSNAME_STORAGE, CLASSNAME_TUNNEL, CLASSNAME_LINKAGE));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_TRANSITION, Arrays.asList(CLASSNAME_ENABLING, CLASSNAME_TIMING, CLASSNAME_FIRING));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SINK, Collections.singletonList(CLASSNAME_SINK));
 
         // For servers, we map the default base signature. The ServerSectionMapper will override
         // the middle section className (e.g. to PreemptiveServer) based on the model strategy during writing.
-        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SERVER, Arrays.asList(XMLConstantNames.CLASSNAME_QUEUE, XMLConstantNames.CLASSNAME_SERVER, XMLConstantNames.CLASSNAME_ROUTER));
+        TYPE_TO_SIGNATURE.put(CommonConstants.STATION_TYPE_SERVER, Arrays.asList(CLASSNAME_QUEUE, CLASSNAME_SERVER, CLASSNAME_ROUTER));
     }
 
     private void initSectionMappers() {
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_SOURCE, new SourceSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_ROUTER, new RouterSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_QUEUE, new QueueSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_DELAY, new DelaySectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_SOURCE, new SourceSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_ROUTER, new RouterSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_QUEUE, new QueueSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_DELAY, new DelaySectionMapper());
 
         AbstractSectionMapper serverMapper = new ServerSectionMapper();
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_SERVER, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_PREEMPTIVESERVER, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_PSSERVER, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_PSSERVER_PRIORITY, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_EXHAUSTIVEPSERVER, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_LKPSERVER, serverMapper);
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_GATEDPSERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_SERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_PREEMPTIVESERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_PSSERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_PSSERVER_PRIORITY, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_EXHAUSTIVEPSERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_LKPSERVER, serverMapper);
+        SECTION_MAPPERS.put(CLASSNAME_GATEDPSERVER, serverMapper);
 
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_FORK, new ForkSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_JOIN, new JoinSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_LOGGER, new LoggerSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_CLASSSWITCH, new ClassSwitchSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_SEMAPHORE, new SemaphoreSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_STORAGE, new StorageSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_FORK, new ForkSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_JOIN, new JoinSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_LOGGER, new LoggerSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_CLASSSWITCH, new ClassSwitchSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_SEMAPHORE, new SemaphoreSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_STORAGE, new StorageSectionMapper());
 
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_ENABLING, new EnablingSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_TIMING, new TimingSectionMapper());
-        SECTION_MAPPERS.put(XMLConstantNames.CLASSNAME_FIRING, new FiringSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_ENABLING, new EnablingSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_TIMING, new TimingSectionMapper());
+        SECTION_MAPPERS.put(CLASSNAME_FIRING, new FiringSectionMapper());
     }
 
     // --- READING PHASE (XML -> DTO -> Model) ---
@@ -162,15 +162,15 @@ public class StationsMapper implements ModelElementMapper {
 
     private String getStationType(NodeDescriptor node) {
         List<SectionDescriptor> sections = node.getSections();
-        if (sections == null || sections.isEmpty()) return "UNKNOWN";
-        if (XMLConstantNames.CLASSNAME_SINK.equals(sections.get(0).getClassName())) return CommonConstants.STATION_TYPE_SINK;
+        if (sections == null || sections.isEmpty()) return STATION_TYPE_UNKNOWN;
+        if (CLASSNAME_SINK.equals(sections.get(0).getClassName())) return CommonConstants.STATION_TYPE_SINK;
 
         List<String> signature = sections.stream()
                 .map(SectionDescriptor::getClassName)
                 .limit(3)
                 .collect(Collectors.toList());
 
-        return STATION_SIGNATURES.getOrDefault(signature, "UNKNOWN");
+        return STATION_SIGNATURES.getOrDefault(signature, STATION_TYPE_UNKNOWN);
     }
 
     // --- WRITING PHASE (Model -> DTO -> XML) ---

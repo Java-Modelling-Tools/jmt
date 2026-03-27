@@ -15,7 +15,7 @@ import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.dto.UserClassDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.Vector;
+;import java.util.List;
 
 public class ClassesMapper implements ModelElementMapper {
 
@@ -37,7 +37,7 @@ public class ClassesMapper implements ModelElementMapper {
         String name = currclass.getName();
 
         // Determines the class type: "open" or "closed"
-        int type = "open".equals(currclass.getType()) ?
+        int type = XML_A_CLASS_TYPE_OPEN.equals(currclass.getType()) ?
                 CommonConstants.CLASS_TYPE_OPEN : CommonConstants.CLASS_TYPE_CLOSED;
 
         // Try parsing the actual attributes (if present and not empty), otherwise use defaults
@@ -62,7 +62,7 @@ public class ClassesMapper implements ModelElementMapper {
     @Override
     public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
         CommonModel model = context.model;
-        Vector<Object> classKeys = model.getClassKeys();
+        List<Object> classKeys = model.getClassKeys();
 
         if (classKeys == null || classKeys.isEmpty()) {
             return;
@@ -81,9 +81,9 @@ public class ClassesMapper implements ModelElementMapper {
 
         // Type & Customers (Population)
         if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {
-            classDto.setType("open");
+            classDto.setType(XML_A_CLASS_TYPE_OPEN);
         } else {
-            classDto.setType("closed");
+            classDto.setType(XML_A_CLASS_TYPE_CLOSED);
             Integer population = model.getClassPopulation(classKey);
             if (population != null) {
                 classDto.setCustomers(population.toString());

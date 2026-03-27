@@ -15,7 +15,7 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.Vector;
+;import java.util.List;
 
 public class PreloadMapper implements ModelElementMapper {
 
@@ -64,7 +64,7 @@ public class PreloadMapper implements ModelElementMapper {
     @Override
     public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
         CommonModel model = context.model;
-        Vector<Object> preloadableStations = model.getStationKeysPreloadable();
+        List<Object> preloadableStations = model.getStationKeysPreloadable();
 
         if (preloadableStations == null || preloadableStations.isEmpty()) {
             return;
@@ -80,7 +80,7 @@ public class PreloadMapper implements ModelElementMapper {
         if (stationName == null) return;
 
         NodeDescriptor stationPopNode = null;
-        Vector<Object> classKeys = model.getClassKeys();
+        List<Object> classKeys = model.getClassKeys();
 
         if (classKeys != null) {
             for (Object classKey : classKeys) {

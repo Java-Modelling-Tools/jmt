@@ -1,10 +1,3 @@
-/**
- * This class is responsible for mapping the Semaphore section of a node.
- * It configures the semaphore strategies and thresholds for the user classes.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.CommonConstants;
@@ -21,8 +14,6 @@ import jmt.gui.common.xml.serializer.WritingContext;
 public class SemaphoreSectionMapper extends AbstractSectionMapper {
 
     private static final String STRATEGIES_BASE = "jmt.engine.NetStrategies.";
-
-    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -52,13 +43,26 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper {
         }
     }
 
-    // --- WRITING PHASE (Model -> DTO -> XML) ---
-
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
+        boolean hasNonDefault = false;
+        for (Object classKey : model.getClassKeys()) {
+            SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key, classKey);
+            // Verifica se è stato modificato il parametro di default
+            if (ss != null && (!(ss instanceof NormalSemaphore) || ss.getThreshold() != 1)) {
+                hasNonDefault = true;
+                break;
+            }
+        }
+
+        if (!hasNonDefault) {
+            return;
+        }
+
         ParameterDescriptor semaphoreStrategy = new ParameterDescriptor();
         semaphoreStrategy.setName("SemaphoreStrategy");
         semaphoreStrategy.setClassPath(STRATEGIES_BASE + "SemaphoreStrategy");
+        semaphoreStrategy.setArray(true); // FIX 2: Forza l'attributo array="true"
 
         for (Object classKey : model.getClassKeys()) {
             SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key, classKey);

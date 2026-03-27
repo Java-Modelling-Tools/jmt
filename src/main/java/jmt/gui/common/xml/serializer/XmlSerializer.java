@@ -1,14 +1,7 @@
 package jmt.gui.common.xml.serializer;
 
 import jmt.gui.common.xml.XMLConstantNames;
-import jmt.gui.common.xml.dto.BlockingRegionDescriptor;
-import jmt.gui.common.xml.dto.ConnectionDescriptor;
-import jmt.gui.common.xml.dto.MeasureDescriptor;
-import jmt.gui.common.xml.dto.NodeDescriptor;
-import jmt.gui.common.xml.dto.ParameterDescriptor;
-import jmt.gui.common.xml.dto.SimDescriptor;
-import jmt.gui.common.xml.dto.UserClassDescriptor;
-
+import jmt.gui.common.xml.dto.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,8 +46,8 @@ public class XmlSerializer implements XMLConstantNames {
         if (sim.getArchiveName() != null) {
             root.setAttribute(XML_A_ROOT_NAME, sim.getArchiveName());
         }
-        root.setAttribute("xsi:noNamespaceSchemaLocation", XML_DOCUMENT_XSD);
-        root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        root.setAttribute(XML_XSI_NO_NAMESPACE_SCHEMA_LOCATION, XML_DOCUMENT_XSD);
+        root.setAttribute(XML_XMLNS_XSI, XML_XSI_SCHEMA_LOCATION_URI);
 
         // All other global attributes (seed, maxTime, maxSamples, polling, log params, …)
         // are stored as a plain map in SimDescriptor and emitted here.
@@ -83,7 +76,7 @@ public class XmlSerializer implements XMLConstantNames {
             setAttrIfNotNull(el, XML_A_CLASS_PRIORITY,       uc.getPriority());
             setAttrIfNotNull(el, XML_A_CLASS_SOFT_DEADLINE,  uc.getSoftDeadline());
             setAttrIfNotNull(el, XML_A_CLASS_CUSTOMERS,      uc.getCustomers());
-            setAttrIfNotNull(el, XML_A_CLASS_REFSOURCE,      uc.getReferenceSource()); // fix 1
+            setAttrIfNotNull(el, XML_A_CLASS_REFSOURCE,      uc.getReferenceSource());
             setAttrIfNotNull(el, XML_A_CLASS_CACHEMISSCLASS, uc.getCacheMissClass());
             setAttrIfNotNull(el, XML_A_CLASS_CACHEHITCLASS,  uc.getCacheHitClass());
             root.appendChild(el);
@@ -99,20 +92,15 @@ public class XmlSerializer implements XMLConstantNames {
             Element nodeEl = doc.createElement(XML_NODE);
             nodeEl.setAttribute(XML_A_STATION_NAME, node.getName());
 
-            // Optional per-node child elements that live outside <section> tags
-            // (classSoftDeadlines, quantumSize, quantumSwitchoverTime).
-            // These are stored as plain Double lists in NodeDescriptor.
             writeClassSoftDeadlines(doc, nodeEl, node);
             writeQuantumSize(doc, nodeEl, node);
             writeQuantumSwitchoverTime(doc, nodeEl, node);
 
-            // Write each section
             for (jmt.gui.common.xml.dto.SectionDescriptor sec : node.getSections()) {
                 Element secEl = doc.createElement(XML_E_STATION_SECTION);
                 secEl.setAttribute(XML_A_STATION_SECTION_CLASSNAME, sec.getClassName());
                 nodeEl.appendChild(secEl);
 
-                // Root-level parameters of the section
                 for (ParameterDescriptor param : sec.getParameters()) {
                     writeParameter(param, secEl, doc, false);
                 }
@@ -126,7 +114,7 @@ public class XmlSerializer implements XMLConstantNames {
         if (node.getClassSoftDeadlines() == null || node.getClassSoftDeadlines().isEmpty()) return;
         Element container = doc.createElement(XML_E_STATION_DUE_DATES);
         for (Double d : node.getClassSoftDeadlines()) {
-            Element entry = doc.createElement("softDeadline");
+            Element entry = doc.createElement(XML_E_SOFT_DEADLINE_ELEMENT);
             entry.setTextContent(d.toString());
             container.appendChild(entry);
         }
@@ -148,7 +136,7 @@ public class XmlSerializer implements XMLConstantNames {
         if (node.getQuantumSwitchoverTime() == null || node.getQuantumSwitchoverTime().isEmpty()) return;
         Element container = doc.createElement(XML_E_STATION_QUANTUM_SWITCHOVER_TIME);
         for (Double d : node.getQuantumSwitchoverTime()) {
-            Element entry = doc.createElement("quantumSwitchoverTime");
+            Element entry = doc.createElement(XML_E_QUANTUM_SWITCHOVER_TIME_ELEMENT);
             entry.setTextContent(d.toString());
             container.appendChild(entry);
         }
@@ -163,7 +151,7 @@ public class XmlSerializer implements XMLConstantNames {
         for (MeasureDescriptor m : sim.getMeasures()) {
             Element el = doc.createElement(XML_E_MEASURE);
             setAttrIfNotNull(el, XML_A_MEASURE_TYPE,          m.getType());
-            setAttrIfNotNull(el, XML_A_MEASURE_STATION,       m.getReferenceNode()); // fix 2
+            setAttrIfNotNull(el, XML_A_MEASURE_STATION,       m.getReferenceNode());
             setAttrIfNotNull(el, XML_A_MEASURE_NODETYPE,      m.getNodeType());
             setAttrIfNotNull(el, XML_A_MEASURE_CLASS,         m.getReferenceUserClass());
             setAttrIfNotNull(el, XML_A_MEASURE_ALPHA,         m.getAlpha());
@@ -198,54 +186,59 @@ public class XmlSerializer implements XMLConstantNames {
             el.setAttribute(XML_A_REGION_NAME, region.getName());
             el.setAttribute(XML_A_REGION_TYPE, region.getType());
 
-            // Region nodes — fix 3: getRegionNodes() not getStationNames()
             for (String stationName : region.getRegionNodes()) {
                 Element nodeEl = doc.createElement(XML_E_REGIONNODE);
                 nodeEl.setAttribute(XML_A_REGIONNODE_NAME, stationName);
                 el.appendChild(nodeEl);
             }
 
-            // Global constraints — fix 4 & 5: stored as Map<String,String>,
-            // keys are XML_A_GLOBALCONSTRAINT_MAXJOBS and XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY
             Element gc = doc.createElement(XML_E_GLOBALCONSTRAINT);
-            gc.setAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS,
-                    region.getGlobalConstraints().get(XML_A_GLOBALCONSTRAINT_MAXJOBS));
+            gc.setAttribute(XML_A_GLOBALCONSTRAINT_MAXJOBS, region.getGlobalConstraints().get(XML_A_GLOBALCONSTRAINT_MAXJOBS));
             el.appendChild(gc);
 
             Element gmc = doc.createElement(XML_E_GLOBALMEMORYCONSTRAINT);
-            gmc.setAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY,
-                    region.getGlobalConstraints().get(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY));
+            gmc.setAttribute(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY, region.getGlobalConstraints().get(XML_A_GLOBALMEMORYCONSTRAINT_MAXMEMORY));
             el.appendChild(gmc);
 
-            // Per-class constraints — fix 6: classConstraints is Map<String, Map<String,String>>
-            // where outer key = className, inner map = { "maxJobs" -> value, "maxMemory" -> value, ... }
-            // The legacy writer emits all classConstraints first, then all classMemory, then drop rules,
-            // then weights — same pass ordering is preserved here.
+            // FIX: Ordine rigoroso XSD per i child element della region
+            // 1. classConstraint
             region.getClassConstraints().forEach((className, props) -> {
                 Element ccEl = doc.createElement(XML_E_CLASSCONSTRAINT);
                 ccEl.setAttribute(XML_A_CLASSCONSTRAINT_CLASS,   className);
                 ccEl.setAttribute(XML_A_CLASSCONSTRAINT_MAXJOBS, props.get(XML_A_CLASSCONSTRAINT_MAXJOBS));
                 el.appendChild(ccEl);
             });
+            // 2. classMemoryConstraint
             region.getClassConstraints().forEach((className, props) -> {
                 Element cmcEl = doc.createElement(XML_E_CLASSMEMORYCONSTRAINT);
                 cmcEl.setAttribute(XML_A_CLASSMEMORYCONSTRAINT_CLASS,     className);
                 cmcEl.setAttribute(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY, props.get(XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY));
                 el.appendChild(cmcEl);
             });
+            // 3. dropRules
             region.getDropRules().forEach((className, rule) -> {
                 Element drEl = doc.createElement(XML_E_DROPRULES);
                 drEl.setAttribute(XML_A_DROPRULE_CLASS, className);
                 drEl.setAttribute(XML_A_DROPRULE_DROP,  rule);
                 el.appendChild(drEl);
             });
+            // 4. classWeight
             region.getClassWeights().forEach((className, weight) -> {
                 Element cwEl = doc.createElement(XML_E_CLASSWEIGHT);
                 cwEl.setAttribute(XML_A_CLASSWEIGHT_CLASS,  className);
                 cwEl.setAttribute(XML_A_CLASSWEIGHT_WEIGHT, weight);
                 el.appendChild(cwEl);
             });
-            // classSoftDeadlines per class (XML_E_CLASSDUEDATE) — stored in classConstraints inner map
+            // 5. classSize
+            if (region.getClassSizes() != null) {
+                region.getClassSizes().forEach((className, size) -> {
+                    Element csEl = doc.createElement(XML_E_CLASSSIZE);
+                    csEl.setAttribute(XML_A_CLASSSIZE_CLASS, className);
+                    csEl.setAttribute(XML_A_CLASSSIZE_SIZE, size);
+                    el.appendChild(csEl);
+                });
+            }
+            // 6. classSoftDeadline
             region.getClassConstraints().forEach((className, props) -> {
                 String deadline = props.get(XML_A_CLASS_SOFT_DEADLINE);
                 if (deadline != null) {
@@ -295,16 +288,20 @@ public class XmlSerializer implements XMLConstantNames {
         boolean hasAny = false;
 
         for (NodeDescriptor preload : sim.getPreloads()) {
-            // NodeDescriptor is reused here: name = station name,
-            // parameters = list of (className, population) pairs encoded as ParameterDescriptors
-            // with name=className and value=population (mapper's convention).
+            if (preload.getSections() == null || preload.getSections().isEmpty()) {
+                continue;
+            }
+
             Element stationEl = doc.createElement(XML_E_STATIONPOPULATIONS);
             stationEl.setAttribute(XML_A_PRELOADSTATION_NAME, preload.getName());
 
-            for (ParameterDescriptor entry : preload.getParameters()) {
+            for (jmt.gui.common.xml.dto.SectionDescriptor section : preload.getSections()) {
                 Element classPopEl = doc.createElement(XML_E_CLASSPOPULATION);
-                classPopEl.setAttribute(XML_A_CLASSPOPULATION_NAME,       entry.getName());
-                classPopEl.setAttribute(XML_A_CLASSPOPULATION_POPULATION,  entry.getValue());
+                classPopEl.setAttribute(XML_A_CLASSPOPULATION_NAME, section.getClassName());
+
+                if (section.getParameters() != null && !section.getParameters().isEmpty()) {
+                    classPopEl.setAttribute(XML_A_CLASSPOPULATION_POPULATION, section.getParameters().get(0).getValue());
+                }
                 stationEl.appendChild(classPopEl);
             }
             preloadEl.appendChild(stationEl);
@@ -320,28 +317,13 @@ public class XmlSerializer implements XMLConstantNames {
     // Core parameter serialization
     // -----------------------------------------------------------------------
 
-    /**
-     * Writes a single {@link ParameterDescriptor} into {@code parent}.
-     *
-     * <p><b>Invariant (from legacy {@code XMLParameter.appendParameterElement}):</b>
-     * if the parameter has a {@code refClass}, the {@code <refClass>} text element is
-     * appended to {@code parent} <em>before</em> the parameter element itself.
-     *
-     * @param p            the parameter to write
-     * @param parent       the DOM element to append into
-     * @param doc          the owning document
-     * @param isSubParam   {@code true}  → emit {@code <subParameter>},
-     *                     {@code false} → emit {@code <parameter>}
-     */
     private void writeParameter(ParameterDescriptor p, Element parent, Document doc, boolean isSubParam) {
-        // 1. refClass goes onto the PARENT, before the parameter element (legacy bug/feature)
         if (p.getRefClass() != null) {
             Element refClassEl = doc.createElement(XML_E_PARAMETER_REFCLASS);
             refClassEl.appendChild(doc.createTextNode(p.getRefClass()));
             parent.appendChild(refClassEl);
         }
 
-        // 2. Create the parameter element itself
         Element el = doc.createElement(isSubParam ? XML_E_SUBPARAMETER : XML_E_PARAMETER);
 
         if (p.getClassPath() != null) {
@@ -350,19 +332,16 @@ public class XmlSerializer implements XMLConstantNames {
         if (p.getName() != null) {
             el.setAttribute(XML_A_PARAMETER_NAME, p.getName());
         }
-        // 'array' attribute: only written when true, matching legacy behaviour
         if (p.isArray()) {
-            el.setAttribute(XML_A_PARAMETER_ARRAY, "true");
+            el.setAttribute(XML_A_PARAMETER_ARRAY, VAL_TRUE_STRING);
         }
 
-        // 3. Leaf value (mutually exclusive with sub-parameters in practice)
         if (p.getValue() != null) {
             Element valueEl = doc.createElement(XML_E_PARAMETER_VALUE);
             valueEl.appendChild(doc.createTextNode(p.getValue()));
             el.appendChild(valueEl);
         }
 
-        // 4. Recurse into sub-parameters — all children are <subParameter>
         for (ParameterDescriptor sub : p.getSubParameters()) {
             writeParameter(sub, el, doc, true);
         }
@@ -384,12 +363,8 @@ public class XmlSerializer implements XMLConstantNames {
         }
     }
 
-    /**
-     * Sets an attribute only if the value is non-null and not the literal string "null".
-     * Mirrors the guard used in the legacy {@code writeClasses} method.
-     */
     private void setAttrIfNotNull(Element el, String attr, String value) {
-        if (value != null && !"null".equals(value)) {
+        if (value != null && !VAL_NULL_STRING.equals(value)) {
             el.setAttribute(attr, value);
         }
     }
