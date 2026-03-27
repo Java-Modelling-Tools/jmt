@@ -366,6 +366,8 @@ public interface XMLConstantNames {
 
     String XML_E_ROUTING_STRATEGY = "RoutingStrategy";
     String XML_A_PROBABILITY = "probability";
+    String XML_MEASURE_NAME_SEPARATOR = "_";
+
 
     final class Maps {
 

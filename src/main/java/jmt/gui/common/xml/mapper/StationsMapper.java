@@ -213,7 +213,6 @@ public class StationsMapper implements ModelElementMapper {
                 // Delegate to the specific Section Mapper to write its parameters
                 AbstractSectionMapper mapper = SECTION_MAPPERS.get(sectionClassName);
                 if (mapper != null) {
-                    // Note: Ensure AbstractSectionMapper defines mapCommonModelToDto(...)
                     mapper.mapCommonModelToDto(section, model, stationKey, node, type, context);
                 }
             }
@@ -221,28 +220,39 @@ public class StationsMapper implements ModelElementMapper {
     }
 
     private void mapModelSoftDeadlinesToDto(NodeDescriptor node, CommonModel model, Object stationKey, String type) {
-        if (CommonConstants.STATION_TYPE_DELAY.equals(type) || CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-            List<Object> classKeys = model.getClassKeys();
-            if (classKeys != null) {
-                List<Double> deadlines = new ArrayList<>();
-                boolean hasNonZeroDeadline = false;
+        boolean isDelay = CommonConstants.STATION_TYPE_DELAY.equals(type);
+        boolean isServer = CommonConstants.STATION_TYPE_SERVER.equals(type);
 
-                for (Object classKey : classKeys) {
-                    Double deadline = model.getClassStationSoftDeadline(stationKey, classKey);
-                    if (deadline == null) {
-                        deadline = 0.0;
-                    }
-                    if (deadline > 0.0) {
-                        hasNonZeroDeadline = true;
-                    }
-                    deadlines.add(deadline);
-                }
+        if (!isDelay && !isServer) {
+            return;
+        }
 
-                // Append the list to the node only if at least one deadline is actually set
-                if (hasNonZeroDeadline) {
-                    node.setClassSoftDeadlines(deadlines);
-                }
+        List<Object> classKeys = model.getClassKeys();
+        if (classKeys == null) {
+            return;
+        }
+
+        extractAndSetDeadlines(node, model, stationKey, classKeys);
+    }
+
+    private void extractAndSetDeadlines(NodeDescriptor node, CommonModel model, Object stationKey, List<Object> classKeys) {
+        List<Double> deadlines = new ArrayList<>();
+        boolean hasNonZeroDeadline = false;
+
+        for (Object classKey : classKeys) {
+            Double deadline = model.getClassStationSoftDeadline(stationKey, classKey);
+            if (deadline == null) {
+                deadline = 0.0;
             }
+            if (deadline > 0.0) {
+                hasNonZeroDeadline = true;
+            }
+            deadlines.add(deadline);
+        }
+
+        // Append the list to the node only if at least one deadline is actually set
+        if (hasNonZeroDeadline) {
+            node.setClassSoftDeadlines(deadlines);
         }
     }
 
