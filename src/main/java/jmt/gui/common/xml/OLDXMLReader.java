@@ -1537,7 +1537,7 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
      * @author Michael Fercu (Bertoli Marco)
      *		   Date: 08-aug-2008
      * @see jmt.engine.log.LoggerParameters LoggerParameters
-     * @see jmt.gui.common.xml.XMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
+     * @see OLDXMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
      * @see jmt.gui.common.definitions.CommonModel#getLoggingParameters CommonModel.getLoggingParameters()
      * @see jmt.gui.common.definitions.CommonModel#setLoggingParameters CommonModel.setLoggingParameters()
      * @see jmt.engine.NodeSections.LogTunnel LogTunnel
