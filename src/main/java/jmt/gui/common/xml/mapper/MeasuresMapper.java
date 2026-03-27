@@ -7,8 +7,8 @@ import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.List;
 
-
 public class MeasuresMapper implements ModelElementMapper {
+
 
     @Override
     public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
@@ -82,45 +82,65 @@ public class MeasuresMapper implements ModelElementMapper {
     private void mapModelMeasureToDto(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
         String measureType = model.getMeasureType(measureKey);
         measureDto.setType(measureType);
-        measureDto.setNodeType(NODETYPE_STATION);
 
-        String refNodeName = "";
         Object stationKey = model.getMeasureStation(measureKey);
-        if (stationKey != null) {
-            String stationName = model.getStationName(stationKey);
-            if (stationName != null) {
-                refNodeName = stationName;
-            } else {
-                String regionName = model.getRegionName(stationKey);
-                if (regionName != null) {
-                    refNodeName = regionName;
-                    measureDto.setNodeType(NODETYPE_REGION);
-                }
-            }
-        }
+        String refNodeName = resolveAndSetNodeAttributes(model, stationKey, measureDto);
+        String refClassName = resolveReferenceClassName(model, measureKey);
+
         measureDto.setReferenceNode(refNodeName);
-
-        String refClassName = "";
-        Object classKey = model.getMeasureClass(measureKey);
-        if (classKey != null) {
-            if (classKey instanceof String) {
-                refClassName = (String) classKey;
-            } else {
-                String className = model.getClassName(classKey);
-                if (className != null) {
-                    refClassName = className;
-                }
-            }
-        }
         measureDto.setReferenceUserClass(refClassName);
+        measureDto.setName(buildMeasureName(refNodeName, refClassName, measureType));
 
-        // Generazione del nome della misura per rispettare i requisiti di validazione XSD
+        setNumericAndBooleanAttributes(model, measureKey, measureDto);
+
+        String serverType = resolveServerType(model, measureKey, stationKey);
+        if (serverType != null) {
+            measureDto.setServerType(serverType);
+        }
+    }
+
+    private String resolveAndSetNodeAttributes(CommonModel model, Object stationKey, MeasureDescriptor measureDto) {
+        measureDto.setNodeType(NODETYPE_STATION);
+        if (stationKey == null) return "";
+
+        String stationName = model.getStationName(stationKey);
+        if (stationName != null) {
+            return stationName;
+        }
+
+        String regionName = model.getRegionName(stationKey);
+        if (regionName != null) {
+            measureDto.setNodeType(NODETYPE_REGION);
+            return regionName;
+        }
+
+        return "";
+    }
+
+    private String resolveReferenceClassName(CommonModel model, Object measureKey) {
+        Object classKey = model.getMeasureClass(measureKey);
+        if (classKey == null) return "";
+
+        if (classKey instanceof String) {
+            return (String) classKey;
+        }
+
+        String className = model.getClassName(classKey);
+        return className != null ? className : "";
+    }
+
+    private String buildMeasureName(String refNodeName, String refClassName, String measureType) {
         String measureName = "";
-        if (!refNodeName.isEmpty()) measureName += refNodeName + "_";
-        if (!refClassName.isEmpty()) measureName += refClassName + "_";
-        measureName += measureType;
-        measureDto.setName(measureName);
+        if (!refNodeName.isEmpty()) {
+            measureName += refNodeName + XML_MEASURE_NAME_SEPARATOR;
+        }
+        if (!refClassName.isEmpty()) {
+            measureName += refClassName + XML_MEASURE_NAME_SEPARATOR;
+        }
+        return measureName + measureType;
+    }
 
+    private void setNumericAndBooleanAttributes(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
         Double alpha = model.getMeasureAlpha(measureKey);
         if (alpha != null) {
             double xmlAlpha = 1.0 - alpha;
@@ -128,22 +148,26 @@ public class MeasuresMapper implements ModelElementMapper {
         }
 
         Double precision = model.getMeasurePrecision(measureKey);
-        if (precision != null) measureDto.setPrecision(precision.toString());
+        if (precision != null) {
+            measureDto.setPrecision(precision.toString());
+        }
 
         boolean verbose = model.getMeasureLog(measureKey);
         measureDto.setVerbose(String.valueOf(verbose));
+    }
 
+    private String resolveServerType(CommonModel model, Object measureKey, Object stationKey) {
         Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);
-        if (serverTypeKey != null && stationKey != null) {
-            List<String> serverTypeNames = model.getServerTypeNames(stationKey);
-            if (serverTypeNames != null) {
-                for (String stName : serverTypeNames) {
-                    if (serverTypeKey.equals(model.getServerTypeKey(stationKey, stName))) {
-                        measureDto.setServerType(stName);
-                        break;
-                    }
-                }
+        if (serverTypeKey == null || stationKey == null) return null;
+
+        List<String> serverTypeNames = model.getServerTypeNames(stationKey);
+        if (serverTypeNames == null) return null;
+
+        for (String stName : serverTypeNames) {
+            if (serverTypeKey.equals(model.getServerTypeKey(stationKey, stName))) {
+                return stName;
             }
         }
+        return null;
     }
 }
