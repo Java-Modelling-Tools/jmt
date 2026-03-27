@@ -1,6 +1,7 @@
 /**
- * This class is responsible for mapping {@link UserClassDescriptor} objects from the DTO to the {@link CommonModel}.
- * It iterates through the user classes defined in the {@link SimDescriptor} and adds them to the model.
+ * This class is responsible for mapping {@link UserClassDescriptor} objects from the DTO to the {@link CommonModel}
+ * and vice-versa. It iterates through the user classes defined in the {@link SimDescriptor} and adds them to the model,
+ * or retrieves them from the model to build the DTO.
  *
  * @author Borgna Daniele
  * @since 25-mar-2026
@@ -12,8 +13,13 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.dto.UserClassDescriptor;
+import jmt.gui.common.xml.serializer.WritingContext;
+
+import java.util.Vector;
 
 public class ClassesMapper implements ModelElementMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
@@ -24,11 +30,6 @@ public class ClassesMapper implements ModelElementMapper {
         for (UserClassDescriptor currclass : dto.getUserClasses()) {
             mapUserClass(currclass, context);
         }
-    }
-
-    @Override
-    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
-        // TODO: implement logic to map common model to dto
     }
 
     private void mapUserClass(UserClassDescriptor currclass, MappingContext context) {
@@ -54,5 +55,60 @@ public class ClassesMapper implements ModelElementMapper {
 
         // Populates the map that associates the class name with its generated key
         context.classes.put(name, key);
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+        CommonModel model = context.model;
+        Vector<Object> classKeys = model.getClassKeys();
+
+        if (classKeys == null || classKeys.isEmpty()) {
+            return;
+        }
+
+        for (Object classKey : classKeys) {
+            UserClassDescriptor classDto = new UserClassDescriptor();
+            mapModelClassToDto(model, classKey, classDto);
+            dto.addUserClass(classDto);
+        }
+    }
+
+    private void mapModelClassToDto(CommonModel model, Object classKey, UserClassDescriptor classDto) {
+        // Name
+        classDto.setName(model.getClassName(classKey));
+
+        // Type & Customers (Population)
+        if (model.getClassType(classKey) == CommonConstants.CLASS_TYPE_OPEN) {
+            classDto.setType("open");
+        } else {
+            classDto.setType("closed");
+            Integer population = model.getClassPopulation(classKey);
+            if (population != null) {
+                classDto.setCustomers(population.toString());
+            }
+        }
+
+        // Priority
+        Integer priority = model.getClassPriority(classKey);
+        if (priority != null) {
+            classDto.setPriority(priority.toString());
+        }
+
+        // Soft Deadline
+        Double softDeadline = model.getClassSoftDeadline(classKey);
+        if (softDeadline != null) {
+            classDto.setSoftDeadline(softDeadline.toString());
+        }
+
+        // Reference Source
+        Object refStationKey = model.getClassRefStation(classKey);
+        if (refStationKey != null) {
+            String refStationName = model.getStationName(refStationKey);
+            if (refStationName != null) {
+                classDto.setReferenceSource(refStationName);
+            }
+        }
     }
 }

@@ -79,7 +79,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 
         // In-Place mapping on model
         SimDescriptorMapper mapper = new SimDescriptorMapper(descriptor, model);
-        mapper.map();
+        mapper.mapToModel();
     }
 
     public static Document loadXML(String filename, String schemaSource) {

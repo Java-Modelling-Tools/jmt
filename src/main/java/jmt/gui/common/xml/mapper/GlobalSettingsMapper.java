@@ -1,6 +1,6 @@
 /**
- * This class is responsible for mapping the global settings from the {@link SimDescriptor} to the {@link CommonModel}.
- * This includes simulation parameters like seed, duration, and logging configurations.
+ * This class is responsible for mapping the global settings from the {@link SimDescriptor} to the {@link CommonModel}
+ * and vice-versa. This includes simulation parameters like seed, duration, and logging configurations.
  *
  * @author Borgna Daniele
  * @since 25-mar-2026
@@ -12,11 +12,14 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.SimDescriptor;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.io.File;
 import java.util.Map;
 
 public class GlobalSettingsMapper implements ModelElementMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
@@ -28,11 +31,6 @@ public class GlobalSettingsMapper implements ModelElementMapper {
         mapIntervalsAndSamples(model, globals);
         mapStatisticsAndEvents(model, globals);
         mapLoggerParameters(model, globals);
-    }
-
-    @Override
-    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
-        // TODO: implement logic to map common model to dto
     }
 
     private void mapSimulationAndSeed(CommonModel model, Map<String, String> globals) {
@@ -82,5 +80,88 @@ public class GlobalSettingsMapper implements ModelElementMapper {
         model.setLoggingGlbParameter("autoAppend", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGREPLACE, Defaults.get("loggerAutoAppend")));
         model.setLoggingGlbParameter("delim", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGDELIM, Defaults.get("loggerDelimiter")));
         model.setLoggingGlbParameter("decimalSeparator", globals.getOrDefault(XMLConstantNames.XML_A_ROOT_LOGDECIMALSEPARATOR, Defaults.get("loggerDecimalSeparator")));
+    }
+
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+        CommonModel model = context.model; // Accessing the model from the writing context
+
+        mapModelSimulationAndSeedToDto(model, dto);
+        mapModelTimeLimitsToDto(model, dto);
+        mapModelIntervalsAndSamplesToDto(model, dto);
+        mapModelStatisticsAndEventsToDto(model, dto);
+        mapModelLoggerParametersToDto(model, dto);
+    }
+
+    private void mapModelSimulationAndSeedToDto(CommonModel model, SimDescriptor dto) {
+        Boolean useRandomSeed = model.getUseRandomSeed();
+        // If random seed is not used and a seed is present, we write it to the DTO
+        if (useRandomSeed != null && !useRandomSeed) {
+            Long seed = model.getSimulationSeed();
+            if (seed != null) {
+                dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_SEED, seed.toString());
+            }
+        }
+    }
+
+    private void mapModelTimeLimitsToDto(CommonModel model, SimDescriptor dto) {
+        Double maxDuration = model.getMaximumDuration();
+        if (maxDuration != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_DURATION, maxDuration.toString());
+        }
+
+        Double maxSimulatedTime = model.getMaxSimulatedTime();
+        if (maxSimulatedTime != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_SIMULATED, maxSimulatedTime.toString());
+        }
+    }
+
+    private void mapModelIntervalsAndSamplesToDto(CommonModel model, SimDescriptor dto) {
+        Double pollingInterval = model.getPollingInterval();
+        if (pollingInterval != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_POLLING, pollingInterval.toString());
+        }
+
+        Integer maxSamples = model.getMaxSimulationSamples();
+        if (maxSamples != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_MAXSAMPLES, maxSamples.toString());
+        }
+    }
+
+    private void mapModelStatisticsAndEventsToDto(CommonModel model, SimDescriptor dto) {
+        Boolean disableStatistic = model.getDisableStatistic();
+        if (disableStatistic != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_DISABLESTATISTIC, disableStatistic.toString());
+        }
+
+        Integer maxEvents = model.getMaxSimulationEvents();
+        if (maxEvents != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_MAXEVENTS, maxEvents.toString());
+        }
+    }
+
+    private void mapModelLoggerParametersToDto(CommonModel model, SimDescriptor dto) {
+        String logPath = model.getLoggingGlbParameter("path");
+        if (logPath != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGPATH, logPath);
+        }
+
+        String autoAppend = model.getLoggingGlbParameter("autoAppend");
+        if (autoAppend != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGREPLACE, autoAppend);
+        }
+
+        String delim = model.getLoggingGlbParameter("delim");
+        if (delim != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGDELIM, delim);
+        }
+
+        String decimalSeparator = model.getLoggingGlbParameter("decimalSeparator");
+        if (decimalSeparator != null) {
+            dto.addGlobalAttribute(XMLConstantNames.XML_A_ROOT_LOGDECIMALSEPARATOR, decimalSeparator);
+        }
     }
 }

@@ -1,3 +1,11 @@
+/**
+ * This class is responsible for mapping the ClassSwitch section of a node.
+ * It handles the parsing and writing of the class switch matrix, which defines
+ * the probabilities of a job changing its class upon passing through the station.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -5,8 +13,11 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 public class ClassSwitchSectionMapper extends AbstractSectionMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -26,8 +37,10 @@ public class ClassSwitchSectionMapper extends AbstractSectionMapper {
         });
     }
 
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
     @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, WritingContext context) {
         ParameterDescriptor matrixParam = new ParameterDescriptor();
         matrixParam.setName("matrix");
         matrixParam.setClassPath("java.lang.Object");
@@ -44,8 +57,12 @@ public class ClassSwitchSectionMapper extends AbstractSectionMapper {
                 cellParam.setName("cell");
                 cellParam.setClassPath("java.lang.Float");
                 cellParam.setRefClass(model.getClassName(classOutKey));
-                cellParam.setValue(Float.toString(model.getClassSwitchMatrix(stationKey, classInKey, classOutKey)));
+
+                // Retrieve the probability of switching from classIn to classOut
+                float switchProbability = model.getClassSwitchMatrix(stationKey, classInKey, classOutKey);
+                cellParam.setValue(Float.toString(switchProbability));
                 cellParam.setArray(true);
+
                 rowParam.addSubParameter(cellParam);
             }
             matrixParam.addSubParameter(rowParam);
