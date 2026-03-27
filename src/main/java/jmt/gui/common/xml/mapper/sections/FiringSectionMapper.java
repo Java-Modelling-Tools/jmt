@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping the Firing section of a node.
+ * It handles the parsing and writing of the Petri Net firing outcomes.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -6,10 +13,13 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.List;
 
 public class FiringSectionMapper extends AbstractSectionMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -19,14 +29,6 @@ public class FiringSectionMapper extends AbstractSectionMapper {
             for (int i = 0; i < outcomes.size(); i++) {
                 mapOutcome(key, i, outcomes.get(i), ctx);
             }
-        }
-    }
-
-    @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        ParameterDescriptor firingOutcomes = createConditionMatrix(XMLConstantNames.PARAM_FIRING_OUTCOMES, "firingOutcome", "firingVector", "firingEntry", key, model, ctx, (s, m, i, to, cl) -> model.getFiringOutcome(s, i, to, cl), false);
-        if (firingOutcomes != null) {
-            sec.addParameter(firingOutcomes);
         }
     }
 
@@ -51,5 +53,15 @@ public class FiringSectionMapper extends AbstractSectionMapper {
                 ctx.firingOutcomeMap.put(new Object[]{key, outcomeIndex, sName, ctx.classes.get(className)}, vVal);
             }
         });
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
+        ParameterDescriptor firingOutcomes = createConditionMatrix(XMLConstantNames.PARAM_FIRING_OUTCOMES, "firingOutcome", "firingVector", "firingEntry", key, model, context, (s, m, i, to, cl) -> model.getFiringOutcome(s, i, to, cl), false);
+        if (firingOutcomes != null) {
+            sec.addParameter(firingOutcomes);
+        }
     }
 }

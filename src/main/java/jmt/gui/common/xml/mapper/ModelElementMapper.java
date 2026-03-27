@@ -9,6 +9,7 @@
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.xml.dto.SimDescriptor;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 public interface ModelElementMapper {
     /**
@@ -24,9 +25,9 @@ public interface ModelElementMapper {
      * This is the inverse operation of {@link #mapDtoToCommonModel(SimDescriptor, MappingContext)}.
      *
      * @param dto     The root DTO object that will be populated with data from the model
-     * @param context The shared context containing the CommonModel and support maps
+     * @param context The shared context used during the WRITING phase
      */
-    void mapCommonModelToDto(SimDescriptor dto, MappingContext context);
+    void mapCommonModelToDto(SimDescriptor dto, WritingContext context); // Usiamo WritingContext qui
 
     default boolean isPresent(String value) {
         return value != null && !value.isEmpty();

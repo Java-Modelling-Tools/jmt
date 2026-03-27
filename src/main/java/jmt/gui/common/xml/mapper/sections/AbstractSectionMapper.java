@@ -9,6 +9,7 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.*;
 
@@ -16,9 +17,12 @@ public abstract class AbstractSectionMapper {
 
     public abstract void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
 
-    public abstract void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
+    public abstract void mapCommonModelToDto(SectionDescriptor section, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, WritingContext context);
 
-    // --- UTILITY ---
+    // =========================================================================================
+    // --- UTILITY (Metodi usati sia in lettura che in scrittura) ---
+    // =========================================================================================
+
     protected ParameterDescriptor getParam(SectionDescriptor sec, String name) {
         if (sec == null || sec.getParameters() == null) return null;
         return sec.getParameters().stream().filter(p -> name.equals(p.getName())).findFirst().orElse(null);
@@ -28,7 +32,6 @@ public abstract class AbstractSectionMapper {
         return (p != null && p.getSubParameters() != null) ? p.getSubParameters() : Collections.emptyList();
     }
 
-    // CRITICAL FIX RESTORED: Use the native getRefClass() of the DTO!
     protected Map<String, ParameterDescriptor> getRefClassMap(ParameterDescriptor p) {
         Map<String, ParameterDescriptor> map = new LinkedHashMap<>();
         if (p == null || p.getSubParameters() == null) return map;
@@ -62,8 +65,36 @@ public abstract class AbstractSectionMapper {
     protected Double valD(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v) : null; }
     protected Integer valI(ParameterDescriptor p) { String v = val(p); return v != null ? Double.valueOf(v).intValue() : null; }
 
-    // --- SHARED PARSING ---
-    protected void addServiceStrategyParameter(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
+    // Factory method per creare un ParameterDescriptor semplice (con valore)
+    protected ParameterDescriptor makeParam(String name, String classPath, String value) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(name);
+        p.setClassPath(classPath);
+        p.setValue(value);
+        return p;
+    }
+
+    // Factory method per creare un container (con subparameter, senza valore)
+    protected ParameterDescriptor makeContainer(String name, String classPath) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(name);
+        p.setClassPath(classPath);
+        return p;
+    }
+
+    // Factory method con refClass
+    protected ParameterDescriptor makeRefParam(String name, String classPath, String refClass, String value) {
+        ParameterDescriptor p = makeParam(name, classPath, value);
+        p.setRefClass(refClass);
+        return p;
+    }
+
+
+    // =========================================================================================
+    // --- SHARED WRITING (Model -> DTO -> XML) - USANO IL WritingContext ---
+    // =========================================================================================
+
+    protected void addServiceStrategyParameter(SectionDescriptor sec, CommonModel model, Object key, WritingContext ctx) {
         ParameterDescriptor serviceStrategy = new ParameterDescriptor();
         serviceStrategy.setName("ServiceStrategy");
         serviceStrategy.setClassPath("jmt.engine.random.ServiceStrategy");
@@ -78,7 +109,7 @@ public abstract class AbstractSectionMapper {
         sec.addParameter(serviceStrategy);
     }
 
-    protected ParameterDescriptor getDistributionParameter(Object distrObj, CommonModel model, Object classKey, String paramName, String classPath, MappingContext ctx) {
+    protected ParameterDescriptor getDistributionParameter(Object distrObj, CommonModel model, Object classKey, String paramName, String classPath, WritingContext ctx) {
         ParameterDescriptor p = new ParameterDescriptor();
         p.setName(paramName);
         p.setClassPath(classPath);
@@ -150,7 +181,7 @@ public abstract class AbstractSectionMapper {
         return p;
     }
 
-    private ParameterDescriptor createParameterDescriptor(Distribution.Parameter param, MappingContext ctx) {
+    private ParameterDescriptor createParameterDescriptor(Distribution.Parameter param, WritingContext ctx) {
         ParameterDescriptor p = new ParameterDescriptor();
         p.setName(param.getName());
         Object val = param.getValue();
@@ -186,11 +217,11 @@ public abstract class AbstractSectionMapper {
         return p;
     }
 
-    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, MappingContext ctx) {
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, WritingContext ctx) {
         mapTransitionConditions(key, sec, model, ctx, true);
     }
 
-    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, MappingContext ctx, boolean includeResource) {
+    protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, WritingContext ctx, boolean includeResource) {
         // Enabling Conditions
         ParameterDescriptor enablingConditions = createConditionMatrix("enablingConditions", "enablingCondition", "enablingVector", "enablingEntry", key, model, ctx, (s, m, i, from, cl) -> model.getEnablingCondition(s, i, from, cl));
         if (enablingConditions != null) sec.addParameter(enablingConditions);
@@ -206,11 +237,11 @@ public abstract class AbstractSectionMapper {
         }
     }
 
-    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, MappingContext ctx, ConditionGetter getter) {
+    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, WritingContext ctx, ConditionGetter getter) {
         return createConditionMatrix(name, condName, vecName, entryName, key, model, ctx, getter, true);
     }
 
-    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, MappingContext ctx, ConditionGetter getter, boolean backward) {
+    protected ParameterDescriptor createConditionMatrix(String name, String condName, String vecName, String entryName, Object key, CommonModel model, WritingContext ctx, ConditionGetter getter, boolean backward) {
         int modes = model.getTransitionModeListSize(key);
         if (modes <= 0) return null;
 
@@ -267,6 +298,11 @@ public abstract class AbstractSectionMapper {
     protected interface ConditionGetter {
         Integer get(Object stationKey, CommonModel model, int modeIndex, Object fromStationKey, Object classKey);
     }
+
+
+    // =========================================================================================
+    // --- SHARED PARSING (XML -> DTO -> Model) - USANO IL MappingContext ---
+    // =========================================================================================
 
     protected Object parseServiceStrategy(ParameterDescriptor p, MappingContext ctx) {
         if (p == null) return null;
@@ -376,9 +412,6 @@ public abstract class AbstractSectionMapper {
         }
         return val;
     }
-
-
-// --- METHODS FOR PETRI NETS AND RESTORED CONDITIONS ---
 
     protected void extractTransitionConditions(Object key, ParameterDescriptor en, ParameterDescriptor in, ParameterDescriptor res, MappingContext ctx) {
         if (en != null) {

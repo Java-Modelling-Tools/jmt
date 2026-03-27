@@ -14,6 +14,7 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class ForkSectionMapper extends AbstractSectionMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -31,8 +34,128 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         }
     }
 
+    private void mapForkParameter(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+        if (XMLConstantNames.PARAM_JOBS_PER_LINK.equals(p.getName())) {
+            Integer v = valI(p);
+            if (v != null) model.setStationNumberOfServers(key, v);
+        } else if (XMLConstantNames.PARAM_BLOCK.equals(p.getName())) {
+            Integer v = valI(p);
+            if (v != null) model.setForkBlock(key, v);
+        } else if (XMLConstantNames.PARAM_IS_SIMPLIFIED_FORK.equals(p.getName())) {
+            String bVal = val(p);
+            if (bVal != null) model.setIsSimplifiedFork(key, Boolean.parseBoolean(bVal));
+        } else if (XMLConstantNames.PARAM_FORK_STRATEGY.equals(p.getName())) {
+            getRefClassMap(p).forEach((className, fP) -> mapForkStrategy(className, fP, key, model, ctx));
+        }
+    }
+
+    private void mapForkStrategy(String className, ParameterDescriptor fP, Object key, CommonModel model, MappingContext ctx) {
+        Object classKey = ctx.classes.get(className);
+        String cp = fP.getClassPath();
+
+        for (ForkStrategy strat : ctx.getEngineToGuiFork().values()) {
+            if (cp != null && cp.equals(strat.getClassPath())) {
+                model.setForkStrategy(key, classKey, strat.clone());
+            }
+        }
+
+        ForkStrategy fs = (ForkStrategy) model.getForkStrategy(key, classKey);
+
+        if (fs instanceof ProbabilitiesFork) {
+            mapProbabilitiesFork(key, classKey, fP, ctx);
+        } else if (fs instanceof CombFork) {
+            mapCombFork(key, classKey, fP, ctx);
+        } else if (fs instanceof ClassSwitchFork || fs instanceof MultiBranchClassSwitchFork) {
+            mapClassSwitchFork(key, classKey, fP, model, ctx);
+        }
+    }
+
+    private void mapProbabilitiesFork(Object key, Object classKey, ParameterDescriptor fP, MappingContext ctx) {
+        Map<String, OutPath> map = new HashMap<>();
+        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                parseProbabilitiesOutPath(entry, map);
+            }
+        }
+        ctx.empiricalFork.put(new Object[]{key, classKey}, map);
+    }
+
+    private void parseProbabilitiesOutPath(ParameterDescriptor entry, Map<String, OutPath> map) {
+        OutPath op = new OutPath();
+        List<ParameterDescriptor> entryParams = getSubParams(entry);
+
+        ParameterDescriptor outUnitProb = getAt(entryParams, 0);
+        List<ParameterDescriptor> outUnitSub = getSubParams(outUnitProb);
+
+        String sName = val(getAt(outUnitSub, 0));
+        Double pVal = valD(getAt(outUnitSub, 1));
+
+        if (pVal != null) op.setProbability(pVal);
+
+        ParameterDescriptor jobsPerLinkDis = getAt(entryParams, 1);
+        op.setOutParameters(mapJobsPerLinkDis(jobsPerLinkDis));
+        if (sName != null) map.put(sName, op);
+    }
+
+    private Map<Object, Object> mapJobsPerLinkDis(ParameterDescriptor jobsPerLinkDis) {
+        Map<Object, Object> opMap = new HashMap<>();
+        if (jobsPerLinkDis != null) {
+            for (ParameterDescriptor res : getSubParams(jobsPerLinkDis)) {
+                List<ParameterDescriptor> resParams = getSubParams(res);
+                Integer rKey = valI(getAt(resParams, 0));
+                Double rVal = valD(getAt(resParams, 1));
+                if (rKey != null && rVal != null) opMap.put(rKey, rVal);
+            }
+        }
+        return opMap;
+    }
+
+    private void mapCombFork(Object key, Object classKey, ParameterDescriptor fP, MappingContext ctx) {
+        Map<String, Double> tmp = new TreeMap<>();
+        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
+        if (entryArray != null) {
+            for (ParameterDescriptor e : getSubParams(entryArray)) {
+                List<ParameterDescriptor> eParams = getSubParams(e);
+                String cName = val(getAt(eParams, 0));
+                Double cVal = valD(getAt(eParams, 1));
+                if (cName != null && cVal != null) tmp.put(cName, cVal);
+            }
+        }
+        ctx.combFork.put(new Object[]{key, classKey}, tmp);
+    }
+
+    private void mapClassSwitchFork(Object key, Object classKey, ParameterDescriptor fP, CommonModel model, MappingContext ctx) {
+        Map<String, OutPath> map = new HashMap<>();
+        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                OutPath op = new OutPath();
+                List<ParameterDescriptor> entryParams = getSubParams(entry);
+
+                String sName = val(getAt(entryParams, 0));
+                List<ParameterDescriptor> classParams = getSubParams(getAt(entryParams, 1));
+                List<ParameterDescriptor> numParams = getSubParams(getAt(entryParams, 2));
+
+                Map<Object, Object> opMap = new HashMap<>();
+                for (int k = 0; k < classParams.size(); k++) {
+                    String targetClass = val(getAt(classParams, k));
+                    Integer count = valI(getAt(numParams, k));
+                    if (targetClass != null && count != null) {
+                        opMap.put(model.getClassByName(targetClass), count);
+                    }
+                }
+                op.setOutParameters(opMap);
+                if (sName != null) map.put(sName, op);
+            }
+        }
+        ctx.empiricalFork.put(new Object[]{key, classKey}, map);
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
     @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
         ParameterDescriptor jobsPerLink = new ParameterDescriptor();
         jobsPerLink.setName(XMLConstantNames.PARAM_JOBS_PER_LINK);
         jobsPerLink.setClassPath(Integer.class.getName());
@@ -58,30 +181,30 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         for (Object classKey : model.getClassKeys()) {
             ForkStrategy fs = (ForkStrategy) model.getForkStrategy(key, classKey);
             if (fs != null) {
-                ParameterDescriptor fsP = mapForkStrategyToDto(fs, key, classKey, model, ctx);
+                ParameterDescriptor fsP = mapForkStrategyToDto(fs, key, classKey, model, context);
                 forkStrategy.addSubParameter(fsP);
             }
         }
         sec.addParameter(forkStrategy);
     }
 
-    private ParameterDescriptor mapForkStrategyToDto(ForkStrategy fs, Object key, Object classKey, CommonModel model, MappingContext ctx) {
+    private ParameterDescriptor mapForkStrategyToDto(ForkStrategy fs, Object key, Object classKey, CommonModel model, WritingContext context) {
         ParameterDescriptor p = new ParameterDescriptor();
         p.setName(fs.getName());
         p.setClassPath(fs.getClassPath());
         p.setRefClass(model.getClassName(classKey));
 
         if (fs instanceof ProbabilitiesFork) {
-            mapProbabilitiesForkToDto(fs, p, key, model, ctx);
+            mapProbabilitiesForkToDto(fs, p, key, model, context);
         } else if (fs instanceof CombFork) {
-            mapCombForkToDto(fs, p, key, model, ctx);
+            mapCombForkToDto(fs, p, key, model, context);
         } else if (fs instanceof ClassSwitchFork || fs instanceof MultiBranchClassSwitchFork) {
-            mapClassSwitchForkToDto(fs, p, key, model, ctx);
+            mapClassSwitchForkToDto(fs, p, key, model, context);
         }
         return p;
     }
 
-    private void mapProbabilitiesForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+    private void mapProbabilitiesForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, WritingContext context) {
         Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
         if (outPaths == null) return;
 
@@ -146,7 +269,7 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         p.addSubParameter(arrayPar);
     }
 
-    private void mapCombForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+    private void mapCombForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, WritingContext context) {
         Map<Object, Double> probs = (Map<Object, Double>) fs.getOutDetails();
         if (probs == null) return;
 
@@ -181,7 +304,7 @@ public class ForkSectionMapper extends AbstractSectionMapper {
         p.addSubParameter(entryArray);
     }
 
-    private void mapClassSwitchForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
+    private void mapClassSwitchForkToDto(ForkStrategy fs, ParameterDescriptor p, Object key, CommonModel model, WritingContext context) {
         Map<Object, OutPath> outPaths = (Map<Object, OutPath>) fs.getOutDetails();
         if (outPaths == null) return;
 
@@ -211,9 +334,9 @@ public class ForkSectionMapper extends AbstractSectionMapper {
             numbersPar.setClassPath(String.class.getName());
             numbersPar.setArray(true);
 
-            Map<Object, Integer> map = (Map) entry.getValue().getOutParameters();
+            Map<Object, Object> map = entry.getValue().getOutParameters();
             for (Object cKey : model.getClassKeys()) {
-                Integer count = map.get(cKey);
+                Integer count = (Integer) map.get(cKey);
                 if (count != null) {
                     ParameterDescriptor jobClass = new ParameterDescriptor();
                     jobClass.setName("class");
@@ -233,126 +356,5 @@ public class ForkSectionMapper extends AbstractSectionMapper {
             classJobNumArray.addSubParameter(entryPar);
         }
         p.addSubParameter(classJobNumArray);
-    }
-
-    private void mapForkParameter(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
-        if (XMLConstantNames.PARAM_JOBS_PER_LINK.equals(p.getName())) {
-            Integer v = valI(p);
-            if (v != null) model.setStationNumberOfServers(key, v);
-        } else if (XMLConstantNames.PARAM_BLOCK.equals(p.getName())) {
-            Integer v = valI(p);
-            if (v != null) model.setForkBlock(key, v);
-        } else if (XMLConstantNames.PARAM_IS_SIMPLIFIED_FORK.equals(p.getName())) {
-            String bVal = val(p);
-            if (bVal != null) model.setIsSimplifiedFork(key, Boolean.parseBoolean(bVal));
-        } else if (XMLConstantNames.PARAM_FORK_STRATEGY.equals(p.getName())) {
-            getRefClassMap(p).forEach((className, fP) -> mapForkStrategy(className, fP, key, model, ctx));
-        }
-    }
-
-    private void mapForkStrategy(String className, ParameterDescriptor fP, Object key, CommonModel model, MappingContext ctx) {
-        Object classKey = ctx.classes.get(className);
-        String cp = fP.getClassPath();
-
-        // Identical to the Oracle: clones from the registry based on the classPath
-        for (ForkStrategy strat : ctx.getEngineToGuiFork().values()) {
-            if (cp != null && cp.equals(strat.getClassPath())) {
-                model.setForkStrategy(key, classKey, strat.clone());
-            }
-        }
-
-        ForkStrategy fs = (ForkStrategy) model.getForkStrategy(key, classKey);
-
-        if (fs instanceof ProbabilitiesFork) {
-            mapProbabilitiesFork(key, classKey, fP, ctx);
-        } else if (fs instanceof CombFork) {
-            mapCombFork(key, classKey, fP, ctx);
-        } else if (fs instanceof ClassSwitchFork || fs instanceof MultiBranchClassSwitchFork) {
-            mapClassSwitchFork(key, classKey, fP, model, ctx);
-        }
-    }
-
-    private void mapProbabilitiesFork(Object key, Object classKey, ParameterDescriptor fP, MappingContext ctx) {
-        Map<String, OutPath> map = new HashMap<>();
-        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
-        if (entryArray != null) {
-            for (ParameterDescriptor entry : getSubParams(entryArray)) {
-                parseProbabilitiesOutPath(entry, map);
-            }
-        }
-        ctx.empiricalFork.put(new Object[]{key, classKey}, map);
-    }
-
-    private void parseProbabilitiesOutPath(ParameterDescriptor entry, Map<String, OutPath> map) {
-        OutPath op = new OutPath();
-        List<ParameterDescriptor> entryParams = getSubParams(entry);
-
-        // FIX ORACLE: entryParams.get(0) is "outUnitProbability", which contains stationName and probability!
-        ParameterDescriptor outUnitProb = getAt(entryParams, 0);
-        List<ParameterDescriptor> outUnitSub = getSubParams(outUnitProb);
-
-        String sName = val(getAt(outUnitSub, 0));
-        Double pVal = valD(getAt(outUnitSub, 1));
-
-        if (pVal != null) op.setProbability(pVal);
-
-        // entryParams.get(1) is "JobsPerLinkDis"
-        ParameterDescriptor jobsPerLinkDis = getAt(entryParams, 1);
-        op.setOutParameters(mapJobsPerLinkDis(jobsPerLinkDis));
-        if (sName != null) map.put(sName, op);
-    }
-
-    private Map<Object, Object> mapJobsPerLinkDis(ParameterDescriptor jobsPerLinkDis) {
-        Map<Object, Object> opMap = new HashMap<>();
-        if (jobsPerLinkDis != null) {
-            for (ParameterDescriptor res : getSubParams(jobsPerLinkDis)) {
-                List<ParameterDescriptor> resParams = getSubParams(res);
-                Integer rKey = valI(getAt(resParams, 0));
-                Double rVal = valD(getAt(resParams, 1));
-                if (rKey != null && rVal != null) opMap.put(rKey, rVal);
-            }
-        }
-        return opMap;
-    }
-
-    private void mapCombFork(Object key, Object classKey, ParameterDescriptor fP, MappingContext ctx) {
-        Map<String, Double> tmp = new TreeMap<>();
-        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
-        if (entryArray != null) {
-            for (ParameterDescriptor e : getSubParams(entryArray)) {
-                List<ParameterDescriptor> eParams = getSubParams(e);
-                String cName = val(getAt(eParams, 0));
-                Double cVal = valD(getAt(eParams, 1));
-                if (cName != null && cVal != null) tmp.put(cName, cVal);
-            }
-        }
-        ctx.combFork.put(new Object[]{key, classKey}, tmp);
-    }
-
-    private void mapClassSwitchFork(Object key, Object classKey, ParameterDescriptor fP, CommonModel model, MappingContext ctx) {
-        Map<String, OutPath> map = new HashMap<>();
-        ParameterDescriptor entryArray = getFirst(getSubParams(fP));
-        if (entryArray != null) {
-            for (ParameterDescriptor entry : getSubParams(entryArray)) {
-                OutPath op = new OutPath();
-                List<ParameterDescriptor> entryParams = getSubParams(entry);
-
-                String sName = val(getAt(entryParams, 0));
-                List<ParameterDescriptor> classParams = getSubParams(getAt(entryParams, 1));
-                List<ParameterDescriptor> numParams = getSubParams(getAt(entryParams, 2));
-
-                Map<Object, Object> opMap = new HashMap<>();
-                for (int k = 0; k < classParams.size(); k++) {
-                    String targetClass = val(getAt(classParams, k));
-                    Integer count = valI(getAt(numParams, k));
-                    if (targetClass != null && count != null) {
-                        opMap.put(model.getClassByName(targetClass), count);
-                    }
-                }
-                op.setOutParameters(opMap);
-                if (sName != null) map.put(sName, op);
-            }
-        }
-        ctx.empiricalFork.put(new Object[]{key, classKey}, map);
     }
 }

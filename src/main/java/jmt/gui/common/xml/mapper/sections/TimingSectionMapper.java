@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping the Timing section of a node.
+ * It configures the timing strategies (firing times), priorities, and server counts for Petri Net transitions.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -6,11 +13,14 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class TimingSectionMapper extends AbstractSectionMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -19,11 +29,6 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         mapTimingStrategies(sec, model, key, ctx);
         mapFiringPriorities(sec, model, key);
         mapFiringWeights(sec, model, key);
-    }
-
-    @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        // TODO: implement logic to map common model to dto
     }
 
     private void mapTransitionModes(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
@@ -95,5 +100,77 @@ public class TimingSectionMapper extends AbstractSectionMapper {
                 }
             }
         }
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model,
+                                    Object key, NodeDescriptor node,
+                                    String stationType, WritingContext context) {
+        // modeNames
+        ParameterDescriptor modeNames = new ParameterDescriptor();
+        modeNames.setName(XMLConstantNames.PARAM_MODE_NAMES);
+        modeNames.setClassPath(String.class.getName());
+        for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
+            ParameterDescriptor mn = new ParameterDescriptor();
+            mn.setName("modeName");
+            mn.setClassPath(String.class.getName());
+            mn.setValue(model.getTransitionModeName(key, i));
+            modeNames.addSubParameter(mn);
+        }
+        sec.addParameter(modeNames);
+
+        // numbersOfServers
+        ParameterDescriptor numbersOfServers = new ParameterDescriptor();
+        numbersOfServers.setName(XMLConstantNames.PARAM_NUMBERS_OF_SERVERS);
+        numbersOfServers.setClassPath(Integer.class.getName());
+        for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
+            ParameterDescriptor nos = new ParameterDescriptor();
+            nos.setName("numberOfServers");
+            nos.setClassPath(Integer.class.getName());
+            nos.setValue(model.getNumberOfServers(key, i).toString());
+            numbersOfServers.addSubParameter(nos);
+        }
+        sec.addParameter(numbersOfServers);
+
+        // timingStrategies
+        ParameterDescriptor timingStrategies = new ParameterDescriptor();
+        timingStrategies.setName(XMLConstantNames.PARAM_TIMING_STRATEGIES);
+        timingStrategies.setClassPath("jmt.engine.NetStrategies.ServiceStrategy");
+        for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
+            Object strategy = model.getFiringTimeDistribution(key, i);
+            ParameterDescriptor ts = getDistributionParameter(
+                    strategy, model, null, "timingStrategy",
+                    "jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy", context);
+            timingStrategies.addSubParameter(ts);
+        }
+        sec.addParameter(timingStrategies);
+
+        // firingPriorities
+        ParameterDescriptor firingPriorities = new ParameterDescriptor();
+        firingPriorities.setName(XMLConstantNames.PARAM_FIRING_PRIORITIES);
+        firingPriorities.setClassPath(Integer.class.getName());
+        for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
+            ParameterDescriptor fp = new ParameterDescriptor();
+            fp.setName("firingPriority");
+            fp.setClassPath(Integer.class.getName());
+            fp.setValue(model.getFiringPriority(key, i).toString());
+            firingPriorities.addSubParameter(fp);
+        }
+        sec.addParameter(firingPriorities);
+
+        // firingWeights
+        ParameterDescriptor firingWeights = new ParameterDescriptor();
+        firingWeights.setName(XMLConstantNames.PARAM_FIRING_WEIGHTS);
+        firingWeights.setClassPath(Double.class.getName());
+        for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
+            ParameterDescriptor fw = new ParameterDescriptor();
+            fw.setName("firingWeight");
+            fw.setClassPath(Double.class.getName());
+            fw.setValue(model.getFiringWeight(key, i).toString());
+            firingWeights.addSubParameter(fw);
+        }
+        sec.addParameter(firingWeights);
     }
 }

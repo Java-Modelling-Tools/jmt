@@ -1,7 +1,9 @@
 /**
- * This class is responsible for performing post-processing steps after the initial mapping.
+ * This class is responsible for performing post-processing steps after the initial mapping during the READING phase.
  * It resolves references between different model elements, such as reference stations for classes and routing strategies
  * that depend on other elements being fully defined.
+ * * Note: During the WRITING phase, this mapper does nothing, as the CommonModel is already fully resolved and
+ * interlinked, allowing individual section mappers to write their data directly.
  *
  * @author Borgna Daniele
  * @since 25-mar-2026
@@ -17,11 +19,14 @@ import jmt.gui.common.routingStrategies.LoadDependentRouting;
 import jmt.gui.common.routingStrategies.ProbabilityRouting;
 import jmt.gui.common.routingStrategies.WeightedRoundRobinRouting;
 import jmt.gui.common.xml.dto.SimDescriptor;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PostProcessingMapper implements ModelElementMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     @SuppressWarnings("unchecked")
@@ -37,11 +42,6 @@ public class PostProcessingMapper implements ModelElementMapper {
         resolvePetriNetConditions(model, context);
 
         model.resetSaveState();
-    }
-
-    @Override
-    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
-        // TODO: implement logic to map common model to dto
     }
 
     private void resolveReferenceStations(CommonModel model, MappingContext context) {
@@ -203,5 +203,16 @@ public class PostProcessingMapper implements ModelElementMapper {
     @FunctionalInterface
     private interface ConditionSetter {
         void set(Object stationKey, int modeIndex, Object stationInOutKey, Object classKey, Integer value);
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+        // Nothing to do here!
+        // In the writing phase, the CommonModel is already fully interlinked.
+        // References (like routing paths, reference stations, or petri net conditions)
+        // will be directly extracted by their respective mappers (e.g. RouterSectionMapper, ClassesMapper)
+        // without the need for a deferred post-processing step.
     }
 }

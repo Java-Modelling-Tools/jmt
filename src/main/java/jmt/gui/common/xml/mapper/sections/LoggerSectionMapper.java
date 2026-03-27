@@ -1,3 +1,10 @@
+/**
+ * This class is responsible for mapping the Logger section of a node.
+ * It configures the logging parameters, such as the output file and specific logging flags.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 package jmt.gui.common.xml.mapper.sections;
 
 import jmt.engine.log.LoggerParameters;
@@ -8,8 +15,11 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.mapper.MappingContext;
+import jmt.gui.common.xml.serializer.WritingContext;
 
 public class LoggerSectionMapper extends AbstractSectionMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
@@ -20,36 +30,6 @@ public class LoggerSectionMapper extends AbstractSectionMapper {
             mapLoggerParameter(p, logParams, model);
         }
         model.setLoggingParameters(key, logParams);
-    }
-
-    @Override
-    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
-        LoggerParameters logParams = model.getLoggingParameters(key);
-        if (logParams == null) return;
-
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILENAME, "java.lang.String", logParams.name);
-
-        // temporary fix as in XMLWriter
-        logParams.path = MacroReplacer.replace(model.getLoggingGlbParameter("path"));
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILEPATH, "java.lang.String", logParams.path);
-
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_EXECTIMESTAMP, "java.lang.Boolean", logParams.boolExecTimestamp.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_LOGGERNAME, "java.lang.Boolean", logParams.boolLoggername.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESTAMP, "java.lang.Boolean", logParams.boolTimeStamp.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBID, "java.lang.Boolean", logParams.boolJobID.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBCLASS, "java.lang.Boolean", logParams.boolJobClass.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESAMECLS, "java.lang.Boolean", logParams.boolTimeSameClass.toString());
-        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMEANYCLS, "java.lang.Boolean", logParams.boolTimeAnyClass.toString());
-
-        addSimpleParameter(sec, "numClasses", "java.lang.Integer", String.valueOf(model.getClassKeys().size()));
-    }
-
-    private void addSimpleParameter(SectionDescriptor sec, String name, String classPath, String value) {
-        ParameterDescriptor p = new ParameterDescriptor();
-        p.setName(name);
-        p.setClassPath(classPath);
-        p.setValue(value);
-        sec.addParameter(p);
     }
 
     private void mapLoggerParameter(ParameterDescriptor p, LoggerParameters logParams, CommonModel model) {
@@ -76,5 +56,37 @@ public class LoggerSectionMapper extends AbstractSectionMapper {
         else if (XMLConstantNames.XML_LOG_B_JOBCLASS.equals(name)) logParams.boolJobClass = bVal;
         else if (XMLConstantNames.XML_LOG_B_TIMESAMECLS.equals(name)) logParams.boolTimeSameClass = bVal;
         else if (XMLConstantNames.XML_LOG_B_TIMEANYCLS.equals(name)) logParams.boolTimeAnyClass = bVal;
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
+        LoggerParameters logParams = model.getLoggingParameters(key);
+        if (logParams == null) return;
+
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILENAME, "java.lang.String", logParams.name);
+
+        // temporary fix as in XMLWriter
+        logParams.path = MacroReplacer.replace(model.getLoggingGlbParameter("path"));
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_FILEPATH, "java.lang.String", logParams.path);
+
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_EXECTIMESTAMP, "java.lang.Boolean", logParams.boolExecTimestamp.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_LOGGERNAME, "java.lang.Boolean", logParams.boolLoggername.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESTAMP, "java.lang.Boolean", logParams.boolTimeStamp.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBID, "java.lang.Boolean", logParams.boolJobID.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_JOBCLASS, "java.lang.Boolean", logParams.boolJobClass.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMESAMECLS, "java.lang.Boolean", logParams.boolTimeSameClass.toString());
+        addSimpleParameter(sec, XMLConstantNames.XML_LOG_B_TIMEANYCLS, "java.lang.Boolean", logParams.boolTimeAnyClass.toString());
+
+        addSimpleParameter(sec, "numClasses", "java.lang.Integer", String.valueOf(model.getClassKeys().size()));
+    }
+
+    private void addSimpleParameter(SectionDescriptor sec, String name, String classPath, String value) {
+        ParameterDescriptor p = new ParameterDescriptor();
+        p.setName(name);
+        p.setClassPath(classPath);
+        p.setValue(value);
+        sec.addParameter(p);
     }
 }

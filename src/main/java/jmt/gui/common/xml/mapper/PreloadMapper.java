@@ -1,6 +1,7 @@
 /**
- * This class is responsible for mapping the preload information from the {@link SimDescriptor} to the {@link CommonModel}.
- * It sets the initial number of jobs in each station for each class.
+ * This class is responsible for mapping the preload information from the {@link SimDescriptor} to the {@link CommonModel}
+ * and vice-versa. It sets the initial number of jobs in each station for each class, or extracts this information
+ * from the model to build the DTO.
  *
  * @author Borgna Daniele
  * @since 25-mar-2026
@@ -12,8 +13,13 @@ import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.ParameterDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
+import jmt.gui.common.xml.serializer.WritingContext;
+
+import java.util.Vector;
 
 public class PreloadMapper implements ModelElementMapper {
+
+    // --- READING PHASE (XML -> DTO -> Model) ---
 
     @Override
     public void mapDtoToCommonModel(SimDescriptor dto, MappingContext context) {
@@ -24,11 +30,6 @@ public class PreloadMapper implements ModelElementMapper {
         for (NodeDescriptor stationPopNode : dto.getPreloads()) {
             mapStationPreload(stationPopNode, context);
         }
-    }
-
-    @Override
-    public void mapCommonModelToDto(SimDescriptor dto, MappingContext context) {
-        // TODO: implement logic to map common model to dto
     }
 
     private void mapStationPreload(NodeDescriptor stationPopNode, MappingContext context) {
@@ -55,6 +56,61 @@ public class PreloadMapper implements ModelElementMapper {
                 Integer preloadCount = Integer.valueOf(popStr.trim());
                 model.setPreloadedJobs(stationKey, classKey, preloadCount);
             }
+        }
+    }
+
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+
+    @Override
+    public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
+        CommonModel model = context.model;
+        Vector<Object> preloadableStations = model.getStationKeysPreloadable();
+
+        if (preloadableStations == null || preloadableStations.isEmpty()) {
+            return;
+        }
+
+        for (Object stationKey : preloadableStations) {
+            mapModelPreloadsToDto(model, stationKey, dto);
+        }
+    }
+
+    private void mapModelPreloadsToDto(CommonModel model, Object stationKey, SimDescriptor dto) {
+        String stationName = model.getStationName(stationKey);
+        if (stationName == null) return;
+
+        NodeDescriptor stationPopNode = null;
+        Vector<Object> classKeys = model.getClassKeys();
+
+        if (classKeys != null) {
+            for (Object classKey : classKeys) {
+                Integer preloadCount = model.getPreloadedJobs(stationKey, classKey);
+
+                // Only write the preload section if there are actually preloaded jobs
+                if (preloadCount != null && preloadCount > 0) {
+
+                    // Lazy initialization of the NodeDescriptor (created only if at least one class has preloads)
+                    if (stationPopNode == null) {
+                        stationPopNode = new NodeDescriptor();
+                        stationPopNode.setName(stationName);
+                    }
+
+                    SectionDescriptor classPopSection = new SectionDescriptor();
+                    classPopSection.setClassName(model.getClassName(classKey));
+
+                    ParameterDescriptor popParam = new ParameterDescriptor();
+                    popParam.setClassPath("java.lang.Integer");
+                    popParam.setValue(preloadCount.toString());
+
+                    classPopSection.addParameter(popParam);
+                    stationPopNode.addSection(classPopSection);
+                }
+            }
+        }
+
+        // Add the station to the DTO preloads list only if it has at least one class preloaded
+        if (stationPopNode != null) {
+            dto.addPreload(stationPopNode);
         }
     }
 }
