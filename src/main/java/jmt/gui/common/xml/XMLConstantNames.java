@@ -368,6 +368,21 @@ public interface XMLConstantNames {
     String XML_A_PROBABILITY = "probability";
     String XML_MEASURE_NAME_SEPARATOR = "_";
 
+    String STR_EMPIRICAL = "Empirical";
+    String STR_PROBABILITIES = "Probabilities";
+    String STR_POWER_OF_K = "PowerOfK";
+    String STR_WEIGHTED_ROUND_ROBIN = "WeightedRoundRobin";
+    String STR_CLASS_SWITCH = "ClassSwitch";
+
+    String XML_E_LD_ROUTING_PARAM = "LoadDependentRoutingParameter";
+    String XML_A_FROM = "from";
+    String XML_A_K = "k";
+    String XML_A_WITH_MEMORY = "withMemory";
+    String XML_E_WEIGHT_ENTRY_ARRAY = "WeightEntryArray";
+    String XML_A_WEIGHT = "weight";
+    String XML_E_CS_ROUTING_PARAM_ARRAY = "ClassSwitchRoutingParameterArray";
+    String XML_E_CS_ROUTING_PARAM = "ClassSwitchRoutingParameter";
+
 
     final class Maps {
 
