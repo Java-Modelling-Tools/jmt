@@ -19,6 +19,35 @@ import java.util.Map;
 
 public abstract class AbstractSectionMapper implements ModelElementMapper {
 
+    // =========================================================================================
+    // --- TEMPORARY CONSTANTS (To be moved to XMLConstantNames) ---
+    // =========================================================================================
+    public static final String ZERO_SERVICE_TIME_STRATEGY = "ZeroServiceTimeStrategy";
+    public static final String DISABLED_SERVICE_TIME_STRATEGY = "DisabledServiceTimeStrategy";
+    public static final String LOAD_DEPENDENT_STRATEGY = "LoadDependentStrategy";
+    public static final String CP_LOAD_DEPENDENT_STRATEGY = "jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy";
+    public static final String LD_PARAMETER = "LDParameter";
+    public static final String CP_LD_PARAMETER = "jmt.engine.NetStrategies.ServiceStrategies.LDParameter";
+    public static final String PARAM_FROM = "from";
+    public static final String PARAM_MEAN = "mean";
+    public static final String PARAM_DISTR = "distr";
+    public static final String CP_DISTRIBUTION = "jmt.engine.random.Distribution";
+    public static final String CP_DISTRIBUTION_CONTAINER = "jmt.engine.random.DistributionContainer";
+    public static final String PARAM_DISTR_PAR = "distrPar";
+
+    public static final String PREFIX_ENABLING = "enabling";
+    public static final String PREFIX_INHIBITING = "inhibiting";
+    public static final String PREFIX_RESOURCE = "resource";
+    public static final String SUFFIX_CONDITION = "Condition";
+
+    public static final String CP_TRANSITION_MATRIX = "jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix";
+    public static final String CP_TRANSITION_VECTOR = "jmt.engine.NetStrategies.TransitionUtilities.TransitionVector";
+
+    public static final String STR_ZERO_STRATEGY = "ZeroStrategy";
+    public static final String STR_DISABLED_STRATEGY = "DisabledStrategy";
+    public static final String STR_LOAD_DEPENDENT = "LoadDependent";
+    // =========================================================================================
+
     public abstract void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx);
 
     public abstract void mapCommonModelToDto(SectionDescriptor section, CommonModel model, Object stationKey, NodeDescriptor node, String stationType, WritingContext context);
@@ -60,10 +89,10 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         }
 
         if (distrObj == null || distrObj instanceof ZeroStrategy) {
-            p.setName("ZeroServiceTimeStrategy");
+            p.setName(ZERO_SERVICE_TIME_STRATEGY);
             p.setClassPath(ZeroStrategy.getEngineClassPath());
         } else if (distrObj instanceof DisabledStrategy) {
-            p.setName("DisabledServiceTimeStrategy");
+            p.setName(DISABLED_SERVICE_TIME_STRATEGY);
             p.setClassPath(DisabledStrategy.getEngineClassPath());
         } else if (distrObj instanceof Distribution) {
             handleDistribution(p, (Distribution) distrObj, ctx);
@@ -75,7 +104,7 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
 
     private void handleDistribution(ParameterDescriptor p, Distribution dist, WritingContext ctx) {
         ParameterDescriptor distDesc = makeContainer(dist.getName(), dist.getClassPath());
-        ParameterDescriptor distParDesc = makeContainer("distrPar", dist.getParameterClassPath());
+        ParameterDescriptor distParDesc = makeContainer(PARAM_DISTR_PAR, dist.getParameterClassPath());
 
         for (int i = 0; i < dist.getNumberOfParameters(); i++) {
             Distribution.Parameter param = dist.getParameter(i);
@@ -88,24 +117,24 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
     }
 
     private void handleLDStrategy(ParameterDescriptor p, LDStrategy strategy, CommonModel model, WritingContext ctx) {
-        p.setName("LoadDependentStrategy");
-        p.setClassPath("jmt.engine.NetStrategies.ServiceStrategies.LoadDependentStrategy");
+        p.setName(LOAD_DEPENDENT_STRATEGY);
+        p.setClassPath(CP_LOAD_DEPENDENT_STRATEGY);
 
-        ParameterDescriptor ldArray = makeContainer("LDParameter", "jmt.engine.NetStrategies.ServiceStrategies.LDParameter");
+        ParameterDescriptor ldArray = makeContainer(LD_PARAMETER, CP_LD_PARAMETER);
         ldArray.setArray(true);
 
         for (Object rKey : strategy.getAllRanges()) {
-            ParameterDescriptor range = makeContainer("LDParameter", "jmt.engine.NetStrategies.ServiceStrategies.LDParameter");
-            range.addSubParameter(makeParam("from", XML_INTEGER_CLASS, String.valueOf(strategy.getRangeFrom(rKey))));
+            ParameterDescriptor range = makeContainer(LD_PARAMETER, CP_LD_PARAMETER);
+            range.addSubParameter(makeParam(PARAM_FROM, XML_INTEGER_CLASS, String.valueOf(strategy.getRangeFrom(rKey))));
 
             Distribution d = strategy.getRangeDistribution(rKey);
-            ParameterDescriptor dP = getDistributionParameter(d, model, null, "distr", "jmt.engine.random.Distribution", ctx);
+            ParameterDescriptor dP = getDistributionParameter(d, model, null, PARAM_DISTR, CP_DISTRIBUTION, ctx);
             if (dP != null && dP.getSubParameters().size() >= 2) {
                 range.addSubParameter(dP.getSubParameters().get(0));
                 range.addSubParameter(dP.getSubParameters().get(1));
             }
 
-            range.addSubParameter(makeParam("mean", "java.lang.Double", String.valueOf(strategy.getRangeDistributionMean(rKey))));
+            range.addSubParameter(makeParam(PARAM_MEAN, XML_DOUBLE_CLASS, String.valueOf(strategy.getRangeDistributionMean(rKey))));
             ldArray.addSubParameter(range);
         }
         p.addSubParameter(ldArray);
@@ -116,20 +145,12 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         Object val = param.getValue();
 
         if (val instanceof Distribution) {
-            p.setClassPath("jmt.engine.random.DistributionContainer");
-            ParameterDescriptor nested = getDistributionParameter(val, null, null, "distr", "jmt.engine.random.Distribution", ctx);
+            p.setClassPath(CP_DISTRIBUTION_CONTAINER);
+            ParameterDescriptor nested = getDistributionParameter(val, null, null, PARAM_DISTR, CP_DISTRIBUTION, ctx);
             p.addSubParameter(nested.getSubParameters().get(0));
             p.addSubParameter(nested.getSubParameters().get(1));
         } else if (val instanceof Object[][]) {
-            p.setArray(true);
-            p.setClassPath(param.getValueClass().getName());
-            for (Object[] row : (Object[][]) val) {
-                ParameterDescriptor rowP = makeContainer(param.getName(), param.getValueClass().getName());
-                for (Object cell : row) {
-                    rowP.addSubParameter(makeParam(param.getName(), param.getValueClass().getName(), cell != null ? cell.toString() : "0"));
-                }
-                p.addSubParameter(rowP);
-            }
+            createMatrixParameterDescriptor(p, param, (Object[][]) val);
         } else {
             p.setClassPath(param.getValueClass().getName());
             if (val != null) p.setValue(val.toString());
@@ -137,19 +158,31 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         return p;
     }
 
+    private void createMatrixParameterDescriptor(ParameterDescriptor p, Distribution.Parameter param, Object[][] matrix) {
+        p.setArray(true);
+        p.setClassPath(param.getValueClass().getName());
+        for (Object[] row : matrix) {
+            ParameterDescriptor rowP = makeContainer(param.getName(), param.getValueClass().getName());
+            for (Object cell : row) {
+                rowP.addSubParameter(makeParam(param.getName(), param.getValueClass().getName(), cell != null ? cell.toString() : VAL_ZERO));
+            }
+            p.addSubParameter(rowP);
+        }
+    }
+
     protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model) {
         mapTransitionConditions(key, sec, model, true);
     }
 
     protected void mapTransitionConditions(Object key, SectionDescriptor sec, CommonModel model, boolean includeResource) {
-        ParameterDescriptor enablingConditions = createConditionMatrix("enabling", "Condition", key, model, (s, m, i, from, cl) -> model.getEnablingCondition(s, i, from, cl));
+        ParameterDescriptor enablingConditions = createConditionMatrix(PREFIX_ENABLING, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -> model.getEnablingCondition(s, i, from, cl));
         if (enablingConditions != null) sec.addParameter(enablingConditions);
 
-        ParameterDescriptor inhibitingConditions = createConditionMatrix("inhibiting", "Condition", key, model, (s, m, i, from, cl) -> model.getInhibitingCondition(s, i, from, cl));
+        ParameterDescriptor inhibitingConditions = createConditionMatrix(PREFIX_INHIBITING, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -> model.getInhibitingCondition(s, i, from, cl));
         if (inhibitingConditions != null) sec.addParameter(inhibitingConditions);
 
         if (includeResource) {
-            ParameterDescriptor resourceConditions = createConditionMatrix("resource", "Condition", key, model, (s, m, i, from, cl) -> model.getResourceCondition(s, i, from, cl));
+            ParameterDescriptor resourceConditions = createConditionMatrix(PREFIX_RESOURCE, SUFFIX_CONDITION, key, model, (s, m, i, from, cl) -> model.getResourceCondition(s, i, from, cl));
             if (resourceConditions != null) sec.addParameter(resourceConditions);
         }
     }
@@ -165,21 +198,23 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         List<Object> stationKeys = backward ? model.getBackwardConnections(key) : model.getForwardConnections(key);
         if (stationKeys == null || stationKeys.isEmpty()) return null;
 
-        // Concatena baseName + suffix + "s" (es. "enablingConditions" o "firingOutcomes")
-        ParameterDescriptor matrix = makeContainer(baseName + suffix + "s", "jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix");
-        boolean hasNonZero = populateMatrixModes(matrix, baseName, suffix, modes, stationKeys, model.getClassKeys(), key, model, getter);
+        ParameterDescriptor matrix = makeContainer(baseName + suffix + "s", CP_TRANSITION_MATRIX);
+        boolean hasNonZero = populateMatrixModes(matrix, baseName, suffix, stationKeys, key, model, getter);
 
         return hasNonZero ? matrix : null;
     }
 
-    private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, int modes, List<Object> stationKeys, List<Object> classKeys, Object key, CommonModel model, ConditionGetter getter) {
+    // Ridotti parametri a 7 ricavando 'modes' e 'classKeys' direttamente dal 'model'
+    private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, List<Object> stationKeys, Object key, CommonModel model, ConditionGetter getter) {
         boolean hasNonZero = false;
+        int modes = model.getTransitionModeListSize(key);
+
         for (int i = 0; i < modes; i++) {
-            ParameterDescriptor condition = makeContainer(baseName + suffix, "jmt.engine.NetStrategies.TransitionUtilities.TransitionMatrix");
-            ParameterDescriptor vectors = makeContainer(baseName + "Vectors", "jmt.engine.NetStrategies.TransitionUtilities.TransitionVector");
+            ParameterDescriptor condition = makeContainer(baseName + suffix, CP_TRANSITION_MATRIX);
+            ParameterDescriptor vectors = makeContainer(baseName + "Vectors", CP_TRANSITION_VECTOR);
 
             for (Object stationKey : stationKeys) {
-                hasNonZero |= buildAndAddVector(vectors, baseName, stationKey, classKeys, key, model, i, getter);
+                hasNonZero |= buildAndAddVector(vectors, baseName, stationKey, key, model, i, getter);
             }
             condition.addSubParameter(vectors);
             matrix.addSubParameter(condition);
@@ -187,14 +222,15 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         return hasNonZero;
     }
 
-    private boolean buildAndAddVector(ParameterDescriptor vectors, String baseName, Object stationKey, List<Object> classKeys, Object key, CommonModel model, int modeIndex, ConditionGetter getter) {
+    // Ridotti parametri a 7 ricavando 'classKeys' direttamente dal 'model'
+    private boolean buildAndAddVector(ParameterDescriptor vectors, String baseName, Object stationKey, Object key, CommonModel model, int modeIndex, ConditionGetter getter) {
         boolean hasNonZero = false;
-        ParameterDescriptor vector = makeContainer(baseName + "Vector", "jmt.engine.NetStrategies.TransitionUtilities.TransitionVector");
+        ParameterDescriptor vector = makeContainer(baseName + "Vector", CP_TRANSITION_VECTOR);
         vector.addSubParameter(makeParam("stationName", XML_STRING_CLASS, model.getStationName(stationKey)));
 
         ParameterDescriptor entries = makeContainer(baseName + "Entries", XML_INTEGER_CLASS);
 
-        for (Object classKey : classKeys) {
+        for (Object classKey : model.getClassKeys()) {
             Integer val = getter.get(key, model, modeIndex, stationKey, classKey);
             if (val != null && val > 0) hasNonZero = true;
 
@@ -217,12 +253,12 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         if (p == null) return null;
         String cp = p.getClassPath();
 
-        if (cp != null && (cp.contains("ZeroStrategy") || ZeroStrategy.getEngineClassPath().equals(cp)))
+        if (cp != null && (cp.contains(STR_ZERO_STRATEGY) || ZeroStrategy.getEngineClassPath().equals(cp)))
             return new ZeroStrategy();
-        if (cp != null && (cp.contains("DisabledStrategy") || DisabledStrategy.getEngineClassPath().equals(cp)))
+        if (cp != null && (cp.contains(STR_DISABLED_STRATEGY) || DisabledStrategy.getEngineClassPath().equals(cp)))
             return new DisabledStrategy();
 
-        if (cp != null && (cp.contains("LoadDependent") || LDStrategy.getEngineClassPath().equals(cp))) {
+        if (cp != null && (cp.contains(STR_LOAD_DEPENDENT) || LDStrategy.getEngineClassPath().equals(cp))) {
             return parseLDStrategy(p, ctx);
         }
 
@@ -234,7 +270,9 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
     private LDStrategy parseLDStrategy(ParameterDescriptor p, MappingContext ctx) {
         LDStrategy strategy = new LDStrategy();
         ParameterDescriptor ldArray = getFirst(getSubParams(p));
-        if (ldArray != null) getSubParams(ldArray).forEach(range -> parseLDRange(range, strategy, ctx));
+        if (ldArray != null) {
+            getSubParams(ldArray).forEach(range -> parseLDRange(range, strategy, ctx));
+        }
         return strategy;
     }
 
@@ -281,7 +319,7 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
 
     private void parseDistributionParam(ParameterDescriptor p, Distribution dist, MappingContext ctx) {
         String name = p.getName();
-        if ("jmt.engine.random.DistributionContainer".equals(p.getClassPath())) {
+        if (CP_DISTRIBUTION_CONTAINER.equals(p.getClassPath())) {
             List<ParameterDescriptor> nested = getSubParams(p);
             if (!nested.isEmpty()) {
                 dist.getParameter(name).setValue(parseDistribution(getAt(nested, 0), getAt(nested, 1), ctx));
@@ -303,7 +341,7 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
             val[j] = new Object[entries.size()];
             for (int k = 0; k < entries.size(); k++) {
                 String valueStr = val(getAt(entries, k));
-                val[j][k] = dist.getParameter(name).parseValue(valueStr != null ? valueStr : "0");
+                val[j][k] = dist.getParameter(name).parseValue(valueStr != null ? valueStr : VAL_ZERO);
             }
         }
         dist.getParameter(name).setValue(val);
@@ -324,17 +362,23 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
             if (modeElements.isEmpty()) continue;
 
             for (ParameterDescriptor vector : getSubParams(modeElements.get(0))) {
-                List<ParameterDescriptor> vectorElements = getSubParams(vector);
-                if (vectorElements.size() < 2) continue;
-
-                String stationName = val(vectorElements.get(0));
-                getRefClassMap(vectorElements.get(1)).forEach((className, entryParam) -> {
-                    Integer vVal = valI(entryParam);
-                    if (stationName != null && vVal != null) {
-                        targetMap.put(new Object[]{key, modeIndex, stationName, ctx.classes.get(className)}, vVal);
-                    }
-                });
+                processVectorForConditionMap(key, modeIndex, vector, targetMap, ctx);
             }
         }
+    }
+
+    private void processVectorForConditionMap(Object key, int modeIndex, ParameterDescriptor vector, Map<Object[], Integer> targetMap, MappingContext ctx) {
+        List<ParameterDescriptor> vectorElements = getSubParams(vector);
+        if (vectorElements.size() < 2) return;
+
+        String stationName = val(vectorElements.get(0));
+        if (stationName == null) return;
+
+        getRefClassMap(vectorElements.get(1)).forEach((className, entryParam) -> {
+            Integer vVal = valI(entryParam);
+            if (vVal != null) {
+                targetMap.put(new Object[]{key, modeIndex, stationName, ctx.classes.get(className)}, vVal);
+            }
+        });
     }
 }
