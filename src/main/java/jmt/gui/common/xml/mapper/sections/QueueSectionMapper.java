@@ -18,74 +18,127 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
 public class QueueSectionMapper extends AbstractSectionMapper {
 
+    private static final String STRATEGIES_BASE = "jmt.engine.NetStrategies.";
+    private static final String QUEUE_GET_SUFFIX = "QueueGetStrategies.";
+    private static final String QUEUE_PUT_SUFFIX = "QueuePutStrategies.";
 
+    // =========================================================================================
+    // --- READING PHASE (XML -> DTO -> Model) ---
+    // =========================================================================================
 
     @Override
     public void mapDtoToCommonModel(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, MappingContext ctx) {
+        mapQueueSize(sec, model, key);
+
+        AtomicBoolean isPreemptive = new AtomicBoolean(false);
+        AtomicBoolean isPriority = new AtomicBoolean(false);
+
+        boolean hasPutStrategy = mapPutStrategies(sec, model, key, ctx, isPreemptive, isPriority);
+        boolean isPolling = mapGetStrategies(sec, model, key);
+
+        if (!isPolling && hasPutStrategy) {
+            setGlobalQueueStrategy(model, key, isPreemptive.get(), isPriority.get());
+        }
+
+        mapDropRulesAndRetrials(sec, model, key, ctx);
+        mapImpatience(sec, model, key, ctx);
+
+        extractTransitionConditions(key, getParam(sec, "enablingConditions"), getParam(sec, "inhibitingConditions"), getParam(sec, "resourceConditions"), ctx);
+    }
+
+    private void mapQueueSize(SectionDescriptor sec, CommonModel model, Object key) {
         ParameterDescriptor size = getParam(sec, XMLConstantNames.PARAM_SIZE);
         if (size != null) {
             Integer sVal = valI(size);
             if (sVal != null) model.setStationQueueCapacity(key, sVal);
         }
+    }
 
-        AtomicBoolean isPreemptive = new AtomicBoolean(false);
-        AtomicBoolean isPriority = new AtomicBoolean(false);
-        // Fallback name for queue strategy
+    private boolean mapPutStrategies(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx, AtomicBoolean isPreemptive, AtomicBoolean isPriority) {
         ParameterDescriptor putStrategy = getParam(sec, XMLConstantNames.PARAM_QUEUE_PUT_STRATEGY);
         if (putStrategy == null) putStrategy = getParam(sec, "NetStrategy");
+        if (putStrategy == null) return false;
 
-        if (putStrategy != null) {
-            getRefClassMap(putStrategy).forEach((className, subP) -> {
-                String cp = subP.getClassPath();
-                if (cp != null) {
-                    String strategy = cp.substring(cp.lastIndexOf(".") + 1);
-                    Object classKey = ctx.classes.get(className);
-                    if (strategy.contains(XMLConstantNames.STRAT_TAIL)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_FCFS);
-                    else if (strategy.contains(XMLConstantNames.STRAT_HEAD)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_LCFS);
-                    else if (strategy.contains(XMLConstantNames.STRAT_RAND)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_RAND);
-                    else if (strategy.contains(XMLConstantNames.STRAT_SJF)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_SJF);
-                    else if (strategy.contains(XMLConstantNames.STRAT_LJF)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_LJF);
-                    else if (strategy.contains(XMLConstantNames.STRAT_SEPT)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_SEPT);
-                    else if (strategy.contains(XMLConstantNames.STRAT_LEPT)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_LEPT);
-                    else if (strategy.contains(XMLConstantNames.STRAT_FCFSPR)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_FCFS_PR);
-                    else if (strategy.contains(XMLConstantNames.STRAT_LCFSPR)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_LCFS_PR);
-                    else if (strategy.contains(XMLConstantNames.STRAT_SRPT)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_SRPT);
-                    else if (strategy.contains(XMLConstantNames.STRAT_EDD)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_EDD);
-                    else if (strategy.contains(XMLConstantNames.STRAT_EDF)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_EDF);
-                    else if (strategy.contains(XMLConstantNames.STRAT_TBS)) model.setQueueStrategy(key, classKey, CommonConstants.QUEUE_STRATEGY_TBS);
+        getRefClassMap(putStrategy).forEach((className, subP) -> {
+            String cp = subP.getClassPath();
+            if (cp != null) {
+                String strategy = cp.substring(cp.lastIndexOf(".") + 1);
+                Object classKey = ctx.classes.get(className);
 
-                    if (strategy.contains("PR") || strategy.contains("SRPT") || strategy.contains("EDF") || strategy.contains("TBS")) isPreemptive.set(true);
-                    if (strategy.contains("Priority")) isPriority.set(true);
+                model.setQueueStrategy(key, classKey, resolveQueueStrategyConstant(strategy));
+
+                if (strategy.contains("PR") || strategy.contains("SRPT") || strategy.contains("EDF") || strategy.contains("TBS")) {
+                    isPreemptive.set(true);
                 }
-            });
-        }
-
-        boolean isPolling = false;
-        ParameterDescriptor fcfs = getParam(sec, XMLConstantNames.PARAM_FCFS_STRATEGY);
-        if (fcfs != null) {
-            String cp = fcfs.getClassPath();
-            if (cp != null && cp.contains("Polling")) {
-                isPolling = true;
-                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
-                if (cp.contains("Limited")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
-                else if (cp.contains("Gated")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
-                else if (cp.contains("Exhaustive")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
+                if (strategy.contains("Priority")) {
+                    isPriority.set(true);
+                }
             }
-            getSubParams(fcfs).stream().filter(p -> "pollingKValue".equals(p.getName())).findFirst().ifPresent(p -> {
-                Integer kVal = valI(p);
-                if (kVal != null) model.setStationPollingServerKValue(key, kVal);
-            });
+        });
+        return true;
+    }
+
+    private String resolveQueueStrategyConstant(String strategy) {
+        if (strategy.contains(XMLConstantNames.STRAT_TAIL)) return CommonConstants.QUEUE_STRATEGY_FCFS;
+        if (strategy.contains(XMLConstantNames.STRAT_HEAD)) return CommonConstants.QUEUE_STRATEGY_LCFS;
+        if (strategy.contains(XMLConstantNames.STRAT_RAND)) return CommonConstants.QUEUE_STRATEGY_RAND;
+        if (strategy.contains(XMLConstantNames.STRAT_SJF)) return CommonConstants.QUEUE_STRATEGY_SJF;
+        if (strategy.contains(XMLConstantNames.STRAT_LJF)) return CommonConstants.QUEUE_STRATEGY_LJF;
+        if (strategy.contains(XMLConstantNames.STRAT_SEPT)) return CommonConstants.QUEUE_STRATEGY_SEPT;
+        if (strategy.contains(XMLConstantNames.STRAT_LEPT)) return CommonConstants.QUEUE_STRATEGY_LEPT;
+        if (strategy.contains(XMLConstantNames.STRAT_FCFSPR)) return CommonConstants.QUEUE_STRATEGY_FCFS_PR;
+        if (strategy.contains(XMLConstantNames.STRAT_LCFSPR)) return CommonConstants.QUEUE_STRATEGY_LCFS_PR;
+        if (strategy.contains(XMLConstantNames.STRAT_SRPT)) return CommonConstants.QUEUE_STRATEGY_SRPT;
+        if (strategy.contains(XMLConstantNames.STRAT_EDD)) return CommonConstants.QUEUE_STRATEGY_EDD;
+        if (strategy.contains(XMLConstantNames.STRAT_EDF)) return CommonConstants.QUEUE_STRATEGY_EDF;
+        if (strategy.contains(XMLConstantNames.STRAT_TBS)) return CommonConstants.QUEUE_STRATEGY_TBS;
+        return CommonConstants.QUEUE_STRATEGY_FCFS;
+    }
+
+    private boolean mapGetStrategies(SectionDescriptor sec, CommonModel model, Object key) {
+        ParameterDescriptor fcfs = getParam(sec, XMLConstantNames.PARAM_FCFS_STRATEGY);
+        if (fcfs == null) return false;
+
+        getSubParams(fcfs).stream()
+                .filter(p -> "pollingKValue".equals(p.getName()))
+                .findFirst()
+                .ifPresent(p -> {
+                    Integer kVal = valI(p);
+                    if (kVal != null) model.setStationPollingServerKValue(key, kVal);
+                });
+
+        String cp = fcfs.getClassPath();
+        if (cp != null && cp.contains("Polling")) {
+            model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
+            if (cp.contains("Limited")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED);
+            else if (cp.contains("Gated")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
+            else if (cp.contains("Exhaustive")) model.setStationPollingServerType(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING_EXHAUSTIVE);
+            return true;
         }
 
-        if (!isPolling && putStrategy != null) {
-            model.setStationQueueStrategy(key, isPreemptive.get() ? (isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE) : (isPriority.get() ? CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY : CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE));
-        }
+        return false;
+    }
 
+    private void setGlobalQueueStrategy(CommonModel model, Object key, boolean isPreemptive, boolean isPriority) {
+        String queueStrategy;
+        if (isPreemptive && isPriority) {
+            queueStrategy = CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY;
+        } else if (isPreemptive) {
+            queueStrategy = CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE;
+        } else if (isPriority) {
+            queueStrategy = CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY;
+        } else {
+            queueStrategy = CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
+        }
+        model.setStationQueueStrategy(key, queueStrategy);
+    }
+
+    private void mapDropRulesAndRetrials(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
         ParameterDescriptor drops = getParam(sec, XMLConstantNames.PARAM_DROP_STRATEGIES);
         ParameterDescriptor retrials = getParam(sec, XMLConstantNames.PARAM_RETRIAL_DISTRIBUTIONS);
+
         if (drops != null) {
             Map<String, ParameterDescriptor> retrialMap = getRefClassMap(retrials);
             getRefClassMap(drops).forEach((className, subP) -> {
@@ -99,43 +152,69 @@ public class QueueSectionMapper extends AbstractSectionMapper {
                 }
             });
         }
-
-        ParameterDescriptor impatience = getParam(sec, XMLConstantNames.PARAM_IMPATIENCE);
-        if (impatience != null) {
-            getRefClassMap(impatience).forEach((cName, p) -> {
-                Object classKey = ctx.classes.get(cName);
-                String impName = p.getName();
-                ImpatienceType type = ImpatienceType.NONE;
-                if (impName != null && impName.contains("Reneging")) type = ImpatienceType.RENEGING;
-                else if (impName != null && impName.contains("Balking")) type = ImpatienceType.BALKING;
-
-                if (type == ImpatienceType.RENEGING) {
-                    model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
-                } else if (type == ImpatienceType.BALKING) {
-                    List<ParameterDescriptor> subs = getSubParams(p);
-                    BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
-                    String bVal = val(getAt(subs, 3)); // adjusted index if needed
-                    if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
-                    model.setImpatienceParameter(key, classKey, bp);
-                } else {
-                    model.setImpatienceParameter(key, classKey, null);
-                }
-                model.setImpatienceType(key, classKey, type);
-            });
-        }
-
-        extractTransitionConditions(key, getParam(sec, "enablingConditions"), getParam(sec, "inhibitingConditions"), getParam(sec, "resourceConditions"), ctx);
     }
+
+    private void mapImpatience(SectionDescriptor sec, CommonModel model, Object key, MappingContext ctx) {
+        ParameterDescriptor impatience = getParam(sec, XMLConstantNames.PARAM_IMPATIENCE);
+        if (impatience == null) return;
+
+        getRefClassMap(impatience).forEach((cName, p) -> {
+            Object classKey = ctx.classes.get(cName);
+            String impName = p.getName();
+            ImpatienceType type;
+
+            if (impName != null && impName.contains("Reneging")) {
+                type = ImpatienceType.RENEGING;
+            } else if (impName != null && impName.contains("Balking")) {
+                type = ImpatienceType.BALKING;
+            } else {
+                type = ImpatienceType.NONE;
+            }
+
+            if (type == ImpatienceType.RENEGING) {
+                model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
+            } else if (type == ImpatienceType.BALKING) {
+                List<ParameterDescriptor> subs = getSubParams(p);
+                BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
+                String bVal = val(getAt(subs, 3));
+                if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
+                model.setImpatienceParameter(key, classKey, bp);
+            } else {
+                model.setImpatienceParameter(key, classKey, null);
+            }
+            model.setImpatienceType(key, classKey, type);
+        });
+    }
+
+    // =========================================================================================
+    // --- WRITING PHASE (Model -> DTO -> XML) ---
+    // =========================================================================================
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
-        Integer capacity = model.getStationQueueCapacity(key);
-        sec.addParameter(makeParam(XMLConstantNames.PARAM_SIZE, "java.lang.Integer", capacity == null ? "-1" : capacity.toString()));
+        writeQueueSize(sec, model, key);
+        writeDropRulesAndRetrials(sec, model, key, context);
+        writeGetStrategy(sec, model, key);
+        writePutStrategies(sec, model, key);
+        writeImpatience(sec, model, key, context);
 
+        if (CommonConstants.STATION_TYPE_SERVER.equals(stationType) || CommonConstants.STATION_TYPE_DELAY.equals(stationType)) {
+            mapTransitionConditions(key, sec, model, context);
+        }
+    }
+
+    private void writeQueueSize(SectionDescriptor sec, CommonModel model, Object key) {
+        Integer capacity = model.getStationQueueCapacity(key);
+        String capStr = capacity == null ? "-1" : capacity.toString();
+        sec.addParameter(makeParam(XMLConstantNames.PARAM_SIZE, "java.lang.Integer", capStr));
+    }
+
+    private void writeDropRulesAndRetrials(SectionDescriptor sec, CommonModel model, Object key, WritingContext context) {
         List<Object> classes = model.getClassKeys();
 
         ParameterDescriptor dropStrategies = makeContainer(XMLConstantNames.PARAM_DROP_STRATEGIES, String.class.getName());
-        dropStrategies.setArray(true); // FIX
+        dropStrategies.setArray(true);
+
         ParameterDescriptor retrialDistributions = makeContainer(XMLConstantNames.PARAM_RETRIAL_DISTRIBUTIONS, STRATEGIES_BASE + "ServiceStrategy");
         retrialDistributions.setArray(true);
 
@@ -143,17 +222,24 @@ public class QueueSectionMapper extends AbstractSectionMapper {
         for (Object classKey : classes) {
             String strategy = model.getDropRule(key, classKey);
             dropStrategies.addSubParameter(makeRefParam("dropStrategy", String.class.getName(), model.getClassName(classKey), Maps.DROP_RULES_REVERSE.get(strategy)));
+
             if (CommonConstants.FINITE_RETRIAL.equals(strategy)) {
                 Object dist = model.getRetrialDistribution(key, classKey);
                 retrialDistributions.addSubParameter(getDistributionParameter(dist, model, classKey, "retrialDistribution", STRATEGIES_BASE + "ServiceStrategies.ServiceTimeStrategy", context));
                 isRetrialEnabled = true;
             }
         }
-        sec.addParameter(dropStrategies);
-        if (isRetrialEnabled) sec.addParameter(retrialDistributions);
 
+        sec.addParameter(dropStrategies);
+        if (isRetrialEnabled) {
+            sec.addParameter(retrialDistributions);
+        }
+    }
+
+    private void writeGetStrategy(SectionDescriptor sec, CommonModel model, Object key) {
         String stationQueueStrategy = model.getStationQueueStrategy(key);
         String getStrategy = "FCFSstrategy";
+
         if (CommonConstants.STATION_QUEUE_STRATEGY_POLLING.equals(stationQueueStrategy)) {
             String pollingType = model.getStationPollingServerType(key);
             if (CommonConstants.STATION_QUEUE_STRATEGY_POLLING_LIMITED.equals(pollingType)) getStrategy = "LimitedPollingGetStrategy";
@@ -166,26 +252,31 @@ public class QueueSectionMapper extends AbstractSectionMapper {
             fcfs.addSubParameter(makeParam("pollingKValue", "java.lang.Integer", model.getStationPollingServerKValue(key).toString()));
         }
         sec.addParameter(fcfs);
+    }
 
-        ParameterDescriptor putStrategies = makeContainer("NetStrategy", STRATEGIES_BASE + "QueuePutStrategy"); // FIX NAME LEGACY
-        putStrategies.setArray(true); // FIX
+    private void writePutStrategies(SectionDescriptor sec, CommonModel model, Object key) {
+        ParameterDescriptor putStrategies = makeContainer("NetStrategy", STRATEGIES_BASE + "QueuePutStrategy");
+        putStrategies.setArray(true);
 
+        String stationQueueStrategy = model.getStationQueueStrategy(key);
         boolean isPriority = CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY.equals(stationQueueStrategy) || CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY.equals(stationQueueStrategy);
         boolean isPS = CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER.equals(stationQueueStrategy) || CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY.equals(stationQueueStrategy);
         Map<String, String> strategyMapping = isPriority ? Maps.PRIORITY_QUEUE_PUT_MAPPING : Maps.QUEUE_PUT_MAPPING;
 
-        for (Object classKey : classes) {
+        for (Object classKey : model.getClassKeys()) {
             String strategy = isPS ? CommonConstants.QUEUE_STRATEGY_FCFS : model.getQueueStrategy(key, classKey);
             String strategyName = strategyMapping.get(strategy);
             putStrategies.addSubParameter(makeRefParam(strategyName, STRATEGIES_BASE + QUEUE_PUT_SUFFIX + strategyName, model.getClassName(classKey), null));
         }
         sec.addParameter(putStrategies);
+    }
 
+    private void writeImpatience(SectionDescriptor sec, CommonModel model, Object key, WritingContext context) {
         ParameterDescriptor impatience = makeContainer(XMLConstantNames.PARAM_IMPATIENCE, ImpatienceType.class.getPackage().getName() + ".Impatience");
-        impatience.setArray(true); // FIX
+        impatience.setArray(true);
 
         boolean hasImpatience = false;
-        for (Object classKey : classes) {
+        for (Object classKey : model.getClassKeys()) {
             ImpatienceType type = model.getImpatienceType(key, classKey);
             if (type == ImpatienceType.RENEGING) {
                 RenegingParameter rp = (RenegingParameter) model.getImpatienceParameter(key, classKey);
@@ -201,10 +292,9 @@ public class QueueSectionMapper extends AbstractSectionMapper {
                 hasImpatience = true;
             }
         }
-        if (hasImpatience) sec.addParameter(impatience);
 
-        if (CommonConstants.STATION_TYPE_SERVER.equals(stationType) || CommonConstants.STATION_TYPE_DELAY.equals(stationType)) {
-            mapTransitionConditions(key, sec, model, context);
+        if (hasImpatience) {
+            sec.addParameter(impatience);
         }
     }
 }
