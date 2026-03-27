@@ -27,6 +27,6 @@ public class EnablingSectionMapper extends AbstractSectionMapper {
 
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
-        mapTransitionConditions(key, sec, model, context, false);
+        mapTransitionConditions(key, sec, model,  false);
     }
 }

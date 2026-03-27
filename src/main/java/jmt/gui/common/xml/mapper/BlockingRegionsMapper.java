@@ -14,7 +14,10 @@ import jmt.gui.common.xml.dto.BlockingRegionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class BlockingRegionsMapper implements ModelElementMapper {
 
@@ -203,7 +206,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
     }
 
     private void extractClassSpecificDataToDto(CommonModel model, Object regionKey, BlockingRegionDescriptor regionDto) {
-        Vector<Object> classKeys = model.getClassKeys();
+        List<Object> classKeys = model.getClassKeys();
         if (classKeys == null) return;
 
         for (Object classKey : classKeys) {

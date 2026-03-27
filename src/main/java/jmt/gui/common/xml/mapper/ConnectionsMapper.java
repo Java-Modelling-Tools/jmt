@@ -15,7 +15,7 @@ import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.ArrayList;
 import java.util.List;
-;
+
 
 public class ConnectionsMapper implements ModelElementMapper {
 

@@ -15,7 +15,7 @@ import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-;import java.util.List;
+import java.util.List;
 
 public class PreloadMapper implements ModelElementMapper {
 

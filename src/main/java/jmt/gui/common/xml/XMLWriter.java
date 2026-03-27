@@ -67,9 +67,7 @@ public class XMLWriter implements XMLConstantNames {
         try {
             Transformer transformer = createSecureTransformer();
             transformer.transform(new DOMSource(doc), new StreamResult(new File(fileName)));
-        } catch (TransformerConfigurationException | TransformerFactoryConfigurationError e) {
-            e.printStackTrace();
-        } catch (TransformerException e) {
+        } catch (TransformerFactoryConfigurationError | TransformerException e) {
             e.printStackTrace();
         }
     }

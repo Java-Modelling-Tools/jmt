@@ -70,8 +70,8 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
         // numberOfVisits (always 1 per class, matches legacy writer)
         sec.addParameter(makePerClassContainer("numberOfVisits", Integer.class.getName(),
-                classes, model, (c) -> makeRefParam("numberOfVisits", Integer.class.getName(),
-                        model.getClassName(c), "1")));
+                classes, c -> makeRefParam("numberOfVisits", Integer.class.getName(),
+                        model.getClassName(c), VAL_ONE)));
 
         // ServiceStrategy
         sec.addParameter(buildServiceStrategy(model, key, classes, context));
@@ -126,16 +126,16 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             for (ServerType st : serverTypes) {
                 for (Object classKey : classes) {
                     Object dist = model.getServiceTimeDistribution(key, classKey, st.getServerKey());
-                    container.addSubParameter(getDistributionParameter(dist, model, null, "ServiceTimeStrategy",
-                            CP_SERVICE + "ServiceTimeStrategy", ctx));
+                    container.addSubParameter(getDistributionParameter(dist, model, null, PARAM_SERVICE_TIME_STRATEGY,
+                            CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx));
                 }
             }
         } else {
             // Homogeneous: one entry per class with refClass
             for (Object classKey : classes) {
                 Object dist = model.getServiceTimeDistribution(key, classKey);
-                container.addSubParameter(getDistributionParameter(dist, model, classKey, "ServiceTimeStrategy",
-                        CP_SERVICE + "ServiceTimeStrategy", ctx));
+                container.addSubParameter(getDistributionParameter(dist, model, classKey, PARAM_SERVICE_TIME_STRATEGY,
+                        CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx));
             }
         }
         return container;
@@ -151,7 +151,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
         // PSStrategy
         Map<String, String> psMap = priority ? Maps.PRIORITY_PS_STRATEGIES_MAPPING : Maps.PS_STRATEGIES_MAPPING;
-        ParameterDescriptor psStrategies = makeContainer("PSStrategy", CP_STRATEGIES + "PSStrategy");
+        ParameterDescriptor psStrategies = makeContainer("PSStrategy", STRATEGIES_BASE + "PSStrategy");
         psStrategies.setArray(true);
         for (Object classKey : classes) {
             String stratName = psMap.get(model.getQueueStrategy(key, classKey));
@@ -189,11 +189,11 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         }
 
         // Non-preemptive: switchover (setup) times
-        if (CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE.equals(queueStrategy)
-                || CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY.equals(queueStrategy)) {
-            if (Boolean.TRUE.equals(model.getSwitchoverTimesEnabled(key))) {
-                adv.addSubParameter(buildSwitchoverStrategies(model, key, classes, ctx));
-            }
+        if ((CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE.equals(queueStrategy)
+                || CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY.equals(queueStrategy))
+                && Boolean.TRUE.equals(model.getSwitchoverTimesEnabled(key))) {
+
+            adv.addSubParameter(buildSwitchoverStrategies(model, key, classes, ctx));
         }
 
         // DelayOff + Setup times
@@ -239,7 +239,9 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         return container;
     }
 
-    /** Switchover (from-class × to-class) for non-preemptive server. */
+    /**
+     * Switchover (from-class × to-class) for non-preemptive server.
+     */
     private ParameterDescriptor buildSwitchoverStrategies(CommonModel model, Object key,
                                                           List<Object> classes, WritingContext ctx) {
         ParameterDescriptor container = makeContainer(CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES,
@@ -252,15 +254,17 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             inner.setArray(true);
             for (Object toClass : classes) {
                 Object dist = model.getSwitchoverTimeDistribution(key, fromClass, toClass);
-                inner.addSubParameter(getDistributionParameter(dist, model, toClass, "ServiceTimeStrategy",
-                        CP_SERVICE + "ServiceTimeStrategy", ctx));
+                inner.addSubParameter(getDistributionParameter(dist, model, toClass, PARAM_SERVICE_TIME_STRATEGY,
+                        CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx));
             }
             container.addSubParameter(inner);
         }
         return container;
     }
 
-    /** DelayOff strategies: one entry per class with refClass. */
+    /**
+     * DelayOff strategies: one entry per class with refClass.
+     */
     private ParameterDescriptor buildDelayOffStrategies(CommonModel model, Object key,
                                                         List<Object> classes, WritingContext ctx) {
         ParameterDescriptor container = makeContainer(CommonConstants.SERVER_FEATURE_DELAY_OFF_STRATEGIES,
@@ -269,13 +273,15 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         for (Object classKey : classes) {
             Object dist = model.getDelayOffTimeDistribution(key, classKey);
             ParameterDescriptor entry = getDistributionParameter(dist, model, classKey, "delayOffTime",
-                    CP_SERVICE + "ServiceTimeStrategy", ctx);
+                    CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx);
             container.addSubParameter(entry);
         }
         return container;
     }
 
-    /** Setup strategies: one entry per class with refClass. */
+    /**
+     * Setup strategies: one entry per class with refClass.
+     */
     private ParameterDescriptor buildSetupStrategies(CommonModel model, Object key,
                                                      List<Object> classes, WritingContext ctx) {
         ParameterDescriptor container = makeContainer(CommonConstants.SERVER_FEATURE_SETUP_STRATEGIES,
@@ -284,20 +290,22 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         for (Object classKey : classes) {
             Object dist = model.getSetupTimeDistribution(key, classKey);
             ParameterDescriptor entry = getDistributionParameter(dist, model, classKey, "setUpTime",
-                    CP_SERVICE + "ServiceTimeStrategy", ctx);
+                    CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx);
             container.addSubParameter(entry);
         }
         return container;
     }
 
-    /** Polling switchover: one distribution per class. */
+    /**
+     * Polling switchover: one distribution per class.
+     */
     private ParameterDescriptor buildPollingSwitchoverStrategies(CommonModel model, Object key,
                                                                  List<Object> classes, WritingContext ctx) {
         ParameterDescriptor container = makeContainer("SwitchoverStrategy", CP_SERVICE_STRAT);
         for (Object classKey : classes) {
             Object dist = model.getPollingSwitchoverDistribution(key, classKey);
-            container.addSubParameter(getDistributionParameter(dist, model, classKey, "ServiceTimeStrategy",
-                    CP_SERVICE + "ServiceTimeStrategy", ctx));
+            container.addSubParameter(getDistributionParameter(dist, model, classKey, PARAM_SERVICE_TIME_STRATEGY,
+                    CP_SERVICE + PARAM_SERVICE_TIME_STRATEGY, ctx));
         }
         return container;
     }
@@ -315,14 +323,16 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         return container;
     }
 
-    /** Server type names, counts, and per-class compatibility arrays. */
+    /**
+     * Server type names, counts, and per-class compatibility arrays.
+     */
     private void buildServerTypes(ParameterDescriptor adv, CommonModel model, Object key, List<Object> classes) {
         int numTypes = model.getNumberOfDifferentServerTypes(key);
         int count = Math.max(1, numTypes);
         String stationName = model.getStationName(key);
 
-        ParameterDescriptor serverNames        = makeContainer(CommonConstants.SERVER_FEATURE_SERVER_NAMES, String.class.getName());
-        ParameterDescriptor serversPerType     = makeContainer(CommonConstants.SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, Integer.class.getName());
+        ParameterDescriptor serverNames = makeContainer(CommonConstants.SERVER_FEATURE_SERVER_NAMES, String.class.getName());
+        ParameterDescriptor serversPerType = makeContainer(CommonConstants.SERVER_FEATURE_SERVERS_PER_SERVER_TYPE, Integer.class.getName());
         ParameterDescriptor serverCompatibilities = makeContainer(CommonConstants.SERVER_FEATURE_SERVER_COMPATIBILITIES, Object.class.getName());
         serverNames.setArray(true);
         serversPerType.setArray(true);
@@ -336,13 +346,13 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             if (numTypes > 0) {
                 ServerType st = model.getInfoForServerType(key, i);
                 name = stationName + " - " + st.getName();
-                num  = st.getNumOfServers();
+                num = st.getNumOfServers();
                 for (Object classKey : classes) {
                     compat.add(st.isCompatible(classKey));
                 }
             } else {
                 name = stationName + " - Server Type 1";
-                num  = 1;
+                num = 1;
                 for (Object ignored : classes) compat.add(Boolean.TRUE);
             }
 
@@ -366,7 +376,9 @@ public class ServerSectionMapper extends AbstractSectionMapper {
                 String.class.getName(), model.getStationSchedulingPolicy(key)));
     }
 
-    /** Vacation strategy parameter, matching VacationStrategyWriter logic. */
+    /**
+     * Vacation strategy parameter, matching VacationStrategyWriter logic.
+     */
     private ParameterDescriptor buildVacationStrategy(CommonModel model, Object key, WritingContext ctx) {
         String vacationPolicy = model.getStationVacationPolicy(key);
         VacationParameters vp = model.getStationVacationParameters(key);
@@ -406,7 +418,9 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         return container;
     }
 
-    /** Appends the distribution and distrPar sub-parameters of a vacation distribution. */
+    /**
+     * Appends the distribution and distrPar sub-parameters of a vacation distribution.
+     */
     private void addVacationDistribution(ParameterDescriptor container, VacationParameters vp, WritingContext ctx) {
         ParameterDescriptor distParam = getDistributionParameter(
                 vp.getVacationTimeDistribution(), null, null,
@@ -421,14 +435,16 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     // Factory helpers (supplement AbstractSectionMapper)
     // -----------------------------------------------------------------------
 
-    /** Creates a container param whose sub-parameters are built per-class. */
+    /**
+     * Creates a container param whose sub-parameters are built per-class.
+     */
     @FunctionalInterface
     private interface PerClassParamFactory {
         ParameterDescriptor build(Object classKey);
     }
 
     private ParameterDescriptor makePerClassContainer(String name, String classPath,
-                                                      List<Object> classes, CommonModel model,
+                                                      List<Object> classes,
                                                       PerClassParamFactory factory) {
         ParameterDescriptor container = makeContainer(name, classPath);
         for (Object classKey : classes) {
@@ -528,19 +544,27 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapMaxJobs(ParameterDescriptor p, Object key, CommonModel model) {
-        Integer v = valI(p); if (v != null) model.setStationNumberOfServers(key, v);
+        Integer v = valI(p);
+        if (v != null) model.setStationNumberOfServers(key, v);
     }
 
     private void mapMaxRunning(ParameterDescriptor p, Object key, CommonModel model) {
-        Integer v = valI(p); if (v != null) model.setStationMaxRunningJobs(key, v);
+        Integer v = valI(p);
+        if (v != null) model.setStationMaxRunningJobs(key, v);
     }
 
     private void mapServerNames(ParameterDescriptor p, List<String> serverNames) {
-        getSubParams(p).forEach(sP -> { String s = val(sP); if (s != null) serverNames.add(s); });
+        getSubParams(p).forEach(sP -> {
+            String s = val(sP);
+            if (s != null) serverNames.add(s);
+        });
     }
 
     private void mapServersPerType(ParameterDescriptor p, List<Integer> serversPerType) {
-        getSubParams(p).forEach(sP -> { Integer sv = valI(sP); if (sv != null) serversPerType.add(sv); });
+        getSubParams(p).forEach(sP -> {
+            Integer sv = valI(sP);
+            if (sv != null) serversPerType.add(sv);
+        });
     }
 
     private void mapServiceWeights(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
@@ -603,10 +627,14 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     private void mapPsStrategy(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         getRefClassMap(p).forEach((c, sP) -> {
             String strat = sP.getClassPath().substring(sP.getClassPath().lastIndexOf(".") + 1);
-            if (strat.contains(XMLConstantNames.STRAT_EPS))  model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_PS);
-            else if (strat.contains(XMLConstantNames.STRAT_GPS))  model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_GPS);
-            else if (strat.contains(XMLConstantNames.STRAT_DPS))  model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_DPS);
-            else if (strat.contains(XMLConstantNames.STRAT_QBPS)) model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_QBPS);
+            if (strat.contains(XMLConstantNames.STRAT_EPS))
+                model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_PS);
+            else if (strat.contains(XMLConstantNames.STRAT_GPS))
+                model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_GPS);
+            else if (strat.contains(XMLConstantNames.STRAT_DPS))
+                model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_DPS);
+            else if (strat.contains(XMLConstantNames.STRAT_QBPS))
+                model.setQueueStrategy(key, ctx.classes.get(c), CommonConstants.QUEUE_STRATEGY_QBPS);
         });
     }
 
@@ -617,8 +645,10 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
         if (cp != null && cp.endsWith(XMLConstantNames.STRAT_VACATION_IDLE)) {
             String v = val(getAt(sps, 0));
-            if (XMLConstantNames.VAL_ZERO.equals(v)) model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_SINGLE);
-            else if (XMLConstantNames.VAL_ONE.equals(v)) model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_MULTIPLE);
+            if (XMLConstantNames.VAL_ZERO.equals(v))
+                model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_SINGLE);
+            else if (XMLConstantNames.VAL_ONE.equals(v))
+                model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_MULTIPLE);
             vp.setVacationTimeDistribution(parseDistribution(getAt(sps, 1), getAt(sps, 2), ctx));
         } else if (cp != null && cp.endsWith(XMLConstantNames.STRAT_VACATION_BERNOULLI)) {
             model.setStationVacationPolicy(key, CommonConstants.STATION_VACATION_POLICY_BERNOULLI);

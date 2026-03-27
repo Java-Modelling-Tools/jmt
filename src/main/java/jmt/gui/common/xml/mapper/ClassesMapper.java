@@ -15,7 +15,7 @@ import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.dto.UserClassDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
-;import java.util.List;
+import java.util.List;
 
 public class ClassesMapper implements ModelElementMapper {
 
