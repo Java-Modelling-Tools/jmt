@@ -10,7 +10,6 @@ package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.NodeDescriptor;
 import jmt.gui.common.xml.dto.SectionDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
@@ -178,7 +177,7 @@ public class StationsMapper implements ModelElementMapper {
     @Override
     public void mapCommonModelToDto(SimDescriptor dto, WritingContext context) {
         CommonModel model = context.model;
-        Vector<Object> stationKeys = model.getStationKeys();
+        List<Object> stationKeys = model.getStationKeys();
 
         if (stationKeys == null || stationKeys.isEmpty()) {
             return;
@@ -223,7 +222,7 @@ public class StationsMapper implements ModelElementMapper {
 
     private void mapModelSoftDeadlinesToDto(NodeDescriptor node, CommonModel model, Object stationKey, String type) {
         if (CommonConstants.STATION_TYPE_DELAY.equals(type) || CommonConstants.STATION_TYPE_SERVER.equals(type)) {
-            Vector<Object> classKeys = model.getClassKeys();
+            List<Object> classKeys = model.getClassKeys();
             if (classKeys != null) {
                 List<Double> deadlines = new ArrayList<>();
                 boolean hasNonZeroDeadline = false;

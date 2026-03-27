@@ -199,7 +199,7 @@ public class QueueSectionMapper extends AbstractSectionMapper {
         writeImpatience(sec, model, key, context);
 
         if (CommonConstants.STATION_TYPE_SERVER.equals(stationType) || CommonConstants.STATION_TYPE_DELAY.equals(stationType)) {
-            mapTransitionConditions(key, sec, model, context);
+            mapTransitionConditions(key, sec, model);
         }
     }
 

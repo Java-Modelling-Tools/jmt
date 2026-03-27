@@ -1,13 +1,12 @@
 package jmt.gui.common.xml.mapper;
 
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.dto.MeasureDescriptor;
 import jmt.gui.common.xml.dto.SimDescriptor;
 import jmt.gui.common.xml.serializer.WritingContext;
 
 import java.util.List;
-;
+
 
 public class MeasuresMapper implements ModelElementMapper {
 
