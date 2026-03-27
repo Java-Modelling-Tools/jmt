@@ -13,6 +13,7 @@ import java.util.*;
 
 public class RouterSectionMapper extends AbstractSectionMapper {
 
+
     // =========================================================================================
     // --- READING PHASE (XML -> DTO -> Model) ---
     // =========================================================================================
@@ -45,26 +46,17 @@ public class RouterSectionMapper extends AbstractSectionMapper {
 
     private RoutingStrategy resolveRoutingStrategy(String cp) {
         if (cp == null) return new RandomRouting();
-        if (cp.contains("Empirical") || cp.contains("Probabilities")) return new ProbabilityRouting();
-        if (cp.contains("LoadDependent")) return new LoadDependentRouting();
-        if (cp.contains("PowerOfK")) return new PowerOfKRouting();
-        if (cp.contains("WeightedRoundRobin")) return new WeightedRoundRobinRouting();
-        if (cp.contains("ClassSwitch")) return new ClassSwitchRouting();
+        if (cp.contains(STR_EMPIRICAL) || cp.contains(STR_PROBABILITIES)) return new ProbabilityRouting();
+        if (cp.contains(STR_LOAD_DEPENDENT)) return new LoadDependentRouting();
+        if (cp.contains(STR_POWER_OF_K)) return new PowerOfKRouting();
+        if (cp.contains(STR_WEIGHTED_ROUND_ROBIN)) return new WeightedRoundRobinRouting();
+        if (cp.contains(STR_CLASS_SWITCH)) return new ClassSwitchRouting();
         return new RandomRouting();
     }
 
     private void parseProbabilityRouting(ParameterDescriptor p, Object key, Object classKey, MappingContext ctx) {
         ParameterDescriptor entryArray = getFirst(getSubParams(p));
-        if (entryArray == null) return;
-
-        Map<String, Double> tmp = new TreeMap<>();
-        for (ParameterDescriptor entry : getSubParams(entryArray)) {
-            List<ParameterDescriptor> subEntries = getSubParams(entry);
-            String sName = val(getAt(subEntries, 0));
-            Double dVal = valD(getAt(subEntries, 1));
-            if (sName != null && dVal != null) tmp.put(sName, dVal);
-        }
-        ctx.empiricalRouting.put(new Object[]{key, classKey}, tmp);
+        ctx.empiricalRouting.put(new Object[]{key, classKey}, parseStringDoubleMap(entryArray));
     }
 
     private void parseLoadDependentRouting(ParameterDescriptor p, Object key, Object classKey, MappingContext ctx) {
@@ -76,16 +68,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
             Integer fromValue = valI(getAt(subFrom, 0));
             if (fromValue == null) continue;
 
-            Map<String, Double> tmp = new TreeMap<>();
-            ParameterDescriptor subArray = getAt(subFrom, 1);
-            if (subArray != null) {
-                for (ParameterDescriptor entry : getSubParams(subArray)) {
-                    List<ParameterDescriptor> subEntries = getSubParams(entry);
-                    String sName = val(getAt(subEntries, 0));
-                    Double dVal = valD(getAt(subEntries, 1));
-                    if (sName != null && dVal != null) tmp.put(sName, dVal);
-                }
-            }
+            Map<String, Double> tmp = parseStringDoubleMap(getAt(subFrom, 1));
             ctx.empiricalLDRouting.put(new Object[]{key, classKey, fromValue}, tmp);
         }
     }
@@ -101,16 +84,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
 
     private void parseWeightedRoundRobinRouting(ParameterDescriptor p, Object key, Object classKey, MappingContext ctx) {
         ParameterDescriptor entryArray = getFirst(getSubParams(p));
-        if (entryArray == null) return;
-
-        Map<String, Integer> tmp = new TreeMap<>();
-        for (ParameterDescriptor entry : getSubParams(entryArray)) {
-            List<ParameterDescriptor> subEntries = getSubParams(entry);
-            String sName = val(getAt(subEntries, 0));
-            Integer iVal = valI(getAt(subEntries, 1));
-            if (sName != null && iVal != null) tmp.put(sName, iVal);
-        }
-        ctx.wrrRouting.put(new Object[]{key, classKey}, tmp);
+        ctx.wrrRouting.put(new Object[]{key, classKey}, parseStringIntegerMap(entryArray));
     }
 
     private void parseClassSwitchRouting(ParameterDescriptor p, Object key, Object classKey, MappingContext ctx) {
@@ -121,30 +95,57 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         Map<String, Map<String, Double>> classTmp = new TreeMap<>();
 
         for (ParameterDescriptor csp : getSubParams(paramArray)) {
-            List<ParameterDescriptor> subCsp = getSubParams(csp);
-            String sName = val(getAt(subCsp, 0));
-            Double dVal = valD(getAt(subCsp, 1));
-
-            if (sName != null && dVal != null) {
-                branchTmp.put(sName, dVal);
-            }
-
-            Map<String, Double> innerMap = new TreeMap<>();
-            ParameterDescriptor subArray = getAt(subCsp, 2);
-            if (subArray != null) {
-                for (ParameterDescriptor entry : getSubParams(subArray)) {
-                    List<ParameterDescriptor> subEntries = getSubParams(entry);
-                    String cName = val(getAt(subEntries, 0));
-                    Double cdVal = valD(getAt(subEntries, 1));
-                    if (cName != null && cdVal != null) innerMap.put(cName, cdVal);
-                }
-            }
-            if (sName != null) {
-                classTmp.put(sName, innerMap);
-            }
+            parseClassSwitchEntry(csp, branchTmp, classTmp);
         }
         ctx.csBranchRouting.put(new Object[]{key, classKey}, branchTmp);
         ctx.csClassRouting.put(new Object[]{key, classKey}, classTmp);
+    }
+
+    private void parseClassSwitchEntry(ParameterDescriptor csp, Map<String, Double> branchTmp, Map<String, Map<String, Double>> classTmp) {
+        List<ParameterDescriptor> subCsp = getSubParams(csp);
+        String sName = val(getAt(subCsp, 0));
+        Double dVal = valD(getAt(subCsp, 1));
+
+        if (sName != null && dVal != null) {
+            branchTmp.put(sName, dVal);
+        }
+
+        Map<String, Double> innerMap = parseStringDoubleMap(getAt(subCsp, 2));
+        if (sName != null) {
+            classTmp.put(sName, innerMap);
+        }
+    }
+
+    // --- Helper Generici per Parsare le Mappe Array dell'XML ---
+
+    private Map<String, Double> parseStringDoubleMap(ParameterDescriptor entryArray) {
+        Map<String, Double> map = new TreeMap<>();
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                List<ParameterDescriptor> subEntries = getSubParams(entry);
+                String sName = val(getAt(subEntries, 0));
+                Double dVal = valD(getAt(subEntries, 1));
+                if (sName != null && dVal != null) {
+                    map.put(sName, dVal);
+                }
+            }
+        }
+        return map;
+    }
+
+    private Map<String, Integer> parseStringIntegerMap(ParameterDescriptor entryArray) {
+        Map<String, Integer> map = new TreeMap<>();
+        if (entryArray != null) {
+            for (ParameterDescriptor entry : getSubParams(entryArray)) {
+                List<ParameterDescriptor> subEntries = getSubParams(entry);
+                String sName = val(getAt(subEntries, 0));
+                Integer iVal = valI(getAt(subEntries, 1));
+                if (sName != null && iVal != null) {
+                    map.put(sName, iVal);
+                }
+            }
+        }
+        return map;
     }
 
     // =========================================================================================
@@ -197,10 +198,10 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         List<Integer> fromList = new ArrayList<>(allEntries.keySet());
         Collections.sort(fromList);
 
-        ParameterDescriptor ldArray = makeContainer("LoadDependentRoutingParameter", LD_ROUTING_PARAM_CLASS);
+        ParameterDescriptor ldArray = makeContainer(XML_E_LD_ROUTING_PARAM, LD_ROUTING_PARAM_CLASS);
         for (Integer from : fromList) {
-            ParameterDescriptor range = makeContainer("LoadDependentRoutingParameter", LD_ROUTING_PARAM_CLASS);
-            range.addSubParameter(makeParam("from", Integer.class.getName(), from.toString()));
+            ParameterDescriptor range = makeContainer(XML_E_LD_ROUTING_PARAM, LD_ROUTING_PARAM_CLASS);
+            range.addSubParameter(makeParam(XML_A_FROM, Integer.class.getName(), from.toString()));
 
             ParameterDescriptor entryArray = makeContainer(EMPIRICAL_ENTRY_ARRAY, EMPIRICAL_ENTRY_CLASS);
             Map<Object, Double> entries = allEntries.get(from);
@@ -217,19 +218,19 @@ public class RouterSectionMapper extends AbstractSectionMapper {
     }
 
     private void writePowerOfKRouting(ParameterDescriptor param, PowerOfKRouting rs) {
-        param.addSubParameter(makeParam("k", Integer.class.getName(), rs.getK().toString()));
-        param.addSubParameter(makeParam("withMemory", Boolean.class.getName(), rs.isWithMemory().toString()));
+        param.addSubParameter(makeParam(XML_A_K, Integer.class.getName(), rs.getK().toString()));
+        param.addSubParameter(makeParam(XML_A_WITH_MEMORY, Boolean.class.getName(), rs.isWithMemory().toString()));
     }
 
     private void writeWeightedRoundRobinRouting(ParameterDescriptor param, WeightedRoundRobinRouting rs, CommonModel model, Object key) {
         List<Object> outputs = model.getForwardConnections(key);
         Map<Object, Integer> weights = rs.getWeights();
 
-        ParameterDescriptor weightArray = makeContainer("WeightEntryArray", WEIGHT_ENTRY_CLASS);
+        ParameterDescriptor weightArray = makeContainer(XML_E_WEIGHT_ENTRY_ARRAY, WEIGHT_ENTRY_CLASS);
         for (Object output : outputs) {
             ParameterDescriptor entry = makeContainer(WEIGHT_ENTRY, WEIGHT_ENTRY_CLASS);
             entry.addSubParameter(makeParam(XML_A_PRELOADSTATION_NAME, String.class.getName(), model.getStationName(output)));
-            entry.addSubParameter(makeParam("weight", Integer.class.getName(), weights.getOrDefault(output, 1).toString()));
+            entry.addSubParameter(makeParam(XML_A_WEIGHT, Integer.class.getName(), weights.getOrDefault(output, 1).toString()));
             weightArray.addSubParameter(entry);
         }
         param.addSubParameter(weightArray);
@@ -241,9 +242,9 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         Map<Object, Double> values = rs.getValues();
         Map<Object, Map<Object, Double>> outPaths = rs.getOutPaths();
 
-        ParameterDescriptor csArray = makeContainer("ClassSwitchRoutingParameterArray", CS_ROUTING_PARAM_CLASS);
+        ParameterDescriptor csArray = makeContainer(XML_E_CS_ROUTING_PARAM_ARRAY, CS_ROUTING_PARAM_CLASS);
         for (Object output : outputs) {
-            ParameterDescriptor csParam = makeContainer("ClassSwitchRoutingParameter", CS_ROUTING_PARAM_CLASS);
+            ParameterDescriptor csParam = makeContainer(XML_E_CS_ROUTING_PARAM, CS_ROUTING_PARAM_CLASS);
             csParam.addSubParameter(makeParam(XML_A_PRELOADSTATION_NAME, String.class.getName(), model.getStationName(output)));
             csParam.addSubParameter(makeParam(XMLConstantNames.XML_A_PROBABILITY, Double.class.getName(), values.getOrDefault(output, 0.0).toString()));
 
