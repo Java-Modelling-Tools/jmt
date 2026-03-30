@@ -26,6 +26,7 @@ import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StoredResultsModel;
 
+import jmt.gui.common.xml.sim.XMLSimReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -48,7 +49,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 * @param model CommonModel where all loaded informations should be stored
 	 */
 	public static void loadGuiModel(StoredResultsModel model, File archiveName) {
-		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_GUI_RESULTS));
+		Document doc = XMLLoader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_GUI_RESULTS));
 		parseXML(doc, model);
 	}
 
@@ -58,7 +59,7 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 * @param model CommonModel where all loaded informations should be stored
 	 */
 	public static void loadModel(StoredResultsModel model, File archiveName) {
-		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS));
+		Document doc = XMLLoader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS));
 		parseXML(doc, model);
 	}
 
