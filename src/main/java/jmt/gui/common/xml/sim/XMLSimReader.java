@@ -2,7 +2,7 @@ package jmt.gui.common.xml.sim;
 
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.xml.OLDXMLReader;
+import jmt.gui.common.xml.XMLReader;
 import jmt.gui.common.xml.XMLArchiver;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.XMLLoader;
@@ -10,19 +10,14 @@ import jmt.gui.common.xml.sim.dto.SimDescriptor;
 import jmt.gui.common.xml.sim.parsers.NodeParser;
 import jmt.gui.common.xml.sim.mapper.SimDescriptorMapper;
 import jmt.gui.common.xml.sim.parsers.SimParser;
-import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 
 /**
  * <p>Title: XML Reader</p>
- * <p>Description: New version of {@link OLDXMLReader}. Reads model information from an XML file. This class provides
+ * <p>Description: New version of {@link XMLReader}. Reads model information from an XML file. This class provides
  * methods for model load.</p>
  *
  * @author Borgna Daniele

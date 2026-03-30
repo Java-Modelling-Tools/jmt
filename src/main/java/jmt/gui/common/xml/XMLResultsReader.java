@@ -18,18 +18,16 @@
 
 package jmt.gui.common.xml;
 
-import java.io.File;
-
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.definitions.StoredResultsModel;
-
-import jmt.gui.common.xml.sim.XMLSimReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import java.io.File;
 
 /**
  * <p>Title: XML Results Reader</p>
@@ -41,6 +39,7 @@ import org.w3c.dom.NodeList;
  *         Date: 3-ott-2005
  *         Time: 12.27.00
  */
+@Deprecated
 public class XMLResultsReader implements XMLResultsConstants {
 
 	/**

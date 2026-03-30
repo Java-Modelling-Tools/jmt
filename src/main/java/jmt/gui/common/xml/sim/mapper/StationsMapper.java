@@ -13,9 +13,8 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.sim.dto.NodeDescriptor;
 import jmt.gui.common.xml.sim.dto.SectionDescriptor;
 import jmt.gui.common.xml.sim.dto.SimDescriptor;
-import jmt.gui.common.xml.mapper.sections.*;
-import jmt.gui.common.xml.sim.serializer.WritingContext;
 import jmt.gui.common.xml.sim.mapper.sections.*;
+import jmt.gui.common.xml.sim.serializer.WritingContext;
 
 import java.util.*;
 import java.util.stream.Collectors;

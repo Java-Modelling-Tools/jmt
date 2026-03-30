@@ -52,7 +52,10 @@ import org.w3c.dom.Node;
  * @author Bertoli Marco
  *         Date: 3-ott-2005
  *         Time: 10.36.30
+ *
+ * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use {@link jmt.gui.common.xml.results.XMLResultsWriter} instead.
  */
+@Deprecated
 public class XMLResultsWriter implements XMLResultsConstants {
 
 	/**

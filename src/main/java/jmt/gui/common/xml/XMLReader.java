@@ -95,10 +95,10 @@ import org.xml.sax.SAXException;
  *         Date: 27-lug-2005
  *         Time: 13.59.48
  *
- * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use XMLReader instead.
+ * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use {@link jmt.gui.common.xml.sim.XMLSimReader} instead.
  */
 @Deprecated
-public class OLDXMLReader implements XMLConstantNames, CommonConstants {
+public class XMLReader implements XMLConstantNames, CommonConstants {
 
     protected static TreeMap<String, Object> classes; // Data structure used to map between class name and its key
     protected static TreeMap<String, Object> stations; // Data structure used to map between station name and its key
@@ -1537,7 +1537,7 @@ public class OLDXMLReader implements XMLConstantNames, CommonConstants {
      * @author Michael Fercu (Bertoli Marco)
      *		   Date: 08-aug-2008
      * @see jmt.engine.log.LoggerParameters LoggerParameters
-     * @see OLDXMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
+     * @see XMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
      * @see jmt.gui.common.definitions.CommonModel#getLoggingParameters CommonModel.getLoggingParameters()
      * @see jmt.gui.common.definitions.CommonModel#setLoggingParameters CommonModel.setLoggingParameters()
      * @see jmt.engine.NodeSections.LogTunnel LogTunnel
