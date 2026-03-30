@@ -93,10 +93,10 @@ import org.w3c.dom.Node;
  *         Date: 15-lug-2005
  *         Time: 10.56.01
  *
- * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use XMLWriter instead.
+ * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use {@link jmt.gui.common.xml.sim.XMLSimWriter} instead.
  */
 @Deprecated
-public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
+public class XMLWriter implements CommonConstants, XMLConstantNames {
 
 	/**
 	 * defines matching between gui representation and engine names for queue
@@ -1318,9 +1318,9 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 			XMLParameter distrArrayParameter;
 			Boolean heterogeneousServersEnabled = model.getHeterogeneousServersEnabled(stationKey);
 			if (heterogeneousServersEnabled != null && heterogeneousServersEnabled) {
-				distrArrayParameter = OLDXMLWriter.getServiceSectionHeterogeneous(model, stationKey, INSTANCE);
+				distrArrayParameter = XMLWriter.getServiceSectionHeterogeneous(model, stationKey, INSTANCE);
 			} else {
-				distrArrayParameter = OLDXMLWriter.getServiceSection(model, stationKey, INSTANCE);
+				distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, INSTANCE);
 			}
 			distrArrayParameter.parameterName = "ServiceStrategy";
 			distrArrayParameter.isSubParameter = false;
@@ -1342,7 +1342,7 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 		private SwitchoverStrategyWriter() {}
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
-			XMLParameter distrArrayParameter = OLDXMLWriter.getServiceSection(model, stationKey, INSTANCE);
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, INSTANCE);
 			distrArrayParameter.parameterName = "SwitchoverStrategy";
 			distrArrayParameter.isSubParameter = false;
 			return distrArrayParameter;
@@ -1360,7 +1360,7 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey, Object fromClassKey) {
 			QueueSwitchOverStrategyWriter instance = new QueueSwitchOverStrategyWriter(fromClassKey);
-			XMLParameter distrArrayParameter = OLDXMLWriter.getServiceSection(model, stationKey, instance);
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
 			distrArrayParameter.parameterName = "SwitchoverStrategy";
 			distrArrayParameter.parameterRefClass = model.getClassName(fromClassKey);
 			distrArrayParameter.isSubParameter = true;
@@ -1377,7 +1377,7 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey,Object classKey){
 			delayOffStrategyWriter instance = new delayOffStrategyWriter();
-			XMLParameter distrArrayParameter = OLDXMLWriter.getServiceSection(model, stationKey, instance);
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
 			distrArrayParameter.parameterName = "delayOffTime";
 			distrArrayParameter.parameterRefClass = model.getClassName(classKey);
 			distrArrayParameter.isSubParameter = true;
@@ -1394,7 +1394,7 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey,Object classKey){
 			setUpStrategyWriter instance = new setUpStrategyWriter();
-			XMLParameter distrArrayParameter = OLDXMLWriter.getServiceSection(model, stationKey, instance);
+			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, instance);
 			distrArrayParameter.parameterName = "setUpTime";
 			distrArrayParameter.parameterRefClass = model.getClassName(classKey);
 			distrArrayParameter.isSubParameter = true;

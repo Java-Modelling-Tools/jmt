@@ -27,7 +27,7 @@ import jmt.gui.common.xml.results.dto.ResultMeasureDescriptor;
 import jmt.gui.common.xml.results.dto.ResultsDescriptor;
 import jmt.gui.common.xml.results.dto.SampleDescriptor;
 
-import java.util.Vector;
+import java.util.List;
 
 public class ResultsDescriptorMapper {
 
@@ -148,9 +148,14 @@ public class ResultsDescriptorMapper {
         m.setState(model.getMeasureState(i));
         m.setLogFileName(model.getLogFileName(i));
 
-        Vector<MeasureValue> values = model.getValues(i);
+        List<MeasureValue> values = model.getValues(i);
+
         if (values != null && !values.isEmpty()) {
-            m.setFinalValue(values.lastElement().getMeanValue());
+            MeasureValue lastMeasure = values.get(values.size() - 1);
+
+            if (lastMeasure != null) {
+                m.setFinalValue(lastMeasure.getMeanValue());
+            }
         }
 
         if (values != null) {
@@ -182,7 +187,7 @@ public class ResultsDescriptorMapper {
         m.setAnalyzedSamples(model.getAnalyzedSamples(i));
         m.setLogFileName(model.getLogFileName(i));
 
-        Vector<MeasureValue> values = model.getValues(i);
+        List<MeasureValue> values = model.getValues(i);
         if (values != null) {
             for (MeasureValue v : values) {
                 PAResultsModel.MeasureValueImpl pv = (PAResultsModel.MeasureValueImpl) v;
