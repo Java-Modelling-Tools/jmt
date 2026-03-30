@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.within;
  * Integration test suite for {@link XMLResultsReader#parseXML(Element, MeasureDefinition)}.
  *
  * <h3>Architecture under test</h3>
- * The two-phase pipeline: {@link jmt.gui.common.xml.parsers.ResultsParser} (DOM → DTO)
- * followed by {@link jmt.gui.common.xml.mapper.ResultsDescriptorMapper} (DTO → Model).
+ * The two-phase pipeline: {@link jmt.gui.common.xml.results.parsers.ResultsParser} (DOM → DTO)
+ * followed by {@link jmt.gui.common.xml.results.mapper.ResultsDescriptorMapper} (DTO → Model).
  *
  * <h3>Prerequisites — replacing the legacy class</h3>
  * The project contains a {@code @Deprecated} class with the same fully-qualified name

@@ -18,6 +18,17 @@
 
 package jmt.gui.common.controller;
 
+import jmt.engine.simDispatcher.DispatcherJSIMschema;
+import jmt.framework.gui.graph.MeasureValue;
+import jmt.gui.common.definitions.*;
+import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.panels.parametric.PAProgressWindow;
+import jmt.gui.common.panels.parametric.PAResultsWindow;
+import jmt.gui.common.xml.XMLLoader;
+import jmt.gui.common.xml.results.XMLResultsReader;
+import jmt.gui.common.xml.sim.XMLSimWriter;
+import org.w3c.dom.Document;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -28,25 +39,6 @@ import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import jmt.engine.simDispatcher.DispatcherJSIMschema;
-import jmt.framework.gui.graph.MeasureValue;
-import jmt.gui.common.definitions.AbortMeasure;
-import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.definitions.GuiInterface;
-import jmt.gui.common.definitions.MeasureDefinition;
-import jmt.gui.common.definitions.PAResultsModel;
-import jmt.gui.common.definitions.SimulationDefinition;
-import jmt.gui.common.definitions.StoredResultsModel;
-import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
-import jmt.gui.common.panels.parametric.PAProgressWindow;
-import jmt.gui.common.panels.parametric.PAResultsWindow;
-import jmt.gui.common.xml.XMLLoader;
-import jmt.gui.common.xml.sim.XMLSimReader;
-import jmt.gui.common.xml.XMLResultsReader;
-import jmt.gui.common.xml.sim.XMLSimWriter;
-
-import org.w3c.dom.Document;
 
 /**
  * <p>
