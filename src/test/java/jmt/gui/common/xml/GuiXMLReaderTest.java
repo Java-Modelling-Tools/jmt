@@ -2,6 +2,7 @@ package jmt.gui.common.xml;
 
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
+import jmt.gui.common.xml.gui.GuiXMLReader;
 import jmt.gui.jsimgraph.definitions.JMTPath;
 import jmt.gui.jsimgraph.definitions.JMTPoint;
 import jmt.gui.jsimgraph.definitions.JSimGraphModel;
@@ -11,9 +12,8 @@ import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
-import java.util.Vector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
@@ -69,7 +69,9 @@ class GuiXMLReaderTest {
         return el;
     }
 
-    /** Returns the key for a station by name, or {@code null} when absent. */
+    /**
+     * Returns the key for a station by name, or {@code null} when absent.
+     */
     private Object findStationKey(JSimGraphModel model, String name) {
         for (Object key : model.getStationKeys()) {
             if (name.equals(model.getStationName(key))) {
@@ -79,7 +81,9 @@ class GuiXMLReaderTest {
         return null;
     }
 
-    /** Returns the key for a user class by name, or {@code null} when absent. */
+    /**
+     * Returns the key for a user class by name, or {@code null} when absent.
+     */
     private Object findClassKey(JSimGraphModel model, String name) {
         for (Object key : model.getClassKeys()) {
             if (name.equals(model.getClassName(key))) {
@@ -104,9 +108,9 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/225_conBeta13fesc.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
@@ -160,9 +164,9 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/520_Sec5_3_FastTask_Quorum1_Wif_JSIMg.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
@@ -224,16 +228,16 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/4039_240415_FCFS_QD.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
         // --- Two distinct class colors ---
         // XML: Class1 "#FF0000FF" (blue), Token "#FFFF0000" (red)
         Object class1Key = findClassKey(model, "Class1");
-        Object tokenKey  = findClassKey(model, "Token");
+        Object tokenKey = findClassKey(model, "Token");
         assertThat(class1Key).as("Class 'Class1' must exist").isNotNull();
         assertThat(tokenKey).as("Class 'Token' must exist").isNotNull();
 
@@ -277,9 +281,9 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/10190_220423_2RotNogen_2Q.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
@@ -306,7 +310,7 @@ class GuiXMLReaderTest {
         assertThat(q2Pos.getX()).as("Queue 2 x must be 375.0").isCloseTo(375.0, within(1e-9));
 
         // --- Three connection shapes present ---
-        Object q1Key   = findStationKey(model, "Queue 1");
+        Object q1Key = findStationKey(model, "Queue 1");
         Object sink1Key = findStationKey(model, "Sink 1");
         assertThat(model.getConnectionShape(src1Key, q1Key))
                 .as("Connection Source1→Queue1 must have been stored").isNotNull();
@@ -330,9 +334,9 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/23985_SjAS04Model_6AS-L5.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
@@ -376,9 +380,9 @@ class GuiXMLReaderTest {
         File xmlFile = new File(
                 "src/test/resources/jmt/gui/common/xml/641_2FJ_2tasks_nestedOK.xml");
 
-        Object[] loaded        = loadArchive(xmlFile);
-        Document doc           = (Document) loaded[0];
-        JSimGraphModel model   = (JSimGraphModel) loaded[1];
+        Object[] loaded = loadArchive(xmlFile);
+        Document doc = (Document) loaded[0];
+        JSimGraphModel model = (JSimGraphModel) loaded[1];
 
         GuiXMLReader.parseXML(getJModelElement(doc), model);
 
