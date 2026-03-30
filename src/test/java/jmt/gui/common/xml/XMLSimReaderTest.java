@@ -2662,14 +2662,14 @@ class XMLSimReaderTest {
         File xmlFile = new File("src/test/resources/jmt/gui/common/xml/afterrefactoring_edgecases.xml");
         CommonModel model = new CommonModel();
 
-        // Caricamento del modello
+        // Load the model
         XMLArchiver.loadModel(xmlFile, model);
 
-        // --- PREPARAZIONE CHIAVI ---
+        // --- KEY LOOKUP ---
         Object classOpen = model.getClassByName("ClassOpen");
         Object classClosed = model.getClassByName("ClassClosed");
 
-        // Ricerca manuale della regione (visto che getRegionByName non esiste in CommonModel)
+        // Manual region lookup (getRegionByName does not exist on CommonModel)
         Object region = null;
         for (Object rKey : model.getRegionKeys()) {
             if ("Region1".equals(model.getRegionName(rKey))) {
@@ -2678,30 +2678,30 @@ class XMLSimReaderTest {
             }
         }
 
-        assertThat(classOpen).as("ClassOpen deve esistere").isNotNull();
-        assertThat(classClosed).as("ClassClosed deve esistere").isNotNull();
-        assertThat(region).as("Region1 deve esistere").isNotNull();
+        assertThat(classOpen).as("ClassOpen must exist").isNotNull();
+        assertThat(classClosed).as("ClassClosed must exist").isNotNull();
+        assertThat(region).as("Region1 must exist").isNotNull();
 
-        // --- TEST 1: Classi Chiuse ---
+        // --- TEST 1: Closed Classes ---
         assertThat(model.getClassType(classClosed))
-                .as("ClassClosed deve essere di tipo chiuso")
+                .as("ClassClosed must be of closed type")
                 .isEqualTo(CommonConstants.CLASS_TYPE_CLOSED);
 
         assertThat(model.getClassPopulation(classClosed))
-                .as("La popolazione della classe chiusa deve essere estratta dall'attributo 'customers'")
+                .as("Closed class population must be read from the 'customers' attribute")
                 .isEqualTo(42);
 
         // --- TEST 2: Blocking Regions ---
         assertThat(model.getRegionCustomerConstraint(region))
-                .as("Il globalConstraint maxJobs della regione deve essere 15")
+                .as("Region globalConstraint maxJobs must be 15")
                 .isEqualTo(15);
 
         assertThat(model.getRegionClassCustomerConstraint(region, classOpen))
-                .as("Il classConstraint maxJobsPerClass per ClassOpen deve essere 5")
+                .as("classConstraint maxJobsPerClass for ClassOpen must be 5")
                 .isEqualTo(5);
 
         assertThat(model.getRegionClassDropRule(region, classClosed))
-                .as("La dropRule per ClassClosed deve essere convertita in Boolean (true)")
+                .as("dropRule for ClassClosed must be parsed as Boolean true")
                 .isTrue();
     }
 

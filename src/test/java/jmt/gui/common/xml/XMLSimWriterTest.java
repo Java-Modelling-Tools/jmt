@@ -174,40 +174,41 @@ class XMLSimWriterTest {
         File originalFile = new File(sourcePath);
         File outputFile = tempDir.resolve(outputName).toFile();
 
-        // 1. Carica il modello dall'XML originale
+        // 1. Load the model from the original XML
         CommonModel originalModel = new CommonModel();
         XMLArchiver.loadModel(originalFile, originalModel);
 
-        // 2. Ottieni il DTO dal modello originale (Il dato semantico ATTESO, include "dati fantasma")
+        // 2. Extract the DTO from the original model (expected semantic data, includes "ghost" data)
         SimDescriptorMapper originalMapper = new SimDescriptorMapper(originalModel);
         SimDescriptor expectedDto = originalMapper.mapToDto();
 
-        // 3. Salva il modello usando la nostra pipeline di scrittura pulita
+        // 3. Save the model using our clean write pipeline
         XMLArchiver.saveModel(outputFile, originalModel);
 
-        // 4. Ricarica il modello dal file appena salvato
+        // 4. Reload the model from the just-saved file
         CommonModel roundTrippedModel = new CommonModel();
         XMLArchiver.loadModel(outputFile, roundTrippedModel);
 
-        // 5. Ottieni il DTO dal modello riletto (Il dato semantico EFFETTIVO, epurato)
+        // 5. Extract the DTO from the reloaded model (actual semantic data, sanitised)
         SimDescriptorMapper roundTrippedMapper = new SimDescriptorMapper(roundTrippedModel);
         SimDescriptor actualDto = roundTrippedMapper.mapToDto();
 
-        // 6. Allinea gli alberi: forza la rimozione dei dati "fantasma" disabilitati in expectedDto
-        // in modo che corrisponda alla versione sanificata generata da actualDto.
+        // 6. Align the trees: force removal of disabled "ghost" data in expectedDto
+        // so that it matches the sanitised version produced by actualDto.
         alignZeroStrategies(expectedDto, actualDto);
 
-        // 7. Esegui la deep-comparison
+        // 7. Run the deep-comparison
         assertThat(actualDto)
                 .as("The round-tripped model should map to the exact same semantic DTO as the original")
+                // No equals() was needed on any DTO — AssertJ's usingRecursiveComparison() handles full field-by-field traversal including nested lists and maps.
                 .usingRecursiveComparison()
-                // Ignora dati prettamente meta-dinamici
+                // Ignore purely meta-dynamic data
                 .ignoringFields(
                         "archiveName",
                         "globalAttributes.timestamp",
                         "globalAttributes.name"
                 )
-                // Ignoriamo le differenze sugli slash finali ("/" vs "") per i path locali
+                // Ignore differences on trailing slashes ("/" vs "") for local paths
                 .withComparatorForType((s1, s2) -> {
                     if (s1 == null && s2 == null) return 0;
                     if (s1 == null || s2 == null) return -1;
@@ -217,9 +218,9 @@ class XMLSimWriterTest {
     }
 
     /**
-     * Percorre i DTO in parallelo. Se il nuovo Writer ha giustamente esportato una
-     * ZeroServiceTimeStrategy o DisabledServiceTimeStrategy (perché la feature era disabilitata),
-     * forziamo l'expectedDto a corrispondere per evitare differenze sui parametri orfani.
+     * Walks both DTOs in parallel. If the new Writer correctly exported a
+     * ZeroServiceTimeStrategy or DisabledServiceTimeStrategy (because the feature was disabled),
+     * we force expectedDto to match in order to avoid differences on orphaned parameters.
      */
     private void alignZeroStrategies(SimDescriptor expected, SimDescriptor actual) {
         if (expected.getNodes() == null || actual.getNodes() == null) return;
@@ -251,7 +252,7 @@ class XMLSimWriterTest {
                         act.getClassPath().contains("DisabledServiceTimeStrategy"));
 
         if (isActZero) {
-            // Forza il nodo expected ad essere identico al nodo actual, svuotando i parametri dell'esponenziale orfano
+            // Force the expected node to be identical to the actual node, clearing orphaned exponential parameters
             exp.setName(act.getName());
             exp.setClassPath(act.getClassPath());
             exp.setValue(act.getValue());
@@ -261,7 +262,7 @@ class XMLSimWriterTest {
             return;
         }
 
-        // Ricorsione sui figli
+        // Recurse into children
         if (exp.getSubParameters() != null && act.getSubParameters() != null) {
             for (int i = 0; i < exp.getSubParameters().size(); i++) {
                 if (i >= act.getSubParameters().size()) break;

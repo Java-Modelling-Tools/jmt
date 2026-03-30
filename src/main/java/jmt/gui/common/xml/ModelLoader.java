@@ -18,27 +18,24 @@
 
 package jmt.gui.common.xml;
 
-import java.awt.Component;
-import java.awt.HeadlessException;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
-
 import jmt.framework.xml.XMLUtils;
 import jmt.gui.common.CommonConstants;
 import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.definitions.StoredResultsModel;
+import jmt.gui.common.xml.results.XMLResultsReader;
 import jmt.gui.common.xml.sim.XMLSimReader;
 import jmt.gui.jaba.JabaModel;
 import jmt.jmva.analytical.ExactModel;
-
 import org.w3c.dom.Document;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import java.awt.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>Title: Model Loader</p>
