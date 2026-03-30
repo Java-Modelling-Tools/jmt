@@ -5,6 +5,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.StoredResultsModel;
+import jmt.gui.common.xml.results.XMLResultsReader;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

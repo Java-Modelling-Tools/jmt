@@ -40,6 +40,10 @@ import jmt.gui.common.definitions.StoredResultsModel;
 
 import jmt.gui.common.xml.sim.XMLSimReader;
 import jmt.gui.common.xml.sim.XMLSimWriter;
+import jmt.gui.common.xml.gui.GuiXMLReader;
+import jmt.gui.common.xml.gui.GuiXMLWriter;
+import jmt.gui.common.xml.results.XMLResultsReader;
+import jmt.gui.common.xml.results.XMLResultsWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
