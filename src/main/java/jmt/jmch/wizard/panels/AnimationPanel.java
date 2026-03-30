@@ -29,7 +29,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
@@ -62,15 +61,12 @@ import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.listeners.MenuAction;
 import jmt.gui.common.JMTImageLoader;
 import jmt.gui.common.controller.DispatcherThread;
-import jmt.gui.common.controller.ModelChecker;
 import jmt.gui.common.definitions.GuiInterface;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.ResultsModel;
-import jmt.gui.common.distributions.Distribution;
 import jmt.gui.common.distributions.Exponential;
 import jmt.gui.common.editors.DistributionsEditor;
-import jmt.gui.common.xml.XMLWriter;
-import jmt.gui.jsimgraph.panels.JModelProblemsWindow;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 import jmt.jmch.Constants;
 import jmt.jmch.Solver;
 import jmt.jmch.wizard.actionsWizard.About;
@@ -720,7 +716,7 @@ public class AnimationPanel extends JMCHWizardPanel implements GuiInterface{
         try {
             temp = File.createTempFile("~JModelSimulation", ".xml");
             temp.deleteOnExit();       
-            XMLWriter.writeXML(temp, solver.getModel());
+            XMLSimWriter.writeXML(temp, solver.getModel());
             String logCSVDelimiter = solver.getModel().getLoggingGlbParameter("delim");
             String logDecimalSeparator = solver.getModel().getLoggingGlbParameter("decimalSeparator");
             solver.getModel().setSimulationResults(new ResultsModel(solver.getModel().getPollingInterval().doubleValue(), logCSVDelimiter, logDecimalSeparator));

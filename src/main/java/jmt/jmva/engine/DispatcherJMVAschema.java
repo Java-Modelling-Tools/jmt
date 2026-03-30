@@ -39,7 +39,7 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.convertors.JMVAtoJSIMConvertor;
 import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.xml.XMLConstantNames;
-import jmt.gui.common.xml.XMLWriter;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 import jmt.jmva.analytical.ExactConstants;
 import jmt.jmva.analytical.ExactModel;
 
@@ -391,7 +391,7 @@ public class DispatcherJMVAschema {
 		removeNullMeasures(exact, simModel);
 		logger.debug("Removed null measures from simulator model");
 
-		Document modelDocument = XMLWriter.getDocument(simModel, outputModel);
+		Document modelDocument = XMLSimWriter.getDocument(simModel, outputModel);
 		logger.debug("Converted JMVA xml to JSIM one");
 		// Adds blocking region informations to model document
 		NodeList blockingList = inputDoc.getElementsByTagName(XMLConstantNames.XML_E_REGION);
@@ -431,7 +431,7 @@ public class DispatcherJMVAschema {
 		}
 		logger.debug("Added finite capacity regions");
 
-		XMLWriter.writeXML(outputModel, modelDocument);
+		XMLSimWriter.writeXML(outputModel, modelDocument);
 
 		logger.debug("JSIM model definition wrote to disk");
 

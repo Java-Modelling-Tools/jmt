@@ -79,6 +79,7 @@ import jmt.gui.common.serviceStrategies.DisabledStrategy;
 import jmt.gui.common.serviceStrategies.LDStrategy;
 import jmt.gui.common.serviceStrategies.ZeroStrategy;
 
+import jmt.gui.common.xml.sim.XMLSimReader;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1577,7 +1578,7 @@ public class OLDXMLWriter implements CommonConstants, XMLConstantNames {
 	 * @see jmt.engine.log.LoggerParameters LoggerParameters
 	 * @see jmt.gui.common.definitions.CommonModel#getLoggingParameters
 	 *      CommonModel.getLoggingParameters()
-	 * @see jmt.gui.common.xml.XMLReader XMLReader.parseLogger()
+	 * @see XMLSimReader XMLReader.parseLogger()
 	 * @see jmt.engine.NodeSections.LogTunnel LogTunnel
 	 */
 	static protected void writeLoggerSection(Document doc, Node node,

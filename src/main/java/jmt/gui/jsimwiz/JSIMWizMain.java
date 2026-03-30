@@ -65,7 +65,7 @@ import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
-import jmt.gui.common.xml.XMLWriter;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 import jmt.gui.jsimwiz.definitions.JSIMModel;
 import jmt.gui.jsimwiz.panels.BlockingRegionsPanel;
 import jmt.gui.jsimwiz.panels.StationParametersPanel;
@@ -600,7 +600,7 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 			try {
 				File temp = File.createTempFile("~JModelSimulation", ".xml");
 				temp.deleteOnExit();
-				XMLWriter.writeXML(temp, model);
+				XMLSimWriter.writeXML(temp, model);
 				// Creates results data structure
 				String logCSVDelimiter = model.getLoggingGlbParameter("delim");
 				String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");

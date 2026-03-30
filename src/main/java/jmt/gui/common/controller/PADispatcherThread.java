@@ -41,9 +41,10 @@ import jmt.gui.common.definitions.StoredResultsModel;
 import jmt.gui.common.definitions.parametric.ParametricAnalysisDefinition;
 import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
-import jmt.gui.common.xml.XMLReader;
+import jmt.gui.common.xml.XMLLoader;
+import jmt.gui.common.xml.sim.XMLSimReader;
 import jmt.gui.common.xml.XMLResultsReader;
-import jmt.gui.common.xml.XMLWriter;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 
 import org.w3c.dom.Document;
 
@@ -183,7 +184,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			XMLWriter.writeXML(simulationFile, (CommonModel) simd);
+			XMLSimWriter.writeXML(simulationFile, (CommonModel) simd);
 
 			DispatcherJSIMschema simulator = new DispatcherJSIMschema(simulationFile);
 			simulator.setParametricStep(currentStep);
@@ -283,7 +284,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 			File output = simulator.getSimulation().getOutputFile();
 			output.deleteOnExit();
 
-			Document doc = XMLReader.loadXML(output.getAbsolutePath());
+			Document doc = XMLLoader.loadXML(output.getAbsolutePath());
 			StoredResultsModel results = new StoredResultsModel();
 			XMLResultsReader.parseXML(doc, results);
 			simulation_results[step] = results;
