@@ -34,6 +34,7 @@ import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.ModelConverter;
 import jmt.gui.common.definitions.StoredResultsModel;
+import jmt.gui.common.xml.sim.XMLSimReader;
 import jmt.gui.jaba.JabaModel;
 import jmt.jmva.analytical.ExactModel;
 
@@ -184,7 +185,7 @@ public class ModelLoader {
 				// Handles loading of JSIM/JMODEL models
 				switch (getXmlFileType(file.getAbsolutePath())) {
 				case XML_SIM:
-					XMLReader.loadModel(file, (CommonModel) modelData);
+					XMLSimReader.loadModel(file, (CommonModel) modelData);
 					fileFormat = CommonConstants.SIMENGINE;
 					break;
 				case XML_ARCHIVE:
@@ -231,7 +232,7 @@ public class ModelLoader {
 				CommonModel tmp = new CommonModel();
 				switch (getXmlFileType(file.getAbsolutePath())) {
 				case XML_SIM:
-					XMLReader.loadModel(file, tmp);
+					XMLSimReader.loadModel(file, tmp);
 					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
 					fileFormat = CommonConstants.SIMENGINE;
 					break;
@@ -387,7 +388,7 @@ public class ModelLoader {
 	protected int getXmlFileType(String fileName) {
 		// Opens without validating (as we do not know document type)
 		try {
-			Document doc = XMLReader.loadXML(fileName);
+			Document doc = XMLLoader.loadXML(fileName);
 			String root = doc.getDocumentElement().getNodeName();
 			// Uses root name to determine document type
 			if (root.equals(XMLConstantNames.XML_DOCUMENT_ROOT)) {

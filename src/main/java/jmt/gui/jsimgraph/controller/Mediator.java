@@ -62,7 +62,7 @@ import jmt.gui.common.panels.parametric.PAProgressWindow;
 import jmt.gui.common.panels.parametric.PAResultsWindow;
 import jmt.gui.common.panels.parametric.ParametricAnalysisPanel;
 import jmt.gui.common.xml.ModelLoader;
-import jmt.gui.common.xml.XMLWriter;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 import jmt.gui.jsimgraph.DialogFactory;
 import jmt.gui.jsimgraph.JGraphMod.*;
 import jmt.gui.jsimgraph.UtilPoint;
@@ -2267,7 +2267,7 @@ public class Mediator implements GuiInterface {
 					try {
 						File temp = File.createTempFile("~JModelSimulation", ".xml");
 						temp.deleteOnExit();
-						XMLWriter.writeXML(temp, model);
+						XMLSimWriter.writeXML(temp, model);
 						// Creates results data structure
 						String logCSVDelimiter = model.getLoggingGlbParameter("delim");
 						String logDecimalSeparator = model.getLoggingGlbParameter("decimalSeparator");

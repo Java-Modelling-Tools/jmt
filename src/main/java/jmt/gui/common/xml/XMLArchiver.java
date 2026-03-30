@@ -38,6 +38,8 @@ import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.definitions.PAResultsModel;
 import jmt.gui.common.definitions.StoredResultsModel;
 
+import jmt.gui.common.xml.sim.XMLSimReader;
+import jmt.gui.common.xml.sim.XMLSimWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -85,12 +87,12 @@ public class XMLArchiver implements GuiXMLConstants {
 	 * Modified by Francesco D'Aquino
 	 */
 	public static void loadModel(File archiveName, CommonModel model) {
-		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMT_ARCHIVE));
+		Document doc = XMLLoader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JMT_ARCHIVE));
 		// If document is simulation file, loads it only, if it is an archive loads everything
 		if (doc.getElementsByTagName(XML_ARCHIVE_DOCUMENT_ROOT).getLength() == 0) {
-			XMLReader.parseXML(doc, model);
+			XMLSimReader.parseXML(doc, model);
 		} else {
-            XMLReader.parseXML(getSimFromArchiveDocument(doc), model);
+            XMLSimReader.parseXML(getSimFromArchiveDocument(doc), model);
 			if (containsGUI(doc)) {
 				GuiXMLReader.parseXML(getGuiFromArchiveDocument(doc), model);
 			}
@@ -125,7 +127,7 @@ public class XMLArchiver implements GuiXMLConstants {
 		}
 		Document archiveDoc = docBuilder.newDocument();
 		// Retrieves documents from XMLWriter and GuiXMLWriter
-		Document sim = XMLWriter.getDocument(model, documentName);
+		Document sim = XMLSimWriter.getDocument(model, documentName);
 		Document jmodel;
 		Document results = null;
 		// Stores gui information
