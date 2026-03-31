@@ -55,6 +55,7 @@ import org.w3c.dom.Node;
  *         Date: 22-lug-2005
  *         Time: 15.54.48
  */
+@Deprecated
 public class GuiXMLWriter implements GuiXMLConstants {
 
 	/**

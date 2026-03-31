@@ -50,6 +50,7 @@ import org.w3c.dom.NodeList;
  *         Date: 27-lug-2005
  *         Time: 11.04.13
  */
+@Deprecated
 public class GuiXMLReader implements GuiXMLConstants {
 
 	/**
