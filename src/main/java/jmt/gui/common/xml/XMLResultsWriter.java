@@ -18,31 +18,23 @@
 
 package jmt.gui.common.xml;
 
-import java.io.File;
-import java.io.OutputStream;
-import java.util.Vector;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import jmt.engine.simEngine.EngineUtils;
 import jmt.framework.gui.graph.MeasureValue;
 import jmt.gui.common.definitions.MeasureDefinition;
 import jmt.gui.common.definitions.PAResultsModel;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import java.io.File;
+import java.io.OutputStream;
+import java.util.Vector;
 
 /**
  * <p>Title: XML Results Writer</p>
@@ -62,6 +54,7 @@ public class XMLResultsWriter implements XMLResultsConstants {
 	 * Writes results into an XML file
 	 * @param fileName name of the file to be created
 	 * @param measure data structure
+	 *
 	 */
 	public static void writeXML(String fileName, MeasureDefinition measure) {
 		writeToResult(new StreamResult(new File(fileName)), measure);

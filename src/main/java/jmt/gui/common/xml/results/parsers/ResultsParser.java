@@ -1,7 +1,7 @@
 /**
  * Parser for simulation results XML documents. Handles both formats:
  * <ul>
- *   <li>{@code Results.xsd} — produced by {@link jmt.gui.common.xml.XMLResultsWriter},
+ *   <li>{@code Results.xsd} — produced by {@link jmt.gui.common.xml.results.XMLResultsWriter},
  *       covering both normal and parametric analysis results.</li>
  *   <li>{@code SIMmodeloutput.xsd} — produced directly by the simulation engine.</li>
  * </ul>
