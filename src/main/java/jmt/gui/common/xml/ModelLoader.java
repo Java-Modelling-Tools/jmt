@@ -44,7 +44,8 @@ import java.util.List;
  *
  * @author Bertoli Marco
  *         Date: 15-feb-2006
- *         Time: 15.36.51
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 public class ModelLoader {
 

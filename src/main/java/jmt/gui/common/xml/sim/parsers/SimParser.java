@@ -1,3 +1,10 @@
+/**
+ * Parser for the {@link jmt.gui.common.xml.sim.dto.SimDescriptor} DTO. Converts a DOM
+ * {@link org.w3c.dom.Element} representing the simulation root into a fully populated DTO.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.parsers;
 
 import jmt.gui.common.xml.XMLConstantNames;
@@ -8,14 +15,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-/**
- * <p>Title: XML Sim Parser</p>
- * <p>Description: parser for the {@link SimDescriptor}</p>
- *
- * @author Borgna Daniele
- *         Date: 25-mar-2026
- *
- */
 public class SimParser implements XmlEntityParser<SimDescriptor> {
 
     @Override

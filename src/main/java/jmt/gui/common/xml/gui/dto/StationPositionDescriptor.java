@@ -3,7 +3,7 @@
  * station node on the JSimGraph canvas ({@code JModelGUI.xsd}).
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.gui.dto;
 

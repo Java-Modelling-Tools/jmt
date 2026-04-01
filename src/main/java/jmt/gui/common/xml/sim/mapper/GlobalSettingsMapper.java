@@ -3,7 +3,7 @@
  * and vice-versa. This includes simulation parameters like seed, duration, and logging configurations.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.mapper;
 

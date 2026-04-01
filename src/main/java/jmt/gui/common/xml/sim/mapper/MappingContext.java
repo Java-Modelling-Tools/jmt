@@ -3,7 +3,7 @@
  * and temporary data structures needed by the different mapper classes.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.mapper;
 

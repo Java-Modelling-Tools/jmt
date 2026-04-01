@@ -3,7 +3,7 @@
  * It contains all the properties of a node, such as its name, sections, and parameters.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.dto;
 

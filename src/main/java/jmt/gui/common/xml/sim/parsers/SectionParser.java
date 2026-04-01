@@ -2,7 +2,7 @@
  * This class is responsible for parsing an XML element representing a section and converting it into a {@link SectionDescriptor} object.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.parsers;
 

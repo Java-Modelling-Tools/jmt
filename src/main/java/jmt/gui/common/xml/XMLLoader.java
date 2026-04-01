@@ -1,3 +1,10 @@
+/**
+ * Utility class for loading and parsing XML documents using the Xerces DOM parser,
+ * with optional XSD schema validation support.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import org.apache.xerces.parsers.DOMParser;

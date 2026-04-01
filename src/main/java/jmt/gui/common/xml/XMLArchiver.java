@@ -54,7 +54,8 @@ import org.w3c.dom.Element;
  *
  * @author Bertoli Marco
  *         Date: 22-lug-2005
- *         Time: 13.47.51
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 public class XMLArchiver implements GuiXMLConstants {
 

@@ -1,3 +1,10 @@
+/**
+ * Maps source section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * handling open-class arrival distributions and reference source assignments.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.gui.common.CommonConstants;
@@ -9,13 +16,6 @@ import jmt.gui.common.xml.sim.dto.SectionDescriptor;
 import jmt.gui.common.xml.sim.mapper.MappingContext;
 import jmt.gui.common.xml.sim.serializer.WritingContext;
 
-/**
- * Maps source section descriptors between the DTO and the {@link CommonModel},
- * handling open-class arrival distributions and reference source assignments.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class SourceSectionMapper extends AbstractSectionMapper {
 
     @Override

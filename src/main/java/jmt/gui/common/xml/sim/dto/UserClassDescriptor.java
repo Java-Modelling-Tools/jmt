@@ -3,7 +3,7 @@
  * User classes are used to differentiate jobs and apply different behaviors or priorities.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.dto;
 

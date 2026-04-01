@@ -1,3 +1,10 @@
+/**
+ * Maps fork section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * handling fork strategies and class-switch branching configurations.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -14,13 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-/**
- * Maps fork section descriptors between the DTO and the {@link CommonModel},
- * handling fork strategies and class-switch branching configurations.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class ForkSectionMapper extends AbstractSectionMapper {
 
     // =========================================================================================

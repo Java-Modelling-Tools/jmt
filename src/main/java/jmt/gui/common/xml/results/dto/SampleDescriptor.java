@@ -1,12 +1,11 @@
-package jmt.gui.common.xml.results.dto;
-
 /**
  * Data Transfer Object representing a single statistical sample point
  * within a simulation measure. Used by both normal and parametric analysis results.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
+package jmt.gui.common.xml.results.dto;
 
 public class SampleDescriptor {
 

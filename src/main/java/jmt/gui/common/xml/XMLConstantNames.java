@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
+ */
 public interface XMLConstantNames {
 
     String VAL_ZERO = "0";

@@ -93,9 +93,10 @@ import org.xml.sax.SAXException;
  *
  * @author Bertoli Marco
  *         Date: 27-lug-2005
- *         Time: 13.59.48
  *
  * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use {@link jmt.gui.common.xml.sim.XMLSimReader} instead.
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 @Deprecated
 public class XMLReader implements XMLConstantNames, CommonConstants {
