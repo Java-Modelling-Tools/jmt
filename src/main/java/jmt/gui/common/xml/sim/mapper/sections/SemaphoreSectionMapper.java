@@ -11,6 +11,13 @@ import jmt.gui.common.xml.sim.dto.SectionDescriptor;
 import jmt.gui.common.xml.sim.mapper.MappingContext;
 import jmt.gui.common.xml.sim.serializer.WritingContext;
 
+/**
+ * Maps semaphore section descriptors between the DTO and the {@link CommonModel},
+ * handling semaphore strategy types and per-class threshold configurations.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 public class SemaphoreSectionMapper extends AbstractSectionMapper {
 
     private static final String STRATEGIES_BASE = "jmt.engine.NetStrategies.";

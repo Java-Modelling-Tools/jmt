@@ -7,6 +7,13 @@ import jmt.gui.common.xml.sim.serializer.WritingContext;
 
 import java.util.List;
 
+/**
+ * Maps performance measure descriptors between the {@link SimDescriptor} DTO and
+ * the {@link CommonModel}, in both parsing and serialization directions.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 public class MeasuresMapper implements ModelElementMapper {
 
 
