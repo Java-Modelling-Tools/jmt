@@ -1,3 +1,10 @@
+/**
+ * Maps queue and storage section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * including queue policies, capacity, impatience strategies, and drop rules.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.engine.NetStrategies.ImpatienceStrategies.BalkingParameter;
@@ -18,13 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Maps queue and storage section descriptors between the DTO and the {@link CommonModel},
- * including queue policies, capacity, impatience strategies, and drop rules.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class QueueSectionMapper extends AbstractSectionMapper {
 
     private static final String STRATEGIES_BASE = "jmt.engine.NetStrategies.";

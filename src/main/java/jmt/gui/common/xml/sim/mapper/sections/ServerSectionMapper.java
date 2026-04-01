@@ -4,7 +4,7 @@
  * vacation strategies, switchover times, setup times, and heterogeneous server definitions.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.mapper.sections;
 

@@ -1,3 +1,20 @@
+/**
+ * Serializes a {@link jmt.gui.common.xml.sim.dto.SimDescriptor} DTO into a DOM {@link org.w3c.dom.Document},
+ * which can then be written to file by the new XMLWriter.
+ *
+ * <p>This class is the symmetric counterpart of the XML→DTO parsing phase.
+ * It knows about the DOM structure but knows nothing about {@link jmt.gui.common.definitions.CommonModel}:
+ * all model data must already be encoded in the DTO before calling
+ * {@link jmt.gui.common.xml.sim.serializer.XmlSerializer#serialize(jmt.gui.common.xml.sim.dto.SimDescriptor)}.
+ *
+ * <p><b>Key invariant (replicated from the legacy {@code XMLParameter.appendParameterElement}):</b>
+ * when a {@link jmt.gui.common.xml.sim.dto.ParameterDescriptor} has a {@code refClass}, the
+ * {@code <refClass>} element is appended to the <em>parent</em> node <em>before</em> the parameter
+ * element itself. This matches the original writer's behaviour exactly.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.serializer;
 
 import jmt.gui.common.xml.XMLConstantNames;
@@ -9,22 +26,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-/**
- * Serializes a {@link SimDescriptor} DTO into a DOM {@link Document}, which can then
- * be written to file by the new XMLWriter.
- *
- * <p>This class is the symmetric counterpart of the XML→DTO parsing phase.
- * It knows about the DOM structure but knows nothing about {@link jmt.gui.common.definitions.CommonModel}:
- * all model data must already be encoded in the DTO before calling {@link #serialize(SimDescriptor)}.
- *
- * <p><b>Key invariant (replicated from the legacy {@code XMLParameter.appendParameterElement}):</b>
- * when a {@link ParameterDescriptor} has a {@code refClass}, the {@code <refClass>} element
- * is appended to the <em>parent</em> node <em>before</em> the parameter element itself.
- * This matches the original writer's behaviour exactly.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class XmlSerializer implements XMLConstantNames {
 
     // -----------------------------------------------------------------------

@@ -8,7 +8,7 @@
  * {@link jmt.gui.common.xml.serializer.GuiSerializer} during the writing phase.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.gui.dto;
 

@@ -1,3 +1,12 @@
+/**
+ * Integration test for the refactored XMLWriter pipeline.
+ * Performs a round-trip: XML -> Model -> Generated XML -> Model
+ * and compares the intermediate DTO representations to ensure perfect
+ * semantic data retention without relying on raw string diffs.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -14,15 +23,6 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Integration test for the refactored XMLWriter pipeline.
- * Performs a round-trip: XML -> Model -> Generated XML -> Model
- * and compares the intermediate DTO representations to ensure perfect
- * semantic data retention without relying on raw string diffs.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 class XMLSimWriterTest {
 
     @TempDir

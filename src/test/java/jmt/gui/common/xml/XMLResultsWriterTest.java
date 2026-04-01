@@ -1,3 +1,11 @@
+/**
+ * Integration round-trip tests for the refactored {@link jmt.gui.common.xml.results.XMLResultsWriter}.
+ * Verifies that results data (standard and parametric) survives a full write-then-reload cycle
+ * with no semantic loss, using AssertJ's deep recursive comparison on the DTO layer.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -19,19 +27,6 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Integration round-trip tests for the refactored {@link XMLResultsWriter}.
- *
- * <h3>Strategy</h3>
- * Each test loads an XML archive, parses the {@code <results>} section into a
- * {@link StoredResultsModel} (or {@link PAResultsModel} for parametric files), maps
- * it to the expected {@link ResultsDescriptor} DTO, writes it back to a temporary file
- * via {@link XMLResultsWriter#writeXML}, reloads the written file, and compares the
- * round-tripped DTO against the original using AssertJ's deep recursive comparison.
- *
- * <p>No {@code equals()} implementation is required on the DTO classes because AssertJ's
- * {@code usingRecursiveComparison()} compares all fields by reflection.
- */
 class XMLResultsWriterTest {
 
     @TempDir

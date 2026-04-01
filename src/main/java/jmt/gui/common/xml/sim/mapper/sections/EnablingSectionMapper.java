@@ -3,7 +3,7 @@
  * It handles the parsing and writing of the Petri Net transition conditions (enabling/inhibiting).
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.mapper.sections;
 

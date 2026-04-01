@@ -1,3 +1,10 @@
+/**
+ * Base class for all section-level mappers, providing shared utilities for
+ * DTO-to-model and model-to-DTO conversions of node section parameters.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -17,13 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Base class for all section-level mappers, providing shared utilities for
- * DTO-to-model and model-to-DTO conversions of node section parameters.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public abstract class AbstractSectionMapper implements ModelElementMapper {
 
 

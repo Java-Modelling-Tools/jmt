@@ -1,3 +1,11 @@
+/**
+ * Integration round-trip tests for the refactored {@link jmt.gui.common.xml.gui.GuiXMLWriter}.
+ * Verifies that GUI descriptor data survives a full save-then-reload cycle with no semantic loss,
+ * using AssertJ's deep recursive comparison on the DTO layer.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.gui.common.xml.gui.dto.GuiDescriptor;
@@ -11,19 +19,6 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Integration round-trip tests for the refactored {@link jmt.gui.common.xml.gui.GuiXMLWriter}.
- *
- * <h3>Strategy</h3>
- * Each test loads an XML archive into a {@link JSimGraphModel}, extracts the expected
- * {@link GuiDescriptor} DTO via {@link GuiDescriptorMapper}, saves the model with
- * {@link XMLArchiver#saveModel} (which invokes the new {@code GuiXMLWriter} pipeline),
- * reloads the saved file, and compares the round-tripped DTO against the expected one
- * using AssertJ's deep recursive comparison.
- *
- * <p>No {@code equals()} implementation is required on the DTO classes because AssertJ's
- * {@code usingRecursiveComparison()} compares all fields by reflection.
- */
 class GuiXMLWriterTest {
 
     @TempDir

@@ -1,3 +1,10 @@
+/**
+ * Maps router section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * handling all routing strategy types and per-class probability distributions.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -11,13 +18,6 @@ import jmt.gui.common.xml.sim.serializer.WritingContext;
 
 import java.util.*;
 
-/**
- * Maps router section descriptors between the DTO and the {@link CommonModel},
- * handling all routing strategy types and per-class probability distributions.
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class RouterSectionMapper extends AbstractSectionMapper {
 
 

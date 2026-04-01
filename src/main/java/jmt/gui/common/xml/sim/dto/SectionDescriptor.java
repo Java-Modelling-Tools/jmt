@@ -3,7 +3,7 @@
  * A section typically defines a specific behavior or configuration, like a routing strategy or a server's properties.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.dto;
 

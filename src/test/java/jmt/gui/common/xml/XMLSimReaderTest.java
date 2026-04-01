@@ -1,3 +1,11 @@
+/**
+ * Integration test suite for {@link jmt.gui.common.xml.sim.XMLSimReader#parseXML(org.w3c.dom.Element, jmt.gui.common.definitions.CommonModel)}.
+ * Verifies that the public contract of {@code parseXML} is preserved across refactoring,
+ * with each test targeting one specific behaviour via an inline XML string.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.engine.NetStrategies.ImpatienceStrategies.ImpatienceType;

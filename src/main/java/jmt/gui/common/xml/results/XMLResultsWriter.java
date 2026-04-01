@@ -7,7 +7,7 @@
  * <p>Phase 2 — {@link ResultsSerializer}: {@link ResultsDescriptor} → DOM {@link Document}</p>
  *
  * @author Borgna Daniele (Refactoring)
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.results;
 

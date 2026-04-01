@@ -48,7 +48,8 @@ import org.w3c.dom.NodeList;
  * 
  * @author Bertoli Marco
  *         Date: 27-lug-2005
- *         Time: 11.04.13
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 @Deprecated
 public class GuiXMLReader implements GuiXMLConstants {

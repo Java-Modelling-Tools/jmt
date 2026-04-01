@@ -3,7 +3,7 @@
  * It holds all the properties of a measure, such as its name, type, and the node it refers to.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.dto;
 

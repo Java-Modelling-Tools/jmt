@@ -1,3 +1,10 @@
+/**
+ * Refactored replacement for the legacy {@code XMLReader}, reading simulation model data from XML
+ * using a two-phase Parse then Map pipeline (DTO intermediate representation).
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim;
 
 import jmt.common.xml.XSDSchemaLoader;
@@ -15,15 +22,6 @@ import org.w3c.dom.Element;
 
 import java.io.File;
 
-/**
- * <p>Title: XML Reader</p>
- * <p>Description: New version of {@link XMLReader}. Reads model information from an XML file. This class provides
- * methods for model load.</p>
- *
- * @author Borgna Daniele
- *         Date: 25-mar-2026
- *
- */
 public class XMLSimReader implements XMLConstantNames {
     private XMLSimReader() {
         /* This utility class should not be instantiated */

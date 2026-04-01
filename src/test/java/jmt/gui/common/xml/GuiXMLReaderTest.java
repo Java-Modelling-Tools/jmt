@@ -1,3 +1,11 @@
+/**
+ * Integration test suite for {@link jmt.gui.common.xml.gui.GuiXMLReader#parseXML(org.w3c.dom.Element, jmt.gui.common.definitions.CommonModel)}.
+ * Verifies that GUI-specific data (user-class colors, station positions, connection shapes,
+ * and parametric-analysis configuration) is correctly parsed from the {@code <jmodel>} section.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.gui.common.definitions.CommonModel;
@@ -18,22 +26,6 @@ import java.io.File;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
-/**
- * Integration test suite for {@link GuiXMLReader#parseXML(Element, CommonModel)}.
- *
- * <h3>Architecture under test</h3>
- * The legacy {@link GuiXMLReader} which reads the {@code <jmodel>} section of an
- * archive and sets GUI-specific data on the model: user-class colors, station
- * positions (including {@code rotate} and {@code angle} attributes), connection
- * shapes, and parametric-analysis configuration.
- *
- * <h3>Test strategy</h3>
- * Each test loads an XML archive via {@link XMLArchiver#loadModel} into a
- * {@link JSimGraphModel} (which extends {@link CommonModel} and satisfies the
- * {@code instanceof JSimGraphModel} guard inside the reader), then extracts the
- * {@code <jmodel>} element and calls {@link GuiXMLReader#parseXML} directly.
- * This isolates the GUI reading layer from the simulation-model layer.
- */
 class GuiXMLReaderTest {
 
     // -----------------------------------------------------------------------

@@ -9,7 +9,7 @@
  * {@link ResultsDescriptor} DTOs and has no knowledge of any results model class.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.results.parsers;
 

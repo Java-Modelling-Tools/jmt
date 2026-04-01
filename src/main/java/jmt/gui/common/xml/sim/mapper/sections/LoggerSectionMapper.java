@@ -3,7 +3,7 @@
  * It configures the logging parameters, such as the output file and specific logging flags.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.mapper.sections;
 

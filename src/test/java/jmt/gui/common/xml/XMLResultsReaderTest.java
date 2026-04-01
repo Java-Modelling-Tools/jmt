@@ -1,3 +1,11 @@
+/**
+ * Integration test suite for {@link jmt.gui.common.xml.results.XMLResultsReader#parseXML(org.w3c.dom.Element, jmt.gui.common.definitions.MeasureDefinition)}.
+ * Exercises the full results reading pipeline (DOM to DTO to model) for both standard and
+ * parametric analysis archives.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml;
 
 import jmt.framework.gui.graph.MeasureValue;

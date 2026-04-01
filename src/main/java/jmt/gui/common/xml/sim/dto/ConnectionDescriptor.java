@@ -2,7 +2,7 @@
  * This class is a Data Transfer Object (DTO) that represents a connection between two nodes in the simulation model.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim.dto;
 

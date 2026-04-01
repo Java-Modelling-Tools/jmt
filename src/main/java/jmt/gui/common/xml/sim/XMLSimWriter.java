@@ -1,10 +1,10 @@
 /**
- * Copyright (C) 2016, Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano
- * <p>
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * Writes model information to an XML file. Provides methods for model save.
+ * Completely refactored to use the DTO/Mapper architecture.
+ *
+ * @author Bertoli Marco (Original)
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.sim;
 
@@ -22,15 +22,6 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.OutputStream;
 
-/**
- * <p>Title: XML Writer</p>
- * <p>Description: Writes model information to an XML file. This class provides
- * methods for model save. Completely refactored to use the DTO/Mapper architecture.</p>
- *
- * @author Bertoli Marco (Original)
- * @author Borgna Daniele (Refactoring)
- * @since 25-mar-2026
- */
 public class XMLSimWriter implements XMLConstantNames {
 
     private XMLSimWriter() {

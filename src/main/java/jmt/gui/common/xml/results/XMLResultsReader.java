@@ -8,7 +8,7 @@
  * <p>Phase 2 — {@link ResultsDescriptorMapper}: {@link ResultsDescriptor} → {@link MeasureDefinition}</p>
  *
  * @author Borgna Daniele (Refactoring)
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.results;
 

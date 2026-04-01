@@ -1,3 +1,10 @@
+/**
+ * Maps storage section descriptors between the DTO and the {@link jmt.gui.common.definitions.CommonModel},
+ * configuring capacity limits, class-specific constraints, and drop rules for Place-type nodes.
+ *
+ * @author Borgna Daniele
+ *         Date: 25-mar-2026
+ */
 package jmt.gui.common.xml.sim.mapper.sections;
 
 import jmt.gui.common.CommonConstants;
@@ -9,13 +16,6 @@ import jmt.gui.common.xml.sim.dto.SectionDescriptor;
 import jmt.gui.common.xml.sim.mapper.MappingContext;
 import jmt.gui.common.xml.sim.serializer.WritingContext;
 
-/**
- * This class is responsible for mapping the Storage section of a node.
- * It configures capacity limits, class-specific constraints, and drop rules (e.g., for Places).
- *
- * @author Borgna Daniele
- * @since 25-mar-2026
- */
 public class StorageSectionMapper extends AbstractSectionMapper {
 
     // --- READING PHASE (XML -> DTO -> Model) ---

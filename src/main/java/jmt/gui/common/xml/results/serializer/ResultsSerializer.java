@@ -5,7 +5,7 @@
  * results model classes.
  *
  * @author Borgna Daniele
- * @since 25-mar-2026
+ *         Date: 25-mar-2026
  */
 package jmt.gui.common.xml.results.serializer;
 

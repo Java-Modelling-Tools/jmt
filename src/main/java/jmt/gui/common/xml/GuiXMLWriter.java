@@ -53,7 +53,8 @@ import org.w3c.dom.Node;
  * 
  * @author Bertoli Marco
  *         Date: 22-lug-2005
- *         Time: 15.54.48
+ * @author Borgna Daniele (Refactoring)
+ *         Date: 25-mar-2026
  */
 @Deprecated
 public class GuiXMLWriter implements GuiXMLConstants {
