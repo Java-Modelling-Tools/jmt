@@ -14,6 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * Maps fork section descriptors between the DTO and the {@link CommonModel},
+ * handling fork strategies and class-switch branching configurations.
+ *
+ * @author Borgna Daniele
+ * @since 25-mar-2026
+ */
 public class ForkSectionMapper extends AbstractSectionMapper {
 
     // =========================================================================================
