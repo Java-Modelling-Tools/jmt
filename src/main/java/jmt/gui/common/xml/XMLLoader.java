@@ -8,7 +8,12 @@ import org.xml.sax.SAXException;
 import java.io.FileReader;
 import java.io.IOException;
 
+
 public class XMLLoader implements XMLConstantNames {
+    private XMLLoader() {
+        /* This utility class should not be instantiated */
+    }
+
     public static Document loadXML(String filename, String schemaSource) {
         DOMParser parser = new DOMParser();
         try {

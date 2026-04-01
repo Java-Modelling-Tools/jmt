@@ -38,6 +38,8 @@ import java.io.File;
  * @author Bertoli Marco
  *         Date: 3-ott-2005
  *         Time: 12.27.00
+ *
+ * @deprecated This class is now deprecated and should not be used anymore. It is kept only for backward traceability. Use {@link jmt.gui.common.xml.results.XMLResultsWriter} instead.
  */
 @Deprecated
 public class XMLResultsReader implements XMLResultsConstants {
