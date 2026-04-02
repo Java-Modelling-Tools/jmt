@@ -9,13 +9,12 @@ package jmt.gui.common.xml.sim;
 
 import jmt.common.xml.XSDSchemaLoader;
 import jmt.gui.common.definitions.CommonModel;
-import jmt.gui.common.xml.XMLReader;
 import jmt.gui.common.xml.XMLArchiver;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.XMLLoader;
 import jmt.gui.common.xml.sim.dto.SimDescriptor;
-import jmt.gui.common.xml.sim.parsers.NodeParser;
 import jmt.gui.common.xml.sim.mapper.SimDescriptorMapper;
+import jmt.gui.common.xml.sim.parsers.NodeParser;
 import jmt.gui.common.xml.sim.parsers.SimParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;

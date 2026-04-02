@@ -123,19 +123,16 @@ public class GuiSerializer implements GuiXMLConstants {
 
     private void writeParametricAnalysis(Document doc, Element root, GuiDescriptor dto) {
         ParametricAnalysisDescriptor pad = dto.getParametricAnalysis();
-        if (pad == null) return;
+        if (pad == null || !pad.isEnabled() || pad.getClassPath() == null) return;
 
         Element el = doc.createElement(XML_E_PARAMETRIC);
         el.setAttribute(XML_A_PARAMETRIC_ENABLED, Boolean.toString(pad.isEnabled()));
-
-        if (pad.isEnabled() && pad.getClassPath() != null) {
-            el.setAttribute(XML_A_PARAMETRIC_CLASSPATH, pad.getClassPath());
-            for (java.util.Map.Entry<String, String> entry : pad.getProperties().entrySet()) {
-                Element field = doc.createElement(XML_E_FIELD);
-                field.setAttribute(XML_A_FIELD_NAME,  entry.getKey());
-                field.setAttribute(XML_A_FIELD_VALUE, entry.getValue());
-                el.appendChild(field);
-            }
+        el.setAttribute(XML_A_PARAMETRIC_CLASSPATH, pad.getClassPath());
+        for (java.util.Map.Entry<String, String> entry : pad.getProperties().entrySet()) {
+            Element field = doc.createElement(XML_E_FIELD);
+            field.setAttribute(XML_A_FIELD_NAME,  entry.getKey());
+            field.setAttribute(XML_A_FIELD_VALUE, entry.getValue());
+            el.appendChild(field);
         }
         root.appendChild(el);
     }

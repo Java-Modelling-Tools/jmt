@@ -182,8 +182,8 @@ public class QueueSectionMapper extends AbstractSectionMapper {
                 model.setImpatienceParameter(key, classKey, new RenegingParameter((Distribution) parseServiceStrategy(p, ctx)));
             } else if (type == ImpatienceType.BALKING) {
                 List<ParameterDescriptor> subs = getSubParams(p);
-                BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 1), ctx));
-                String bVal = val(getAt(subs, 3));
+                BalkingParameter bp = new BalkingParameter((LDStrategy) parseServiceStrategy(getAt(subs, 0), ctx));
+                String bVal = val(getAt(subs, 1));
                 if (bVal != null) bp.setPriorityActivated(Boolean.parseBoolean(bVal));
                 model.setImpatienceParameter(key, classKey, bp);
             } else {
