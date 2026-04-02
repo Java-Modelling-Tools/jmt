@@ -668,7 +668,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             List<Boolean> comp = (i < compatibilities.size()) ? new ArrayList<>(compatibilities.get(i)) : new ArrayList<>();
             while (comp.size() < numClasses) comp.add(Boolean.TRUE);
             String sName = (i < serverNames.size() && serverNames.get(i) != null)
-                    ? serverNames.get(i) : "Server " + (i + 1);
+                    ? serverNames.get(i) : "Server Type " + (i + 1);
             model.addServerType(key, sName, n, comp, true);
         }
     }
