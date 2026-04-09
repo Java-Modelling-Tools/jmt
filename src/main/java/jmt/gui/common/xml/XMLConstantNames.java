@@ -224,8 +224,8 @@ public interface XMLConstantNames {
     String PARAM_SERVER_TYPES_COMPATIBILITIES = "serverTypesCompatibilities";
     String PARAM_SERVICE_STRATEGY = "ServiceStrategy";
     String PARAM_SERVICE_TIME_STRATEGY = "ServiceTimeStrategy";
-    String SERVICE_TIME_STRATEGY_CLASS = "jmt.engine.random.ServiceTimeStrategy";
-    String SERVICE_STRATEGY_CLASS = "jmt.engine.random.ServiceStrategy";
+    String SERVICE_TIME_STRATEGY_CLASS = "jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy";
+    String SERVICE_STRATEGY_CLASS = "jmt.engine.NetStrategies.ServiceStrategy";
     String CLASSNAME_TUNNEL = "ServiceTunnel";
     String PARAM_SERVICE_WEIGHTS = "serviceWeights";
     String XML_E_STATION_SET_UP = "setUp";

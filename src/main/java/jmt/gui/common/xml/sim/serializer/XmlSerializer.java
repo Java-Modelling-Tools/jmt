@@ -333,8 +333,23 @@ public class XmlSerializer implements XMLConstantNames {
         if (p.getName() != null) {
             el.setAttribute(XML_A_PARAMETER_NAME, p.getName());
         }
-        if (p.isArray()) {
+
+        boolean hasSubParameters = p.getSubParameters() != null && !p.getSubParameters().isEmpty();
+        boolean isLeafWithValue = p.getValue() != null && !hasSubParameters;
+        boolean hasRefClassGroupedChildren = hasSubParameters
+                && p.getSubParameters().stream().anyMatch(sp -> sp.getRefClass() != null && !sp.getRefClass().isEmpty());
+
+        // Legacy-compat:
+        // - leaf nodes with <value> are scalar (no array attr)
+        // - group-by-refClass parameters must be array for SimLoader
+        if (!isLeafWithValue && (p.isArray() || hasRefClassGroupedChildren)) {
             el.setAttribute(XML_A_PARAMETER_ARRAY, VAL_TRUE_STRING);
+        }
+
+        // Legacy-compat: map parameters (e.g., advancedFeatures) must carry map="true"
+        // so SimLoader handles them as map containers instead of constructor arguments.
+        if (p.isMap()) {
+            el.setAttribute(XML_A_PARAMETER_MAP, VAL_TRUE_STRING);
         }
 
         if (p.getValue() != null) {

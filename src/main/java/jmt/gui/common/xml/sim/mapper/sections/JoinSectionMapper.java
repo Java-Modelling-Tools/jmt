@@ -109,7 +109,8 @@ public class JoinSectionMapper extends AbstractSectionMapper {
         globalJoin.setName("JoinStrategy");
         globalJoin.setClassPath("jmt.engine.NetStrategies.JoinStrategy");
         globalJoin.setSubParameters(joinStrats);
-        globalJoin.setArray(false);
+        // Legacy-compat: group-by-refClass parameters are arrays for SimLoader.
+        globalJoin.setArray(true);
 
         sec.getParameters().add(globalJoin);
     }
@@ -127,7 +128,7 @@ public class JoinSectionMapper extends AbstractSectionMapper {
             numRequired.setName(XMLConstantNames.PARAM_NUM_REQUIRED);
             numRequired.setClassPath(Integer.class.getName());
             numRequired.setValue(String.valueOf(js.getRequiredNum()));
-            numRequired.setArray(true);
+            numRequired.setArray(false);
             subParams.add(numRequired);
         } else if (js instanceof GuardJoin) {
             GuardJoin gj = (GuardJoin) js;
@@ -152,14 +153,14 @@ public class JoinSectionMapper extends AbstractSectionMapper {
                     classSub.setName("class");
                     classSub.setClassPath(String.class.getName());
                     classSub.setValue(model.getClassName(c));
-                    classSub.setArray(true);
+                    classSub.setArray(false);
                     classList.add(classSub);
 
                     ParameterDescriptor numSub = new ParameterDescriptor();
                     numSub.setName("required");
                     numSub.setClassPath(String.class.getName());
                     numSub.setValue(required.toString());
-                    numSub.setArray(true);
+                    numSub.setArray(false);
                     numberList.add(numSub);
                 }
             }

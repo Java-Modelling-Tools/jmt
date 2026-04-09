@@ -128,11 +128,64 @@ public class StationsMapper implements ModelElementMapper {
         List<SectionDescriptor> sections = node.getSections();
         if (sections != null) {
             for (SectionDescriptor section : sections) {
+                if (!shouldMapSectionForStationType(type, section.getClassName())) {
+                    continue;
+                }
                 AbstractSectionMapper mapper = SECTION_MAPPERS.get(section.getClassName());
                 if (mapper != null) {
                     mapper.mapDtoToCommonModel(section, model, stationKey, node, type, context);
                 }
             }
+        }
+    }
+
+    private boolean shouldMapSectionForStationType(String stationType, String sectionClassName) {
+        if (stationType == null || sectionClassName == null) {
+            return false;
+        }
+        switch (stationType) {
+            case CommonConstants.STATION_TYPE_SOURCE:
+                return CLASSNAME_SOURCE.equals(sectionClassName) || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_TERMINAL:
+                return CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_ROUTER:
+                return CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_DELAY:
+                return CLASSNAME_QUEUE.equals(sectionClassName)
+                        || CLASSNAME_DELAY.equals(sectionClassName)
+                        || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_SERVER:
+                return CLASSNAME_QUEUE.equals(sectionClassName)
+                        || CLASSNAME_SERVER.equals(sectionClassName)
+                        || CLASSNAME_PREEMPTIVESERVER.equals(sectionClassName)
+                        || CLASSNAME_PSSERVER.equals(sectionClassName)
+                        || CLASSNAME_PSSERVER_PRIORITY.equals(sectionClassName)
+                        || CLASSNAME_EXHAUSTIVEPSERVER.equals(sectionClassName)
+                        || CLASSNAME_LKPSERVER.equals(sectionClassName)
+                        || CLASSNAME_GATEDPSERVER.equals(sectionClassName)
+                        || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_FORK:
+                return CLASSNAME_QUEUE.equals(sectionClassName) || CLASSNAME_FORK.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_JOIN:
+                return CLASSNAME_JOIN.equals(sectionClassName) || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_LOGGER:
+                return CLASSNAME_LOGGER.equals(sectionClassName) || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_CLASSSWITCH:
+                return CLASSNAME_QUEUE.equals(sectionClassName)
+                        || CLASSNAME_CLASSSWITCH.equals(sectionClassName)
+                        || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_SEMAPHORE:
+                return CLASSNAME_SEMAPHORE.equals(sectionClassName) || CLASSNAME_ROUTER.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_SCALER:
+                return CLASSNAME_JOIN.equals(sectionClassName) || CLASSNAME_FORK.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_PLACE:
+                return CLASSNAME_STORAGE.equals(sectionClassName);
+            case CommonConstants.STATION_TYPE_TRANSITION:
+                return CLASSNAME_ENABLING.equals(sectionClassName)
+                        || CLASSNAME_TIMING.equals(sectionClassName)
+                        || CLASSNAME_FIRING.equals(sectionClassName);
+            default:
+                return false;
         }
     }
 
@@ -237,23 +290,17 @@ public class StationsMapper implements ModelElementMapper {
 
     private void extractAndSetDeadlines(NodeDescriptor node, CommonModel model, Object stationKey, List<Object> classKeys) {
         List<Double> deadlines = new ArrayList<>();
-        boolean hasNonZeroDeadline = false;
 
         for (Object classKey : classKeys) {
             Double deadline = model.getClassStationSoftDeadline(stationKey, classKey);
             if (deadline == null) {
                 deadline = 0.0;
             }
-            if (deadline > 0.0) {
-                hasNonZeroDeadline = true;
-            }
             deadlines.add(deadline);
         }
 
-        // Append the list to the node only if at least one deadline is actually set
-        if (hasNonZeroDeadline) {
-            node.setClassSoftDeadlines(deadlines);
-        }
+        // Legacy writer emits classSoftDeadlines for all classes on Delay/Server stations.
+        node.setClassSoftDeadlines(deadlines);
     }
 
     private void mapModelQuantumParametersToDto(NodeDescriptor node, CommonModel model, Object stationKey, String type) {

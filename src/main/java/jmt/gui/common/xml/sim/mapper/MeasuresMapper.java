@@ -8,6 +8,7 @@
 package jmt.gui.common.xml.sim.mapper;
 
 import jmt.gui.common.definitions.CommonModel;
+import jmt.gui.common.definitions.SimulationDefinition;
 import jmt.gui.common.xml.sim.dto.MeasureDescriptor;
 import jmt.gui.common.xml.sim.dto.SimDescriptor;
 import jmt.gui.common.xml.sim.serializer.WritingContext;
@@ -36,7 +37,8 @@ public class MeasuresMapper implements ModelElementMapper {
 
         Object key = model.addMeasure(m.getType(), stationKey, classKey, alpha, precision, verbose);
 
-        if (stationKey != null && isPresent(m.getServerType())) {
+        // Legacy-compat: try to bind serverType whenever station is set (even if XML attribute is empty).
+        if (stationKey != null) {
             model.setMeasureServerTypeKey(model.getServerTypeKey(stationKey, m.getServerType()), key);
         }
     }
@@ -55,12 +57,12 @@ public class MeasuresMapper implements ModelElementMapper {
         String type = m.getType();
         if (!isPresent(className)) return null;
 
-        if (isFiringMeasure(type)) return resolveFiringClassKey(className, stationKey, context);
+        if (SimulationDefinition.MEASURE_FX.equals(type)) return resolveFiringClassKey(className, stationKey, context);
         else return context.classes.get(className);
     }
 
     private boolean isFiringMeasure(String type) {
-        return type != null && (type.equals(MEASURE_TYPE_FIRING_THROUGHPUT) || type.equals(MEASURE_TYPE_FIRE_FREQUENCY) || type.endsWith(MEASURE_TYPE_FX));
+        return SimulationDefinition.MEASURE_FX.equals(type);
     }
 
     private Object resolveFiringClassKey(String className, Object stationKey, MappingContext context) {
@@ -86,32 +88,15 @@ public class MeasuresMapper implements ModelElementMapper {
         }
     }
 
-    private void mapModelMeasureToDto(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
-        String measureType = model.getMeasureType(measureKey);
-        measureDto.setType(measureType);
-
-        Object stationKey = model.getMeasureStation(measureKey);
-        String refNodeName = resolveAndSetNodeAttributes(model, stationKey, measureDto);
-        String refClassName = resolveReferenceClassName(model, measureKey);
-
-        measureDto.setReferenceNode(refNodeName);
-        measureDto.setReferenceUserClass(refClassName);
-        measureDto.setName(buildMeasureName(refNodeName, refClassName, measureType));
-
-        setNumericAndBooleanAttributes(model, measureKey, measureDto);
-
-        String serverType = resolveServerType(model, measureKey, stationKey);
-        if (serverType != null) {
-            measureDto.setServerType(serverType);
-        }
-    }
-
     private String resolveAndSetNodeAttributes(CommonModel model, Object stationKey, MeasureDescriptor measureDto) {
-        measureDto.setNodeType(NODETYPE_STATION);
-        if (stationKey == null) return "";
+        if (stationKey == null) {
+            measureDto.setNodeType("");
+            return "";
+        }
 
         String stationName = model.getStationName(stationKey);
         if (stationName != null) {
+            measureDto.setNodeType(NODETYPE_STATION);
             return stationName;
         }
 
@@ -121,6 +106,7 @@ public class MeasuresMapper implements ModelElementMapper {
             return regionName;
         }
 
+        measureDto.setNodeType("");
         return "";
     }
 
@@ -151,6 +137,8 @@ public class MeasuresMapper implements ModelElementMapper {
         Double alpha = model.getMeasureAlpha(measureKey);
         if (alpha != null) {
             double xmlAlpha = 1.0 - alpha;
+            // Legacy writer keeps 10 decimal digits.
+            xmlAlpha = Math.rint(xmlAlpha * 1e10) / 1e10;
             measureDto.setAlpha(String.valueOf(xmlAlpha));
         }
 
@@ -176,5 +164,39 @@ public class MeasuresMapper implements ModelElementMapper {
             }
         }
         return null;
+    }
+
+    private String resolveMeasureName(CommonModel model, Object measureKey, String refNodeName, String refClassName, String measureType) {
+        Object stationKey = model.getMeasureStation(measureKey);
+        Object serverTypeKey = model.getMeasureServerTypeKey(measureKey);
+
+        String prefix = refNodeName;
+        if (stationKey != null && serverTypeKey != null && model.getServerType(serverTypeKey) != null) {
+            String serverTypeStationName = model.getServerTypeStationName(serverTypeKey);
+            if (serverTypeStationName != null) {
+                prefix = serverTypeStationName;
+            }
+        }
+        return buildMeasureName(prefix == null ? "" : prefix, refClassName, measureType);
+    }
+
+    private void mapModelMeasureToDto(CommonModel model, Object measureKey, MeasureDescriptor measureDto) {
+        String measureType = model.getMeasureType(measureKey);
+        measureDto.setType(measureType);
+
+        Object stationKey = model.getMeasureStation(measureKey);
+        String refNodeName = resolveAndSetNodeAttributes(model, stationKey, measureDto);
+        String refClassName = resolveReferenceClassName(model, measureKey);
+
+        measureDto.setReferenceNode(refNodeName);
+        measureDto.setReferenceUserClass(refClassName);
+        measureDto.setName(resolveMeasureName(model, measureKey, refNodeName, refClassName, measureType));
+
+        setNumericAndBooleanAttributes(model, measureKey, measureDto);
+
+        String serverType = resolveServerType(model, measureKey, stationKey);
+        if (serverType != null) {
+            measureDto.setServerType(serverType);
+        }
     }
 }
