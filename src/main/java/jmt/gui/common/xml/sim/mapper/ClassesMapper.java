@@ -104,11 +104,22 @@ public class ClassesMapper implements ModelElementMapper {
 
         // Reference Source
         Object refStationKey = model.getClassRefStation(classKey);
-        if (refStationKey != null) {
-            String refStationName = model.getStationName(refStationKey);
-            if (refStationName != null) {
-                classDto.setReferenceSource(refStationName);
-            }
+        String referenceSource = resolveReferenceSourceForClass(model, refStationKey);
+        if (referenceSource != null) {
+            classDto.setReferenceSource(referenceSource);
         }
+    }
+
+    private String resolveReferenceSourceForClass(CommonModel model, Object refStationKey) {
+        if (refStationKey == null) {
+            return null;
+        }
+        if (CommonConstants.STATION_TYPE_FORK.equals(refStationKey)
+                || CommonConstants.STATION_TYPE_CLASSSWITCH.equals(refStationKey)
+                || CommonConstants.STATION_TYPE_SCALER.equals(refStationKey)
+                || CommonConstants.STATION_TYPE_TRANSITION.equals(refStationKey)) {
+            return (String) refStationKey;
+        }
+        return model.getStationName(refStationKey);
     }
 }
