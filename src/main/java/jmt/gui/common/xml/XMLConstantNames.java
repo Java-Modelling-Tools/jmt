@@ -327,7 +327,7 @@ public interface XMLConstantNames {
     String STR_DISABLED_STRATEGY = "DisabledStrategy";
     String STR_LOAD_DEPENDENT = "LoadDependent";
     String XML_DOUBLE_CLASS = "java.lang.Double";
-    String CP_FORK_STRATEGY = "jmt.engine.random.ForkStrategy";
+    String CP_FORK_STRATEGY = "jmt.engine.NetStrategies.ForkStrategy";
     String XML_E_EMPIRICAL_ENTRY_ARRAY = "EmpiricalEntryArray";
     String CP_OUTPATH = "jmt.engine.NetStrategies.ForkStrategies.OutPath";
     String XML_E_OUTPATH_ENTRY = "OutPathEntry";
