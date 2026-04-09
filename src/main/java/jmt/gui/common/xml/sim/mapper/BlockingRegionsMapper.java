@@ -8,13 +8,14 @@
  */
 package jmt.gui.common.xml.sim.mapper;
 
+import jmt.gui.common.Defaults;
 import jmt.gui.common.definitions.CommonModel;
 import jmt.gui.common.xml.XMLConstantNames;
 import jmt.gui.common.xml.sim.dto.BlockingRegionDescriptor;
 import jmt.gui.common.xml.sim.dto.SimDescriptor;
 import jmt.gui.common.xml.sim.serializer.WritingContext;
 
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +39,11 @@ public class BlockingRegionsMapper implements ModelElementMapper {
 
     private void mapBlockingRegion(BlockingRegionDescriptor region, MappingContext context) {
         CommonModel model = context.getModel();
-        Object regionKey = model.addBlockingRegion(region.getName(), region.getType());
+        String regionType = region.getType();
+        if (regionType == null || regionType.isEmpty()) {
+            regionType = Defaults.get("blockingRegionType");
+        }
+        Object regionKey = model.addBlockingRegion(region.getName(), regionType);
         context.regions.put(region.getName(), regionKey);
 
         applyGlobalConstraints(model, regionKey, region.getGlobalConstraints());
@@ -81,7 +86,10 @@ public class BlockingRegionsMapper implements ModelElementMapper {
             if (constraintsMap.get(XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY) != null) {
                 model.setRegionClassMemorySize(regionKey, classKey, Integer.parseInt(constraintsMap.get(XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY)));
             }
-            if (constraintsMap.get(XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE) != null) {
+            // Legacy-compat: softDeadline era applicato solo nel loop vincolato dalla cardinalita' classSize.
+            if (constraintsMap.get(XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE) != null
+                    && region.getClassSizes() != null
+                    && region.getClassSizes().containsKey(className)) {
                 model.setRegionClassSoftDeadline(regionKey, classKey, Double.parseDouble(constraintsMap.get(XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE)));
             }
         });
@@ -118,42 +126,46 @@ public class BlockingRegionsMapper implements ModelElementMapper {
     }
 
     private void applyGroups(CommonModel model, Object regionKey, BlockingRegionDescriptor region, MappingContext context) {
-        Set<String> groupNames = collectGroupNames(region);
-        int groupIndex = 0;
-        for (String groupName : groupNames) {
+        if (region.getGroupConstraints() == null || region.getGroupConstraints().isEmpty()) {
+            return;
+        }
+
+        List<Map.Entry<String, String>> groupConstraintEntries = new ArrayList<>(region.getGroupConstraints().entrySet());
+        List<Map.Entry<String, String>> groupMemoryEntries = region.getGroupMemoryConstraints() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(region.getGroupMemoryConstraints().entrySet());
+        List<Map.Entry<String, List<String>>> groupClassListEntries = region.getGroupClassLists() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(region.getGroupClassLists().entrySet());
+
+        // Legacy-compat: i gruppi nascono solo da groupConstraint e gli altri blocchi si applicano per indice.
+        for (int groupIndex = 0; groupIndex < groupConstraintEntries.size(); groupIndex++) {
+            Map.Entry<String, String> groupConstraint = groupConstraintEntries.get(groupIndex);
+            String groupName = groupConstraint.getKey();
             model.addRegionGroup(regionKey, groupName);
-            applyGroupConstraints(model, regionKey, groupIndex, groupName, region);
-            applyGroupClasses(model, regionKey, groupIndex, groupName, region, context);
-            groupIndex++;
-        }
-    }
 
-    private Set<String> collectGroupNames(BlockingRegionDescriptor region) {
-        Set<String> groupNames = new LinkedHashSet<>();
-        if (region.getGroupConstraints() != null) groupNames.addAll(region.getGroupConstraints().keySet());
-        if (region.getGroupMemoryConstraints() != null) groupNames.addAll(region.getGroupMemoryConstraints().keySet());
-        if (region.getGroupClassLists() != null) groupNames.addAll(region.getGroupClassLists().keySet());
-        return groupNames;
-    }
+            String maxJobs = groupConstraint.getValue();
+            if (maxJobs != null) {
+                model.setRegionGroupCustomerConstraint(regionKey, groupIndex, Integer.parseInt(maxJobs));
+            }
 
-    private void applyGroupConstraints(CommonModel model, Object regionKey, int groupIndex, String groupName, BlockingRegionDescriptor region) {
-        String maxJobs = region.getGroupConstraints() != null ? region.getGroupConstraints().get(groupName) : null;
-        if (maxJobs != null) {
-            model.setRegionGroupCustomerConstraint(regionKey, groupIndex, Integer.parseInt(maxJobs));
-        }
-        String maxMemory = region.getGroupMemoryConstraints() != null ? region.getGroupMemoryConstraints().get(groupName) : null;
-        if (maxMemory != null) {
-            model.setRegionGroupMemorySize(regionKey, groupIndex, Integer.parseInt(maxMemory));
-        }
-    }
+            if (groupIndex < groupMemoryEntries.size()) {
+                String maxMemory = groupMemoryEntries.get(groupIndex).getValue();
+                if (maxMemory != null) {
+                    model.setRegionGroupMemorySize(regionKey, groupIndex, Integer.parseInt(maxMemory));
+                }
+            }
 
-    private void applyGroupClasses(CommonModel model, Object regionKey, int groupIndex, String groupName, BlockingRegionDescriptor region, MappingContext context) {
-        List<String> classes = region.getGroupClassLists() != null ? region.getGroupClassLists().get(groupName) : null;
-        if (classes == null) return;
-        for (String className : classes) {
-            Object classKey = context.classes.get(className);
-            if (classKey != null) {
-                model.addClassIntoRegionGroup(regionKey, groupIndex, classKey);
+            if (groupIndex < groupClassListEntries.size()) {
+                List<String> classes = groupClassListEntries.get(groupIndex).getValue();
+                if (classes != null) {
+                    for (String className : classes) {
+                        Object classKey = context.classes.get(className);
+                        if (classKey != null) {
+                            model.addClassIntoRegionGroup(regionKey, groupIndex, classKey);
+                        }
+                    }
+                }
             }
         }
     }
