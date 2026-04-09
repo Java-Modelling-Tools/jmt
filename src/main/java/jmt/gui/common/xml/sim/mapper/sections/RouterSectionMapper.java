@@ -189,6 +189,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         List<Object> outputs = model.getForwardConnections(key);
         Map<Object, Double> values = rs.getValues();
         ParameterDescriptor entryArray = makeContainer(EMPIRICAL_ENTRY_ARRAY, EMPIRICAL_ENTRY_CLASS);
+        entryArray.setArray(true);
 
         for (Object output : outputs) {
             ParameterDescriptor entry = makeContainer(XMLConstantNames.PARAM_EMPIRICAL_ENTRY, EMPIRICAL_ENTRY_CLASS);
@@ -206,11 +207,13 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         Collections.sort(fromList);
 
         ParameterDescriptor ldArray = makeContainer(XML_E_LD_ROUTING_PARAM, LD_ROUTING_PARAM_CLASS);
+        ldArray.setArray(true);
         for (Integer from : fromList) {
             ParameterDescriptor range = makeContainer(XML_E_LD_ROUTING_PARAM, LD_ROUTING_PARAM_CLASS);
             range.addSubParameter(makeParam(XML_A_FROM, Integer.class.getName(), from.toString()));
 
             ParameterDescriptor entryArray = makeContainer(EMPIRICAL_ENTRY_ARRAY, EMPIRICAL_ENTRY_CLASS);
+            entryArray.setArray(true);
             Map<Object, Double> entries = allEntries.get(from);
             for (Object output : outputs) {
                 ParameterDescriptor entry = makeContainer(XMLConstantNames.PARAM_EMPIRICAL_ENTRY, EMPIRICAL_ENTRY_CLASS);
@@ -234,6 +237,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         Map<Object, Integer> weights = rs.getWeights();
 
         ParameterDescriptor weightArray = makeContainer(XML_E_WEIGHT_ENTRY_ARRAY, WEIGHT_ENTRY_CLASS);
+        weightArray.setArray(true);
         for (Object output : outputs) {
             ParameterDescriptor entry = makeContainer(WEIGHT_ENTRY, WEIGHT_ENTRY_CLASS);
             entry.addSubParameter(makeParam(XML_A_PRELOADSTATION_NAME, String.class.getName(), model.getStationName(output)));
@@ -250,12 +254,14 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         Map<Object, Map<Object, Double>> outPaths = rs.getOutPaths();
 
         ParameterDescriptor csArray = makeContainer(XML_E_CS_ROUTING_PARAM_ARRAY, CS_ROUTING_PARAM_CLASS);
+        csArray.setArray(true);
         for (Object output : outputs) {
             ParameterDescriptor csParam = makeContainer(XML_E_CS_ROUTING_PARAM, CS_ROUTING_PARAM_CLASS);
             csParam.addSubParameter(makeParam(XML_A_PRELOADSTATION_NAME, String.class.getName(), model.getStationName(output)));
             csParam.addSubParameter(makeParam(XMLConstantNames.XML_A_PROBABILITY, Double.class.getName(), values.getOrDefault(output, 0.0).toString()));
 
             ParameterDescriptor classEntryArray = makeContainer(EMPIRICAL_ENTRY_ARRAY, EMPIRICAL_ENTRY_CLASS);
+            classEntryArray.setArray(true);
             Map<Object, Double> outPath = outPaths.getOrDefault(output, Collections.emptyMap());
             for (Object classK : classes) {
                 ParameterDescriptor classEntry = makeContainer(XMLConstantNames.PARAM_EMPIRICAL_ENTRY, EMPIRICAL_ENTRY_CLASS);
