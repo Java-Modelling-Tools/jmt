@@ -112,6 +112,7 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor modeNames = new ParameterDescriptor();
         modeNames.setName(XMLConstantNames.PARAM_MODE_NAMES);
         modeNames.setClassPath(String.class.getName());
+        modeNames.setArray(true);
         for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
             ParameterDescriptor mn = new ParameterDescriptor();
             mn.setName("modeName");
@@ -125,6 +126,7 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor numbersOfServers = new ParameterDescriptor();
         numbersOfServers.setName(XMLConstantNames.PARAM_NUMBERS_OF_SERVERS);
         numbersOfServers.setClassPath(Integer.class.getName());
+        numbersOfServers.setArray(true);
         for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
             ParameterDescriptor nos = new ParameterDescriptor();
             nos.setName("numberOfServers");
@@ -138,6 +140,7 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor timingStrategies = new ParameterDescriptor();
         timingStrategies.setName(XMLConstantNames.PARAM_TIMING_STRATEGIES);
         timingStrategies.setClassPath("jmt.engine.NetStrategies.ServiceStrategy");
+        timingStrategies.setArray(true);
         for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
             Object strategy = model.getFiringTimeDistribution(key, i);
             ParameterDescriptor ts = getDistributionParameter(
@@ -151,6 +154,7 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor firingPriorities = new ParameterDescriptor();
         firingPriorities.setName(XMLConstantNames.PARAM_FIRING_PRIORITIES);
         firingPriorities.setClassPath(Integer.class.getName());
+        firingPriorities.setArray(true);
         for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
             ParameterDescriptor fp = new ParameterDescriptor();
             fp.setName("firingPriority");
@@ -164,6 +168,7 @@ public class TimingSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor firingWeights = new ParameterDescriptor();
         firingWeights.setName(XMLConstantNames.PARAM_FIRING_WEIGHTS);
         firingWeights.setClassPath(Double.class.getName());
+        firingWeights.setArray(true);
         for (int i = 0; i < model.getTransitionModeListSize(key); i++) {
             ParameterDescriptor fw = new ParameterDescriptor();
             fw.setName("firingWeight");

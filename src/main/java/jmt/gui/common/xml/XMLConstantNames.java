@@ -309,6 +309,7 @@ public interface XMLConstantNames {
     String LD_PARAMETER = "LDParameter";
     String CP_LD_PARAMETER = "jmt.engine.NetStrategies.ServiceStrategies.LDParameter";
     String PARAM_FROM = "from";
+    String PARAM_FUNCTION = "function";
     String PARAM_MEAN = "mean";
     String PARAM_DISTR = "distr";
     String CP_DISTRIBUTION = "jmt.engine.random.Distribution";
@@ -377,6 +378,9 @@ public interface XMLConstantNames {
     String STR_POWER_OF_K = "PowerOfK";
     String STR_WEIGHTED_ROUND_ROBIN = "WeightedRoundRobin";
     String STR_CLASS_SWITCH = "ClassSwitch";
+    String STR_SHORTEST_QUEUE = "ShortestQueue";
+    String STR_SHORTEST_RESPONSE_TIME = "ShortestResponseTime";
+    String STR_FASTEST_SERVICE = "FastestService";
 
     String XML_E_LD_ROUTING_PARAM = "LoadDependentRoutingParameter";
     String XML_A_FROM = "from";

@@ -206,8 +206,9 @@ public class QueueSectionMapper extends AbstractSectionMapper {
         writeImpatience(sec, model, key, context);
 
         if (CommonConstants.STATION_TYPE_SERVER.equals(stationType) || CommonConstants.STATION_TYPE_DELAY.equals(stationType)) {
-            mapTransitionConditions(key, sec, model);
+            mapTransitionLikeConditionsForServerDelay(key, sec, model);
         }
+
     }
 
     private void writeQueueSize(SectionDescriptor sec, CommonModel model, Object key) {
@@ -262,7 +263,7 @@ public class QueueSectionMapper extends AbstractSectionMapper {
     }
 
     private void writePutStrategies(SectionDescriptor sec, CommonModel model, Object key) {
-        ParameterDescriptor putStrategies = makeContainer("NetStrategy", STRATEGIES_BASE + "QueuePutStrategy");
+        ParameterDescriptor putStrategies = makeContainer(XMLConstantNames.PARAM_QUEUE_PUT_STRATEGY, STRATEGIES_BASE + "QueuePutStrategy");
         putStrategies.setArray(true);
 
         String stationQueueStrategy = model.getStationQueueStrategy(key);

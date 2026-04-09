@@ -1,6 +1,6 @@
 /**
- * This class is responsible for mapping the Delay section of a node.
- * It handles the parsing and writing of the service strategies and transition conditions.
+ * This class maps the Delay section of a node.
+ * It reads service strategies (and legacy transition conditions if present) and writes only service strategies.
  *
  * @author Borgna Daniele
  *         Date: 25-mar-2026
@@ -31,7 +31,8 @@ public class DelaySectionMapper extends AbstractSectionMapper {
             });
         }
 
-        extractTransitionConditions(key, getParam(sec, "enablingConditions"), getParam(sec, "inhibitingConditions"), getParam(sec, "resourceConditions"), ctx);
+        // Legacy XMLReader: transition conditions for Delay/Server are parsed from Queue section, not Delay section.
+        // See XMLReader.parseQueueSectionDelay() vs XMLReader.parseDelaySection()
     }
 
     // --- WRITING PHASE (Model -> DTO -> XML) ---
@@ -39,6 +40,8 @@ public class DelaySectionMapper extends AbstractSectionMapper {
     @Override
     public void mapCommonModelToDto(SectionDescriptor sec, CommonModel model, Object key, NodeDescriptor node, String stationType, WritingContext context) {
         addServiceStrategyParameter(sec, model, key, context);
-        mapTransitionConditions(key, sec, model);
+        // Transition conditions for Server/Delay are serialized in Queue section.
+        // Keeping Delay section limited to ServiceStrategy preserves engine constructor compatibility.
     }
 }
+

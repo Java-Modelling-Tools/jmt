@@ -115,7 +115,8 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
                 range.addSubParameter(dP.getSubParameters().get(1));
             }
 
-            range.addSubParameter(makeParam(PARAM_MEAN, XML_DOUBLE_CLASS, String.valueOf(strategy.getRangeDistributionMean(rKey))));
+            // Legacy XMLWriter emits LDParameter mean as string sub-parameter named "function".
+            range.addSubParameter(makeParam(PARAM_FUNCTION, XML_STRING_CLASS, String.valueOf(strategy.getRangeDistributionMean(rKey))));
             ldArray.addSubParameter(range);
         }
         p.addSubParameter(ldArray);
@@ -141,11 +142,13 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
 
     private void createMatrixParameterDescriptor(ParameterDescriptor p, Distribution.Parameter param, Object[][] matrix) {
         p.setArray(true);
-        p.setClassPath(param.getValueClass().getName());
+        // Legacy XMLWriter encodes distribution matrices as Object[] of Object[] rows.
+        p.setClassPath(Object.class.getName());
         for (Object[] row : matrix) {
-            ParameterDescriptor rowP = makeContainer(param.getName(), param.getValueClass().getName());
+            ParameterDescriptor rowP = makeContainer("vector", Object.class.getName());
+            rowP.setArray(true);
             for (Object cell : row) {
-                rowP.addSubParameter(makeParam(param.getName(), param.getValueClass().getName(), cell != null ? cell.toString() : VAL_ZERO));
+                rowP.addSubParameter(makeParam("entry", param.getValueClass().getName(), cell != null ? cell.toString() : VAL_ZERO));
             }
             p.addSubParameter(rowP);
         }
@@ -168,6 +171,29 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         }
     }
 
+    /**
+     * Legacy parity for Queue section of Server/Delay nodes:
+     * conditions are emitted only on backward connected places and with a single mode.
+     */
+    protected void mapTransitionLikeConditionsForServerDelay(Object key, SectionDescriptor sec, CommonModel model) {
+        List<Object> stationKeys = model.getBackwardConnectedPlaces(key);
+        if (stationKeys == null || stationKeys.isEmpty()) {
+            return;
+        }
+
+        ParameterDescriptor enabling = createConditionMatrixForStations(PREFIX_ENABLING, SUFFIX_CONDITION, key, model,
+                (s, m, i, from, cl) -> model.getEnablingCondition(s, i, from, cl), stationKeys, 1);
+        sec.addParameter(enabling);
+
+        ParameterDescriptor inhibiting = createConditionMatrixForStations(PREFIX_INHIBITING, SUFFIX_CONDITION, key, model,
+                (s, m, i, from, cl) -> model.getInhibitingCondition(s, i, from, cl), stationKeys, 1);
+        sec.addParameter(inhibiting);
+
+        ParameterDescriptor resource = createConditionMatrixForStations(PREFIX_RESOURCE, SUFFIX_CONDITION, key, model,
+                (s, m, i, from, cl) -> model.getResourceCondition(s, i, from, cl), stationKeys, 1);
+        sec.addParameter(resource);
+    }
+
     protected ParameterDescriptor createConditionMatrix(String baseName, String suffix, Object key, CommonModel model, ConditionGetter getter) {
         return createConditionMatrix(baseName, suffix, key, model, getter, true);
     }
@@ -179,20 +205,27 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         List<Object> stationKeys = backward ? model.getBackwardConnections(key) : model.getForwardConnections(key);
         if (stationKeys == null || stationKeys.isEmpty()) return null;
 
-        ParameterDescriptor matrix = makeContainer(baseName + suffix + "s", CP_TRANSITION_MATRIX);
-        boolean hasNonZero = populateMatrixModes(matrix, baseName, suffix, stationKeys, key, model, getter);
+        return createConditionMatrixForStations(baseName, suffix, key, model, getter, stationKeys, modes);
+    }
 
-        return hasNonZero ? matrix : null;
+    private ParameterDescriptor createConditionMatrixForStations(String baseName, String suffix, Object key, CommonModel model,
+                                                                 ConditionGetter getter, List<Object> stationKeys, int modes) {
+        ParameterDescriptor matrix = makeContainer(baseName + suffix + "s", CP_TRANSITION_MATRIX);
+        matrix.setArray(true);
+        populateMatrixModes(matrix, baseName, suffix, stationKeys, key, model, getter, modes);
+
+        // Legacy XMLWriter always emits transition condition matrices, even when all entries are zero.
+        return matrix;
     }
 
     // Ridotti parametri a 7 ricavando 'modes' e 'classKeys' direttamente dal 'model'
-    private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, List<Object> stationKeys, Object key, CommonModel model, ConditionGetter getter) {
+    private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, List<Object> stationKeys, Object key, CommonModel model, ConditionGetter getter, int modes) {
         boolean hasNonZero = false;
-        int modes = model.getTransitionModeListSize(key);
 
         for (int i = 0; i < modes; i++) {
             ParameterDescriptor condition = makeContainer(baseName + suffix, CP_TRANSITION_MATRIX);
             ParameterDescriptor vectors = makeContainer(baseName + "Vectors", CP_TRANSITION_VECTOR);
+            vectors.setArray(true);
 
             for (Object stationKey : stationKeys) {
                 hasNonZero |= buildAndAddVector(vectors, baseName, stationKey, key, model, i, getter);

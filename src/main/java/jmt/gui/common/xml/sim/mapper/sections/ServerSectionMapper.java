@@ -526,6 +526,9 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             mapClassParallelism(p, key, model, ctx);
         } else if (CommonConstants.SERVER_FEATURE_VACATION_STRATEGY.equals(name)) {
             mapVacationStrategy(p, cp, key, model, ctx);
+        } else if (CommonConstants.SERVER_FEATURE_SCHEDULING_POLICY.equals(name)) {
+            String policy = val(p);
+            if (policy != null) model.setStationSchedulingPolicy(key, policy);
         }
     }
 

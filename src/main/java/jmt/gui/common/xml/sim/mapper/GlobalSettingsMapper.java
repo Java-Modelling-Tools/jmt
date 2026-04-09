@@ -108,12 +108,12 @@ public class GlobalSettingsMapper implements ModelElementMapper {
 
     private void mapModelTimeLimitsToDto(CommonModel model, SimDescriptor dto) {
         Double maxDuration = model.getMaximumDuration();
-        if (maxDuration != null) {
+        if (maxDuration != null && maxDuration > 0) {
             dto.addGlobalAttribute(XML_A_ROOT_DURATION, maxDuration.toString());
         }
 
         Double maxSimulatedTime = model.getMaxSimulatedTime();
-        if (maxSimulatedTime != null) {
+        if (maxSimulatedTime != null && maxSimulatedTime > 0) {
             dto.addGlobalAttribute(XML_A_ROOT_SIMULATED, maxSimulatedTime.toString());
         }
     }
@@ -145,7 +145,7 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     private void mapModelLoggerParametersToDto(CommonModel model, SimDescriptor dto) {
         String logPath = model.getLoggingGlbParameter(LOGGER_PARAM_PATH);
         if (logPath != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_LOGPATH, logPath);
+            dto.addGlobalAttribute(XML_A_ROOT_LOGPATH, MacroReplacer.replace(logPath));
         }
 
         String autoAppend = model.getLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND);

@@ -78,6 +78,7 @@ public class StorageSectionMapper extends AbstractSectionMapper {
         writeTotalCapacity(sec, model, key);
         writeClassCapacities(sec, model, key);
         writeDropRules(sec, model, key);
+        writeGetStrategy(sec);
         writePutStrategies(sec, model, key);
     }
 
@@ -94,14 +95,12 @@ public class StorageSectionMapper extends AbstractSectionMapper {
 
         for (Object classKey : model.getClassKeys()) {
             Integer classCap = model.getQueueCapacity(key, classKey);
-            if (classCap != null && classCap != -1) { // -1 indicates infinite/not set
-                caps.addSubParameter(makeRefParam("capacity", Integer.class.getName(), model.getClassName(classKey), classCap.toString()));
+            if (classCap == null) {
+                classCap = -1;
             }
+            caps.addSubParameter(makeRefParam("capacity", Integer.class.getName(), model.getClassName(classKey), classCap.toString()));
         }
-
-        if (!caps.getSubParameters().isEmpty()) {
-            sec.addParameter(caps);
-        }
+        sec.addParameter(caps);
     }
 
     private void writeDropRules(SectionDescriptor sec, CommonModel model, Object key) {
@@ -110,17 +109,18 @@ public class StorageSectionMapper extends AbstractSectionMapper {
 
         for (Object classKey : model.getClassKeys()) {
             String dropRule = model.getDropRule(key, classKey);
-            if (dropRule != null) {
-                String xmlDropRule = Maps.DROP_RULES_REVERSE.get(dropRule);
-                if (xmlDropRule != null) {
-                    drops.addSubParameter(makeRefParam("dropRule", String.class.getName(), model.getClassName(classKey), xmlDropRule));
-                }
+            String xmlDropRule = Maps.DROP_RULES_REVERSE.get(dropRule);
+            if (xmlDropRule == null) {
+                xmlDropRule = XMLConstantNames.DROP_XML_DROP;
             }
+            drops.addSubParameter(makeRefParam("dropRule", String.class.getName(), model.getClassName(classKey), xmlDropRule));
         }
+        sec.addParameter(drops);
+    }
 
-        if (!drops.getSubParameters().isEmpty()) {
-            sec.addParameter(drops);
-        }
+    private void writeGetStrategy(SectionDescriptor sec) {
+        // Legacy writer always emits FCFS getStrategy for Storage.
+        sec.addParameter(makeContainer("getStrategy", "jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy"));
     }
 
     private void writePutStrategies(SectionDescriptor sec, CommonModel model, Object key) {
@@ -131,14 +131,12 @@ public class StorageSectionMapper extends AbstractSectionMapper {
             String queueStrategy = model.getQueueStrategy(key, classKey);
             String strategyName = getPutStrategyName(queueStrategy);
 
-            if (strategyName != null) {
-                puts.addSubParameter(makeRefParam(strategyName, "jmt.engine.NetStrategies.QueuePutStrategies." + strategyName, model.getClassName(classKey), null));
+            if (strategyName == null) {
+                strategyName = XMLConstantNames.STRAT_TAIL_STRATEGY;
             }
+            puts.addSubParameter(makeRefParam("putStrategy", "jmt.engine.NetStrategies.QueuePutStrategies." + strategyName, model.getClassName(classKey), null));
         }
-
-        if (!puts.getSubParameters().isEmpty()) {
-            sec.addParameter(puts);
-        }
+        sec.addParameter(puts);
     }
 
     private String getPutStrategyName(String queueStrategy) {
