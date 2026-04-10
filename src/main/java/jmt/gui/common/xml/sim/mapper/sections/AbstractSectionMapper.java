@@ -236,13 +236,14 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         return hasNonZero;
     }
 
-    // Parameters reduced to 7 by deriving 'classKeys' directly from 'model'
     private boolean buildAndAddVector(ParameterDescriptor vectors, String baseName, Object stationKey, Object key, CommonModel model, int modeIndex, ConditionGetter getter) {
         boolean hasNonZero = false;
         ParameterDescriptor vector = makeContainer(baseName + "Vector", CP_TRANSITION_VECTOR);
         vector.addSubParameter(makeParam("stationName", XML_STRING_CLASS, model.getStationName(stationKey)));
 
         ParameterDescriptor entries = makeContainer(baseName + "Entries", XML_INTEGER_CLASS);
+        // Legacy XMLWriter emits entries as an Integer array container.
+        entries.setArray(true);
 
         for (Object classKey : model.getClassKeys()) {
             Integer val = getter.get(key, model, modeIndex, stationKey, classKey);
