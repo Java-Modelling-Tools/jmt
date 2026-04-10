@@ -36,7 +36,7 @@ public interface ModelElementMapper extends XMLConstantNames {
      * @param dto     The root DTO object that will be populated with data from the model
      * @param context The shared context used during the WRITING phase
      */
-    void mapCommonModelToDto(SimDescriptor dto, WritingContext context); // Usiamo WritingContext qui
+    void mapCommonModelToDto(SimDescriptor dto, WritingContext context); // We use WritingContext here
 
     default boolean isPresent(String value) {
         return value != null && !value.isEmpty();

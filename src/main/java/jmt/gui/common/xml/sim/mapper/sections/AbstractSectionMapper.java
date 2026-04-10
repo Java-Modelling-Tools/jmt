@@ -218,7 +218,7 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         return matrix;
     }
 
-    // Ridotti parametri a 7 ricavando 'modes' e 'classKeys' direttamente dal 'model'
+    // Parameters reduced to 7 by deriving 'modes' and 'classKeys' directly from 'model'
     private boolean populateMatrixModes(ParameterDescriptor matrix, String baseName, String suffix, List<Object> stationKeys, Object key, CommonModel model, ConditionGetter getter, int modes) {
         boolean hasNonZero = false;
 
@@ -236,7 +236,7 @@ public abstract class AbstractSectionMapper implements ModelElementMapper {
         return hasNonZero;
     }
 
-    // Ridotti parametri a 7 ricavando 'classKeys' direttamente dal 'model'
+    // Parameters reduced to 7 by deriving 'classKeys' directly from 'model'
     private boolean buildAndAddVector(ParameterDescriptor vectors, String baseName, Object stationKey, Object key, CommonModel model, int modeIndex, ConditionGetter getter) {
         boolean hasNonZero = false;
         ParameterDescriptor vector = makeContainer(baseName + "Vector", CP_TRANSITION_VECTOR);

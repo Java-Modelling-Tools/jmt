@@ -86,7 +86,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
             if (constraintsMap.get(XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY) != null) {
                 model.setRegionClassMemorySize(regionKey, classKey, Integer.parseInt(constraintsMap.get(XMLConstantNames.XML_A_CLASSMEMORYCONSTRAINT_MAXMEMORY)));
             }
-            // Legacy-compat: softDeadline era applicato solo nel loop vincolato dalla cardinalita' classSize.
+            // Legacy-compat: softDeadline was applied only in the loop constrained by classSize cardinality.
             if (constraintsMap.get(XMLConstantNames.XML_A_CLASS_SOFT_DEADLINE) != null
                     && region.getClassSizes() != null
                     && region.getClassSizes().containsKey(className)) {
@@ -138,7 +138,7 @@ public class BlockingRegionsMapper implements ModelElementMapper {
                 ? new ArrayList<>()
                 : new ArrayList<>(region.getGroupClassLists().entrySet());
 
-        // Legacy-compat: i gruppi nascono solo da groupConstraint e gli altri blocchi si applicano per indice.
+        // Legacy-compat: groups are created only from groupConstraint and the other blocks are applied by index.
         for (int groupIndex = 0; groupIndex < groupConstraintEntries.size(); groupIndex++) {
             Map.Entry<String, String> groupConstraint = groupConstraintEntries.get(groupIndex);
             String groupName = groupConstraint.getKey();

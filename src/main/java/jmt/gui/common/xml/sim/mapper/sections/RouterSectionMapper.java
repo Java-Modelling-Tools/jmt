@@ -127,7 +127,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         }
     }
 
-    // --- Helper Generici per Parsare le Mappe Array dell'XML ---
+    // --- Generic helpers for parsing XML array maps ---
 
     private Map<String, Double> parseStringDoubleMap(ParameterDescriptor entryArray) {
         Map<String, Double> map = new TreeMap<>();

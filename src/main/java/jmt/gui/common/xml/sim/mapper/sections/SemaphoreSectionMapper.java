@@ -55,7 +55,7 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper {
         boolean hasNonDefault = false;
         for (Object classKey : model.getClassKeys()) {
             SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key, classKey);
-            // Verifica se è stato modificato il parametro di default
+            // Check whether the default parameter has been changed
             if (ss != null && (!(ss instanceof NormalSemaphore) || ss.getThreshold() != 1)) {
                 hasNonDefault = true;
                 break;
@@ -69,7 +69,7 @@ public class SemaphoreSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor semaphoreStrategy = new ParameterDescriptor();
         semaphoreStrategy.setName("SemaphoreStrategy");
         semaphoreStrategy.setClassPath(STRATEGIES_BASE + "SemaphoreStrategy");
-        semaphoreStrategy.setArray(true); // FIX 2: Forza l'attributo array="true"
+        semaphoreStrategy.setArray(true); // FIX 2: Force the array="true" attribute
 
         for (Object classKey : model.getClassKeys()) {
             SemaphoreStrategy ss = (SemaphoreStrategy) model.getSemaphoreStrategy(key, classKey);
