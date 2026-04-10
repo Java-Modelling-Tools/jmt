@@ -101,6 +101,24 @@ public interface ModelElementMapper extends XMLConstantNames {
         return null;
     }
 
+    /**
+     * Returns the first non-empty value from a parameter without trimming it.
+     * <p>
+     * Use this when XML text must be preserved exactly as provided by legacy files (for example,
+     * map keys used by routing post-processing), while still treating blank strings as absent.
+     * This mirrors {@link #val(ParameterDescriptor)} lookup order but keeps the original text.
+     */
+    default String rawVal(ParameterDescriptor p) {
+        if (p == null) return null;
+        if (p.getValue() != null && !p.getValue().trim().isEmpty()) return p.getValue();
+        for (ParameterDescriptor sub : getSubParams(p)) {
+            if ("value".equals(sub.getName()) && sub.getValue() != null && !sub.getValue().trim().isEmpty()) {
+                return sub.getValue();
+            }
+        }
+        return null;
+    }
+
     default Double valD(ParameterDescriptor p) {
         String v = val(p);
         return v != null ? Double.valueOf(v) : null;

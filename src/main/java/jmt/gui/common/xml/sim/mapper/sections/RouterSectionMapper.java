@@ -114,7 +114,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
 
     private void parseClassSwitchEntry(ParameterDescriptor csp, Map<String, Double> branchTmp, Map<String, Map<String, Double>> classTmp) {
         List<ParameterDescriptor> subCsp = getSubParams(csp);
-        String sName = val(getAt(subCsp, 0));
+        String sName = rawVal(getAt(subCsp, 0));
         Double dVal = valD(getAt(subCsp, 1));
 
         if (sName != null && dVal != null) {
@@ -134,7 +134,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         if (entryArray != null) {
             for (ParameterDescriptor entry : getSubParams(entryArray)) {
                 List<ParameterDescriptor> subEntries = getSubParams(entry);
-                String sName = val(getAt(subEntries, 0));
+                String sName = rawVal(getAt(subEntries, 0));
                 Double dVal = valD(getAt(subEntries, 1));
                 if (sName != null && dVal != null) {
                     map.put(sName, dVal);
@@ -149,7 +149,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         if (entryArray != null) {
             for (ParameterDescriptor entry : getSubParams(entryArray)) {
                 List<ParameterDescriptor> subEntries = getSubParams(entry);
-                String sName = val(getAt(subEntries, 0));
+                String sName = rawVal(getAt(subEntries, 0));
                 Integer iVal = valI(getAt(subEntries, 1));
                 if (sName != null && iVal != null) {
                     map.put(sName, iVal);
@@ -158,6 +158,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         }
         return map;
     }
+
 
     // =========================================================================================
     // --- WRITING PHASE (Model -> DTO -> XML) ---
