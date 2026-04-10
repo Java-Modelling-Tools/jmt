@@ -178,10 +178,10 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
         descriptor.setParametric(false);
 
         String decSep = root.getAttribute(XML_A_ROOT_LOG_DECIMAL_SEP);
-        descriptor.setLogDecimalSeparator((decSep == null || decSep.isEmpty()) ? "." : decSep);
+        descriptor.setLogDecimalSeparator(decSep);
 
         String delim = root.getAttribute(XML_A_ROOT_LOG_DELIMITER);
-        descriptor.setLogCsvDelimiter((delim == null || delim.isEmpty()) ? ";" : delim);
+        descriptor.setLogCsvDelimiter(delim);
 
         NodeList measures = root.getElementsByTagName(XML_EO_MEASURE);
         for (int i = 0; i < measures.getLength(); i++) {
@@ -206,7 +206,8 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
         m.setClassName(className);
 
         m.setNodeType(el.getAttribute(XML_AO_MEASURE_NODETYPE));
-        m.setAlpha(1.0 - parseDouble(el.getAttribute(XML_AO_MEASURE_ALPHA), 0.0)); // engine stores complement
+        String alphaAttr = el.getAttribute(XML_AO_MEASURE_ALPHA);
+        m.setAlpha(alphaAttr.isEmpty() ? 0.0 : (1.0 - parseDouble(alphaAttr, 0.0))); // legacy-compatible fallback
         m.setPrecision(parseDouble(el.getAttribute(XML_AO_MEASURE_PRECISION), 0.0));
         m.setAnalyzedSamples(parseInt(el.getAttribute(XML_AO_MEASURE_SAMPLES), 0));
         m.setDiscardedSamples(parseInt(el.getAttribute(XML_AO_MEASURE_DISCARDEDSAMPLES), 0));
@@ -231,7 +232,11 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
 
         // Engine format has a single aggregate sample per measure
         SampleDescriptor s = new SampleDescriptor();
-        s.setMean(parseDouble(el.getAttribute(XML_AO_MEASURE_MEAN), 0.0));
+        double mean = parseDouble(el.getAttribute(XML_AO_MEASURE_MEAN), 0.0);
+        s.setMean(mean);
+        // Legacy reader behavior: these two fields were populated from the same mean attribute.
+        s.setLastIntervalAvgValue(mean);
+        s.setSimulationTime(mean);
         s.setUpperBound(parseDouble(el.getAttribute(XML_AO_MEASURE_UPPER), 0.0));
         s.setLowerBound(parseDouble(el.getAttribute(XML_AO_MEASURE_LOWER), 0.0));
         m.addSample(s);

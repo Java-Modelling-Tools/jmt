@@ -558,22 +558,32 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void mapServerNames(ParameterDescriptor p, List<String> serverNames) {
         getSubParams(p).forEach(sP -> {
-            // sP is a subparameter like "serverTypesNames" which contains the actual value
-            List<ParameterDescriptor> children = getSubParams(sP);
-            if (!children.isEmpty()) {
-                String s = val(getAt(children, 0));
-                if (s != null) serverNames.add(s);
+            // Legacy format stores the value directly on each serverTypesNames subParameter.
+            String s = val(sP);
+            if (s == null) {
+                List<ParameterDescriptor> children = getSubParams(sP);
+                if (!children.isEmpty()) {
+                    s = val(getAt(children, 0));
+                }
+            }
+            if (s != null) {
+                serverNames.add(s);
             }
         });
     }
 
     private void mapServersPerType(ParameterDescriptor p, List<Integer> serversPerType) {
         getSubParams(p).forEach(sP -> {
-            // sP is a subparameter like "serverTypesNumOfServers" which contains the actual value
-            List<ParameterDescriptor> children = getSubParams(sP);
-            if (!children.isEmpty()) {
-                Integer sv = valI(getAt(children, 0));
-                if (sv != null) serversPerType.add(sv);
+            // Legacy format stores the value directly on each serverTypesNumOfServers subParameter.
+            Integer sv = valI(sP);
+            if (sv == null) {
+                List<ParameterDescriptor> children = getSubParams(sP);
+                if (!children.isEmpty()) {
+                    sv = valI(getAt(children, 0));
+                }
+            }
+            if (sv != null) {
+                serversPerType.add(sv);
             }
         });
     }
@@ -589,12 +599,16 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void mapClassParallelism(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         getRefClassMap(p).forEach((c, sP) -> {
-            // sP is the class-specific subparameter (e.g., "serverParallelism")
-            // Extract the value from its first child
-            List<ParameterDescriptor> children = getSubParams(sP);
-            if (!children.isEmpty()) {
-                Integer num = valI(getAt(children, 0));
-                if (num != null) model.setServerNumRequired(key, ctx.classes.get(c), num);
+            // Legacy format stores the numeric value directly on serverParallelism.
+            Integer num = valI(sP);
+            if (num == null) {
+                List<ParameterDescriptor> children = getSubParams(sP);
+                if (!children.isEmpty()) {
+                    num = valI(getAt(children, 0));
+                }
+            }
+            if (num != null) {
+                model.setServerNumRequired(key, ctx.classes.get(c), num);
             }
         });
     }

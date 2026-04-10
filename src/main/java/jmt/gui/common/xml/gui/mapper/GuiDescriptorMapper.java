@@ -251,10 +251,6 @@ public class GuiDescriptorMapper implements GuiXMLConstants {
 
     private void extractParametricAnalysis(CommonModel model, GuiDescriptor dto) {
         if (!model.isParametricAnalysisEnabled()) {
-            // Write a disabled marker so the XML consumer knows the state explicitly
-            ParametricAnalysisDescriptor pad = new ParametricAnalysisDescriptor();
-            pad.setEnabled(false);
-            dto.setParametricAnalysis(pad);
             return;
         }
 
@@ -269,9 +265,6 @@ public class GuiDescriptorMapper implements GuiXMLConstants {
                 if (result == 2) {
                     ParametricAnalysisChecker checker = new ParametricAnalysisChecker(model, model, model);
                     if (!checker.canBeEnabled()) {
-                        ParametricAnalysisDescriptor pad = new ParametricAnalysisDescriptor();
-                        pad.setEnabled(false);
-                        dto.setParametricAnalysis(pad);
                         return;
                     }
                     String available = checker.getRunnableParametricAnalysis()[0];

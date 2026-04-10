@@ -119,48 +119,23 @@ public class GlobalSettingsMapper implements ModelElementMapper {
     }
 
     private void mapModelIntervalsAndSamplesToDto(CommonModel model, SimDescriptor dto) {
-        Double pollingInterval = model.getPollingInterval();
-        if (pollingInterval != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_POLLING, pollingInterval.toString());
-        }
-
-        Integer maxSamples = model.getMaxSimulationSamples();
-        if (maxSamples != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_MAXSAMPLES, maxSamples.toString());
-        }
+        dto.addGlobalAttribute(XML_A_ROOT_POLLING, model.getPollingInterval().toString());
+        dto.addGlobalAttribute(XML_A_ROOT_MAXSAMPLES, model.getMaxSimulationSamples().toString());
     }
 
     private void mapModelStatisticsAndEventsToDto(CommonModel model, SimDescriptor dto) {
-        Boolean disableStatistic = model.getDisableStatistic();
-        if (disableStatistic != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_DISABLESTATISTIC, disableStatistic.toString());
-        }
-
-        Integer maxEvents = model.getMaxSimulationEvents();
-        if (maxEvents != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_MAXEVENTS, maxEvents.toString());
-        }
+        dto.addGlobalAttribute(XML_A_ROOT_DISABLESTATISTIC, model.getDisableStatistic().toString());
+        dto.addGlobalAttribute(XML_A_ROOT_MAXEVENTS, model.getMaxSimulationEvents().toString());
     }
 
     private void mapModelLoggerParametersToDto(CommonModel model, SimDescriptor dto) {
-        String logPath = model.getLoggingGlbParameter(LOGGER_PARAM_PATH);
-        if (logPath != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_LOGPATH, MacroReplacer.replace(logPath));
-        }
-
-        String autoAppend = model.getLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND);
-        if (autoAppend != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_LOGREPLACE, autoAppend);
-        }
-
-        String delim = model.getLoggingGlbParameter(LOGGER_PARAM_DELIM);
-        if (delim != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_LOGDELIM, delim);
-        }
-
-        String decimalSeparator = model.getLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR);
-        if (decimalSeparator != null) {
-            dto.addGlobalAttribute(XML_A_ROOT_LOGDECIMALSEPARATOR, decimalSeparator);
-        }
+        dto.addGlobalAttribute(XML_A_ROOT_LOGPATH,
+                MacroReplacer.replace(model.getLoggingGlbParameter(LOGGER_PARAM_PATH)));
+        dto.addGlobalAttribute(XML_A_ROOT_LOGREPLACE,
+                model.getLoggingGlbParameter(LOGGER_PARAM_AUTO_APPEND));
+        dto.addGlobalAttribute(XML_A_ROOT_LOGDELIM,
+                model.getLoggingGlbParameter(LOGGER_PARAM_DELIM));
+        dto.addGlobalAttribute(XML_A_ROOT_LOGDECIMALSEPARATOR,
+                model.getLoggingGlbParameter(LOGGER_PARAM_DECIMAL_SEPARATOR));
     }
 }
