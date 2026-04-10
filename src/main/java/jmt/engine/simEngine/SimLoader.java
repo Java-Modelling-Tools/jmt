@@ -82,7 +82,7 @@ import org.xml.sax.SAXNotSupportedException;
 public class SimLoader {
 
 	//used for debug purposes
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 
 	//represents the entire XML document. it is the root
 	//of the document tree, and provides the primary access to the document's data
@@ -661,12 +661,14 @@ public class SimLoader {
 		if (!param.getTagName().equals("parameter")) {
 			throw new LoadException("trying to use createParameter on a : " + param.getTagName());
 		}
+		String classPathForError = null;
 		try {
 			if (DEBUG) {
 				System.out.println("        start creation of parameter = " + param.getAttribute("name"));
 			}
 			//gets Class Object for the parameter
 			String classPath = param.getAttribute("classPath");
+			classPathForError = classPath;
 			NodeList valueList = XMLParser.getElementsByTagName(param, "value");
 			//if value == null the object is a null pointer
 			if (valueList.getLength() > 0 && valueList.item(0).getChildNodes().item(0).getNodeValue().equals("null")) {
@@ -840,16 +842,27 @@ public class SimLoader {
 				return constr.newInstance(initargs);
 			}
 		} catch (ClassNotFoundException e) {
-			throw new LoadException("Class of Parameter not found", e);
+			throw new LoadException(appendDebugInstantiationInfo("Class of Parameter not found", classPathForError), e);
 		} catch (NoSuchMethodException e) {
-			throw new LoadException("there is not a String Constructor", e);
+			throw new LoadException(appendDebugInstantiationInfo("there is not a String Constructor", classPathForError), e);
 		} catch (InstantiationException e) {
-			throw new LoadException("Class of parameter cannot be instantiated", e);
+			throw new LoadException(appendDebugInstantiationInfo("Class of parameter cannot be instantiated", classPathForError), e);
 		} catch (IllegalAccessException e) {
-			throw new LoadException("Class of parameter cannot be instantiated", e);
+			throw new LoadException(appendDebugInstantiationInfo("Class of parameter cannot be instantiated", classPathForError), e);
 		} catch (InvocationTargetException e) {
-			throw new LoadException("Class of parameter cannot be instantiated", e);
+			throw new LoadException(appendDebugInstantiationInfo("Class of parameter cannot be instantiated", classPathForError), e);
 		}
+	}
+
+	/**
+	 * @author Daniele Borgna
+	 * Date: 10-apr-2026
+	 * */
+	private String appendDebugInstantiationInfo(String baseMessage, String classPath) {
+		if (DEBUG && classPath != null && !classPath.isEmpty()) {
+			return baseMessage + " [classPath=" + classPath + "]";
+		}
+		return baseMessage;
 	}
 
 	/**

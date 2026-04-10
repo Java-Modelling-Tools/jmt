@@ -30,11 +30,15 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
      */
     @Override
     public ResultsDescriptor parse(Element root) {
+        return parse(root, null);
+    }
+
+    public ResultsDescriptor parse(Element root, Boolean forceGuiParametric) {
         ResultsDescriptor descriptor = new ResultsDescriptor();
         String rootTag = root.getTagName();
 
         if (XML_DOCUMENT_ROOT.equals(rootTag)) {
-            parseGuiResults(root, descriptor);
+            parseGuiResults(root, descriptor, forceGuiParametric);
         } else if (XML_DOCUMENT_O_ROOT.equals(rootTag)) {
             parseEngineResults(root, descriptor);
         }
@@ -46,7 +50,7 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
     // GUI-format results  (<results> root)
     // -----------------------------------------------------------------------
 
-    private void parseGuiResults(Element root, ResultsDescriptor descriptor) {
+    private void parseGuiResults(Element root, ResultsDescriptor descriptor, Boolean forceParametric) {
         // Global attributes
         String pollingStr = root.getAttribute(XML_A_ROOT_POLLING);
         if (pollingStr != null && !pollingStr.isEmpty()) {
@@ -67,7 +71,7 @@ public class ResultsParser implements XmlEntityParser<ResultsDescriptor>, XMLRes
         }
 
         // Detect parametric vs normal by checking for <sample validity="...">
-        boolean parametric = isParametricFormat(root);
+        boolean parametric = (forceParametric != null) ? forceParametric : isParametricFormat(root);
         descriptor.setParametric(parametric);
 
         NodeList measures = root.getElementsByTagName(XML_E_MEASURE);

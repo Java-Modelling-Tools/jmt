@@ -39,9 +39,6 @@ public class ResultsSerializer implements XMLResultsConstants {
         root.setAttribute(XML_A_ROOT_ELAPSED, Long.toString(dto.getElapsedTime()));
         root.setAttribute(XML_A_ROOT_LOG_DECIMAL_SEP, dto.getLogDecimalSeparator());
         root.setAttribute(XML_A_ROOT_LOG_DELIMITER, dto.getLogCsvDelimiter());
-        if (dto.getLogPath() != null) {
-            root.setAttribute(XML_A_ROOT_LOG_PATH, dto.getLogPath());
-        }
 
         for (ResultMeasureDescriptor m : dto.getMeasures()) {
             root.appendChild(dto.isParametric()

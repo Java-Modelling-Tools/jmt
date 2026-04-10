@@ -73,16 +73,27 @@ public class XMLResultsReader implements XMLResultsConstants {
         if (root == null || model == null) return;
 
         String rootTag = root.getTagName();
-
-        // Verify the root tag matches the expected model type before parsing
-        boolean isGuiFormat    = XML_DOCUMENT_ROOT.equals(rootTag);
+        boolean isGuiFormat = XML_DOCUMENT_ROOT.equals(rootTag);
         boolean isEngineFormat = XML_DOCUMENT_O_ROOT.equals(rootTag);
 
-        if (!isGuiFormat && !isEngineFormat) return;
+        if (model instanceof PAResultsModel) {
+            if (!isGuiFormat) {
+                return;
+            }
+        } else {
+            if (!isGuiFormat && !isEngineFormat) {
+                return;
+            }
+        }
 
-        // Phase 1: parse DOM → DTO
+        // Phase 1: parse DOM -> DTO
         ResultsParser parser = new ResultsParser();
-        ResultsDescriptor dto = parser.parse(root);
+        ResultsDescriptor dto;
+        if (isGuiFormat) {
+            dto = parser.parse(root, model instanceof PAResultsModel);
+        } else {
+            dto = parser.parse(root, null);
+        }
 
         // Phase 2: map DTO → model
         ResultsDescriptorMapper mapper = new ResultsDescriptorMapper();

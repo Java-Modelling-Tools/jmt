@@ -71,7 +71,10 @@ public class GuiDescriptorMapper implements GuiXMLConstants {
                 continue;
             }
             String hex = desc.getColor();
-            if (hex != null && hex.startsWith("#")) {
+            if (hex == null) {
+                hex = "";
+            }
+            if (hex.startsWith("#")) {
                 hex = hex.substring(1);
             }
             try {

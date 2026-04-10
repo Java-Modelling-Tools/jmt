@@ -44,6 +44,7 @@ public class ClassSwitchSectionMapper extends AbstractSectionMapper {
         ParameterDescriptor matrixParam = new ParameterDescriptor();
         matrixParam.setName("matrix");
         matrixParam.setClassPath("java.lang.Object");
+        matrixParam.setArray(true);
 
         for (Object classInKey : model.getClassKeys()) {
             ParameterDescriptor rowParam = new ParameterDescriptor();

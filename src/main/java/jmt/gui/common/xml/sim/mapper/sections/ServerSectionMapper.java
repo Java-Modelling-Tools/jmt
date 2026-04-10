@@ -83,8 +83,12 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             addPsParams(sec, model, key, classes, true);
         }
 
-        // advancedFeatures map parameter
-        sec.addParameter(buildAdvancedFeatures(model, key, classes, queueStrategy, context));
+        // Keep server advanced parameters flat in the section to avoid creating a new
+        // wrapper node that was not present in the input model.
+        ParameterDescriptor advancedFeatures = buildAdvancedFeatures(model, key, classes, queueStrategy, context);
+        for (ParameterDescriptor p : advancedFeatures.getSubParameters()) {
+            sec.addParameter(p);
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -213,8 +217,10 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         // Server types (names, counts, compatibilities)
         buildServerTypes(adv, model, key, classes);
 
-        // Vacation strategy
-        adv.addSubParameter(buildVacationStrategy(model, key, ctx));
+        // Legacy input files often omit NoVacationStrategy; do not synthesize it.
+        if (!CommonConstants.STATION_VACATION_POLICY_NONE.equals(model.getStationVacationPolicy(key))) {
+            adv.addSubParameter(buildVacationStrategy(model, key, ctx));
+        }
 
         return adv;
     }
@@ -447,6 +453,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
                                                       List<Object> classes,
                                                       PerClassParamFactory factory) {
         ParameterDescriptor container = makeContainer(name, classPath);
+        container.setArray(true);
         for (Object classKey : classes) {
             container.addSubParameter(factory.build(classKey));
         }
@@ -489,8 +496,17 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         List<ParameterDescriptor> params = sec.getParameters() != null
                 ? new ArrayList<>(sec.getParameters()) : new ArrayList<>();
         ParameterDescriptor adv = getParam(sec, CommonConstants.SERVER_PARAMETER_ADVANCED_FEATURES);
-        if (adv != null) params.addAll(getSubParams(adv));
+        if (adv != null) {
+            addAllSubParametersDepthFirst(adv, params);
+        }
         return params;
+    }
+
+    private void addAllSubParametersDepthFirst(ParameterDescriptor root, List<ParameterDescriptor> out) {
+        for (ParameterDescriptor child : getSubParams(root)) {
+            out.add(child);
+            addAllSubParametersDepthFirst(child, out);
+        }
     }
 
     private void mapServerParameter(ParameterDescriptor p, Object key, CommonModel model,
@@ -514,8 +530,6 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             mapSwitchoverStrategies(p, key, model, ctx);
         } else if (isDelayOffParam(name)) {
             mapDelayOffStrategies(p, key, model, ctx);
-        } else if (CommonConstants.SERVER_FEATURE_SETUP_STRATEGIES.equals(name)) {
-            mapSetupStrategies(p, key, model, ctx);
         } else if (XMLConstantNames.ENGINE_PS_STRATEGY.equals(cp)) {
             mapPsStrategy(p, key, model, ctx);
         } else if (XMLConstantNames.PARAM_SERVICE_WEIGHTS.equals(name)) {
@@ -534,6 +548,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private boolean isSwitchoverParam(String name) {
         return CommonConstants.SERVER_FEATURE_SWITCHOVER_STRATEGIES.equals(name)
+                || CommonConstants.SERVER_FEATURE_SETUP_STRATEGIES.equals(name)
                 || "switchoverTimes".equals(name) || "switchoverStrategy".equals(name);
     }
 
@@ -557,7 +572,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapServerNames(ParameterDescriptor p, List<String> serverNames) {
-        getSubParams(p).forEach(sP -> {
+        getAllDescendantSubParameters(p).forEach(sP -> {
             // Legacy format stores the value directly on each serverTypesNames subParameter.
             String s = val(sP);
             if (s == null) {
@@ -573,7 +588,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapServersPerType(ParameterDescriptor p, List<Integer> serversPerType) {
-        getSubParams(p).forEach(sP -> {
+        getAllDescendantSubParameters(p).forEach(sP -> {
             // Legacy format stores the value directly on each serverTypesNumOfServers subParameter.
             Integer sv = valI(sP);
             if (sv == null) {
@@ -624,16 +639,29 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapCompatibilities(ParameterDescriptor p, List<List<Boolean>> compatibilities) {
-        getSubParams(p).stream()
+        getAllDescendantSubParameters(p).stream()
                 .filter(sP -> XMLConstantNames.PARAM_SERVER_TYPES_COMPATIBILITIES.equals(sP.getName()))
                 .forEach(sP -> {
                     List<Boolean> comp = new ArrayList<>();
-                    getSubParams(sP).forEach(sSP -> {
+                    getAllDescendantSubParameters(sP).forEach(sSP -> {
                         String bVal = val(sSP);
-                        comp.add(bVal == null || Boolean.parseBoolean(bVal));
+                        comp.add(Boolean.parseBoolean(bVal));
                     });
                     compatibilities.add(comp);
                 });
+    }
+
+    private List<ParameterDescriptor> getAllDescendantSubParameters(ParameterDescriptor root) {
+        List<ParameterDescriptor> out = new ArrayList<>();
+        collectDescendants(root, out);
+        return out;
+    }
+
+    private void collectDescendants(ParameterDescriptor parent, List<ParameterDescriptor> out) {
+        for (ParameterDescriptor child : getSubParams(parent)) {
+            out.add(child);
+            collectDescendants(child, out);
+        }
     }
 
     private void mapSwitchoverStrategies(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
@@ -648,14 +676,14 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void mapDelayOffStrategies(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         model.setDelayOffTimesEnabled(key, Boolean.TRUE);
-        getRefClassMap(p).forEach((c, sP) -> getRefClassMap(sP).forEach((innerC, sSP) ->
-                model.setDelayOffTimeDistribution(key, ctx.classes.get(innerC), parseServiceStrategy(sSP, ctx))));
+        getRefClassMap(p).forEach((className, sP) -> {
+            ParameterDescriptor distParam = getRefClassMap(sP).get(className);
+            if (distParam != null) {
+                model.setDelayOffTimeDistribution(key, ctx.classes.get(className), parseServiceStrategy(distParam, ctx));
+            }
+        });
     }
 
-    private void mapSetupStrategies(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
-        getRefClassMap(p).forEach((c, sP) -> getRefClassMap(sP).forEach((innerC, sSP) ->
-                model.setSetupTimeDistribution(key, ctx.classes.get(innerC), parseServiceStrategy(sSP, ctx))));
-    }
 
     private void mapPsStrategy(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
         getRefClassMap(p).forEach((c, sP) -> {
@@ -693,16 +721,8 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void createServers(Object key, CommonModel model, List<String> serverNames,
                                List<Integer> serversPerType, List<List<Boolean>> compatibilities) {
-        int numClasses = model.getClassKeys().size();
-        int numServersToCreate = Math.max(1, serverNames.size());
-        for (int i = 0; i < numServersToCreate; i++) {
-            Integer sCount = (i < serversPerType.size()) ? serversPerType.get(i) : null;
-            int n = (sCount != null) ? sCount : 1;
-            List<Boolean> comp = (i < compatibilities.size()) ? new ArrayList<>(compatibilities.get(i)) : new ArrayList<>();
-            while (comp.size() < numClasses) comp.add(Boolean.TRUE);
-            String sName = (i < serverNames.size() && serverNames.get(i) != null)
-                    ? serverNames.get(i) : "Server Type " + (i + 1);
-            model.addServerType(key, sName, n, comp, true);
+        for (int i = 0; i < serverNames.size(); i++) {
+            model.addServerType(key, serverNames.get(i), serversPerType.get(i), compatibilities.get(i), true);
         }
     }
 
