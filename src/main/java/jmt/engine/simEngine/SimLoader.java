@@ -873,7 +873,9 @@ public class SimLoader {
 	 */
 	private Object createSubParameter(Element subp) throws LoadException {
 		//gets Class object
+		String classPathForError = null;
 		try {
+			classPathForError = subp.getAttribute("classPath");
 			NodeList valueList = XMLParser.getElementsByTagName(subp, "value");
 			//if value == null the object is a null pointer
 			if (valueList.getLength() > 0 && valueList.item(0).getChildNodes().item(0).getNodeValue().equals("null")) {
@@ -1004,13 +1006,13 @@ public class SimLoader {
 				return o;
 			}
 		} catch (ClassNotFoundException e) {
-			throw new LoadException("class of subparameter not found", e);
+			throw new LoadException(appendDebugInstantiationInfo("class of subparameter not found", classPathForError), e);
 		} catch (InstantiationException e) {
-			throw new LoadException("class of subparameter not found", e);
+			throw new LoadException(appendDebugInstantiationInfo("class of subparameter not found", classPathForError), e);
 		} catch (IllegalAccessException e) {
-			throw new LoadException("class of subparameter not found", e);
+			throw new LoadException(appendDebugInstantiationInfo("class of subparameter not found", classPathForError), e);
 		} catch (NoSuchMethodException e) {
-			throw new LoadException("class of subparameter not found", e);
+			throw new LoadException(appendDebugInstantiationInfo("class of subparameter not found", classPathForError), e);
 		} catch (InvocationTargetException e) {
 			e.printStackTrace();
 		} catch (IncorrectDistributionParameterException e) {
