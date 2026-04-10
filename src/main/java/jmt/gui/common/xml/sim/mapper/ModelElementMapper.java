@@ -108,7 +108,14 @@ public interface ModelElementMapper extends XMLConstantNames {
 
     default Integer valI(ParameterDescriptor p) {
         String v = val(p);
-        return v != null ? Double.valueOf(v).intValue() : null;
+        if (v == null) return null;
+        try {
+            // Try parsing as int first for precision
+            return Integer.parseInt(v);
+        } catch (NumberFormatException e) {
+            // Fall back to double if needed (for scientific notation, etc.)
+            return Double.valueOf(v).intValue();
+        }
     }
 
     default ParameterDescriptor makeParam(String name, String classPath, String value) {

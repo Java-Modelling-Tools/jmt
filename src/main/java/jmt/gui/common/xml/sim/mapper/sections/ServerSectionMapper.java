@@ -558,15 +558,23 @@ public class ServerSectionMapper extends AbstractSectionMapper {
 
     private void mapServerNames(ParameterDescriptor p, List<String> serverNames) {
         getSubParams(p).forEach(sP -> {
-            String s = val(sP);
-            if (s != null) serverNames.add(s);
+            // sP is a subparameter like "serverTypesNames" which contains the actual value
+            List<ParameterDescriptor> children = getSubParams(sP);
+            if (!children.isEmpty()) {
+                String s = val(getAt(children, 0));
+                if (s != null) serverNames.add(s);
+            }
         });
     }
 
     private void mapServersPerType(ParameterDescriptor p, List<Integer> serversPerType) {
         getSubParams(p).forEach(sP -> {
-            Integer sv = valI(sP);
-            if (sv != null) serversPerType.add(sv);
+            // sP is a subparameter like "serverTypesNumOfServers" which contains the actual value
+            List<ParameterDescriptor> children = getSubParams(sP);
+            if (!children.isEmpty()) {
+                Integer sv = valI(getAt(children, 0));
+                if (sv != null) serversPerType.add(sv);
+            }
         });
     }
 
@@ -580,7 +588,15 @@ public class ServerSectionMapper extends AbstractSectionMapper {
     }
 
     private void mapClassParallelism(ParameterDescriptor p, Object key, CommonModel model, MappingContext ctx) {
-        getRefClassMap(p).forEach((c, sP) -> model.setServerNumRequired(key, ctx.classes.get(c), valI(sP)));
+        getRefClassMap(p).forEach((c, sP) -> {
+            // sP is the class-specific subparameter (e.g., "serverParallelism")
+            // Extract the value from its first child
+            List<ParameterDescriptor> children = getSubParams(sP);
+            if (!children.isEmpty()) {
+                Integer num = valI(getAt(children, 0));
+                if (num != null) model.setServerNumRequired(key, ctx.classes.get(c), num);
+            }
+        });
     }
 
     private void mapServiceStrategy(ParameterDescriptor p, Object key, CommonModel model,
