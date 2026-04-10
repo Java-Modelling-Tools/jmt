@@ -57,6 +57,7 @@ class JSIMGraphSimulationSmokeTest {
     private static final long THREAD_INIT_TIMEOUT_MS = 10_000;
     private static final long SIMULATION_TIMEOUT_MS = 120_000;
     private static final long RESULTS_READY_TIMEOUT_MS = 15_000;
+    private static final long RESULTS_COMPLETION_TIMEOUT_MS = 15_000;
     private static final long RESULTS_POLL_MS = 50;
     private static final long MAX_GUI_MODEL_BYTES = 8L * 1024L * 1024L;
 
@@ -128,16 +129,7 @@ class JSIMGraphSimulationSmokeTest {
             assertThat(measureCount)
                     .as("Simulation should expose at least one measure for %s", fileName)
                     .isGreaterThan(0);
-            int analyzedSamples = totalAnalyzedSamples(results, measureCount);
-            if (analyzedSamples == 0) {
-                assertThat(hasNoInProgressMeasures(results, measureCount))
-                        .as("Simulation ended with zero analyzed samples, but measures are still in progress for %s", fileName)
-                        .isTrue();
-            } else {
-                assertThat(analyzedSamples)
-                        .as("Simulation should analyze at least one sample for %s", fileName)
-                        .isGreaterThan(0);
-            }
+            awaitMeasuresCompletion(results, measureCount, isParametric, fileName);
         } finally {
             if (mediator != null) {
                 Mediator mediatorRef = mediator;
@@ -260,7 +252,7 @@ class JSIMGraphSimulationSmokeTest {
                 resultsClass = results.getClass().getName();
                 try {
                     measureCount = results.getMeasureNumber();
-                    if (measureCount != null && measureCount > 0) {
+                    if (measureCount > 0) {
                         return results;
                     }
                 } catch (NullPointerException ignored) {
@@ -283,6 +275,33 @@ class JSIMGraphSimulationSmokeTest {
             total += Math.max(0, results.getAnalyzedSamples(i));
         }
         return total;
+    }
+
+    private void awaitMeasuresCompletion(MeasureDefinition results, int measureCount, boolean isParametric, String fileName)
+            throws InterruptedException {
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < RESULTS_COMPLETION_TIMEOUT_MS) {
+            if (!isParametric && hasNoInProgressMeasures(results, measureCount)) {
+                return;
+            }
+            if (isParametric && results.isSimulationFinished()) {
+                return;
+            }
+            Thread.sleep(RESULTS_POLL_MS);
+        }
+
+        int analyzedSamples = totalAnalyzedSamples(results, measureCount);
+        if (analyzedSamples == 0) {
+            assertThat(hasNoInProgressMeasures(results, measureCount))
+                    .as("Simulation ended with zero analyzed samples, but measures are still in progress for %s", fileName)
+                    .isTrue();
+            return;
+        }
+
+        assertThat(isParametric ? results.isSimulationFinished() : hasNoInProgressMeasures(results, measureCount))
+                .as("Measures did not reach a terminal state for %s within %sms (measureCount=%s, analyzedSamples=%s)",
+                        fileName, RESULTS_COMPLETION_TIMEOUT_MS, measureCount, analyzedSamples)
+                .isTrue();
     }
 
     private boolean hasNoInProgressMeasures(MeasureDefinition results, int measureCount) {
