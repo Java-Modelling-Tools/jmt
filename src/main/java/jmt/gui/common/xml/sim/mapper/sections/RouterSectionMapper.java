@@ -57,6 +57,7 @@ public class RouterSectionMapper extends AbstractSectionMapper {
         if (cp.contains(STR_LOAD_DEPENDENT)) return new LoadDependentRouting();
         if (cp.contains(STR_POWER_OF_K)) return new PowerOfKRouting();
         if (cp.contains(STR_WEIGHTED_ROUND_ROBIN)) return new WeightedRoundRobinRouting();
+        if (cp.contains(STR_ROUND_ROBIN)) return new RoundRobinRouting();
         if (cp.contains(STR_CLASS_SWITCH)) return new ClassSwitchRouting();
         if (cp.contains(STR_SHORTEST_QUEUE)) return new ShortestQueueLengthRouting();
         if (cp.contains(STR_SHORTEST_RESPONSE_TIME)) return new ShortestResponseTimeRouting();

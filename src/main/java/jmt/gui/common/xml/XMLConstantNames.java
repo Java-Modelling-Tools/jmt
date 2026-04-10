@@ -377,6 +377,7 @@ public interface XMLConstantNames {
     String STR_PROBABILITIES = "Probabilities";
     String STR_POWER_OF_K = "PowerOfK";
     String STR_WEIGHTED_ROUND_ROBIN = "WeightedRoundRobin";
+    String STR_ROUND_ROBIN = "RoundRobinStrategy";
     String STR_CLASS_SWITCH = "ClassSwitch";
     String STR_SHORTEST_QUEUE = "ShortestQueue";
     String STR_SHORTEST_RESPONSE_TIME = "ShortestResponseTime";
