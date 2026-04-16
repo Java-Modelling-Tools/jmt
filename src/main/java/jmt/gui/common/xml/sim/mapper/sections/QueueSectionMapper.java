@@ -67,31 +67,54 @@ public class QueueSectionMapper extends AbstractSectionMapper {
                 Object classKey = ctx.classes.get(className);
 
                 model.setQueueStrategy(key, classKey, resolveQueueStrategyConstant(strategy));
-                setStationQueueStrategyFromPutStrategy(model, key, strategy);
+
+                String stationStrategy = resolveStationQueueStrategyFromPutStrategy(strategy);
+                if (stationStrategy != null) {
+                    String merged = mergeStationQueueStrategies(model.getStationQueueStrategy(key), stationStrategy);
+                    model.setStationQueueStrategy(key, merged);
+                }
             }
         });
+
         return true;
     }
 
-    private void setStationQueueStrategyFromPutStrategy(CommonModel model, Object key, String strategy) {
+    private String resolveStationQueueStrategyFromPutStrategy(String strategy) {
         if (strategy.contains(XMLConstantNames.STRAT_FCFSPR)
                 || strategy.contains(XMLConstantNames.STRAT_LCFSPR)
                 || strategy.contains(XMLConstantNames.STRAT_SRPT)
                 || strategy.contains(XMLConstantNames.STRAT_EDF)
                 || strategy.contains(XMLConstantNames.STRAT_TBS)) {
             if (strategy.contains("Priority")) {
-                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY);
+                return CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY;
             } else {
-                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+                return CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE;
             }
-            return;
         }
 
         if (strategy.contains("Priority")) {
-            model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY);
+            return CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY;
         } else {
-            model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE);
+            return CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE;
         }
+    }
+
+    private String mergeStationQueueStrategies(String current, String candidate) {
+        if (candidate == null) {
+            return current;
+        }
+        if (current == null) {
+            return candidate;
+        }
+        return rankStationQueueStrategy(candidate) > rankStationQueueStrategy(current) ? candidate : current;
+    }
+
+    private int rankStationQueueStrategy(String strategy) {
+        if (CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY.equals(strategy)) return 4;
+        if (CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE.equals(strategy)) return 3;
+        if (CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE_PRIORITY.equals(strategy)) return 2;
+        if (CommonConstants.STATION_QUEUE_STRATEGY_NON_PREEMPTIVE.equals(strategy)) return 1;
+        return 0;
     }
 
     private String resolveQueueStrategyConstant(String strategy) {

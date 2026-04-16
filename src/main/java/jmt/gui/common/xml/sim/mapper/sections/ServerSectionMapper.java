@@ -475,6 +475,11 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         if (XMLConstantNames.CLASSNAME_PSSERVER.equals(secName)) {
             model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PSSERVER);
             ctx.classes.values().forEach(c -> model.setQueueStrategy(key, c, CommonConstants.QUEUE_STRATEGY_PS));
+        } else if (XMLConstantNames.CLASSNAME_PREEMPTIVESERVER.equals(secName)) {
+            String current = model.getStationQueueStrategy(key);
+            if (!CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY.equals(current)) {
+                model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE);
+            }
         } else if (isPollingServer(secName)) {
             model.setStationQueueStrategy(key, CommonConstants.STATION_QUEUE_STRATEGY_POLLING);
             if (XMLConstantNames.CLASSNAME_LKPSERVER.equals(secName))

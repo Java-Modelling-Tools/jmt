@@ -82,7 +82,7 @@ import org.xml.sax.SAXNotSupportedException;
 public class SimLoader {
 
 	//used for debug purposes
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 
 	//represents the entire XML document. it is the root
 	//of the document tree, and provides the primary access to the document's data
