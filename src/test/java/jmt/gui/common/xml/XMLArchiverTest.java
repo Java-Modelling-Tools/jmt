@@ -285,8 +285,14 @@ class XMLArchiverTest {
         return (s1, s2) -> {
             if (s1 == null && s2 == null) return 0;
             if (s1 == null || s2 == null) return -1;
-            return s1.replaceAll("/$", "").compareTo(s2.replaceAll("/$", ""));
+            return normalizePathLike(s1).compareTo(normalizePathLike(s2));
         };
+    }
+
+    private String normalizePathLike(String value) {
+        String normalized = value.replace('\\', '/');
+        normalized = normalized.replaceAll("/+$", "");
+        return normalized;
     }
 
     // -------------------------------------------------------------------------
