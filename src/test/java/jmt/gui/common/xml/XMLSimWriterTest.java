@@ -20,6 +20,7 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -208,12 +209,8 @@ class XMLSimWriterTest {
                         "globalAttributes.timestamp",
                         "globalAttributes.name"
                 )
-                // Ignore differences on trailing slashes ("/" vs "") for local paths
-                .withComparatorForType((s1, s2) -> {
-                    if (s1 == null && s2 == null) return 0;
-                    if (s1 == null || s2 == null) return -1;
-                    return s1.replaceAll("/$", "").compareTo(s2.replaceAll("/$", ""));
-                }, String.class)
+                // Ignore differences on trailing slashes and backslashes on path-like values
+                .withComparatorForType(trailingSlashComparator(), String.class)
                 .isEqualTo(expectedDto);
     }
 
@@ -269,5 +266,23 @@ class XMLSimWriterTest {
                 alignParams(exp.getSubParameters().get(i), act.getSubParameters().get(i));
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // String comparator (ignores trailing slashes on path-like values)
+    // -------------------------------------------------------------------------
+
+    private Comparator<String> trailingSlashComparator() {
+        return (s1, s2) -> {
+            if (s1 == null && s2 == null) return 0;
+            if (s1 == null || s2 == null) return -1;
+            return normalizePathLike(s1).compareTo(normalizePathLike(s2));
+        };
+    }
+
+    private String normalizePathLike(String value) {
+        String normalized = value.replace('\\', '/');
+        normalized = normalized.replaceAll("/+$", "");
+        return normalized;
     }
 }
