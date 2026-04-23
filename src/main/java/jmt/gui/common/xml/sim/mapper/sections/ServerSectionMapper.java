@@ -83,12 +83,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
             addPsParams(sec, model, key, classes, true);
         }
 
-        // Keep server advanced parameters flat in the section to avoid creating a new
-        // wrapper node that was not present in the input model.
-        ParameterDescriptor advancedFeatures = buildAdvancedFeatures(model, key, classes, queueStrategy, context);
-        for (ParameterDescriptor p : advancedFeatures.getSubParameters()) {
-            sec.addParameter(p);
-        }
+        sec.addParameter(buildAdvancedFeatures(model, key, classes, queueStrategy, context));
     }
 
     // -----------------------------------------------------------------------
@@ -217,10 +212,7 @@ public class ServerSectionMapper extends AbstractSectionMapper {
         // Server types (names, counts, compatibilities)
         buildServerTypes(adv, model, key, classes);
 
-        // Legacy input files often omit NoVacationStrategy; do not synthesize it.
-        if (!CommonConstants.STATION_VACATION_POLICY_NONE.equals(model.getStationVacationPolicy(key))) {
-            adv.addSubParameter(buildVacationStrategy(model, key, ctx));
-        }
+        adv.addSubParameter(buildVacationStrategy(model, key, ctx));
 
         return adv;
     }
