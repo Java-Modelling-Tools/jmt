@@ -123,6 +123,8 @@ public class GraphStartScreen extends JMTFrame {
 			FONT_TYPE, GlobalSettings.getSetting(GlobalSettings.VERSION), FONT_TYPE);
 	public static final String HTML_POLI = String.format("<html><body><font face='%s' size='%s'><b>DEIB<br>"
 			+ "Politecnico di Milano<br>Italy</b></font></body></html>", FONT_TYPE, FONT_SIZE);
+	public static final String HTML_UNIVAQ = String.format("<html><body><font face='%s' size='%s'><b>DISIM<br>"
+			+ "Università degli Studi dell'Aquila<br>Italy</b></font></body></html>", FONT_TYPE, FONT_SIZE);
 
 	/**
 	 * Constructs a new GraphStartScreen
@@ -305,6 +307,7 @@ public class GraphStartScreen extends JMTFrame {
 			BoxLayout layout = new BoxLayout(logoPanel, BoxLayout.Y_AXIS);
 			logoPanel.setLayout(layout);
 			logoPanel.add(Company.POLIMI.getLogo());
+			logoPanel.add(Company.UNIVAQ.getLogo());
 			leftPanel.add(logoPanel, BorderLayout.NORTH);
 		}
 		this.getGlassPane().setVisible(true);

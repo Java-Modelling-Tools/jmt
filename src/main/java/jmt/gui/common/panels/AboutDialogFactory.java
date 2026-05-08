@@ -417,7 +417,7 @@ import jmt.gui.common.startScreen.GraphStartScreen;
 public class AboutDialogFactory {
 
 	public enum Company {
-		POLIMI, ICL;
+		POLIMI, UNIVAQ, ICL;
 
 		public JComponent getLogo() {
 			switch (this) {
@@ -428,6 +428,13 @@ public class AboutDialogFactory {
 					logo.setIconTextGap(10);
 					logo.setIcon(JMTImageLoader.loadImage("logo", new Dimension((int)(70 * CommonConstants.widthScaling), (int)(70 * CommonConstants.heightScaling))));
 					return logo;
+				case UNIVAQ:
+					JLabel logoUnivaq = new JLabel(GraphStartScreen.HTML_UNIVAQ);
+					logoUnivaq.setHorizontalTextPosition(SwingConstants.TRAILING);
+					logoUnivaq.setVerticalTextPosition(SwingConstants.CENTER);
+					logoUnivaq.setIconTextGap(10);
+					logoUnivaq.setIcon(JMTImageLoader.loadImage("logo_spencer", new Dimension((int)(70 * CommonConstants.widthScaling), (int)(70 * CommonConstants.heightScaling))));
+					return logoUnivaq;
 				case ICL:
 					return new JLabel(JMTImageLoader.loadImage("logo_icl", new Dimension(-1, 40)));
 				default:
@@ -438,29 +445,35 @@ public class AboutDialogFactory {
 
 	private static final Contributors[] JMVA = {
 			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Bertoli Marco", "Cerotti Davide", "Conti Andrea", "Dall'Orso Federico", "Granata Federico", "Gribaudo Marco", "Omini Stefano", "Sheikhvand Kourosh"),
-			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Su Haixiao", "Tokaj Piotr", "Wai Hong Ong", "Zakon Alexander", "Pahnke Ben")
+			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Makaronidis Michalis", "Bradshaw John", "Chugh Abhimanyu", "Su Haixiao", "Tokaj Piotr", "Wai Hong Ong", "Zakon Alexander", "Pahnke Ben"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JSIM = {
 			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Bertoli Marco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Dall'Orso Federico"),
-			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Salem Ahmed", "Badial Jeevan", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben", "Choy Ashton", "Zhu Jerry")
+			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Salem Ahmed", "Badial Jeevan", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben", "Choy Ashton", "Zhu Jerry"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JMODEL = {
 			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Bertoli Marco", "Bortone Emma", "Cazzoli Mattia", "D'Aquino Francesco", "Granata Federico", "Omini Stefano", "Radaelli Francesco", "Das Ashanka", "Spicuglia Sebastiano", "Gribaudo Marco", "Canakoglu Arif", "Tucci Francesco", "Rosmini Simone"),
-			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Salem Ahmed", "Badial Jeevan", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben", "Choy Ashton", "Gao Xinyu", "Zhu Jerry")
+			new Contributors(Company.ICL, "Casale (Unit Leader) Giuliano", "Salem Ahmed", "Badial Jeevan", "Davies Emyr", "Eleftheriou Anastasia", "Jiang Shuai", "Lopes Vitor", "Zhu Lulai", "Phuangjaisri Phumin", "Murali Srikrishna", "Vaibhav Krishnakumar", "Ng Lok Sen Rosemary", "Kodiak Conrad", "Li Zelun", "Wang Nathan", "Roman Andrei", "Pahnke Ben", "Choy Ashton", "Gao Xinyu", "Zhu Jerry"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JABA = {
-			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Bertoli Marco", "Zanzottera Andrea", "Gimondi Carlo", "Spicuglia Sebastiano")
+			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Bertoli Marco", "Zanzottera Andrea", "Gimondi Carlo", "Spicuglia Sebastiano"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JMCH = {
-			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Canakoglu Arif", "Di Mauro Ernesto", "Torri Lorenzo")
+			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Canakoglu Arif", "Di Mauro Ernesto", "Torri Lorenzo"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JWAT = {
-			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Brambilla Davide", "Fumagalli Claudio")
+			new Contributors(Company.POLIMI, "Serazzi (Unit Leader) Giuseppe", "Brambilla Davide", "Fumagalli Claudio"),
+			new Contributors(Company.UNIVAQ, "Cortellessa (Unit Leader) Vittorio", "Tucci Michele", "Di Pompeo Daniele", "Carlino Calogero"),
 	};
 
 	private static final Contributors[] JMT;
