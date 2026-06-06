@@ -51,6 +51,12 @@
 			margin: 15px 0;
 			border-radius: 3px;
 		}
+		.closing-message {
+			margin-top: 30px;
+			font-weight: bold;
+			color: #2c3e50;
+			text-align: center;
+		}
 	</style>
 </head>
 <body>
@@ -63,19 +69,22 @@
 <h2>What's new in version 1.4.0</h2>
 <h3>JMCH</h3>
 <ul>
-	<li>Added graphical animations to visualize the behavior of different scheduling algorithms on a single queue station. Supported policies include First Come First Served (FCFS), Last Come First Served (LCFS), Shortest Job First (SJF), Longest Job First (LJF), and Processor Sharing (PS).</li>
-	<li>Introduced animations to demonstrate network routing policies, specifically Round Robin (RR), Join Shortest Queue (JSQ), and Probabilistic routing.</li>
+	<li>Added graphical animations to visualize the behavior of different scheduling algorithms on a single queue station: First Come First Served (FCFS), Last Come First Served (LCFS), Shortest Job First (SJF), Longest Job First (LJF), and Processor Sharing (PS).</li>
+	<li>Introduced animations to visualize the behavior of Round Robin (RR), Join Shortest Queue (JSQ), and Probabilistic routing policies.</li>
 	<li>Implemented a new multi-threaded animation engine that smoothly repaints graphical components frame-by-frame, complete with Play and Pause playback controls.</li>
-	<li>Added a new results table that captures live performance indices (such as Response Time, Queue Time, Number of Customers, and Throughput) directly from the graphical animation. This allows users to easily compare the educational animation results with the metrics computed by the JSIMg simulator.</li>
+	<li>Added a new results table that captures live performance indices (such as Response Time, Queue Time, Number of Customers, and Throughput) directly from the graphical animation. This allows users to compare the results obtained from the animations with the correspondent metrics computed by the JSIMg simulator.</li>
 </ul>
-<h3>JSIM</h3>
+
+<h3>JSIM (FORK/JOIN)</h3>
 <ul>
-	<li>Fixed an issue where simulations would stall prematurely in models using Fork nodes configured to produce multiple output jobs. This fix ensures the simulation completes fully and calculates all index values correctly.</li>
+	<li>Fixed an issue where simulations would stall prematurely in models using Fork nodes configured to produce multiple output jobs.</li>
 </ul>
-<h3>JMVA</h3>
+
+<h3>JMVA (WHAT-IF)</h3>
 <ul>
-	<li>Fixed a bug in open models using What-If analysis where the System Throughput 𝑋0 failed to update across iterations. Previously, 𝑋0 incorrectly retained the value from the initial iteration (such as the starting arrival rate 𝜆), even though other performance indices and resource throughputs were updating correctly.</li>
+	<li>Fixed a bug in open models using What-If analysis where the System Throughput failed to update across iterations.</li>
 </ul>
+
 <h2>Working folder</h2>
 <br>
 A JMT working folder will be created in the home directory of the user to store examples and working files.
@@ -91,8 +100,12 @@ In older JMT versions, the default working folder was the JMT installation path.
 <!--If you have stored some JMT models there, we suggest you to move them in the new working folder.-->
 
 <h2>Keeping updated</h2>
-New JMT versions are released at: http://jmt.sourceforge.net
+New JMT versions are released at: <a href="http://jmt.sourceforge.net">http://jmt.sourceforge.net</a>
 <br>
 Please subscribe to the jmt-announce list on the website for release announcements!
+
+<div class="closing-message">
+	<p>We are working on new powerful features!<br>Enjoy JMT!</p>
+</div>
 </body>
 </html>

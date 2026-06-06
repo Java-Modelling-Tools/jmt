@@ -283,11 +283,20 @@ public class GraphStartScreen extends JMTFrame {
 		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
 		mainPanel.add(imageLabel, BorderLayout.CENTER);
 
-		// Adds buttons taking them from buttonActions[]
-		JPanel buttonPanel = new JPanel(new GridLayout(buttonActions.length, 1, 2, 2));
-		for (AbstractAction buttonAction : buttonActions) {
-			buttonPanel.add(createButton(buttonAction));
-		}
+		// Set layout to null to enable absolute positioning
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(null);
+		buttonPanel.setOpaque(false); // Keeps it transparent over the background
+
+		int panelWidth = (int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling) + 5;
+		buttonPanel.setPreferredSize(new Dimension(panelWidth, 0));
+
+		buttonPanel.add(createButton(startJSIM, 5, 5));
+		buttonPanel.add(createButton(startJMODEL, 5, 107));
+		buttonPanel.add(createButton(startJMVA, 5, 205));
+		buttonPanel.add(createButton(startJMCH, 5, 310));
+		buttonPanel.add(createButton(startJABA, 5, 410));
+		buttonPanel.add(createButton(startJWAT, 5, 510));
 
 		mainPanel.add(buttonPanel, BorderLayout.EAST);
 
@@ -397,16 +406,21 @@ public class GraphStartScreen extends JMTFrame {
 	 * @param action action associated to that button
 	 * @return created component
 	 */
-	private JComponent createButton(AbstractAction action) {
-		JPanel panel = new JPanel(); // Use gridbag as centers by default
+	private JComponent createButton(AbstractAction action, int x, int y) {
 		JButton button = new JButton(action);
 		button.setHorizontalTextPosition(SwingConstants.CENTER);
 		button.setVerticalTextPosition(SwingConstants.BOTTOM);
-		button.setPreferredSize(new Dimension((int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling),
-				(int) (BUTTONSIZE * 2.0 * CommonConstants.heightScaling)));
+
+		// Calculate dynamic width and height based on scaling
+		int width = (int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling);
+		int height = (int) (BUTTONSIZE * 2.0 * CommonConstants.heightScaling);
+
+		// setBounds dictates exactly where the button goes and how big it is
+		button.setBounds(x, y, width, height);
+
 		button.addMouseListener(rollover);
-		panel.add(button);
-		return panel;
+
+		return button;
 	}
 
 	/**
