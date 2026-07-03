@@ -61,6 +61,13 @@ import jmt.jmch.wizard.MainWizard;
 import jmt.jmva.gui.JMVAWizard;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
+import java.awt.BasicStroke;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.RenderingHints;
 
 /**
  * <p>
@@ -274,14 +281,13 @@ public class GraphStartScreen extends JMTFrame {
 		title.setBorder(BorderFactory.createEmptyBorder(8, 8, 0, 0));
 		this.getContentPane().add(title, BorderLayout.NORTH);
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(BORDERSIZE, BORDERSIZE, BORDERSIZE, BORDERSIZE));
-		// Adds start screen image
-		JLabel imageLabel = new JLabel();
-		imageLabel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
-		imageLabel.setIcon(JMTImageLoader.loadImage(IMG_STARTSCREEN, new Dimension(
-				(int) (440 * CommonConstants.widthScaling), (int) (420 * CommonConstants.heightScaling))));
-		imageLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-		imageLabel.setVerticalAlignment(SwingConstants.NORTH);
-		mainPanel.add(imageLabel, BorderLayout.CENTER);
+
+		// Adds the custom diagram drawing panel
+		DiagramPanel diagramPanel = new DiagramPanel();
+		diagramPanel.setBorder(BorderFactory.createEmptyBorder(BUTTONSIZE - 5, 1, 0, 0));
+		diagramPanel.setPreferredSize(new Dimension(
+				(int) (440 * CommonConstants.widthScaling), (int) (560 * CommonConstants.heightScaling)));
+		mainPanel.add(diagramPanel, BorderLayout.CENTER);
 
 		// Set layout to null to enable absolute positioning
 		JPanel buttonPanel = new JPanel();
@@ -412,8 +418,8 @@ public class GraphStartScreen extends JMTFrame {
 		button.setVerticalTextPosition(SwingConstants.BOTTOM);
 
 		// Calculate dynamic width and height based on scaling
-		int width = (int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling);
-		int height = (int) (BUTTONSIZE * 2.0 * CommonConstants.heightScaling);
+		int width = getButtonWidth();
+		int height = getButtonHeight();
 
 		// setBounds dictates exactly where the button goes and how big it is
 		button.setBounds(x, y, width, height);
@@ -421,6 +427,14 @@ public class GraphStartScreen extends JMTFrame {
 		button.addMouseListener(rollover);
 
 		return button;
+	}
+
+	private int getButtonWidth() {
+		return (int) (BUTTONSIZE * 3.5 * CommonConstants.widthScaling);
+	}
+
+	private int getButtonHeight() {
+		return (int) (BUTTONSIZE * 2.0 * CommonConstants.heightScaling);
 	}
 
 	/**
@@ -519,4 +533,311 @@ public class GraphStartScreen extends JMTFrame {
 		sampleQNAni.start();
 	}
 
+	/**
+	 * Custom panel to draw the flowchart diagram via code.
+	 */
+	private class DiagramPanel extends JPanel {
+		private static final long serialVersionUID = 1L;
+
+		// =========================================================================
+		// TUNABLE BASE OFFSETS & TEXT
+		// Tune these raw values to move elements globally. Scaling is handled automatically.
+		// =========================================================================
+
+		// --- Button Anchor Y-Levels ---
+		private final int BASE_BTN_JSIMWIZ_Y   = 5;
+		private final int BASE_BTN_JSIMGRAPH_Y = 107;
+		private final int BASE_BTN_JMVA_Y      = 205;
+		private final int BASE_BTN_JMCH_Y      = 310;
+		private final int BASE_BTN_JABA_Y      = 410;
+		private final int BASE_BTN_JWAT_Y      = 510;
+
+		// --- Horizontal Offsets (Distance from the right edge) ---
+		private final int OFFSET_START_X    = 430;
+		private final int OFFSET_SPLIT_X    = 380;
+		private final int OFFSET_METHODS_X  = 280;
+		private final int OFFSET_SOLUTION_X = 180;
+		private final int OFFSET_DEF_X      = 100; // Shared by both Model Definition diamonds
+
+		// --- Vertical Base Positions ---
+		private final int BASE_MAIN_LINE_Y = 285; // Start and Split Y
+		private final int BASE_METHODS_Y   = 170;
+		private final int BASE_DEFTOP_Y    = 70;
+		private final int BASE_DEFMID_Y    = 150;
+
+		// --- Line Turning Point Offsets (Added to a diamond's X-coordinate) ---
+		private final int TURN_METHODS_OUT  = 60;
+		private final int TURN_DEF_OUT      = 55; // Shared by both Model Definition lines
+		private final int TURN_SOLUTION_OUT = 60;
+
+		// --- Diamond Dimensions ---
+		private final int DIAMOND_W = 90;
+		private final int DIAMOND_H = 60;
+
+		// --- Text Labels ---
+		private final String TEXT_MODELS      = "Models";
+		private final String TEXT_WORKLOAD    = "Workload";
+		private final String TEXT_ANALYSIS    = "Analysis";
+		private final String TEXT_SIMULATION  = "Simulation";
+		private final String TEXT_ANALYTICAL  = "Analytical";
+		private final String TEXT_MVA         = "MVA";
+		private final String TEXT_EXACT       = "exact";
+		private final String TEXT_APPROXIMATE = "approximate";
+		private final String TEXT_TEXTUAL     = "Textual";
+		private final String TEXT_GRAPHICAL   = "Graphical";
+		private final String TEXT_CLASSROOM = "Classroom";
+		private final String TEXT_HELPER = "Helper";
+		private final String TEXT_ASYMPTOTIC  = "Asymptotic";
+		private final String TEXT_BOUNDS      = "bounds";
+		private final String TEXT_METHODS     = "Methods";
+		private final String TEXT_SOLUTION    = "Solution";
+		private final String TEXT_MODEL_DEF   = "Model\nDefinition";
+
+
+		public DiagramPanel() {
+			setOpaque(false);
+		}
+
+		@Override
+		protected void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			Graphics2D g2d = (Graphics2D) g;
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+			double wScale = CommonConstants.widthScaling;
+			double hScale = CommonConstants.heightScaling;
+
+			int btn_height = getButtonHeight();
+
+			// Auto-Scaled Button Y-Levels
+			int btn_JSIMwiz_Y   = (int) (BASE_BTN_JSIMWIZ_Y * hScale);
+			int btn_JSIMgraph_Y = (int) (BASE_BTN_JSIMGRAPH_Y * hScale);
+			int btn_JMVA_Y      = (int) (BASE_BTN_JMVA_Y * hScale);
+			int btn_JMCH_Y      = (int) (BASE_BTN_JMCH_Y * hScale);
+			int btn_JABA_Y      = (int) (BASE_BTN_JABA_Y * hScale);
+			int btn_JWAT_Y      = (int) (BASE_BTN_JWAT_Y * hScale);
+
+			int baseRight = getWidth() - (int)(15 * wScale); // Reference point for X coordinates
+			int end_X = baseRight;   // Arrowheads stop here
+
+			// =========================================================================
+			// SCALED STRUCTURAL COORDINATES (Computed from config area)
+			// =========================================================================
+
+			// --- DOTS ---
+			int start_X = baseRight - (int)(OFFSET_START_X * wScale);
+			int split_X = baseRight - (int)(OFFSET_SPLIT_X * wScale);
+			int mainLine_Y = (int)(BASE_MAIN_LINE_Y * hScale);
+
+			// --- DIAMONDS ---
+			int methods_X = baseRight - (int)(OFFSET_METHODS_X * wScale);
+			int methods_Y = (int)(BASE_METHODS_Y * hScale);
+
+			int solution_X = baseRight - (int)(OFFSET_SOLUTION_X * wScale);
+			int solution_Y = btn_JMCH_Y - (btn_height / 2) - (int)(12 * hScale);
+
+			int def_X = baseRight - (int)(OFFSET_DEF_X * wScale);
+			int defTop_Y = (int)(BASE_DEFTOP_Y * hScale);
+			int defMid_Y = (int)(BASE_DEFMID_Y * hScale);
+
+			// --- LINE TURNS ---
+			int turn_DefOut_X      = def_X + (int)(TURN_DEF_OUT * wScale);
+			int turn_SolutionOut_X = solution_X + (int)(TURN_SOLUTION_OUT * wScale);
+
+			// =========================================================================
+			// TEXT LABELS (Coordinates for Bottom-Left start of text)
+			// =========================================================================
+			int txt_Models_X = split_X - (int)(20 * wScale);
+			int txt_Models_Y = mainLine_Y - (int)(50 * hScale);
+
+			int txt_Workload_X  = txt_Models_X - (int)(5 * wScale);
+			int txt_Workload_Y1 = mainLine_Y + (int)(70 * hScale); // "Workload"
+			int txt_Workload_Y2 = txt_Workload_Y1 - (int)(15 * hScale); // "Analysis"
+
+			int txt_Simulation_X = methods_X - (int)(25 * wScale);
+			int txt_Simulation_Y = methods_Y - (int)(60 * hScale);
+
+			int txt_Analytical_X = methods_X - (int)(30 * wScale);
+			int txt_Analytical_Y = methods_Y + (int)(70 * hScale);
+
+			int txt_MVA_X      = turn_SolutionOut_X - (int)(75 * wScale);
+			int txt_MVA_Y_MVA  = solution_Y - (int)(70 * hScale); // "MVA"
+			int txt_MVA_Y_ex   = txt_MVA_Y_MVA + (int)(12 * hScale); // "exact"
+			int txt_MVA_Y_app  = txt_MVA_Y_ex + (int)(12 * hScale);  // "approximate"
+
+			int txt_TextualTop_X = turn_DefOut_X - (int)(25 * wScale);
+			int txt_TextualTop_Y = btn_JSIMwiz_Y + (btn_height / 2) + (int)(5 * hScale);
+
+			int txt_Graphical_X = turn_DefOut_X - (int)(30 * wScale);
+			int txt_Graphical_Y = btn_JSIMgraph_Y + (int)(10 * hScale);
+
+			int txt_TextualMid_X = turn_DefOut_X - (int)(30 * wScale);
+			int txt_TextualMid_Y = btn_JMVA_Y - (int)(15 * hScale);
+
+			int txt_Markov_X    = turn_SolutionOut_X + (int)(30 * wScale);
+			int txt_Markov_Y1   = solution_Y - (int)(5 * hScale); // "Markov"
+			int txt_Markov_Y2   = txt_Markov_Y1 + (int)(15 * hScale);  // "Chain"
+
+			int txt_Asymptotic_X  = solution_X - (int)(30 * wScale);
+			int txt_Asymptotic_Y1 = btn_JABA_Y - (btn_height / 2) - (int)(70 * hScale);
+			int txt_Asymptotic_Y2 = txt_Asymptotic_Y1 + (int)(15 * hScale); // "bounds"
+
+
+			// =========================================================================
+			// AUTO-WIRING ENGINE (Draws connections and shapes)
+			// =========================================================================
+			int dW = (int) (DIAMOND_W * wScale);
+			int dH = (int) (DIAMOND_H * hScale);
+			int dx = dW / 2; // Distance to Left/Right tips
+			int dy = dH / 2; // Distance to Top/Bottom tips
+
+			g2d.setColor(new Color(180, 180, 180));
+			g2d.setStroke(new BasicStroke(1.2f));
+
+			// Start -> Models Split
+			drawPath(g2d, true, start_X, mainLine_Y, split_X - (int)(4 * wScale), mainLine_Y);
+
+			// Models Split -> Directions
+			drawPath(g2d, true, split_X, mainLine_Y, split_X, btn_JWAT_Y - (int)(75 * hScale), end_X, btn_JWAT_Y - (int)(75 * hScale)); // down to WAT
+			drawPath(g2d, true, split_X, mainLine_Y, split_X, methods_Y, methods_X - dx, methods_Y); // up to Methods
+
+			// --- METHODS DIAMOND OUT ---
+			drawPath(g2d, true,
+					methods_X, methods_Y - dy,
+					methods_X, defTop_Y,
+					def_X - dx, defTop_Y
+			); // Top Tip -> DefTop
+			drawPath(g2d, true,
+					methods_X, methods_Y + dy,
+					methods_X, solution_Y,
+					solution_X - dx, solution_Y
+			); // Bottom Tip -> DefMid
+
+			// --- DEFTOP DIAMOND OUT ---
+			drawPath(g2d, true,
+					def_X, defTop_Y - dy,
+					def_X, btn_JSIMwiz_Y + btn_height / 2,
+					end_X, btn_JSIMwiz_Y + btn_height / 2
+			); // Top Tip -> JSIMwiz
+			drawPath(g2d, true,
+					def_X, defTop_Y + dy,
+					def_X, btn_JSIMgraph_Y + (int)(7 * hScale),
+					end_X, btn_JSIMgraph_Y + (int)(7 * hScale)
+			); // Bottom Tip -> JSIMgraph
+
+			// --- DEFMID DIAMOND OUT ---
+			drawPath(g2d, true,
+					def_X, defMid_Y,
+					def_X, btn_JMVA_Y - (int)(20 * hScale),
+					end_X, btn_JMVA_Y - (int)(20 * hScale)
+			); // Right Tip -> JMVA
+
+			// --- SOLUTION DIAMOND OUT ---
+			drawPath(g2d, true,
+					solution_X + dx, solution_Y,
+					end_X, solution_Y
+			); // Right Tip -> JMCH
+			drawPath(g2d, true,
+					solution_X, solution_Y + dy,
+					solution_X, btn_JABA_Y - (btn_height / 2) - (int)(32 * hScale),
+					end_X, btn_JABA_Y - (btn_height / 2) - (int)(32 * hScale)
+			); // Bottom Tip -> JABA
+			drawPath(g2d, true,
+					solution_X, solution_Y - dy,
+					solution_X, defMid_Y,
+					def_X - dx, defMid_Y
+			); // Top Tip -> DefMid
+
+			// Draw Dots
+			g2d.setColor(Color.BLACK);
+			g2d.fillOval(start_X - 5, mainLine_Y - 5, 10, 10); // Start dot
+			g2d.setColor(Color.WHITE);
+			g2d.fillOval(split_X - 4, mainLine_Y - 4, 8, 8); // Split hollow dot
+			g2d.setColor(Color.BLACK);
+			g2d.drawOval(split_X - 4, mainLine_Y - 4, 8, 8);
+
+			// Draw decision Diamonds (Using extracted text fields)
+			drawDiamond(g2d, methods_X, methods_Y, dW, dH, TEXT_METHODS);
+			drawDiamond(g2d, solution_X, solution_Y, dW, dH, TEXT_SOLUTION);
+			drawDiamond(g2d, def_X, defTop_Y, dW, dH, TEXT_MODEL_DEF);
+			drawDiamond(g2d, def_X, defMid_Y, dW, dH, TEXT_MODEL_DEF);
+
+			// Draw Bold Text
+			Font mainFont = new Font("Arial", Font.PLAIN, (int) Math.max(12, 14 * wScale));
+			Font smallFont = new Font("Arial", Font.PLAIN, (int) Math.max(9, 10 * wScale));
+
+			g2d.setColor(Color.BLACK);
+			g2d.setFont(mainFont);
+
+			g2d.drawString(TEXT_MODELS, txt_Models_X, txt_Models_Y);
+			g2d.drawString(TEXT_WORKLOAD, txt_Workload_X, txt_Workload_Y1);
+			g2d.drawString(TEXT_ANALYSIS, txt_Workload_X, txt_Workload_Y2);
+			g2d.drawString(TEXT_SIMULATION, txt_Simulation_X, txt_Simulation_Y);
+			g2d.drawString(TEXT_ANALYTICAL, txt_Analytical_X, txt_Analytical_Y);
+
+			g2d.drawString(TEXT_MVA, txt_MVA_X, txt_MVA_Y_MVA);
+			g2d.setFont(smallFont);
+			g2d.drawString(TEXT_EXACT, txt_MVA_X + (int)(2 * wScale), txt_MVA_Y_ex);
+			g2d.drawString(TEXT_APPROXIMATE, txt_MVA_X - (int)(15 * wScale), txt_MVA_Y_app);
+
+			g2d.setFont(mainFont);
+			g2d.drawString(TEXT_TEXTUAL, txt_TextualTop_X, txt_TextualTop_Y);
+			g2d.drawString(TEXT_GRAPHICAL, txt_Graphical_X, txt_Graphical_Y);
+			g2d.drawString(TEXT_TEXTUAL, txt_TextualMid_X, txt_TextualMid_Y);
+
+			g2d.drawString(TEXT_CLASSROOM, txt_Markov_X - (int)(15 * wScale), txt_Markov_Y1);
+			g2d.drawString(TEXT_HELPER, txt_Markov_X + (int)(3 * wScale), txt_Markov_Y2);
+
+			g2d.drawString(TEXT_ASYMPTOTIC, txt_Asymptotic_X, txt_Asymptotic_Y1);
+			g2d.setFont(smallFont);
+			g2d.drawString(TEXT_BOUNDS, txt_Asymptotic_X + (int)(15 * wScale), txt_Asymptotic_Y2);
+		}
+
+		// Helper to draw orthogonal connecting paths with an arrowhead at the last point
+		private void drawPath(Graphics2D g, boolean arrow, int... coords) {
+			for (int i = 0; i < coords.length - 2; i += 2) {
+				g.drawLine(coords[i], coords[i+1], coords[i+2], coords[i+3]);
+			}
+			if (arrow && coords.length >= 4) {
+				int x = coords[coords.length - 2];
+				int y = coords[coords.length - 1];
+				int arrSz = 5;
+				Polygon arr = new Polygon();
+				arr.addPoint(x, y);
+				arr.addPoint(x - arrSz, y - arrSz);
+				arr.addPoint(x - arrSz, y + arrSz);
+				g.setColor(Color.BLACK);
+				g.fillPolygon(arr);
+				g.setColor(new Color(180, 180, 180)); // reset line color
+			}
+		}
+
+		// Helper to draw the decision diamond shape with centered multiline text
+		private void drawDiamond(Graphics2D g, int cx, int cy, int w, int h, String text) {
+			Polygon p = new Polygon();
+			p.addPoint(cx, cy - h/2);
+			p.addPoint(cx + w/2, cy);
+			p.addPoint(cx, cy + h/2);
+			p.addPoint(cx - w/2, cy);
+
+			g.setColor(new Color(232, 238, 247));
+			g.fillPolygon(p);
+			g.setColor(Color.GRAY);
+			g.drawPolygon(p);
+
+			g.setColor(Color.BLACK);
+			Font originalFont = g.getFont();
+			g.setFont(new Font("Arial", Font.BOLD, (int) (originalFont.getSize() * 1.4f)));
+			FontMetrics fm = g.getFontMetrics();
+			String[] lines = text.split("\n");
+			int yOffset = cy - (fm.getHeight() * lines.length) / 2 + fm.getAscent();
+			for (String line : lines) {
+				int textW = fm.stringWidth(line);
+				g.drawString(line, cx - textW / 2, yOffset);
+				yOffset += fm.getHeight();
+			}
+			g.setFont(originalFont);
+			g.setColor(new Color(180, 180, 180));
+		}
+	}
 }
