@@ -1,6 +1,5 @@
 package jmt.jmva.analytical.solvers.queueingnet;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -272,4 +271,3 @@ public class MonteCarloSolver extends QNSolver {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

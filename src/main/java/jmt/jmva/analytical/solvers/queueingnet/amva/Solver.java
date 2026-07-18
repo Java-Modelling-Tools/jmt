@@ -242,4 +242,3 @@ public abstract class Solver {
 	public abstract void solve();
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

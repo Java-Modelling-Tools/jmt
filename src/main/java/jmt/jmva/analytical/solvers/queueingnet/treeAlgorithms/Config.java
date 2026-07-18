@@ -92,5 +92,4 @@ public class Config {
 		Printer.out.println("USE_FEEDBACK_FILTERING: " + USE_FEEDBACK_FILTERING);
 		Printer.out.println("FEEDBACK_FILTERING_OVERLAP_POP_THRESHOLD: " + FEEDBACK_FILTERING_OVERLAP_POP_THRESHOLD);
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

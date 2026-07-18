@@ -194,5 +194,4 @@ public class TCComplexityEvaluator extends ComplexityEvaluator {
 		Printer.out.println("Ratio of FCS to PCS: " + fcfToPcRatio);
 		Printer.out.println("--- END Complexity Evaluation ---");
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

@@ -63,10 +63,7 @@ public interface XMLConstantNames {
 
 	public static final String XML_E_STATION_SET_UP = "setUp";
 	public static final String XML_A_STATION_SECTION_CLASSNAME = "className";
-<<<<<<< HEAD
-=======
 	public static final String XML_A_STATION_SECTION_PS_PRIORITY = "psPriority";
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 	public static final String XML_E_PARAMETER = "parameter";
 	public static final String XML_A_PARAMETER_NAME = "name";
 	public static final String XML_A_PARAMETER_CLASSPATH = "classPath";

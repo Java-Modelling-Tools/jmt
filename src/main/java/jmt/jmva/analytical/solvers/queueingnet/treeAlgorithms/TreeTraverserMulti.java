@@ -109,5 +109,4 @@ public abstract class TreeTraverserMulti {
 	 * @return A Thread which will run the subnetwork node computation.
 	 */
 	public abstract Thread getSubnetNodeThread(Node node, PopulationVector pv);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

@@ -360,5 +360,4 @@ public class ConvolutionCore {
 			p = ccu.nextPermutation(p, parentPcMax);
 		}
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

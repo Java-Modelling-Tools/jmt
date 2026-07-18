@@ -315,5 +315,4 @@ public class ClassCoverageUtils {
  		
  		return npv;
     }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

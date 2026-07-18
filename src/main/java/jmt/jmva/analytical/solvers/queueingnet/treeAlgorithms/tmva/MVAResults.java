@@ -24,4 +24,3 @@ public class MVAResults {
 		R = new double[K][C];
 	}
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.utilisations;
 
 import jmt.jmva.analytical.solvers.priority.interpolators.ReflectedNonLinearInterpolator;
@@ -11,17 +10,3 @@ public class RNLI_NCPrioMVAUtilCalculator extends InterpolatedPrioMVAUtilCalcula
        super(new ReflectedNonLinearInterpolator(), NO_CHANGE);
     }
 }
-=======
-package jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.utilisations;
-
-import jmt.jmva.analytical.solvers.priority.interpolators.ReflectedNonLinearInterpolator;
-import jmt.jmva.analytical.solvers.priority.prioMVACalculators.InterpolatedPrioMVAUtilCalculator;
-
-public class RNLI_NCPrioMVAUtilCalculator extends InterpolatedPrioMVAUtilCalculator {
-
-    // Reflected Non-Linear Interpolator - No Change
-    public RNLI_NCPrioMVAUtilCalculator() {
-       super(new ReflectedNonLinearInterpolator(), NO_CHANGE);
-    }
-}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

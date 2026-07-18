@@ -65,4 +65,3 @@ public abstract class SafeFunction implements Function {
 	protected abstract BigDecimal safeEvaluate(double[] point) throws InternalErrorException;
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

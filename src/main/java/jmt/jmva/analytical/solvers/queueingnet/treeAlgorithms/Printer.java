@@ -88,4 +88,3 @@ public abstract class Printer {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

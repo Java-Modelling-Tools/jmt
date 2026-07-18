@@ -271,5 +271,4 @@ public class ConvolutionLayer {
 			p = nextPermutation(p, orig);
 		}
 	}*/
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

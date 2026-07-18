@@ -166,4 +166,3 @@ public class MultiVariateGaussian implements MultiVariateRealDistribution {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

@@ -31,4 +31,3 @@ public class CoMoMBTFSolver extends CoMoMSolver {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

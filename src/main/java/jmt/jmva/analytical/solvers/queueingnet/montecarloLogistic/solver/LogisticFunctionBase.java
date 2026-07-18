@@ -32,4 +32,3 @@ public abstract class LogisticFunctionBase extends SafeFunction {
 	public DoubleMatrix2D getHess_stat() { return hess_stat.copy(); }
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

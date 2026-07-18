@@ -1,8 +1,3 @@
-<<<<<<< HEAD
 org.freehep.graphicsio.gif.GIFImageWriterSpi
 org.freehep.graphicsio.raw.RawImageWriterSpi
-=======
-org.freehep.graphicsio.gif.GIFImageWriterSpi
-org.freehep.graphicsio.raw.RawImageWriterSpi
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 org.freehep.graphicsio.ppm.PPMImageWriterSpi

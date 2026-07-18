@@ -499,5 +499,4 @@ public class TreePlanter {
 		
 		return currNode;
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

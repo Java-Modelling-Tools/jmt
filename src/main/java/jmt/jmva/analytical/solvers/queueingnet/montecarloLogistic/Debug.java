@@ -1,7 +1,5 @@
 package jmt.jmva.analytical.solvers.queueingnet.montecarloLogistic;
 
-import static jmt.jmva.analytical.solvers.utilities.MiscMathsFunctions.log;
-
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Arrays;
@@ -383,4 +381,3 @@ public class Debug {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

@@ -47,4 +47,3 @@ public interface MultiVariateRealDistribution {
 	MultiVariateRealDistribution copy(int seed) throws InternalErrorException;
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

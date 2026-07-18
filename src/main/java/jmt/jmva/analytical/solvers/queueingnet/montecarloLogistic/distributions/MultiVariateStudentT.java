@@ -156,4 +156,3 @@ public class MultiVariateStudentT implements MultiVariateRealDistribution {
 	}
 
 }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

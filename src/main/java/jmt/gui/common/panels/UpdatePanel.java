@@ -102,13 +102,6 @@ public class UpdatePanel {
     }
 
     private static void promptUserToUpdate(String latestVersion,String currentVersion) {
-<<<<<<< HEAD
-        int response = JOptionPane.showConfirmDialog(parentFrame,
-                "An update is available. Would you like to download and install it now?",
-                "Update Available",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.INFORMATION_MESSAGE);
-=======
         Object[] options = {"Yes, update now", "No, remind me later", "Open download page"};
         int response = JOptionPane.showOptionDialog(parentFrame,
                 "An update is available. Would you like to download and install it now?",
@@ -118,16 +111,12 @@ public class UpdatePanel {
                 null,
                 options,
                 options[0]);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 
         if (response == JOptionPane.YES_OPTION) {
             showProgressDialog();
             downloadAndUpdate(latestVersion,currentVersion);
-<<<<<<< HEAD
-=======
         } else if (response == JOptionPane.CANCEL_OPTION) {
             openDownloadPage();
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
         }
     }
 
@@ -300,8 +289,6 @@ public class UpdatePanel {
         }
     }
 
-<<<<<<< HEAD
-=======
     private static void openDownloadPage() {
         try {
             String url = "https://sourceforge.net/projects/jmt/files/latest/download";
@@ -310,7 +297,6 @@ public class UpdatePanel {
             e.printStackTrace();
         }
     }
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 
     private static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase().contains("win");

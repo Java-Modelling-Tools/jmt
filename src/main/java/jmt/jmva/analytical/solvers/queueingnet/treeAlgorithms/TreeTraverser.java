@@ -79,5 +79,4 @@ public abstract class TreeTraverser {
 	 * @param pv The population vector to use for the computation.
 	 */
 	public abstract void computeSubnetNode(Node node, PopulationVector pv);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

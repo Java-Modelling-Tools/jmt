@@ -119,10 +119,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		temp.put(QUEUE_STRATEGY_PS, "EPSStrategyPriority");
 		temp.put(QUEUE_STRATEGY_GPS, "GPSStrategyPriority");
 		temp.put(QUEUE_STRATEGY_DPS, "DPSStrategyPriority");
-<<<<<<< HEAD
-=======
 		temp.put(QUEUE_STRATEGY_QBPS, "QBPSStrategyPriority");
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 		PRIORITY_PS_STRATEGIES_MAPPING = Collections.unmodifiableMap(temp);
 
 		temp = new HashMap<String, String>();
@@ -1023,11 +1020,7 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
 		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PSSERVER_PRIORITY)) {
-<<<<<<< HEAD
-			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER_PRIORITY);
-=======
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PSSERVER);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 		} else if (queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE)
 				|| queueStrategy.equals(STATION_QUEUE_STRATEGY_PREEMPTIVE_PRIORITY)) {
 			elem.setAttribute(XML_A_STATION_SECTION_CLASSNAME, CLASSNAME_PREEMPTIVESERVER);
@@ -1086,13 +1079,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			XMLParameter psStrategies = new XMLParameter("PSStrategy",
 					strategiesClasspathBase + "PSStrategy", null,
 					psStrategy, false);
-<<<<<<< HEAD
-=======
 			XMLParameter psStrategiesPriority = new XMLParameter("PSPriorityUsed",
 					"java.lang.Boolean", null,
 					String.valueOf(false), false);
 			psStrategiesPriority.appendParameterElement(doc, elem);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 			psStrategies.appendParameterElement(doc, elem);
 			// creating service weights node element
 			XMLParameter[] serviceWeight = new XMLParameter[classes.size()];
@@ -1123,13 +1113,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 			XMLParameter psStrategies = new XMLParameter("PSStrategy",
 					strategiesClasspathBase + "PSStrategy", null,
 					psStrategy, false);
-<<<<<<< HEAD
-=======
 			XMLParameter psStrategiesPriority = new XMLParameter("PSPriorityUsed",
 					"java.lang.Boolean", null,
 					String.valueOf(true), false);
 			psStrategiesPriority.appendParameterElement(doc, elem);
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 			psStrategies.appendParameterElement(doc, elem);
 			// creating service weights node element
 			XMLParameter[] serviceWeight = new XMLParameter[classes.size()];

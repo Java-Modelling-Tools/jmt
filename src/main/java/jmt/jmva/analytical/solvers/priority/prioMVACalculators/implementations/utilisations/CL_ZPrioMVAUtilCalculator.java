@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.utilisations;
 
 import jmt.jmva.analytical.solvers.priority.interpolators.LinearInterpolator;
@@ -14,20 +13,3 @@ public class CL_ZPrioMVAUtilCalculator extends InterpolatedPrioMVAUtilCalculator
         super(new LinearInterpolator(), RETURN_ZERO);
     }
 }
-=======
-package jmt.jmva.analytical.solvers.priority.prioMVACalculators.implementations.utilisations;
-
-import jmt.jmva.analytical.solvers.priority.interpolators.LinearInterpolator;
-import jmt.jmva.analytical.solvers.priority.prioMVACalculators.InterpolatedPrioMVAUtilCalculator;
-
-public class CL_ZPrioMVAUtilCalculator extends InterpolatedPrioMVAUtilCalculator {
-
-    // Named after: Chandy and Lakshmi
-    // C & L had nothing to do with this variation though
-    // When x1 = 0, it doesn't interpolate, it just returns 0
-
-    public CL_ZPrioMVAUtilCalculator() {
-        super(new LinearInterpolator(), RETURN_ZERO);
-    }
-}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)

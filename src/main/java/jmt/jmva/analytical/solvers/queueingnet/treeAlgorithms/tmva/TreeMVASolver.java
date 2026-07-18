@@ -126,5 +126,4 @@ public class TreeMVASolver extends QNSolver {
 			System.out.println("\n --- END Tree MVA Summary ---\n");
 		}
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

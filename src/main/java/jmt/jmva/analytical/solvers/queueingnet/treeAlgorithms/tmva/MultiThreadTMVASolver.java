@@ -93,5 +93,4 @@ public class MultiThreadTMVASolver extends TreeTraverserMulti implements IThread
 	    	tmvaCore.computeSubnetNode(node);
 	    }
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }

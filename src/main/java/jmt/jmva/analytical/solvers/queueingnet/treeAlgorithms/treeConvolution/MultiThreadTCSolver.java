@@ -290,5 +290,4 @@ public class MultiThreadTCSolver extends TreeTraverserMulti implements IThreaded
 	    	cl.computeSubnetNodeGArray(node, pv);
 	    }
 	}
->>>>>>> b0a37c45 (Initial commit at SVN r1153.)
 }
