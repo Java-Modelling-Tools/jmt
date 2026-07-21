@@ -651,8 +651,8 @@ public class GraphStartScreen extends JMTFrame {
 			int txt_Models_Y = mainLine_Y - (int)(50 * hScale);
 
 			int txt_Workload_X  = txt_Models_X - (int)(5 * wScale);
-			int txt_Workload_Y1 = mainLine_Y + (int)(70 * hScale); // "Workload"
-			int txt_Workload_Y2 = txt_Workload_Y1 - (int)(15 * hScale); // "Analysis"
+			int txt_Workload_Y1 = mainLine_Y + (int)(55 * hScale); // "Workload" (top line)
+			int txt_Workload_Y2 = txt_Workload_Y1 + (int)(15 * hScale); // "Analysis" (bottom line)
 
 			int txt_Simulation_X = methods_X - (int)(25 * wScale);
 			int txt_Simulation_Y = methods_Y - (int)(60 * hScale);
