@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="producer_consumer.jsimg" timestamp="Fri Aug 14 20:50:08 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\lmacera\JMT\" logReplaceMode="1" maxEvents="-1" maxSamples="1000000" name="producer_consumer.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass customers="5" name="Class1" priority="0" referenceSource="emptySlots" softDeadline="0.0" type="closed"/>
+        <node name="producerReady">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="startProduce">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="timingStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>0</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producing</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="producing">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="endProduce">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producing</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producing</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>newJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="newJob">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="insertJob">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>newJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>emptySlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>newJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>emptySlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="timingStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>0</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>producerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>fullSlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="nextJob">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="startConsume">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>nextJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>nextJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="timingStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>0</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consuming</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="consuming">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="endConsume">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consuming</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consuming</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="timingStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consumerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="consumerReady">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="removeJob">
+            <section className="Enabling">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="enablingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consumerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="enablingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>fullSlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="enablingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="enablingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingConditions">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="inhibitingCondition">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>consumerReady</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="inhibitingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>fullSlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="inhibitingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="inhibitingEntry">
+                                        <value>0</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Timing">
+                <parameter array="true" classPath="java.lang.String" name="modeNames">
+                    <subParameter classPath="java.lang.String" name="modeName">
+                        <value>Mode1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numbersOfServers">
+                    <subParameter classPath="java.lang.Integer" name="numberOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="timingStrategies">
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="timingStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="firingPriorities">
+                    <subParameter classPath="java.lang.Integer" name="firingPriority">
+                        <value>0</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="firingWeights">
+                    <subParameter classPath="java.lang.Double" name="firingWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Firing">
+                <parameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcomes">
+                    <subParameter classPath="NetStrategies.TransitionUtilities.TransitionMatrix" name="firingOutcome">
+                        <subParameter array="true" classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVectors">
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>nextJob</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="NetStrategies.TransitionUtilities.TransitionVector" name="firingVector">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>emptySlots</value>
+                                </subParameter>
+                                <subParameter array="true" classPath="java.lang.Integer" name="firingEntries">
+                                    <refClass>Class1</refClass>
+                                    <subParameter classPath="java.lang.Integer" name="firingEntry">
+                                        <value>1</value>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="emptySlots">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <node name="fullSlots">
+            <section className="Storage">
+                <parameter classPath="java.lang.Integer" name="totalCapacity">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="capacities">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="capacity">
+                        <value>-1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropRules">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropRule">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="getStrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="putStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="putStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Linkage"/>
+        </node>
+        <measure alpha="0.01" name="producerReady_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="producerReady" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="producing_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="producing" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="newJob_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="newJob" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="nextJob_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="nextJob" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="consuming_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="consuming" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="consumerReady_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="consumerReady" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="emptySlots_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="emptySlots" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="fullSlots_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="fullSlots" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="startProduce_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="startProduce" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <measure alpha="0.01" name="endProduce_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="endProduce" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <measure alpha="0.01" name="insertJob_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="insertJob" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <measure alpha="0.01" name="startConsume_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="startConsume" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <measure alpha="0.01" name="endConsume_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="endConsume" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <measure alpha="0.01" name="removeJob_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceNode="removeJob" referenceUserClass="Mode1" type="Firing Throughput" verbose="false"/>
+        <connection source="producerReady" target="startProduce"/>
+        <connection source="startProduce" target="producing"/>
+        <connection source="producing" target="endProduce"/>
+        <connection source="endProduce" target="newJob"/>
+        <connection source="newJob" target="insertJob"/>
+        <connection source="insertJob" target="producerReady"/>
+        <connection source="insertJob" target="fullSlots"/>
+        <connection source="nextJob" target="startConsume"/>
+        <connection source="startConsume" target="consuming"/>
+        <connection source="consuming" target="endConsume"/>
+        <connection source="endConsume" target="consumerReady"/>
+        <connection source="consumerReady" target="removeJob"/>
+        <connection source="removeJob" target="nextJob"/>
+        <connection source="removeJob" target="emptySlots"/>
+        <connection source="emptySlots" target="insertJob"/>
+        <connection source="fullSlots" target="removeJob"/>
+        <preload>
+            <stationPopulations stationName="producerReady">
+                <classPopulation population="1" refClass="Class1"/>
+            </stationPopulations>
+            <stationPopulations stationName="consumerReady">
+                <classPopulation population="1" refClass="Class1"/>
+            </stationPopulations>
+            <stationPopulations stationName="emptySlots">
+                <classPopulation population="3" refClass="Class1"/>
+            </stationPopulations>
+        </preload>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="Class1"/>
+        <station name="producerReady">
+            <position angle="0.0" rotate="false" x="56.0" y="40.0"/>
+        </station>
+        <station name="startProduce">
+            <position angle="0.0" rotate="false" x="168.0" y="40.0"/>
+        </station>
+        <station name="producing">
+            <position angle="0.0" rotate="false" x="262.0" y="40.0"/>
+        </station>
+        <station name="endProduce">
+            <position angle="0.0" rotate="false" x="350.0" y="40.0"/>
+        </station>
+        <station name="newJob">
+            <position angle="0.0" rotate="false" x="477.0" y="40.0"/>
+        </station>
+        <station name="insertJob">
+            <position angle="0.0" rotate="false" x="678.0" y="40.0"/>
+        </station>
+        <station name="nextJob">
+            <position angle="0.0" rotate="false" x="75.0" y="248.0"/>
+        </station>
+        <station name="startConsume">
+            <position angle="0.0" rotate="false" x="168.0" y="248.0"/>
+        </station>
+        <station name="consuming">
+            <position angle="0.0" rotate="false" x="262.0" y="248.0"/>
+        </station>
+        <station name="endConsume">
+            <position angle="0.0" rotate="false" x="350.0" y="248.0"/>
+        </station>
+        <station name="consumerReady">
+            <position angle="0.0" rotate="false" x="455.0" y="248.0"/>
+        </station>
+        <station name="removeJob">
+            <position angle="0.0" rotate="false" x="672.0" y="248.0"/>
+        </station>
+        <station name="emptySlots">
+            <position angle="0.0" rotate="false" x="577.0" y="145.0"/>
+        </station>
+        <station name="fullSlots">
+            <position angle="0.0" rotate="false" x="777.0" y="145.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="20162" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.0" name="producerReady_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="producerReady" state="1" type="0">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="6686.485910050712"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="12128.635177927843"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="455" finalValue="0.8325434170132122" name="producing_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="producing" state="1" type="0">
+            <sample lastIntervalAvgValue="0.8300851204472589" lowerBound="0.7685836830854863" meanValue="0.8294329521300972" simulationTime="6686.485910050712" upperBound="0.890282221174708"/>
+            <sample lastIntervalAvgValue="0.8305667152947415" lowerBound="0.8088288357198994" meanValue="0.8353319304769082" simulationTime="24447.026240708197" upperBound="0.8618350252339171"/>
+            <sample lastIntervalAvgValue="0.8321003705355616" lowerBound="0.8154629730213168" meanValue="0.8325434170132122" simulationTime="36622.82440115346" upperBound="0.8496238610051077"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="143360" discardedSamples="455" finalValue="0.16867251253150065" name="newJob_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="newJob" state="1" type="0">
+            <sample lastIntervalAvgValue="0.1699148795527411" lowerBound="0.12754612631404016" meanValue="0.1705670478699028" simulationTime="6686.485910050712" upperBound="0.2135879694257654"/>
+            <sample lastIntervalAvgValue="0.16943328470525842" lowerBound="0.14554260934530824" meanValue="0.16466806952309176" simulationTime="24447.026240708197" upperBound="0.18379352970087529"/>
+            <sample lastIntervalAvgValue="0.15981076625659668" lowerBound="0.1586274854043614" meanValue="0.16745658298678776" simulationTime="43605.98768114631" upperBound="0.17628568056921412"/>
+            <sample lastIntervalAvgValue="0.1651488079018347" lowerBound="0.1586274854043614" meanValue="0.16745658298678776" simulationTime="63982.69560087775" upperBound="0.17628568056921412"/>
+            <sample lastIntervalAvgValue="0.16845949987848363" lowerBound="0.15697015925086555" meanValue="0.16324015059698038" simulationTime="84903.36874188355" upperBound="0.16951014194309522"/>
+            <sample lastIntervalAvgValue="0.1697235563750918" lowerBound="0.15697015925086555" meanValue="0.16324015059698038" simulationTime="106237.96377288313" upperBound="0.16951014194309522"/>
+            <sample lastIntervalAvgValue="0.17445541674390977" lowerBound="0.15697015925086555" meanValue="0.16324015059698038" simulationTime="127764.09969638161" upperBound="0.16951014194309522"/>
+            <sample lastIntervalAvgValue="0.17513590498560666" lowerBound="0.1641484456505909" meanValue="0.16867251253150065" simulationTime="144576.3032022857" upperBound="0.1731965794124104"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="10000" discardedSamples="0" finalValue="0.0" name="nextJob_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="nextJob" state="1" type="0">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="6685.871238367873"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="12135.357086702057"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="12800" discardedSamples="395" finalValue="0.845721688186415" name="consuming_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="consuming" state="1" type="0">
+            <sample lastIntervalAvgValue="0.8395911487918186" lowerBound="0.7762916206805502" meanValue="0.8393956147953056" simulationTime="6685.871238367873" upperBound="0.9024996089100609"/>
+            <sample lastIntervalAvgValue="0.8504163771288953" lowerBound="0.823313711477196" meanValue="0.845721688186415" simulationTime="13408.73437894631" upperBound="0.868129664895634"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="409600" discardedSamples="395" finalValue="0.16725965059361383" name="consumerReady_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="consumerReady" state="1" type="0">
+            <sample lastIntervalAvgValue="0.16040885120818144" lowerBound="0.08218733988704914" meanValue="0.16060438520469444" simulationTime="6685.871238367873" upperBound="0.23902143052233976"/>
+            <sample lastIntervalAvgValue="0.16293274174053396" lowerBound="0.13576774982714462" meanValue="0.15427831181358495" simulationTime="24446.100936419956" upperBound="0.17278887380002528"/>
+            <sample lastIntervalAvgValue="0.1699418447908539" lowerBound="0.1541494723488087" meanValue="0.16649927275030205" simulationTime="43605.98768114631" upperBound="0.17884907315179538"/>
+            <sample lastIntervalAvgValue="0.1670492405194277" lowerBound="0.1608036554369654" meanValue="0.1685579383637689" simulationTime="63981.827634906105" upperBound="0.1763122212905724"/>
+            <sample lastIntervalAvgValue="0.16327536462123282" lowerBound="0.1608036554369654" meanValue="0.1685579383637689" simulationTime="84903.27897746471" upperBound="0.1763122212905724"/>
+            <sample lastIntervalAvgValue="0.17186758875817923" lowerBound="0.16106168292163525" meanValue="0.1674677101937212" simulationTime="106237.96377288313" upperBound="0.17387373746580714"/>
+            <sample lastIntervalAvgValue="0.16452856394101928" lowerBound="0.16106168292163525" meanValue="0.1674677101937212" simulationTime="127765.32409873302" upperBound="0.17387373746580714"/>
+            <sample lastIntervalAvgValue="0.16144954375743337" lowerBound="0.16106168292163525" meanValue="0.1674677101937212" simulationTime="148982.403678983" upperBound="0.17387373746580714"/>
+            <sample lastIntervalAvgValue="0.17061559516878755" lowerBound="0.16106168292163525" meanValue="0.1674677101937212" simulationTime="170257.32082776027" upperBound="0.17387373746580714"/>
+            <sample lastIntervalAvgValue="0.17082660347830972" lowerBound="0.16106168292163525" meanValue="0.1674677101937212" simulationTime="191351.4139980506" upperBound="0.17387373746580714"/>
+            <sample lastIntervalAvgValue="0.17380068533948817" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="212450.0806989703" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.16108169845472534" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="233637.13017026143" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.16206886125258546" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="254731.5953368718" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.16838789463903683" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="275659.98676242656" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.16904101003410354" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="296732.1931290367" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.1646487944047354" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="317810.5945547914" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.1664234187167403" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="339251.9920946925" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.16164857851367448" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="360537.8832958514" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.17056277052325358" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="381450.933458345" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.17500923763418652" lowerBound="0.16234744546849875" meanValue="0.1674499877453823" simulationTime="402494.9164383848" upperBound="0.17255253002226587"/>
+            <sample lastIntervalAvgValue="0.17311840626461372" lowerBound="0.16426138237656973" meanValue="0.16725965059361383" simulationTime="410980.01190404524" upperBound="0.17025791881065794"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="92160" discardedSamples="545" finalValue="1.5063686383718224" name="emptySlots_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="emptySlots" state="1" type="0">
+            <sample lastIntervalAvgValue="1.454568210210378" lowerBound="1.2019520556073868" meanValue="1.445124742469419" simulationTime="6686.485910050712" upperBound="1.688297429331451"/>
+            <sample lastIntervalAvgValue="1.4694059838552784" lowerBound="1.3647419366175242" meanValue="1.461632148226265" simulationTime="24447.026240708197" upperBound="1.558522359835006"/>
+            <sample lastIntervalAvgValue="1.5271913071137766" lowerBound="1.4439532014519638" meanValue="1.495466558870695" simulationTime="43605.98768114631" upperBound="1.5469799162894262"/>
+            <sample lastIntervalAvgValue="1.4982557371781833" lowerBound="1.4439532014519638" meanValue="1.495466558870695" simulationTime="63981.7343773437" upperBound="1.5469799162894262"/>
+            <sample lastIntervalAvgValue="1.534339944742784" lowerBound="1.4658918025505303" meanValue="1.5063686383718224" simulationTime="70202.90135308346" upperBound="1.5468454741931146"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="92160" discardedSamples="545" finalValue="1.4936313616281787" name="fullSlots_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="fullSlots" state="1" type="0">
+            <sample lastIntervalAvgValue="1.5454317897896188" lowerBound="1.3728738217737901" meanValue="1.554875257530581" simulationTime="6686.485910050712" upperBound="1.736876693287372"/>
+            <sample lastIntervalAvgValue="1.5305940161447211" lowerBound="1.4578490553849697" meanValue="1.5383678517737347" simulationTime="24447.026240708197" upperBound="1.6188866481624997"/>
+            <sample lastIntervalAvgValue="1.4728086928862234" lowerBound="1.457318383112587" meanValue="1.5045334411293054" simulationTime="43605.98768114631" upperBound="1.5517484991460238"/>
+            <sample lastIntervalAvgValue="1.5017442628218167" lowerBound="1.457318383112587" meanValue="1.5045334411293054" simulationTime="63981.7343773437" upperBound="1.5517484991460238"/>
+            <sample lastIntervalAvgValue="1.465660055257216" lowerBound="1.4609059253492032" meanValue="1.4936313616281787" simulationTime="70202.90135308346" upperBound="1.5263567979071542"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="15360" discardedSamples="220" finalValue="0.825269440368901" name="startProduce_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="startProduce" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8291350755210002" lowerBound="0.7408161391514377" meanValue="0.8317559917555967" simulationTime="6686.485910050712" upperBound="0.948147017030185"/>
+            <sample lastIntervalAvgValue="0.8239425130713631" lowerBound="0.8029149833774415" meanValue="0.825269440368901" simulationTime="18866.947338833383" upperBound="0.8489043150358399"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="51200" discardedSamples="355" finalValue="0.8245854033996055" name="endProduce_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="endProduce" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8289855201321976" lowerBound="0.7634274646867633" meanValue="0.8334659162685134" simulationTime="6686.485910050712" upperBound="0.9176533797534165"/>
+            <sample lastIntervalAvgValue="0.8248059871643387" lowerBound="0.8029396527145607" meanValue="0.8291433500599219" simulationTime="24447.026240708197" upperBound="0.8571150452681886"/>
+            <sample lastIntervalAvgValue="0.8260071331748854" lowerBound="0.7961039773052507" meanValue="0.8222023417266903" simulationTime="43605.45643388847" upperBound="0.8500698481234028"/>
+            <sample lastIntervalAvgValue="0.823273870503282" lowerBound="0.8120330445540107" meanValue="0.8245854033996055" simulationTime="62478.884289070294" upperBound="0.8375319223929193"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="51200" discardedSamples="330" finalValue="0.8245322994480723" name="insertJob_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="insertJob" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8289855201321976" lowerBound="0.7668840695397716" meanValue="0.8329674790785357" simulationTime="6686.485910050712" upperBound="0.9115138249857152"/>
+            <sample lastIntervalAvgValue="0.8248059871643387" lowerBound="0.8040263670778841" meanValue="0.8291216057353877" simulationTime="24447.026240708197" upperBound="0.855833857708444"/>
+            <sample lastIntervalAvgValue="0.825984229322512" lowerBound="0.7976729287422778" meanValue="0.8220476768632207" simulationTime="43605.98768114631" upperBound="0.8479590336581476"/>
+            <sample lastIntervalAvgValue="0.8230933597857518" lowerBound="0.811645001670947" meanValue="0.8245322994480723" simulationTime="62453.18139929024" upperBound="0.837835449099143"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="15360" discardedSamples="200" finalValue="0.8251949004291584" name="startConsume_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="startConsume" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8286130262586993" lowerBound="0.7410876918126352" meanValue="0.8311456525808479" simulationTime="6685.871238367873" upperBound="0.9461193304384099"/>
+            <sample lastIntervalAvgValue="0.8239934809831861" lowerBound="0.8036325714009623" meanValue="0.8251949004291584" simulationTime="18846.161618389047" upperBound="0.8479462122569292"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="15360" discardedSamples="215" finalValue="0.8252386410509143" name="endConsume_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="endConsume" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8284634571203854" lowerBound="0.7550894156343257" meanValue="0.8324326097612171" simulationTime="6685.871238367873" upperBound="0.9274283395656812"/>
+            <sample lastIntervalAvgValue="0.8240652905679833" lowerBound="0.802584571316527" meanValue="0.8252386410509143" simulationTime="18868.158388310403" upperBound="0.8492087431099495"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="15360" discardedSamples="200" finalValue="0.8251949004291584" name="removeJob_Mode1_Firing Throughput" nodeType="station" precision="0.03" referenceClass="Mode1" referenceStation="removeJob" state="1" type="28">
+            <sample lastIntervalAvgValue="0.8286130262586993" lowerBound="0.7410876918126352" meanValue="0.8311456525808479" simulationTime="6685.871238367873" upperBound="0.9461193304384099"/>
+            <sample lastIntervalAvgValue="0.8239934809831861" lowerBound="0.8036325714009623" meanValue="0.8251949004291584" simulationTime="18846.161618389047" upperBound="0.8479462122569292"/>
+        </measure>
+    </results>
+</archive>

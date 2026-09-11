@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Sec2_3_Equi_ServiceDemands.jsimg" timestamp="Sun Nov 05 16:22:39 CET 2023" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Giuseppe Serazzi\JMT" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="Sec2_3_Equi_ServiceDemands.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass customers="20" name="Class1" priority="0" referenceSource="Users" softDeadline="0.0" type="closed"/>
+<node name="Users">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.commandline.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Delay">
+<parameter array="true" classPath="jmt.commandline.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.commandline.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.commandline.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.commandline.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="WS - Web Server">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.commandline.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.commandline.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.commandline.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>20.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.commandline.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="AS1 - App&amp;Storage Server">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.commandline.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.commandline.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.commandline.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>8.333333333333334</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.commandline.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="AS2 - App&amp;Storage Server">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.commandline.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>Class1</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.commandline.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.commandline.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.commandline.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>13.333333333333334</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.commandline.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>Class1</refClass>
+<subParameter classPath="jmt.commandline.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="WS - Web Server_Utilization" nodeType="station" precision="0.03" referenceNode="WS - Web Server" referenceUserClass="" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="AS1 - App&amp;Storage Server_Utilization" nodeType="station" precision="0.03" referenceNode="AS1 - App&amp;Storage Server" referenceUserClass="" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="AS2 - App&amp;Storage Server_Utilization" nodeType="station" precision="0.03" referenceNode="AS2 - App&amp;Storage Server" referenceUserClass="" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="Users_Residence Time" nodeType="station" precision="0.03" referenceNode="Users" referenceUserClass="" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="WS - Web Server_Residence Time" nodeType="station" precision="0.03" referenceNode="WS - Web Server" referenceUserClass="" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="AS1 - App&amp;Storage Server_Residence Time" nodeType="station" precision="0.03" referenceNode="AS1 - App&amp;Storage Server" referenceUserClass="" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="AS2 - App&amp;Storage Server_Residence Time" nodeType="station" precision="0.03" referenceNode="AS2 - App&amp;Storage Server" referenceUserClass="" type="Residence Time" verbose="false"/>
+<measure alpha="0.01" name="Users_Response Time" nodeType="station" precision="0.03" referenceNode="Users" referenceUserClass="" type="Response Time" verbose="false"/>
+<connection source="Users" target="WS - Web Server"/>
+<connection source="WS - Web Server" target="AS1 - App&amp;Storage Server"/>
+<connection source="AS1 - App&amp;Storage Server" target="AS2 - App&amp;Storage Server"/>
+<connection source="AS2 - App&amp;Storage Server" target="Users"/>
+<preload>
+<stationPopulations stationName="Users">
+<classPopulation population="20" refClass="Class1"/>
+</stationPopulations>
+</preload>
+</sim>
+<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+<userClass color="#FF0000FF" name="Class1"/>
+<station name="Users">
+<position angle="0.0" rotate="false" x="133.0" y="81.0"/>
+</station>
+<station name="WS - Web Server">
+<position angle="0.0" rotate="false" x="240.0" y="101.0"/>
+</station>
+<station name="AS1 - App&amp;Storage Server">
+<position angle="0.0" rotate="false" x="390.0" y="101.0"/>
+</station>
+<station name="AS2 - App&amp;Storage Server">
+<position angle="0.0" rotate="false" x="551.0" y="101.0"/>
+</station>
+</jmodel>
+<results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="81920" discardedSamples="130" finalValue="2.4153135736231364" name="System Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="" state="1" type="15">
+<sample lastIntervalAvgValue="2.3992581533689643" lowerBound="2.2954643174173834" meanValue="2.3993404679870367" simulationTime="1956.6141700428582" upperBound="2.50321661855669"/>
+<sample lastIntervalAvgValue="2.417268684326915" lowerBound="2.3740341319704235" meanValue="2.40905186245833" simulationTime="9573.774991620998" upperBound="2.4440695929462364"/>
+<sample lastIntervalAvgValue="2.370387347915573" lowerBound="2.3800793496493085" meanValue="2.4153135736231364" simulationTime="9897.113321083647" upperBound="2.4505477975969643"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="51200" discardedSamples="35" finalValue="8.305752207113331" name="System Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="" state="1" type="16">
+<sample lastIntervalAvgValue="8.330206460501604" lowerBound="8.058704396398966" meanValue="8.337568974421869" simulationTime="1956.6141700428582" upperBound="8.636425083039581"/>
+<sample lastIntervalAvgValue="8.30181100104878" lowerBound="8.167316230613366" meanValue="8.305752207113331" simulationTime="6164.852588815159" upperBound="8.448962079594539"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="61440" discardedSamples="175" finalValue="0.4134643077664577" name="WS - Web Server_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="WS - Web Server" state="1" type="6">
+<sample lastIntervalAvgValue="0.4179946356201254" lowerBound="0.40528732264925754" meanValue="0.42075851131526854" simulationTime="1956.5920422705653" upperBound="0.43622969998127953"/>
+<sample lastIntervalAvgValue="0.4131165896851929" lowerBound="0.4051932990977492" meanValue="0.4134643077664577" simulationTime="4667.352385861588" upperBound="0.4217353164351662"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="87040" discardedSamples="6595" finalValue="0.9927150357270175" name="AS1 - App&amp;Storage Server_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="AS1 - App&amp;Storage Server" state="1" type="6">
+<sample lastIntervalAvgValue="0.9926486557516698" meanValue="0.9926486557516698" simulationTime="1956.5262999927618"/>
+<sample lastIntervalAvgValue="0.9924036587392303" lowerBound="0.9802689240275082" meanValue="0.9927268312148564" simulationTime="9573.68421841779" upperBound="1.0051847384022046"/>
+<sample lastIntervalAvgValue="0.9928979164799989" lowerBound="0.9806461888421966" meanValue="0.9927150357270175" simulationTime="11169.239517654289" upperBound="1.0047838826118385"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="61440" discardedSamples="0" finalValue="0.6220659202188276" name="AS2 - App&amp;Storage Server_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="AS2 - App&amp;Storage Server" state="1" type="6">
+<sample lastIntervalAvgValue="0.6254226387516939" lowerBound="0.5964863475516952" meanValue="0.6237324982450198" simulationTime="1956.6141700428582" upperBound="0.6509786489383443"/>
+<sample lastIntervalAvgValue="0.6203171929204662" lowerBound="0.6104720367669669" meanValue="0.6220659202188276" simulationTime="5362.916544544736" upperBound="0.6336598036706882"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="51200" discardedSamples="745" finalValue="1.0023066754881076" name="Users_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Users" state="1" type="3">
+<sample lastIntervalAvgValue="0.9919770873349514" lowerBound="0.957171303060615" meanValue="0.9862514127386013" simulationTime="1956.5362471473845" upperBound="1.0153315224165873"/>
+<sample lastIntervalAvgValue="1.0036765412386301" lowerBound="0.9846836923707988" meanValue="1.0023066754881076" simulationTime="6249.47933189137" upperBound="1.0199296586054163"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="61440" discardedSamples="65" finalValue="0.08464556498203787" name="WS - Web Server_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="WS - Web Server" state="1" type="3">
+<sample lastIntervalAvgValue="0.0854244661736929" lowerBound="0.0785091496449253" meanValue="0.0851067308395829" simulationTime="1956.5920422705653" upperBound="0.0917043120342405"/>
+<sample lastIntervalAvgValue="0.08461274692686646" lowerBound="0.08258185114952754" meanValue="0.08464556498203787" simulationTime="7391.1325108180945" upperBound="0.08670927881454821"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="163840" discardedSamples="17100" finalValue="1.1452809048991828" name="AS1 - App&amp;Storage Server_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="AS1 - App&amp;Storage Server" state="1" type="3">
+<sample lastIntervalAvgValue="1.1317291700739789" meanValue="1.1317291700739789" simulationTime="1956.5262999927618"/>
+<sample lastIntervalAvgValue="1.1440531504459996" lowerBound="1.0913294724629108" meanValue="1.128503402995506" simulationTime="9573.68421841779" upperBound="1.1656773335281014"/>
+<sample lastIntervalAvgValue="1.1420281281116496" lowerBound="1.1221885735963013" meanValue="1.1452809048991828" simulationTime="21847.437721042796" upperBound="1.168373236202064"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="128000" discardedSamples="3865" finalValue="0.1911597189466424" name="AS2 - App&amp;Storage Server_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="AS2 - App&amp;Storage Server" state="1" type="3">
+<sample lastIntervalAvgValue="0.190237251065919" meanValue="0.19015558414837566" simulationTime="1956.6141700428582"/>
+<sample lastIntervalAvgValue="0.1887045438652453" lowerBound="0.18044235638906286" meanValue="0.1870156604798575" simulationTime="9573.774991620998" upperBound="0.1935889645706521"/>
+<sample lastIntervalAvgValue="0.19216415689228555" lowerBound="0.1863596471210875" meanValue="0.1911597189466424" simulationTime="15925.486907571078" upperBound="0.19595979077219733"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="51200" discardedSamples="745" finalValue="1.0020366055574552" name="Users_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Users" state="1" type="2">
+<sample lastIntervalAvgValue="0.9919770873349514" lowerBound="0.9564674143710251" meanValue="0.9855261389947071" simulationTime="1956.5362471473845" upperBound="1.014584863618389"/>
+<sample lastIntervalAvgValue="1.0036765412386301" lowerBound="0.9844183709247618" meanValue="1.0020366055574552" simulationTime="6249.47933189137" upperBound="1.0196548401901486"/>
+</measure>
+</results>
+</archive>

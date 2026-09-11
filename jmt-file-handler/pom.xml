@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-file-handler</artifactId>
+
+    <!-- Centralized model serialization layer: all XML readers and writers that
+         operate on JMT model objects (CommonModel, SimulationDefinition, analytical.ExactModel, etc.).
+         This is the canonical module for adding new serialization formats (e.g. JSON).
+
+         Depends on jmt-gui for model definition interfaces; jmt-engine constants
+         (XMLConstantNames, XSDSchemaLoader, XMLUtils, etc.) are available transitively.
+
+         Classes that remain in their own modules:
+           - GuiXMLReader/Writer, PNMLReader/Writer, ModelLoader (jmt-jsimg-gui) — depend
+             on jsimgraph graph model types (JSimGraphModel, JMTArc) and Swing
+           - SimLoader, XMLSimulationOutput (jmt-engine) — construct live QueueNet objects
+           - ExactDocumentCreator/Constants (jmt-jmva-core) — called by analytical.ExactModel itself -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

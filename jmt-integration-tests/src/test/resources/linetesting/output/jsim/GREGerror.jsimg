@@ -1,0 +1,1223 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="GREGerror.jsimg" timestamp="Fri Aug 14 20:46:29 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\lmacera\JMT\" logReplaceMode="1" maxEvents="-1" maxSamples="5000000" name="GREGerror.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass customers="10" name="OE" priority="0" referenceSource="Terminals" softDeadline="0.0" type="closed"/>
+        <userClass customers="5" name="OI" priority="0" referenceSource="Terminals" softDeadline="0.0" type="closed"/>
+        <userClass customers="5" name="Other" priority="0" referenceSource="Terminals" softDeadline="0.0" type="closed"/>
+        <node name="CPU">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>2.358490566037736</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>7.692307692307692</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>3.9682539682539684</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>OE</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>OI</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Other</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>CPU - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskA</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskA</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskA</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Terminals">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.2631578947368421</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.2</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.07194244604316546</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="DiskA">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>5.780346820809</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>9.090909090909092</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>2.155172413793103</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>OE</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>OI</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Other</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>DiskA - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskB</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskC</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskB</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskC</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskB</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>DiskC</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="DiskB">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>4.11522633744856</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>12.987012987012987</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>Infinity</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>OE</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>OI</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Other</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>DiskB - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="DiskC">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>9.803921568627452</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>43.47826086956522</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>20.833333333333332</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>OE</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>OI</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Other</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>DiskC - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>OE</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Terminals</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>OI</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Terminals</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Other</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Terminals</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <measure alpha="0.005" name="DiskB_Residence Time" nodeType="station" precision="0.01" referenceNode="DiskB" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OE_Residence Time" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OE" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OI_Residence Time" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OI" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Other_Residence Time" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="Other" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Number of Customers" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OE_Number of Customers" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OE" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OI_Number of Customers" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OI" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Utilization" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OE_Utilization" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OE" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OI_Utilization" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OI" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Other_Number of Customers" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="Other" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Other_Utilization" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="Other" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="CPU_Residence Time" nodeType="station" precision="0.03" referenceNode="CPU" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="0.005" name="System Response Time" nodeType="" precision="0.01" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="System Throughput" nodeType="" precision="0.01" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Throughput" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OE_Throughput" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OE" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_OI_Throughput" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="OI" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Other_Throughput" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="Other" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_Number of Customers" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_OE_Number of Customers" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="OE" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_OI_Number of Customers" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="OI" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_Other_Number of Customers" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="Other" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_Residence Time" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskA_Residence Time" nodeType="station" precision="0.03" referenceNode="DiskA" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskC_Residence Time" nodeType="station" precision="0.03" referenceNode="DiskC" referenceUserClass="" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_Response Time" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskA_Response Time" nodeType="station" precision="0.03" referenceNode="DiskA" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskB_Response Time" nodeType="station" precision="0.03" referenceNode="DiskB" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="DiskC_Response Time" nodeType="station" precision="0.03" referenceNode="DiskC" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="CPU_Response Time" nodeType="station" precision="0.03" referenceNode="CPU" referenceUserClass="" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Terminals_Throughput" nodeType="station" precision="0.03" referenceNode="Terminals" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="CPU_Throughput" nodeType="station" precision="0.03" referenceNode="CPU" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskA_Throughput" nodeType="station" precision="0.03" referenceNode="DiskA" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="DiskC_Throughput" nodeType="station" precision="0.03" referenceNode="DiskC" referenceUserClass="" type="Throughput" verbose="false"/>
+        <connection source="CPU" target="DiskA"/>
+        <connection source="Terminals" target="CPU"/>
+        <connection source="DiskA" target="DiskB"/>
+        <connection source="DiskA" target="DiskC"/>
+        <connection source="DiskB" target="DiskC"/>
+        <connection source="DiskC" target="Terminals"/>
+        <preload>
+            <stationPopulations stationName="Terminals">
+                <classPopulation population="10" refClass="OE"/>
+                <classPopulation population="5" refClass="OI"/>
+                <classPopulation population="5" refClass="Other"/>
+            </stationPopulations>
+        </preload>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FFFFC800" name="OE"/>
+        <userClass color="#FF00FFFF" name="OI"/>
+        <userClass color="#FFFFFF00" name="Other"/>
+        <station name="CPU">
+            <position angle="0.0" rotate="false" x="165.0" y="105.0"/>
+        </station>
+        <station name="Terminals">
+            <position angle="0.0" rotate="false" x="72.0" y="85.0"/>
+        </station>
+        <station name="DiskA">
+            <position angle="0.0" rotate="false" x="319.0" y="94.0"/>
+        </station>
+        <station name="DiskB">
+            <position angle="0.0" rotate="false" x="461.0" y="105.0"/>
+        </station>
+        <station name="DiskC">
+            <position angle="0.0" rotate="false" x="585.0" y="109.0"/>
+        </station>
+        <connectionShape source="DiskA" target="DiskC">
+            <arc>
+                <source x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="52.0" y="-63.0"/>
+            </arc>
+            <arc>
+                <source x="52.0" y="-63.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="129.0" y="-66.0"/>
+            </arc>
+            <arc>
+                <source x="129.0" y="-66.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="0.0" y="0.0"/>
+            </arc>
+        </connectionShape>
+        <connectionShape source="DiskB" target="DiskC">
+            <arc>
+                <source x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="0.0" y="0.0"/>
+            </arc>
+        </connectionShape>
+        <connectionShape source="DiskC" target="Terminals">
+            <arc>
+                <source x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="56.0" y="-5.0"/>
+            </arc>
+            <arc>
+                <source x="56.0" y="-5.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="53.0" y="128.0"/>
+            </arc>
+            <arc>
+                <source x="53.0" y="128.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="-646.0" y="116.0"/>
+            </arc>
+            <arc>
+                <source x="-646.0" y="116.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="-642.0" y="-4.0"/>
+            </arc>
+            <arc>
+                <source x="-642.0" y="-4.0"/>
+                <point x="0.0" y="0.0"/>
+                <point x="0.0" y="0.0"/>
+                <target x="0.0" y="0.0"/>
+            </arc>
+        </connectionShape>
+    </jmodel>
+    <results elapsedTime="16230" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.995" analyzedSamples="819200" discardedSamples="0" finalValue="0.2801479028004423" name="DiskB_Residence Time" nodeType="station" precision="0.01" referenceClass="" referenceStation="DiskB" state="1" type="3">
+            <sample lastIntervalAvgValue="0.28307061392404526" lowerBound="0.2559790781789957" meanValue="0.2846420772505936" simulationTime="2645.1125100135514" upperBound="0.31330507632219146"/>
+            <sample lastIntervalAvgValue="0.27639110892892765" lowerBound="0.2652271524861038" meanValue="0.277799763903573" simulationTime="11073.552645178612" upperBound="0.2903723753210422"/>
+            <sample lastIntervalAvgValue="0.2777922128405002" lowerBound="0.27087979149815605" meanValue="0.2778063313011147" simulationTime="28767.996408888896" upperBound="0.2847328711040734"/>
+            <sample lastIntervalAvgValue="0.27863605614295867" lowerBound="0.27064095556069834" meanValue="0.2770418830845699" simulationTime="54307.53612945002" upperBound="0.28344281060844145"/>
+            <sample lastIntervalAvgValue="0.28096408648850024" lowerBound="0.2705560004829636" meanValue="0.2769549187348303" simulationTime="77359.00149161917" upperBound="0.283353836986697"/>
+            <sample lastIntervalAvgValue="0.2790880375911376" lowerBound="0.2754444834999516" meanValue="0.279462144440981" simulationTime="103054.25902678996" upperBound="0.28347980538201045"/>
+            <sample lastIntervalAvgValue="0.27678129801753193" lowerBound="0.2754628153426974" meanValue="0.27948074367382897" simulationTime="124755.00668162364" upperBound="0.28349867200496054"/>
+            <sample lastIntervalAvgValue="0.2783183930158637" lowerBound="0.2754807068596103" meanValue="0.27949889615820706" simulationTime="149588.1131721197" upperBound="0.2835170854568039"/>
+            <sample lastIntervalAvgValue="0.27911888621341013" lowerBound="0.27528485249896273" meanValue="0.27831681898238764" simulationTime="173814.22529740998" upperBound="0.2813487854658125"/>
+            <sample lastIntervalAvgValue="0.2778211345804343" lowerBound="0.2752630662395765" meanValue="0.2782947927707931" simulationTime="199199.35074631657" upperBound="0.28132651930200975"/>
+            <sample lastIntervalAvgValue="0.2829699621899366" lowerBound="0.27525615383108015" meanValue="0.27828780422955396" simulationTime="218652.97143131515" upperBound="0.2813194546280277"/>
+            <sample lastIntervalAvgValue="0.28214536768134735" lowerBound="0.27527909704953535" meanValue="0.2783110001428768" simulationTime="240957.38603512282" upperBound="0.28134290323621824"/>
+            <sample lastIntervalAvgValue="0.28026740606329437" lowerBound="0.27529550271645586" meanValue="0.2783275865005683" simulationTime="264316.90051098197" upperBound="0.2813596702846808"/>
+            <sample lastIntervalAvgValue="0.2811048797923663" lowerBound="0.27532531056774057" meanValue="0.27835772265326597" simulationTime="286881.18767613976" upperBound="0.2813901347387914"/>
+            <sample lastIntervalAvgValue="0.28506697137398357" lowerBound="0.27532652209379205" meanValue="0.27835894752297347" simulationTime="305829.995404987" upperBound="0.2813913729521549"/>
+            <sample lastIntervalAvgValue="0.28264959131709105" lowerBound="0.275340755198334" meanValue="0.2783733373898492" simulationTime="329157.27204542514" upperBound="0.2814059195813644"/>
+            <sample lastIntervalAvgValue="0.2790300452070013" lowerBound="0.27845860835768893" meanValue="0.2801479028004423" simulationTime="336060.1001145587" upperBound="0.28183719724319567"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="640" finalValue="0.409018210064312" name="DiskB_OE_Residence Time" nodeType="station" precision="0.03" referenceClass="OE" referenceStation="DiskB" state="1" type="3">
+            <sample lastIntervalAvgValue="0.4151105066505777" meanValue="0.4151105066505777" simulationTime="2645.1125100135514"/>
+            <sample lastIntervalAvgValue="0.40702273031147757" lowerBound="0.38858202445786466" meanValue="0.4067109798155691" simulationTime="11073.552645178612" upperBound="0.42483993517327345"/>
+            <sample lastIntervalAvgValue="0.4101752960909828" lowerBound="0.3971920876638524" meanValue="0.409018210064312" simulationTime="22795.561613060665" upperBound="0.4208443324647716"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="545" finalValue="0.13288527227360206" name="DiskB_OI_Residence Time" nodeType="station" precision="0.03" referenceClass="OI" referenceStation="DiskB" state="1" type="3">
+            <sample lastIntervalAvgValue="0.13306819294973282" meanValue="0.13306819294973282" simulationTime="2645.0171005890284"/>
+            <sample lastIntervalAvgValue="0.1349640535674756" lowerBound="0.1125831116648503" meanValue="0.13416461195763227" simulationTime="11071.862358107035" upperBound="0.15574611225041424"/>
+            <sample lastIntervalAvgValue="0.1325985824721817" lowerBound="0.12708078267847142" meanValue="0.1331491070441929" simulationTime="28767.996408888896" upperBound="0.13921743140991436"/>
+            <sample lastIntervalAvgValue="0.13288882795326074" lowerBound="0.12978464460727185" meanValue="0.13288527227360206" simulationTime="43080.34681172742" upperBound="0.13598589993993224"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="DiskB_Other_Residence Time" nodeType="station" precision="0.03" referenceClass="Other" referenceStation="DiskB" state="3" type="3">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="133120" discardedSamples="1885" finalValue="0.7661067834510198" name="DiskB_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskB" state="1" type="0">
+            <sample lastIntervalAvgValue="0.779324185475077" lowerBound="0.6873086404650248" meanValue="0.7593700042901429" simulationTime="2646.099608957431" upperBound="0.831431368115261"/>
+            <sample lastIntervalAvgValue="0.7659643709204224" lowerBound="0.7344919613425149" meanValue="0.7755475231142451" simulationTime="11073.687788269908" upperBound="0.8166030848859753"/>
+            <sample lastIntervalAvgValue="0.7667379020467187" lowerBound="0.7474255658590601" meanValue="0.7661067834510198" simulationTime="27554.274683583586" upperBound="0.7847880010429795"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="10" finalValue="0.650017895173802" name="DiskB_OE_Number of Customers" nodeType="station" precision="0.03" referenceClass="OE" referenceStation="DiskB" state="1" type="0">
+            <sample lastIntervalAvgValue="0.6681364684231931" lowerBound="0.5238142328282274" meanValue="0.6604724556645774" simulationTime="2646.099608957431" upperBound="0.7971306785009273"/>
+            <sample lastIntervalAvgValue="0.649999249072092" lowerBound="0.6263483233027338" meanValue="0.6583497780269645" simulationTime="11073.687788269908" upperBound="0.6903512327511951"/>
+            <sample lastIntervalAvgValue="0.6491373505458485" lowerBound="0.6310447908398253" meanValue="0.650017895173802" simulationTime="19180.407660751156" upperBound="0.6689909995077787"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="92160" discardedSamples="14865" finalValue="0.1126720725208359" name="DiskB_OI_Number of Customers" nodeType="station" precision="0.03" referenceClass="OI" referenceStation="DiskB" state="1" type="0">
+            <sample lastIntervalAvgValue="0.11123322210141467" meanValue="0.11123322210141467" simulationTime="2645.0171005890284"/>
+            <sample lastIntervalAvgValue="0.11597534548645208" meanValue="0.11484247397479144" simulationTime="11071.862358107035"/>
+            <sample lastIntervalAvgValue="0.11188211138218979" lowerBound="0.10557105415068672" meanValue="0.11061378230603416" simulationTime="28767.996408888896" upperBound="0.1156565104613816"/>
+            <sample lastIntervalAvgValue="0.11210674527156328" lowerBound="0.10724286969064546" meanValue="0.11129114135585319" simulationTime="54306.53471169672" upperBound="0.11533941302106092"/>
+            <sample lastIntervalAvgValue="0.11395386095986743" lowerBound="0.10984450285160641" meanValue="0.1126720725208359" simulationTime="63422.63377918899" upperBound="0.1154996421900654"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="40" finalValue="0.4542991971229155" name="DiskB_Utilization" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskB" state="1" type="6">
+            <sample lastIntervalAvgValue="0.4537032130747985" lowerBound="0.41824823151773527" meanValue="0.4468050396960367" simulationTime="2646.099608957431" upperBound="0.4753618478743381"/>
+            <sample lastIntervalAvgValue="0.4539573275132451" lowerBound="0.4407778275456618" meanValue="0.4542991971229155" simulationTime="8351.009989007154" upperBound="0.4678205667001692"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="81920" discardedSamples="40" finalValue="0.3826302796355043" name="DiskB_OE_Utilization" nodeType="station" precision="0.03" referenceClass="OE" referenceStation="DiskB" state="1" type="6">
+            <sample lastIntervalAvgValue="0.39185347251387964" lowerBound="0.36071096851960277" meanValue="0.3847569385334377" simulationTime="2646.099608957431" upperBound="0.4088029085472726"/>
+            <sample lastIntervalAvgValue="0.385036445949168" lowerBound="0.3755737648999554" meanValue="0.38789584191690163" simulationTime="11073.687788269908" upperBound="0.40021791893384784"/>
+            <sample lastIntervalAvgValue="0.37945159088700614" lowerBound="0.3745093508051837" meanValue="0.3826302796355043" simulationTime="16716.262080064153" upperBound="0.39075120846582484"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="204800" discardedSamples="3135" finalValue="0.06444015146106803" name="DiskB_OI_Utilization" nodeType="station" precision="0.03" referenceClass="OI" referenceStation="DiskB" state="1" type="6">
+            <sample lastIntervalAvgValue="0.061849740560919034" meanValue="0.061849740560919034" simulationTime="2646.099608957431"/>
+            <sample lastIntervalAvgValue="0.06639396614084739" lowerBound="0.06268673719394358" meanValue="0.06550171121613584" simulationTime="11073.687788269908" upperBound="0.0683166852383281"/>
+            <sample lastIntervalAvgValue="0.06415169320088587" lowerBound="0.06170385867061187" meanValue="0.06419746152870351" simulationTime="28767.996408888896" upperBound="0.06669106438679515"/>
+            <sample lastIntervalAvgValue="0.06445948393707653" lowerBound="0.06300568892737703" meanValue="0.06444015146106803" simulationTime="42521.12767522445" upperBound="0.06587461399475904"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="DiskB_Other_Number of Customers" nodeType="station" precision="0.03" referenceClass="Other" referenceStation="DiskB" state="3" type="0">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="DiskB_Other_Utilization" nodeType="station" precision="0.03" referenceClass="Other" referenceStation="DiskB" state="3" type="6">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="204800" discardedSamples="0" finalValue="1.2198315737284453" name="CPU_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="3">
+            <sample lastIntervalAvgValue="1.196605414323867" lowerBound="1.0158375155083015" meanValue="1.1758578704897018" simulationTime="2646.0528649712605" upperBound="1.3358782254711021"/>
+            <sample lastIntervalAvgValue="1.1767919363757993" lowerBound="1.1420383472960953" meanValue="1.1899958411766485" simulationTime="11073.321605443107" upperBound="1.2379533350572018"/>
+            <sample lastIntervalAvgValue="1.2276043132467374" lowerBound="1.1443072775806356" meanValue="1.192838326579801" simulationTime="28766.89256112704" upperBound="1.2413693755789663"/>
+            <sample lastIntervalAvgValue="1.2141972816965818" lowerBound="1.1694337592393855" meanValue="1.2110483953121047" simulationTime="54307.72398654305" upperBound="1.2526630313848242"/>
+            <sample lastIntervalAvgValue="1.2268388562866326" lowerBound="1.1994217498750344" meanValue="1.2198315737284453" simulationTime="74259.16800420955" upperBound="1.2402413975818565"/>
+        </measure>
+        <measure alpha="0.995" analyzedSamples="163840" discardedSamples="85" finalValue="7.258384113161906" name="System Response Time" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="15">
+            <sample lastIntervalAvgValue="7.244776329020102" lowerBound="6.432476732143552" meanValue="7.232431741863398" simulationTime="2645.334904302676" upperBound="8.032386751583244"/>
+            <sample lastIntervalAvgValue="7.211242417151429" lowerBound="6.982972901930179" meanValue="7.2240811716529345" simulationTime="11073.598475215158" upperBound="7.46518944137569"/>
+            <sample lastIntervalAvgValue="7.238487371841809" lowerBound="7.129255330365494" meanValue="7.2313725366457415" simulationTime="28766.878686565764" upperBound="7.333489742925989"/>
+            <sample lastIntervalAvgValue="7.27024513581444" lowerBound="7.139665522568345" meanValue="7.235825767974509" simulationTime="54307.78453560095" upperBound="7.331986013380673"/>
+            <sample lastIntervalAvgValue="7.294057158474307" lowerBound="7.204836907895849" meanValue="7.258384113161906" simulationTime="59456.98312512286" upperBound="7.311931318427963"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="143360" discardedSamples="55" finalValue="2.7569560910306445" name="System Throughput" nodeType="" precision="0.01" referenceClass="" referenceStation="" state="1" type="16">
+            <sample lastIntervalAvgValue="2.7550386864611967" lowerBound="2.4724923779563763" meanValue="2.7312455626470187" simulationTime="2645.334904302676" upperBound="3.0504875445647452"/>
+            <sample lastIntervalAvgValue="2.7730504395544955" lowerBound="2.68158507935849" meanValue="2.77017877999506" simulationTime="11073.598475215158" upperBound="2.864826371791384"/>
+            <sample lastIntervalAvgValue="2.7630829001757022" lowerBound="2.731163098129509" meanValue="2.76882424215025" simulationTime="28766.878686565764" upperBound="2.8075385591726203"/>
+            <sample lastIntervalAvgValue="2.749618683238937" lowerBound="2.737759025379149" meanValue="2.7569560910306445" simulationTime="51995.917821826006" upperBound="2.7764242759982243"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="365" finalValue="2.4497522280595216" name="DiskB_Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskB" state="1" type="5">
+            <sample lastIntervalAvgValue="2.4471548849038705" lowerBound="2.196832780353542" meanValue="2.419387582971734" simulationTime="2645.1125100135514" upperBound="2.6921183392570365"/>
+            <sample lastIntervalAvgValue="2.4562077523250485" lowerBound="2.394206843495355" meanValue="2.4665935152828684" simulationTime="11073.552645178612" upperBound="2.5434937409763414"/>
+            <sample lastIntervalAvgValue="2.4468364121512653" lowerBound="2.4150857773538936" meanValue="2.4497522280595216" simulationTime="25226.9303814337" upperBound="2.485428385576947"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="20480" discardedSamples="45" finalValue="1.6029099661165997" name="DiskB_OE_Throughput" nodeType="station" precision="0.03" referenceClass="OE" referenceStation="DiskB" state="1" type="5">
+            <sample lastIntervalAvgValue="1.610895560725381" lowerBound="1.3907330823678519" meanValue="1.5837369913409318" simulationTime="2645.1125100135514" upperBound="1.838942789866903"/>
+            <sample lastIntervalAvgValue="1.5969740289003553" lowerBound="1.5468759740647102" meanValue="1.5963189221169478" simulationTime="11073.552645178612" upperBound="1.6490269312031418"/>
+            <sample lastIntervalAvgValue="1.607602991704824" lowerBound="1.5580141140319326" meanValue="1.6029099661165997" simulationTime="12817.764378093108" upperBound="1.650470034984712"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="15360" discardedSamples="210" finalValue="0.8446890546918823" name="DiskB_OI_Throughput" nodeType="station" precision="0.03" referenceClass="OI" referenceStation="DiskB" state="1" type="5">
+            <sample lastIntervalAvgValue="0.8362894892087472" lowerBound="0.776483889725461" meanValue="0.8485843514179298" simulationTime="2645.0171005890284" upperBound="0.9354451733613035"/>
+            <sample lastIntervalAvgValue="0.8593963433159107" lowerBound="0.7990562976572461" meanValue="0.8604144780457066" simulationTime="11071.862358107035" upperBound="0.9319796149451084"/>
+            <sample lastIntervalAvgValue="0.8344369147016135" lowerBound="0.8228785453856343" meanValue="0.8446890546918823" simulationTime="18401.355927057088" upperBound="0.8676872242086815"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="0" discardedSamples="0" finalValue="0.0" name="DiskB_Other_Throughput" nodeType="station" precision="0.03" referenceClass="Other" referenceStation="DiskB" state="3" type="5">
+            <sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="Infinity" meanValue="0.0" simulationTime="0.0"/>
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="11520" discardedSamples="5" finalValue="14.760360716581424" name="Terminals_Number of Customers" nodeType="station" precision="0.03" referenceClass="" referenceStation="Terminals" state="1" type="0">
+            <sample lastIntervalAvgValue="14.815415761452769" lowerBound="14.334810070438069" meanValue="14.760360716581424" simulationTime="2096.7243960437545" upperBound="15.185911362724779"/>
+            <sample lastIntervalAvgValue="14.815415761452769" lowerBound="14.334810070438069" meanValue="14.760360716581424" simulationTime="2096.7243960437545" upperBound="15.185911362724779"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="5" finalValue="6.118628500771162" name="Terminals_OE_Number of Customers" nodeType="station" precision="0.03" referenceClass="OE" referenceStation="Terminals" state="1" type="0">
+            <sample lastIntervalAvgValue="6.100100683691285" lowerBound="5.813159982317613" meanValue="6.1433183043755495" simulationTime="2645.4374276970357" upperBound="6.473476626433486"/>
+            <sample lastIntervalAvgValue="6.115706870660814" lowerBound="5.931816908441346" meanValue="6.120374731981518" simulationTime="11073.598475215158" upperBound="6.30893255552169"/>
+            <sample lastIntervalAvgValue="6.120961701059725" lowerBound="6.022611251900413" meanValue="6.118628500771162" simulationTime="12785.584384863672" upperBound="6.21464574964191"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="30720" discardedSamples="0" finalValue="4.232774817215404" name="Terminals_OI_Number of Customers" nodeType="station" precision="0.03" referenceClass="OI" referenceStation="Terminals" state="1" type="0">
+            <sample lastIntervalAvgValue="4.221426058882653" lowerBound="3.929904314652501" meanValue="4.236383569670667" simulationTime="2645.9580628206754" upperBound="4.542862824688833"/>
+            <sample lastIntervalAvgValue="4.235938398325243" lowerBound="4.084316131685686" meanValue="4.216456733185422" simulationTime="11073.720044718397" upperBound="4.348597334685158"/>
+            <sample lastIntervalAvgValue="4.225997755533227" lowerBound="4.113037940981204" meanValue="4.232774817215404" simulationTime="18138.616268367965" upperBound="4.352511693449603"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="14080" discardedSamples="0" finalValue="4.374321253625373" name="Terminals_Other_Number of Customers" nodeType="station" precision="0.03" referenceClass="Other" referenceStation="Terminals" state="1" type="0">
+            <sample lastIntervalAvgValue="4.399056517491008" meanValue="4.399056517491008" simulationTime="2645.2368937121355"/>
+            <sample lastIntervalAvgValue="4.38238463765276" lowerBound="4.082665203297053" meanValue="4.405938894353959" simulationTime="11073.701614114845" upperBound="4.729212585410864"/>
+            <sample lastIntervalAvgValue="4.370436706009579" lowerBound="4.2458042522446435" meanValue="4.374321253625373" simulationTime="22320.888927143125" upperBound="4.502838255006103"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="50000" discardedSamples="24995" finalValue="19.99999999999969" name="System Number of Customers" nodeType="" precision="0.03" referenceClass="" referenceStation="" state="1" type="14">
+            <sample lastIntervalAvgValue="20.000000000000004" meanValue="20.000000000000004" simulationTime="2645.334904302676"/>
+            <sample lastIntervalAvgValue="20.000000000000068" meanValue="19.999999999999936" simulationTime="11073.598475215158"/>
+            <sample lastIntervalAvgValue="20.00000000000002" meanValue="19.99999999999969" simulationTime="18100.52556929394"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="46080" discardedSamples="725" finalValue="5.319742430962746" name="Terminals_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Terminals" state="1" type="3">
+            <sample lastIntervalAvgValue="5.342668259385372" lowerBound="4.667743222404504" meanValue="5.264360632471344" simulationTime="2645.9580628206754" upperBound="5.860978042538182"/>
+            <sample lastIntervalAvgValue="5.3164710441523875" lowerBound="5.089533633800841" meanValue="5.333753530645993" simulationTime="11073.720044718397" upperBound="5.577973427491145"/>
+            <sample lastIntervalAvgValue="5.311558497611899" lowerBound="5.221194756381804" meanValue="5.319742430962746" simulationTime="16910.57828526787" upperBound="5.418290105543688"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="92160" discardedSamples="1290" finalValue="0.360377850900188" name="DiskA_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskA" state="1" type="3">
+            <sample lastIntervalAvgValue="0.3512103985834099" lowerBound="0.305058694791077" meanValue="0.34774636122130337" simulationTime="2646.099608957431" upperBound="0.39043402765152974"/>
+            <sample lastIntervalAvgValue="0.3578315773812363" lowerBound="0.33465335138407304" meanValue="0.3538327206762644" simulationTime="11073.687788269908" upperBound="0.37301208996845586"/>
+            <sample lastIntervalAvgValue="0.36224012640215075" lowerBound="0.3417384462784374" meanValue="0.35559551445358767" simulationTime="28767.763745347766" upperBound="0.3694525826287379"/>
+            <sample lastIntervalAvgValue="0.3516467975841735" lowerBound="0.35012829406664064" meanValue="0.360377850900188" simulationTime="33797.35001083794" upperBound="0.3706274077337353"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="365" finalValue="0.08809172616948599" name="DiskC_Residence Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskC" state="1" type="3">
+            <sample lastIntervalAvgValue="0.08599823607772666" lowerBound="0.0778731250841972" meanValue="0.08647263202693424" simulationTime="2645.334904302676" upperBound="0.09507213896967129"/>
+            <sample lastIntervalAvgValue="0.08833393381744103" lowerBound="0.08319118052319045" meanValue="0.08625021135121679" simulationTime="11073.598475215158" upperBound="0.0893092421792431"/>
+            <sample lastIntervalAvgValue="0.08797596186392061" lowerBound="0.08583552484885382" meanValue="0.08809172616948599" simulationTime="13088.005568215536" upperBound="0.09034792749011816"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="46080" discardedSamples="725" finalValue="5.3174698622672025" name="Terminals_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="Terminals" state="1" type="2">
+            <sample lastIntervalAvgValue="5.32804683557753" lowerBound="4.654968884083748" meanValue="5.249953515250568" simulationTime="2645.9580628206754" upperBound="5.844938146417388"/>
+            <sample lastIntervalAvgValue="5.313005287278755" lowerBound="5.086215815265116" meanValue="5.3302765074839025" simulationTime="11073.720044718397" upperBound="5.574337199702689"/>
+            <sample lastIntervalAvgValue="5.309289425053806" lowerBound="5.2189642867847" meanValue="5.3174698622672025" simulationTime="16910.57828526787" upperBound="5.415975437749705"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="92160" discardedSamples="1290" finalValue="0.3603662819115982" name="DiskA_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskA" state="1" type="2">
+            <sample lastIntervalAvgValue="0.3510658873783969" lowerBound="0.3049331734518405" meanValue="0.34760327535054986" simulationTime="2646.099608957431" upperBound="0.3902733772492592"/>
+            <sample lastIntervalAvgValue="0.35778489963829585" lowerBound="0.33460969715091565" meanValue="0.35378656456868857" simulationTime="11073.687788269908" upperBound="0.3729634319864615"/>
+            <sample lastIntervalAvgValue="0.3622173591824103" lowerBound="0.3417169676135047" meanValue="0.3555731648555553" simulationTime="28767.763745347766" upperBound="0.3694293620976059"/>
+            <sample lastIntervalAvgValue="0.35163550888322054" lowerBound="0.35011705411327254" meanValue="0.3603662819115982" simulationTime="33797.35001083794" upperBound="0.37061550970992385"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="51200" discardedSamples="0" finalValue="0.3136825839934858" name="DiskB_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskB" state="1" type="2">
+            <sample lastIntervalAvgValue="0.31858016722333843" lowerBound="0.27942442436568393" meanValue="0.32034876143528107" simulationTime="2645.1125100135514" upperBound="0.3612730985048782"/>
+            <sample lastIntervalAvgValue="0.31181595648732524" lowerBound="0.2987604271302681" meanValue="0.3134051577463014" simulationTime="11073.552645178612" upperBound="0.3280498883623347"/>
+            <sample lastIntervalAvgValue="0.31457702847382557" lowerBound="0.30581868893296876" meanValue="0.3136825839934858" simulationTime="20922.306715314306" upperBound="0.32154647905400285"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="365" finalValue="0.0880892931668575" name="DiskC_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskC" state="1" type="2">
+            <sample lastIntervalAvgValue="0.08598643610021875" lowerBound="0.07786243996824163" meanValue="0.08646076695667808" simulationTime="2645.334904302676" upperBound="0.09505909394511453"/>
+            <sample lastIntervalAvgValue="0.08833105273675554" lowerBound="0.08318846717744606" meanValue="0.08624739823277741" simulationTime="11073.598475215158" upperBound="0.08930632928810876"/>
+            <sample lastIntervalAvgValue="0.08797353205858285" lowerBound="0.085833154160179" meanValue="0.0880892931668575" simulationTime="13088.005568215536" upperBound="0.090345432173536"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="204800" discardedSamples="0" finalValue="1.2198017928295795" name="CPU_Response Time" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="2">
+            <sample lastIntervalAvgValue="1.195785034909138" lowerBound="1.0151410685622517" meanValue="1.175051715361161" simulationTime="2646.0528649712605" upperBound="1.3349623621600704"/>
+            <sample lastIntervalAvgValue="1.176561674452428" lowerBound="1.141814885579301" meanValue="1.1897629956559383" simulationTime="11073.321605443107" upperBound="1.2377111057325756"/>
+            <sample lastIntervalAvgValue="1.2275271568658814" lowerBound="1.1442353565168428" meanValue="1.1927633552822647" simulationTime="28766.89256112704" upperBound="1.2412913540476866"/>
+            <sample lastIntervalAvgValue="1.2141324462734808" lowerBound="1.1693713140884106" meanValue="1.2109837280325042" simulationTime="54307.72398654305" upperBound="1.2525961419765979"/>
+            <sample lastIntervalAvgValue="1.2268089043123678" lowerBound="1.1993924672604506" meanValue="1.2198017928295795" simulationTime="74259.16800420955" upperBound="1.2402111183987083"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="0" finalValue="2.765660803385754" name="Terminals_Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="Terminals" state="1" type="5">
+            <sample lastIntervalAvgValue="2.75627951269395" lowerBound="2.511653463932516" meanValue="2.73131827160036" simulationTime="2645.9580628206754" upperBound="2.99308854745703"/>
+            <sample lastIntervalAvgValue="2.773334136654982" lowerBound="2.6856255812326406" meanValue="2.7708234257051743" simulationTime="11073.720044718397" upperBound="2.8616039461353258"/>
+            <sample lastIntervalAvgValue="2.7493435903091457" lowerBound="2.7298076033898706" meanValue="2.765660803385754" simulationTime="12955.987513302818" upperBound="2.8024683268462995"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="30720" discardedSamples="215" finalValue="2.7730804008073537" name="CPU_Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="CPU" state="1" type="5">
+            <sample lastIntervalAvgValue="2.7554249185717574" lowerBound="2.5023847837791235" meanValue="2.7182242296285746" simulationTime="2646.0528649712605" upperBound="2.974812193000778"/>
+            <sample lastIntervalAvgValue="2.7734964577255594" lowerBound="2.7002079927731577" meanValue="2.7834108255316563" simulationTime="11073.321605443107" upperBound="2.8719042182667356"/>
+            <sample lastIntervalAvgValue="2.9264395344848975" lowerBound="2.699468387669073" meanValue="2.7730804008073537" simulationTime="11166.609027507699" upperBound="2.8508196225247704"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="30720" discardedSamples="55" finalValue="2.76985378051103" name="DiskA_Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskA" state="1" type="5">
+            <sample lastIntervalAvgValue="2.7546204138822583" lowerBound="2.526165088478684" meanValue="2.721865615328786" simulationTime="2646.099608957431" upperBound="2.9504340062434182"/>
+            <sample lastIntervalAvgValue="2.7733913312677756" lowerBound="2.6974244941963983" meanValue="2.7848564582598265" simulationTime="11073.687788269908" upperBound="2.8781461772798176"/>
+            <sample lastIntervalAvgValue="2.8164933530149123" lowerBound="2.700084494677441" meanValue="2.76985378051103" simulationTime="11115.228805888415" upperBound="2.843324336237567"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="55" finalValue="2.765484639242042" name="DiskC_Throughput" nodeType="station" precision="0.03" referenceClass="" referenceStation="DiskC" state="1" type="5">
+            <sample lastIntervalAvgValue="2.7550386864611967" lowerBound="2.4724923779563763" meanValue="2.7312455626470187" simulationTime="2645.334904302676" upperBound="3.0504875445647452"/>
+            <sample lastIntervalAvgValue="2.7730504395544955" lowerBound="2.68158507935849" meanValue="2.77017877999506" simulationTime="11073.598475215158" upperBound="2.864826371791384"/>
+            <sample lastIntervalAvgValue="2.749323095206316" lowerBound="2.726563759983103" meanValue="2.765484639242042" simulationTime="12979.15843254962" upperBound="2.805532777522745"/>
+        </measure>
+    </results>
+</archive>

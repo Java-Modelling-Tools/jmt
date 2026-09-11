@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jmva-gui</artifactId>
+
+    <!-- JMVA GUI: Swing wizard (JMVAWizard), solution panels (ClassesPanel,
+         StationsPanel, ServiceDemandsPanel, GraphPanel, WhatIfPanel …),
+         JMVA↔JSIM convertors bridge (DispatcherJMVAschema), load-dependent
+         editor, and algorithm-list utilities. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jmva-core</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jsimw-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-file-handler</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

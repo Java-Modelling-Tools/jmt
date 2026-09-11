@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jsimg-gui</artifactId>
+
+    <!--
+        JSIM Graph (JModel) editor — pure graph editor, no application bootstrap.
+        Contains: JGraph-based network editor, UI state machine, Mediator controller,
+                  all JGraphMod cells, GuiXMLWriter/Reader, PNMLWriter/Reader,
+                  DispatcherThread (Mediator creates it), simulation state checker.
+        Entry points (JabaWizard, JMVAWizard, GraphStartScreen …) live in jmt-app.
+    -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <!-- JSIMtoJMVAConvertor lives here; Mediator calls it for JSIM→JMVA conversion -->
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jmva-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <!-- JModelClassesPanel extends jsimwiz.panels.ClassesPanel -->
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jsimw-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <!-- ModelLoader opens .jaba files; requires JabaModel from jmt-jaba-gui -->
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jaba-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+        <!-- XMLReader, XMLWriter, XMLResultsReader/Writer, XMLArchiver, GuiXMLConstants, PNMLConstants -->
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-file-handler</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

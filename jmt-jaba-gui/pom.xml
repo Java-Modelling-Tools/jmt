@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jaba-gui</artifactId>
+
+    <!-- JABA GUI: Swing wizard, 2D/3D graphs, convex hull panels,
+         sector visualisation, and label placement for JABA tool. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jaba-core</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>
