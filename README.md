@@ -12,7 +12,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/Java-Modelling-Tools/jmt">
-    <img src="readme/logo.png" alt="Logo" width="80" height="80">
+    <img src="docs/readme/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Java Modelling Tools (JMT)</h3>
@@ -354,7 +354,7 @@ Java Modelling Tools includes the following third-party software that can be fre
 [issues-url]: https://github.com/Java-Modelling-Tools/jmt/issues
 [license-shield]: https://img.shields.io/github/license/Java-Modelling-Tools/jmt.svg?style=for-the-badge
 [license-url]: https://github.com/Java-Modelling-Tools/jmt/blob/master/License.txt
-[product-screenshot]: readme/product-screenshot.png
+[product-screenshot]: docs/readme/product-screenshot.png
 [Java.com]: https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white
 [Java-url]: https://www.java.com/
 [Maven.apache.org]: https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white

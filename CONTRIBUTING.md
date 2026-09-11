@@ -98,7 +98,7 @@ Don't assume a fix in one engine applies to the other, and don't assume `jmt.com
 
 JMT is organized into a layered 16-module Maven project. Modules belong to explicit dependency layers; modules in layer *N* may only import from layers below them.
 
-![](docs/images/architecture.png)
+![](docs/contributing/architecture.png)
 
 ### Layer 0: Engine
 *   **`jmt-engine`**: Pure simulation engine. Owns the queue-network runtime (`QueueNet`, `NodeSection`, `NetNode`), scheduling strategies (FCFS, PS, LCFS, SJF, etc.), random distributions, parametric analysis engine, XML schema constants (`XMLConstantNames`, `XMLResultsConstants`), schema loader (`XSDSchemaLoader`), XML utilities (`XMLUtils`), format transformer (`ModelTransformer`), CSV logging, and the engine-side simulation dispatcher (`DispatcherJSIMschema`). Contains zero GUI dependencies.
@@ -138,7 +138,7 @@ JMT is organized into a layered 16-module Maven project. Modules belong to expli
 ## Full Dependency Graph
 Direct compile-scope dependencies only. Arrow **A → B** means A depends on B. Each node's connection points are spread across its edge so parallel edges fan out instead of merging.
 
-![](docs/images/dependency_graph.png)
+![](docs/contributing/dependency_graph.png)
 
 ---
 
@@ -146,7 +146,7 @@ Direct compile-scope dependencies only. Arrow **A → B** means A depends on B. 
 
 When introducing new functionality, use this decision path to find the appropriate module:
 
-![](docs/images/where_to_put_code.png)
+![](docs/contributing/where_to_put_code.png)
 
 ---
 
