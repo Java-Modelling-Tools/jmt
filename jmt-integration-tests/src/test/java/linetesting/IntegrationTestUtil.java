@@ -8,8 +8,6 @@ import static linetesting.IntegrationTestConstants.STABILITY_TRESHOLD;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,25 +16,21 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
-import analytical.ExactModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import jmt.framework.gui.wizard.Wizard;
-import common.controller.DispatcherThread;
-import common.definitions.CommonModel;
-import common.xml.ModelLoader;
-import jaba.JabaModel;
 import jaba.JabaResults;
-import jaba.JabaWizard;
-import jsimgraph.controller.Mediator;
-import jsimgraph.definitions.JSimGraphModel;
-import jsimgraph.mainGui.JSIMGraphMain;
-import jsimwiz.JSIMWizMain;
-import jsimwiz.definitions.JSIMModel;
-import jmva.JMVAWizard;
 
+/**
+ * Drives a model through the solver and compares the result against the stored
+ * oracle.
+ *
+ * <p>
+ * Nothing here opens a window. The solving itself lives in {@link HeadlessSolver};
+ * this class only decides where the output goes and whether the numbers match.
+ * </p>
+ */
 public class IntegrationTestUtil {
 
 	private static final ThreadLocal<DocumentBuilderFactory> DB_FACTORY = ThreadLocal
@@ -69,296 +63,40 @@ public class IntegrationTestUtil {
 	}
 
 	private static File testJSIMGraph(File testModel) {
-
 		try {
-
-			// Create test instance with overridden checkForSave
-			JSIMGraphMain jsimGraphMain = new JSIMGraphMain();
-
-			// Get Mediator
-			Field mediatorField = JSIMGraphMain.class.getDeclaredField("mediator");
-			mediatorField.setAccessible(true);
-			Mediator mediator = (Mediator) mediatorField.get(jsimGraphMain);
-
-			mediator.openModel(testModel);
-
-			// Get Model
-			Field modelField = Mediator.class.getDeclaredField("model");
-			modelField.setAccessible(true);
-			JSimGraphModel model = (JSimGraphModel) modelField.get(mediator);
-
-			// Reset results in order to avoid "This operation will overwrite old simulation
-			// results. " confirm dialog
-			model.setSimulationResults(null);
-
-			// Prevent the "log files exist, continue?" dialog from blocking
-			// (autoAppend defaults to ASK which shows a confirm dialog for any model
-			// that has a logPath pointing to a directory with .csv files)
-			model.setLoggingGlbParameter("autoAppend",
-					String.valueOf(log.LoggerParameters.LOGGER_AR_REPLACE));
-
-			// Check if this model is a Parametric Analysis
-			boolean isParametricAnalysis = model.isParametricAnalysisEnabled();
-
-			// Auto-dismiss the ModelChecker "Simulation diagnostic" dialog if it shows
-			// warnings (not errors). startSimulation() creates this dialog on the calling
-			// thread (non-EDT), so pw.show() blocks and continued() never gets called.
-			// The watcher finds the dialog and clicks Continue (enabled only when error-free).
-			Thread dialogWatcher = startModelCheckerDialogWatcher();
-			try {
-				mediator.startSimulation();
-			} finally {
-				dialogWatcher.interrupt();
-			}
-
-			Thread threadToAwait = null;
-
-			if (!isParametricAnalysis) {
-				// NORMAL SIMULATION LOGIC
-				DispatcherThread dispatcherThread = (DispatcherThread) waitForThreadInitialization(mediator,
-						"dispatcher", "dispatcherThread");
-
-				// Get the poller thread
-				Field pollerField = DispatcherThread.class.getDeclaredField("poller");
-				pollerField.setAccessible(true);
-				threadToAwait = (Thread) pollerField.get(dispatcherThread);
-
-			} else {
-				// PARAMETRIC ANALYSIS LOGIC
-				threadToAwait = (Thread) waitForThreadInitialization(mediator, "batchThread",
-						"batchThread (Parametric Analysis)");
-			}
-
-			awaitSimulationEnd(threadToAwait);
-
 			File modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
-
-			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
-
-			// Get ModelLoader
-			Field modelLoaderField = Mediator.class.getDeclaredField("modelLoader");
-			modelLoaderField.setAccessible(true);
-			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(mediator);
-
-			// Updates station positions into data structure - otherwise next instruction
-			// gives error
-			mediator.updateStationPositions();
-			modelLoader.saveModel(model, jsimGraphMain, modelOutputFile);
-
+			HeadlessSolver.solveJSimGraph(testModel, modelOutputFile);
 			return modelOutputFile;
-
-		} catch (SecurityException | ReflectiveOperationException | IOException | InterruptedException e) {
-			e.printStackTrace();
-			// System.exit(0);
+		} catch (Exception e) {
 			throw new RuntimeException("Error executing JSIMGraph test", e);
 		}
-
 	}
 
 	private static File testJMVA(File testModel) {
-
 		try {
-
-			JMVAWizard jmvaWizard = new JMVAWizard();
-
-			// Get ModelLoader
-			Field modelLoaderField = JMVAWizard.class.getDeclaredField("modelLoader");
-			modelLoaderField.setAccessible(true);
-			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jmvaWizard);
-
-			ExactModel newdata = new ExactModel();
-			modelLoader.loadModel(newdata, jmvaWizard, testModel);
-
-			// Get data
-			Field dataField = JMVAWizard.class.getDeclaredField("data");
-			dataField.setAccessible(true);
-			// Set data
-			dataField.set(jmvaWizard, newdata);
-
-			// Get tempFile
-			Field tempFileField = JMVAWizard.class.getDeclaredField("tempFile");
-			tempFileField.setAccessible(true);
-			// Set tempFile
-			tempFileField.set(jmvaWizard, modelLoader.getSelectedFile());
-
-			// Solve the model
-			Method solve = JMVAWizard.class.getDeclaredMethod("solve");
-			solve.setAccessible(true);
-			solve.invoke(jmvaWizard);
-
-			// solve() is synchronous from the caller’s point of view, even though it
-			// internally uses a background thread.
-
 			File modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
-
-			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
-
-			// Save model
-			modelLoader.saveModel(jmvaWizard.getData(), jmvaWizard, modelOutputFile);
-
+			HeadlessSolver.solveJMVA(testModel, modelOutputFile);
 			return modelOutputFile;
-
-		} catch (SecurityException | ReflectiveOperationException | IOException e) {
-			e.printStackTrace();
-			// System.exit(0);
+		} catch (Exception e) {
 			throw new RuntimeException("Error executing JMVA test", e);
 		}
-
 	}
 
 	private static File testJSIMWiz(File testModel) {
-
 		try {
-
-			// Create test instance with overridden checkForSave
-			JSIMWizMain jsimWizMain = new JSIMWizMain();
-
-			// Get Mediator
-			Field modelLoaderField = JSIMWizMain.class.getDeclaredField("modelLoader");
-			modelLoaderField.setAccessible(true);
-			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jsimWizMain);
-
-			JSIMModel tmpmodel = new JSIMModel();
-
-			Field currentFileField = JSIMWizMain.class.getDeclaredField("currentFile");
-			currentFileField.setAccessible(true);
-
-			Field jsimWizModelField = JSIMWizMain.class.getDeclaredField("model");
-			jsimWizModelField.setAccessible(true);
-			CommonModel model = (CommonModel) jsimWizModelField.get(jsimWizMain);
-
-			int state = modelLoader.loadModel(tmpmodel, jsimWizMain, testModel);
-
-			if (state == ModelLoader.SUCCESS || state == ModelLoader.WARNING) {
-
-				currentFileField.set(jsimWizMain, modelLoader.getSelectedFile());
-
-				jsimWizModelField.set(jsimWizMain, tmpmodel);
-
-				model.resetSaveState();
-			} else {
-				throw new RuntimeException("Error loading JSIMWIZ test");
-			}
-
-			// Corrects eventual problems on preloading for closed classes
-			model.manageJobs();
-
-			jsimWizMain.launchSimulation();
-
-			// Get Dispatcher
-			Field dispatcherField = JSIMWizMain.class.getDeclaredField("dispatcher");
-			dispatcherField.setAccessible(true);
-			DispatcherThread dispatcherThread = (DispatcherThread) dispatcherField.get(jsimWizMain);
-
-			// Get the poller thread
-			Field pollerField = DispatcherThread.class.getDeclaredField("poller");
-			pollerField.setAccessible(true);
-			Thread pollerThread = (Thread) pollerField.get(dispatcherThread);
-
-			awaitSimulationEnd(pollerThread);
-
 			File modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
-
-			// System.out.println("File created at: " + modelOutputFile.getAbsolutePath());
-
-			modelLoader.saveModel(jsimWizMain.getModel(), jsimWizMain, modelOutputFile);
-
+			HeadlessSolver.solveJSimWiz(testModel, modelOutputFile);
 			return modelOutputFile;
-
-		} catch (SecurityException | ReflectiveOperationException | IOException e) {
-			e.printStackTrace();
-			// System.exit(0);
+		} catch (Exception e) {
 			throw new RuntimeException("Error executing JSIMWiz test", e);
 		}
-
 	}
 
 	private static JabaResults testJABA(File testModel) {
-
 		try {
-
-			// Create test instance with overridden checkForSave
-			JabaWizard jabaWizard = new JabaWizard();
-
-			// Get Mediator
-			Field modelLoaderField = JabaWizard.class.getDeclaredField("modelLoader");
-			modelLoaderField.setAccessible(true);
-			ModelLoader modelLoader = (ModelLoader) modelLoaderField.get(jabaWizard);
-
-			JabaModel newdata = new JabaModel();
-
-			Field dataField = JabaWizard.class.getDeclaredField("data");
-			dataField.setAccessible(true);
-
-			int retval = modelLoader.loadModel(newdata, jabaWizard, testModel);
-
-			if (retval == ModelLoader.SUCCESS || retval == ModelLoader.WARNING) {
-
-				dataField.set(jabaWizard, newdata);
-
-			} else {
-				throw new RuntimeException("Error loading JABA test");
-			}
-
-			Method checkFinish = Wizard.class.getDeclaredMethod("checkFinish");
-			checkFinish.setAccessible(true);
-			boolean isFinished = (boolean) checkFinish.invoke(jabaWizard);
-
-			if (!isFinished) {
-				throw new RuntimeException("Error executing JABA test: Panels failed validation.");
-			}
-
-			// solve() is synchronous from the caller’s point of view, even though it
-			// internally uses a background thread.
-			jabaWizard.solve();
-
-			return jabaWizard.getData().getResults();
-
-		} catch (SecurityException | ReflectiveOperationException e) {
-			e.printStackTrace();
-			// System.exit(0);
+			return HeadlessSolver.solveJABA(testModel);
+		} catch (Exception e) {
 			throw new RuntimeException("Error executing JABA test", e);
-		}
-
-	}
-
-	// Aggressively dispose ALL open Swing windows tied to the JVM.
-	public static void closeGUI() {
-		for (java.awt.Window window : java.awt.Window.getWindows()) {
-			if (window.isDisplayable()) {
-				window.dispose();
-			}
-		}
-	}
-
-	private static void awaitSimulationEnd(Thread pollerThread) {
-		try {
-			// System.out.println("Simulation truly started");
-
-			while (pollerThread.getState() == Thread.State.NEW) {
-				Thread.sleep(10); // Wait until it starts
-			}
-
-//							System.out.println("dispatcherThread: " + dispatcherThread);
-//							System.out.println("pollerThread: " + pollerThread);
-//							System.out.println("pollerThread isAlive: " + pollerThread.isAlive());
-//							System.out.println("pollerThread state: " + pollerThread.getState());
-
-			// Now join on the real simulation thread
-			if (pollerThread.isAlive()) {
-//								long startTime = System.currentTimeMillis();
-				pollerThread.join();
-//								long endTime = System.currentTimeMillis();
-//								System.out.println("Time taken: " + (endTime - startTime) + " ms");
-			} else {
-				System.out.println("pollerThread already finished, join returns immediately.");
-			}
-
-			// System.out.println("Simulation truly finished");
-		} catch (SecurityException | IllegalArgumentException | InterruptedException e) {
-			e.printStackTrace();
-			// System.exit(0);
-			throw new RuntimeException("Error waiting for simulation to end", e);
 		}
 	}
 
@@ -549,76 +287,6 @@ public class IntegrationTestUtil {
 			throw new RuntimeException("Simulation crashed for JABA test: " + testModel.getName(), e);
 		}
 
-	}
-
-	// Helper method to wait for async threads to spin up via reflection
-	private static Object waitForThreadInitialization(Object targetObj, String fieldName, String threadDisplayName)
-			throws ReflectiveOperationException, InterruptedException {
-
-		Field field = targetObj.getClass().getDeclaredField(fieldName);
-		field.setAccessible(true);
-
-		Object threadObj = null;
-		int retries = 0;
-
-		// Wait up to 5 seconds
-		// (IntegrationTestConstants.THREAD_INITIALIZATION_WAIT_TIME *
-		// IntegrationTestConstants.THREAD_INITIALIZATION_SLEEP_TIMEms) for the async
-		// GUI thread to initialize
-		while (threadObj == null && retries < IntegrationTestConstants.THREAD_INITIALIZATION_WAIT_TIME) {
-			threadObj = field.get(targetObj);
-			if (threadObj == null) {
-				Thread.sleep(IntegrationTestConstants.THREAD_INITIALIZATION_SLEEP_TIME);
-				retries++;
-			}
-		}
-
-		// If it's still null, the simulation GUI crashed and aborted startup
-		if (threadObj == null) {
-			throw new RuntimeException(
-					"Simulation aborted: " + threadDisplayName + " never initialized. Check AWT/GUI logs.");
-		}
-
-		return threadObj;
-	}
-
-	// Daemon thread that watches for the ModelChecker "Simulation diagnostic" dialog
-	// and auto-clicks Continue when only warnings are present (button is enabled).
-	// Needed because startSimulation() calls pw.show() from a non-EDT thread, which
-	// blocks the caller — no user can click Continue in automated tests.
-	private static Thread startModelCheckerDialogWatcher() {
-		Thread watcher = new Thread(() -> {
-			while (!Thread.currentThread().isInterrupted()) {
-				try {
-					Thread.sleep(50);
-				} catch (InterruptedException e) {
-					break;
-				}
-				for (java.awt.Window window : java.awt.Window.getWindows()) {
-					if (window instanceof javax.swing.JDialog && window.isVisible()) {
-						dismissContinueButtonIfPresent((java.awt.Container) window);
-					}
-				}
-			}
-		}, "model-checker-dialog-watcher");
-		watcher.setDaemon(true);
-		watcher.start();
-		return watcher;
-	}
-
-	private static void dismissContinueButtonIfPresent(java.awt.Container container) {
-		for (java.awt.Component c : container.getComponents()) {
-			if (c instanceof javax.swing.JButton) {
-				javax.swing.JButton btn = (javax.swing.JButton) c;
-				if ("Continue".equals(btn.getText()) && btn.isEnabled() && btn.isShowing()) {
-					javax.swing.SwingUtilities.invokeLater(btn::doClick);
-					return;
-				}
-			}
-			if (c instanceof java.awt.Container) {
-				dismissContinueButtonIfPresent((java.awt.Container) c);
-			}
-		}
 	}
 
 }

@@ -9,6 +9,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
+import jmt.commandline.Jmt;
+
 public class SingleOpenScheduling {
 
     @Test

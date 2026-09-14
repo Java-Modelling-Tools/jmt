@@ -1,6 +1,6 @@
 package linetesting;
 
-import static linetesting.IntegrationTestConstants.CLASSES_DIRECTORY;
+import static linetesting.IntegrationTestConstants.CLASSES_DIRECTORIES;
 import static linetesting.IntegrationTestConstants.EXCLUDED_PACKAGES;
 import static linetesting.IntegrationTestConstants.JABA_TESTS_FOLDER_NAME;
 import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.function.Executable;
@@ -45,8 +44,8 @@ public class IntegrationTest {
 
 	@BeforeAll
 	static void setupCsvs() throws IOException {
-		if (!CLASSES_DIRECTORY.exists()) {
-			throw new IOException("Classes dir not found. Run 'mvn compile' first.");
+		if (CLASSES_DIRECTORIES.length == 0) {
+			throw new IOException("No module target/classes directory found. Run 'mvn compile' first.");
 		}
 
 		File outputFolder = new File(OUTPUT_FOLDER_PATH);
@@ -78,13 +77,6 @@ public class IntegrationTest {
 		}
 		System.out.println("Coverage report ready at: " + absolutePath);
 		return absolutePath;
-	}
-
-	@AfterEach
-	void tearDown() {
-		// This automatically runs after EVERY single parameterized test finishes,
-		// regardless of whether the test passed or failed!
-		IntegrationTestUtil.closeGUI();
 	}
 
 	private static Stream<Arguments> testProvider(String testFolderName) {
@@ -143,7 +135,7 @@ public class IntegrationTest {
 		} finally {
 			// Append to the SPECIFIC csv path passed to this method
 			if (csvPath != null) {
-				CoverageTracker.calculateAndAppend(testFile.getName(), CLASSES_DIRECTORY, csvPath, EXCLUDED_PACKAGES);
+				CoverageTracker.calculateAndAppend(testFile.getName(), CLASSES_DIRECTORIES, csvPath, EXCLUDED_PACKAGES);
 			}
 
 			Instant endInstant = Instant.now();

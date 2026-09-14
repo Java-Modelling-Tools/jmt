@@ -44,6 +44,10 @@
     </modules>
     <properties>
     <izpack.version>5.2.4</izpack.version>
+    <!-- 0.8.10 cannot instrument JDK 23+ class files (major version 67): the agent
+         throws "Unsupported class file major version" for every JDK internal class
+         it sees. 0.8.13 covers up to JDK 24. -->
+    <jacoco.version>0.8.13</jacoco.version>
     <izpack.staging>${project.build.directory}/staging</izpack.staging>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -246,7 +250,7 @@
           <plugin>
 		    <groupId>org.jacoco</groupId>
 		    <artifactId>jacoco-maven-plugin</artifactId>
-		    <version>0.8.10</version>
+		    <version>${jacoco.version}</version>
 		    <executions>
 		        <execution>
 		            <goals>
@@ -579,7 +583,7 @@
 	<dependency>
 	    <groupId>org.jacoco</groupId>
 	    <artifactId>org.jacoco.core</artifactId>
-	    <version>0.8.10</version> <scope>test</scope>
+	    <version>${jacoco.version}</version> <scope>test</scope>
 	</dependency>
   </dependencies>
 </project>

@@ -27,7 +27,7 @@ existing JMT limitation, or a gap in current modeling/solving capabilities.
 
 Describe what will actually be built or investigated, e.g.:
 
-- A new simulation strategy/station type (`jmt.commandline.NetStrategies` / `NodeSections`)
+- A new simulation strategy/station type (`jmt.engine.NetStrategies` / `NodeSections`)
 - A new or extended analytical solver (`jmt.jmva.analytical` / `jmva.engine`)
 - A new GUI workflow or editor (`jmt.gui.common`, or a specific tool's package)
 - Changes to the model XML format/schema (`src/main/resources/jmt/common/xml`) and any

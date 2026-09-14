@@ -38,7 +38,7 @@ For anything non-trivial (new modeling capabilities, schema changes, or anything
 6.  **Debug a running instance:** 
     *   The VS Code task "Maven: exec:java debug GraphStartScreen (8000)" launches the suite with a JDWP agent on port 8000 (`MAVEN_OPTS='-agentlib:jdwp=...' mvn -Pfull -DskipTests -Dexec.mainClass=jmt.gui.common.startScreen.GraphStartScreen exec:java`); attach with the "Attach to Maven exec:java (8000)" launch config.
 7.  **Headless/CLI mode (no GUI):** 
-    *   `java -cp <jar> jmt.commandline.Jmt [mva|sim|jsimw|jsimg] <modelfile.xml> [-seed N] [-maxtime N]` drives `jmva.engine.SolverDispatcher` or `jmt.commandline.simDispatcher.DispatcherJSIMschema` directly against a model XML file.
+    *   `java -cp <jar> jmt.commandline.Jmt [mva|sim|jsimw|jsimg] <modelfile.xml> [-seed N] [-maxtime N]` drives `jmva.engine.SolverDispatcher` or `jmt.engine.simDispatcher.DispatcherJSIMschema` directly against a model XML file.
 8.  **Legacy packaging:** 
     *   There's a separate `jmva` Maven profile (`-Pjmva -Dmode=jmva`) that builds a JMVA-only jar targeting Java 1.7 with a different main class (`jmt.jmva.JMVAWizard`) - a legacy/standalone packaging path, distinct from the default `full` profile.
 
@@ -82,7 +82,7 @@ Don't assume a fix in one engine applies to the other, and don't assume `jmt.com
 
 ### GUI structure
 
-`jmt.gui.common` is the shared GUI framework - model classes (`definitions/`), probability distributions, strategy UI mirroring `jmt.commandline.NetStrategies`, the XML layer described above, shared panels/editors, and `startScreen/` (the suite launcher). **JSIMwiz** and **JSIMgraph** both build heavily on `jmt.gui.common`, editing the same underlying model through a wizard vs. a graphical-canvas front-end respectively. `jmva`, `jaba`, `jwat`, and `table` are largely self-contained per-tool GUI packages under `jmt.gui`.
+`jmt.gui.common` is the shared GUI framework - model classes (`definitions/`), probability distributions, strategy UI mirroring `jmt.engine.NetStrategies`, the XML layer described above, shared panels/editors, and `startScreen/` (the suite launcher). **JSIMwiz** and **JSIMgraph** both build heavily on `jmt.gui.common`, editing the same underlying model through a wizard vs. a graphical-canvas front-end respectively. `jmva`, `jaba`, `jwat`, and `table` are largely self-contained per-tool GUI packages under `jmt.gui`.
 
 ### Entry points
 

@@ -254,7 +254,17 @@ public class XMLResultsReader implements XMLResultsConstants {
 			} else {
 				stationName = current.getAttribute(XML_AO_MEASURE_STATION);
 			}
-			String type = current.getAttribute(XML_AO_MEASURE_TYPE);
+			// SIMmodeloutput.xsd declares this attribute as "measureType"
+			// (XML_AO_MEASURE_TYPE), but XMLSimulationOutput actually writes it as "type"
+			// (XML_A_MEASURE_TYPE). Reading only the schema name yielded an empty type for
+			// every engine result file, which left measure names as "Station_Class_" and
+			// made them impossible to match against PAResultsModel - the cause of the NPE
+			// that silently killed every What-If run. Accept the name the engine emits,
+			// falling back to the schema name for any file that does carry it.
+			String type = current.getAttribute(XML_A_MEASURE_TYPE);
+			if (type.isEmpty()) {
+				type = current.getAttribute(XML_AO_MEASURE_TYPE);
+			}
 			String className = null;
 			if (current.getAttribute(XML_AO_MEASURE_CLASS).isEmpty()) {
 				if (type.equals(SimulationDefinition.MEASURE_FX)) {

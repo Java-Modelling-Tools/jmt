@@ -1533,11 +1533,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @param key key of search for this logger station into data structure
 	 * @author Michael Fercu (Bertoli Marco)
 	 *		   Date: 08-aug-2008
-	 * @see jmt.commandline.log.LoggerParameters LoggerParameters
+	 * @see log.LoggerParameters LoggerParameters
 	 * @see jmt.gui.common.xml.XMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
 	 * @see jmt.gui.common.definitions.CommonModel#getLoggingParameters CommonModel.getLoggingParameters()
 	 * @see jmt.gui.common.definitions.CommonModel#setLoggingParameters CommonModel.setLoggingParameters()
-	 * @see jmt.commandline.NodeSections.LogTunnel LogTunnel
+	 * @see NodeSections.LogTunnel LogTunnel
 	 */
 	protected static void parseLoggerSection(Element section, CommonModel model, Object key) {
 		NodeList parameters = section.getElementsByTagName(XML_E_PARAMETER);

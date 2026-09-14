@@ -18,34 +18,12 @@
 
 package common.controller;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import simDispatcher.DispatcherJSIMschema;
-import jmt.framework.gui.graph.MeasureValue;
 import common.definitions.AbortMeasure;
-import common.definitions.CommonModel;
 import common.definitions.GuiInterface;
-import common.definitions.MeasureDefinition;
 import common.definitions.PAResultsModel;
 import common.definitions.SimulationDefinition;
-import common.definitions.StoredResultsModel;
-import common.definitions.parametric.ParametricAnalysisDefinition;
 import common.panels.parametric.PAProgressWindow;
 import common.panels.parametric.PAResultsWindow;
-import common.xml.XMLReader;
-import common.xml.XMLResultsReader;
-import common.xml.XMLWriter;
-
-import org.w3c.dom.Document;
 
 /**
  * <p>
@@ -57,6 +35,11 @@ import org.w3c.dom.Document;
  * stop simulation after that time. We do not rely on engine method as it does
  * not appear to work properly.
  * </p>
+ * <p>
+ * The step loop itself lives in {@link ParametricAnalysisRunner}, which has no
+ * Swing dependency; this class adds the progress window, the results window and
+ * the toolbar state that only make sense with a GUI attached.
+ * </p>
  *
  * @author Francesco D'Aquino Date: 29-dic-2005 Time: 9.58.49
  *
@@ -67,16 +50,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	private SimulationDefinition simd;
 	private GuiInterface gui;
 	private PAProgressWindow progressWindow;
-	private boolean stopped;
-	private int currentStep;
-
-	private Map<Integer, PASimulation> active_simulations = new HashMap<>();
-	private ExecutorService exec;
-	private PAResultsModel parametricAnalysisResultsModel;
-	private CountDownLatch results_latch;
-	private CountDownLatch set_results_latch;
-
-	private StoredResultsModel[] simulation_results;
+	private ParametricAnalysisRunner runner;
 
 	/**
 	 * Construct a new Parametric Analysis Dispatcher Thread
@@ -88,6 +62,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 		progressWindow = papw;
 		this.simd = simd;
 		this.gui = gui;
+		this.runner = new ParametricAnalysisRunner(simd, new ProgressWindowListener());
 		// Avoids hanging the system during execution
 		this.setPriority(Thread.MIN_PRIORITY);
 	}
@@ -96,11 +71,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	 * Pauses current simulation only if it was already started
 	 */
 	public void pauseSimulation() {
-		Set<Entry<Integer, PASimulation>> entrySet = active_simulations.entrySet();
-		for (Entry<Integer, PASimulation> entry : entrySet) {
-			PASimulation sim = entry.getValue();
-			sim.pause();
-		}
+		runner.pause();
 		gui.changeSimActionsState(true, false, true);
 		progressWindow.pause();
 	}
@@ -110,25 +81,7 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	 * only if it was already started
 	 */
 	public void stopSimulation() {
-		exec.shutdownNow();
-
-		Set<Entry<Integer, PASimulation>> entrySet = active_simulations.entrySet();
-		for (Entry<Integer, PASimulation> entry : entrySet) {
-			PASimulation sim = entry.getValue();
-			sim.stopSimulation();
-		}
-
-		while (results_latch.getCount() > 0) {
-			results_latch.countDown();
-		}
-
-		try {
-			set_results_latch.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		stopped = true;
+		runner.stopRun();
 		progressWindow.stop();
 	}
 
@@ -137,207 +90,64 @@ public class PADispatcherThread extends Thread implements AbortMeasure {
 	 * was already started
 	 */
 	public void restartSimulation() {
-		Set<Entry<Integer, PASimulation>> entrySet = active_simulations.entrySet();
-		for (Entry<Integer, PASimulation> entry : entrySet) {
-			PASimulation sim = entry.getValue();
-			sim.restart();
-		}
-
+		runner.restart();
 		gui.changeSimActionsState(false, true, true);
 		progressWindow.restart();
 	}
 
 	/**
 	 * Aborts a measure, given its index
-	 * 
+	 *
 	 * @param index
 	 *            index of the measure to be aborted
 	 */
 	public void abortMeasure(int index) {
-		Set<Entry<Integer, PASimulation>> entrySet = active_simulations.entrySet();
-		for (Entry<Integer, PASimulation> entry : entrySet) {
-			PASimulation sim = entry.getValue();
-			sim.abortMeasureAtRefresh(index);
-		}
+		runner.abortMeasure(index);
 	}
 
 	@Override
 	public void run() {
-		File simulationFile = null;
-		ParametricAnalysisDefinition pad = simd.getParametricAnalysisModel();
-		pad.createValuesSet();
-		int steps = pad.getNumberOfSteps();
-		int parallelism = simd.getWhatIfParallelism();
+		PAResultsModel results = runner.run();
 
-		results_latch = new CountDownLatch(steps);
-		set_results_latch = new CountDownLatch(1);
-		parametricAnalysisResultsModel = new PAResultsModel((CommonModel) simd);
-		exec = Executors.newFixedThreadPool(parallelism);
-		simulation_results = new StoredResultsModel[steps];
-
-		for (currentStep = 0; currentStep < steps; currentStep++) {
-			pad.changeModel(currentStep);
-			try {
-				simulationFile = File.createTempFile("~JModelSimulation-" + currentStep, ".xml");
-				simulationFile.deleteOnExit();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			XMLWriter.writeXML(simulationFile, (CommonModel) simd);
-
-			DispatcherJSIMschema simulator = new DispatcherJSIMschema(simulationFile);
-			simulator.setParametricStep(currentStep);
-			// Propagate the fixed seed to each PA step so convergence is deterministic
-			if (!simd.getUseRandomSeed().booleanValue()) {
-				simulator.setSimulationSeed(simd.getSimulationSeed().longValue() + currentStep);
-			}
-			SimSolver ss = new SimSolver(simulator, currentStep, results_latch);
-			if (simd.getMaximumDuration().doubleValue() > 0) {
-				ss.setTimer(new TimerThread(simulator, simd.getMaximumDuration().doubleValue()));
-			}
-
-			exec.execute(ss);
-		}
-
-		try {
-			results_latch.await();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
-		boolean hasResults = false;
-		for (StoredResultsModel results : simulation_results) {
-			if (results == null) {
-				continue;
-			}
-			for (int i = 0; i < results.getMeasureNumber(); i++) {
-				hasResults = true;
-				Vector<MeasureValue> thisResult = results.getValues(i);
-				int measureState = results.getMeasureState(i);
-				MeasureValue value = thisResult.get(0);
-				boolean valid = (measureState == MeasureDefinition.MEASURE_SUCCESS);
-				parametricAnalysisResultsModel.addSample(results.getName(i), value.getLowerBound(),
-						value.getMeanValue(), value.getUpperBound(), valid);
-			}
-		}
-
-		set_results_latch.countDown();
-
-		pad.restoreOriginalValues();
-		if (!stopped) {
+		if (!runner.isStopped()) {
 			progressWindow.finished();
 			progressWindow.stopAnimation();
 		} else {
 			progressWindow.stop();
 		}
 
-		if (hasResults) {
+		if (results != null) {
 			// Sets the parametric analysis model results
-			simd.setSimulationResults(parametricAnalysisResultsModel);
+			simd.setSimulationResults(results);
 			PAResultsWindow resWin = new PAResultsWindow(simd, gui.getFileName());
 			gui.setResultsWindow(resWin);
 			gui.showResultsWindow();
 		}
 		gui.changeSimActionsState(true, false, false);
-		exec.shutdown();
 	}
 
-	class SimSolver implements Runnable {
-		private DispatcherJSIMschema simulator;
-		private TimerThread timer;
-		private int step;
-		private CountDownLatch latch;
+	/**
+	 * Drives the progress window and surfaces per-step failures through the GUI.
+	 */
+	private class ProgressWindowListener implements ParametricAnalysisRunner.Listener {
 
-		public SimSolver(DispatcherJSIMschema simulator, int step, CountDownLatch latch) {
-			this.simulator = simulator;
-			this.step = step;
-			this.latch = latch;
-		}
-
-		public void setTimer(TimerThread timer) {
-			this.timer = timer;
+		@Override
+		public void stepCompleted() {
+			progressWindow.incrementStepNumber();
 		}
 
 		@Override
-		public void run() {
-			try {
-				PASimulation PASim = new PASimulation(simulator);
-				if (timer != null) {
-					PASim.setTimer(timer);
-					timer.start();
-				}
-				active_simulations.put(step, PASim);
-				simulator.solveModel();
-				active_simulations.remove(step);
-			} catch (OutOfMemoryError err) {
-				simulator.abortAllMeasures();
-				simulator.killSimulation();
-				progressWindow.stop();
-				progressWindow.dispose();
-				gui.showErrorMessage("Out of memory error. Try to run Java Virtual Machine with more heap size (-Xmx<num>m)");
-			} catch (InterruptedException ex) {
-				// interrupted by stop simulation
-				return;
-			} catch (Exception ex) {
-				simulator.abortAllMeasures();
-				simulator.killSimulation();
-				gui.handleException(ex);
-			}
-
-			File output = simulator.getSimulation().getOutputFile();
-			output.deleteOnExit();
-
-			Document doc = XMLReader.loadXML(output.getAbsolutePath());
-			StoredResultsModel results = new StoredResultsModel();
-			XMLResultsReader.parseXML(doc, results);
-			simulation_results[step] = results;
-
-			progressWindow.incrementStepNumber();
-
-			if (timer != null) {
-				timer.kill();
-			}
-			latch.countDown();
-		}
-	}
-
-	class PASimulation {
-		private DispatcherJSIMschema simulator;
-		private TimerThread timer;
-
-		public PASimulation(DispatcherJSIMschema simulator) {
-			this.simulator = simulator;
+		public void outOfMemory(String message) {
+			progressWindow.stop();
+			progressWindow.dispose();
+			gui.showErrorMessage(message);
 		}
 
-		public void abortMeasureAtRefresh(int index) {
-			simulator.abortMeasureAtRefresh(index);
+		@Override
+		public void exception(Exception e) {
+			gui.handleException(e);
 		}
 
-		public void stopSimulation() {
-			if (timer != null) {
-				timer.kill();
-			}
-			simulator.abortAllMeasures();
-			simulator.killSimulation();
-		}
-
-		public void restart() {
-			if (timer != null) {
-				timer.restart();
-			}
-			simulator.restartSim();
-		}
-
-		public void setTimer(TimerThread timer) {
-			this.timer = timer;
-		}
-
-		public void pause() {
-			if (timer != null) {
-				timer.pause();
-			}
-			simulator.pauseSim();
-		}
 	}
 
 }

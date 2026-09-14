@@ -90,9 +90,6 @@ nb-configuration.xml
 *.log
 jacoco.exec
 
-# Remove test output folder
-/src/test/resources/linetesting/output
-
 # Environments
 .env
 .envrc

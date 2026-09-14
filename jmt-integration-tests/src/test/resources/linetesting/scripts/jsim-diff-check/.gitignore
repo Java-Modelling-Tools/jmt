@@ -214,3 +214,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Remove test output folder
+comparison_detailed.csv
+comparison_summary.csv
+changed_files

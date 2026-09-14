@@ -69,7 +69,7 @@ public class CoverageTracker {
 		}
 	}
 
-	public static void calculateAndAppend(String testId, File classesDir, String csvFile, String[] excludedPackages) {
+	public static void calculateAndAppend(String testId, File[] classesDirs, String csvFile, String[] excludedPackages) {
 		Object agent = getAgent();
 		if (agent == null) {
 			System.err.println("!!! ERROR: JaCoCo Agent is NOT attached. Run with -javaagent VM argument.");
@@ -92,7 +92,11 @@ public class CoverageTracker {
 
 			CoverageBuilder builder = new CoverageBuilder();
 			Analyzer analyzer = new Analyzer(execStore, builder);
-			analyzer.analyzeAll(classesDir);
+			// One directory per analysed module — the reactor no longer has a single
+			// target/classes holding every compiled class.
+			for (File classesDir : classesDirs) {
+				analyzer.analyzeAll(classesDir);
+			}
 
 			IBundleCoverage bundle = builder.getBundle("JMT");
 
