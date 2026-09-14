@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Sec6_1_Obj1_Arr0,2-1,75_pc04_Wif_JSIMg.jsimg" timestamp="Mon Sep 14 19:59:24 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\calog\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="20000000" name="Sec6_1_Obj1_Arr0,2-1,75_pc04_Wif_JSIMg.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Class-E" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <userClass name="Class-C" priority="0" referenceSource="ClassSwitch" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.2</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <value>null</value>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Edge node</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Edge node</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Edge node">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>2.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>10.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>Class-E</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Class-C</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>Edge node - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.6</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>ClassSwitch 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.4</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink 2</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>ClassSwitch 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.0</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Sink 2</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1">
+            <section className="JobSink"/>
+        </node>
+        <node name="ClassSwitch 1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ClassSwitch">
+                <parameter array="true" classPath="java.lang.Object" name="matrix">
+                    <refClass>Class-E</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>Class-E</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                        <refClass>Class-C</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter array="true" classPath="java.lang.Float" name="row">
+                        <refClass>Class-E</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>0.0</value>
+                        </subParameter>
+                        <refClass>Class-C</refClass>
+                        <subParameter classPath="java.lang.Float" name="cell">
+                            <value>1.0</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Cloud server</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Cloud server</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Cloud server">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="PSServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="maxRunning">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.25</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="PSPriorityUsed">
+                    <value>false</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.PSStrategy" name="PSStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.PSStrategies.EPSStrategy" name="EPSStrategy"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Double" name="serviceWeights">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="java.lang.Double" name="serviceWeight">
+                        <value>1.0</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+                    <subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                        <refClass>Class-E</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                        <refClass>Class-C</refClass>
+                        <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.String" name="serverNames">
+                        <subParameter classPath="java.lang.String" name="serverTypesNames">
+                            <value>Cloud server - Server Type 1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                        <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                            <value>1</value>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                        <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                            <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                                <value>true</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <subParameter classPath="java.lang.String" name="schedulingPolicy">
+                        <value>ALIS (Assign Longest Idle Server)</value>
+                    </subParameter>
+                    <subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class-E</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Edge node</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class-C</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Edge node</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 2">
+            <section className="JobSink"/>
+        </node>
+        <measure alpha="0.01" name="Class-E_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class-E" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Class-C_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class-C" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Sink 1_Class-E_Response Time per Sink" nodeType="station" precision="0.03" referenceNode="Sink 1" referenceUserClass="Class-E" type="Response Time per Sink" verbose="false"/>
+        <measure alpha="0.01" name="Sink 2_Class-C_Response Time per Sink" nodeType="station" precision="0.03" referenceNode="Sink 2" referenceUserClass="Class-C" type="Response Time per Sink" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-E_Utilization" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-E" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-C_Utilization" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-C" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Cloud server_Class-C_Utilization" nodeType="station" precision="0.03" referenceNode="Cloud server" referenceUserClass="Class-C" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Utilization" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Cloud server_Utilization" nodeType="station" precision="0.03" referenceNode="Cloud server" referenceUserClass="" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="Sink 1_Throughput per Sink" nodeType="station" precision="0.03" referenceNode="Sink 1" referenceUserClass="" type="Throughput per Sink" verbose="false"/>
+        <measure alpha="0.01" name="Sink 2_Throughput per Sink" nodeType="station" precision="0.03" referenceNode="Sink 2" referenceUserClass="" type="Throughput per Sink" verbose="false"/>
+        <measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Cloud server_Class-C_Response Time" nodeType="station" precision="0.03" referenceNode="Cloud server" referenceUserClass="Class-C" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-E_Response Time" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-E" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-C_Response Time" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-C" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-C_Residence Time" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-C" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="Edge node_Class-E_Residence Time" nodeType="station" precision="0.03" referenceNode="Edge node" referenceUserClass="Class-E" type="Residence Time" verbose="false"/>
+        <connection source="Source 1" target="Edge node"/>
+        <connection source="Edge node" target="Sink 1"/>
+        <connection source="Edge node" target="ClassSwitch 1"/>
+        <connection source="Edge node" target="Sink 2"/>
+        <connection source="ClassSwitch 1" target="Cloud server"/>
+        <connection source="Cloud server" target="Edge node"/>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="Class-E"/>
+        <userClass color="#FFFF0000" name="Class-C"/>
+        <station name="Source 1">
+            <position angle="0.0" rotate="false" x="65.0" y="182.0"/>
+        </station>
+        <station name="Edge node">
+            <position angle="0.0" rotate="false" x="216.0" y="188.0"/>
+        </station>
+        <station name="Sink 1">
+            <position angle="0.0" rotate="false" x="511.0" y="110.0"/>
+        </station>
+        <station name="ClassSwitch 1">
+            <position angle="0.0" rotate="false" x="372.0" y="237.0"/>
+        </station>
+        <station name="Cloud server">
+            <position angle="0.0" rotate="false" x="529.0" y="243.0"/>
+        </station>
+        <station name="Sink 2">
+            <position angle="0.0" rotate="false" x="513.0" y="170.0"/>
+        </station>
+        <parametric classPath="common.definitions.parametric.ArrivalRateParametricAnalysis" enabled="true">
+            <field name="Class" value="Class-E"/>
+            <field name="From" value="0.2"/>
+            <field name="Is single class" value="true"/>
+            <field name="Steps" value="5"/>
+            <field name="To" value="1.75"/>
+            <field name="Type" value="Arrival rates"/>
+        </parametric>
+    </jmodel>
+    <results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="0.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="5" name="Network_Class-E_System Response Time" nodeType="" precision="0.03" referenceClass="Class-E" referenceStation="Network" type="15">
+            <sample lowerBound="0.5540996542513785" meanValue="0.5643815184416502" upperBound="0.5746633826319218" validity="true"/>
+            <sample lowerBound="0.7093952324413042" meanValue="0.7266682195492701" upperBound="0.743941206657236" validity="true"/>
+            <sample lowerBound="1.0271196614697982" meanValue="1.0509479078427535" upperBound="1.0747761542157088" validity="true"/>
+            <sample lowerBound="1.8552215191915913" meanValue="1.9032974327419077" upperBound="1.951373346292224" validity="true"/>
+            <sample lowerBound="8.787791743119893" meanValue="9.031443498500984" upperBound="9.275095253882075" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Network_Class-C_System Response Time" nodeType="" precision="0.03" referenceClass="Class-C" referenceStation="Network" type="15">
+            <sample lowerBound="1.4989661553777305" meanValue="1.5219311771041197" upperBound="1.544896198830509" validity="true"/>
+            <sample lowerBound="1.8213373264069954" meanValue="1.8562323583968061" upperBound="1.8911273903866168" validity="true"/>
+            <sample lowerBound="2.389811965269862" meanValue="2.44783312262925" upperBound="2.505854279988638" validity="true"/>
+            <sample lowerBound="3.6115330589608625" meanValue="3.7000569768040217" upperBound="3.788580894647181" validity="true"/>
+            <sample lowerBound="12.491312803407979" meanValue="12.76881814382639" upperBound="13.046323484244802" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Sink 1_Class-E_Response Time per Sink" nodeType="station" precision="0.03" referenceClass="Class-E" referenceStation="Sink 1" type="22">
+            <sample lowerBound="0.5540996542513785" meanValue="0.5643815184416502" upperBound="0.5746633826319218" validity="true"/>
+            <sample lowerBound="0.7093952324413042" meanValue="0.7266682195492701" upperBound="0.743941206657236" validity="true"/>
+            <sample lowerBound="1.0271196614697982" meanValue="1.0509479078427535" upperBound="1.0747761542157088" validity="true"/>
+            <sample lowerBound="1.8552215191915913" meanValue="1.9032974327419077" upperBound="1.951373346292224" validity="true"/>
+            <sample lowerBound="8.787791743119893" meanValue="9.031443498500984" upperBound="9.275095253882075" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Sink 2_Class-C_Response Time per Sink" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Sink 2" type="22">
+            <sample lowerBound="1.4989661553777305" meanValue="1.5219311771041197" upperBound="1.544896198830509" validity="true"/>
+            <sample lowerBound="1.8213373264069954" meanValue="1.8562323583968061" upperBound="1.8911273903866168" validity="true"/>
+            <sample lowerBound="2.389811965269862" meanValue="2.44783312262925" upperBound="2.505854279988638" validity="true"/>
+            <sample lowerBound="3.6115330589608625" meanValue="3.7000569768040217" upperBound="3.788580894647181" validity="true"/>
+            <sample lowerBound="12.491312803407979" meanValue="12.76881814382639" upperBound="13.046323484244802" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-E_Utilization" nodeType="station" precision="0.03" referenceClass="Class-E" referenceStation="Edge node" type="6">
+            <sample lowerBound="0.09843871455909091" meanValue="0.10073307701418256" upperBound="0.10302743946927422" validity="true"/>
+            <sample lowerBound="0.2887719498596008" meanValue="0.2945851950175015" upperBound="0.30039844017540224" validity="true"/>
+            <sample lowerBound="0.4758954517438926" meanValue="0.4905278519412067" upperBound="0.5051602521385208" validity="true"/>
+            <sample lowerBound="0.6682011833335236" meanValue="0.6835396809384323" upperBound="0.698878178543341" validity="true"/>
+            <sample lowerBound="0.8655265154201494" meanValue="0.8890072314064312" upperBound="0.9124879473927131" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-C_Utilization" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Edge node" type="6">
+            <sample lowerBound="0.007793824010499023" meanValue="0.007997831308185327" upperBound="0.00820183860587163" validity="true"/>
+            <sample lowerBound="0.02303210052055215" meanValue="0.023525479587162928" upperBound="0.024018858653773706" validity="true"/>
+            <sample lowerBound="0.037423498667879314" meanValue="0.038446246532671424" upperBound="0.039468994397463535" validity="true"/>
+            <sample lowerBound="0.05254075442032737" meanValue="0.0539422536118103" upperBound="0.05534375280329323" validity="true"/>
+            <sample lowerBound="0.06920305649171532" meanValue="0.07077226926670335" upperBound="0.07234148204169139" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Cloud server_Class-C_Utilization" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Cloud server" type="6">
+            <sample lowerBound="0.06265107276740821" meanValue="0.06413822158510106" upperBound="0.06562537040279391" validity="true"/>
+            <sample lowerBound="0.18444449449025596" meanValue="0.18889494214815622" upperBound="0.19334538980605648" validity="true"/>
+            <sample lowerBound="0.30499036225796294" meanValue="0.31420346181155145" upperBound="0.32341656136513997" validity="true"/>
+            <sample lowerBound="0.4232044985822188" meanValue="0.43240034412557243" upperBound="0.44159618966892605" validity="true"/>
+            <sample lowerBound="0.5377017471405314" meanValue="0.5538905919673929" upperBound="0.5700794367942543" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_All classes_Utilization" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Edge node" type="6">
+            <sample lowerBound="0.1063027338724375" meanValue="0.10879252623592976" upperBound="0.11128231859942203" validity="true"/>
+            <sample lowerBound="0.3121936000742655" meanValue="0.318128629193013" upperBound="0.3240636583117605" validity="true"/>
+            <sample lowerBound="0.5109339370965509" meanValue="0.5254884271617106" upperBound="0.5400429172268704" validity="true"/>
+            <sample lowerBound="0.7213662590208887" meanValue="0.737782049882351" upperBound="0.7541978407438132" validity="true"/>
+            <sample lowerBound="0.9434419537023497" meanValue="0.9641619941682562" upperBound="0.9848820346341627" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Cloud server_All classes_Utilization" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Cloud server" type="6">
+            <sample lowerBound="0.06265107276740821" meanValue="0.06413822158510106" upperBound="0.06562537040279391" validity="true"/>
+            <sample lowerBound="0.18444449449025596" meanValue="0.18889494214815622" upperBound="0.19334538980605648" validity="true"/>
+            <sample lowerBound="0.30499036225796294" meanValue="0.31420346181155145" upperBound="0.32341656136513997" validity="true"/>
+            <sample lowerBound="0.4232044985822188" meanValue="0.43240034412557243" upperBound="0.44159618966892605" validity="true"/>
+            <sample lowerBound="0.5377017471405314" meanValue="0.5538905919673929" upperBound="0.5700794367942543" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Sink 1_All classes_Throughput per Sink" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Sink 1" type="23">
+            <sample lowerBound="0.11791291818783145" meanValue="0.12013920924232725" upperBound="0.12245118646439737" validity="true"/>
+            <sample lowerBound="0.3474286810105165" meanValue="0.3540034089666184" upperBound="0.3608317766256452" validity="true"/>
+            <sample lowerBound="0.5775090331311783" meanValue="0.586941875784669" upperBound="0.5966879810674233" validity="true"/>
+            <sample lowerBound="0.8071733311386606" meanValue="0.8204957926007815" upperBound="0.8342654110446213" validity="true"/>
+            <sample lowerBound="1.0302284631291918" meanValue="1.0496476850895717" upperBound="1.0698130541293165" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Sink 2_All classes_Throughput per Sink" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Sink 2" type="23">
+            <sample lowerBound="0.07910587448888515" meanValue="0.08037876731072723" upperBound="0.08169329431132473" validity="true"/>
+            <sample lowerBound="0.23004609394179307" meanValue="0.2362172354018523" upperBound="0.24272859345602266" validity="true"/>
+            <sample lowerBound="0.3812809189211466" meanValue="0.39109449752917463" upperBound="0.40142659453515794" validity="true"/>
+            <sample lowerBound="0.5302223701659973" meanValue="0.5422955729186478" upperBound="0.5549314021652646" validity="true"/>
+            <sample lowerBound="0.6842116764545502" meanValue="0.6950245892685749" upperBound="0.7061847527454658" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Network_All classes_System Response Time" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" type="15">
+            <sample lowerBound="0.926814002828528" meanValue="0.9493698228434403" upperBound="0.9719256428583526" validity="true"/>
+            <sample lowerBound="1.1432782402832558" meanValue="1.1726518171647742" upperBound="1.2020253940462926" validity="true"/>
+            <sample lowerBound="1.5775140711633242" meanValue="1.617025539920328" upperBound="1.6565370086773317" validity="true"/>
+            <sample lowerBound="2.5391703346089045" meanValue="2.6074783962484753" upperBound="2.675786457888046" validity="true"/>
+            <sample lowerBound="10.168766438000278" meanValue="10.433361243502926" upperBound="10.697956049005574" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Cloud server_Class-C_Response Time" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Cloud server" type="2">
+            <sample lowerBound="0.8398789630684095" meanValue="0.8557355471905085" upperBound="0.8715921313126075" validity="true"/>
+            <sample lowerBound="0.9549163977096091" meanValue="0.9782082671488421" upperBound="1.0015001365880751" validity="true"/>
+            <sample lowerBound="1.1356025666983198" meanValue="1.1673877101898473" upperBound="1.1991728536813748" validity="true"/>
+            <sample lowerBound="1.3776461721555273" meanValue="1.4056406444891234" upperBound="1.4336351168227195" validity="true"/>
+            <sample lowerBound="1.7868843904824125" meanValue="1.8298809787796138" upperBound="1.872877567076815" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-E_Response Time" nodeType="station" precision="0.03" referenceClass="Class-E" referenceStation="Edge node" type="2">
+            <sample lowerBound="0.5511039941661112" meanValue="0.5627286968013326" upperBound="0.5743533994365541" validity="true"/>
+            <sample lowerBound="0.707365281998774" meanValue="0.7258580297554919" upperBound="0.7443507775122097" validity="true"/>
+            <sample lowerBound="1.0412350601657563" meanValue="1.0649548769788701" upperBound="1.088674693791984" validity="true"/>
+            <sample lowerBound="1.8710819607510059" meanValue="1.9140430230764276" upperBound="1.9570040854018493" validity="true"/>
+            <sample lowerBound="8.791185016611252" meanValue="9.04863837441377" upperBound="9.306091732216288" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-C_Response Time" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Edge node" type="2">
+            <sample lowerBound="0.10941409890794258" meanValue="0.11121118520209951" upperBound="0.11300827149625643" validity="true"/>
+            <sample lowerBound="0.14216673824954965" meanValue="0.14515647976359267" upperBound="0.1481462212776357" validity="true"/>
+            <sample lowerBound="0.2075106244053289" meanValue="0.2126877312175126" upperBound="0.21786483802969633" validity="true"/>
+            <sample lowerBound="0.37605950531912263" meanValue="0.38454459382216544" upperBound="0.39302968232520824" validity="true"/>
+            <sample lowerBound="1.7822586626357686" meanValue="1.8276303341480171" upperBound="1.8730020056602656" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Network_All classes_System Throughput" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" type="16">
+            <sample lowerBound="0.19782172559615155" meanValue="0.2014024684082754" upperBound="0.20511522990052333" validity="true"/>
+            <sample lowerBound="0.5824474339712842" meanValue="0.5921273872614347" upperBound="0.6021345291538013" validity="true"/>
+            <sample lowerBound="0.9537327870981007" meanValue="0.9712544938604527" upperBound="0.9894320574361117" validity="true"/>
+            <sample lowerBound="1.3274529916948454" meanValue="1.3553724936924103" upperBound="1.3844916547952957" validity="true"/>
+            <sample lowerBound="1.705710388467494" meanValue="1.734861807671339" upperBound="1.765026976176196" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-C_Residence Time" nodeType="station" precision="0.03" referenceClass="Class-C" referenceStation="Edge node" type="3">
+            <sample lowerBound="0.04398706017439513" meanValue="0.04470953144408196" upperBound="0.045432002713768786" validity="true"/>
+            <sample lowerBound="0.05701029067799489" meanValue="0.05820920706917263" upperBound="0.059408123460350376" validity="true"/>
+            <sample lowerBound="0.08290624518955149" meanValue="0.0849746428341223" upperBound="0.08704304047869312" validity="true"/>
+            <sample lowerBound="0.15023349632203475" meanValue="0.1536232378240672" upperBound="0.15701297932609964" validity="true"/>
+            <sample lowerBound="0.713142954941698" meanValue="0.7312977203364344" upperBound="0.7494524857311707" validity="true"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="5" name="Edge node_Class-E_Residence Time" nodeType="station" precision="0.03" referenceClass="Class-E" referenceStation="Edge node" type="3">
+            <sample lowerBound="0.5511174481965337" meanValue="0.5627424346241148" upperBound="0.5743674210516959" validity="true"/>
+            <sample lowerBound="0.7073774605240224" meanValue="0.725870526665599" upperBound="0.7443635928071758" validity="true"/>
+            <sample lowerBound="1.0412726525933744" meanValue="1.0649933257793964" upperBound="1.0887139989654187" validity="true"/>
+            <sample lowerBound="1.8710854696568993" meanValue="1.914046612548714" upperBound="1.957007755440529" validity="true"/>
+            <sample lowerBound="8.791204696165227" meanValue="9.04865863029133" upperBound="9.30611256441743" validity="true"/>
+        </measure>
+    </results>
+</archive>

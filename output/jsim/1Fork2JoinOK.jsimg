@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="1Fork2JoinOK.jsimg" timestamp="Mon Sep 14 19:54:37 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="C:\Users\calog\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="1Fork2JoinOK.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Class1" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Fork 1">
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Fork">
+                <parameter classPath="java.lang.Integer" name="jobsPerLink">
+                    <value>1</value>
+                </parameter>
+                <parameter classPath="java.lang.Integer" name="block">
+                    <value>-1</value>
+                </parameter>
+                <parameter classPath="java.lang.Boolean" name="isSimplifiedFork">
+                    <value>true</value>
+                </parameter>
+                <parameter array="true" classPath="NetStrategies.ForkStrategy" name="ForkStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ForkStrategies.ProbabilitiesFork" name="Branch Probabilities">
+                        <subParameter array="true" classPath="NetStrategies.ForkStrategies.OutPath" name="EmpiricalEntryArray">
+                            <subParameter classPath="NetStrategies.ForkStrategies.OutPath" name="OutPathEntry">
+                                <subParameter classPath="random.EmpiricalEntry" name="outUnitProbability">
+                                    <subParameter classPath="java.lang.String" name="stationName">
+                                        <value>Delay 1</value>
+                                    </subParameter>
+                                    <subParameter classPath="java.lang.Double" name="probability">
+                                        <value>1.0</value>
+                                    </subParameter>
+                                </subParameter>
+                                <subParameter array="true" classPath="random.EmpiricalEntry" name="JobsPerLinkDis">
+                                    <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                        <subParameter classPath="java.lang.String" name="numbers">
+                                            <value>1</value>
+                                        </subParameter>
+                                        <subParameter classPath="java.lang.Double" name="probability">
+                                            <value>1.0</value>
+                                        </subParameter>
+                                    </subParameter>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Join 1">
+            <section className="Join">
+                <parameter array="true" classPath="NetStrategies.JoinStrategy" name="JoinStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Join 2">
+            <section className="Join">
+                <parameter array="true" classPath="NetStrategies.JoinStrategy" name="JoinStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.JoinStrategies.NormalJoin" name="Standard Join">
+                        <subParameter classPath="java.lang.Integer" name="numRequired">
+                            <value>-1</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1">
+            <section className="JobSink"/>
+        </node>
+        <node name="Delay 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>0.2</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Delay 2</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.5</value>
+                                </subParameter>
+                            </subParameter>
+                            <subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>Delay 3</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>0.5</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="Delay 2">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>0.3</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Delay 3">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>1.25</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Delay 4">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.DeterministicDistr" name="Deterministic"/>
+                        <subParameter classPath="random.DeterministicDistrPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="t">
+                                <value>2.0</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <measure alpha="0.01" name="Fork 1_Fork Join Response Time" nodeType="station" precision="0.03" referenceNode="Fork 1" referenceUserClass="" type="Fork Join Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Join 1_Number of Customers" nodeType="station" precision="0.03" referenceNode="Join 1" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Join 2_Number of Customers" nodeType="station" precision="0.03" referenceNode="Join 2" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay 1_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay 2_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 2" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay 3_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 3" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Join 1_Throughput" nodeType="station" precision="0.03" referenceNode="Join 1" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Join 2_Throughput" nodeType="station" precision="0.03" referenceNode="Join 2" referenceUserClass="" type="Throughput" verbose="false"/>
+        <measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+        <measure alpha="0.01" name="Delay 4_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 4" referenceUserClass="" type="Number of Customers" verbose="false"/>
+        <connection source="Source 1" target="Fork 1"/>
+        <connection source="Fork 1" target="Delay 1"/>
+        <connection source="Join 1" target="Delay 4"/>
+        <connection source="Join 2" target="Delay 4"/>
+        <connection source="Delay 1" target="Delay 2"/>
+        <connection source="Delay 1" target="Delay 3"/>
+        <connection source="Delay 2" target="Join 1"/>
+        <connection source="Delay 3" target="Join 2"/>
+        <connection source="Delay 4" target="Sink 1"/>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="Class1"/>
+        <station name="Source 1">
+            <position angle="0.0" rotate="false" x="49.0" y="166.0"/>
+        </station>
+        <station name="Fork 1">
+            <position angle="0.0" rotate="false" x="160.0" y="167.0"/>
+        </station>
+        <station name="Join 1">
+            <position angle="0.0" rotate="false" x="381.0" y="80.0"/>
+        </station>
+        <station name="Join 2">
+            <position angle="0.0" rotate="false" x="381.0" y="258.0"/>
+        </station>
+        <station name="Sink 1">
+            <position angle="0.0" rotate="false" x="606.0" y="168.0"/>
+        </station>
+        <station name="Delay 1">
+            <position angle="0.0" rotate="false" x="233.0" y="143.0"/>
+        </station>
+        <station name="Delay 2">
+            <position angle="0.0" rotate="false" x="311.0" y="55.0"/>
+        </station>
+        <station name="Delay 3">
+            <position angle="0.0" rotate="false" x="315.0" y="236.0"/>
+        </station>
+        <station name="Delay 4">
+            <position angle="0.0" rotate="false" x="512.0" y="143.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="0" logDecimalSeparator="," logDelimiter=";" pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="25600" discardedSamples="0" finalValue="0.7477191831364295" name="Fork 1_All classes_Fork Join Response Time" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Fork 1" state="1" type="27">
+            <sample lastIntervalAvgValue="0.7477191831364295" lowerBound="0.7281413208854607" meanValue="0.7477191831364295" simulationTime="0.7477191831364295" upperBound="0.7672970453873983"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="100000" discardedSamples="68820" finalValue="0.0" name="Join 1_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Join 1" state="1" type="0">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="100000" discardedSamples="68820" finalValue="0.0" name="Join 2_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Join 2" state="1" type="0">
+            <sample lastIntervalAvgValue="0.0" meanValue="0.0" simulationTime="0.0"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="140" finalValue="0.2032653192339188" name="Delay 1_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Delay 1" state="1" type="0">
+            <sample lastIntervalAvgValue="0.2032653192339188" lowerBound="0.1985257105964899" meanValue="0.2032653192339188" simulationTime="0.2032653192339188" upperBound="0.2080049278713477"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="40960" discardedSamples="80" finalValue="0.15062674600204562" name="Delay 2_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Delay 2" state="1" type="0">
+            <sample lastIntervalAvgValue="0.15062674600204562" lowerBound="0.14744506140457594" meanValue="0.15062674600204562" simulationTime="0.15062674600204562" upperBound="0.1538084305995153"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="122880" discardedSamples="0" finalValue="0.39830483462201305" name="Delay 3_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Delay 3" state="1" type="0">
+            <sample lastIntervalAvgValue="0.39830483462201305" lowerBound="0.3928251209062458" meanValue="0.39830483462201305" simulationTime="0.39830483462201305" upperBound="0.4037845483377803"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="25600" discardedSamples="0" finalValue="2.7477191831364287" name="Network_All classes_System Response Time" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" state="1" type="15">
+            <sample lastIntervalAvgValue="2.7477191831364287" lowerBound="2.67269045473213" meanValue="2.7477191831364287" simulationTime="2.7477191831364287" upperBound="2.8227479115407275"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="45" finalValue="0.4985611674653644" name="Join 1_All classes_Throughput" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Join 1" state="1" type="5">
+            <sample lastIntervalAvgValue="0.4985611674653644" lowerBound="0.4881025227014885" meanValue="0.4985611674653644" simulationTime="0.4985611674653644" upperBound="0.5094778239628743"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="35840" discardedSamples="555" finalValue="0.5014988815503792" name="Join 2_All classes_Throughput" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Join 2" state="1" type="5">
+            <sample lastIntervalAvgValue="0.5014988815503792" lowerBound="0.4943274706844572" meanValue="0.5014988815503792" simulationTime="0.5014988815503792" upperBound="0.5088814326978244"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="20480" discardedSamples="75" finalValue="1.0153133343196383" name="Network_All classes_System Throughput" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" state="1" type="16">
+            <sample lastIntervalAvgValue="1.0153133343196383" lowerBound="0.9867787509789373" meanValue="1.0153133343196383" simulationTime="1.0153133343196383" upperBound="1.0455473226218834"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="61440" discardedSamples="180" finalValue="2.018895233922491" name="Delay 4_All classes_Number of Customers" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Delay 4" state="1" type="0">
+            <sample lastIntervalAvgValue="2.018895233922491" lowerBound="1.9763924971060673" meanValue="2.018895233922491" simulationTime="2.018895233922491" upperBound="2.0613979707389145"/>
+        </measure>
+    </results>
+</archive>

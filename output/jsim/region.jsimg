@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="region.jsimg" timestamp="Mon Sep 14 19:57:51 CEST 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+    <sim disableStatisticStop="true" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\calog\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="1000000" name="region.jsimg" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Class1" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <userClass name="Class2" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <userClass name="Class3" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.25</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.15</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.05</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Delay 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+                </parameter>
+            </section>
+            <section className="Delay">
+                <parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.1</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.1</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="random.Exponential" name="Exponential"/>
+                        <subParameter classPath="random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.1</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Class2</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                    <refClass>Class3</refClass>
+                    <subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1">
+            <section className="JobSink"/>
+        </node>
+        <measure alpha="0.01" name="Delay 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay 1_Class2_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="Class2" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="Delay 1_Class3_Number of Customers" nodeType="station" precision="0.03" referenceNode="Delay 1" referenceUserClass="Class3" type="Number of Customers" verbose="false"/>
+        <connection source="Source 1" target="Delay 1"/>
+        <connection source="Delay 1" target="Sink 1"/>
+        <blockingRegion name="FCRegion2" type="default">
+            <regionNode nodeName="Delay 1"/>
+            <globalConstraint maxJobs="-1"/>
+            <globalMemoryConstraint maxMemory="-1"/>
+            <classConstraint jobClass="Class1" maxJobsPerClass="-1"/>
+            <classConstraint jobClass="Class2" maxJobsPerClass="-1"/>
+            <classConstraint jobClass="Class3" maxJobsPerClass="-1"/>
+            <classMemoryConstraint jobClass="Class1" maxMemoryPerClass="-1"/>
+            <classMemoryConstraint jobClass="Class2" maxMemoryPerClass="-1"/>
+            <classMemoryConstraint jobClass="Class3" maxMemoryPerClass="-1"/>
+            <dropRules dropThisClass="true" jobClass="Class1"/>
+            <dropRules dropThisClass="true" jobClass="Class2"/>
+            <dropRules dropThisClass="true" jobClass="Class3"/>
+            <classWeight jobClass="Class1" weight="1"/>
+            <classWeight jobClass="Class2" weight="1"/>
+            <classWeight jobClass="Class3" weight="1"/>
+            <classSize jobClass="Class1" size="1"/>
+            <classSize jobClass="Class2" size="2"/>
+            <classSize jobClass="Class3" size="1"/>
+            <classSoftDeadline jobClass="Class1" softDeadline="0.0"/>
+            <classSoftDeadline jobClass="Class2" softDeadline="0.0"/>
+            <classSoftDeadline jobClass="Class3" softDeadline="0.0"/>
+            <groupConstraint jobGroup="Group1" maxJobsPerGroup="1"/>
+            <groupMemoryConstraint jobGroup="Group1" maxMemoryPerGroup="-1"/>
+            <groupClassList>
+                <groupClass jobClass="Class1" jobGroup="Group1"/>
+                <groupClass jobClass="Class2" jobGroup="Group1"/>
+            </groupClassList>
+        </blockingRegion>
+    </sim>
+    <jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+        <userClass color="#FF0000FF" name="Class1"/>
+        <userClass color="#FFFF0000" name="Class2"/>
+        <userClass color="#FF00FF00" name="Class3"/>
+        <station name="Source 1">
+            <position angle="0.0" rotate="false" x="25.0" y="94.0"/>
+        </station>
+        <station name="Delay 1">
+            <position angle="0.0" rotate="false" x="146.0" y="71.0"/>
+        </station>
+        <station name="Sink 1">
+            <position angle="0.0" rotate="false" x="266.0" y="94.0"/>
+        </station>
+    </jmodel>
+    <results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+        <measure alpha="0.99" analyzedSamples="1000000" discardedSamples="295" finalValue="0.5006261796861167" name="Delay 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class1" referenceStation="Delay 1" state="1" type="0">
+            <sample lastIntervalAvgValue="0.5006261796861167" lowerBound="0.49700770762034535" meanValue="0.5006261796861167" simulationTime="0.5006261796861167" upperBound="0.504244651751888"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="1000000" discardedSamples="1080" finalValue="0.29844174231912035" name="Delay 1_Class2_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class2" referenceStation="Delay 1" state="1" type="0">
+            <sample lastIntervalAvgValue="0.29844174231912035" lowerBound="0.29523806008938774" meanValue="0.29844174231912035" simulationTime="0.29844174231912035" upperBound="0.30164542454885296"/>
+        </measure>
+        <measure alpha="0.99" analyzedSamples="1000000" discardedSamples="420" finalValue="0.5009912814093909" name="Delay 1_Class3_Number of Customers" nodeType="station" precision="0.03" referenceClass="Class3" referenceStation="Delay 1" state="1" type="0">
+            <sample lastIntervalAvgValue="0.5009912814093909" lowerBound="0.4978405659718367" meanValue="0.5009912814093909" simulationTime="0.5009912814093909" upperBound="0.504141996846945"/>
+        </measure>
+    </results>
+</archive>
