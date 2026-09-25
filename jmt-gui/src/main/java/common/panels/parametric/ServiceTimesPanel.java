@@ -155,10 +155,10 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 		}
 		if (STPA.isSingleClass()) {
 			fromLabel = new JLabel("From (s):");
-			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.0, Double.MAX_VALUE, 0.001));
 			from.setEnabled(true);   // changed to "true
 			toLabel = new JLabel("To (s):");
-			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
+			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.0, Double.MAX_VALUE, 0.001));
 			to.setToolTipText("Sets the final service time mean value expressed in seconds");
 			stepsLabel = new JLabel("Steps: ");
 			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
@@ -183,12 +183,12 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 			description.setText(DESCRIPTION_SINGLE);
 		} else {
 			fromLabel = new JLabel("From (%):");
-			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+			from = new JSpinner(new SpinnerNumberModel(STPA.getInitialValue(), 0.0, Double.MAX_VALUE, 0.001));
 			from.setEnabled(true);  // changed to "true"
 			//from.setPreferredSize(new Dimension((int)(130 * CommonConstants.widthScaling), (int)(30 * CommonConstants.heightScaling)));
 			from.setToolTipText("Sets the initial service time");
 			toLabel = new JLabel("To (%):");
-			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
+			to = new JSpinner(new SpinnerNumberModel(STPA.getFinalValue(), 0.0, Double.MAX_VALUE, 0.1));
 			to.setToolTipText("Sets the final proportion of service time with respect to the initial");
 			stepsLabel = new JLabel("Steps: ");
 			steps = new JSpinner(new SpinnerNumberModel(STPA.getNumberOfSteps(), 2, ParametricAnalysis.MAX_STEP_NUMBER, 1));
@@ -325,10 +325,10 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (%): ");
 				STPA.setDefaultInitialValue();
 				STPA.setDefaultFinalValue();
-				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.0, Double.MAX_VALUE, 0.001));
 				from.setValue(new Double(STPA.getInitialValue()));
 				from.setToolTipText("Sets the initial value of service time");
-				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.1, Double.MAX_VALUE, 0.1));
+				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.0, Double.MAX_VALUE, 0.1));
 				to.setValue(new Double(STPA.getFinalValue()));
 				to.setToolTipText("Sets the final proportion of service time with respect to the initial");
 				classChooser.removeAllItems();
@@ -368,10 +368,10 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 				toLabel.setText("To (s):");
 				STPA.setDefaultInitialValue();
 				STPA.setDefaultFinalValue();
-				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+				from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.0, Double.MAX_VALUE, 0.001));
 				from.setValue(new Double(STPA.getInitialValue()));
 				from.setToolTipText("Sets the initial service time in job/sec");
-				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
+				to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.0, Double.MAX_VALUE, 0.001));
 				to.setValue(new Double(STPA.getFinalValue()));
 				to.setToolTipText("Sets the final service time in job/sec");
 				description.setText(DESCRIPTION_SINGLE);
@@ -453,9 +453,9 @@ public class ServiceTimesPanel extends ParameterOptionPanel {
 						STPA.setReferenceClass(validC.get(0));
 						STPA.setDefaultInitialValue();
 						STPA.setDefaultFinalValue();
-						from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.001, Double.MAX_VALUE, 0.001));
+						from.setModel(new SpinnerNumberModel(STPA.getInitialValue(), 0.0, Double.MAX_VALUE, 0.001));
 						from.setValue(new Double(STPA.getInitialValue()));
-						to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.001, Double.MAX_VALUE, 0.001));
+						to.setModel(new SpinnerNumberModel(STPA.getFinalValue(), 0.0, Double.MAX_VALUE, 0.001));
 						to.setValue(new Double(STPA.getFinalValue()));
 						//... and set the STPA to be single class
 						singleClass.setSelected(true);
