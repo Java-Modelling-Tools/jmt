@@ -814,7 +814,9 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 
 		useTemplate.setEnabled(false);
 
-		serverCompatibilities.setEnabled(false);
+		if (serverCompatibilities != null) {
+			serverCompatibilities.setEnabled(false);
+		}
 
 		editPAParams.setEnabled(false);
 		takeScreenShot.setEnabled(false);
