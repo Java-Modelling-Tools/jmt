@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jmch-core</artifactId>
+
+    <!-- JMCH (Java Markov Chain Helper) computation engine.
+         Contains: Markov queue logic (jmt.jmarkov.Queues.*), pure simulation
+         types (jmt.jmch.simulation.SimulationType, SimulationFactory,
+         Simulation interface), distribution wrappers (DistributionJMCH),
+         and the solver-independent Constants class. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-engine</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

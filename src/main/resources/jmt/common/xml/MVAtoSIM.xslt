@@ -153,7 +153,7 @@
 				<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
 					<xsl:apply-templates select="visits/visit"/>
 				</parameter>
-				<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+				<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
 					<xsl:apply-templates select="servicetimes/servicetime"/>
 				</parameter>
 			</section>
@@ -174,7 +174,7 @@
 				<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
 					<xsl:apply-templates select="visits/visit"/>
 				</parameter>
-				<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+				<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
 					<xsl:apply-templates select="servicetimes/servicetimes"/>
 				</parameter>
 			</section>
@@ -189,7 +189,7 @@
 			<xsl:attribute name="name"><xsl:value-of select="@name"/></xsl:attribute>
 			<xsl:call-template name="createQueueSection"/>
 			<section className="Delay">
-				<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+				<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
 					<xsl:apply-templates select="servicetimes/servicetime" mode="delayServiceTime"/>
 				</parameter>
 			</section>
@@ -203,14 +203,14 @@
 	<xsl:template name="createSource">
 		<node name="{$defaultSourceName}">
 			<section className="RandomSource">
-				<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+				<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
 				<xsl:for-each select="//model/parameters/classes/*">
 					<xsl:choose>
 						<xsl:when test="name(.)='openclass'">
 							<refClass><xsl:value-of select="@name"/></refClass>
-							<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
-								<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
-								<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+							<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
+								<subParameter classPath="random.Exponential" name="Exponential"/>
+								<subParameter classPath="random.ExponentialPar" name="distrPar">
 									<subParameter classPath="java.lang.Double" name="lambda">
 										<!--<value><xsl:value-of select="string(@rate) * sum(key('sumOfVisits',@name))"/></value>-->
 										<xsl:variable name="rate_noexp">
@@ -227,7 +227,7 @@
 						</xsl:when>
 						<xsl:otherwise>
 							<refClass><xsl:value-of select="@name"/></refClass>
-							<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
+							<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
 								<value>null</value>
 							</subParameter>
 						</xsl:otherwise>
@@ -280,7 +280,7 @@
 				<!--If this station is a source or a terminal, routing section must route jobs to the servers with probabilities according to the 
 				     number of visits of each class defined on each server in the mva model.-->
 				<xsl:when test="$stationName=$defaultSourceName or $stationName=$defaultTerminalName">
-					<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+					<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
 						<xsl:apply-templates select="../../classes/*" mode="MultipleEmpiricalRouting"/>
 					</parameter>
 				</xsl:when>
@@ -288,14 +288,14 @@
 				open classes to the sink that will be created, and all of the closed ones to the terminal station. This must be specified with an 
 				empirical strategy. Otherwise also a random routing strategy can be used, as this station is link only to one other.-->
 				<xsl:when test="count(../../classes/openclass)=0 or count(../../classes/closedclass)=0">
-					<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+					<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
 						<xsl:apply-templates select="../../classes/*" mode="ignoreValueRouting"/>
 					</parameter>
 				</xsl:when>
 				<!--If this station is a li or a ld ora a delay station and there are both open and closed classes, the routing section must route 
 				     open classes to the sink, closed classes to the terminal-->
 				<xsl:when test="name(.)='ldstation' or name(.)='listation' or name(.)='delaystation' ">
-					<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+					<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
 						<xsl:apply-templates select="../../classes/*" mode="EmpiricalRouting"/>
 					</parameter>
 				</xsl:when>
@@ -311,8 +311,8 @@
 			<parameter classPath="java.lang.Boolean" name="drop">
 				<value>false</value>
 			</parameter>
-			<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
-			<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+			<parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+			<parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="NetStrategy">
 				<xsl:apply-templates select="../../classes/*" mode="ignoreValueQueueing"/>
 			</parameter>
 		</section>
@@ -325,12 +325,12 @@
 			</refClass>
 			<xsl:choose>
 				<xsl:when test="number(.)=0">
-					<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="ZeroTimeServiceStrategy"/>
+					<subParameter classPath="NetStrategies.ServiceStrategies.ZeroServiceTimeStrategy" name="ZeroTimeServiceStrategy"/>
 				</xsl:when>
 				<xsl:otherwise>
-					<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
-						<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
-						<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+					<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
+						<subParameter classPath="random.Exponential" name="Exponential"/>
+						<subParameter classPath="random.ExponentialPar" name="distrPar">
 							<subParameter classPath="java.lang.Double" name="lambda">
 								<value><xsl:value-of select="1 div number(.)"/></value>
 							</subParameter>
@@ -346,9 +346,9 @@
 			</refClass>
 			<xsl:choose>
 				<xsl:when test="number(.)=0">
-					<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
-						<subParameter classPath="jmt.engine.random.ConstantDistr" name="ConstantDistr"/>
-						<subParameter classPath="jmt.engine.random.ConstantDistrPar" name="distrPar">
+					<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
+						<subParameter classPath="random.ConstantDistr" name="ConstantDistr"/>
+						<subParameter classPath="random.ConstantDistrPar" name="distrPar">
 							<subParameter classPath="java.lang.Double" name="const">
 								<value>0</value>
 							</subParameter>
@@ -356,9 +356,9 @@
 					</subParameter>
 				</xsl:when>
 				<xsl:otherwise>
-					<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
-						<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
-						<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+					<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategy">
+						<subParameter classPath="random.Exponential" name="Exponential"/>
+						<subParameter classPath="random.ExponentialPar" name="distrPar">
 							<subParameter classPath="java.lang.Double" name="lambda">
 								<value><xsl:value-of select="1 div number(.)"/></value>
 							</subParameter>
@@ -372,9 +372,9 @@
 			<refClass>
 				<xsl:value-of select="@customerclass"/>
 			</refClass>
-			<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategyLD">
-				<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
-				<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+			<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="TimeServiceStrategyLD">
+				<subParameter classPath="random.Exponential" name="Exponential"/>
+				<subParameter classPath="random.ExponentialPar" name="distrPar">
 					<subParameter classPath="java.lang.String" name="lambda">
 						<value>
 							<xsl:value-of select="."/>
@@ -406,14 +406,14 @@
 			<refClass>
 				<xsl:value-of select="@name"/>
 			</refClass>
-			<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="RandomStrategy"/>
+			<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="RandomStrategy"/>
 	</xsl:template>
 	
 	<xsl:template match="classes/*" mode="EmpiricalRouting">
 			<refClass>
 				<xsl:value-of select="@name"/>
 			</refClass>
-			<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="EmpiricalStrategy">
+			<subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="EmpiricalStrategy">
 				<xsl:call-template name="createEmpiricalEntries"/>
 			</subParameter>  
 	</xsl:template>
@@ -422,14 +422,14 @@
 			<refClass>
 				<xsl:value-of select="@name"/>
 			</refClass>
-			<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="EmpiricalStrategy">
+			<subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="EmpiricalStrategy">
 				<xsl:call-template name="createMultipleEmpiricalEntries"/>
 			</subParameter>  
 	</xsl:template>
 	
 	<!--Creates empirical entries for the Empirical strategy subparameter element.-->
 	<xsl:template name="createEmpiricalEntries">
-		<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry"> 
+		<subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntry">
 		<xsl:call-template name="createEmpiricalEntry">
 			<xsl:with-param name="stationName"><xsl:value-of select="$defaultTerminalName"/></xsl:with-param>
 			<xsl:with-param name="probability">
@@ -454,7 +454,7 @@
 	<!--Creates empirical entries for the Empirical strategy subparameter element for each server.-->
 	<xsl:template name="createMultipleEmpiricalEntries">
 	<xsl:param name="className"><xsl:value-of select="@name"/></xsl:param>
-		<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+		<subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntry">
 		<xsl:for-each select="$stations/*">
 			<xsl:call-template name="createEmpiricalEntry">
 				<xsl:with-param name="stationName"><xsl:value-of select="@name"/></xsl:with-param>
@@ -470,7 +470,7 @@
 	<xsl:template name="createEmpiricalEntry">
 	<xsl:param name="stationName"/>
 	<xsl:param name="probability"/>
-		<subParameter array="false" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry"> 
+		<subParameter array="false" classPath="random.EmpiricalEntry" name="EmpiricalEntry">
 			<subParameter classPath="java.lang.String" name="stationName">
 				<value>
 					<xsl:value-of select="$stationName"/>
@@ -488,7 +488,7 @@
 		<refClass>
 			<xsl:value-of select="@name"/>
 		</refClass>
-		<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+		<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
 	</xsl:template>
 	
 	<xsl:template name="formatExpNumber">

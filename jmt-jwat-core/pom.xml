@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jwat-core</artifactId>
+
+    <!-- JWAT (Java Workload Analysis Tool) computation engine.
+         Contains data loading/filtering, distribution fitting (exponential,
+         Pareto), k-means and fuzzy k-means clustering, traffic analysis,
+         workload analysis algorithms. Pure computation, no GUI. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-engine</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

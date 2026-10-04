@@ -24,6 +24,8 @@ dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
+maven/
+*/maven/
 
 ##############################
 ## Gradle
@@ -89,9 +91,6 @@ nb-configuration.xml
 ##############################
 *.log
 jacoco.exec
-
-# Remove test output folder
-/src/test/resources/linetesting/output
 
 # Environments
 .env

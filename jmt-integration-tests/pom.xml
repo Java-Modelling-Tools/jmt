@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-integration-tests</artifactId>
+
+    <!--
+        End-to-end and cross-module integration tests.
+        Contains: linetesting framework (IntegrationTest, IntegrationTestUtil, …).
+        These run headless — HeadlessSolver drives the engine and the analytical
+        solvers directly, so no Swing component is ever constructed.
+        GUI tests (JabaGuiTest, MainGuiTest, …) live in jmt-app/src/test/java
+        so they can reach the full app classpath.
+        Run all integration tests with: mvn test -pl jmt-integration-tests -am
+    -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-app</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

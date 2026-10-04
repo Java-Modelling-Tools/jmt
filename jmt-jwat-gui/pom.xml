@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-jwat-gui</artifactId>
+
+    <!-- JWAT GUI: Swing wizard, traffic analysis panels, workload analysis
+         panels, clustering visualisation charts (scatter, QQ-plots, CDF/PDF),
+         fitting charts, and data input panels. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-jwat-core</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-gui</artifactId>
+            <version>latest</version>
+        </dependency>
+    </dependencies>
+
+</project>

@@ -5,8 +5,49 @@
   <groupId>jmt</groupId>
   <artifactId>jmt</artifactId>
   <version>latest</version>
-  <properties>
+    <packaging>pom</packaging>
+    <modules>
+      <!-- Layer 0: pure engine (no GUI, no tool-specific code) -->
+      <module>jmt-engine</module>
+
+      <!-- Layer 1: shared GUI framework + JSIM shared model -->
+      <module>jmt-gui</module>
+
+      <!-- Layer 2: file serialization (readers/writers for all JMT model formats) -->
+      <module>jmt-file-handler</module>
+
+      <!-- Layer 3: tool-specific computation cores (depend on jmt-engine only) -->
+      <module>jmt-jaba-core</module>
+      <module>jmt-jwat-core</module>
+      <module>jmt-jmva-core</module>
+      <module>jmt-jmch-core</module>
+
+      <!-- Layer 3: tool-specific GUI model layers (depend on jmt-gui) -->
+      <!-- jmt-jsimg-core: merged into jmt-gui -->
+      <!-- jmt-jsimw-core: merged into jmt-gui (JSIMModel extends CommonModel) -->
+
+      <!-- Layer 4: tool-specific GUI implementations (depend on jmt-gui + their cores) -->
+      <module>jmt-jaba-gui</module>
+      <module>jmt-jwat-gui</module>
+      <module>jmt-jmva-gui</module>
+      <module>jmt-jmch-gui</module>
+      <module>jmt-jsimw-gui</module>
+
+      <!-- Layer 5: graph editor (depends on jmt-gui + jmt-jmva-gui + jmt-jsimw-gui) -->
+      <module>jmt-jsimg-gui</module>
+
+      <!-- Layer 6: application composition root (depends on jmt-jsimg-gui + all tool GUIs) -->
+      <module>jmt-app</module>
+
+      <!-- Tests -->
+      <module>jmt-integration-tests</module>
+    </modules>
+    <properties>
     <izpack.version>5.2.4</izpack.version>
+    <!-- 0.8.10 cannot instrument JDK 23+ class files (major version 67): the agent
+         throws "Unsupported class file major version" for every JDK internal class
+         it sees. 0.8.13 covers up to JDK 24. -->
+    <jacoco.version>0.8.13</jacoco.version>
     <izpack.staging>${project.build.directory}/staging</izpack.staging>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -14,12 +55,12 @@
     <repository>
       <id>internal.repo</id>
       <name>Temporary Staging Repository</name>
-      <url>file://${project.build.directory}/../maven/mvn-artifact</url>
+      <url>file://${project.build.directory}/mvn-artifact</url>
     </repository>
     <site>
       <id>site</id>
       <name>Project Site</name>
-      <url>file://${project.build.directory}/../maven/site/</url>
+      <url>file://${project.build.directory}/site/</url>
     </site>
   </distributionManagement>
   <profiles>
@@ -74,7 +115,7 @@
                 </goals>
                 <configuration>
                   <files>
-                    <file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
+                    <file>${maven.multiModuleProjectDirectory}/src/main/resources/jmt/common/globalsettings.conf</file>
                   </files>
                 </configuration>
               </execution>
@@ -114,9 +155,10 @@
                 </goals>
                 <configuration>
                   <finalName>JMT-singlejar-${jmt.version}</finalName>
+                  <outputDirectory>${maven.multiModuleProjectDirectory}/target</outputDirectory>
                   <transformers>
                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                      <mainClass>jmt.gui.common.startScreen.GraphStartScreen</mainClass>
+                      <mainClass>common.startScreen.GraphStartScreen</mainClass>
                     </transformer>
                   </transformers>
                   <dependencyReducedPomLocation>${basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
@@ -137,6 +179,7 @@
           <plugin>
             <artifactId>maven-antrun-plugin</artifactId>
             <version>1.8</version>
+            <inherited>false</inherited>
             <executions>
               <execution>
                 <id>create-staging-area</id>
@@ -161,7 +204,7 @@
                     <copy todir="${izpack.staging}/license">
                       <fileset dir="${basedir}/license"/>
                     </copy>
-                    <copy file="${project.build.directory}/JMT-singlejar-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar"/>
+                    <copy file="${project.build.directory}/JMT-singlejar-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar" failonerror="false"/>
                     <copy file="${basedir}/license/LICENSE_JMT.txt" tofile="${izpack.staging}/LICENSE_JMT.txt"/>
                   </tasks>
                 </configuration>
@@ -172,6 +215,7 @@
             <groupId>org.codehaus.izpack</groupId>
             <artifactId>izpack-maven-plugin</artifactId>
             <version>${izpack.version}</version>
+            <inherited>false</inherited>
             <!-- Rest of your izpack plugin configuration -->
             <configuration>
               <installFile>${izpack.staging}/jmt_install.xml</installFile>
@@ -199,7 +243,7 @@
             <configuration>
               <skip>false</skip>
               <altDeploymentRepository>
-                internal.repo::default::file://${project.build.directory}/../maven/mvn-artifact
+                internal.repo::default::file://${project.build.directory}/mvn-artifact
               </altDeploymentRepository>
             </configuration>
           </plugin>
@@ -207,7 +251,7 @@
           <plugin>
 		    <groupId>org.jacoco</groupId>
 		    <artifactId>jacoco-maven-plugin</artifactId>
-		    <version>0.8.10</version>
+		    <version>${jacoco.version}</version>
 		    <executions>
 		        <execution>
 		            <goals>
@@ -250,7 +294,7 @@
                 </goals>
                 <configuration>
                   <files>
-                    <file>${basedir}/src/main/resources/jmt/common/globalsettings.conf</file>
+                    <file>${maven.multiModuleProjectDirectory}/src/main/resources/jmt/common/globalsettings.conf</file>
                   </files>
                 </configuration>
               </execution>
@@ -280,7 +324,7 @@
                 <configuration>
                   <transformers>
                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                      <mainClass>jmt.jmva.gui.JMVAWizard</mainClass>
+                      <mainClass>jmt.jmva.JMVAWizard</mainClass>
                     </transformer>
                   </transformers>
                   <filters>
@@ -313,7 +357,7 @@
   <repositories>
     <repository>
       <id>local-repo</id>
-      <url>file:${project.basedir}/repo</url>
+      <url>file:${maven.multiModuleProjectDirectory}/repo</url>
     </repository>
     <repository>
       <id>kpc-toolbox-java-mvn-repo</id>
@@ -414,11 +458,6 @@
       <groupId>ptolemy</groupId>
       <artifactId>ptolemy</artifactId>
       <version>1.0.0</version>
-    </dependency>
-    <dependency>
-      <groupId>xerces</groupId>
-      <artifactId>xercesImpl</artifactId>
-      <version>2.9.0</version>
     </dependency>
     <dependency> <!-- this needs version increase if xerces is changed version -->
       <groupId>xml-apis</groupId>
@@ -545,7 +584,7 @@
 	<dependency>
 	    <groupId>org.jacoco</groupId>
 	    <artifactId>org.jacoco.core</artifactId>
-	    <version>0.8.10</version> <scope>test</scope>
+	    <version>${jacoco.version}</version> <scope>test</scope>
 	</dependency>
   </dependencies>
 </project>

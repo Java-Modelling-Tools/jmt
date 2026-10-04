@@ -28,7 +28,7 @@ existing JMT limitation, or a gap in current modeling/solving capabilities.
 Describe what will actually be built or investigated, e.g.:
 
 - A new simulation strategy/station type (`jmt.engine.NetStrategies` / `NodeSections`)
-- A new or extended analytical solver (`jmt.jmva.analytical` / `jmt.jmva.engine`)
+- A new or extended analytical solver (`jmt.jmva.analytical` / `jmva.engine`)
 - A new GUI workflow or editor (`jmt.gui.common`, or a specific tool's package)
 - Changes to the model XML format/schema (`src/main/resources/jmt/common/xml`) and any
   required XSLT conversion
@@ -38,7 +38,7 @@ Describe what will actually be built or investigated, e.g.:
 
 List the Java packages expected to be touched (add/remove as appropriate):
 
-- [ ] `jmt.engine` (simulation core: `QueueNet`, `NodeSections`, `NetStrategies`, `simEngine`, `simDispatcher`)
+- [ ] `jmt.commandline` (simulation core: `QueueNet`, `NodeSections`, `NetStrategies`, `simEngine`, `simDispatcher`)
 - [ ] `jmt.jmva` (analytical solver: `jmva/analytical`, `jmva/engine`)
 - [ ] `jmt.gui.common` (shared GUI/model framework)
 - [ ] `jmt.gui.jsimwiz` / `jmt.gui.jsimgraph`
