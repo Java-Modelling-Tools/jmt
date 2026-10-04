@@ -4078,6 +4078,10 @@ JMVALauncherService.Registry.launch(output);
 
 	@Override
 	public void simulationFinished() {
-		throw new UnsupportedOperationException("Unimplemented method 'simulationFinished'");
+		// Called by the DispatcherThread when the simulation completes.
+		// The thread already resets the button states (Play/Pause/Stop),
+		// but we should clean up the logging and debug states.
+		toggleDebug(false);
+		LoggerStateManager.clearAllowedEvents();
 	}
 }

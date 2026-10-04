@@ -61,6 +61,15 @@ public class JmtRouting implements Edge.Routing {
 
 		if (from != null && to != null) {
 			JmtEdge edge = (JmtEdge) edgeView.getCell();
+
+			// Prevent NullPointerException if the edge is transiently disconnected
+			// (e.g., currently being drawn or modified by the user)
+			if (edge.getSource() == null || edge.getTarget() == null) {
+				list.add(from);
+				list.add(to);
+				return list;
+			}
+
 			JmtCell source = (JmtCell) ((DefaultPort) edge.getSource()).getParent();
 			JmtCell target = (JmtCell) ((DefaultPort) edge.getTarget()).getParent();
 
@@ -136,8 +145,8 @@ public class JmtRouting implements Edge.Routing {
 					routed = new Point2D[2];
 					if ((boundFrom > boundTo)
 							&& ((targetBounds.getMaxY() > from.getY() && targetBounds.getMinY() < from.getY())
-									|| (sourceBounds.getMaxY() <= targetBounds.getMaxY() && sourceBounds.getMaxY() >= to.getY())
-									|| (sourceBounds.getMinY() >= targetBounds.getMinY() && sourceBounds.getMinY() <= to.getY()))) {
+							|| (sourceBounds.getMaxY() <= targetBounds.getMaxY() && sourceBounds.getMaxY() >= to.getY())
+							|| (sourceBounds.getMinY() >= targetBounds.getMinY() && sourceBounds.getMinY() <= to.getY()))) {
 						routed = new Point2D[4];
 						routed[0] = new Point2D.Double(boundFrom + offset, from.getY());
 						routed[3] = new Point2D.Double(boundTo + offsetTo2, to.getY());
@@ -145,7 +154,7 @@ public class JmtRouting implements Edge.Routing {
 						routed[2] = new Point2D.Double(routed[3].getX(), (int) sourceBounds.getMaxY() + 2);
 					} else if ((boundFrom <= boundTo)
 							&& ((targetBounds.getMaxY() > from.getY() && targetBounds.getMinY() < from.getY())
-									|| (from.getY() < to.getY() && boundFrom + offset * 2 < targetBounds.getMinX()))) {
+							|| (from.getY() < to.getY() && boundFrom + offset * 2 < targetBounds.getMinX()))) {
 						routed = new Point2D[4];
 						routed[0] = new Point2D.Double(boundFrom + offset, from.getY());
 						routed[3] = new Point2D.Double(boundTo + offsetTo2, to.getY());

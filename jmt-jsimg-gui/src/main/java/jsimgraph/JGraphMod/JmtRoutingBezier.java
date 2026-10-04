@@ -59,6 +59,13 @@ public class JmtRoutingBezier implements Edge.Routing {
 
 		if (from != null && to != null) {
 
+			// Null check for path to prevent NullPointerException
+			if (path == null) {
+				list.add(from);
+				list.add(to);
+				return list;
+			}
+
 			int nbArcs = path.getArcsNb();
 			Point2D sourceArc, controlPointSource, targetArc, controlPointTarget;
 
