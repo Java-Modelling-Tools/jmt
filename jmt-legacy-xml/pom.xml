@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>jmt</groupId>
+        <artifactId>jmt</artifactId>
+        <version>latest</version>
+    </parent>
+
+    <artifactId>jmt-legacy-xml</artifactId>
+
+    <!-- Writes model XML (.jsimg, .jsimw, simulation input) in the format of earlier JMT releases.
+         The module-refactoring commit renamed Java packages (jmt.engine.random -> random, ...),
+         and the XML stores those names in classPath attributes, so releases up to 1.4.0 cannot
+         read files saved by the current code. The XSD schemas are unchanged across releases,
+         which makes rewriting classPath values enough.
+
+         JDK only (no dependency on any other JMT module), so any tool can call it after saving. -->
+
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>

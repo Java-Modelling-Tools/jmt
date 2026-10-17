@@ -16,6 +16,9 @@
       <!-- Layer 2: file serialization (readers/writers for all JMT model formats) -->
       <module>jmt-file-handler</module>
 
+      <!-- Layer 2: export of model XML to the format of earlier releases (JDK only) -->
+      <module>jmt-legacy-xml</module>
+
       <!-- Layer 3: tool-specific computation cores (depend on jmt-engine only) -->
       <module>jmt-jaba-core</module>
       <module>jmt-jwat-core</module>
