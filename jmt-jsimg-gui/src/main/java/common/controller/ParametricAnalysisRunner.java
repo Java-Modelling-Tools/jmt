@@ -134,10 +134,11 @@ public class ParametricAnalysisRunner implements AbortMeasure {
 
 			DispatcherJSIMschema simulator = new DispatcherJSIMschema(simulationFile);
 			simulator.setParametricStep(currentStep);
-			// Propagate the fixed seed to each PA step so convergence is deterministic.
-			// currentStep is added so the steps still sample independently.
+			// Propagate the fixed seed to each PA step so the run is reproducible.
+			// Every step uses the same seed: a per-step offset (seed + currentStep) gave some steps
+			// seeds under which the simulation converges very slowly (e.g. 11 min vs 41 min on Obj3).
 			if (!simd.getUseRandomSeed().booleanValue()) {
-				simulator.setSimulationSeed(simd.getSimulationSeed().longValue() + currentStep);
+				simulator.setSimulationSeed(simd.getSimulationSeed().longValue());
 			}
 			SimSolver ss = new SimSolver(simulator, currentStep, resultsLatch);
 			if (simd.getMaximumDuration().doubleValue() > 0) {
