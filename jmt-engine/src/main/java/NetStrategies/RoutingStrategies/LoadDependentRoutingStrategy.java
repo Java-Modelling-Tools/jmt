@@ -53,12 +53,20 @@ public class LoadDependentRoutingStrategy extends RoutingStrategy {
 	}
 
 	@Override
+	public NetNode getOutNode(NodeSection section, Job job) {
+		return getOutNode(section, job.getJobClass());
+	}
+
+	@Override
 	public NetNode getOutNode(NodeSection section, JobClass jobClass) {
 		try {
 			int jobs = section.getOwnerNode().getIntNodeProperty(NetNode.PROPERTY_ID_RESIDENT_JOBS, jobClass);
 			int index = Arrays.binarySearch(parameters, new Integer(jobs));
 			if (index < 0) {
 				index = -index - 2;
+			}
+			if (index < 0) {
+				index = 0;
 			}
 			return parameters[index].getOutNode(section.getOwnerNode());
 		} catch (NetException e) {
