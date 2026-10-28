@@ -91,6 +91,7 @@ nb-configuration.xml
 ##############################
 *.log
 jacoco.exec
+scripts/*/output
 
 # Environments
 .env
