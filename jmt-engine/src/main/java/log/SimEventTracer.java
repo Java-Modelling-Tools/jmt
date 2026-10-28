@@ -4,7 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FilterOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.zip.GZIPOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ListIterator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -69,9 +72,51 @@ public final class SimEventTracer {
 
 	/** Default output trace file or directory path */
 	public static volatile String OUTPUT_FILE = System.getProperty("jmt.trace.file",
-			System.getProperty("jmt.trace.dir", "visual_trace.ndjson"));
+			System.getProperty("jmt.trace.dir", "visual_trace.ndjson.gz"));
 
 	// Run tracking across multiple simulations
+	/** Default max uncompressed megabytes per chunk before rolling (500 GB = 512,000 MB) */
+	public static final int DEFAULT_CHUNK_MAX_MB = 500 * 1024; // 512,000 MB = 500 GB uncompressed JSON
+	/** Default max events per chunk before rolling (~850M events = ~500 GB uncompressed JSON text at ~600 bytes/event) */
+	public static final int DEFAULT_CHUNK_MAX_EVENTS = 850_000_000;
+
+	/** Max uncompressed megabytes per chunk file before rolling (0 = disabled, default 512,000 MB = 500 GB) */
+	public static volatile int CHUNK_MAX_MB = Integer.getInteger("jmt.trace.chunk.mb",
+			Integer.getInteger("jmt.trace.chunk-mb", DEFAULT_CHUNK_MAX_MB));
+
+	/** Max event count per chunk file before rolling (0 = disabled, default 850,000,000 events) */
+	public static volatile int CHUNK_MAX_EVENTS = Integer.getInteger("jmt.trace.chunk.events",
+			Integer.getInteger("jmt.trace.chunk-events", DEFAULT_CHUNK_MAX_EVENTS));
+
+	/**
+	 * Whether to filter out high-frequency internal engine ticks (e.g. EVENT_TIMING, EVENT_KEEP_AWAKE).
+	 * Enabled by default to record only what is strictly necessary for visual debugging.
+	 */
+	public static volatile boolean FILTER_INTERNAL_EVENTS = Boolean.parseBoolean(
+			System.getProperty("jmt.trace.filter", "true"));
+
+	/**
+	 * Checks if an event is a structural packet/job lifecycle event required for visual debugging.
+	 * Filters out internal scheduler wakeups and housekeeping pulses.
+	 */
+	public static boolean isVisualLifecycleEvent(int event) {
+		if (!FILTER_INTERNAL_EVENTS) {
+			return true;
+		}
+		switch (event) {
+			case NetEvent.EVENT_TIMING:
+			case NetEvent.EVENT_KEEP_AWAKE:
+			case NetEvent.EVENT_CHECK_DELAY_OFF:
+			case NetEvent.EVENT_RESET_COOLSTART:
+			case NetEvent.EVENT_QUEUE_IDLE:
+			case NetEvent.EVENT_QUEUE_IDLE_ACK:
+			case NetEvent.EVENT_POLLING_SERVER_READY:
+				return false;
+			default:
+				return true;
+		}
+	}
+
 	private static final AtomicInteger RUN_COUNTER = new AtomicInteger(1);
 	private static volatile File currentResolvedFile = null;
 
@@ -169,10 +214,25 @@ public final class SimEventTracer {
 	 * If running multiple simulations (e.g. parametric steps or multiple models),
 	 * each run receives its own dedicated file.
 	 */
-	private static synchronized File resolveOutputFile(QueueNetwork network) {
+	private static final class BaseFileInfo {
+		final File dir;
+		final String prefix;
+
+		BaseFileInfo(File dir, String prefix) {
+			this.dir = dir;
+			this.prefix = prefix;
+		}
+
+		File getChunkFile(int partIndex) {
+			String filename = prefix + "_part" + partIndex + ".ndjson.gz";
+			return dir != null ? new File(dir, filename) : new File(filename);
+		}
+	}
+
+	private static synchronized BaseFileInfo resolveBaseFile(QueueNetwork network) {
 		String base = OUTPUT_FILE;
 		if (base == null || base.trim().isEmpty()) {
-			base = "visual_trace.ndjson";
+			base = "visual_trace.ndjson.gz";
 		}
 
 		File file = new File(base);
@@ -188,28 +248,22 @@ public final class SimEventTracer {
 			if (!file.exists()) {
 				file.mkdirs();
 			}
-			return new File(file, modelName + stepPart + runPart + ".ndjson");
+			return new BaseFileInfo(file, modelName + stepPart + runPart);
 		}
 
-		// Single simulation without prior runs
-		if (runId == 1 && step == 0) {
-			return file;
-		}
-
-		// Subsequent runs in the same JVM session: auto-generate unique filename
-		String parent = file.getParent();
+		// Explicit file path specified
+		File parent = file.getParentFile();
 		String name = file.getName();
-		String nameWithoutExt = name;
-		String ext = ".ndjson";
-		int dot = name.lastIndexOf('.');
-		if (dot >= 0) {
-			nameWithoutExt = name.substring(0, dot);
-			ext = name.substring(dot);
-		}
+		String cleanName = name;
+		if (cleanName.endsWith(".gz")) cleanName = cleanName.substring(0, cleanName.length() - 3);
+		if (cleanName.endsWith(".ndjson")) cleanName = cleanName.substring(0, cleanName.length() - 7);
 
-		String suffix = step > 0 ? "_step" + step : "_run" + runId;
-		String newName = nameWithoutExt + "_" + modelName + suffix + ext;
-		return parent != null ? new File(parent, newName) : new File(newName);
+		if (runId == 1 && step == 0) {
+			return new BaseFileInfo(parent, cleanName);
+		} else {
+			String suffix = step > 0 ? "_step" + step : "_run" + runId;
+			return new BaseFileInfo(parent, cleanName + "_" + modelName + suffix);
+		}
 	}
 
 	private static String sanitize(String name) {
@@ -226,10 +280,11 @@ public final class SimEventTracer {
 		}
 
 		traceStartTimeMs = System.currentTimeMillis();
-		currentResolvedFile = resolveOutputFile(network);
+		BaseFileInfo baseInfo = resolveBaseFile(network);
+		currentResolvedFile = baseInfo.getChunkFile(1);
 
-		writerThread = new WriterThread(currentResolvedFile);
-		writerThread.setName("JMT-Visual-Event-Tracer-" + currentResolvedFile.getName());
+		writerThread = new WriterThread(baseInfo);
+		writerThread.setName("JMT-Visual-Event-Tracer-" + baseInfo.prefix);
 		writerThread.setDaemon(true);
 		writerThread.start();
 
@@ -249,7 +304,7 @@ public final class SimEventTracer {
 	 *
 	 * @param network The QueueNetwork being simulated.
 	 */
-	public static void initTrace(QueueNetwork network) {
+		public static void initTrace(QueueNetwork network) {
 		if (!DEBUG_VISUAL_TRACE || network == null) {
 			return;
 		}
@@ -424,7 +479,7 @@ public final class SimEventTracer {
 	public static void recordSend(double simTime, double delay, int event, Object data,
 								  byte sourceSection, byte destinationSection,
 								  NetNode source, NetNode destination) {
-		if (!DEBUG_VISUAL_TRACE) {
+		if (!DEBUG_VISUAL_TRACE || !isVisualLifecycleEvent(event)) {
 			return;
 		}
 		ensureWriterStarted(source != null ? source.getQueueNet() : null);
@@ -505,7 +560,7 @@ public final class SimEventTracer {
 	 * Called inside {@link NetNode#dispatch(NetMessage)}.
 	 */
 	public static void recordDispatch(double simTime, NetMessage message, NetNode destination) {
-		if (!DEBUG_VISUAL_TRACE || message == null) {
+		if (!DEBUG_VISUAL_TRACE || message == null || !isVisualLifecycleEvent(message.getEvent())) {
 			return;
 		}
 		ensureWriterStarted(destination != null ? destination.getQueueNet() : null);
@@ -805,15 +860,48 @@ public final class SimEventTracer {
 	/**
 	 * Background writer thread that drains the SPSC ring buffer and formats NDJSON.
 	 */
+	private static final class CountingOutputStream extends FilterOutputStream {
+		private long count = 0;
+
+		CountingOutputStream(OutputStream out) {
+			super(out);
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			out.write(b);
+			count++;
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			out.write(b, off, len);
+			count += len;
+		}
+
+		long getByteCount() {
+			return count;
+		}
+	}
+
+	/**
+	 * Background writer thread that drains the SPSC ring buffer, compresses to GZIP,
+	 * and rolls chunk files when size or event thresholds are reached.
+	 */
 	private static final class WriterThread extends Thread {
 
-		private final File outputFile;
+		private final BaseFileInfo baseInfo;
 		private volatile boolean running = true;
+		private int currentPart = 1;
+		private CountingOutputStream countingOut = null;
 		private BufferedWriter writer = null;
+		private long currentChunkEvents = 0;
+		private long currentChunkUncompressedBytes = 0;
+		private String cachedMetadataJson = null;
 		private final StringBuilder sb = new StringBuilder(2048);
 
-		WriterThread(File file) {
-			this.outputFile = file;
+		WriterThread(BaseFileInfo baseInfo) {
+			this.baseInfo = baseInfo;
 		}
 
 		void shutdown() {
@@ -821,25 +909,55 @@ public final class SimEventTracer {
 		}
 
 		void writeDirect(String text) {
+			this.cachedMetadataJson = text;
 			try {
-				ensureOpen();
-				writer.write(text);
-				writer.flush();
+				if (writer == null) {
+					openChunk(currentPart);
+				} else {
+					writer.write(text);
+					writer.flush();
+					currentChunkUncompressedBytes += text.length();
+				}
 			} catch (IOException e) {
 				System.err.println("[SimEventTracer] Error writing direct metadata: " + e.getMessage());
 			}
 		}
 
+		private void openChunk(int part) throws IOException {
+			if (writer != null) {
+				try {
+					writer.flush();
+					writer.close();
+				} catch (IOException ignored) {}
+				writer = null;
+				countingOut = null;
+			}
+
+			File chunkFile = baseInfo.getChunkFile(part);
+			currentResolvedFile = chunkFile;
+
+			File parent = chunkFile.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
+
+			countingOut = new CountingOutputStream(new FileOutputStream(chunkFile, false));
+			GZIPOutputStream gzos = new GZIPOutputStream(countingOut, 64 * 1024);
+			writer = new BufferedWriter(new OutputStreamWriter(gzos, StandardCharsets.UTF_8), 64 * 1024);
+			currentChunkEvents = 0;
+			currentChunkUncompressedBytes = 0;
+
+			// Write metadata at the start of every chunk so each chunk is self-contained
+			if (cachedMetadataJson != null) {
+				writer.write(cachedMetadataJson);
+				writer.flush();
+				currentChunkUncompressedBytes += cachedMetadataJson.length();
+			}
+		}
+
 		private void ensureOpen() throws IOException {
 			if (writer == null) {
-				File parent = outputFile.getParentFile();
-				if (parent != null && !parent.exists()) {
-					parent.mkdirs();
-				}
-				writer = new BufferedWriter(
-						new OutputStreamWriter(new FileOutputStream(outputFile, false), StandardCharsets.UTF_8),
-						64 * 1024 // 64KB write buffer
-				);
+				openChunk(currentPart);
 			}
 		}
 
@@ -861,17 +979,33 @@ public final class SimEventTracer {
 					int batchCount = 0;
 					while (READ_SEQ < targetWrite && batchCount < 2048) {
 						SimEventRecord r = RING[(int) (READ_SEQ & BUFFER_MASK)];
-						// Wait briefly for record to be fully populated by producer
 						int spins = 0;
 						while (!r.ready && spins < 1000) {
 							spins++;
 							Thread.yield();
 						}
 
+						// Check if chunk threshold reached (uncompressed JSON size or event count)
+						boolean shouldRoll = false;
+						if (CHUNK_MAX_EVENTS > 0 && currentChunkEvents >= CHUNK_MAX_EVENTS) {
+							shouldRoll = true;
+						}
+						if (CHUNK_MAX_MB > 0 && currentChunkUncompressedBytes >= (long) CHUNK_MAX_MB * 1024L * 1024L) {
+							shouldRoll = true;
+						}
+
+						if (shouldRoll) {
+							currentPart++;
+							openChunk(currentPart);
+						}
+
 						sb.setLength(0);
 						formatRecordJson(sb, r);
 						sb.append('\n');
-						writer.write(sb.toString());
+						String recordJson = sb.toString();
+						writer.write(recordJson);
+						currentChunkEvents++;
+						currentChunkUncompressedBytes += recordJson.length();
 
 						r.reset();
 						READ_SEQ++;
@@ -881,13 +1015,14 @@ public final class SimEventTracer {
 					writer.flush();
 				}
 
-				// Write footer summary record
+				// Write footer summary record into active chunk
 				long durationMs = System.currentTimeMillis() - traceStartTimeMs;
 				sb.setLength(0);
 				sb.append("{\"type\":\"footer\",\"totalEvents\":").append(TOTAL_RECORDED.get())
 						.append(",\"droppedEvents\":").append(DROPPED_EVENTS.get())
 						.append(",\"lastSimTime\":").append(lastSimTime)
 						.append(",\"durationMs\":").append(durationMs)
+						.append(",\"part\":").append(currentPart)
 						.append("}\n");
 				writer.write(sb.toString());
 				writer.flush();
@@ -900,11 +1035,12 @@ public final class SimEventTracer {
 						writer.close();
 					} catch (IOException ignored) {}
 					writer = null;
+					countingOut = null;
 				}
 			}
 		}
 
-		private void formatRecordJson(StringBuilder sb, SimEventRecord r) {
+			private void formatRecordJson(StringBuilder sb, SimEventRecord r) {
 			sb.append("{\"type\":\"event\",\"seq\":").append(r.sequenceNumber)
 					.append(",\"t\":").append(r.simTime)
 					.append(",\"phase\":\"").append(r.phase).append('"')

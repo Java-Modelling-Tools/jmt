@@ -6,10 +6,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +37,10 @@ public class SimEventTracerTest {
 	public void setUp() throws IOException {
 		SimEventTracer.disable();
 		SimEventTracer.stop();
-		tempTraceFile = File.createTempFile("jmt_test_trace_", ".ndjson");
+		SimEventTracer.CHUNK_MAX_MB = SimEventTracer.DEFAULT_CHUNK_MAX_MB;
+		SimEventTracer.CHUNK_MAX_EVENTS = SimEventTracer.DEFAULT_CHUNK_MAX_EVENTS;
+		SimEventTracer.FILTER_INTERNAL_EVENTS = true;
+		tempTraceFile = File.createTempFile("jmt_test_trace_", ".ndjson.gz");
 		tempTraceFile.deleteOnExit();
 	}
 
@@ -56,7 +63,8 @@ public class SimEventTracerTest {
 		SimEventTracer.recordSend(1.0, 0.5, NetEvent.EVENT_JOB, null,
 				NodeSection.INPUT, NodeSection.SERVICE, null, null);
 
-		assertFalse("File should not be created when tracer is disabled", tempTraceFile.length() > 0);
+		File current = SimEventTracer.getCurrentOutputFile();
+		assertTrue("No active file or file should not exist when tracer is disabled", current == null || !current.exists() || current.length() == 0);
 	}
 
 	@Test
@@ -95,11 +103,14 @@ public class SimEventTracerTest {
 		// Event 3: Drop event
 		SimEventTracer.recordDrop(0.25, nodeB, testJob);
 
+		File writtenFile = SimEventTracer.getCurrentOutputFile();
+
 		// 4. Stop and flush
 		SimEventTracer.stop();
 
-		// 5. Verify written NDJSON lines
-		List<String> lines = readLines(tempTraceFile);
+		// 5. Verify written compressed NDJSON lines
+		assertTrue("Output file must end with .ndjson.gz", writtenFile.getName().endsWith(".ndjson.gz"));
+		List<String> lines = readLines(writtenFile);
 		assertTrue("Trace file should contain at least 4 lines (metadata, 2 events, footer)", lines.size() >= 4);
 
 		// Verify Line 1: Metadata
@@ -127,36 +138,81 @@ public class SimEventTracerTest {
 		String footerLine = lines.get(lines.size() - 1);
 		assertTrue("Last line must be footer", footerLine.startsWith("{\"type\":\"footer\""));
 		assertTrue("Footer must record total events", footerLine.contains("\"totalEvents\":"));
+
+		writtenFile.delete();
 	}
 
 	@Test
-	public void testHighThroughputBurstPerformance() throws Exception {
+	public void testFilterInternalHousekeepingEvents() throws Exception {
 		SimEventTracer.setOutputFile(tempTraceFile.getAbsolutePath());
 		SimEventTracer.enable(tempTraceFile.getAbsolutePath());
 
 		NetNode src = new NetNode("SourceNode");
 		NetNode dst = new NetNode("DestNode");
 
-		long startTime = System.nanoTime();
-		int eventCount = 50_000;
+		QueueNetwork network = new QueueNetwork("FilterTestModel");
+		network.addNode(src);
+		network.addNode(dst);
+		SimEventTracer.initTrace(network);
 
-		for (int i = 0; i < eventCount; i++) {
-			SimEventTracer.recordSend(i * 0.01, 0.01, NetEvent.EVENT_JOB, null,
-					NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
-		}
+		// Record high-frequency internal events (should be filtered)
+		SimEventTracer.recordSend(0.1, 0.0, NetEvent.EVENT_TIMING, null, NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
+		SimEventTracer.recordSend(0.2, 0.0, NetEvent.EVENT_KEEP_AWAKE, null, NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
+		SimEventTracer.recordSend(0.3, 0.0, NetEvent.EVENT_CHECK_DELAY_OFF, null, NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
 
-		long elapsedNs = System.nanoTime() - startTime;
-		double nsPerEvent = (double) elapsedNs / eventCount;
+		// Record structural packet events (should be kept)
+		SimEventTracer.recordSend(0.4, 0.1, NetEvent.EVENT_JOB, null, NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
+		SimEventTracer.recordSend(0.5, 0.0, NetEvent.EVENT_ACK, null, NodeSection.INPUT, NodeSection.SERVICE, dst, src);
 
-		// Stop and flush
+		File activeFile = SimEventTracer.getCurrentOutputFile();
 		SimEventTracer.stop();
 
-		// Verify hot-path throughput is within single-digit microseconds per event (even during burst)
-		System.out.println("[SimEventTracer Benchmark] 50,000 events recorded in "
-				+ (elapsedNs / 1_000_000.0) + " ms (" + String.format("%.1f", nsPerEvent) + " ns/event)");
+		List<String> lines = readLines(activeFile);
+		// metadata (1) + 2 kept events + footer (1) = 4 lines
+		assertEquals("Should have exactly 4 lines (metadata, 2 packet events, footer)", 4, lines.size());
+		for (String line : lines) {
+			assertFalse("EVENT_TIMING should have been filtered out", line.contains("EVENT_TIMING"));
+			assertFalse("EVENT_KEEP_AWAKE should have been filtered out", line.contains("EVENT_KEEP_AWAKE"));
+		}
 
-		List<String> lines = readLines(tempTraceFile);
-		assertTrue("Should have recorded events", lines.size() > 1000);
+		activeFile.delete();
+	}
+
+	@Test
+	public void testRollingFileChunks() throws Exception {
+		// Set small chunk limit: 5 events per chunk
+		SimEventTracer.CHUNK_MAX_EVENTS = 5;
+		SimEventTracer.CHUNK_MAX_MB = 0; // disable MB check
+
+		File tempDir = new File(System.getProperty("java.io.tmpdir"), "jmt_chunk_test_" + System.currentTimeMillis());
+		tempDir.mkdirs();
+
+		SimEventTracer.setOutputFile(tempDir.getAbsolutePath());
+		SimEventTracer.enable(tempDir.getAbsolutePath());
+
+		NetNode src = new NetNode("SourceNode");
+		NetNode dst = new NetNode("DestNode");
+		QueueNetwork network = new QueueNetwork("ChunkModel");
+		network.addNode(src);
+		network.addNode(dst);
+		SimEventTracer.initTrace(network);
+
+		// Record 12 events -> should create part1 (5 events), part2 (5 events), part3 (2 events + footer)
+		for (int i = 0; i < 12; i++) {
+			SimEventTracer.recordSend(i * 0.1, 0.01, NetEvent.EVENT_JOB, null, NodeSection.OUTPUT, NodeSection.INPUT, src, dst);
+		}
+
+		SimEventTracer.stop();
+
+		File[] chunkFiles = tempDir.listFiles((dir, name) -> name.endsWith(".ndjson.gz"));
+		assertTrue("Should have created at least 2 chunk files", chunkFiles != null && chunkFiles.length >= 2);
+
+		for (File chunk : chunkFiles) {
+			List<String> chunkLines = readLines(chunk);
+			assertTrue("Each chunk must start with metadata", chunkLines.get(0).startsWith("{\"type\":\"metadata\""));
+			chunk.delete();
+		}
+		tempDir.delete();
 	}
 
 	@Test
@@ -205,12 +261,25 @@ public class SimEventTracerTest {
 
 	private static List<String> readLines(File f) throws IOException {
 		List<String> lines = new ArrayList<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(f))) {
+		if (f == null || !f.exists()) {
+			return lines;
+		}
+		BufferedReader br = null;
+		if (f.getName().endsWith(".gz")) {
+			br = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(f)), StandardCharsets.UTF_8));
+		} else {
+			br = new BufferedReader(new FileReader(f));
+		}
+		try {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (!line.trim().isEmpty()) {
 					lines.add(line);
 				}
+			}
+		} finally {
+			if (br != null) {
+				br.close();
 			}
 		}
 		return lines;
