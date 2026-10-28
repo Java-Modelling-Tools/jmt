@@ -50,8 +50,6 @@ public class SimSystem {
 	private boolean running; // Tells whether the run() member been called yet
 	private NumberFormat nf;
 
-	// cache for the entity IDs
-	private Hashtable<Integer,SimEntity> entityIdHash = new Hashtable<Integer,SimEntity>();
 	// cache for the entity Names
 	private Hashtable<String,SimEntity> entityNameHash = new Hashtable<String,SimEntity>();
 
@@ -132,11 +130,12 @@ public class SimSystem {
 	 * @return A reference to the entity, or null if it could not be found
 	 */
 	final public SimEntity getEntity(int id) {
-		SimEntity found = entityIdHash.get(id);
-		if (found == null) {
+		// An entity's id is its index in entities (see add), so no map lookup is needed on this per-event path.
+		if (id < 0 || id >= entities.size()) {
 			System.out.println("SimSystem: could not find entity " + id);
+			return null;
 		}
-		return found;
+		return entities.get(id);
 	}
 
 	/** Finds an entity by its name.
@@ -165,7 +164,6 @@ public class SimSystem {
 		} else {
 			e.setId(entities.size());
 			entities.add(e);
-			entityIdHash.put(e.getId(), e);
 			entityNameHash.put(e.getName(), e);
 		}
 	}
@@ -179,7 +177,6 @@ public class SimSystem {
 	synchronized void addEntityDynamically(SimEntity e) {
 		e.setId(entities.size());
 		entities.add(e);
-		entityIdHash.put(e.getId(), e);
 		entityNameHash.put(e.getName(), e);
 		e.start();
 	}

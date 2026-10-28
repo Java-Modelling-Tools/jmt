@@ -769,7 +769,9 @@ public class Queue extends InputSection {
 
 			case NetEvent.EVENT_JOB_FINISH:{
 				if(unfinishedRequestNumber <= 0){
-					return MSG_NOT_PROCESSED;
+					// No pending place request: a transition sends JOB_FINISH after every firing, so ignore it.
+					// MSG_NOT_PROCESSED here made NetNode log a warning per firing.
+					break;
 				}
 
 				unfinishedRequestNumber--;
