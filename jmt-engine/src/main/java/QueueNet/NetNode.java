@@ -33,6 +33,7 @@ import dataAnalysis.Measure;
 import dataAnalysis.SimParameters;
 import log.JSimLogger;
 import log.LoggerStateManager;
+import log.SimEventTracer;
 import simEngine.*;
 
 /**
@@ -197,6 +198,13 @@ public class NetNode extends SimEntity {
 	 * Gets the JobInfoList of this node.
 	 */
 	public JobInfoList getJobInfoList() {
+		return jobsList;
+	}
+
+	/**
+	 * Alias for getJobInfoList() returning the JobInfoList of this node.
+	 */
+	public JobInfoList getJobsList() {
 		return jobsList;
 	}
 
@@ -617,6 +625,9 @@ public class NetNode extends SimEntity {
 	 * inherit all the superclass handled events.
 	 */
 	protected void dispatch(NetMessage message) throws NetException {
+		if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+			SimEventTracer.recordDispatch(getNetSystem().getTime(), message, this);
+		}
 		int processed = NodeSection.MSG_NOT_PROCESSED;
 		NetNode source = message.getSource();
 		byte sourceSection = message.getSourceSection();
@@ -715,6 +726,9 @@ public class NetNode extends SimEntity {
 
 		// This situation should be avoided as it is probably an error.
 		if (processed == NodeSection.MSG_NOT_PROCESSED) {
+			if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+				SimEventTracer.recordUnprocessed(getNetSystem().getTime(), message, this);
+			}
 			String src = message.getSource().getName() + ":" + message.getSourceSection();
 			String dst = message.getDestination().getName() + ":" + message.getDestinationSection();
 			String job = "";
@@ -779,6 +793,9 @@ public class NetNode extends SimEntity {
 		tag = event & NetEvent.EVENT_MASK;
 		tag += sourceSection << NodeSection.SOURCE_SHIFT;
 		tag += destinationSection << NodeSection.DESTINATION_SHIFT;
+		if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+			SimEventTracer.recordSend(getNetSystem().getTime(), delay, event, data, sourceSection, destinationSection, this, destination);
+		}
 		return simSchedule(destination.getId(), delay, tag, data);
 	}
 

@@ -84,6 +84,14 @@ public class PollingServer extends ServiceSection {
 		}
 	}
 
+
+	/**
+	 * Returns the total number of parallel servers configured for this station.
+	 * @return number of servers.
+	 */
+	public int getNumberOfServers() {
+		return numberOfServers;
+	}
 	@Override
 	protected void nodeLinked(NetNode node) throws NetException {
 		maxRunningJobs = numberOfServers;

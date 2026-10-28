@@ -144,6 +144,10 @@ public class NetEvent {
 				return "EVENT_JOB_REQUEST_FROM_SERVER";
 			case EVENT_RESET_COOLSTART:
 				return "EVENT_RESET_COOLSTART";
+			case EVENT_SET_UP_COMPLETE:
+				return "EVENT_SET_UP_COMPLETE";
+			case EVENT_CHECK_DELAY_OFF:
+				return "EVENT_CHECK_DELAY_OFF";
 			case EVENT_QUEUE_IDLE:
 				return "EVENT_QUEUE_IDLE";
 			case EVENT_QUEUE_IDLE_ACK:

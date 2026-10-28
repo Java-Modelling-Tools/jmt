@@ -20,6 +20,8 @@ package QueueNet;
 
 import java.util.ListIterator;
 
+import log.SimEventTracer;
+
 import jmt.common.exception.NetException;
 import dataAnalysis.Measure;
 import random.engine.MersenneTwister;
@@ -78,6 +80,9 @@ public class NetSystem {
 	 * launch a new simulation.
 	 */
 	public void terminate() {
+		if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+			SimEventTracer.stop();
+		}
 		abort();
 	}
 
@@ -102,6 +107,12 @@ public class NetSystem {
 	 * @throws InterruptedException
 	 */
 	public void start() throws NetException, InterruptedException {
+		if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+			ListIterator<QueueNetwork> initNets = networkList.listIterator();
+			while (initNets.hasNext()) {
+				SimEventTracer.initTrace(initNets.next());
+			}
+		}
 		NetNode Node;
 		ListIterator<QueueNetwork> nets = networkList.listIterator();
 		ListIterator<NetNode> nodes;
@@ -123,7 +134,13 @@ public class NetSystem {
 		}
 
 		netController.start();
-		netController.run();
+		try {
+			netController.run();
+		} finally {
+			if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+				SimEventTracer.stop();
+			}
+		}
 	}
 
 	public boolean pause() {
@@ -266,7 +283,10 @@ public class NetSystem {
 
 				switch (network.getBehaviour()) {
 					case QueueNetwork.BEHAVIOUR_ABORT:
-						abort();
+						if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+			SimEventTracer.stop();
+		}
+		abort();
 						break;
 					case QueueNetwork.BEHAVIOUR_STOP:
 						stop();

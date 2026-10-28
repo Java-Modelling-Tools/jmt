@@ -33,6 +33,7 @@ import NetStrategies.QueuePutStrategies.TailStrategy;
 import NetStrategies.TransitionUtilities.TransitionMatrix;
 import NetStrategies.TransitionUtilities.TransitionVector;
 import QueueNet.*;
+import log.SimEventTracer;
 import NetStrategies.QueuePutStrategy;
 import NetStrategies.ServiceStrategy;
 import dataAnalysis.Measure;
@@ -555,6 +556,9 @@ public class Queue extends InputSection {
 						addJobToBuffer(job, message, BufferType.WAITING_REQUESTS);
 						send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
 					} else if (drop[jobClass]) {
+						if (SimEventTracer.DEBUG_VISUAL_TRACE) {
+							SimEventTracer.recordDrop(getOwnerNode().getNetSystem().getTime(), getOwnerNode(), job);
+						}
 						// otherwise if the drop strategy is enabled
 						if (!(job instanceof ForkJob)) {
 							netJobsList.dropJob(job);
@@ -808,6 +812,21 @@ public class Queue extends InputSection {
 	public int getStationCapacity() {
 		return capacity;
 	}
+
+	/**
+	 * Alias for getStationCapacity() returning the capacity of the station (queue+server).
+	 */
+	public int getCapacity() {
+		return capacity;
+	}
+
+	/**
+	 * Returns the current number of jobs in the queue.
+	 */
+	public int getSize() {
+		return jobsList != null ? jobsList.size() : 0;
+	}
+
 
 	/**
 	 * This method should be used only in process(), and whenever a job is to be added to a buffer in this class.
