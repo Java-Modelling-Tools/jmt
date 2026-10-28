@@ -7,14 +7,14 @@ Ensure your files are organized as follows for the automatic paths to work:
 
 ```text
 jmt/
-├── src/test/resources/linetesting/
-│   ├── output/
-│   │   ├── jsim_coverage.csv     <-- Generated here after running tests
-│   │   ├── jmva_coverage.csv     <-- Generated here after running tests
-│   │   └── ...
-│   │
-│   └── scripts/
-│       └── coverage-greedy-set-cover/  <-- YOU ARE HERE
+└── jmt-integration-tests/
+    ├── target/jmt/integration/output/
+    │   ├── jsim_coverage.csv     <-- Generated here after running tests
+    │   ├── jmva_coverage.csv     <-- Generated here after running tests
+    │   └── ...
+    │
+    └── src/test/resources/jmt/integration/scripts/
+        └── coverage-greedy-set-cover/  <-- YOU ARE HERE
 │           ├── optimize_coverage.py
 │           ├── generate_html_report.py
 │           ├── main.py
@@ -37,13 +37,13 @@ To generate the raw coverage data, you **must run the tests using Maven** so the
    ```
 3. This triggers the JaCoCo engine over the test suites and calculates the coverage.
 
-After the tests finish, the generated CSV files (e.g., `jsim_coverage.csv`, `jmva_coverage.csv`) will be created in `jmt/jmt-integration-tests/src/test/resources/linetesting/output`.
+After the tests finish, the generated CSV files (e.g., `jsim_coverage.csv`, `jmva_coverage.csv`) will be created in `jmt/jmt-integration-tests/target/jmt/integration/output`.
 
 ### 2. Run the Optimization Orchestrator
 * **Prerequisites:**
     * Python 3.x installed.
     * No external libraries required (uses standard os, csv, json, subprocess).
-* Open your terminal in the script folder (`jmt/jmt-integration-tests/src/test/resources/linetesting/scripts/coverage-greedy-set-cover/`) and run:
+* Open your terminal in the script folder (`jmt/jmt-integration-tests/src/test/resources/jmt/integration/scripts/coverage-greedy-set-cover/`) and run:
 ```bash
 python main.py
 ```

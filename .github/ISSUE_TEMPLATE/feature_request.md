@@ -34,7 +34,7 @@ a wizard-only workaround vs. a schema change, etc.)
 
 - Does this change the XML schema in a backwards-incompatible way? If so, note whether an
   XSLT migration for existing model files is needed.
-- Any expected impact on existing tests (unit tests, `linetesting` integration coverage)?
+- Any expected impact on existing tests (unit tests, integration test coverage)?
 
 ## Additional context
 

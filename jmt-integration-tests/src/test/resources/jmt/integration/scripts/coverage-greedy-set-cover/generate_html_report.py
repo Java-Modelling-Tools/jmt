@@ -412,7 +412,7 @@ def main():
     
     if not os.path.exists(output_dir):
         print(f"Error: Output directory not found at {output_dir}")
-        return
+        sys.exit(1)
 
     keep_path = os.path.join(output_dir, f"{base_name}_optimized_suite_KEEP.csv")
     discard_path = os.path.join(output_dir, f"{base_name}_optimized_suite_DISCARD.csv")
@@ -423,8 +423,8 @@ def main():
     d_data = read_csv_data(discard_path)
     
     if not k_data and not d_data:
-        print("Error: No data found.")
-        return
+        print(f"Error: No optimized data found for {base_name} (KEEP/DISCARD CSVs missing or empty).")
+        sys.exit(1)
 
     print("Generating HTML Report...")
     # Passing base_name directly to generate_html

@@ -1,4 +1,4 @@
-package linetesting;
+package jmt.integration;
 
 import java.io.File;
 

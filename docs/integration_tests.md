@@ -22,7 +22,7 @@ This guide provides a comprehensive overview of the integration test suite in th
 
 ## 1. Overview & Architecture
 
-The integration testing framework in JMT is located in the `jmt-integration-tests` module (package `linetesting`). Its goal is to perform end-to-end regression and verification testing by running hundreds of real simulation and analytical models through JMT solvers and verifying the numerical accuracy of their results against stored baselines (oracles).
+The integration testing framework in JMT is located in the `jmt-integration-tests` module (package `jmt.integration`). Its goal is to perform end-to-end regression and verification testing by running hundreds of real simulation and analytical models through JMT solvers and verifying the numerical accuracy of their results against stored baselines (oracles).
 
 ### Key Architectural Characteristics
 
@@ -30,7 +30,7 @@ The integration testing framework in JMT is located in the `jmt-integration-test
   Historically, JMT tools (`JSIMGraphMain`, `JSIMWizMain`, `JMVAWizard`, `JabaWizard`) were wrapped in Swing `JFrame` instances. `HeadlessSolver` bypasses GUI window creation entirely, invoking the underlying XML parsers (`common.xml`), simulation engines (`simDispatcher`), and analytical algorithms directly. This makes the tests fast, deterministic, and runnable in headless environments such as CI/CD pipelines and servers without display servers (X11 / Wayland / Windows desktop).
 
 - **Data-Driven Parameterized Tests (`IntegrationTest.java`)**:
-  Tests are structured as JUnit 5 parameterized tests using `@MethodSource` test providers. Each provider scans an input directory (`src/test/resources/linetesting/input/<engine>`) and streams all model files into test instances.
+  Tests are structured as JUnit 5 parameterized tests using `@MethodSource` test providers. Each provider scans an input directory (`src/test/resources/jmt/integration/input/<engine>`) and streams all model files into test instances.
 
 - **Per-Test JaCoCo Coverage (`CoverageTracker.java`)**:
   Before each individual test model runs, execution data in the JaCoCo runtime agent is flushed. After the model finishes, the exact bytecode instructions and source lines executed are captured and recorded in coverage CSV files.
@@ -51,21 +51,21 @@ The integration tests evaluate four core modeling paradigms in JMT:
 ### Directory Layout
 ```text
 jmt-integration-tests/
-├── src/test/java/linetesting/
+├── src/test/java/jmt/integration/
 │   ├── IntegrationTest.java           # Main JUnit 5 test entry point
 │   ├── IntegrationTestConstants.java  # Constants, paths, thresholds, timeouts
 │   ├── IntegrationTestUtil.java       # Model loaders, XML extractors, numerical comparator
 │   ├── HeadlessSolver.java            # Headless solver orchestrator (no GUI)
 │   ├── CoverageTracker.java           # JaCoCo runtime coverage extractor
 │   └── FileUtil.java                  # File I/O helpers
-└── src/test/resources/linetesting/
+└── src/test/resources/jmt/integration/
     ├── input/                         # Baseline test model files (oracles)
     │   ├── jsim/                      # JSIMgraph simulation models
     │   ├── jmva/                      # JMVA analytical models
     │   ├── jsimw/                     # JSIMwiz models
     │   └── jaba/                      # JABA models
-    ├── output/                        # Test run outputs & generated coverage CSVs
     └── scripts/                       # Python analysis & optimization tools
+└── target/jmt/integration/output/         # Test run outputs & generated coverage CSVs (cleanable)
 ```
 
 ---
@@ -73,7 +73,7 @@ jmt-integration-tests/
 ## 3. How Verification Works (Oracles & SMAPE)
 
 ### Extraction
-1. When a test model runs, `HeadlessSolver` saves the solved model to `src/test/resources/linetesting/output/<engine>/<model-name>`.
+1. When a test model runs, `HeadlessSolver` saves the solved model to `target/jmt/integration/output/<engine>/<model-name>`.
 2. `IntegrationTestUtil` extracts numerical performance indices from both the original baseline model (oracle) and the newly generated output using XPath:
    - **Simulation Models (JSIMgraph / JSIMwiz)**: `//results/measure/@finalValue`
    - **Analytical Models (JMVA)**: `//solutions//measure/@meanValue`
@@ -88,7 +88,7 @@ $$\text{SMAPE} = \frac{|\text{actual} - \text{expected}|}{\frac{|\text{actual}| 
 - **Functional Verification**: If a model file does not have pre-stored results, the test verifies that the solver executes to completion without crashing or throwing exceptions.
 
 ### Timeouts
-To guard against infinite loops or hanging simulations (e.g. complex parametric analyses with millions of samples), each test is guarded by an assertion timeout (`TEST_TIMEOUT = 10` minutes). If a test times out, it is logged to `src/test/resources/linetesting/output/timeouts.csv`.
+To guard against infinite loops or hanging simulations (e.g. complex parametric analyses with millions of samples), each test is guarded by an assertion timeout (`TEST_TIMEOUT = 10` minutes). If a test times out, it is logged to `target/jmt/integration/output/timeouts.csv`.
 
 ---
 
@@ -104,7 +104,7 @@ The test suite includes fine-grained coverage tracking capable of measuring whic
    - `BRANCH_MISSED`, `BRANCH_COVERED`
    - `LINE_MISSED`, `LINE_COVERED`
    - `SPECIFIC_LINES_COVERED`, `SPECIFIC_LINES_MISSED` (space-separated line numbers)
-5. **Output Files**: Generated in `src/test/resources/linetesting/output/`:
+5. **Output Files**: Generated in `target/jmt/integration/output/`:
    - `jsim_coverage.csv`
    - `jmva_coverage.csv`
    - `jsimwiz_coverage.csv`
@@ -192,7 +192,7 @@ This runs tests with the full Maven build lifecycle and attaches JaCoCo properly
 This allows running and debugging tests with IntelliJ's visual test runner:
 
 1. In the Project tool window, navigate to:
-   `jmt-integration-tests/src/test/java/linetesting/IntegrationTest.java`
+   `jmt-integration-tests/src/test/java/jmt/integration/IntegrationTest.java`
 2. Right-click `IntegrationTest` (or a specific test method like `testJMVA`) and select **Run 'IntegrationTest'** or **Debug 'IntegrationTest'**.
 3. **To enable JaCoCo coverage collection when using the native JUnit runner:**
    - Open **Run** > **Edit Configurations...**
@@ -216,25 +216,42 @@ For standalone script execution or custom CI runners without Maven installed, te
 java -javaagent:path/to/org.jacoco.agent-0.8.13-runtime.jar \
      -cp "jmt-integration-tests/target/test-classes;jmt-app/target/classes;jmt-engine/target/classes;jmt-jmva-core/target/classes;lib/*;target/dependency/*" \
      org.junit.platform.console.ConsoleLauncher \
-     --select-class linetesting.IntegrationTest
+     --select-class jmt.integration.IntegrationTest
 ```
 
 ---
 
 ## 7. Downstream Analysis & Optimization Tools
 
-The outputs generated by the integration tests feed into analysis scripts located in `jmt-integration-tests/src/test/resources/linetesting/scripts/` (documented in `docs/`):
+The outputs generated by the integration tests feed into analysis scripts located in `jmt-integration-tests/src/test/resources/jmt/integration/scripts/` (documented in `docs/`):
 
 1. **Coverage Optimization Tool (`docs/coverage_greedy_set_cover.md`)**:
-   - Location: `jmt-integration-tests/src/test/resources/linetesting/scripts/coverage-greedy-set-cover/`
-   - Uses the generated `*_coverage.csv` files to solve the Minimum Set Cover problem.
+   - Location: `jmt-integration-tests/src/test/resources/jmt/integration/scripts/coverage-greedy-set-cover/`
+   - Uses the generated `*_coverage.csv` files in `target/jmt/integration/output/` to solve the Minimum Set Cover problem.
    - Identifies redundant test models and finds the minimal "Champion" test suite that retains 100% code coverage.
-   - Generates interactive HTML coverage dashboards (`*_dashboard.html`).
+   - Generates interactive HTML coverage dashboards (`output/*_dashboard.html`).
+   - **Command to run**:
+     ```bash
+     # From root:
+     python jmt-integration-tests/src/test/resources/jmt/integration/scripts/coverage-greedy-set-cover/main.py
+     
+     # Or navigate to the folder:
+     cd jmt-integration-tests/src/test/resources/jmt/integration/scripts/coverage-greedy-set-cover
+     python main.py
+     ```
 
 2. **Regression Testing Diff Checker (`docs/jsim_diff_check.md`)**:
-   - Location: `jmt-integration-tests/src/test/resources/linetesting/scripts/jsim-diff-check/`
-   - Compares performance metrics between previous stable versions and current version runs.
+   - Location: `jmt-integration-tests/src/test/resources/jmt/integration/scripts/jsim-diff-check/`
+   - Compares performance metrics between baseline runs and current outputs in `target/jmt/integration/output/jsim`.
    - Produces detailed comparison reports (`comparison_detailed.csv`, `comparison_summary.csv`).
+   - **Command to run**:
+     ```bash
+     # From root:
+     python jmt-integration-tests/src/test/resources/jmt/integration/scripts/jsim-diff-check/diff-checker.py
+
+     # Or compare specific folders:
+     python jmt-integration-tests/src/test/resources/jmt/integration/scripts/jsim-diff-check/diff-checker.py <old_dir> <new_dir>
+     ```
 
 ---
 
@@ -251,8 +268,8 @@ The outputs generated by the integration tests feed into analysis scripts locate
 ### A test model fails with `Difference: X.XX% (exceeds threshold 5.0%)`
 - **Cause**: The numerical result produced by the solver deviated by more than 5% from the oracle.
 - **Investigation**:
-  1. Inspect the test output in `src/test/resources/linetesting/output/<engine>/`.
-  2. Compare the measure values with the oracle in `src/test/resources/linetesting/input/<engine>/`.
+  1. Inspect the test output in `target/jmt/integration/output/<engine>/`.
+  2. Compare the measure values with the oracle in `src/test/resources/jmt/integration/input/<engine>/`.
   3. If the solver algorithm was intentionally changed or improved, update the oracle baseline.
 
 ### How do I skip long-running integration tests during normal development builds?
@@ -278,18 +295,18 @@ Ensure the model has solved measures:
 - If the model contains no pre-existing results, it will function as a **functional execution test** (verifying that the solver runs from start to finish without crashing).
 
 ### Step 2: Choose Test Structure & Place in Input Directory
-Place the file under the corresponding engine folder inside `jmt-integration-tests/src/test/resources/linetesting/input/`:
+Place the file under the corresponding engine folder inside `jmt-integration-tests/src/test/resources/jmt/integration/input/`:
 
 - **Single Model Test (Standard)**:
   ```text
-  src/test/resources/linetesting/input/<engine>/<model-name>.<ext>
+  src/test/resources/jmt/integration/input/<engine>/<model-name>.<ext>
   ```
-  *(e.g., `src/test/resources/linetesting/input/jsim/my_new_fork_join_model.jsimg`)*
+  *(e.g., `src/test/resources/jmt/integration/input/jsim/my_new_fork_join_model.jsimg`)*
 
 - **Paired Line Test (Model + Explicit Result File)**:
   Alternatively, you can create a dedicated subfolder with separate model and expected output files:
   ```text
-  src/test/resources/linetesting/input/jsim/<my_test_folder>/
+  src/test/resources/jmt/integration/input/jsim/<my_test_folder>/
   ├── model.jsim                   # Input model definition
   └── model.jsim-result.jsim       # Expected baseline results oracle
   ```
@@ -314,7 +331,7 @@ Adjust simulation parameters (such as sample size or max simulation duration) to
 ### Step 4: Verify Coverage Contribution
 Run the Greedy Set Cover script to see whether your new model covers unique lines of code in the engine:
 ```bash
-python jmt-integration-tests/src/test/resources/linetesting/scripts/coverage-greedy-set-cover/main.py
+python jmt-integration-tests/src/test/resources/jmt/integration/scripts/coverage-greedy-set-cover/main.py
 ```
 Open `output/*_dashboard.html` in your browser. If your new model exercises previously uncovered classes or instructions, the algorithm will automatically select it in the **KEEP** set!
 

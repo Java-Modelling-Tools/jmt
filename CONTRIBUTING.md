@@ -51,9 +51,9 @@ For anything non-trivial (new modeling capabilities, schema changes, or anything
 3.  Match the existing code style in the file/package you're editing (indentation, brace style, naming). There is no enforced formatter/linter configuration in this repo, so consistency with surrounding code is the standard to follow.
 4.  Add or update tests for any behavior change:
     *   Unit tests under `src/test/java`.
-    *   For simulation/analytical solver correctness fixes, add new models directly to the integration test suite (`jmt-integration-tests/src/test/resources/linetesting/input/`). See [Adding New Test Models & Oracles](docs/integration_tests.md#9-adding-new-test-models--oracles) for the end-to-end workflow on creating baseline oracles and running stability checks. 
+    *   For simulation/analytical solver correctness fixes, add new models directly to the integration test suite (`jmt-integration-tests/src/test/resources/jmt/integration/input/`). See [Adding New Test Models & Oracles](docs/integration_tests.md#9-adding-new-test-models--oracles) for the end-to-end workflow on creating baseline oracles and running stability checks. 
     *   If your change affects the model XML format, keep `src/main/resources/jmt/common/xml` schemas and any XSLT converters in sync.
-    *   Check whether the `linetesting` integration suite needs new sample models.
+    *   Check whether the `jmt.integration` suite needs new sample models.
 5.  Run `mvn test` locally before opening a PR. GUI tests (`*GuiTest`) are excluded from the default run - if your change affects GUI behavior, note in the PR description how you tested it (running the excluded GUI tests locally, or manual testing steps).
 6.  Update documentation as needed - this includes user-facing docs (`manuals/`, in-app help) as well as updating this contributing guide if you change the architecture or build/test workflow it describes.
 
@@ -88,9 +88,9 @@ Don't assume a fix in one engine applies to the other, and don't assume `jmt.com
 
 `jmt.gui.common.startScreen.GraphStartScreen` (the default `mainClass` in `pom.xml`) is the suite launcher screen; clicking a tool icon instantiates that tool's own main class: `JSIMWizMain`, `JSIMGraphMain`, `JMVAWizard`, `JabaWizard`, `MainJwatWizard` (jwat), `MainWizard` (jmch). Each of these also has a standalone `main()`. `jmt.commandline.Jmt` is the headless entry point for running solves from scripts/CI without any GUI involved.
 
-### Integration Testing (`linetesting`)
+### Integration Testing (`jmt.integration`)
 
-`jmt-integration-tests/src/test/java/linetesting/IntegrationTest.java` is a parameterized JUnit 5 integration suite (distinct from the regular unit tests) that runs every model file under `src/test/resources/linetesting/input/{jsim,jsimw,jmva,jaba}` through the corresponding engine, tracks per-line bytecode coverage via `linetesting.CoverageTracker`, and writes `*_coverage.csv` / `timeouts.csv` reports to `src/test/resources/linetesting/output/`. It requires `target/classes` to already exist (`mvn compile` first) and isolates coverage to core computation modules (`jmt-engine`, `jmt-jmva-core`, `jmt-jaba-core`, `jmt-jwat-core`, `jmt-jmch-core`). For full execution commands, IntelliJ setup, and oracle stability check details, see the [JMT Integration Testing Guide](docs/integration_tests.md).
+`jmt-integration-tests/src/test/java/jmt/integration/IntegrationTest.java` is a parameterized JUnit 5 integration suite (distinct from the regular unit tests) that runs every model file under `src/test/resources/jmt/integration/input/{jsim,jsimw,jmva,jaba}` through the corresponding engine, tracks per-line bytecode coverage via `jmt.integration.CoverageTracker`, and writes `*_coverage.csv` / `timeouts.csv` reports to `target/jmt/integration/output/`. It requires `target/classes` to already exist (`mvn compile` first) and isolates coverage to core computation modules (`jmt-engine`, `jmt-jmva-core`, `jmt-jaba-core`, `jmt-jwat-core`, `jmt-jmch-core`). For full execution commands, IntelliJ setup, and oracle stability check details, see the [JMT Integration Testing Guide](docs/integration_tests.md).
 
 ---
 

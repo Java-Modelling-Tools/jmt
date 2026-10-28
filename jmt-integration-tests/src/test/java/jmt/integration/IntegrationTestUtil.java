@@ -1,13 +1,16 @@
-package linetesting;
+package jmt.integration;
 
-import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.STABILITY_TRESHOLD;
+import static jmt.integration.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.OUTPUT_DIR;
+import static jmt.integration.IntegrationTestConstants.STABILITY_TRESHOLD;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,50 +47,60 @@ public class IntegrationTestUtil {
 			throw new RuntimeException("Line test model does not have parent folder");
 		}
 
-		List<String> folderHierarchy = new ArrayList<>();
-		folderHierarchy.add("linetesting");
-		folderHierarchy.add("output");
-		folderHierarchy.add(toolFolderName);
-
+		Path folder = OUTPUT_DIR.resolve(toolFolderName);
 		if (!parentFolderName.equals(toolFolderName)) {
-			folderHierarchy.add(parentFolderName);
+			folder = folder.resolve(parentFolderName);
 		}
 
-		File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
+		Files.createDirectories(folder);
+		File modelOutputFile = folder.resolve(testModel.getName()).toFile();
 
-		if (!modelOutputFile.exists()) {
-			throw new FileNotFoundException("Could not create model output file");
+		// If a 0-byte stub exists from a previous aborted run, clean it up
+		if (modelOutputFile.exists() && modelOutputFile.length() == 0) {
+			modelOutputFile.delete();
 		}
 
 		return modelOutputFile;
 	}
 
 	private static File testJSIMGraph(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJSimGraph(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JSIMGraph test", e);
 		}
 	}
 
 	private static File testJMVA(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJMVA(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JMVA test", e);
 		}
 	}
 
 	private static File testJSIMWiz(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJSimWiz(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JSIMWiz test", e);
 		}
 	}
