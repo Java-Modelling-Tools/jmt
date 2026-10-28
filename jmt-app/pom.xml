@@ -76,8 +76,73 @@
         </dependency>
     </dependencies>
 
+    <properties>
+        <!-- The root project builds first in the reactor, before the single jar exists; the installer is
+             staged and built here, in the last module, but in the root target directory. -->
+        <izpack.staging>${maven.multiModuleProjectDirectory}/target/staging</izpack.staging>
+    </properties>
+
     <build>
         <plugins>
+          <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>1.8</version>
+            <executions>
+              <execution>
+                <id>create-staging-area</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>run</goal>
+                </goals>
+                <configuration>
+                  <tasks>
+                    <copy todir="${izpack.staging}">
+                      <fileset dir="${maven.multiModuleProjectDirectory}/src/main/resources/jmt/izpack"/>
+                    </copy>
+                    <copy todir="${izpack.staging}/manuals">
+                      <fileset dir="${maven.multiModuleProjectDirectory}/manuals"/>
+                    </copy>
+                    <copy todir="${izpack.staging}/jwatFormats">
+                      <fileset dir="${maven.multiModuleProjectDirectory}/jwatFormats"/>
+                    </copy>
+                    <copy todir="${izpack.staging}/examples">
+                      <fileset dir="${maven.multiModuleProjectDirectory}/examples"/>
+                    </copy>
+                    <copy todir="${izpack.staging}/license">
+                      <fileset dir="${maven.multiModuleProjectDirectory}/license"/>
+                    </copy>
+                    <copy file="${maven.multiModuleProjectDirectory}/target/JMT-singlejar-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar"/>
+                    <copy file="${maven.multiModuleProjectDirectory}/license/LICENSE_JMT.txt" tofile="${izpack.staging}/LICENSE_JMT.txt"/>
+                  </tasks>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.izpack</groupId>
+            <artifactId>izpack-maven-plugin</artifactId>
+            <version>${izpack.version}</version>
+            <!-- Rest of your izpack plugin configuration -->
+            <configuration>
+              <installFile>${izpack.staging}/jmt_install.xml</installFile>
+              <enableAttachArtifact>false</enableAttachArtifact>
+              <kind>standard</kind>
+              <baseDir>${izpack.staging}</baseDir>
+              <outputDirectory>${maven.multiModuleProjectDirectory}/target</outputDirectory>
+              <finalName>JMT-installer-${jmt.version}</finalName>
+              <classifier>final</classifier>
+            </configuration>
+            <executions>
+              <execution>
+                <id>standard-installer</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>izpack</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>

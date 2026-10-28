@@ -179,65 +179,6 @@
               </execution>
             </executions>
           </plugin>
-          <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>1.8</version>
-            <inherited>false</inherited>
-            <executions>
-              <execution>
-                <id>create-staging-area</id>
-                <phase>post-integration-test</phase>
-                <goals>
-                  <goal>run</goal>
-                </goals>
-                <configuration>
-                  <tasks>
-                    <copy todir="${izpack.staging}">
-                      <fileset dir="${basedir}/src/main/resources/jmt/izpack"/>
-                    </copy>
-                    <copy todir="${izpack.staging}/manuals">
-                      <fileset dir="${basedir}/manuals"/>
-                    </copy>
-                    <copy todir="${izpack.staging}/jwatFormats">
-                      <fileset dir="${basedir}/jwatFormats"/>
-                    </copy>
-                    <copy todir="${izpack.staging}/examples">
-                      <fileset dir="${basedir}/examples"/>
-                    </copy>
-                    <copy todir="${izpack.staging}/license">
-                      <fileset dir="${basedir}/license"/>
-                    </copy>
-                    <copy file="${project.build.directory}/JMT-singlejar-${jmt.version}.jar" tofile="${izpack.staging}/JMT.jar" failonerror="false"/>
-                    <copy file="${basedir}/license/LICENSE_JMT.txt" tofile="${izpack.staging}/LICENSE_JMT.txt"/>
-                  </tasks>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.codehaus.izpack</groupId>
-            <artifactId>izpack-maven-plugin</artifactId>
-            <version>${izpack.version}</version>
-            <inherited>false</inherited>
-            <!-- Rest of your izpack plugin configuration -->
-            <configuration>
-              <installFile>${izpack.staging}/jmt_install.xml</installFile>
-              <enableAttachArtifact>false</enableAttachArtifact>
-              <kind>standard</kind>
-              <baseDir>${izpack.staging}</baseDir>
-              <finalName>JMT-installer-${jmt.version}</finalName>
-              <classifier>final</classifier>
-            </configuration>
-            <executions>
-              <execution>
-                <id>standard-installer</id>
-                <phase>deploy</phase>
-                <goals>
-                  <goal>izpack</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
           <!-- Do not deploy any of the installer artifacts. -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
