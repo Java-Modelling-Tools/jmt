@@ -43,6 +43,12 @@
             <artifactId>jmt-jaba-gui</artifactId>
             <version>latest</version>
         </dependency>
+        <!-- XMLArchiver.saveModel also writes the copy readable by releases up to 1.4.0 -->
+        <dependency>
+            <groupId>jmt</groupId>
+            <artifactId>jmt-legacy-xml</artifactId>
+            <version>latest</version>
+        </dependency>
         <!-- XMLReader, XMLWriter, XMLResultsReader/Writer, XMLArchiver, GuiXMLConstants, PNMLConstants -->
         <dependency>
             <groupId>jmt</groupId>

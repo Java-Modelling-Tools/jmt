@@ -11,6 +11,23 @@
 
     <artifactId>jmt-engine</artifactId>
 
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <!-- The only copy of globalsettings.conf lives at the repo root (src/main/resources/jmt/common).
+                 The parent pom reads jmt.version from it, and GlobalSettings loads it from this module's classpath. -->
+            <resource>
+                <directory>${project.basedir}/../src/main/resources/jmt/common</directory>
+                <includes>
+                    <include>globalsettings.conf</include>
+                </includes>
+                <targetPath>jmt/common</targetPath>
+            </resource>
+        </resources>
+    </build>
+
     <dependencies>
         <!-- SLF4J API only -->
         <dependency>

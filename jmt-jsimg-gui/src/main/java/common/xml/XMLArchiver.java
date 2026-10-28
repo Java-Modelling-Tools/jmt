@@ -17,6 +17,7 @@
  */
 
 package common.xml;
+import legacyxml.LegacyXmlExporter;
 import simEngine.xml.XMLConstantNames;
 import simEngine.xml.XMLResultsConstants;
 
@@ -35,6 +36,7 @@ import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import jmt.common.GlobalSettings;
 import jmt.common.xml.XSDSchemaLoader;
 import common.definitions.CommonModel;
 import common.definitions.PAResultsModel;
@@ -54,6 +56,9 @@ import org.w3c.dom.Element;
  */
 public class XMLArchiver implements GuiXMLConstants {
 
+	/** Archive root attribute holding the JMT version that saved the file. Mirrored in legacyxml.LegacyXmlExporter. */
+	public static final String XML_ARCHIVE_A_JMT_VERSION = "jmtVersion";
+
 	/**
 	 * Saves JMT Archive storing informations for simulator and for the gui
 	 * @param archiveName Handler to the archive to be created
@@ -69,6 +74,8 @@ public class XMLArchiver implements GuiXMLConstants {
 			transformer.setOutputProperty(OutputKeys.ENCODING, "ISO-8859-1");
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new DOMSource(modelDoc), new StreamResult(archiveName));
+			// Also keep a copy readable by releases up to 1.4.0 (e.g. model.legacy.jsimg)
+			LegacyXmlExporter.saveLegacyCopy(modelDoc, archiveName);
 		} catch (TransformerConfigurationException e) {
 			e.printStackTrace();
 		} catch (TransformerFactoryConfigurationError e) {
@@ -161,6 +168,12 @@ public class XMLArchiver implements GuiXMLConstants {
 		root.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 		root.setAttribute(XML_ARCHIVE_A_NAME, documentName);
 		root.setAttribute(XML_ARCHIVE_A_TIMESTAMP, new Date().toString());
+		// Every file we write carries its version (only releases up to 1.4.0 omitted it), so refuse to save without one
+		String jmtVersion = GlobalSettings.getSetting("jmt.version");
+		if (jmtVersion == null || jmtVersion.trim().isEmpty()) {
+			throw new IllegalStateException("Cannot save: the JMT version (jmt.version in globalsettings.conf) is not set");
+		}
+		root.setAttribute(XML_ARCHIVE_A_JMT_VERSION, jmtVersion.trim());
 
 		return archiveDoc;
 	}

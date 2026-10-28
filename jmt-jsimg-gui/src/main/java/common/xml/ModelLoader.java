@@ -22,6 +22,7 @@ import simEngine.xml.XMLConstantNames;
 import simEngine.xml.XMLResultsConstants;
 
 import java.awt.Component;
+import java.awt.GraphicsEnvironment;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.util.ArrayList;
@@ -31,7 +32,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
+import jmt.common.GlobalSettings;
 import jmt.framework.xml.XMLUtils;
+import legacyxml.JmtVersion;
 import common.CommonConstants;
 import common.Defaults;
 import common.definitions.CommonModel;
@@ -190,6 +193,9 @@ public class ModelLoader {
 					fileFormat = CommonConstants.SIMENGINE;
 					break;
 				case XML_ARCHIVE:
+					if (!confirmOpenNewerVersion(parent, file)) {
+						return CANCELLED;
+					}
 					XMLArchiver.loadModel(file, (CommonModel) modelData);
 					fileFormat = CommonConstants.JSIM;
 					break;
@@ -238,6 +244,9 @@ public class ModelLoader {
 					fileFormat = CommonConstants.SIMENGINE;
 					break;
 				case XML_ARCHIVE:
+					if (!confirmOpenNewerVersion(parent, file)) {
+						return CANCELLED;
+					}
 					XMLArchiver.loadModel(file, tmp);
 					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
 					fileFormat = CommonConstants.JSIM;
@@ -298,6 +307,26 @@ public class ModelLoader {
 		} else {
 			return SUCCESS;
 		}
+	}
+
+	/**
+	 * Warns if the archive was saved by a newer JMT than the running one, since parts of it may be
+	 * misread or lost on the next save.
+	 * @return true to go on loading (file is not newer, no GUI available, or user chose to open anyway)
+	 */
+	private boolean confirmOpenNewerVersion(Component parent, File file) {
+		String running = GlobalSettings.getSetting("jmt.version");
+		String saved = JmtVersion.readFileVersion(file);
+		if (!JmtVersion.isNewer(saved, running) || GraphicsEnvironment.isHeadless()) {
+			return true;
+		}
+		Object[] options = { "Open anyway", "Cancel" };
+		int choice = JOptionPane.showOptionDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
+				+ "</font> was saved by JMT <b>" + saved + "</b>, which is newer than the version you are running (<b>" + running
+				+ "</b>).<br>It may use features this version does not support, and some data may be ignored or lost if you save it.<br>"
+				+ "Do you want to open it anyway?</html>", "JMT - Newer file version", JOptionPane.DEFAULT_OPTION,
+				JOptionPane.WARNING_MESSAGE, null, options, options[1]);
+		return choice == 0;
 	}
 
 	/**

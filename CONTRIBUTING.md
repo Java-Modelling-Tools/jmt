@@ -109,6 +109,8 @@ JMT is organized into a layered 16-module Maven project. Modules belong to expli
 ### Layer 2: File Serialization
 *   **`jmt-file-handler`**: Centralized model serialization layer decoupled from UI components. Owns `XMLWriter`, `XMLReader`, `XMLResultsWriter`, `XMLResultsReader`, and schema constant interfaces (`GuiXMLConstants`, `PNMLConstants`). Depends on `jmt-gui` and transitively on `jmt-engine`.
 
+*   **`jmt-legacy-xml`**: Exports model XML (`.jsimg`, `.jsimw`, simulation input) in the format of earlier releases (up to 1.4.0). The refactoring renamed Java packages, and the XML stores them in `classPath` attributes, so old releases cannot read files saved by current code; the schemas themselves are unchanged. JDK-only. CLI: `java -cp jmt-legacy-xml.jar legacyxml.LegacyXmlExporter <in> <out> [1.4.0|current]`. When you rename a package whose classes appear in saved XML, update the root lists in `LegacyXmlExporter`.
+
 ### Layer 3: Analytical & Computation Cores
 *   **`jmt-jmva-core`**: JMVA analytical solver. Owns all MVA algorithms (exact, approximate, AMVA, CoMoM, Tree MVA, Tree Convolution, Monte Carlo, RECAL), `analytical.ExactModel`, `QNModel`, `PopulationVector`, `BigRational`, and the CLI solver entry point.
 *   **`jmt-jaba-core`**: JABA (Bottleneck Analysis) pure computation. Owns convex-hull algorithms, saturation analysis, and the geometric calculation engine.

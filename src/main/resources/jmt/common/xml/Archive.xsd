@@ -32,6 +32,11 @@
 			</xs:sequence>
 			<xs:attribute name="name" type="xs:string" use="required"/>
 			<xs:attribute name="timestamp" type="xs:string" use="required"/>
+			<xs:attribute name="jmtVersion" type="xs:string" use="optional">
+				<xs:annotation>
+					<xs:documentation>Version of JMT that saved the file. Always written by current releases; optional in the schema only so files saved by releases up to 1.4.0 (which lack it) still load.</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
 		</xs:complexType>
 	</xs:element>
 </xs:schema>
