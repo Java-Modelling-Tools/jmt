@@ -55,7 +55,7 @@ public abstract class RoutingStrategy implements AutoCheck {
 	 * Currently only LoadDependentRoutingStrategy overrides it.
 	 */
 	public NetNode getOutNode(NodeSection section, Job job) {
-		return getOutNode(section.getOwnerNode(), job.getJobClass());
+		return getOutNode(section, job.getJobClass());
 	}
 
 	public boolean check() {
