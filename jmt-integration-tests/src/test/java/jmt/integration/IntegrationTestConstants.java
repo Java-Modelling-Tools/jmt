@@ -139,9 +139,80 @@ public final class IntegrationTestConstants {
 	public static final String TIMEOUT_CSV_NAME = "timeouts.csv";
 
 	// Execution Configs
-	public static final double STABILITY_TRESHOLD = 5.0;
-	public static final int TEST_TIMEOUT = 10; // Minutes (increased: PA simulations with 5 steps × 20M samples need more time)
+	public static final double DEFAULT_STABILITY_THRESHOLD = 5.0;
+	public static final double STABILITY_THRESHOLD = resolveStabilityThreshold();
+
+	public static final int DEFAULT_TEST_TIMEOUT = 10; // Minutes
+	public static final int TEST_TIMEOUT = resolveTestTimeout();
+
 	public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+	private static double resolveStabilityThreshold() {
+		// 1. System property: -Dstability.threshold=X, -Dtolerance=X, or -DSTABILITY_THRESHOLD=X
+		String sysProp = System.getProperty("stability.threshold");
+		if (sysProp == null) {
+			sysProp = System.getProperty("tolerance");
+		}
+		if (sysProp == null) {
+			sysProp = System.getProperty("STABILITY_THRESHOLD");
+		}
+		if (sysProp != null && !sysProp.trim().isEmpty()) {
+			try {
+				return Double.parseDouble(sysProp.trim());
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid stability threshold property '" + sysProp + "', using default "
+						+ DEFAULT_STABILITY_THRESHOLD + "%");
+			}
+		}
+
+		// 2. Environment variable: STABILITY_THRESHOLD or JMT_TOLERANCE
+		String envVal = System.getenv("STABILITY_THRESHOLD");
+		if (envVal == null) {
+			envVal = System.getenv("JMT_TOLERANCE");
+		}
+		if (envVal != null && !envVal.trim().isEmpty()) {
+			try {
+				return Double.parseDouble(envVal.trim());
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid STABILITY_THRESHOLD env var '" + envVal + "', using default "
+						+ DEFAULT_STABILITY_THRESHOLD + "%");
+			}
+		}
+
+		return DEFAULT_STABILITY_THRESHOLD;
+	}
+
+	private static int resolveTestTimeout() {
+		// 1. System property: -Dtest.timeout=X, -Dtest.timeout.minutes=X, or -DTEST_TIMEOUT_MINUTES=X
+		String sysProp = System.getProperty("test.timeout");
+		if (sysProp == null) {
+			sysProp = System.getProperty("test.timeout.minutes");
+		}
+		if (sysProp == null) {
+			sysProp = System.getProperty("TEST_TIMEOUT_MINUTES");
+		}
+		if (sysProp != null && !sysProp.trim().isEmpty()) {
+			try {
+				return Integer.parseInt(sysProp.trim());
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid test.timeout property '" + sysProp + "', using default "
+						+ DEFAULT_TEST_TIMEOUT + " minutes");
+			}
+		}
+
+		// 2. Environment variable: TEST_TIMEOUT_MINUTES
+		String envVal = System.getenv("TEST_TIMEOUT_MINUTES");
+		if (envVal != null && !envVal.trim().isEmpty()) {
+			try {
+				return Integer.parseInt(envVal.trim());
+			} catch (NumberFormatException e) {
+				System.err.println("Invalid TEST_TIMEOUT_MINUTES env var '" + envVal + "', using default "
+						+ DEFAULT_TEST_TIMEOUT + " minutes");
+			}
+		}
+
+		return DEFAULT_TEST_TIMEOUT;
+	}
 
 	// GUI exclusion is now handled by COVERED_MODULES above. What remains here are the
 	// non-GUI packages that were excluded for other reasons and still exist by name.

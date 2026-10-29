@@ -4,7 +4,7 @@ import static jmt.integration.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
 import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
 import static jmt.integration.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static jmt.integration.IntegrationTestConstants.OUTPUT_DIR;
-import static jmt.integration.IntegrationTestConstants.STABILITY_TRESHOLD;
+import static jmt.integration.IntegrationTestConstants.STABILITY_THRESHOLD;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -168,7 +168,12 @@ public class IntegrationTestUtil {
 		}
 	}
 
-	private static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+		return checkResults(testModelFinalValues, simulatedModelFinalValues, STABILITY_THRESHOLD);
+	}
+
+	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues,
+			double threshold) {
 		// If the oracle has no stored results, the model has no baseline to compare against.
 		// This means it is a functional test only: just verify the simulation ran (which
 		// testJSIMGraph already guarantees by returning a file). Always pass.
@@ -205,10 +210,10 @@ public class IntegrationTestUtil {
 
 				double smape = ratio * 100.0;
 
-				// Check against the threshold
-				if (smape >= STABILITY_TRESHOLD) {
+				// Check against the tolerance threshold
+				if (smape >= threshold) {
 					System.err.println("Unstable result at index " + i + ": Expected ~" + oldVal + ", Got " + newVal
-							+ " (Difference: " + String.format("%.2f", smape) + "%)");
+							+ " (Difference: " + String.format("%.2f", smape) + "%, Threshold: " + threshold + "%)");
 					return false; // Fails the check the moment a value exceeds the threshold
 				}
 
@@ -220,11 +225,15 @@ public class IntegrationTestUtil {
 			}
 		}
 
-		// If it makes it through the loop, all values are within the 5% tolerance
+		// If it makes it through the loop, all values are within the tolerance threshold
 		return true;
 	}
 
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
+		return testLineJSIMGraphModel(testModel, testResults, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testLineJSIMGraphModel(File testModel, File testResults, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMGraph(testModel);
 
@@ -232,7 +241,7 @@ public class IntegrationTestUtil {
 
 			List<String> expectedMeanValues = getExpectedMeanValues(testResults);
 
-			return checkResults(expectedMeanValues, actualValues);
+			return checkResults(expectedMeanValues, actualValues, threshold);
 
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMGraph line test: " + testModel.getName(), e);
@@ -240,20 +249,27 @@ public class IntegrationTestUtil {
 	}
 
 	public static boolean testJSIMGraphModel(File testModel) {
+		return testJSIMGraphModel(testModel, STABILITY_THRESHOLD);
+	}
 
+	public static boolean testJSIMGraphModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMGraph(testModel);
 
 			List<String> expectedValues = getJSIMGraphModelFinalValues(testModel);
 			List<String> actualValues = getJSIMGraphModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMGraph test: " + testModel.getName(), e);
 		}
 	}
 
 	public static boolean testJMVAModel(File testModel) {
+		return testJMVAModel(testModel, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testJMVAModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJMVA(testModel);
 
@@ -268,25 +284,27 @@ public class IntegrationTestUtil {
 			List<String> expectedValues = getJMVAModelFinalValues(testModel);
 			List<String> actualValues = getJMVAModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JMVA test: " + testModel.getName(), e);
 		}
-
 	}
 
 	public static boolean testJSIMWizModel(File testModel) {
+		return testJSIMWizModel(testModel, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testJSIMWizModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMWiz(testModel);
 
 			List<String> expectedValues = getJSIMWizModelFinalValues(testModel);
 			List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMWiz test: " + testModel.getName(), e);
 		}
-
 	}
 
 	public static boolean testJABAModel(File testModel) {

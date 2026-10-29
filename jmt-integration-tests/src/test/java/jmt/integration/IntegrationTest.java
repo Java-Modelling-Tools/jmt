@@ -55,7 +55,7 @@ public class IntegrationTest {
 
 		Files.createDirectories(OUTPUT_DIR);
 
-		// Initialize individual CSVs inside target/linetesting/output
+		// Initialize individual CSVs inside target/jmt/integration/output
 		JSIM_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jsim_coverage.csv");
 		JMVA_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jmva_coverage.csv");
 		JSIMWIZ_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jsimwiz_coverage.csv");

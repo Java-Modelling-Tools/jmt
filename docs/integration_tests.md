@@ -83,12 +83,29 @@ Because stochastic simulation models inherently produce minor statistical variat
 
 $$\text{SMAPE} = \frac{|\text{actual} - \text{expected}|}{\frac{|\text{actual}| + |\text{expected}|}{2}} \times 100\%$$
 
-- **Stability Check**: A metric passes if $\text{SMAPE} < \text{STABILITY\_TRESHOLD}$ (default: **5.0%**).
+- **Stability Check**: A metric passes if $\text{SMAPE} < \text{STABILITY\_THRESHOLD}$ (default: **5.0%**).
+  You can customize this tolerance threshold dynamically without editing code:
+  - **Via Maven command line property**:
+    ```bash
+    mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am -Dstability.threshold=10.0
+    # or
+    mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am -Dtolerance=10.0
+    ```
+  - **Via Environment Variable**: `STABILITY_THRESHOLD=10.0` or `JMT_TOLERANCE=10.0`
+  - **Programmatically**: Pass the custom threshold to `IntegrationTestUtil.testJSIMGraphModel(file, tolerance)` or `checkResults(expected, actual, tolerance)`.
 - **Exact String Fast-Pass**: If the serialized strings match identically, calculation is skipped.
 - **Functional Verification**: If a model file does not have pre-stored results, the test verifies that the solver executes to completion without crashing or throwing exceptions.
 
 ### Timeouts
-To guard against infinite loops or hanging simulations (e.g. complex parametric analyses with millions of samples), each test is guarded by an assertion timeout (`TEST_TIMEOUT = 10` minutes). If a test times out, it is logged to `target/jmt/integration/output/timeouts.csv`.
+To guard against infinite loops or hanging simulations (e.g. complex parametric analyses with millions of samples), each test is guarded by an assertion timeout (`TEST_TIMEOUT = 10` minutes default). If a test times out, it is logged to `target/jmt/integration/output/timeouts.csv`.
+You can customize the timeout dynamically:
+- **Via Maven command line property**:
+  ```bash
+  mvn test -pl jmt-integration-tests -am -Dtest.timeout=20
+  # or
+  mvn test -pl jmt-integration-tests -am -DTEST_TIMEOUT_MINUTES=20
+  ```
+- **Via Environment Variable**: `TEST_TIMEOUT_MINUTES=20`
 
 ---
 

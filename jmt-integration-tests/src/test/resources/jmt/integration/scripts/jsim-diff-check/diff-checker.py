@@ -162,9 +162,8 @@ def compare_jsimg_folders(old_folder, new_folder, csv_output="diff_output.csv", 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Resolve latest test output folder (target/jmt/integration/output/jsim) with fallbacks
+    # Resolve latest test output folder (target/jmt/integration/output/jsim)
     target_jsim = os.path.normpath(os.path.join(script_dir, '..', '..', '..', '..', '..', '..', '..', 'target', 'jmt', 'integration', 'output', 'jsim'))
-    legacy_jsim = os.path.normpath(os.path.join(script_dir, '..', '..', 'output', 'jsim'))
     default_latest = os.path.join(script_dir, "jmt-1.3.0-stable-runs")
 
     previous_jmt_runs = sys.argv[1] if len(sys.argv) > 1 else os.path.join(script_dir, "jmt-previous-runs")
@@ -172,8 +171,6 @@ if __name__ == "__main__":
         latest_jmt_runs = sys.argv[2]
     elif os.path.exists(target_jsim):
         latest_jmt_runs = target_jsim
-    elif os.path.exists(legacy_jsim):
-        latest_jmt_runs = legacy_jsim
     else:
         latest_jmt_runs = default_latest
 
