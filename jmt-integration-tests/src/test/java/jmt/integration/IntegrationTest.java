@@ -98,10 +98,22 @@ public class IntegrationTest {
 				return Stream.empty();
 			}
 
+			String modelFilter = System.getProperty("test.model");
+			if (modelFilter == null) {
+				modelFilter = System.getProperty("testModel");
+			}
+			if (modelFilter != null && !modelFilter.trim().isEmpty()) {
+				String filter = modelFilter.trim().toLowerCase();
+				entries = Stream.of(entries)
+						.filter(f -> f.getName().toLowerCase().contains(filter))
+						.toArray(File[]::new);
+			}
+
 			int totalTests = entries.length;
+			final File[] testEntries = entries;
 
 			// Create a stream of Arguments: (File, currentIndex, totalTests)
-			return IntStream.range(0, totalTests).mapToObj(i -> Arguments.of(entries[i], i + 1, totalTests));
+			return IntStream.range(0, totalTests).mapToObj(i -> Arguments.of(testEntries[i], i + 1, totalTests));
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to read test models from classpath: " + resourcePath, e);
 		}

@@ -1252,7 +1252,10 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 				}
 
 			}else{
-				num = 1;
+				// A model loaded from a file saved before server types existed has no server-type list; the
+				// default type must carry all the servers of the station, not just one.
+				Integer stationServers = model.getStationNumberOfServers(stationKey);
+				num = (stationServers == null || stationServers < 1) ? 1 : stationServers;
 				name = model.getStationName(stationKey) + " - Server Type 1";
 
 				for(int j = 0; j< classes.size(); j++){
