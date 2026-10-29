@@ -565,6 +565,14 @@ public class Server extends ServiceSection {
         return serverNumRequired[class_id];
     }
 
+    /**
+     * Returns the total number of parallel servers configured for this station.
+     * @return number of servers.
+     */
+    public int getNumberOfServers() {
+        return numberOfServers;
+    }
+
     private int getNumberOfAvailableServersForClass(int id) {
         return numberOfAvailableServersPerClass[id];
     }

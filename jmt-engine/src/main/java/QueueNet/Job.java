@@ -298,6 +298,14 @@ public class Job implements Cloneable {
 		this.currentStationSoftDeadline = currentStationSoftDeadline;
 	}
 
+
+	public boolean isToken() {
+		return isToken;
+	}
+
+	public void setToken(boolean isToken) {
+		this.isToken = isToken;
+	}
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Job)) {
