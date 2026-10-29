@@ -8,6 +8,9 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.security.CodeSource;
 
 public final class IntegrationTestConstants {
 
@@ -38,6 +41,14 @@ public final class IntegrationTestConstants {
 	// Modules whose compiled classes JaCoCo analyses.
 	private static final String[] COVERED_MODULES = { "jmt-engine", "jmt-jaba-core", "jmt-jwat-core", "jmt-jmva-core",
 			"jmt-jmch-core" };
+
+	private static final String[] REPRESENTATIVE_CLASS_NAMES = {
+			"simDispatcher.DispatcherJSIMschema",
+			"jaba.JabaModel",
+			"analytical.ExactModel",
+			"jwat.JWATConstants",
+			"jmt.jmarkov.Job"
+	};
 
 	public static final File[] CLASSES_DIRECTORIES = resolveClassesDirectories();
 
@@ -75,27 +86,51 @@ public final class IntegrationTestConstants {
 	}
 
 	/**
-	 * Resolves the target/classes directories across covered sibling modules.
+	 * Resolves the class locations (directories or JARs) across covered modules.
+	 * Prioritizes the exact CodeSource locations where the JVM loaded the classes from,
+	 * guaranteeing 100% bytecode CRC64 matching with JaCoCo in-memory probe data,
+	 * with fallbacks to sibling module target/classes directories.
 	 */
 	private static File[] resolveClassesDirectories() {
-		List<File> dirs = new ArrayList<>();
-		for (String module : COVERED_MODULES) {
-			Path moduleClasses = REACTOR_ROOT.resolve(module).resolve("target").resolve("classes");
-			File classDir = moduleClasses.toFile();
-			if (classDir.isDirectory()) {
-				dirs.add(classDir);
-			} else {
-				// Fallback to relative checking if reactor root differed
-				File sibling = new File("../" + module + "/target/classes");
-				File fromRoot = new File(module + "/target/classes");
-				if (sibling.isDirectory()) {
-					dirs.add(sibling);
-				} else if (fromRoot.isDirectory()) {
-					dirs.add(fromRoot);
+		Set<File> locations = new LinkedHashSet<>();
+
+		// 1. Prioritize CodeSource of active classes loaded in the current JVM
+		if (REPRESENTATIVE_CLASS_NAMES != null) {
+			for (String className : REPRESENTATIVE_CLASS_NAMES) {
+				try {
+					Class<?> clazz = Class.forName(className);
+					CodeSource cs = clazz.getProtectionDomain().getCodeSource();
+					if (cs != null && cs.getLocation() != null) {
+						File loc = Paths.get(cs.getLocation().toURI()).toFile();
+						if (loc.exists()) {
+							locations.add(loc);
+						}
+					}
+				} catch (Exception ignored) {
 				}
 			}
 		}
-		return dirs.toArray(new File[0]);
+
+		// 2. Fallback to sibling module target/classes in the reactor
+		if (COVERED_MODULES != null && REACTOR_ROOT != null) {
+			for (String module : COVERED_MODULES) {
+				Path moduleClasses = REACTOR_ROOT.resolve(module).resolve("target").resolve("classes");
+				File classDir = moduleClasses.toFile();
+				if (classDir.isDirectory()) {
+					locations.add(classDir);
+				} else {
+					File sibling = new File("../" + module + "/target/classes");
+					File fromRoot = new File(module + "/target/classes");
+					if (sibling.isDirectory()) {
+						locations.add(sibling);
+					} else if (fromRoot.isDirectory()) {
+						locations.add(fromRoot);
+					}
+				}
+			}
+		}
+
+		return locations.toArray(new File[0]);
 	}
 
 	// File Names

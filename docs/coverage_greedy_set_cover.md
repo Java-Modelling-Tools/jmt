@@ -29,13 +29,27 @@ jmt/
 ### 1. Generate Coverage Data (JaCoCo Engine)
 To generate the raw coverage data, you **must run the tests using Maven** so the JaCoCo engine successfully attaches. Do not run the tests using IntelliJ's standard run button, as the files will generate with empty data.
 
-**To run via IntelliJ IDEA:**
-1. Double-click the **`Ctrl`** key to open the "Run Anything" window.
-2. Paste the following command and hit Enter:
+#### Command to Run ALL Integration Tests (Terminal or IntelliJ "Run Anything"):
+```bash
+mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am
+```
+*(Or simply: `mvn test -pl jmt-integration-tests -am`)*
+
+This command executes all 4 integration test suites:
+- **`testJSIMGraph`** (JSIMgraph simulations)
+- **`testJMVA`** (JMVA analytical models)
+- **`testJSIMWiz`** (JSIMwiz wizard models)
+- **`testJABA`** (JABA asymptotic bounds)
+
+The `-am` (`--also-make`) flag ensures all dependent modules (`jmt-app`, `jmt-engine`, etc.) are built into the reactor with matching bytecode checksums for JaCoCo.
+
+**To run in IntelliJ IDEA:**
+1. Double-click the **`Ctrl`** key (`Ctrl` + `Ctrl` on Windows/Linux, `Cmd` + `Cmd` on macOS) to open the "Run Anything" window.
+2. Paste:
    ```bash
-   mvn test -Dtest=IntegrationTest -pl jmt-integration-tests
+   mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am
    ```
-3. This triggers the JaCoCo engine over the test suites and calculates the coverage.
+3. Hit **Enter**.
 
 After the tests finish, the generated CSV files (e.g., `jsim_coverage.csv`, `jmva_coverage.csv`) will be created in `jmt/jmt-integration-tests/target/jmt/integration/output`.
 

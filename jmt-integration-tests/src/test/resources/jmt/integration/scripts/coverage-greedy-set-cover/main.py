@@ -83,7 +83,7 @@ def main():
     if not target_csvs:
         print(f"Error: No coverage CSVs found matching '{csv_pattern}'")
         print("Please ensure you have run the integration tests via Maven:")
-        print("  mvn test -Dtest=IntegrationTest -pl jmt-integration-tests")
+        print("  mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am")
         sys.exit(1)
 
     print(f"Found {len(target_csvs)} coverage files to process.")
@@ -131,9 +131,12 @@ def main():
         print("Dashboards skipped due to missing/incomplete test coverage:\n")
         for base_name, reason in skipped_dashboards:
             print(f"   - {base_name}: {reason}")
-        print("\nTo generate the missing dashboards, run the corresponding integration tests with JaCoCo enabled:\n"
-              "   mvn test -Dtest=IntegrationTest#testJSIMGraph -pl jmt-integration-tests\n"
-              "   mvn test -Dtest=IntegrationTest#testJSIMWiz -pl jmt-integration-tests\n")
+        print("\nTo generate the missing dashboards, run the integration tests with JaCoCo enabled:\n"
+              "   # Command for ALL integration tests (recommended):\n"
+              "   mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am\n"
+              "   # Or run specific test suites:\n"
+              "   mvn test -Dtest=IntegrationTest#testJSIMGraph -pl jmt-integration-tests -am\n"
+              "   mvn test -Dtest=IntegrationTest#testJSIMWiz -pl jmt-integration-tests -am\n")
 
 if __name__ == "__main__":
     main()

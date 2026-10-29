@@ -98,6 +98,11 @@ public class CoverageTracker {
 				analyzer.analyzeAll(classesDir);
 			}
 
+			if (!builder.getNoMatchClasses().isEmpty()) {
+				System.err.println("[WARN] JaCoCo: " + builder.getNoMatchClasses().size()
+						+ " classes had execution data but did not match analyzed class files (CRC64 mismatch).");
+			}
+
 			IBundleCoverage bundle = builder.getBundle("JMT");
 
 			// Open CSV in append mode

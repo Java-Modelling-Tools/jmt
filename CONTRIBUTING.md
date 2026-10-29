@@ -32,6 +32,7 @@ For anything non-trivial (new modeling capabilities, schema changes, or anything
     *   `mvn test` - run the JUnit suite. **GUI tests are excluded by default** (see `<excludes>` in the `full` profile of `pom.xml`): `JabaGuiTest`, `JmchGuiTest`, `JmvaGuiTest`, `JSIMgraphGuiTest`, `JSIMwizGuiTest`, `JwatGuiTest`, `MainGuiTest`, and several JMVA batch/data-collection helper classes. These are long-running/FEST-Swing UI tests or data-generation scripts, not part of the regular test loop.
     *   `mvn test -Dtest=ClassName` - run a single test class (standard Surefire).
     *   `mvn test -Dtest=ClassName#methodName` - run a single test method.
+    *   `mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am` (or `mvn test -pl jmt-integration-tests -am`) - run all headless integration tests across JSIM, JMVA, JSIMwiz, and JABA with JaCoCo attached. See [Integration Tests Guide](docs/integration_tests.md).
     *   JaCoCo is wired into `mvn test` automatically (`prepare-agent` + `report` at the `test` phase); report lands at `target/site/jacoco/jacoco.xml`. For per-model coverage analysis and test suite minimization, see the [Coverage Optimization Tool](docs/coverage_greedy_set_cover.md).
 5.  **Launch a specific tool from source:** 
     *   `mvn -Pfull -DskipTests -Dexec.mainClass=jmt.gui.common.startScreen.GraphStartScreen exec:java`

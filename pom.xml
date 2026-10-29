@@ -81,6 +81,7 @@
             <artifactId>maven-surefire-plugin</artifactId>
             <version>3.5.4</version>
             <configuration>
+              <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
               <excludes>
                 <exclude>**/JabaGuiTest.class</exclude>
                 <exclude>**/JmchGuiTest.class</exclude>

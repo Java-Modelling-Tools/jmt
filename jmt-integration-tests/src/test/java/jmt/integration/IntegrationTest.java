@@ -9,6 +9,7 @@ import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL
 import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
 import static jmt.integration.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
 import static jmt.integration.IntegrationTestConstants.OUTPUT_DIR;
+import static jmt.integration.IntegrationTestConstants.TARGET_DIR;
 import static jmt.integration.IntegrationTestConstants.TEST_RESOURCES_INPUT_PREFIX;
 import static jmt.integration.IntegrationTestConstants.TEST_TIMEOUT;
 import static jmt.integration.IntegrationTestConstants.TIMEOUT_CSV_NAME;
@@ -91,6 +92,7 @@ public class IntegrationTest {
 
 		try {
 			Path folderPath = Paths.get(resource.toURI());
+			syncStaleResources(folderPath, testFolderName);
 			File[] entries = FileUtil.listAllFilesAndFoldersInFolder(folderPath);
 			if (entries == null) {
 				return Stream.empty();
@@ -103,6 +105,40 @@ public class IntegrationTest {
 		} catch (Exception e) {
 			throw new RuntimeException("Failed to read test models from classpath: " + resourcePath, e);
 		}
+	}
+
+	private static void syncStaleResources(Path targetFolderPath, String testFolderName) {
+		try {
+			Path moduleDir = TARGET_DIR.getParent();
+			if (moduleDir != null) {
+				Path srcFolder = moduleDir.resolve("src").resolve("test").resolve("resources")
+						.resolve("jmt").resolve("integration").resolve("input").resolve(testFolderName);
+				if (Files.isDirectory(srcFolder)) {
+					File[] targetFiles = FileUtil.listAllFilesAndFoldersInFolder(targetFolderPath);
+					if (targetFiles != null) {
+						for (File targetFile : targetFiles) {
+							Path srcFile = srcFolder.resolve(targetFile.getName());
+							if (!Files.exists(srcFile)) {
+								deleteRecursively(targetFile);
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
+	private static void deleteRecursively(File file) {
+		if (file.isDirectory()) {
+			File[] children = file.listFiles();
+			if (children != null) {
+				for (File child : children) {
+					deleteRecursively(child);
+				}
+			}
+		}
+		file.delete();
 	}
 
 	static Stream<Arguments> jsimGraphTestProvider() {
