@@ -106,3 +106,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+##### Graphify
+graphify-out
+
+.superpowers
+docs/superpowers
