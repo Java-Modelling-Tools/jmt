@@ -219,7 +219,7 @@ Each tool has its own main class. Use these with the fat JAR:
 
 **Run integration tests**
 
-1. Right-click `jmt-integration-tests/src/test/java/linetesting/IntegrationTests.java`.
+1. Right-click `jmt-integration-tests/src/test/java/jmt/integration/IntegrationTest.java`.
 2. Run → Run 'IntegrationTests'.
    *(Note: Integration tests open real Swing windows headlessly. Do not interact with them while tests are running — dialogs are auto-dismissed by the test framework.)*
 

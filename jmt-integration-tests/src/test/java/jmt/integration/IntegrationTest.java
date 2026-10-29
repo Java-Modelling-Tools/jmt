@@ -1,24 +1,29 @@
-package linetesting;
+package jmt.integration;
 
-import static linetesting.IntegrationTestConstants.CLASSES_DIRECTORIES;
-import static linetesting.IntegrationTestConstants.EXCLUDED_PACKAGES;
-import static linetesting.IntegrationTestConstants.JABA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME;
-import static linetesting.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME;
-import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.OUTPUT_FOLDER_PATH;
-import static linetesting.IntegrationTestConstants.TEST_FILES_BASE_FOLDER_PATH;
-import static linetesting.IntegrationTestConstants.TEST_TIMEOUT;
-import static linetesting.IntegrationTestConstants.TIMEOUT_CSV_NAME;
-import static linetesting.IntegrationTestConstants.TIMESTAMP_FORMATTER;
+import static jmt.integration.IntegrationTestConstants.CLASSES_DIRECTORIES;
+import static jmt.integration.IntegrationTestConstants.EXCLUDED_PACKAGES;
+import static jmt.integration.IntegrationTestConstants.JABA_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_FILE_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_LINE_TEST_MODEL_RESULTS_FILE_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.OUTPUT_DIR;
+import static jmt.integration.IntegrationTestConstants.TARGET_DIR;
+import static jmt.integration.IntegrationTestConstants.TEST_RESOURCES_INPUT_PREFIX;
+import static jmt.integration.IntegrationTestConstants.TEST_TIMEOUT;
+import static jmt.integration.IntegrationTestConstants.TIMEOUT_CSV_NAME;
+import static jmt.integration.IntegrationTestConstants.TIMESTAMP_FORMATTER;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -48,47 +53,104 @@ public class IntegrationTest {
 			throw new IOException("No module target/classes directory found. Run 'mvn compile' first.");
 		}
 
-		File outputFolder = new File(OUTPUT_FOLDER_PATH);
-		if (!outputFolder.exists() && !outputFolder.mkdirs()) {
-			throw new IOException("Failed to create output directory: " + outputFolder.getAbsolutePath());
-		}
+		Files.createDirectories(OUTPUT_DIR);
 
-		// Initialize individual CSVs using the helper
-		JSIM_CSV_PATH = initCoverageCsv(outputFolder, "jsim_coverage.csv");
-		JMVA_CSV_PATH = initCoverageCsv(outputFolder, "jmva_coverage.csv");
-		JSIMWIZ_CSV_PATH = initCoverageCsv(outputFolder, "jsimwiz_coverage.csv");
-		JABA_CSV_PATH = initCoverageCsv(outputFolder, "jaba_coverage.csv");
+		// Initialize individual CSVs inside target/jmt/integration/output
+		JSIM_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jsim_coverage.csv");
+		JMVA_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jmva_coverage.csv");
+		JSIMWIZ_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jsimwiz_coverage.csv");
+		JABA_CSV_PATH = initCoverageCsv(OUTPUT_DIR, "jaba_coverage.csv");
 
 		// Setup Timeout CSV
-		TIMEOUT_CSV_PATH = new File(outputFolder, TIMEOUT_CSV_NAME).getAbsolutePath();
-		try (PrintWriter writer = new PrintWriter(new FileWriter(TIMEOUT_CSV_PATH))) {
+		Path timeoutFile = OUTPUT_DIR.resolve(TIMEOUT_CSV_NAME);
+		TIMEOUT_CSV_PATH = timeoutFile.toAbsolutePath().toString();
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(timeoutFile))) {
 			writer.println("FILE_NAME,STATUS,TIMESTAMP");
 		}
 	}
 
 	// Helper method to create a CSV and write the header
-	private static String initCoverageCsv(File folder, String fileName) throws IOException {
-		String absolutePath = new File(folder, fileName).getAbsolutePath();
-		try (PrintWriter writer = new PrintWriter(new FileWriter(absolutePath))) {
+	private static String initCoverageCsv(Path folder, String fileName) throws IOException {
+		Path csvPath = folder.resolve(fileName);
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(csvPath))) {
 			writer.println("TEST_ID,GROUP,PACKAGE,CLASS," + "INSTRUCTION_MISSED,INSTRUCTION_COVERED,"
 					+ "BRANCH_MISSED,BRANCH_COVERED," + "LINE_MISSED,LINE_COVERED,"
 					+ "COMPLEXITY_MISSED,COMPLEXITY_COVERED," + "METHOD_MISSED,METHOD_COVERED,"
 					+ "SPECIFIC_LINES_COVERED,SPECIFIC_LINES_MISSED");
 		}
+		String absolutePath = csvPath.toAbsolutePath().toString();
 		System.out.println("Coverage report ready at: " + absolutePath);
 		return absolutePath;
 	}
 
 	private static Stream<Arguments> testProvider(String testFolderName) {
-		String jsimTestsFolder = TEST_FILES_BASE_FOLDER_PATH + "/" + testFolderName;
-		File[] entries = FileUtil.listAllFilesAndFoldersInFolder(jsimTestsFolder);
-		if (entries == null)
-			return Stream.empty();
+		String resourcePath = TEST_RESOURCES_INPUT_PREFIX + "/" + testFolderName;
+		URL resource = IntegrationTest.class.getResource(resourcePath);
+		if (resource == null) {
+			throw new IllegalArgumentException("Test input folder not found on classpath: " + resourcePath);
+		}
 
-		int totalTests = entries.length;
+		try {
+			Path folderPath = Paths.get(resource.toURI());
+			syncStaleResources(folderPath, testFolderName);
+			File[] entries = FileUtil.listAllFilesAndFoldersInFolder(folderPath);
+			if (entries == null) {
+				return Stream.empty();
+			}
 
-		// Create a stream of Arguments: (File, currentIndex, totalTests)
-		return IntStream.range(0, totalTests).mapToObj(i -> Arguments.of(entries[i], i + 1, totalTests));
+			String modelFilter = System.getProperty("test.model");
+			if (modelFilter == null) {
+				modelFilter = System.getProperty("testModel");
+			}
+			if (modelFilter != null && !modelFilter.trim().isEmpty()) {
+				String filter = modelFilter.trim().toLowerCase();
+				entries = Stream.of(entries)
+						.filter(f -> f.getName().toLowerCase().contains(filter))
+						.toArray(File[]::new);
+			}
+
+			int totalTests = entries.length;
+			final File[] testEntries = entries;
+
+			// Create a stream of Arguments: (File, currentIndex, totalTests)
+			return IntStream.range(0, totalTests).mapToObj(i -> Arguments.of(testEntries[i], i + 1, totalTests));
+		} catch (Exception e) {
+			throw new RuntimeException("Failed to read test models from classpath: " + resourcePath, e);
+		}
+	}
+
+	private static void syncStaleResources(Path targetFolderPath, String testFolderName) {
+		try {
+			Path moduleDir = TARGET_DIR.getParent();
+			if (moduleDir != null) {
+				Path srcFolder = moduleDir.resolve("src").resolve("test").resolve("resources")
+						.resolve("jmt").resolve("integration").resolve("input").resolve(testFolderName);
+				if (Files.isDirectory(srcFolder)) {
+					File[] targetFiles = FileUtil.listAllFilesAndFoldersInFolder(targetFolderPath);
+					if (targetFiles != null) {
+						for (File targetFile : targetFiles) {
+							Path srcFile = srcFolder.resolve(targetFile.getName());
+							if (!Files.exists(srcFile)) {
+								deleteRecursively(targetFile);
+							}
+						}
+					}
+				}
+			}
+		} catch (Exception ignored) {
+		}
+	}
+
+	private static void deleteRecursively(File file) {
+		if (file.isDirectory()) {
+			File[] children = file.listFiles();
+			if (children != null) {
+				for (File child : children) {
+					deleteRecursively(child);
+				}
+			}
+		}
+		file.delete();
 	}
 
 	static Stream<Arguments> jsimGraphTestProvider() {

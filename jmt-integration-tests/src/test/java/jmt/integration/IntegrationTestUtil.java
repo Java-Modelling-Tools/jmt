@@ -1,13 +1,16 @@
-package linetesting;
+package jmt.integration;
 
-import static linetesting.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
-import static linetesting.IntegrationTestConstants.STABILITY_TRESHOLD;
+import static jmt.integration.IntegrationTestConstants.JMVA_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMGRAPH_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.JSIMWIZ_TESTS_FOLDER_NAME;
+import static jmt.integration.IntegrationTestConstants.OUTPUT_DIR;
+import static jmt.integration.IntegrationTestConstants.STABILITY_THRESHOLD;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,50 +47,60 @@ public class IntegrationTestUtil {
 			throw new RuntimeException("Line test model does not have parent folder");
 		}
 
-		List<String> folderHierarchy = new ArrayList<>();
-		folderHierarchy.add("linetesting");
-		folderHierarchy.add("output");
-		folderHierarchy.add(toolFolderName);
-
+		Path folder = OUTPUT_DIR.resolve(toolFolderName);
 		if (!parentFolderName.equals(toolFolderName)) {
-			folderHierarchy.add(parentFolderName);
+			folder = folder.resolve(parentFolderName);
 		}
 
-		File modelOutputFile = FileUtil.createFileInTestResources(folderHierarchy, testModel.getName());
+		Files.createDirectories(folder);
+		File modelOutputFile = folder.resolve(testModel.getName()).toFile();
 
-		if (!modelOutputFile.exists()) {
-			throw new FileNotFoundException("Could not create model output file");
+		// If a 0-byte stub exists from a previous aborted run, clean it up
+		if (modelOutputFile.exists() && modelOutputFile.length() == 0) {
+			modelOutputFile.delete();
 		}
 
 		return modelOutputFile;
 	}
 
 	private static File testJSIMGraph(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JSIMGRAPH_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJSimGraph(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JSIMGraph test", e);
 		}
 	}
 
 	private static File testJMVA(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JMVA_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJMVA(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JMVA test", e);
 		}
 	}
 
 	private static File testJSIMWiz(File testModel) {
+		File modelOutputFile = null;
 		try {
-			File modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
+			modelOutputFile = createOutputFile(testModel, JSIMWIZ_TESTS_FOLDER_NAME);
 			HeadlessSolver.solveJSimWiz(testModel, modelOutputFile);
 			return modelOutputFile;
 		} catch (Exception e) {
+			if (modelOutputFile != null && modelOutputFile.exists() && modelOutputFile.length() == 0) {
+				modelOutputFile.delete();
+			}
 			throw new RuntimeException("Error executing JSIMWiz test", e);
 		}
 	}
@@ -155,7 +168,12 @@ public class IntegrationTestUtil {
 		}
 	}
 
-	private static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues) {
+		return checkResults(testModelFinalValues, simulatedModelFinalValues, STABILITY_THRESHOLD);
+	}
+
+	public static boolean checkResults(List<String> testModelFinalValues, List<String> simulatedModelFinalValues,
+			double threshold) {
 		// If the oracle has no stored results, the model has no baseline to compare against.
 		// This means it is a functional test only: just verify the simulation ran (which
 		// testJSIMGraph already guarantees by returning a file). Always pass.
@@ -192,10 +210,10 @@ public class IntegrationTestUtil {
 
 				double smape = ratio * 100.0;
 
-				// Check against the threshold
-				if (smape >= STABILITY_TRESHOLD) {
+				// Check against the tolerance threshold
+				if (smape >= threshold) {
 					System.err.println("Unstable result at index " + i + ": Expected ~" + oldVal + ", Got " + newVal
-							+ " (Difference: " + String.format("%.2f", smape) + "%)");
+							+ " (Difference: " + String.format("%.2f", smape) + "%, Threshold: " + threshold + "%)");
 					return false; // Fails the check the moment a value exceeds the threshold
 				}
 
@@ -207,11 +225,15 @@ public class IntegrationTestUtil {
 			}
 		}
 
-		// If it makes it through the loop, all values are within the 5% tolerance
+		// If it makes it through the loop, all values are within the tolerance threshold
 		return true;
 	}
 
 	public static boolean testLineJSIMGraphModel(File testModel, File testResults) {
+		return testLineJSIMGraphModel(testModel, testResults, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testLineJSIMGraphModel(File testModel, File testResults, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMGraph(testModel);
 
@@ -219,7 +241,7 @@ public class IntegrationTestUtil {
 
 			List<String> expectedMeanValues = getExpectedMeanValues(testResults);
 
-			return checkResults(expectedMeanValues, actualValues);
+			return checkResults(expectedMeanValues, actualValues, threshold);
 
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMGraph line test: " + testModel.getName(), e);
@@ -227,20 +249,27 @@ public class IntegrationTestUtil {
 	}
 
 	public static boolean testJSIMGraphModel(File testModel) {
+		return testJSIMGraphModel(testModel, STABILITY_THRESHOLD);
+	}
 
+	public static boolean testJSIMGraphModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMGraph(testModel);
 
 			List<String> expectedValues = getJSIMGraphModelFinalValues(testModel);
 			List<String> actualValues = getJSIMGraphModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMGraph test: " + testModel.getName(), e);
 		}
 	}
 
 	public static boolean testJMVAModel(File testModel) {
+		return testJMVAModel(testModel, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testJMVAModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJMVA(testModel);
 
@@ -255,25 +284,27 @@ public class IntegrationTestUtil {
 			List<String> expectedValues = getJMVAModelFinalValues(testModel);
 			List<String> actualValues = getJMVAModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JMVA test: " + testModel.getName(), e);
 		}
-
 	}
 
 	public static boolean testJSIMWizModel(File testModel) {
+		return testJSIMWizModel(testModel, STABILITY_THRESHOLD);
+	}
+
+	public static boolean testJSIMWizModel(File testModel, double threshold) {
 		try {
 			File simulatedModelFile = testJSIMWiz(testModel);
 
 			List<String> expectedValues = getJSIMWizModelFinalValues(testModel);
 			List<String> actualValues = getJSIMWizModelFinalValues(simulatedModelFile);
 
-			return checkResults(expectedValues, actualValues);
+			return checkResults(expectedValues, actualValues, threshold);
 		} catch (Exception e) {
 			throw new RuntimeException("Simulation crashed for JSIMWiz test: " + testModel.getName(), e);
 		}
-
 	}
 
 	public static boolean testJABAModel(File testModel) {

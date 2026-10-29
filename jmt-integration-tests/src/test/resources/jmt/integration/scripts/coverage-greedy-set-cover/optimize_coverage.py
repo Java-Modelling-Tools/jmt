@@ -189,7 +189,7 @@ def main():
     
     if not os.path.exists(input_csv):
         print(f"Error: Input file not found: {input_csv}")
-        return
+        sys.exit(1)
 
     script_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.join(script_dir, 'output')
@@ -202,8 +202,8 @@ def main():
     test_map, universe = parse_csv_line_data(input_csv)
     
     if not test_map:
-        print("No valid data found in CSV.")
-        return
+        print(f"No valid data or covered lines found in '{os.path.basename(input_csv)}'.")
+        sys.exit(1)
 
     keep_reasons, discard_reasons = run_set_cover_optimization(test_map, universe)
     print(f"RESULTS: Kept {len(keep_reasons)} files. Discarded {len(discard_reasons)} files.")

@@ -32,13 +32,14 @@ For anything non-trivial (new modeling capabilities, schema changes, or anything
     *   `mvn test` - run the JUnit suite. **GUI tests are excluded by default** (see `<excludes>` in the `full` profile of `pom.xml`): `JabaGuiTest`, `JmchGuiTest`, `JmvaGuiTest`, `JSIMgraphGuiTest`, `JSIMwizGuiTest`, `JwatGuiTest`, `MainGuiTest`, and several JMVA batch/data-collection helper classes. These are long-running/FEST-Swing UI tests or data-generation scripts, not part of the regular test loop.
     *   `mvn test -Dtest=ClassName` - run a single test class (standard Surefire).
     *   `mvn test -Dtest=ClassName#methodName` - run a single test method.
-    *   JaCoCo is wired into `mvn test` automatically (`prepare-agent` + `report` at the `test` phase); report lands at `target/site/jacoco/jacoco.xml`. `extract_coverage.py` at the repo root parses that report into a readable line/instruction coverage table (`python3 extract_coverage.py [xml_file] [output_file] [--all]`).
+    *   `mvn test -Dtest=IntegrationTest -pl jmt-integration-tests -am` (or `mvn test -pl jmt-integration-tests -am`) - run all headless integration tests across JSIM, JMVA, JSIMwiz, and JABA with JaCoCo attached. See [Integration Tests Guide](docs/integration_tests.md).
+    *   JaCoCo is wired into `mvn test` automatically (`prepare-agent` + `report` at the `test` phase); report lands at `target/site/jacoco/jacoco.xml`. For per-model coverage analysis and test suite minimization, see the [Coverage Optimization Tool](docs/coverage_greedy_set_cover.md).
 5.  **Launch a specific tool from source:** 
     *   `mvn -Pfull -DskipTests -Dexec.mainClass=jmt.gui.common.startScreen.GraphStartScreen exec:java`
 6.  **Debug a running instance:** 
     *   The VS Code task "Maven: exec:java debug GraphStartScreen (8000)" launches the suite with a JDWP agent on port 8000 (`MAVEN_OPTS='-agentlib:jdwp=...' mvn -Pfull -DskipTests -Dexec.mainClass=jmt.gui.common.startScreen.GraphStartScreen exec:java`); attach with the "Attach to Maven exec:java (8000)" launch config.
 7.  **Headless/CLI mode (no GUI):** 
-    *   `java -cp <jar> jmt.commandline.Jmt [mva|sim|jsimw|jsimg] <modelfile.xml> [-seed N] [-maxtime N]` drives `jmva.engine.SolverDispatcher` or `jmt.engine.simDispatcher.DispatcherJSIMschema` directly against a model XML file.
+    *   `java -cp <jar> jmt.commandline.Jmt [mva|sim|jsimw|jsimg] <modelfile.xml> [-seed N] [-maxtime N]` drives `solvers.dispatchers.SolverDispatcher` or `simDispatcher.DispatcherJSIMschema` directly against a model XML file. See the [Headless CLI Reference Guide](docs/cli_reference.md) for complete options and usage examples.
 8.  **Legacy packaging:** 
     *   There's a separate `jmva` Maven profile (`-Pjmva -Dmode=jmva`) that builds a JMVA-only jar targeting Java 1.7 with a different main class (`jmt.jmva.JMVAWizard`) - a legacy/standalone packaging path, distinct from the default `full` profile.
 
@@ -51,9 +52,9 @@ For anything non-trivial (new modeling capabilities, schema changes, or anything
 3.  Match the existing code style in the file/package you're editing (indentation, brace style, naming). There is no enforced formatter/linter configuration in this repo, so consistency with surrounding code is the standard to follow.
 4.  Add or update tests for any behavior change:
     *   Unit tests under `src/test/java`.
-    *   For simulation/analytical solver correctness fixes, use `JUnit-jsim.pl` / `JUnit-jmva.pl` to generate input/output fixtures and a test stub from a model file, rather than hand-writing new fixture formats. These helper scripts turn a hand-built model file into a regression test by running the model through `jmt.commandline.Jmt`, splitting the file into `<test>-input.xml` / `<test>-output.xml` fixtures, and stamping out a test method from `JUnitTemplate-jsim.java` / `JUnitTemplate-jmva.java`. 
+    *   For simulation/analytical solver correctness fixes, add new models directly to the integration test suite (`jmt-integration-tests/src/test/resources/jmt/integration/input/`). See [Adding New Test Models & Oracles](docs/integration_tests.md#9-adding-new-test-models--oracles) for the end-to-end workflow on creating baseline oracles and running stability checks. 
     *   If your change affects the model XML format, keep `src/main/resources/jmt/common/xml` schemas and any XSLT converters in sync.
-    *   Check whether the `linetesting` integration suite needs new sample models.
+    *   Check whether the `jmt.integration` suite needs new sample models.
 5.  Run `mvn test` locally before opening a PR. GUI tests (`*GuiTest`) are excluded from the default run - if your change affects GUI behavior, note in the PR description how you tested it (running the excluded GUI tests locally, or manual testing steps).
 6.  Update documentation as needed - this includes user-facing docs (`manuals/`, in-app help) as well as updating this contributing guide if you change the architecture or build/test workflow it describes.
 
@@ -88,9 +89,9 @@ Don't assume a fix in one engine applies to the other, and don't assume `jmt.com
 
 `jmt.gui.common.startScreen.GraphStartScreen` (the default `mainClass` in `pom.xml`) is the suite launcher screen; clicking a tool icon instantiates that tool's own main class: `JSIMWizMain`, `JSIMGraphMain`, `JMVAWizard`, `JabaWizard`, `MainJwatWizard` (jwat), `MainWizard` (jmch). Each of these also has a standalone `main()`. `jmt.commandline.Jmt` is the headless entry point for running solves from scripts/CI without any GUI involved.
 
-### Integration Testing (`linetesting`)
+### Integration Testing (`jmt.integration`)
 
-`src/test/java/linetesting/IntegrationTest.java` is a separate, parameterized JUnit 5 integration suite (distinct from the regular unit tests) that runs every model file under `src/test/resources/linetesting/input/{jsim,jsimw,jmva,jaba,jwat}` through the corresponding engine, tracks per-line bytecode coverage via `linetesting.CoverageTracker`, and writes `*_coverage.csv` / `timeouts.csv` reports to `src/test/resources/linetesting/output/`. It requires `target/classes` to already exist (`mvn compile` first) and excludes GUI packages from coverage (`jmt/framework/gui`, `jmt/gui`, `jmt/jmva/gui`, `jmt/commandline`) since it drives engines directly rather than through the UI.
+`jmt-integration-tests/src/test/java/jmt/integration/IntegrationTest.java` is a parameterized JUnit 5 integration suite (distinct from the regular unit tests) that runs every model file under `src/test/resources/jmt/integration/input/{jsim,jsimw,jmva,jaba}` through the corresponding engine, tracks per-line bytecode coverage via `jmt.integration.CoverageTracker`, and writes `*_coverage.csv` / `timeouts.csv` reports to `target/jmt/integration/output/`. It requires `target/classes` to already exist (`mvn compile` first) and isolates coverage to core computation modules (`jmt-engine`, `jmt-jmva-core`, `jmt-jaba-core`, `jmt-jwat-core`, `jmt-jmch-core`). For full execution commands, IntelliJ setup, and oracle stability check details, see the [JMT Integration Testing Guide](docs/integration_tests.md).
 
 ---
 
@@ -109,7 +110,7 @@ JMT is organized into a layered 16-module Maven project. Modules belong to expli
 ### Layer 2: File Serialization
 *   **`jmt-file-handler`**: Centralized model serialization layer decoupled from UI components. Owns `XMLWriter`, `XMLReader`, `XMLResultsWriter`, `XMLResultsReader`, and schema constant interfaces (`GuiXMLConstants`, `PNMLConstants`). Depends on `jmt-gui` and transitively on `jmt-engine`.
 
-*   **`jmt-legacy-xml`**: Exports model XML (`.jsimg`, `.jsimw`, simulation input) in the format of earlier releases (up to 1.4.0). The refactoring renamed Java packages, and the XML stores them in `classPath` attributes, so old releases cannot read files saved by current code; the schemas themselves are unchanged. JDK-only. CLI: `java -cp jmt-legacy-xml.jar legacyxml.LegacyXmlExporter <in> <out> [1.4.0|current]`. When you rename a package whose classes appear in saved XML, update the root lists in `LegacyXmlExporter`.
+*   **`jmt-legacy-xml`**: Exports model XML (`.jsimg`, `.jsimw`, simulation input) in the format of earlier releases (up to 1.4.0). The refactoring renamed Java packages, and the XML stores them in `classPath` attributes, so old releases cannot read files saved by current code; the schemas themselves are unchanged. JDK-only. CLI: `java -cp jmt-legacy-xml.jar legacyxml.LegacyXmlExporter <in> <out> [1.4.0|current]`. When you rename a package whose classes appear in saved XML, update the root lists in `LegacyXmlExporter`. See the [Legacy XML Compatibility Guide](docs/legacy_xml_converter.md) for full details.
 
 ### Layer 3: Analytical & Computation Cores
 *   **`jmt-jmva-core`**: JMVA analytical solver. Owns all MVA algorithms (exact, approximate, AMVA, CoMoM, Tree MVA, Tree Convolution, Monte Carlo, RECAL), `analytical.ExactModel`, `QNModel`, `PopulationVector`, `BigRational`, and the CLI solver entry point.

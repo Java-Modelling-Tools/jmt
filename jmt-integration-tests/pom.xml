@@ -13,7 +13,7 @@
 
     <!--
         End-to-end and cross-module integration tests.
-        Contains: linetesting framework (IntegrationTest, IntegrationTestUtil, …).
+        Contains: integration test framework (IntegrationTest, IntegrationTestUtil, …).
         These run headless — HeadlessSolver drives the engine and the analytical
         solvers directly, so no Swing component is ever constructed.
         GUI tests (JabaGuiTest, MainGuiTest, …) live in jmt-app/src/test/java

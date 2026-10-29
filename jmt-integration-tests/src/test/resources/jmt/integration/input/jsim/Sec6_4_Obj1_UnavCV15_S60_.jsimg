@@ -1,0 +1,463 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" jmtVersion="1.4.0-refac_legacy" name="Sec6_4_Obj1_UnavCV15_S60_.jsimg" timestamp="Thu Oct 29 15:51:42 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
+<sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\calog\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="Sec6_4_Obj1_UnavCV15_S60_.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass name="ComReq" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+<userClass customers="200" name="NodeUn" priority="1" referenceSource="Available" softDeadline="0.0" type="closed"/>
+<node name="Source 1">
+<section className="RandomSource">
+<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>4.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<value>null</value>
+</subParameter>
+</parameter>
+</section>
+<section className="ServiceTunnel"/>
+<section className="Router">
+<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CompServers</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="Sink 1">
+<section className="JobSink"/>
+</node>
+<node name="Available">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Delay">
+<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.016666666666666666</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="CompServers">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<quantumSize>
+<quantaSize>0.0</quantaSize>
+</quantumSize>
+<quantumSwitchoverTime>
+<quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+</quantumSwitchoverTime>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>200</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.25</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+<subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="serverParallelism">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="serverParallelism">
+<value>1</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.String" name="serverNames">
+<subParameter classPath="java.lang.String" name="serverTypesNames">
+<value>CompServers - Server Type 1</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+<subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+<value>200</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+<subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+<subParameter classPath="java.lang.Boolean" name="compatibilities">
+<value>true</value>
+</subParameter>
+<subParameter classPath="java.lang.Boolean" name="compatibilities">
+<value>true</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="java.lang.String" name="schedulingPolicy">
+<value>ALIS (Assign Longest Idle Server)</value>
+</subParameter>
+<subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="Unavailable">
+<classSoftDeadlines>
+<softDeadline>0.0</softDeadline>
+<softDeadline>0.0</softDeadline>
+</classSoftDeadlines>
+<quantumSize>
+<quantaSize>0.0</quantaSize>
+</quantumSize>
+<quantumSwitchoverTime>
+<quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+</quantumSwitchoverTime>
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.Exponential" name="Exponential"/>
+<subParameter classPath="random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.2</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="random.HyperExp" name="Hyperexponential"/>
+<subParameter classPath="random.HyperExpPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="p">
+<value>0.0022173058256554357</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="lambda1">
+<value>0.004434611651310871</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="lambda2">
+<value>1.9955653883486892</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+<parameter classPath="java.util.HashMap" map="true" name="advancedFeatures">
+<subParameter array="true" classPath="java.lang.Integer" name="classParallelism">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="serverParallelism">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="serverParallelism">
+<value>1</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.String" name="serverNames">
+<subParameter classPath="java.lang.String" name="serverTypesNames">
+<value>Unavailable - Server Type 1</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+<subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+<value>1</value>
+</subParameter>
+</subParameter>
+<subParameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+<subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+<subParameter classPath="java.lang.Boolean" name="compatibilities">
+<value>true</value>
+</subParameter>
+<subParameter classPath="java.lang.Boolean" name="compatibilities">
+<value>true</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<subParameter classPath="java.lang.String" name="schedulingPolicy">
+<value>ALIS (Assign Longest Idle Server)</value>
+</subParameter>
+<subParameter classPath="NetStrategies.VacationStrategies.NoVacationStrategy" name="vacationStrategy"/>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<measure alpha="0.01" name="CompServers_ComReq_Utilization" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Response Time" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Throughput" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Number of Customers" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Unavailable_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceNode="Unavailable" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="CrowdPlatform_NodeUn_Number of Customers" nodeType="region" precision="0.03" referenceNode="CrowdPlatform" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Available_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceNode="Available" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Available_Response Time" nodeType="station" precision="0.03" referenceNode="Available" referenceUserClass="" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="CrowdPlatform_ComReq_Number of Customers" nodeType="region" precision="0.03" referenceNode="CrowdPlatform" referenceUserClass="ComReq" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Unavailable_NodeUn_Utilization" nodeType="station" precision="0.03" referenceNode="Unavailable" referenceUserClass="NodeUn" type="Utilization" verbose="false"/>
+<connection source="Source 1" target="CompServers"/>
+<connection source="Available" target="Unavailable"/>
+<connection source="CompServers" target="Sink 1"/>
+<connection source="Unavailable" target="Available"/>
+<blockingRegion name="CrowdPlatform" type="default">
+<regionNode nodeName="CompServers"/>
+<regionNode nodeName="Unavailable"/>
+<globalConstraint maxJobs="200"/>
+<globalMemoryConstraint maxMemory="-1"/>
+<classConstraint jobClass="ComReq" maxJobsPerClass="-1"/>
+<classConstraint jobClass="NodeUn" maxJobsPerClass="-1"/>
+<classMemoryConstraint jobClass="ComReq" maxMemoryPerClass="-1"/>
+<classMemoryConstraint jobClass="NodeUn" maxMemoryPerClass="-1"/>
+<dropRules dropThisClass="false" jobClass="ComReq"/>
+<dropRules dropThisClass="false" jobClass="NodeUn"/>
+<classWeight jobClass="ComReq" weight="1"/>
+<classWeight jobClass="NodeUn" weight="1"/>
+<classSize jobClass="ComReq" size="1"/>
+<classSize jobClass="NodeUn" size="1"/>
+<classSoftDeadline jobClass="ComReq" softDeadline="0.0"/>
+<classSoftDeadline jobClass="NodeUn" softDeadline="0.0"/>
+</blockingRegion>
+<preload>
+<stationPopulations stationName="Unavailable">
+<classPopulation population="200" refClass="NodeUn"/>
+</stationPopulations>
+</preload>
+</sim>
+<jmodel xsi:noNamespaceSchemaLocation="JModelGUI.xsd">
+<userClass color="#FF0000FF" name="ComReq"/>
+<userClass color="#FFFF0000" name="NodeUn"/>
+<station name="Source 1">
+<position angle="0.0" rotate="false" x="76.0" y="144.0"/>
+</station>
+<station name="Sink 1">
+<position angle="0.0" rotate="false" x="443.0" y="144.0"/>
+</station>
+<station name="Available">
+<position angle="0.0" rotate="true" x="264.0" y="335.0"/>
+</station>
+<station name="CompServers">
+<position angle="0.0" rotate="false" x="248.0" y="141.0"/>
+</station>
+<station name="Unavailable">
+<position angle="0.0" rotate="false" x="257.0" y="245.0"/>
+</station>
+</jmodel>
+<results elapsedTime="0" logDecimalSeparator="." logDelimiter="," pollingInterval="1.0" xsi:noNamespaceSchemaLocation="Results.xsd">
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="2920" finalValue="0.08016349977062183" name="CompServers_ComReq_Utilization" nodeType="station" precision="0.03" referenceClass="ComReq" referenceStation="CompServers" state="2" type="6">
+<sample lastIntervalAvgValue="0.08016349977062183" lowerBound="0.07628871170814076" meanValue="0.08016349977062183" simulationTime="0.08016349977062183" upperBound="0.0840382878331029"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="35840" discardedSamples="835" finalValue="3.985583331841352" name="CompServers_ComReq_Response Time" nodeType="station" precision="0.03" referenceClass="ComReq" referenceStation="CompServers" state="1" type="2">
+<sample lastIntervalAvgValue="3.985583331841352" lowerBound="3.894833429407282" meanValue="3.985583331841352" simulationTime="3.985583331841352" upperBound="4.076333234275422"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="942080" discardedSamples="0" finalValue="4.00138188248265" name="CompServers_ComReq_Throughput" nodeType="station" precision="0.03" referenceClass="ComReq" referenceStation="CompServers" state="1" type="5">
+<sample lastIntervalAvgValue="4.00138188248265" lowerBound="3.907217289092407" meanValue="4.00138188248265" simulationTime="4.00138188248265" upperBound="4.100197327227947"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="10585" finalValue="16.008283763951983" name="CompServers_ComReq_Number of Customers" nodeType="station" precision="0.03" referenceClass="ComReq" referenceStation="CompServers" state="2" type="0">
+<sample lastIntervalAvgValue="16.008283763951983" lowerBound="15.15102690978901" meanValue="16.008283763951983" simulationTime="16.008283763951983" upperBound="16.865540618114956"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="573440" discardedSamples="26345" finalValue="138.36877924821835" name="Unavailable_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceClass="NodeUn" referenceStation="Unavailable" state="1" type="0">
+<sample lastIntervalAvgValue="138.36877924821835" lowerBound="134.93381580402323" meanValue="138.36877924821835" simulationTime="138.36877924821835" upperBound="141.80374269241346"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="0" finalValue="120.91272434822085" name="Network_All classes_System Response Time" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" state="2" type="15">
+<sample lastIntervalAvgValue="120.91272434822085" lowerBound="107.28149503490057" meanValue="120.91272434822085" simulationTime="120.91272434822085" upperBound="134.54395366154114"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="1802240" discardedSamples="940" finalValue="5.057691344191782" name="Network_All classes_System Throughput" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" state="1" type="16">
+<sample lastIntervalAvgValue="5.057691344191782" lowerBound="4.970880511965455" meanValue="5.057691344191782" simulationTime="5.057691344191782" upperBound="5.14758817685872"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="11840" finalValue="599.1807577315025" name="Network_All classes_System Number of Customers" nodeType="" precision="0.03" referenceClass="All classes" referenceStation="Network" state="2" type="14">
+<sample lastIntervalAvgValue="599.1807577315025" lowerBound="514.6187905870988" meanValue="599.1807577315025" simulationTime="599.1807577315025" upperBound="683.7427248759061"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="3932160" discardedSamples="51970" finalValue="60.33092012083705" name="Available_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceClass="NodeUn" referenceStation="Available" state="1" type="0">
+<sample lastIntervalAvgValue="60.33092012083705" lowerBound="58.734804531555106" meanValue="60.33092012083705" simulationTime="60.33092012083705" upperBound="61.92703571011899"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10240" discardedSamples="95" finalValue="200.00000000000003" name="Network_NodeUn_System Number of Customers" nodeType="" precision="0.03" referenceClass="NodeUn" referenceStation="Network" state="1" type="14">
+<sample lastIntervalAvgValue="200.00000000000003" lowerBound="194.2703133736591" meanValue="200.00000000000003" simulationTime="200.00000000000003" upperBound="205.72968662634096"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="8200" finalValue="100.91481058904763" name="Network_ComReq_System Response Time" nodeType="" precision="0.03" referenceClass="ComReq" referenceStation="Network" state="2" type="15">
+<sample lastIntervalAvgValue="100.91481058904763" lowerBound="85.81689844144275" meanValue="100.91481058904763" simulationTime="100.91481058904763" upperBound="116.01272273665252"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="2621440" discardedSamples="6110" finalValue="200.2757132864954" name="Network_NodeUn_System Response Time" nodeType="" precision="0.03" referenceClass="NodeUn" referenceStation="Network" state="1" type="15">
+<sample lastIntervalAvgValue="200.2757132864954" lowerBound="195.36979109509943" meanValue="200.2757132864954" simulationTime="200.2757132864954" upperBound="205.18163547789138"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="46080" discardedSamples="1345" finalValue="59.88110838415212" name="Available_All classes_Response Time" nodeType="station" precision="0.03" referenceClass="All classes" referenceStation="Available" state="1" type="2">
+<sample lastIntervalAvgValue="59.88110838415212" lowerBound="58.72899315592502" meanValue="59.88110838415212" simulationTime="59.88110838415212" upperBound="61.033223612379224"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="5260" finalValue="394.9943981075005" name="Network_ComReq_System Number of Customers" nodeType="" precision="0.03" referenceClass="ComReq" referenceStation="Network" state="2" type="14">
+<sample lastIntervalAvgValue="394.9943981075005" lowerBound="312.5344746480192" meanValue="394.9943981075005" simulationTime="394.9943981075005" upperBound="477.4543215669818"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="942080" discardedSamples="0" finalValue="4.00138188248265" name="Network_ComReq_System Throughput" nodeType="" precision="0.03" referenceClass="ComReq" referenceStation="Network" state="1" type="16">
+<sample lastIntervalAvgValue="4.00138188248265" lowerBound="3.907217289092407" meanValue="4.00138188248265" simulationTime="4.00138188248265" upperBound="4.100197327227947"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="2621440" discardedSamples="5910" finalValue="0.9986160014846656" name="Network_NodeUn_System Throughput" nodeType="" precision="0.03" referenceClass="NodeUn" referenceStation="Network" state="1" type="16">
+<sample lastIntervalAvgValue="0.9986160014846656" lowerBound="0.9748851732526633" meanValue="0.9986160014846656" simulationTime="0.9986160014846656" upperBound="1.023530974459369"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="12800" discardedSamples="68820" finalValue="1.0" name="Unavailable_NodeUn_Utilization" nodeType="station" precision="0.03" referenceClass="NodeUn" referenceStation="Unavailable" state="1" type="6">
+<sample lastIntervalAvgValue="1.0" lowerBound="0.9713515668682959" meanValue="1.0" simulationTime="1.0" upperBound="1.028648433131704"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="491520" discardedSamples="63540" finalValue="138.4700791506237" name="CrowdPlatform_NodeUn_Number of Customers" nodeType="region" precision="0.03" referenceClass="NodeUn" referenceStation="CrowdPlatform" state="1" type="0">
+<sample lastIntervalAvgValue="138.4700791506237" lowerBound="135.05414317527632" meanValue="138.4700791506237" simulationTime="138.4700791506237" upperBound="141.88601512597106"/>
+</measure>
+<measure alpha="0.99" analyzedSamples="10000000" discardedSamples="5260" finalValue="394.9943981075005" name="CrowdPlatform_ComReq_Number of Customers" nodeType="region" precision="0.03" referenceClass="ComReq" referenceStation="CrowdPlatform" state="2" type="0">
+<sample lastIntervalAvgValue="394.9943981075005" lowerBound="312.5344746480192" meanValue="394.9943981075005" simulationTime="394.9943981075005" upperBound="477.4543215669818"/>
+</measure>
+</results>
+</archive>

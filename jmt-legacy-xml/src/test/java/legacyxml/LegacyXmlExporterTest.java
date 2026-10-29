@@ -23,7 +23,7 @@ class LegacyXmlExporterTest {
 
 	private static final File OLD_FORMAT_DIR = new File("../jmt-app/src/test/resources/commandline");
 	private static final File CURRENT_FORMAT_SAMPLE = new File(
-			"../jmt-integration-tests/src/test/resources/linetesting/input/jsim/1Fork2JoinOK.jsimg");
+			"../jmt-integration-tests/src/test/resources/jmt/integration/input/jsim/1Fork2JoinOK.jsimg");
 
 	@Test
 	void mapsEachRootBothWays() {
