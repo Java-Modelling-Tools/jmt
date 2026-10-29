@@ -14,6 +14,9 @@ Welcome to the central documentation directory for **Java Modelling Tools (JMT)*
 * **[Adding New Test Models & Oracles](integration_tests.md#9-adding-new-test-models--oracles)**  
   Step-by-step developer walkthrough for adding new simulation or analytical models to the integration test suite, establishing baseline oracles, and verifying numerical stability.
 
+* **[Station Utilization Checker](utilization_checker.md)**  
+  Automated diagnostic tool (`utilization_checker.py`) for scanning test models and simulation outputs to identify stations operating at 100% saturation ($U = 1.0$), bottlenecks, and heavy-load asymptotic limits.
+
 * **[Regression Testing Diff Checker](jsim_diff_check.md)**  
   Automated tool for detecting numerical regressions between JMT versions. Compares performance metrics extracted from simulation runs and generates detailed stability reports (`comparison_detailed.csv` and `comparison_summary.csv`).
 
@@ -63,5 +66,6 @@ Welcome to the central documentation directory for **Java Modelling Tools (JMT)*
 | [`coverage_greedy_set_cover.md`](coverage_greedy_set_cover.md) | Test suite minimization & coverage dashboards | Test Engineers, Core Contributors |
 | [`jsim_diff_check.md`](jsim_diff_check.md) | Regression testing diff analysis | Release Managers, QA |
 | [`classes_and_lines_counter.md`](classes_and_lines_counter.md) | Code metrics & line/class counting | Developers, Reviewers |
+| [`utilization_checker.md`](utilization_checker.md) | Saturated station ($U = 1.0$) analysis & bottleneck detection | Performance Engineers, Testers |
 | [`legacy_xml_converter.md`](legacy_xml_converter.md) | Bidirectional XML model compatibility | Core Developers, Integrators |
 | [`../CONTRIBUTING.md`](../CONTRIBUTING.md) | Project architecture, setup & guidelines | All Contributors |
