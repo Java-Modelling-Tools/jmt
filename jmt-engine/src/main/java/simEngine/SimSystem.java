@@ -174,7 +174,7 @@ public class SimSystem {
 	 * on the fly.
 	 * @param e A reference to the new entity
 	 */
-	synchronized void addEntityDynamically(SimEntity e) {
+	void addEntityDynamically(SimEntity e) {
 		e.setId(entities.size());
 		entities.add(e);
 		entityNameHash.put(e.getName(), e);
@@ -255,13 +255,13 @@ public class SimSystem {
 
 	// Entity helper methods
 
-	synchronized RemoveToken hold(int src, double delay) {
+	RemoveToken hold(int src, double delay) {
 		SimEvent e = new SimEvent(SimEvent.HOLD_DONE, clock + delay, src);
 		future.add(e);
 		return new RemoveToken(e);
 	}
 
-	synchronized RemoveToken send(int src, int dest, double delay, int tag, Object data) {
+	RemoveToken send(int src, int dest, double delay, int tag, Object data) {
 		SimEvent e = new SimEvent(SimEvent.SEND, clock + delay, src, dest, tag, data);
 		if ((tag & NetEvent.EVENT_MASK) == NetEvent.EVENT_TIMING) {
 			timing.add(e);
@@ -276,7 +276,7 @@ public class SimSystem {
 	 * @param token the remove token
 	 * @return true if the event was found and removed, false otherwise.
 	 */
-	synchronized boolean remove(RemoveToken token) {
+	boolean remove(RemoveToken token) {
 		SimEvent e = token.getEvent();
 		if (token.isDeferred()) {
 			return deferred.remove(e);
@@ -289,11 +289,11 @@ public class SimSystem {
 		}
 	}
 
-	synchronized void wait(int src) {
+	void wait(int src) {
 
 	}
 
-	synchronized int waiting(int d, SimPredicate p) {
+	int waiting(int d, SimPredicate p) {
 		SimEvent ev = null;
 		int w = 0;
 		for (Object element : deferred) {
@@ -310,7 +310,7 @@ public class SimSystem {
 	// Extract the first event whose destination is `src` on the
 	// deferred queue, matched by the `predicate`. And then put it
 	// into the `src`'s event buffer
-	synchronized void select(int src, SimPredicate p) {
+	void select(int src, SimPredicate p) {
 		SimEvent ev = null;
 		boolean found = false;
 
@@ -335,7 +335,7 @@ public class SimSystem {
 	// Cancel the first event whose source is `src` on the
 	// future queue, matched by the `predicate`. Remove it and put it
 	// into the `src`'s event buffer
-	synchronized void cancel(int src, SimPredicate p) {
+	void cancel(int src, SimPredicate p) {
 		SimEvent ev = null;
 		boolean found = false;
 
