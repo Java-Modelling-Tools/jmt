@@ -43,6 +43,7 @@ import analytical.JMVALauncherService;
 import log.JSimLogger;
 import log.LoggerParameters;
 import log.LoggerStateManager;
+import log.SimEventTracer;
 import jmt.framework.data.MacroReplacer;
 import jmt.framework.gui.components.JMTMenuBar;
 import jmt.framework.gui.components.JMTToolBar;
@@ -177,6 +178,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	private AbstractJmodelAction editPAParams;
 
 	private AbstractJmodelAction debugSolverAction ;
+	private VisualDebugTracer visualDebugTracerAction;
 
 	private JmtOverlapping overlapping;
 
@@ -184,6 +186,11 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	private BezierConnectionHelperBar bezierConnectionHelperBar;
 
 	private JmtEdgeBreakagesIterator edgeBreakagesIterator;
+
+	/** Default constructor for testing or headless use */
+	public Mediator() {
+		visualDebugTracerAction = new VisualDebugTracer(this);
+	}
 
 	public Mediator(final JmtJGraph graph, JSIMGraphMain mainWindow) {
 		this.mainWindow = mainWindow;
@@ -259,6 +266,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		debugSolverButton.setToolTipText("Open Debug Solver");
 //		toolbar.add(debugSolverButton);
 		debugPanel = new DebugSolverPanel(this);
+		visualDebugTracerAction = new VisualDebugTracer(this);
 
 		actionSnapToGrid = new ActionSnapToGrid(this);
 
@@ -315,7 +323,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		menu.addMenu(action);
 
 		// Solve menu
-		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null, debugSolverAction });
+		action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults, null, debugSolverAction, visualDebugTracerAction });
 		//action = new MenuAction("Solve", new AbstractJmodelAction[] { simulate, pauseSimulation, stopSimulation, null, switchToExactSolver, null, showResults});
 		menu.addMenu(action);
 
@@ -670,6 +678,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		saveModelAs.setEnabled(true);
 		editMeasures.setEnabled(true);
 		debugSolverAction.setEnabled(true);
+		visualDebugTracerAction.setEnabled(true);
 		useTemplate.setEnabled(true);
 
 		// Show only insert options on ComponentBar
@@ -707,6 +716,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		// Enables the button to start simulation
 		simulate.setEnabled(true);
 		debugSolverAction.setEnabled(true);
+		visualDebugTracerAction.setEnabled(true);
 		editSimParams.setEnabled(true);
 		editPAParams.setEnabled(true);
 		takeScreenShot.setEnabled(true);
@@ -746,6 +756,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 			openedArchive = modelLoader.getSelectedFile();
 			mainWindow.updateTitle(openedArchive.getName());
 			debugSolverAction.setEnabled(true);
+		visualDebugTracerAction.setEnabled(true);
 			// Removes selection
 			graph.clearSelection();
 			// If model contains results, enable Results Window
@@ -801,6 +812,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		setSelect.setEnabled(false);
 		simulate.setEnabled(false);
 		debugSolverAction.setEnabled(false);
+		visualDebugTracerAction.setEnabled(false);
 		toggleDebug(false);
 		LoggerStateManager.clearAllowedEvents();
 		solveAnalitic.setEnabled(false);
@@ -2265,6 +2277,9 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 					resultsWindow.dispose();
 					showResults.setEnabled(false);
 				}
+				if (isVisualDebugTracerActive()) {
+					SimEventTracer.enableVisualDebugTracer(false);
+				}
 				if (!model.isParametricAnalysisEnabled()) {
 					try {
 						File temp = File.createTempFile("~JModelSimulation", ".xml");
@@ -2310,6 +2325,9 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		if (stopSimulation.isEnabled()) {
 			toggleDebug(false);
 			LoggerStateManager.clearAllowedEvents();
+			if (isVisualDebugTracerActive()) {
+				SimEventTracer.stop();
+			}
 			if (!model.isParametricAnalysisEnabled()) {
 				dispatcher.stopSimulation();
 			} else {
@@ -4070,10 +4088,40 @@ JMVALauncherService.Registry.launch(output);
 	}
 
 	public void editDebugParameter() {
+		if (debugPanel != null) {
+			debugPanel.updateVisualTracerState();
+		}
 		dialogFactory.getDialog(debugPanel, "Debug Solver",
 				400,
-				500,
+				550,
 				true, "JSIMDebugSolverWindowWidth", "JSIMDebugSolverWindowHeight");
+	}
+
+	public VisualDebugTracer getVisualDebugTracerAction() {
+		return visualDebugTracerAction;
+	}
+
+	public boolean isVisualDebugTracerActive() {
+		return SimEventTracer.isEnabled();
+	}
+
+	public boolean toggleVisualDebugTracer(boolean enable) {
+		if (enable) {
+			if (!SimEventTracer.isRunningFromJar() && !SimEventTracer.isVmOptionActive()) {
+				return false;
+			}
+			boolean ok = SimEventTracer.enableVisualDebugTracer(false);
+			if (visualDebugTracerAction != null) {
+				visualDebugTracerAction.setSelected(ok);
+			}
+			return ok;
+		} else {
+			SimEventTracer.disable();
+			if (visualDebugTracerAction != null) {
+				visualDebugTracerAction.setSelected(false);
+			}
+			return true;
+		}
 	}
 
 	@Override

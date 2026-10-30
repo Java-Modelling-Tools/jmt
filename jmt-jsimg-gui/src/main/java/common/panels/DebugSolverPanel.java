@@ -2,6 +2,7 @@ package common.panels;
 
 import log.JSimLogger;
 import log.LoggerStateManager;
+import log.SimEventTracer;
 import jsimgraph.controller.Mediator;
 
 import javax.swing.*;
@@ -22,6 +23,7 @@ public class DebugSolverPanel extends JPanel {
     private boolean allSelected = false;
 
     private JComboBox<String> delimiterComboBox, decimalSeparatorComboBox;
+    private JCheckBox visualTracerCheckBox;
 
     private File file;
 
@@ -91,6 +93,8 @@ public class DebugSolverPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 mediator.toggleDebug(false);
+                mediator.toggleVisualDebugTracer(false);
+                updateVisualTracerState();
                 JOptionPane.showMessageDialog(DebugSolverPanel.this, "Debug logging disabled");
                 SwingUtilities.getWindowAncestor(DebugSolverPanel.this).dispose();
             }
@@ -140,8 +144,20 @@ public class DebugSolverPanel extends JPanel {
         eventsAndSelectAllPanel.add(listScrollPane, BorderLayout.CENTER);
         eventsAndSelectAllPanel.add(selectAllPanel, BorderLayout.SOUTH);
 
+        visualTracerCheckBox = new JCheckBox("Enable Visual Debug Tracer (logs to traces/ folder)");
+        updateVisualTracerState();
+
+        JPanel visualTracerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        visualTracerPanel.setBorder(BorderFactory.createTitledBorder("Visual Debug Tracer (JSONL.GZ)"));
+        visualTracerPanel.add(visualTracerCheckBox);
+
+        JPanel bottomConfigPanel = new JPanel();
+        bottomConfigPanel.setLayout(new BoxLayout(bottomConfigPanel, BoxLayout.Y_AXIS));
+        bottomConfigPanel.add(delimiterPanel);
+        bottomConfigPanel.add(visualTracerPanel);
+
         centerPanel.add(eventsAndSelectAllPanel, BorderLayout.CENTER);
-        centerPanel.add(delimiterPanel, BorderLayout.SOUTH);
+        centerPanel.add(bottomConfigPanel, BorderLayout.SOUTH);
 
         add(northPanel, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
@@ -161,32 +177,83 @@ public class DebugSolverPanel extends JPanel {
     }
 
     private void enableDebugSolver(ActionEvent e) {
-        if (LoggerStateManager.getAllowedEvents().length == 0) {
-            JOptionPane.showMessageDialog(this, "Please select at least one event to log");
+        boolean visualTraceSelected = visualTracerCheckBox.isSelected();
+        boolean hasCsvEvents = LoggerStateManager.getAllowedEvents().length > 0;
+
+        if (!visualTraceSelected && !hasCsvEvents) {
+            JOptionPane.showMessageDialog(this, "Please select at least one event to log or enable Visual Debug Tracer");
             return;
         }
-        if (file != null) {
-            JSimLogger.resetDebugLoggerStorePath(file.getAbsolutePath());
+
+        if (visualTraceSelected) {
+            if (!SimEventTracer.isRunningFromJar() && !SimEventTracer.isVmOptionActive()) {
+                JOptionPane.showMessageDialog(this,
+                        "Visual Debug Tracer mode can only be activated when running from a packaged JMT JAR archive.",
+                        "Visual Debug Tracer - JAR Required",
+                        JOptionPane.WARNING_MESSAGE);
+                visualTracerCheckBox.setSelected(false);
+                return;
+            }
+            mediator.toggleVisualDebugTracer(true);
         } else {
-            JSimLogger.resetDebugLoggerStorePath(System.getProperty("user.home")+ System.getProperty("file.separator") + "JMT");
+            mediator.toggleVisualDebugTracer(false);
         }
 
-        // Set delimiter and decimal separator
-        String delimiter = resolveDelimiter((String) Objects.requireNonNull(delimiterComboBox.getSelectedItem()));
-        String decimalSeparator = (String) decimalSeparatorComboBox.getSelectedItem();
-        JSimLogger.setDelimiter(delimiter);
-        JSimLogger.setDecimalSeparator(decimalSeparator);
+        if (hasCsvEvents) {
+            if (file != null) {
+                JSimLogger.resetDebugLoggerStorePath(file.getAbsolutePath());
+            } else {
+                JSimLogger.resetDebugLoggerStorePath(System.getProperty("user.home")+ System.getProperty("file.separator") + "JMT");
+            }
 
-        if (logPathField.getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "log file will generate at default position(user\\JMT\\JSIM_debug.csv) since" +
-                    " no input of log path, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
-        } else {
-            JOptionPane.showMessageDialog(this, "log file will generate at " + logPathField.getText() + "\\JSIM_debug.csv, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
+            // Set delimiter and decimal separator
+            String delimiter = resolveDelimiter((String) Objects.requireNonNull(delimiterComboBox.getSelectedItem()));
+            String decimalSeparator = (String) decimalSeparatorComboBox.getSelectedItem();
+            JSimLogger.setDelimiter(delimiter);
+            JSimLogger.setDecimalSeparator(decimalSeparator);
+
+            if (logPathField.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "log file will generate at default position(user\\JMT\\JSIM_debug.csv) since" +
+                        " no input of log path, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
+            } else {
+                JOptionPane.showMessageDialog(this, "log file will generate at " + logPathField.getText() + "\\JSIM_debug.csv, Simulation started... Delimiter: " + delimiter + ", Decimal Separator: " + decimalSeparator);
+            }
+            mediator.toggleDebug(true);
+        } else if (visualTraceSelected) {
+            JOptionPane.showMessageDialog(this, "Visual Debug Tracer mode activated.\nSimulation traces will be recorded in the 'traces/' folder.");
         }
-        mediator.toggleDebug(true);
 
         // Close the dialog/window if needed
         SwingUtilities.getWindowAncestor(this).dispose();
+    }
+
+    public JCheckBox getVisualTracerCheckBox() {
+        return visualTracerCheckBox;
+    }
+
+    public void updateVisualTracerState() {
+        if (visualTracerCheckBox == null) {
+            return;
+        }
+        boolean hasJar = SimEventTracer.isRunningFromJar();
+        boolean hasVmOption = SimEventTracer.isVmOptionActive();
+        if (!hasJar && !hasVmOption) {
+            visualTracerCheckBox.setEnabled(false);
+            visualTracerCheckBox.setSelected(false);
+            visualTracerCheckBox.setText("Enable Visual Debug Tracer (requires packaged JMT JAR)");
+            visualTracerCheckBox.setToolTipText("Visual Debug Tracer mode can only be activated when running from a packaged JMT JAR archive.");
+        } else {
+            visualTracerCheckBox.setEnabled(true);
+            if (hasVmOption && !hasJar) {
+                visualTracerCheckBox.setSelected(true);
+                visualTracerCheckBox.setText("Enable Visual Debug Tracer (active via VM option)");
+                visualTracerCheckBox.setToolTipText("Visual Debug Tracer enabled via JVM VM option -Djmt.trace.visual=true");
+            } else {
+                visualTracerCheckBox.setSelected(SimEventTracer.isEnabled());
+                visualTracerCheckBox.setText("Enable Visual Debug Tracer (logs to traces/ folder)");
+                visualTracerCheckBox.setToolTipText("Records high-throughput visual simulation events into traces/ directory");
+            }
+        }
     }
 
     private String resolveDelimiter(String delimiter) {

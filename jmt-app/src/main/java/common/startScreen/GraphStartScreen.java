@@ -59,6 +59,7 @@ import jsimwiz.JSIMWizMain;
 import jwat.MainJwatWizard;
 import jmt.jmch.wizard.MainWizard;
 import jmva.JMVAWizard;
+import jmt.commandline.Jmt;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
 import java.awt.BasicStroke;
@@ -525,6 +526,34 @@ public class GraphStartScreen extends JMTFrame {
 	 * @param args not used
 	 */
 	public static void main(String args[]) {
+		if (args != null && args.length > 0) {
+			String cmd = args[0].trim().toLowerCase();
+			if (cmd.equals("sim") || cmd.equals("mva") || cmd.equals("jsimw") || cmd.equals("jsimg") || cmd.equals("jmva")
+					|| cmd.equals("-h") || cmd.equals("-help") || cmd.equals("--help") || cmd.equals("/?") || cmd.equals("help")) {
+				try {
+					jmt.commandline.Jmt.main(args);
+					return;
+				} catch (Exception e) {
+					System.err.println("Error executing command " + args[0] + ": " + e.getMessage());
+					e.printStackTrace();
+					System.exit(1);
+				}
+			}
+			if (args.length == 1) {
+				String lower = args[0].toLowerCase();
+				if (lower.endsWith(".jsimg") || lower.endsWith(".jsimg.xml")) {
+					JSIMGraphMain.main(args);
+					return;
+				} else if (lower.endsWith(".jmva")) {
+					new JMVAWizard(args[0]);
+					return;
+				} else if (lower.endsWith(".jsim")) {
+					JSIMWizMain.main(args);
+					return;
+				}
+			}
+		}
+
 		GraphStartScreen.args = null;
 		GraphStartScreen gss = new GraphStartScreen();
 		gss.setVisible(true);

@@ -18,6 +18,8 @@
 
 package jmt.commandline;
 
+import log.SimEventTracer;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -57,6 +59,9 @@ public class Jmt {
 
 	private static final String OPTION_SEED = "-seed";
 	private static final String OPTION_MAXTIME = "-maxtime";
+	public static final String OPTION_TRACE = "-trace";
+	public static final String OPTION_VISUAL_TRACE = "-visual-trace";
+	public static final String OPTION_VISUAL_DEBUG_TRACER = "-visual-debug-tracer";
 
 	public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
 		TransformerFactory tf = TransformerFactory.newInstance();
@@ -78,6 +83,7 @@ public class Jmt {
 		System.err.println("sim options:");
 		System.err.println("  -seed 1234 : sets the simulation seed to 1234");
 		System.err.println("  -maxtime 60 : sets the maximum simulation time to 60 seconds");
+		System.err.println("  -trace : activates visual-debug-tracer mode (logs in traces/ folder, requires packaged JAR)");
 		System.err.println("jsimw options:");
 		System.err.println("  <none>");
 		System.err.println("jsimg options:");
@@ -228,12 +234,48 @@ public class Jmt {
 			}
 		}
 
+		if (isTraceOptionRequested(options)) {
+			if (!handleTraceOption(options)) {
+				System.exit(1);
+			}
+		}
+
 		// Starts the simulation
-		boolean success = dispatcher.solveModel();
+		boolean success;
+		try {
+			success = dispatcher.solveModel();
+		} finally {
+			if (isTraceOptionRequested(options)) {
+				SimEventTracer.stop();
+				File traceFile = SimEventTracer.getCurrentOutputFile();
+				if (traceFile != null) {
+					System.out.println("Visual debug trace written to: " + traceFile.getAbsolutePath());
+				}
+			}
+		}
 		File output = dispatcher.getOutputFile();
 		copyFile(output, result);
 		output.delete();
 		return success;
+	}
+
+	public static boolean isTraceOptionRequested(Map<String, String> options) {
+		return options != null && (options.containsKey(OPTION_TRACE)
+				|| options.containsKey(OPTION_VISUAL_TRACE)
+				|| options.containsKey(OPTION_VISUAL_DEBUG_TRACER));
+	}
+
+	public static boolean handleTraceOption(Map<String, String> options) {
+		if (isTraceOptionRequested(options)) {
+			if (!SimEventTracer.isRunningFromJar() && !SimEventTracer.isVmOptionActive()) {
+				System.err.println("Error: Visual-debug-tracer mode can only be activated when running from a packaged JMT JAR archive.");
+				return false;
+			}
+			SimEventTracer.enableVisualDebugTracer(false);
+			File tracesDir = new File(SimEventTracer.OUTPUT_FILE);
+			System.out.println("Visual debug tracer activated. Output directory: " + tracesDir.getAbsolutePath());
+		}
+		return true;
 	}
 
 	/**

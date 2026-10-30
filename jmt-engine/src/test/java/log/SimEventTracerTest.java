@@ -37,6 +37,8 @@ public class SimEventTracerTest {
 	public void setUp() throws IOException {
 		SimEventTracer.disable();
 		SimEventTracer.stop();
+		SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+		SimEventTracer.OUTPUT_FILE = SimEventTracer.DEFAULT_TRACES_DIR;
 		SimEventTracer.CHUNK_MAX_MB = SimEventTracer.DEFAULT_CHUNK_MAX_MB;
 		SimEventTracer.CHUNK_MAX_EVENTS = SimEventTracer.DEFAULT_CHUNK_MAX_EVENTS;
 		SimEventTracer.FILTER_INTERNAL_EVENTS = true;
@@ -48,6 +50,8 @@ public class SimEventTracerTest {
 	public void tearDown() {
 		SimEventTracer.disable();
 		SimEventTracer.stop();
+		SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+		SimEventTracer.OUTPUT_FILE = SimEventTracer.DEFAULT_TRACES_DIR;
 		if (tempTraceFile != null && tempTraceFile.exists()) {
 			tempTraceFile.delete();
 		}
@@ -283,5 +287,95 @@ public class SimEventTracerTest {
 			}
 		}
 		return lines;
+	}
+
+	@Test
+	public void testVisualDebugTracerActivationRequiresJar() throws Exception {
+		// When running without JAR, activation must fail and remain disabled
+		SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = false;
+		assertFalse(SimEventTracer.isRunningFromJar());
+		boolean activatedWithoutJar = SimEventTracer.enableVisualDebugTracer();
+		assertFalse(activatedWithoutJar);
+		assertFalse(SimEventTracer.isEnabled());
+
+		// When JAR is present, activation must succeed and target traces/ directory
+		SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = true;
+		assertTrue(SimEventTracer.isRunningFromJar());
+		boolean activatedWithJar = SimEventTracer.enableVisualDebugTracer();
+		assertTrue(activatedWithJar);
+		assertTrue(SimEventTracer.isEnabled());
+		assertEquals(SimEventTracer.DEFAULT_TRACES_DIR, SimEventTracer.OUTPUT_FILE);
+
+		// Verify it writes inside traces/ folder
+		QueueNetwork network = new QueueNetwork("JarActivationModel");
+		NetNode node = new NetNode("TestStation");
+		network.getNodes().add(node);
+		SimEventTracer.initTrace(network);
+		SimEventTracer.recordSend(0.0, 0.1, NetEvent.EVENT_JOB, null, NodeSection.OUTPUT, NodeSection.INPUT, node, null);
+		File traceFile = SimEventTracer.getCurrentOutputFile();
+		assertTrue("Trace file must be located inside traces folder", traceFile.getPath().replace('\\', '/').contains("traces/"));
+		SimEventTracer.stop();
+		if (traceFile != null && traceFile.exists()) {
+			traceFile.delete();
+		}
+		File tracesDir = new File(SimEventTracer.DEFAULT_TRACES_DIR);
+		if (tracesDir.exists() && tracesDir.list().length == 0) {
+			tracesDir.delete();
+		}
+		SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+	}
+
+	@Test
+	public void testVisualDebugTracerViaVmOptionsWithoutJar() throws Exception {
+		String oldVisual = System.getProperty("jmt.trace.visual");
+		String oldFile = System.getProperty("jmt.trace.file");
+		try {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = false;
+
+			System.setProperty("jmt.trace.visual", "true");
+			System.setProperty("jmt.trace.file", "traces/");
+
+			assertTrue("isVmOptionActive must return true when -Djmt.trace.visual=true is set",
+					SimEventTracer.isVmOptionActive());
+
+			boolean activated = SimEventTracer.enableVisualDebugTracer(true);
+			assertTrue("Activation must succeed when running with VM options in IDE", activated);
+			assertTrue("Tracer must be enabled via VM options",
+					SimEventTracer.isEnabled());
+			assertEquals("traces/", SimEventTracer.OUTPUT_FILE);
+
+			QueueNetwork network = new QueueNetwork("IdeTraceModel");
+			NetNode nodeA = new NetNode("StationA");
+			NetNode nodeB = new NetNode("StationB");
+			nodeA.connect(nodeB);
+			network.addNode(nodeA);
+			network.addNode(nodeB);
+
+			SimEventTracer.initTrace(network);
+			SimEventTracer.recordSend(1.0, 0.5, NetEvent.EVENT_JOB, null,
+					NodeSection.OUTPUT, NodeSection.INPUT, nodeA, nodeB);
+
+			File traceFile = SimEventTracer.getCurrentOutputFile();
+			assertTrue("Trace file must be created", traceFile != null);
+			assertTrue("File must reside in traces/ folder",
+					traceFile.getAbsolutePath().replace('\\', '/').contains("/traces/"));
+			assertTrue("File must match model name and chunk pattern",
+					traceFile.getName().startsWith("IdeTraceModel_run"));
+
+			SimEventTracer.stop();
+			assertTrue("Trace file must exist on disk", traceFile.exists());
+
+			if (traceFile.exists()) {
+				traceFile.delete();
+			}
+		} finally {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+			if (oldVisual != null) System.setProperty("jmt.trace.visual", oldVisual);
+			else System.clearProperty("jmt.trace.visual");
+			if (oldFile != null) System.setProperty("jmt.trace.file", oldFile);
+			else System.clearProperty("jmt.trace.file");
+		}
 	}
 }

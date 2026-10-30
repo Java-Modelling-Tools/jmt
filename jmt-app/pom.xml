@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>jmt</groupId>
+            <artifactId>jmt-engine</artifactId>
+            <version>latest</version>
+        </dependency>
+        <dependency>
+            <groupId>jmt</groupId>
             <artifactId>jmt-jsimg-gui</artifactId>
             <version>latest</version>
         </dependency>

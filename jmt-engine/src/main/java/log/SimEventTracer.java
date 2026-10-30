@@ -70,9 +70,19 @@ public final class SimEventTracer {
 	/** Alias for DEBUG_VISUAL_TRACE for convenience */
 	public static volatile boolean ENABLED = DEBUG_VISUAL_TRACE;
 
+	/** Default output folder for the visual debug tracer mode */
+	public static final String DEFAULT_TRACES_DIR = "traces";
+
 	/** Default output trace file or directory path */
 	public static volatile String OUTPUT_FILE = System.getProperty("jmt.trace.file",
-			System.getProperty("jmt.trace.dir", "visual_trace.ndjson.gz"));
+			System.getProperty("jmt.trace.dir", DEFAULT_TRACES_DIR));
+
+	/**
+	 * Checks if visual tracing was explicitly enabled via JVM system property (-Djmt.trace.visual=true).
+	 */
+	public static boolean isVmOptionActive() {
+		return Boolean.getBoolean("jmt.trace.visual");
+	}
 
 	// Run tracking across multiple simulations
 	/** Default max uncompressed megabytes per chunk before rolling (500 GB = 512,000 MB) */
@@ -164,15 +174,80 @@ public final class SimEventTracer {
 		}
 		DEBUG_VISUAL_TRACE = true;
 		ENABLED = true;
-		ensureWriterStarted(null);
+	}
+
+	/** Override flag for testing JAR detection (null = use standard CodeSource detection) */
+	public static volatile Boolean IS_RUNNING_FROM_JAR_OVERRIDE = null;
+
+	/**
+	 * Checks if the application is running from a packaged JAR archive rather than loose class files / IDE.
+	 */
+	public static boolean isRunningFromJar() {
+		if (IS_RUNNING_FROM_JAR_OVERRIDE != null) {
+			return IS_RUNNING_FROM_JAR_OVERRIDE;
+		}
+		try {
+			java.security.CodeSource codeSource = SimEventTracer.class.getProtectionDomain().getCodeSource();
+			if (codeSource == null) {
+				return false;
+			}
+			java.net.URL location = codeSource.getLocation();
+			if (location == null) {
+				return false;
+			}
+			String path = location.getPath();
+			if (path == null) {
+				return false;
+			}
+			return path.endsWith(".jar") || path.contains(".jar!") || "jar".equalsIgnoreCase(location.getProtocol());
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Activates visual-debug-tracer mode which logs in the "traces/" folder.
+	 * By default, this only succeeds if running from a packaged JAR archive or if visual tracing
+	 * was explicitly enabled via JVM options (-Djmt.trace.visual=true).
+	 *
+	 * @return true if successfully activated, false if prevented because not running from a JAR.
+	 */
+	public static boolean enableVisualDebugTracer() {
+		return enableVisualDebugTracer(true);
+	}
+
+	/**
+	 * Activates visual-debug-tracer mode which logs in the "traces/" folder (or custom directory from VM options).
+	 *
+	 * @param requireJar If true, activation is permitted only when running from a packaged JAR or via VM options.
+	 * @return true if successfully activated, false if prevented because not running from a JAR.
+	 */
+	public static synchronized boolean enableVisualDebugTracer(boolean requireJar) {
+		if (requireJar && !isRunningFromJar() && !isVmOptionActive()) {
+			return false;
+		}
+		String configured = System.getProperty("jmt.trace.file", System.getProperty("jmt.trace.dir"));
+		if (configured != null && !configured.trim().isEmpty()) {
+			OUTPUT_FILE = configured;
+		} else {
+			OUTPUT_FILE = DEFAULT_TRACES_DIR;
+		}
+		File dir = new File(OUTPUT_FILE);
+		if ((OUTPUT_FILE.endsWith("/") || OUTPUT_FILE.endsWith("\\") || OUTPUT_FILE.equalsIgnoreCase("traces")
+				|| OUTPUT_FILE.equalsIgnoreCase("./traces") || OUTPUT_FILE.equalsIgnoreCase(".\\traces")) && !dir.exists()) {
+			dir.mkdirs();
+		}
+		enable(OUTPUT_FILE);
+		return true;
 	}
 
 	/**
 	 * Disables event tracing.
 	 */
-	public static void disable() {
+	public static synchronized void disable() {
 		DEBUG_VISUAL_TRACE = false;
 		ENABLED = false;
+		stop();
 	}
 
 	/**
@@ -231,12 +306,17 @@ public final class SimEventTracer {
 
 	private static synchronized BaseFileInfo resolveBaseFile(QueueNetwork network) {
 		String base = OUTPUT_FILE;
+		String prop = System.getProperty("jmt.trace.file", System.getProperty("jmt.trace.dir"));
+		if (prop != null && !prop.trim().isEmpty()) {
+			base = prop;
+		}
 		if (base == null || base.trim().isEmpty()) {
-			base = "visual_trace.ndjson.gz";
+			base = DEFAULT_TRACES_DIR;
 		}
 
 		File file = new File(base);
-		boolean isDir = file.isDirectory() || base.endsWith("/") || base.endsWith("\\");
+		boolean isDir = file.isDirectory() || base.endsWith("/") || base.endsWith("\\")
+				|| base.equalsIgnoreCase("traces") || base.equalsIgnoreCase("./traces") || base.equalsIgnoreCase(".\\traces");
 		String modelName = (network != null && network.getName() != null) ? sanitize(network.getName()) : "model";
 		int runId = RUN_COUNTER.getAndIncrement();
 		int step = (network != null) ? network.getParametricStep() : 0;
@@ -492,7 +572,7 @@ public final class SimEventTracer {
 		}
 
 		SimEventRecord r = RING[(int) (writeIndex & BUFFER_MASK)];
-		r.ready = false;
+		r.reset();
 
 		r.sequenceNumber = writeIndex + 1;
 		r.simTime = simTime;
@@ -573,7 +653,7 @@ public final class SimEventTracer {
 		}
 
 		SimEventRecord r = RING[(int) (writeIndex & BUFFER_MASK)];
-		r.ready = false;
+		r.reset();
 
 		r.sequenceNumber = writeIndex + 1;
 		r.simTime = simTime;
@@ -709,7 +789,7 @@ public final class SimEventTracer {
 		}
 
 		SimEventRecord r = RING[(int) (writeIndex & BUFFER_MASK)];
-		r.ready = false;
+		r.reset();
 
 		r.sequenceNumber = writeIndex + 1;
 		r.simTime = simTime;
@@ -891,6 +971,7 @@ public final class SimEventTracer {
 	private static final class WriterThread extends Thread {
 
 		private final BaseFileInfo baseInfo;
+		private final Object writerLock = new Object();
 		private volatile boolean running = true;
 		private int currentPart = 1;
 		private CountingOutputStream countingOut = null;
@@ -909,55 +990,61 @@ public final class SimEventTracer {
 		}
 
 		void writeDirect(String text) {
-			this.cachedMetadataJson = text;
-			try {
-				if (writer == null) {
-					openChunk(currentPart);
-				} else {
-					writer.write(text);
-					writer.flush();
-					currentChunkUncompressedBytes += text.length();
+			synchronized (writerLock) {
+				this.cachedMetadataJson = text;
+				try {
+					if (writer == null) {
+						openChunk(currentPart);
+					} else {
+						writer.write(text);
+						writer.flush();
+						currentChunkUncompressedBytes += text.length();
+					}
+				} catch (IOException e) {
+					System.err.println("[SimEventTracer] Error writing direct metadata: " + e.getMessage());
 				}
-			} catch (IOException e) {
-				System.err.println("[SimEventTracer] Error writing direct metadata: " + e.getMessage());
 			}
 		}
 
 		private void openChunk(int part) throws IOException {
-			if (writer != null) {
-				try {
+			synchronized (writerLock) {
+				if (writer != null) {
+					try {
+						writer.flush();
+						writer.close();
+					} catch (IOException ignored) {}
+					writer = null;
+					countingOut = null;
+				}
+
+				File chunkFile = baseInfo.getChunkFile(part);
+				currentResolvedFile = chunkFile;
+
+				File parent = chunkFile.getParentFile();
+				if (parent != null && !parent.exists()) {
+					parent.mkdirs();
+				}
+
+				countingOut = new CountingOutputStream(new FileOutputStream(chunkFile, false));
+				GZIPOutputStream gzos = new GZIPOutputStream(countingOut, 64 * 1024);
+				writer = new BufferedWriter(new OutputStreamWriter(gzos, StandardCharsets.UTF_8), 64 * 1024);
+				currentChunkEvents = 0;
+				currentChunkUncompressedBytes = 0;
+
+				// Write metadata at the start of every chunk so each chunk is self-contained
+				if (cachedMetadataJson != null) {
+					writer.write(cachedMetadataJson);
 					writer.flush();
-					writer.close();
-				} catch (IOException ignored) {}
-				writer = null;
-				countingOut = null;
-			}
-
-			File chunkFile = baseInfo.getChunkFile(part);
-			currentResolvedFile = chunkFile;
-
-			File parent = chunkFile.getParentFile();
-			if (parent != null && !parent.exists()) {
-				parent.mkdirs();
-			}
-
-			countingOut = new CountingOutputStream(new FileOutputStream(chunkFile, false));
-			GZIPOutputStream gzos = new GZIPOutputStream(countingOut, 64 * 1024);
-			writer = new BufferedWriter(new OutputStreamWriter(gzos, StandardCharsets.UTF_8), 64 * 1024);
-			currentChunkEvents = 0;
-			currentChunkUncompressedBytes = 0;
-
-			// Write metadata at the start of every chunk so each chunk is self-contained
-			if (cachedMetadataJson != null) {
-				writer.write(cachedMetadataJson);
-				writer.flush();
-				currentChunkUncompressedBytes += cachedMetadataJson.length();
+					currentChunkUncompressedBytes += cachedMetadataJson.length();
+				}
 			}
 		}
 
 		private void ensureOpen() throws IOException {
-			if (writer == null) {
-				openChunk(currentPart);
+			synchronized (writerLock) {
+				if (writer == null) {
+					openChunk(currentPart);
+				}
 			}
 		}
 
@@ -979,10 +1066,14 @@ public final class SimEventTracer {
 					int batchCount = 0;
 					while (READ_SEQ < targetWrite && batchCount < 2048) {
 						SimEventRecord r = RING[(int) (READ_SEQ & BUFFER_MASK)];
-						int spins = 0;
-						while (!r.ready && spins < 1000) {
-							spins++;
+						while (!r.ready) {
+							if (!running && READ_SEQ >= WRITE_SEQ.get()) {
+								break;
+							}
 							Thread.yield();
+						}
+						if (!r.ready) {
+							break;
 						}
 
 						// Check if chunk threshold reached (uncompressed JSON size or event count)
@@ -994,25 +1085,31 @@ public final class SimEventTracer {
 							shouldRoll = true;
 						}
 
-						if (shouldRoll) {
-							currentPart++;
-							openChunk(currentPart);
-						}
+						synchronized (writerLock) {
+							if (shouldRoll) {
+								currentPart++;
+								openChunk(currentPart);
+							}
 
-						sb.setLength(0);
-						formatRecordJson(sb, r);
-						sb.append('\n');
-						String recordJson = sb.toString();
-						writer.write(recordJson);
-						currentChunkEvents++;
-						currentChunkUncompressedBytes += recordJson.length();
+							sb.setLength(0);
+							formatRecordJson(sb, r);
+							sb.append('\n');
+							String recordJson = sb.toString();
+							writer.write(recordJson);
+							currentChunkEvents++;
+							currentChunkUncompressedBytes += recordJson.length();
+						}
 
 						r.reset();
 						READ_SEQ++;
 						batchCount++;
 					}
 
-					writer.flush();
+					synchronized (writerLock) {
+						if (writer != null) {
+							writer.flush();
+						}
+					}
 				}
 
 				// Write footer summary record into active chunk
@@ -1024,18 +1121,24 @@ public final class SimEventTracer {
 						.append(",\"durationMs\":").append(durationMs)
 						.append(",\"part\":").append(currentPart)
 						.append("}\n");
-				writer.write(sb.toString());
-				writer.flush();
+				synchronized (writerLock) {
+					if (writer != null) {
+						writer.write(sb.toString());
+						writer.flush();
+					}
+				}
 
 			} catch (IOException e) {
 				System.err.println("[SimEventTracer] I/O error during event tracing: " + e.getMessage());
 			} finally {
-				if (writer != null) {
-					try {
-						writer.close();
-					} catch (IOException ignored) {}
-					writer = null;
-					countingOut = null;
+				synchronized (writerLock) {
+					if (writer != null) {
+						try {
+							writer.close();
+						} catch (IOException ignored) {}
+						writer = null;
+						countingOut = null;
+					}
 				}
 			}
 		}

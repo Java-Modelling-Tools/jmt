@@ -12,6 +12,9 @@ import solvers.multiSolverAlgorithms.SolverMultiClosedMVA;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
+import log.SimEventTracer;
+import java.util.Map;
+import java.util.HashMap;
 
 public class CommandLineTest {
 
@@ -255,4 +258,69 @@ public class CommandLineTest {
 		}		
 	}
 
+	@Test
+	public void testTraceOptionRequiresJar() {
+		try {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = false;
+
+			Map<String, String> options = new HashMap<String, String>();
+			options.put(jmt.commandline.Jmt.OPTION_TRACE, null);
+
+			assertTrue(jmt.commandline.Jmt.isTraceOptionRequested(options));
+			boolean handled = jmt.commandline.Jmt.handleTraceOption(options);
+			assertFalse("Trace activation without JAR should fail", handled);
+			assertFalse("Tracer should not be enabled without JAR", SimEventTracer.isEnabled());
+
+			// Now test with JAR override = true
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = true;
+			handled = jmt.commandline.Jmt.handleTraceOption(options);
+			assertTrue("Trace activation with JAR should succeed", handled);
+			assertTrue("Tracer should be enabled with JAR", SimEventTracer.isEnabled());
+		} finally {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+		}
+	}
+	@Test
+	public void testCliTraceOptionWithVmOptionInIde() {
+		String oldVisual = System.getProperty("jmt.trace.visual");
+		try {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = false;
+			System.setProperty("jmt.trace.visual", "true");
+
+			Map<String, String> options = new HashMap<String, String>();
+			options.put(jmt.commandline.Jmt.OPTION_TRACE, null);
+
+			boolean handled = jmt.commandline.Jmt.handleTraceOption(options);
+			assertTrue("Trace option must be handled when VM option is active even without JAR", handled);
+			assertTrue("Tracer must be enabled", SimEventTracer.isEnabled());
+		} finally {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+			if (oldVisual != null) System.setProperty("jmt.trace.visual", oldVisual);
+			else System.clearProperty("jmt.trace.visual");
+		}
+	}
+	@Test
+	public void testGraphStartScreenSimDispatchWithTrace() throws Exception {
+		try {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = true;
+			File tempModel = new File("../examples/jsim/qn_models/closed_1class_2stat.jsimg");
+			if (!tempModel.exists()) {
+				tempModel = new File("examples/jsim/qn_models/closed_1class_2stat.jsimg");
+			}
+			common.startScreen.GraphStartScreen.main(new String[]{"sim", tempModel.getAbsolutePath(), "-trace"});
+			assertTrue("Tracer must be enabled when running sim with -trace via GraphStartScreen", SimEventTracer.isEnabled());
+			File resultFile = new File(tempModel.getAbsolutePath() + "-result.jsim");
+			if (resultFile.exists()) {
+				resultFile.delete();
+			}
+		} finally {
+			SimEventTracer.disable();
+			SimEventTracer.IS_RUNNING_FROM_JAR_OVERRIDE = null;
+		}
+	}
 }

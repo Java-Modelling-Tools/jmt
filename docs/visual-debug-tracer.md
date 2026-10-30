@@ -360,63 +360,98 @@ You can override these thresholds either via JVM properties or programmatically 
 
 ## 4. How to Run and Enable the Tracer
 
-### Option 1: Via Command Line (CMD / PowerShell / Bash)
+### 4.1. End-User Activation & JAR Archive Requirement
 
-Pass the JVM system property `-Djmt.trace.visual=true`.
+> [!IMPORTANT]
+> The Visual Debug Tracer mode is designed for production execution from a packaged JMT JAR archive (`JMT.jar`). End users can only activate the mode if they run the application from a packaged JAR file. If an attempt is made to activate it from loose class files (e.g., when launched inside an IDE without packaging), the activation is prevented and an explicit warning is displayed.
 
-#### A. Basic Run (Default Output: `visual_trace_part1.ndjson.gz`)
-```bash
-java -Djmt.trace.visual=true -jar jmt.jar sim my_model.jsimg
-```
-
-#### B. Output to a Dedicated Folder (Recommended for Multiple Models)
-```bash
-java -Djmt.trace.visual=true -Djmt.trace.dir="./traces" -jar jmt.jar sim my_model.jsimg
-```
-*Creates: `traces/JSIM_simulation..._run1_part1.ndjson.gz`*
-
-#### C. Custom Chunk Thresholds (e.g. 10 MB chunks or 100k events)
-```bash
-java -Djmt.trace.visual=true -Djmt.trace.dir="./traces" -Djmt.trace.chunk.mb=10 -Djmt.trace.chunk.events=100000 -jar jmt.jar sim my_model.jsimg
-```
+Simulation traces are saved into the `traces/` folder (`traces/<modelName>_run<M>_part1.ndjson.gz`), which is automatically created if it does not already exist.
 
 ---
 
-### Option 2: Using IntelliJ IDEA
+### 4.2. Activation in the GUI (JSIMGraph)
 
-1. Open your project in **IntelliJ IDEA**.
-2. Click the **Run Configuration** dropdown in the top bar $\to$ **Edit Configurations...**.
-3. Select your Application or JUnit test configuration.
-4. Under **VM options** (click *Modify options* $\to$ *Add VM options* if not visible), enter:
-   ```text
-   -Djmt.trace.visual=true -Djmt.trace.dir=./traces
-   ```
-   *(Or adjust chunking: `-Djmt.trace.visual=true -Djmt.trace.dir=./traces -Djmt.trace.chunk.mb=512000`)*
-5. Click **Apply** and **OK**.
-6. Run or Debug the application. The `.ndjson.gz` files will be automatically created inside the `./traces` folder in your project root.
+Users have two ways to toggle the Visual Debug Tracer mode in the GUI:
+
+#### Method 1: The Solve Menu or Keyboard Shortcut
+1. Open or build a model in **JSIMGraph**.
+2. Go to the menu: **Solve** $\to$ **Visual Debug Tracer Mode** (or press `Alt+Shift+V`).
+3. If running from the packaged JAR, the mode toggles ON with a confirmation dialog:
+   > *"Visual Debug Tracer mode activated. Simulation traces will be recorded in the 'traces/' folder."*
+4. Run your simulation via **Solve $\to$ Simulate** (or the Play button). The trace chunks will appear inside the `traces/` folder.
+
+#### Method 2: The Debug Solver Dialog
+1. Go to **Solve** $\to$ **Debug Solver...**.
+2. In the configuration dialog, inspect the **Visual Debug Tracer (JSONL.GZ)** section:
+   - When running from a JAR archive: The checkbox is enabled and reads `Enable Visual Debug Tracer (logs to traces/ folder)`.
+   - When running without a JAR archive: The checkbox is disabled and reads `Enable Visual Debug Tracer (requires packaged JMT JAR)`.
+3. Check the box and click **Enable debug logging**.
 
 ---
 
-### Option 3: Programmatic Activation in Code
+### 4.3. Activation via Command Line Interface (CLI)
 
+Pass the `-trace` (or `-visual-trace`, `-visual-debug-tracer`) command-line flag when invoking `sim`:
+
+```bash
+java -jar JMT.jar sim my_model.jsimg -trace
+```
+
+#### Additional Options:
+* Combine with seed and duration:
+  ```bash
+  java -jar JMT.jar sim my_model.jsimg -trace -seed 42 -maxtime 120
+  ```
+* Output files will be stored directly in `traces/<modelName>_run1_part1.ndjson.gz`.
+* If `-trace` is passed when running outside of a packaged JAR, the CLI will output:
+  ```text
+  Error: Visual-debug-tracer mode can only be activated when running from a packaged JMT JAR archive.
+  ```
+  and exit with error code `1`.
+
+---
+
+### 4.4. Developer Options: JVM Properties & Programmatic API
+
+For development, testing, and advanced customization, developers can also use JVM arguments or programmatic methods:
+
+#### A. Running in IDE via VM Options (IntelliJ IDEA / Eclipse)
+Developers can run visual debug tracing directly in the IDE without packaging a JAR by configuring VM options in their Run/Debug Configuration:
+```text
+-Djmt.trace.visual=true -Djmt.trace.file=traces/
+```
+*(or `-Djmt.trace.visual=true -Djmt.trace.dir=traces/`)*
+
+When launched with `-Djmt.trace.visual=true`:
+- Tracing is enabled immediately and permitted without requiring a packaged `.jar` archive.
+- The traces are written to the specified directory (defaults to `traces/`).
+- In JSIMGraph, the Debug Solver panel displays `Enable Visual Debug Tracer (active via VM option)` and the checkbox is selected.
+
+#### B. Command Line JVM System Properties
+```bash
+# Force enable visual tracer and specify folder
+java -Djmt.trace.visual=true -Djmt.trace.file=traces/ -jar JMT.jar sim my_model.jsimg
+
+# Custom chunk thresholds (e.g. 10 MB or 100k events per chunk)
+java -Djmt.trace.visual=true -Djmt.trace.chunk.mb=10 -Djmt.trace.chunk.events=100000 -jar JMT.jar sim my_model.jsimg
+```
+
+#### C. Programmatic Activation in Code
 ```java
 import log.SimEventTracer;
 
 public class MySimulationRunner {
     public static void main(String[] args) throws Exception {
-        // 1. Configure chunk size if desired
-        SimEventTracer.CHUNK_MAX_MB = 500 * 1024; // 500 GB uncompressed
-        SimEventTracer.CHUNK_MAX_EVENTS = 850_000_000; // ~500 GB uncompressed
+        // Activate visual debug tracer mode (logs into traces/ folder)
+        // Pass false if invoking directly in development without JAR checks:
+        SimEventTracer.enableVisualDebugTracer(false);
 
-        // 2. Enable tracing pointing to a folder or base file
-        SimEventTracer.enable("./traces");
-
-        // 3. Run simulation normally
+        // Run simulation
         NetSystem netSystem = new NetSystem();
         // ... configure model ...
         netSystem.start();
 
-        // 4. Stop tracing manually (if not relying on shutdown hooks)
+        // Tracer automatically stops at end of simulation, or stop manually:
         SimEventTracer.stop();
     }
 }
