@@ -152,7 +152,7 @@ class ModelCheckerSummaryTest {
 		assertJmvaConsistent(j);
 	}
 
-	@Disabled("bug: isWarningFreeToJMVA omits BCMP_PRIORITY_SCHEDULING_POLICY_WARNING, so a model with a priority queue is reported warning-free for JMVA")
+	@Disabled("unverified: isWarningFreeToJMVA omits BCMP_PRIORITY_SCHEDULING_POLICY_WARNING, but isThereBcmpPrioritySchedulingPolicyWarning has no caller outside tests and its index aliases NO_OPTIONAL_LINK, so the intended JMVA behaviour is unverified")
 	@Test
 	void jmvaPriorityWarningCountsAsWarning() {
 		CommonModel m = ModelFixtures.closedTwoStations();
@@ -162,7 +162,7 @@ class ModelCheckerSummaryTest {
 		assertFalse(j.isWarningFreeToJMVA());
 	}
 
-	@Disabled("bug: the zero-total-population warning is stored in errors[] (aliasing the fork/join routing error), so isErrorFreeNormal is false and isWarningFreeNormal true for a warning-only condition")
+	@Disabled("bug: same root cause as ModelCheckerWarningsTest.zeroTotalPopulationIsOnlyAWarning (ZERO_TOTAL_POPULATION stored in errors[] aliasing FORK_JOIN_ROUTING_ERROR; one fix re-enables both): the zero-total-population warning is stored in errors[] (aliasing the fork/join routing error), so isErrorFreeNormal is false and isWarningFreeNormal true for a warning-only condition")
 	@Test
 	void zeroTotalPopulationCountsAsWarning() {
 		CommonModel m = ModelFixtures.closedTwoStations();

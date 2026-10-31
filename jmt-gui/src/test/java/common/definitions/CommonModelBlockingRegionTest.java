@@ -65,6 +65,7 @@ class CommonModelBlockingRegionTest {
 		Object b = m.addBlockingRegion("R", TYPE);
 		assertEquals("R", m.getRegionName(a));
 		assertEquals("R_1", m.getRegionName(b));
+		// pinned quirk: renaming onto an existing region name gets an "R_" suffix
 		m.setRegionName(b, "R");
 		assertFalse("R".equals(m.getRegionName(b)));
 		assertTrue(m.getRegionName(b).startsWith("R_"));

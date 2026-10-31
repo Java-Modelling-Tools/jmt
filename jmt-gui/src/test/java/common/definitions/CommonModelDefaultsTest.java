@@ -98,7 +98,7 @@ class CommonModelDefaultsTest {
 	@Test
 	void animationAndParametricFlags() {
 		CommonModel m = ModelFixtures.emptyModel();
-		// animation is a JSimGraphModel feature: the base class ignores it
+		// pinned quirk: animation is a JSimGraphModel feature: the base class ignores it
 		m.setAnimationEnabled(true);
 		assertFalse(m.isAnimationEnabled());
 		m.setParametricAnalysisEnabled(true);

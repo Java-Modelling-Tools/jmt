@@ -219,7 +219,7 @@ class CommonModelConnectionsTest {
 		assertTrue(m.areConnected(src, q));
 		assertTrue(m.getRoutingStrategy(q, c2) instanceof RandomRouting);
 		m.setRoutingStrategy(q, c2, new ProbabilityRouting());
-		// a strategy installed with setRoutingStrategy does not learn the existing links by itself
+		// pinned quirk: a strategy installed with setRoutingStrategy does not learn the existing links by itself
 		assertTrue(((ProbabilityRouting) m.getRoutingStrategy(q, c2)).getValues().isEmpty());
 	}
 

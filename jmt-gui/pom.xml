@@ -36,7 +36,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <!-- Proves model classes load headless: no jgoodies look and feel on the test classpath. -->
+                    <!-- Keeps the jgoodies look and feel from being loadable in tests; the JMTFrame guard class in src/test is what proves model classes load headless. -->
                     <classpathDependencyExcludes>
                         <classpathDependencyExclude>com.jgoodies:looks</classpathDependencyExclude>
                     </classpathDependencyExcludes>

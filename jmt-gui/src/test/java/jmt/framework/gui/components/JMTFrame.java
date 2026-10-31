@@ -7,6 +7,7 @@ package jmt.framework.gui.components;
  */
 public class JMTFrame {
 	static {
+		// Boolean.TRUE: a static initialiser that cannot complete normally is a compile error
 		if (Boolean.TRUE) {
 			throw new AssertionError("JMTFrame must not be initialised by model classes (headless guard)");
 		}

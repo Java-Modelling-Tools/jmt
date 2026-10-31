@@ -110,7 +110,7 @@ class ModelCheckerWarningsTest {
 		assertFalse(normal(open()).isThereZeroTotalPopulationWarning(), "no closed class");
 	}
 
-	@Disabled("bug: ZERO_TOTAL_POPULATION_WARNING is written to and read from the errors[] array (index 14), so a zero closed population also raises isThereForkJoinRoutingError and clears isErrorFreeNormal")
+	@Disabled("bug: same root cause as ModelCheckerSummaryTest.zeroTotalPopulationCountsAsWarning (ZERO_TOTAL_POPULATION stored in errors[] aliasing FORK_JOIN_ROUTING_ERROR; one fix re-enables both): ZERO_TOTAL_POPULATION_WARNING is written to and read from the errors[] array (index 14), so a zero closed population also raises isThereForkJoinRoutingError and clears isErrorFreeNormal")
 	@Test
 	void zeroTotalPopulationIsOnlyAWarning() {
 		CommonModel m = closed();
