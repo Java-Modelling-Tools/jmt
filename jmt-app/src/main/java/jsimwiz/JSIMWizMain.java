@@ -1065,6 +1065,7 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 	}
 
 	public static void main(String[] args) {
+		jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 		JSIMWizMain jsm = new JSIMWizMain();
 		jsm.setVisible(true);
 		if (args != null && args.length > 0) {

@@ -764,6 +764,7 @@ public class JMVAWizard extends Wizard implements JMVAController {
 
 	// JMVA MAIN
 	public static void main(String[] args) {
+		jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 		try {
 			UIManager.setLookAndFeel(new com.jgoodies.looks.plastic.Plastic3DLookAndFeel());
 

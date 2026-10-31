@@ -686,6 +686,7 @@ public class JabaWizard extends Wizard implements JabaController {
 
 	// JABA MAIN
 	public static void main(String[] args) {
+		jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 		new JabaWizard(new JabaModel());
 	}
 

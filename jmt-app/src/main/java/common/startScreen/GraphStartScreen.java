@@ -539,6 +539,7 @@ public class GraphStartScreen extends JMTFrame {
 					System.exit(1);
 				}
 			}
+			jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 			if (args.length == 1) {
 				String lower = args[0].toLowerCase();
 				if (lower.endsWith(".jsimg") || lower.endsWith(".jsimg.xml")) {
@@ -554,6 +555,7 @@ public class GraphStartScreen extends JMTFrame {
 			}
 		}
 
+		jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 		GraphStartScreen.args = null;
 		GraphStartScreen gss = new GraphStartScreen();
 		gss.setVisible(true);
