@@ -77,7 +77,7 @@ public class JMVAWizard extends Wizard implements JMVAController {
 	private SolverClient solver;
 
 	// New Bertoli Marco
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JMVA, ModelLoader.JMVA_SAVE));
 	// End
 
 	//NEW Dall'Orso

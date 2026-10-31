@@ -48,19 +48,19 @@ class ModelLoaderTest {
 	// --- helpers ---------------------------------------------------------------------------------------
 
 	private static ModelLoader sim() {
-		return new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE);
+		return new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader graph() {
-		return new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
+		return new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader mva() {
-		return new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
+		return new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader jaba() {
-		return new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE);
+		return new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE, new HeadlessModelFileView());
 	}
 
 	private File write(String name, String content) throws Exception {

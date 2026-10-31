@@ -168,7 +168,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	private JmtClipboard clipboard;
 	private DebugSolverPanel debugPanel;
 	private volatile DispatcherThread dispatcher = null;
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE));
 	private JMTToolBar componentBar;
 
 	private ModelChecker mc;

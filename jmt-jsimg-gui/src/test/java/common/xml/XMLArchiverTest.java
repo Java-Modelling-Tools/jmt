@@ -297,7 +297,7 @@ class XMLArchiverTest {
 	@Test
 	void savingToAnUnwritablePathReportsFailure() {
 		File f = new File(new File(tmp, "no/such/dir"), "m.jsimg");
-		ModelLoader ml = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
+		ModelLoader ml = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE, new HeadlessModelFileView());
 		// XMLArchiver.saveModel swallows the TransformerException (printStackTrace only), so SUCCESS is returned
 		assertEquals(ModelLoader.FAILURE, ml.saveModel(GuiXmlFixtures.fullModel(), null, f));
 		assertFalse(f.exists());

@@ -99,7 +99,7 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 	private JFrame resultsWindow;
 	private DispatcherThread dispatcher;
 
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JSIM, ModelLoader.JSIM_SAVE));
 
 	private ClassesPanel classes;
 	private StationsPanel stations;

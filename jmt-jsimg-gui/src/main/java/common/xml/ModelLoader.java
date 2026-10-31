@@ -35,7 +35,6 @@ import common.CommonConstants;
 import common.definitions.CommonModel;
 import common.definitions.ModelConverter;
 import common.definitions.StoredResultsModel;
-import common.xml.swing.SwingModelFileView;
 import jaba.JabaModel;
 
 import org.w3c.dom.Document;
@@ -116,15 +115,6 @@ public class ModelLoader {
 	protected String fileFormat;
 
 	protected XMLUtils xmlutils = new XMLUtils();
-
-	/**
-	 * Initializes a new model loader with specified default file filters
-	 * @param defaultFilter default file filter for current application
-	 * @param defaultSaveFilter default file save filter for current application
-	 */
-	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter) {
-		this(defaultFilter, defaultSaveFilter, new SwingModelFileView(defaultFilter, defaultSaveFilter));
-	}
 
 	/**
 	 * Initializes a new model loader with specified default file filters and user interface

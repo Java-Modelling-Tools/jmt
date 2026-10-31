@@ -14,7 +14,7 @@ import static dataCollection.DataCollectUtils.*;
 public class SolveAndSaveModel {
 
     private static final boolean VERBOSE = true;
-    private static final ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
+    private static final ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JMVA, ModelLoader.JMVA_SAVE));
 
     private static final String MODEL1_FN = "/home/ben_pahnke/IndProj/individualproject/WriteUp/Code/Bondi/Solved/Model1/Model1_SCA.xml";
     private static final String MODEL2_FN = "/home/ben_pahnke/IndProj/individualproject/WriteUp/Code/Bondi/Solved/Model2/Model2_SCA.xml";
