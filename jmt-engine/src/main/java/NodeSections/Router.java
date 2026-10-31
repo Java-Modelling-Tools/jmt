@@ -20,7 +20,7 @@ package NodeSections;
 
 import java.util.Arrays;
 
-import jmt.common.ErrorReporters;
+import jmt.common.AsyncWarning;
 
 import jmt.common.exception.NetException;
 import NetStrategies.RoutingStrategy;
@@ -208,18 +208,9 @@ public class Router extends OutputSection {
 						+ " could not route one or more " + jobClass.getName()
 						+ " jobs forward as its output stations are all sinks or routing is disabled.");
 			} else {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(800);
-						} catch (InterruptedException e) {
-						}
-						ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
+				AsyncWarning.warn("JSIMengine - Warning", getOwnerNode().getName()
 								+ " could not route one or more " + jobClass.getName()
 								+ " jobs forward as its output stations are all sinks or routing is disabled.");
-					}
-				}).start();
 			}
 			isClosedJobRoutingWarningShown[jobClass.getId()] = true;
 		}

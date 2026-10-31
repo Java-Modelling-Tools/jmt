@@ -18,7 +18,7 @@
 
 package NetStrategies.ServiceStrategies;
 
-import jmt.common.ErrorReporters;
+import jmt.common.AsyncWarning;
 
 import jmt.common.exception.NetException;
 import NetStrategies.ServiceStrategy;
@@ -53,18 +53,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 						+ " job requires service at " + nodeSection.getOwnerNode().getName()
 						+ ", which however is disabled.");
 			} else {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(800);
-						} catch (InterruptedException e) {
-						}
-						ErrorReporters.get().warning("JSIMengine - Warning", "A " + jobClass.getName()
+				AsyncWarning.warn("JSIMengine - Warning", "A " + jobClass.getName()
 								+ " job requires service at " + nodeSection.getOwnerNode().getName()
 								+ ", which however is disabled.");
-					}
-				}).start();
 			}
 			isDisabledWarningShown = true;
 		}

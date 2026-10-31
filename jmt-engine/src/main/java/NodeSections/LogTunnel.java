@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import jmt.common.ErrorReporters;
+import jmt.common.AsyncWarning;
 
 import jmt.common.exception.NetException;
 import QueueNet.Job;
@@ -171,17 +171,8 @@ public class LogTunnel extends ServiceTunnel {
 						System.out.println("JSIMengine - Warning: " + getOwnerNode().getName()
 								+ " failed to write the CSV file: " + file.getAbsolutePath());
 					} else {
-						new Thread(new Runnable() {
-							@Override
-							public void run() {
-								try {
-									Thread.sleep(800);
-								} catch (InterruptedException e) {
-								}
-								ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
+						AsyncWarning.warn("JSIMengine - Warning", getOwnerNode().getName()
 										+ " failed to write the CSV file: " + file.getAbsolutePath());
-							}
-						}).start();
 					}
 					try {
 						JSimLoggerFactory.remove(logger);
