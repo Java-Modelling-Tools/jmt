@@ -31,12 +31,12 @@ class ModelLoaderViewTest {
 
 	/** One loader flavour: how to build it, a model to load into / save from, and a loadable file. */
 	private final class Flavour {
-		final ModelLoader.JmtFileFilter open, save;
+		final FileFormat open, save;
 		final String ext;
 		final Supplier<Object> model;
 		final Function<String, File> validFile;
 
-		Flavour(ModelLoader.JmtFileFilter open, ModelLoader.JmtFileFilter save, String ext, Supplier<Object> model, Function<String, File> validFile) {
+		Flavour(FileFormat open, FileFormat save, String ext, Supplier<Object> model, Function<String, File> validFile) {
 			this.open = open;
 			this.save = save;
 			this.ext = ext;

@@ -28,7 +28,7 @@ import javax.swing.JOptionPane;
 import common.Defaults;
 import common.xml.ModelFileView;
 import common.xml.ModelLoader;
-import common.xml.ModelLoader.JmtFileFilter;
+import common.xml.FileFormat;
 
 /**
  * Swing implementation of {@link ModelFileView}: the file chooser and dialogs formerly inside {@link ModelLoader}.
@@ -36,14 +36,14 @@ import common.xml.ModelLoader.JmtFileFilter;
 public class SwingModelFileView implements ModelFileView {
 
 	private final JmtFileChooser dialog;
-	private final JmtFileFilter defaultFilter;
-	private final JmtFileFilter defaultSaveFilter;
+	private final FileFormat defaultFilter;
+	private final FileFormat defaultSaveFilter;
 
 	/**
 	 * @param defaultFilter default open filter of the application (JABA selects only the JABA filter)
 	 * @param defaultSaveFilter default save filter of the application
 	 */
-	public SwingModelFileView(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter) {
+	public SwingModelFileView(FileFormat defaultFilter, FileFormat defaultSaveFilter) {
 		this.defaultFilter = defaultFilter;
 		this.defaultSaveFilter = defaultSaveFilter;
 		dialog = new JmtFileChooser(defaultSaveFilter);
@@ -70,8 +70,9 @@ public class SwingModelFileView implements ModelFileView {
 	@Override
 	public File chooseFileToSave(Object parent) {
 		dialog.resetChoosableFileFilters();
-		dialog.addChoosableFileFilter(defaultSaveFilter);
-		dialog.setFileFilter(defaultSaveFilter);
+		FormatFileFilter save = new FormatFileFilter(defaultSaveFilter);
+		dialog.addChoosableFileFilter(save);
+		dialog.setFileFilter(save);
 		int status = dialog.showSaveDialog(asComponent(parent));
 		return status == JFileChooser.APPROVE_OPTION ? dialog.getSelectedFile() : null;
 	}
@@ -102,17 +103,19 @@ public class SwingModelFileView implements ModelFileView {
 	 * Adds only compatible filters to current dialog
 	 */
 	private void addCompatibleFilters() {
-		dialog.addChoosableFileFilter(ModelLoader.ALL);
+		dialog.addChoosableFileFilter(new FormatFileFilter(ModelLoader.ALL));
+		FormatFileFilter initial;
 		if (defaultFilter == ModelLoader.JABA) {
-			dialog.addChoosableFileFilter(ModelLoader.JABA);
-			dialog.setFileFilter(ModelLoader.JABA);
+			initial = new FormatFileFilter(ModelLoader.JABA);
+			dialog.addChoosableFileFilter(initial);
 		} else {
-			dialog.addChoosableFileFilter(ModelLoader.ALL_NOTJABA);
-			dialog.addChoosableFileFilter(ModelLoader.JMODEL);
-			dialog.addChoosableFileFilter(ModelLoader.JSIM);
-			dialog.addChoosableFileFilter(ModelLoader.JMVA);
-			dialog.setFileFilter(ModelLoader.ALL_NOTJABA);
+			initial = new FormatFileFilter(ModelLoader.ALL_NOTJABA);
+			dialog.addChoosableFileFilter(initial);
+			dialog.addChoosableFileFilter(new FormatFileFilter(ModelLoader.JMODEL));
+			dialog.addChoosableFileFilter(new FormatFileFilter(ModelLoader.JSIM));
+			dialog.addChoosableFileFilter(new FormatFileFilter(ModelLoader.JMVA));
 		}
+		dialog.setFileFilter(initial);
 	}
 
 	/**
@@ -122,9 +125,9 @@ public class SwingModelFileView implements ModelFileView {
 
 		private static final long serialVersionUID = 1L;
 
-		private final JmtFileFilter defaultSaveFilter;
+		private final FileFormat defaultSaveFilter;
 
-		JmtFileChooser(JmtFileFilter defaultSaveFilter) {
+		JmtFileChooser(FileFormat defaultSaveFilter) {
 			super(Defaults.getWorkingPath());
 			this.defaultSaveFilter = defaultSaveFilter;
 		}

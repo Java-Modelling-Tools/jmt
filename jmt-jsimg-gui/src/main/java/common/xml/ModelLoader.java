@@ -21,12 +21,9 @@ import analytical.ExactModel;
 import simEngine.xml.XMLConstantNames;
 import simEngine.xml.XMLResultsConstants;
 
-import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.filechooser.FileFilter;
 
 import jmt.common.GlobalSettings;
 import jmt.framework.xml.XMLUtils;
@@ -53,18 +50,18 @@ public class ModelLoader {
 	/**
 	 * Filters for input files
 	 */
-	public static final JmtFileFilter ALL = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jaba;.jsim;.jmodel;.pnml", "All JMT data files");
-	public static final JmtFileFilter ALL_NOTJABA = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jsim;.jmodel;.pnml", "All compatible JMT data files");
+	public static final FileFormat ALL = new FileFormat(".jsimg;.jsimw;.jmva;.jaba;.jsim;.jmodel;.pnml", "All JMT data files");
+	public static final FileFormat ALL_NOTJABA = new FileFormat(".jsimg;.jsimw;.jmva;.jsim;.jmodel;.pnml", "All compatible JMT data files");
 
-	public static final JmtFileFilter JMODEL = new JmtFileFilter(".jsimg;.jmodel;.pnml", "JSIMgraph data file");
-	public static final JmtFileFilter JSIM = new JmtFileFilter(".jsimw;.jsim;.pnml", "JSIMwiz data file");
-	public static final JmtFileFilter JMVA = new JmtFileFilter(".jmva", "JMVA data file");
-	public static final JmtFileFilter JABA = new JmtFileFilter(".jaba", "JABA data file");
+	public static final FileFormat JMODEL = new FileFormat(".jsimg;.jmodel;.pnml", "JSIMgraph data file");
+	public static final FileFormat JSIM = new FileFormat(".jsimw;.jsim;.pnml", "JSIMwiz data file");
+	public static final FileFormat JMVA = new FileFormat(".jmva", "JMVA data file");
+	public static final FileFormat JABA = new FileFormat(".jaba", "JABA data file");
 
-	public static final JmtFileFilter JMODEL_SAVE = new JmtFileFilter(".jsimg;.pnml", "JSIMgraph data file");
-	public static final JmtFileFilter JSIM_SAVE = new JmtFileFilter(".jsimw;.pnml", "JSIMwiz data file");
-	public static final JmtFileFilter JMVA_SAVE = new JmtFileFilter(".jmva", "JMVA data file");
-	public static final JmtFileFilter JABA_SAVE = new JmtFileFilter(".jaba", "JABA data file");
+	public static final FileFormat JMODEL_SAVE = new FileFormat(".jsimg;.pnml", "JSIMgraph data file");
+	public static final FileFormat JSIM_SAVE = new FileFormat(".jsimw;.pnml", "JSIMwiz data file");
+	public static final FileFormat JMVA_SAVE = new FileFormat(".jmva", "JMVA data file");
+	public static final FileFormat JABA_SAVE = new FileFormat(".jaba", "JABA data file");
 
 	/**
 	 * Constants used for output
@@ -103,8 +100,8 @@ public class ModelLoader {
 	// Last file chosen by the view or passed in by the caller
 	protected File selectedFile;
 
-	protected JmtFileFilter defaultFilter;
-	protected JmtFileFilter defaultSaveFilter;
+	protected FileFormat defaultFilter;
+	protected FileFormat defaultSaveFilter;
 
 	// Motivation of last failure
 	protected String failureMotivation;
@@ -122,7 +119,7 @@ public class ModelLoader {
 	 * @param defaultSaveFilter default file save filter for current application
 	 * @param view asked for files and confirmations
 	 */
-	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter, ModelFileView view) {
+	public ModelLoader(FileFormat defaultFilter, FileFormat defaultSaveFilter, ModelFileView view) {
 		this.defaultFilter = defaultFilter;
 		this.defaultSaveFilter = defaultSaveFilter;
 		this.view = view;
@@ -166,7 +163,7 @@ public class ModelLoader {
 	 * @throws ClassCastException if modelData is not of instance of the correct class
 	 * @see #getFailureMotivation getFailureMotivation()
 	 */
-	public int loadModel(Object modelData, Component parent, File file) {
+	public int loadModel(Object modelData, Object parent, File file) {
 		if (file == null) {
 			file = view.chooseFileToOpen(parent);
 			if (file == null) {
@@ -309,7 +306,7 @@ public class ModelLoader {
 	 * misread or lost on the next save.
 	 * @return true to go on loading (file is not newer, or the view says to open anyway)
 	 */
-	private boolean confirmOpenNewerVersion(Component parent, File file) {
+	private boolean confirmOpenNewerVersion(Object parent, File file) {
 		String running = GlobalSettings.getSetting("jmt.version");
 		String saved = JmtVersion.readFileVersion(file);
 		if (!JmtVersion.isNewer(saved, running)) {
@@ -340,7 +337,7 @@ public class ModelLoader {
 	 * @throws ClassCastException if modelData is not of instance of the correct class
 	 * @see #getFailureMotivation getFailureMotivation()
 	 */
-	public int saveModel(Object modelData, Component parent, File file) {
+	public int saveModel(Object modelData, Object parent, File file) {
 		if (file == null) {
 			// Shows save as window
 			file = view.chooseFileToSave(parent);
@@ -428,83 +425,6 @@ public class ModelLoader {
 			// If an exception is thrown, reports that format is unknown
 			return FILE_UNKNOWN;
 		}
-	}
-	// --------------------------------------------------------------------------------------------
-
-	// --- Inner classes --------------------------------------------------------------------------
-	/**
-	 * Inner class used to create simple file filters with only extension check
-	 */
-	public static class JmtFileFilter extends FileFilter {
-
-		public static final String SEP = ";";
-
-		private String[] extensions;
-		private String description;
-
-		/**
-		 * Creates a new file filter with specified semicolon separated list of 
-		 * extensions and specified description
-		 * @param extensionList semicolon separated list of extensions of this
-		 * filter (for example ".jsimg;.jmodel")
-		 * @param text text description of this filter
-		 */
-		public JmtFileFilter(String extensionList, String text) {
-			this.extensions = extensionList.split(SEP);
-			this.description = createDescription(text);
-		}
-
-		/**
-		 * Whether the given file is accepted by this filter.
-		 */
-		@Override
-		public boolean accept(File f) {
-			String name = f.getName().toLowerCase();
-			if (f.isDirectory()) {
-				return true;
-			}
-			for (String e : extensions) {
-				if (name.endsWith(e)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * Creates the description for this filter
-		 * @param text text description of the filter
-		 * @return created description
-		 */
-		private String createDescription(String text) {
-			StringBuffer sb = new StringBuffer();
-			sb.append(text);
-			sb.append(" (*");
-			for (int i = 0; i < extensions.length - 1; i++) {
-				sb.append(extensions[i]);
-				sb.append("; *");
-			}
-			sb.append(extensions[extensions.length - 1]);
-			sb.append(")");
-			return sb.toString();
-		}
-
-		/**
-		 * Gets the extensions of this filter
-		 * @return extensions of this filter
-		 */
-		public String[] getExtensions() {
-			return extensions;
-		}
-
-		/**
-		 * The description of this filter.
-		 */
-		@Override
-		public String getDescription() {
-			return description;
-		}
-
 	}
 	// --------------------------------------------------------------------------------------------
 
