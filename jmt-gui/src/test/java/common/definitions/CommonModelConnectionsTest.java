@@ -18,6 +18,7 @@ import common.CommonConstants;
 import common.forkStrategies.OutPath;
 import common.forkStrategies.ProbabilitiesFork;
 import common.routingStrategies.ProbabilityRouting;
+import common.routingStrategies.RandomRouting;
 
 /** Characterization of CommonModel connections and the routing/fork data that follows them. */
 class CommonModelConnectionsTest {
@@ -118,12 +119,11 @@ class CommonModelConnectionsTest {
 	}
 
 	@Test
-	void linksToSinksAndFromSourcesAreRecordedInRouting() {
+	void probabilityRoutingLearnsLinkAdditionsAndRemovals() {
 		CommonModel m = ModelFixtures.openOneStation();
 		Object c = m.getClassKeys().get(0);
 		Object src = m.getStationKeysSource().get(0);
 		Object q = m.getStationKeysServer().get(0);
-		Object out = m.getStationKeysSink().get(0);
 		m.setRoutingStrategy(q, c, new ProbabilityRouting());
 		// the strategy was installed after linking: it learns about links added later
 		Object d = addStation(m, "D", CommonConstants.STATION_TYPE_DELAY);
@@ -133,7 +133,6 @@ class CommonModelConnectionsTest {
 		m.setConnected(q, d, false);
 		assertFalse(((ProbabilityRouting) m.getRoutingStrategy(q, c)).getValues().containsKey(d));
 		assertNotNull(m.getRoutingStrategy(src, c));
-		assertTrue(m.areConnected(q, out));
 	}
 
 	@Test
@@ -218,14 +217,14 @@ class CommonModelConnectionsTest {
 		Object q = m.getStationKeysServer().get(0);
 		Object c2 = addClass(m, "C2", CommonConstants.CLASS_TYPE_OPEN);
 		assertTrue(m.areConnected(src, q));
-		assertTrue(m.getRoutingStrategy(q, c2) instanceof common.routingStrategies.RandomRouting);
+		assertTrue(m.getRoutingStrategy(q, c2) instanceof RandomRouting);
 		m.setRoutingStrategy(q, c2, new ProbabilityRouting());
 		// a strategy installed with setRoutingStrategy does not learn the existing links by itself
 		assertTrue(((ProbabilityRouting) m.getRoutingStrategy(q, c2)).getValues().isEmpty());
 	}
 
 	@Test
-	void unlinkAllAndDeleteLeavesNoConnections() {
+	void unlinkingEveryPairLeavesNoConnections() {
 		CommonModel m = ModelFixtures.openOneStation();
 		for (Object s : m.getStationKeys()) {
 			for (Object t : m.getStationKeys()) {

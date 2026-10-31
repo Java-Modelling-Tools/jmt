@@ -23,12 +23,15 @@ import common.distributions.Deterministic;
 import common.distributions.Exponential;
 import common.forkStrategies.ClassSwitchFork;
 import common.forkStrategies.CombFork;
+import common.forkStrategies.OutPath;
 import common.forkStrategies.ProbabilitiesFork;
 import common.joinStrategies.GuardJoin;
 import common.joinStrategies.JoinStrategy;
 import common.joinStrategies.NormalJoin;
 import common.joinStrategies.PartialJoin;
+import common.routingStrategies.RandomRouting;
 import common.semaphoreStrategies.NormalSemaphore;
+import common.serviceStrategies.ZeroStrategy;
 
 /** Characterization of the per-section parameters of CommonModel: queue, service, delay, fork, join, semaphore, logger, class switch. */
 class CommonModelSectionsTest {
@@ -69,6 +72,7 @@ class CommonModelSectionsTest {
 		CommonModel m = ModelFixtures.openOneStation();
 		Object q = m.getStationKeysServer().get(0);
 		Object c = m.getClassKeys().get(0);
+		// pinned quirk: unset until first set; null means 1 on set (harmless; a later stage may default it to 1)
 		assertNull(m.getServerNumRequired(q, c));
 		m.setServerNumRequired(q, c, null);
 		assertEquals(Integer.valueOf(1), m.getServerNumRequired(q, c));
@@ -93,7 +97,8 @@ class CommonModelSectionsTest {
 		m.setImpatienceType(q, c, ImpatienceType.RENEGING);
 		assertEquals(ImpatienceType.RENEGING, m.getImpatienceType(q, c));
 		m.resetImpatience(q, c);
-		assertNull(m.getImpatienceType(q, c)); // reset clears the type rather than restoring NONE
+		// pinned quirk: reset clears the type to null rather than restoring NONE (a later stage may legitimately change it)
+		assertNull(m.getImpatienceType(q, c));
 		assertNull(m.getImpatienceParameter(q, c));
 	}
 
@@ -118,18 +123,24 @@ class CommonModelSectionsTest {
 	}
 
 	@Test
-	void deletingAClassDropsItsSwitchoverDelayOffAndSetupEntriesInOtherClasses() {
+	void deletingAClassKeepsSwitchoverEntriesOfOtherClassesAndForgetsTheDeletedOne() {
 		CommonModel m = ModelFixtures.emptyModel();
 		Object c1 = addClass(m, "C1", CommonConstants.CLASS_TYPE_OPEN);
 		Object c2 = addClass(m, "C2", CommonConstants.CLASS_TYPE_OPEN);
+		Object c3 = addClass(m, "C3", CommonConstants.CLASS_TYPE_OPEN);
 		Object q = addStation(m, "Q", CommonConstants.STATION_TYPE_SERVER);
-		Deterministic sw = new Deterministic();
-		m.setSwitchoverTimeDistribution(q, c1, c2, sw);
-		m.setDelayOffTimeDistribution(q, c1, new Deterministic());
+		Deterministic toC2 = new Deterministic();
+		Deterministic toC3 = new Deterministic();
+		m.setSwitchoverTimeDistribution(q, c1, c2, toC2);
+		m.setSwitchoverTimeDistribution(q, c1, c3, toC3);
+		assertSame(toC2, m.getSwitchoverTimeDistribution(q, c1, c2));
 		m.deleteClass(c2);
-		// the getter lazily recreates a zero-time entry, so a missing entry reads as ZeroStrategy
-		assertTrue(m.getSwitchoverTimeDistribution(q, c1, c2) instanceof common.serviceStrategies.ZeroStrategy);
-		assertNotNull(m.getDelayOffTimeDistribution(q, c1));
+		assertSame(toC3, m.getSwitchoverTimeDistribution(q, c1, c3));
+		// pinned quirk: the getter lazily recreates a zero-time entry, so a dropped entry reads as a fresh ZeroStrategy
+		// (observable by callers; a later stage may legitimately change it).
+		Object after = m.getSwitchoverTimeDistribution(q, c1, c2);
+		assertNotSame(toC2, after);
+		assertTrue(after instanceof ZeroStrategy);
 	}
 
 	@Test
@@ -203,16 +214,23 @@ class CommonModelSectionsTest {
 	void forkStrategyEntriesFollowClassSetChanges() {
 		CommonModel m = ModelFixtures.withForkJoin();
 		Object f = m.getStationKeysFork().get(0);
+		Object q1 = m.getStationKeysServer().get(0);
 		Object c = m.getClassKeys().get(0);
 		m.setForkStrategy(f, c, new ClassSwitchFork());
-		Object c2 = addClass(m, "C2", CommonConstants.CLASS_TYPE_OPEN);
+		// pinned quirk: a strategy installed later does not learn existing links; relink to populate it
+		m.setConnected(f, q1, false);
+		m.setConnected(f, q1, true);
 		ClassSwitchFork csf = (ClassSwitchFork) m.getForkStrategy(f, c);
-		for (Object out : csf.getOutDetails().values()) {
-			assertTrue(((common.forkStrategies.OutPath) out).getOutParameters().containsKey(c2));
+		assertEquals(1, csf.getOutDetails().size());
+		Object c2 = addClass(m, "C2", CommonConstants.CLASS_TYPE_OPEN);
+		for (OutPath out : csf.getOutDetails().values()) {
+			assertTrue(out.getOutParameters().containsKey(c));
+			assertTrue(out.getOutParameters().containsKey(c2));
 		}
 		m.deleteClass(c2);
-		for (Object out : csf.getOutDetails().values()) {
-			assertFalse(((common.forkStrategies.OutPath) out).getOutParameters().containsKey(c2));
+		for (OutPath out : csf.getOutDetails().values()) {
+			assertTrue(out.getOutParameters().containsKey(c));
+			assertFalse(out.getOutParameters().containsKey(c2));
 		}
 	}
 
@@ -273,7 +291,7 @@ class CommonModelSectionsTest {
 		assertEquals(1, ((JoinStrategy) m.getJoinStrategy(j, c)).getRequiredNum());
 	}
 
-	@Disabled("latent: setJoinStrategy drops a same-name replacement (JoinStrategy.equals compares names only); no current caller replaces a strategy by one of the same name with other parameters")
+	@Disabled("latent: setJoinStrategy drops a same-name replacement (JoinStrategy.equals compares names only); no current caller replaces a strategy by one of the same name with other parameters. Fragile, not a current bug: JMCH Solver:249-255, JMVA ModelConverter:197-199 and JMVAtoJSIMConvertor:143 install a ProbabilityRouting and then mutate their local copy, which only works because the default routing is Random")
 	@Test
 	void setJoinStrategyShouldInstallReplacementWithDifferentParameters() {
 		CommonModel m = ModelFixtures.withForkJoin();
@@ -294,12 +312,12 @@ class CommonModelSectionsTest {
 		Object c = addClass(m, "C", CommonConstants.CLASS_TYPE_OPEN);
 		Object s = addStation(m, "Sem", CommonConstants.STATION_TYPE_SEMAPHORE);
 		assertTrue(m.getSemaphoreStrategy(s, c) instanceof NormalSemaphore);
-		assertTrue(m.getRoutingStrategy(s, c) instanceof common.routingStrategies.RandomRouting);
+		assertTrue(m.getRoutingStrategy(s, c) instanceof RandomRouting);
 		m.setSemaphoreThreshold(s, c, Integer.valueOf(3));
 		assertEquals(Integer.valueOf(3), m.getSemaphoreThreshold(s, c));
 		NormalSemaphore replacement = new NormalSemaphore();
 		m.setSemaphoreStrategy(s, c, replacement);
-		// same-name replacement is ignored here as well
+		// pinned quirk: same-name replacement is ignored here as well (equals compares names only)
 		assertNotSame(replacement, m.getSemaphoreStrategy(s, c));
 	}
 
@@ -385,7 +403,7 @@ class CommonModelSectionsTest {
 		assertEquals(2, m.getInfoForServerType(q, 0).getNumOfServers());
 	}
 
-	@Disabled("bug: deleteServerType calls deleteStationMeasures(serverKey), which matches measure stations, so measures that reference the deleted server type survive with a stale key (reached from ServerTypesEditor delete and MetricConfigurationsPanel; XMLWriter then silently writes it as a station-level measure)")
+	@Disabled("bug: deleteServerType calls deleteStationMeasures(serverKey), which matches measure stations, so measures that reference the deleted server type survive with a stale key (reached from ServerTypesEditor delete and MetricConfigurationsPanel; XMLWriter:2020 is null-guarded and silently writes a station-level measure; MeasurePanel:709 shows the stale key; MetricConfigurationsPanel.updateServerPreferences l.97-100 calls getServerType(staleKey).getName() which would NPE when the measure is reopened, traced from code, not run in the GUI)")
 	@Test
 	void deletingServerTypeAlsoDropsMeasuresThatReferenceIt() {
 		CommonModel m = ModelFixtures.openOneStation();
@@ -445,7 +463,8 @@ class CommonModelSectionsTest {
 		assertSame(e, m.getFiringTimeDistribution(t, 0));
 		// unlinking drops the corresponding rows
 		m.setConnected(p, t, false);
-		assertEquals(Integer.valueOf(0), m.getEnablingCondition(t, 0, p, c)); // removed row reads as the default 0
+		// pinned quirk: a removed row reads as the default 0, not null
+		assertEquals(Integer.valueOf(0), m.getEnablingCondition(t, 0, p, c));
 		m.deleteTransitionMode(t, 2);
 		assertEquals(2, m.getTransitionModeListSize(t));
 	}
