@@ -274,7 +274,12 @@ class CommonModelSectionsTest {
 	 * JoinStrategy.equals compares names only, so setJoinStrategy silently ignores a replacement that has the
 	 * same name but different parameters (a Quorum join with another required count). Today's callers survive
 	 * this: JoinSectionPanel and XMLReader only replace a strategy of a different name and then edit the
-	 * installed instance in place, and the default join is "Normal". Pinned as current behavior.
+	 * installed instance in place, and the default join is "Normal".
+	 * pinned quirk: current behavior is pinned here; the @Disabled test below asserts the opposite, so both
+	 * tests must be flipped together when the bug is fixed.
+	 * The same equals-by-name behavior exists on setRoutingStrategy: JMCH Solver:249-255, JMVA ModelConverter:197-199
+	 * and JMVAtoJSIMConvertor:143 install a ProbabilityRouting and then mutate their local copy, which only works
+	 * because the default routing is Random (fragile, not a current bug).
 	 */
 	@Test
 	void setJoinStrategyKeepsInstalledStrategyWhenReplacementHasTheSameName() {
@@ -291,7 +296,7 @@ class CommonModelSectionsTest {
 		assertEquals(1, ((JoinStrategy) m.getJoinStrategy(j, c)).getRequiredNum());
 	}
 
-	@Disabled("latent: setJoinStrategy drops a same-name replacement (JoinStrategy.equals compares names only); no current caller replaces a strategy by one of the same name with other parameters. Fragile, not a current bug: JMCH Solver:249-255, JMVA ModelConverter:197-199 and JMVAtoJSIMConvertor:143 install a ProbabilityRouting and then mutate their local copy, which only works because the default routing is Random")
+	@Disabled("latent: setJoinStrategy drops a same-name replacement (JoinStrategy.equals compares names only); no current caller replaces a strategy by one of the same name with other parameters")
 	@Test
 	void setJoinStrategyShouldInstallReplacementWithDifferentParameters() {
 		CommonModel m = ModelFixtures.withForkJoin();
