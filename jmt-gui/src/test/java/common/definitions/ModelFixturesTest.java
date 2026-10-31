@@ -2,7 +2,10 @@ package common.definitions;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import common.CommonConstants;
+import common.controller.ModelChecker;
 import org.junit.jupiter.api.Test;
 
 class ModelFixturesTest {
@@ -57,8 +60,42 @@ class ModelFixturesTest {
 		CommonModel a = ModelFixtures.openOneStation();
 		CommonModel b = ModelFixtures.openOneStation();
 		assertNotSame(a, b);
-		ModelFixtures.addClass(a, "Extra", common.CommonConstants.CLASS_TYPE_OPEN);
+		ModelFixtures.addClass(a, "Extra", CommonConstants.CLASS_TYPE_OPEN);
 		counts(a, 2, 3, 2);
 		counts(b, 1, 3, 2);
+	}
+
+	private static void assertValid(CommonModel m) {
+		ModelChecker c = new ModelChecker(m, m, m, m, false);
+		c.checkModel();
+		assertTrue(c.isErrorFreeNormal());
+	}
+
+	@Test
+	void buildersPassModelChecker() {
+		assertValid(ModelFixtures.openOneStation());
+		assertValid(ModelFixtures.closedTwoStations());
+		assertValid(ModelFixtures.withForkJoin());
+		assertValid(ModelFixtures.withBlockingRegion());
+	}
+
+	@Test
+	void closedPopulationAndReferenceStations() {
+		CommonModel c = ModelFixtures.closedTwoStations();
+		Object cls = c.getClassKeys().get(0);
+		assertEquals(Integer.valueOf(5), c.getClassPopulation(cls));
+		assertEquals(c.getStationKeysDelay().get(0), c.getClassRefStation(cls));
+		CommonModel o = ModelFixtures.openOneStation();
+		assertEquals(o.getStationKeysSource().get(0), o.getClassRefStation(o.getClassKeys().get(0)));
+	}
+
+	@Test
+	void emptyModelReportsMissingParts() {
+		CommonModel m = ModelFixtures.emptyModel();
+		ModelChecker c = new ModelChecker(m, m, m, m, false);
+		c.checkModel();
+		assertTrue(c.isThereNoClassError());
+		assertTrue(c.isThereNoStationError());
+		assertTrue(c.isThereNoMeasureError());
 	}
 }
