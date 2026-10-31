@@ -22,24 +22,20 @@ import simEngine.xml.XMLConstantNames;
 import simEngine.xml.XMLResultsConstants;
 
 import java.awt.Component;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import jmt.common.GlobalSettings;
 import jmt.framework.xml.XMLUtils;
 import legacyxml.JmtVersion;
 import common.CommonConstants;
-import common.Defaults;
 import common.definitions.CommonModel;
 import common.definitions.ModelConverter;
 import common.definitions.StoredResultsModel;
+import common.xml.swing.SwingModelFileView;
 import jaba.JabaModel;
 
 import org.w3c.dom.Document;
@@ -103,7 +99,10 @@ public class ModelLoader {
 	protected static final String XML_MVA_ROOT = "model";
 	protected static final String XML_PNML_ROOT = "pnml";
 
-	protected JmtFileChooser dialog;
+	protected ModelFileView view;
+
+	// Last file chosen by the view or passed in by the caller
+	protected File selectedFile;
 
 	protected JmtFileFilter defaultFilter;
 	protected JmtFileFilter defaultSaveFilter;
@@ -124,10 +123,17 @@ public class ModelLoader {
 	 * @param defaultSaveFilter default file save filter for current application
 	 */
 	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter) {
+		this(defaultFilter, defaultSaveFilter, new SwingModelFileView(defaultFilter, defaultSaveFilter));
+	}
+
+	/**
+	 * Initializes a new model loader with specified default file filters and user interface
+	 * @param view asked for files and confirmations
+	 */
+	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter, ModelFileView view) {
 		this.defaultFilter = defaultFilter;
 		this.defaultSaveFilter = defaultSaveFilter;
-		// Initialize filechooser dialog
-		dialog = new JmtFileChooser(defaultSaveFilter);
+		this.view = view;
 	}
 
 	/**
@@ -170,17 +176,12 @@ public class ModelLoader {
 	 */
 	public int loadModel(Object modelData, Component parent, File file) {
 		if (file == null) {
-			int status = showOpenDialog(parent);
-			if (status == JFileChooser.CANCEL_OPTION) {
+			file = view.chooseFileToOpen(parent);
+			if (file == null) {
 				return CANCELLED;
-			} else if (status == JFileChooser.ERROR_OPTION) {
-				failureMotivation = "Error selecting input file";
-				return FAILURE;
 			}
-			file = dialog.getSelectedFile();
-		} else {
-			dialog.setSelectedFile(file);
 		}
+		selectedFile = file;
 
 		warnings.clear();
 		try {
@@ -317,16 +318,10 @@ public class ModelLoader {
 	private boolean confirmOpenNewerVersion(Component parent, File file) {
 		String running = GlobalSettings.getSetting("jmt.version");
 		String saved = JmtVersion.readFileVersion(file);
-		if (!JmtVersion.isNewer(saved, running) || GraphicsEnvironment.isHeadless()) {
+		if (!JmtVersion.isNewer(saved, running)) {
 			return true;
 		}
-		Object[] options = { "Open anyway", "Cancel" };
-		int choice = JOptionPane.showOptionDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
-				+ "</font> was saved by JMT <b>" + saved + "</b>, which is newer than the version you are running (<b>" + running
-				+ "</b>).<br>It may use features this version does not support, and some data may be ignored or lost if you save it.<br>"
-				+ "Do you want to open it anyway?</html>", "JMT - Newer file version", JOptionPane.DEFAULT_OPTION,
-				JOptionPane.WARNING_MESSAGE, null, options, options[1]);
-		return choice == 0;
+		return view.confirmOpenNewerVersion(parent, file, saved, running);
 	}
 
 	/**
@@ -334,7 +329,7 @@ public class ModelLoader {
 	 * @return name of selected file for open or save
 	 */
 	public File getSelectedFile() {
-		return dialog.getSelectedFile();
+		return selectedFile;
 	}
 	// --------------------------------------------------------------------------------------------
 
@@ -354,15 +349,11 @@ public class ModelLoader {
 	public int saveModel(Object modelData, Component parent, File file) {
 		if (file == null) {
 			// Shows save as window
-			int status;
-			status = this.showSaveDialog(parent);
-			if (status == JFileChooser.CANCEL_OPTION) {
+			file = view.chooseFileToSave(parent);
+			if (file == null) {
 				return CANCELLED;
-			} else if (status == JFileChooser.ERROR_OPTION) {
-				failureMotivation = "Error selecting output file";
-				return FAILURE;
 			}
-			file = dialog.getSelectedFile();
+			selectedFile = file;
 		} else {
 			// Check extension to avoid saving over a converted file
 			boolean hasValidExtension = false;
@@ -374,10 +365,7 @@ public class ModelLoader {
 				}
 			}
 			if (!hasValidExtension) {
-				int resultValue = JOptionPane.showConfirmDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
-				+ "</font> does not have valid extension.<br>Do you want to replace it anyway?</html>", "JMT - Warning",
-				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-				if (resultValue != JOptionPane.OK_OPTION) {
+				if (!view.confirmSaveWithoutValidExtension(parent, file)) {
 					return CANCELLED;
 				}
 			}
@@ -449,126 +437,7 @@ public class ModelLoader {
 	}
 	// --------------------------------------------------------------------------------------------
 
-	// --- Methods to show dialogs ----------------------------------------------------------------
-	/**
-	 * Adds only compatible filters to current dialog
-	 */
-	protected void addCompatibleFilters() {
-		dialog.addChoosableFileFilter(ALL);
-		if (defaultFilter == JABA) {
-			dialog.addChoosableFileFilter(JABA);
-			dialog.setFileFilter(JABA);
-		} else {
-			dialog.addChoosableFileFilter(ALL_NOTJABA);
-			dialog.addChoosableFileFilter(JMODEL);
-			dialog.addChoosableFileFilter(JSIM);
-			dialog.addChoosableFileFilter(JMVA);
-			dialog.setFileFilter(ALL_NOTJABA);
-		}
-	}
-
-	/**
-	 * Shows open file dialog
-	 * @param parent parent component for this dialog
-	 * @return   the return state of the file chooser on popdown:
-	 * <ul>
-	 * <li>JFileChooser.CANCEL_OPTION
-	 * <li>JFileChooser.APPROVE_OPTION
-	 * <li>JFileCHooser.ERROR_OPTION if an error occurs or the
-	 *			dialog is dismissed
-	 * </ul>
-	 * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-	 * returns true.
-	 */
-	protected int showOpenDialog(Component parent) {
-		dialog.resetChoosableFileFilters();
-		addCompatibleFilters();
-		return dialog.showOpenDialog(parent);
-	}
-
-	/**
-	 * Shows save file dialog
-	 * @param    parent  the parent component of the dialog,
-	 *			can be <code>null</code>;
-	 *                  see <code>showDialog</code> for details
-	 * @return   the return state of the file chooser on popdown:
-	 * <ul>
-	 * <li>JFileChooser.CANCEL_OPTION
-	 * <li>JFileChooser.APPROVE_OPTION
-	 * <li>JFileCHooser.ERROR_OPTION if an error occurs or the
-	 *			dialog is dismissed
-	 * </ul>
-	 * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-	 * returns true.
-	 * @see java.awt.GraphicsEnvironment#isHeadless
-	 */
-	protected int showSaveDialog(Component parent) {
-		dialog.resetChoosableFileFilters();
-		dialog.addChoosableFileFilter(defaultSaveFilter);
-		dialog.setFileFilter(defaultSaveFilter);
-		return dialog.showSaveDialog(parent);
-	}
-	// --------------------------------------------------------------------------------------------
-
 	// --- Inner classes --------------------------------------------------------------------------
-	/**
-	 * Custom file chooser class
-	 */
-	protected static class JmtFileChooser extends JFileChooser {
-
-		private static final long serialVersionUID = 1L;
-
-		protected JmtFileFilter defaultSaveFilter;
-
-		/**
-		 * Creates a File chooser in the appropriate directory user default
-		 * @param defaultSaveFilter default file save filter
-		 */
-		public JmtFileChooser(JmtFileFilter defaultSaveFilter) {
-			super(Defaults.getWorkingPath());
-			this.defaultSaveFilter = defaultSaveFilter;
-		}
-
-		/**
-		 * Overrides default method to provide a warning if saving over an existing file
-		 */
-		@Override
-		public void approveSelection() {
-			// Gets the chosen file name
-			String name = getSelectedFile().getName();
-			String parent = getSelectedFile().getParent();
-			if (getDialogType() == OPEN_DIALOG) {
-				super.approveSelection();
-			}
-			if (getDialogType() == SAVE_DIALOG) {
-				boolean hasValidExtension = false;
-				String[] extensions = defaultSaveFilter.getExtensions();
-				for (String e : extensions) {
-					if (name.toLowerCase().endsWith(e)) {
-						hasValidExtension = true;
-						break;
-					}
-				}
-				if (!hasValidExtension) {
-					name += extensions[0];
-					setSelectedFile(new File(parent, name));
-				}
-				if (getSelectedFile().exists()) {
-					int resultValue = JOptionPane.showConfirmDialog(this, "<html>File <font color=#0000ff>" + name
-							+ "</font> already exists in this folder.<br>Do you want to replace it?</html>", "JMT - Warning",
-							JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-					if (resultValue == JOptionPane.OK_OPTION) {
-						getSelectedFile().delete();
-						super.approveSelection();
-					}
-				} else {
-					super.approveSelection();
-				}
-			}
-		}
-
-	}
-
 	/**
 	 * Inner class used to create simple file filters with only extension check
 	 */
