@@ -50,6 +50,7 @@ import common.JMTImageLoader;
 import common.panels.AboutDialogFactory;
 import common.panels.WarningWindow;
 import common.xml.ModelLoader;
+import common.xml.swing.SwingModelFileView;
 import jaba.link.SolverDispatcher;
 import jaba.panels.AllInOnePanel;
 import jaba.panels.ClassesPanel;
@@ -84,7 +85,7 @@ public class JabaWizard extends Wizard implements JabaController {
 	private JLabel helpLabel;
 	private HoverHelp help;
 
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JABA, ModelLoader.JABA_SAVE));
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE, new SwingModelFileView(ModelLoader.JABA, ModelLoader.JABA_SAVE));
 
 	private SolverDispatcher jsolver;
 

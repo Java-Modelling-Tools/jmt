@@ -139,6 +139,28 @@ class ModelLoaderViewTest {
 		}
 	}
 
+	@Test
+	void parentIsForwardedToEveryViewCall() throws Exception {
+		java.awt.Component parent = new java.awt.Container();
+		File newer = archiveWithVersion("fwd.jsimg", "99.0.0");
+		for (Flavour f : flavours()) {
+			RecordingModelFileView v = new RecordingModelFileView();
+			ModelLoader ml = f.loader(v);
+			ml.loadModel(target(f), parent, null); // chooseFileToOpen
+			ml.saveModel(f.model.get(), parent, null); // chooseFileToSave
+			ml.saveModel(f.model.get(), parent, new File(tmp, "fwd_" + f.ext.substring(1) + ".txt")); // confirmSaveWithoutValidExtension
+			int expected = 3;
+			if (Arrays.asList(archiveReaders()).stream().anyMatch(a -> a.open == f.open)) {
+				ml.loadModel(target(f), parent, newer); // confirmOpenNewerVersion
+				expected++;
+			}
+			assertEquals(expected, v.parents.size(), f.ext);
+			for (Object p : v.parents) {
+				assertSame(parent, p, f.ext);
+			}
+		}
+	}
+
 	// --- save ------------------------------------------------------------------------------------------
 
 	@Test

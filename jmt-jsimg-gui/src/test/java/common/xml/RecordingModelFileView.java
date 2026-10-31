@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Test double: scripted answers, every call recorded as "name" or "name:args". */
+/** Test double: scripted answers; {@code calls} records call names only, {@code parents} the parent of each call that takes one. */
 class RecordingModelFileView implements ModelFileView {
 
 	File openAnswer;

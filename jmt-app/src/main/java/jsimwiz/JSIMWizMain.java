@@ -65,6 +65,7 @@ import common.panels.parametric.PAProgressWindow;
 import common.panels.parametric.PAResultsWindow;
 import common.panels.parametric.ParametricAnalysisPanel;
 import common.xml.ModelLoader;
+import common.xml.swing.SwingModelFileView;
 import common.xml.XMLWriter;
 import jsimwiz.definitions.JSIMModel;
 import jsimwiz.panels.BlockingRegionsPanel;
@@ -99,7 +100,7 @@ public class JSIMWizMain extends Wizard implements GuiInterface {
 	private JFrame resultsWindow;
 	private DispatcherThread dispatcher;
 
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new common.xml.swing.SwingModelFileView(ModelLoader.JSIM, ModelLoader.JSIM_SAVE));
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new SwingModelFileView(ModelLoader.JSIM, ModelLoader.JSIM_SAVE));
 
 	private ClassesPanel classes;
 	private StationsPanel stations;
