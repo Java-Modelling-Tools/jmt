@@ -2,10 +2,10 @@ package analytical.scaCorrectness;
 
 import analytical.BondiCorrectnessTest;
 import solvers.multiSolverAlgorithms.SolverMultiMixedRWA;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class SCACorrectnessBondiModelOneNTwoSixTest {
+class SCACorrectnessBondiModelOneNTwoSixTest {
 
     /**
      * Results are from the paper:
@@ -16,30 +16,30 @@ public class SCACorrectnessBondiModelOneNTwoSixTest {
 
     private SolverMultiMixedRWA rwaSolver;
 
-    @Before
-    public void initSolver() {
+    @BeforeEach
+    void initSolver() {
         // given
         rwaSolver = BondiCorrectnessTest.getModelOneNTwoSix().getRWASolver();
     }
 
     @Test
-    public void queueLengthTest() {
+    void queueLengthTest() {
         // Page 11, Table 9
         double queueLenOneOne = 0.3814;
-        BondiCorrectnessTest.queueLengthTest(rwaSolver, queueLenOneOne);
+        BondiCorrectnessTest.queueLengthTest(rwaSolver, queueLenOneOne, BondiCorrectnessTest.TOLERANCE);
     }
 
     @Test
-    public void residenceTimeTest() {
+    void residenceTimeTest() {
         // Page 9, Table 7
         double resTimeTwoTwo = 0.1583;
-        BondiCorrectnessTest.residenceTimeTest(rwaSolver, resTimeTwoTwo);
+        BondiCorrectnessTest.residenceTimeTest(rwaSolver, resTimeTwoTwo, BondiCorrectnessTest.TOLERANCE);
     }
 
     @Test
-    public void throughputTest() {
+    void throughputTest() {
         // Page 6, Table 4
         double[] correctThroughput = {15.2737, 3.4716};
-        BondiCorrectnessTest.throughputTest(rwaSolver, correctThroughput);
+        BondiCorrectnessTest.throughputTest(rwaSolver, correctThroughput, BondiCorrectnessTest.TOLERANCE);
     }
 }
