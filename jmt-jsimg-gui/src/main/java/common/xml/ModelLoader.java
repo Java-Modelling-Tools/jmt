@@ -128,6 +128,8 @@ public class ModelLoader {
 
 	/**
 	 * Initializes a new model loader with specified default file filters and user interface
+	 * @param defaultFilter default file filter for current application
+	 * @param defaultSaveFilter default file save filter for current application
 	 * @param view asked for files and confirmations
 	 */
 	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter, ModelFileView view) {
@@ -180,6 +182,8 @@ public class ModelLoader {
 			if (file == null) {
 				return CANCELLED;
 			}
+		} else {
+			view.setSelectedFile(file);
 		}
 		selectedFile = file;
 
@@ -313,7 +317,7 @@ public class ModelLoader {
 	/**
 	 * Warns if the archive was saved by a newer JMT than the running one, since parts of it may be
 	 * misread or lost on the next save.
-	 * @return true to go on loading (file is not newer, no GUI available, or user chose to open anyway)
+	 * @return true to go on loading (file is not newer, or the view says to open anyway)
 	 */
 	private boolean confirmOpenNewerVersion(Component parent, File file) {
 		String running = GlobalSettings.getSetting("jmt.version");

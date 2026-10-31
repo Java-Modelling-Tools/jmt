@@ -26,6 +26,10 @@ import java.io.File;
 public class HeadlessModelFileView implements ModelFileView {
 
 	@Override
+	public void setSelectedFile(File file) {
+	}
+
+	@Override
 	public File chooseFileToOpen(Object parent) {
 		return null;
 	}

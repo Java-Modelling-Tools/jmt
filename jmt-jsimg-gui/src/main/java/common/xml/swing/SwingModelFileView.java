@@ -49,15 +49,20 @@ public class SwingModelFileView implements ModelFileView {
 		dialog = new JmtFileChooser(defaultSaveFilter);
 	}
 
-	public SwingModelFileView(JmtFileFilter saveFilter) {
-		this(null, saveFilter);
+	private static Component asComponent(Object parent) {
+		return parent instanceof Component ? (Component) parent : null;
+	}
+
+	@Override
+	public void setSelectedFile(File file) {
+		dialog.setSelectedFile(file);
 	}
 
 	@Override
 	public File chooseFileToOpen(Object parent) {
 		dialog.resetChoosableFileFilters();
 		addCompatibleFilters();
-		int status = dialog.showOpenDialog((Component) parent);
+		int status = dialog.showOpenDialog(asComponent(parent));
 		// ERROR_OPTION is never returned by Swing in practice; treated as cancelled
 		return status == JFileChooser.APPROVE_OPTION ? dialog.getSelectedFile() : null;
 	}
@@ -67,7 +72,7 @@ public class SwingModelFileView implements ModelFileView {
 		dialog.resetChoosableFileFilters();
 		dialog.addChoosableFileFilter(defaultSaveFilter);
 		dialog.setFileFilter(defaultSaveFilter);
-		int status = dialog.showSaveDialog((Component) parent);
+		int status = dialog.showSaveDialog(asComponent(parent));
 		return status == JFileChooser.APPROVE_OPTION ? dialog.getSelectedFile() : null;
 	}
 
@@ -77,7 +82,7 @@ public class SwingModelFileView implements ModelFileView {
 			return true;
 		}
 		Object[] options = { "Open anyway", "Cancel" };
-		int choice = JOptionPane.showOptionDialog((Component) parent, "<html>File <font color=#0000ff>" + file.getName()
+		int choice = JOptionPane.showOptionDialog(asComponent(parent), "<html>File <font color=#0000ff>" + file.getName()
 				+ "</font> was saved by JMT <b>" + saved + "</b>, which is newer than the version you are running (<b>" + running
 				+ "</b>).<br>It may use features this version does not support, and some data may be ignored or lost if you save it.<br>"
 				+ "Do you want to open it anyway?</html>", "JMT - Newer file version", JOptionPane.DEFAULT_OPTION,
@@ -87,7 +92,7 @@ public class SwingModelFileView implements ModelFileView {
 
 	@Override
 	public boolean confirmSaveWithoutValidExtension(Object parent, File file) {
-		int resultValue = JOptionPane.showConfirmDialog((Component) parent, "<html>File <font color=#0000ff>" + file.getName()
+		int resultValue = JOptionPane.showConfirmDialog(asComponent(parent), "<html>File <font color=#0000ff>" + file.getName()
 				+ "</font> does not have valid extension.<br>Do you want to replace it anyway?</html>", "JMT - Warning",
 				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 		return resultValue == JOptionPane.OK_OPTION;

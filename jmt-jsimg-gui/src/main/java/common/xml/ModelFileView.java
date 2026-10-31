@@ -25,6 +25,9 @@ import java.io.File;
  * {@code parent} is opaque (a Component for Swing) so callers keep passing the window they have.
  */
 public interface ModelFileView {
+	/** Remember this file as the current selection, e.g. to preselect it in the next dialog. */
+	void setSelectedFile(File file);
+
 	/** Asks for a file to open; returns null if cancelled. */
 	File chooseFileToOpen(Object parent);
 
