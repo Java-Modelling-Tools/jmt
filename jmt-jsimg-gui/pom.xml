@@ -68,4 +68,21 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- JMTFrame's static init loads the Plastic look and feel, whose class init throws an Error
+                         (uncaught) when no display exists; without jgoodies it is a caught ClassNotFoundException,
+                         so CommonModel/Defaults work headless in unit tests. -->
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.jgoodies:looks</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
