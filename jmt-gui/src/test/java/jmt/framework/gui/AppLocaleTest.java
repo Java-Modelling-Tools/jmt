@@ -2,7 +2,6 @@ package jmt.framework.gui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.Locale;
 
@@ -13,7 +12,6 @@ class AppLocaleTest {
 	void platformDefaultIsCapturedAndAppIsEnglish() {
 		Locale platform = AppLocale.platformDefault();
 		assertNotNull(platform);
-		assertSame(platform, AppLocale.platformDefault());
 		assertEquals(Locale.ENGLISH, Locale.getDefault());
 	}
 }

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import common.definitions.CommonModel;
 
-/** Runs with com.jgoodies:looks excluded from the classpath (see pom): model classes must load without Swing look and feel. */
+/** Defaults and CommonModel must not initialise JMTFrame: the test-source JMTFrame guard throws if they do. */
 class DefaultsHeadlessTest {
 	@Test
 	void defaultsAndCommonModelLoadHeadless() {
