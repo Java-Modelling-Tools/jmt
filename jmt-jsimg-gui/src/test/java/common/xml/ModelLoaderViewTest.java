@@ -49,12 +49,6 @@ class ModelLoaderViewTest {
 		}
 	}
 
-	private File simFile(String name) {
-		File f = new File(tmp, name);
-		XMLWriter.writeXML(f, ArchiveFixtures.simpleModel());
-		return f;
-	}
-
 	private File archiveFile(String name) {
 		File f = new File(tmp, name);
 		new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new HeadlessModelFileView()).saveModel(ArchiveFixtures.simpleModel(), null, f);
@@ -175,18 +169,21 @@ class ModelLoaderViewTest {
 	void saveWithExplicitValidExtensionAsksNothingAndKeepsSelection() {
 		for (Flavour f : flavours()) {
 			RecordingModelFileView v = new RecordingModelFileView();
-			File lower = new File(tmp, "v" + f.ext);
 			ModelLoader ml = f.loader(v);
-			assertEquals(ModelLoader.SUCCESS, ml.saveModel(f.model.get(), null, lower), f.ext);
-			assertTrue(v.calls.isEmpty(), f.ext);
-			assertTrue(lower.length() > 0, f.ext);
+			// lower and upper case: the extension check is case-insensitive
+			for (String name : Arrays.asList("v" + f.ext, "V" + f.ext.toUpperCase())) {
+				File out = new File(tmp, name);
+				assertEquals(ModelLoader.SUCCESS, ml.saveModel(f.model.get(), null, out), name);
+				assertTrue(v.calls.isEmpty(), name);
+				assertTrue(out.length() > 0, name);
+			}
 			// Save with an explicit file does not change the selection (only save-as does)
 			assertNull(ml.getSelectedFile(), f.ext);
 		}
 	}
 
 	@Test
-	void saveWithInvalidExtensionAsksAndNoWritesNothing() {
+	void saveWithInvalidExtensionRefusedWritesNothing() {
 		for (Flavour f : flavours()) {
 			RecordingModelFileView v = new RecordingModelFileView();
 			v.extensionAnswer = false;
@@ -218,9 +215,7 @@ class ModelLoaderViewTest {
 		File f = archiveFile(name);
 		String xml = new String(Files.readAllBytes(f.toPath()), StandardCharsets.UTF_8);
 		String patched = xml.replaceFirst("jmtVersion=\"[^\"]*\"", "jmtVersion=\"" + version + "\"");
-		if (!patched.contains("jmtVersion=\"" + version + "\"")) {
-			patched = patched.replaceFirst("<archive", "<archive jmtVersion=\"" + version + "\"");
-		}
+		assertTrue(patched.contains("jmtVersion=\"" + version + "\""), "archive has no jmtVersion attribute");
 		Files.write(f.toPath(), patched.getBytes(StandardCharsets.UTF_8));
 		return f;
 	}
@@ -237,7 +232,7 @@ class ModelLoaderViewTest {
 			File file = archiveWithVersion("old.jsimg", version);
 			for (Flavour f : archiveReaders()) {
 				RecordingModelFileView v = new RecordingModelFileView();
-				assertLoaded(f.loader(v).loadModel(target(f), null, file), f.ext + " " + version);
+				assertLoaded(f, f.loader(v).loadModel(target(f), null, file), f.ext + " " + version);
 				assertFalse(v.calls.contains("confirmOpenNewerVersion"), f.ext + " " + version);
 			}
 		}
@@ -249,7 +244,10 @@ class ModelLoaderViewTest {
 		for (Flavour f : archiveReaders()) {
 			RecordingModelFileView v = new RecordingModelFileView();
 			v.newerAnswer = true;
-			assertLoaded(f.loader(v).loadModel(target(f), null, file), f.ext);
+			Object model = target(f);
+			String empty = snapshot(model);
+			assertLoaded(f, f.loader(v).loadModel(model, null, file), f.ext);
+			assertFalse(empty.equals(snapshot(model)), f.ext + " model was filled");
 			assertEquals(Arrays.asList("setSelectedFile", "confirmOpenNewerVersion"), v.calls, f.ext);
 			assertEquals(file, v.confirmedFile, f.ext);
 			assertEquals("99.0.0", v.savedVersion, f.ext);
@@ -271,14 +269,15 @@ class ModelLoaderViewTest {
 		}
 	}
 
-	/** JSIM-to-JMVA conversion reports warnings; both mean the model was loaded. */
-	private static void assertLoaded(int status, String msg) {
-		assertTrue(status == ModelLoader.SUCCESS || status == ModelLoader.WARNING, msg + " status " + status);
+	/** JSIM/JMODEL load cleanly; JMVA converts the archive and reports conversion warnings. */
+	private void assertLoaded(Flavour f, int status, String msg) {
+		assertEquals(f.open == ModelLoader.JMVA ? ModelLoader.WARNING : ModelLoader.SUCCESS, status, msg);
 	}
 
 	private static String snapshot(Object m) {
 		if (m instanceof CommonModel) {
-			return ArchiveFixtures.saveToString((CommonModel) m);
+			// the archive root carries a one-second timestamp: drop it so equal models compare equal
+			return ArchiveFixtures.saveToString((CommonModel) m).replaceAll("timestamp=\"[^\"]*\"", "");
 		}
 		return ArchiveFixtures.toString(((ExactModel) m).createDocument());
 	}
