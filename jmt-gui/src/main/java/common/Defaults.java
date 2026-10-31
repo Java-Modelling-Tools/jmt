@@ -30,7 +30,7 @@ import java.util.Properties;
 
 import log.JSimLogger;
 import jmt.framework.data.MacroReplacer;
-import jmt.framework.gui.components.JMTFrame;
+import jmt.framework.gui.AppLocale;
 import common.distributions.Distribution;
 
 /**
@@ -127,7 +127,7 @@ public class Defaults implements CommonConstants {
 		def.setProperty("blockingRegionType", "default");
 
 		// Logger Parameters (for global log)
-		Locale locale = JMTFrame.getPlatformDefaultLocale();
+		Locale locale = AppLocale.platformDefault();
 		DecimalFormatSymbols symbols = new DecimalFormatSymbols(locale);
 		if (String.valueOf(symbols.getDecimalSeparator()).equals(",")) {
 			def.setProperty("loggerDelimiter", ";");

@@ -31,4 +31,18 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <!-- Proves model classes load headless: no jgoodies look and feel on the test classpath. -->
+                    <classpathDependencyExcludes>
+                        <classpathDependencyExclude>com.jgoodies:looks</classpathDependencyExclude>
+                    </classpathDependencyExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
