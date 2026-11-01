@@ -122,7 +122,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLResultsWriter throws NoSuchElementException (values.lastElement()) for a measure that has no samples, although state NO_SAMPLES is a valid state")
 	void measureWithoutSamplesIsWritten() {
 		StoredResultsModel m = new StoredResultsModel();
 		m.addMeasure("Q1_C1_" + QL, "Q1", "C1", 0.99, 0.03, 0, 0, MeasureDefinition.MEASURE_NO_SAMPLES, QL, "station", null);
