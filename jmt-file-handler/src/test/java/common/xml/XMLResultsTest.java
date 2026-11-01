@@ -275,7 +275,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: engine-output path (setEngineMeasures) sets lastIntervalAvgValue and simulationTime from the meanValue attribute, which carries neither")
 	void engineOutputSampleTimeAndLastIntervalAreNotTheMean() throws Exception {
 		String xml = "<solutions><measure station=\"S\" class=\"C\" type=\"" + QL + "\" successful=\"true\" meanValue=\"1.5\""
 				+ " analyzedSamples=\"5\" alfa=\"0.01\" precision=\"0.1\"/></solutions>";
