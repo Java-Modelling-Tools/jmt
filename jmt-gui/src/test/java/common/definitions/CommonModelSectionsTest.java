@@ -408,7 +408,6 @@ class CommonModelSectionsTest {
 		assertEquals(2, m.getInfoForServerType(q, 0).getNumOfServers());
 	}
 
-	@Disabled("bug: deleteServerType calls deleteStationMeasures(serverKey), which matches measure stations, so measures that reference the deleted server type survive with a stale key (reached from ServerTypesEditor delete and MetricConfigurationsPanel; XMLWriter:2020 is null-guarded and silently writes a station-level measure; MeasurePanel:709 shows the stale key; MetricConfigurationsPanel.updateServerPreferences l.97-100 calls getServerType(staleKey).getName() which would NPE when the measure is reopened, traced from code, not run in the GUI)")
 	@Test
 	void deletingServerTypeAlsoDropsMeasuresThatReferenceIt() {
 		CommonModel m = ModelFixtures.openOneStation();
