@@ -1344,7 +1344,8 @@ public class XMLWriter implements CommonConstants, XMLConstantNames {
 		public static XMLParameter getServiceSection(CommonModel model, Object stationKey) {
 			XMLParameter distrArrayParameter = XMLWriter.getServiceSection(model, stationKey, INSTANCE);
 			distrArrayParameter.parameterName = "SwitchoverStrategy";
-			distrArrayParameter.isSubParameter = false;
+			// the xsd only allows subParameter inside the advancedFeatures map
+			distrArrayParameter.isSubParameter = true;
 			return distrArrayParameter;
 		}
 
