@@ -1580,7 +1580,7 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> classes = class_def.getClassKeys();
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServer = servers.get(i);
-			for (int j = 1; j < classes.size(); j++) {
+			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
 				String queueStrategy = station_def.getQueueStrategy(thisServer, thisClass);
 				Object serviceStrategy = station_def.getServiceTimeDistribution(thisServer, thisClass);

@@ -171,7 +171,6 @@ class ModelCheckerErrorsTest {
 		assertFalse(normal(m).isThereUnpredictableServiceError(), "LD service with FCFS");
 	}
 
-	@Disabled("bug: checkForUnpredictableServiceError starts its class loop at index 1, so the first class (the only one in a single-class model) is never inspected")
 	@Test
 	void unpredictableServiceFirstClass() {
 		CommonModel m = ModelFixtures.closedTwoStations();
