@@ -113,10 +113,6 @@ class XMLServerFeaturesTest {
 	}
 
 	@Test
-	@Disabled("bug: delay-off and set-up distributions are lost on reload. XMLReader.parseServerSection visits every nested "
-			+ "subParameter of advancedFeatures, so the inner same-named delayOffTime/setUpTime element overwrites the "
-			+ "distribution with null; also setUpTime is matched by the SwitchoverStrategy branch, which makes the later "
-			+ "setUpTime branch dead and enables switch-over times")
 	void delayOffAndSetupTimesSurviveReload() throws Exception {
 		CommonModel m = base();
 		m.setDelayOffTimesEnabled(st(m, "S"), Boolean.TRUE);
