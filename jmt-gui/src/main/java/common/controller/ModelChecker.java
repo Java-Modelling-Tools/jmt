@@ -1374,7 +1374,7 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> servers = station_def.getStationKeysServer();
 		boolean serverWorkingAsTransition = false;
 		for(Object server : servers){
-			if(station_def.getBackwardConnectedPlaces(server).size() > 0);{
+			if(station_def.getBackwardConnectedPlaces(server).size() > 0) {
 				serverWorkingAsTransition = true;
 				break;
 			}

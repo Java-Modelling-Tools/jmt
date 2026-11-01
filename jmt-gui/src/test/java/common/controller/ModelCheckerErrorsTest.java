@@ -70,7 +70,6 @@ class ModelCheckerErrorsTest {
 		assertFalse(normal(ModelFixtures.closedTwoStations()).isThereOpenClassButNoSinkError());
 	}
 
-	@Disabled("bug: a stray ';' after the 'if' in checkForOpenClassButNoSinkError makes serverWorkingAsTransition true whenever any server exists, so an open model with a queue but no sink is never flagged")
 	@Test
 	void openClassButNoSinkWithServer() {
 		CommonModel m = ModelFixtures.emptyModel();
