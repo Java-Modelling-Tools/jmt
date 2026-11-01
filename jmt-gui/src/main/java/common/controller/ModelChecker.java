@@ -925,7 +925,7 @@ public class ModelChecker implements CommonConstants {
 	 * @return true if the total population of closed classes is zero.
 	 */
 	public boolean isThereZeroTotalPopulationWarning() {
-		return errors[ZERO_TOTAL_POPULATION_WARNING];
+		return warnings[ZERO_TOTAL_POPULATION_WARNING];
 	}
 
 	/**
@@ -2418,7 +2418,7 @@ public class ModelChecker implements CommonConstants {
 	 */
 	private void checkForZeroTotalPopulationWarning() {
 		if (!class_def.getClosedClassKeys().isEmpty() && class_def.getTotalClosedClassPopulation() == 0) {
-			errors[ZERO_TOTAL_POPULATION_WARNING] = true;
+			warnings[ZERO_TOTAL_POPULATION_WARNING] = true;
 		}
 	}
 

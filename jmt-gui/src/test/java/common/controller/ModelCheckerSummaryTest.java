@@ -162,7 +162,6 @@ class ModelCheckerSummaryTest {
 		assertFalse(j.isWarningFreeToJMVA());
 	}
 
-	@Disabled("bug: same root cause as ModelCheckerWarningsTest.zeroTotalPopulationIsOnlyAWarning (ZERO_TOTAL_POPULATION stored in errors[] aliasing FORK_JOIN_ROUTING_ERROR; one fix re-enables both): the zero-total-population warning is stored in errors[] (aliasing the fork/join routing error), so isErrorFreeNormal is false and isWarningFreeNormal true for a warning-only condition")
 	@Test
 	void zeroTotalPopulationCountsAsWarning() {
 		CommonModel m = ModelFixtures.closedTwoStations();
