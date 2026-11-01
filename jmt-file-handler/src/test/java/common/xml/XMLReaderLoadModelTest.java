@@ -136,7 +136,6 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: loadModel parses the whole <archive> instead of its <sim> child, so GUI <userClass> entries add duplicate classes ('C_1')")
 	void archiveLoadDoesNotDuplicateClassesFromGuiSection() throws IOException {
 		CommonModel m = new CommonModel();
 		assertTrue(XMLReader.loadModel(write("arch.jsimg", archive("")), m));
@@ -144,7 +143,6 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: loadModel reads root attributes from <archive> instead of <sim>, so seed/maxTime/maxSamples of archives are ignored")
 	void archiveLoadReadsSimRootAttributes() throws IOException {
 		CommonModel m = new CommonModel();
 		assertTrue(XMLReader.loadModel(write("arch.jsimg", archive("seed=\"7\"")), m));
@@ -153,13 +151,11 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: loadModel parses the whole <archive> so GUI <userClass> duplicates the class, and addServerType then indexes a 1-entry compatibility list with 2 classes (IndexOutOfBounds)")
 	void openOneClassThreeStationForkLoads() {
 		assertTrue(XMLReader.loadModel(new File(ModelFixtures.examplesDir(), "jsim/qn_models/open_1class_3stat_fork.jsimg"), new CommonModel()));
 	}
 
 	@Test
-	@Disabled("bug: loadModel parses the whole <archive> so GUI <userClass> duplicates the class, and addServerType then indexes a 1-entry compatibility list with 2 classes (IndexOutOfBounds)")
 	void openOneClassThreeStationAdvForkLoads() {
 		assertTrue(XMLReader.loadModel(new File(ModelFixtures.examplesDir(), "jsim/qn_models/open_1class_3stat_advfork.jsimg"), new CommonModel()));
 	}

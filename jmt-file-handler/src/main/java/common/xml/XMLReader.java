@@ -154,13 +154,13 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	public static boolean loadModel(String fileName, CommonModel model) {
 		Document doc = loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));
-		if (doc.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() != 0) {
+		if (doc.getElementsByTagName(GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {
+			// Document is an archive: an archive also contains <sim>, so test it first and parse only <sim>
+			parseXML((org.w3c.dom.Element) doc.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), model);
+			return true;
+		} else if (doc.getElementsByTagName(XML_DOCUMENT_ROOT).getLength() != 0) {
 			// Document is a simulation model
 			parseXML(doc, model);
-			return true;
-		} else if (doc.getElementsByTagName(GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {
-			// Document is an archive
-			parseXML((org.w3c.dom.Element) doc.getElementsByTagName(simEngine.xml.XMLConstantNames.XML_DOCUMENT_ROOT).item(0), model);
 			return true;
 		}
 		return false;
