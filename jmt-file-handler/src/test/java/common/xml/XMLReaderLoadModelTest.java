@@ -36,7 +36,6 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLReader.loadModel throws NPE on a missing, malformed or empty file instead of returning false")
 	void missingFileReturnsFalseAndLeavesModelEmpty() {
 		CommonModel m = new CommonModel();
 		File missing = new File(tmp, "nope.jsimg");
@@ -47,7 +46,6 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLReader.loadModel throws NPE on a missing, malformed or empty file instead of returning false")
 	void notWellFormedXmlReturnsFalseAndLeavesModelEmpty() throws IOException {
 		CommonModel m = new CommonModel();
 		File f = write("broken.jsimg", "<sim><userClass name=\"C\"");
@@ -56,7 +54,6 @@ class XMLReaderLoadModelTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLReader.loadModel throws NPE on a missing, malformed or empty file instead of returning false")
 	void emptyFileReturnsFalse() throws IOException {
 		File f = write("empty.jsimg", "");
 		assertFalse(XMLReader.loadModel(f, new CommonModel()));

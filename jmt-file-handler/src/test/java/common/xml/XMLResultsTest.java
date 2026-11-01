@@ -267,7 +267,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLResultsReader.loadGuiModel throws NPE (XMLReader.loadXML returns null) on a missing/malformed file instead of leaving the model empty")
 	void loadGuiModelOnMalformedFileLeavesModelEmpty() throws IOException {
 		File f = new File(tmp, "bad.xml");
 		Files.write(f.toPath(), "<results".getBytes(StandardCharsets.UTF_8));

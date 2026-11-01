@@ -154,6 +154,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 */
 	public static boolean loadModel(String fileName, CommonModel model) {
 		Document doc = loadXML(fileName, XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_DEFINITION));
+		if (doc == null) { // loadXML returns null on a missing or malformed file
+			return false;
+		}
 		if (doc.getElementsByTagName(GuiXMLConstants.XML_ARCHIVE_DOCUMENT_ROOT).getLength() != 0) {
 			// Document is an archive: an archive also contains <sim>, so test it first and parse only <sim>
 			parseXML((org.w3c.dom.Element) doc.getElementsByTagName(XML_DOCUMENT_ROOT).item(0), model);

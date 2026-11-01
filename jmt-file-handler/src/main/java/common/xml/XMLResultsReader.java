@@ -50,7 +50,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	public static void loadGuiModel(StoredResultsModel model, File archiveName) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_GUI_RESULTS));
-		parseXML(doc, model);
+		if (doc != null) { // loadXML returns null on a missing or malformed file
+			parseXML(doc, model);
+		}
 	}
 
 	/**
@@ -60,7 +62,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	public static void loadModel(StoredResultsModel model, File archiveName) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS));
-		parseXML(doc, model);
+		if (doc != null) { // loadXML returns null on a missing or malformed file
+			parseXML(doc, model);
+		}
 	}
 
 	/**
