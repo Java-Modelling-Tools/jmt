@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -141,7 +140,6 @@ class XMLServerFeaturesTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLReader never reads the server schedulingPolicy parameter, so any policy other than the default ALIS is lost on reload")
 	void schedulingPolicySurvivesReload() {
 		CommonModel m = base();
 		m.setStationSchedulingPolicy(st(m, "S"), CommonConstants.STATION_SCHEDULING_POLICY_FSF);

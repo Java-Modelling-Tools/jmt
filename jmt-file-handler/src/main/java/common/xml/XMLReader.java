@@ -1146,6 +1146,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Integer num = Integer.valueOf(findText(((Element) classParallelism.get(className)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 					model.setServerNumRequired(key, classes.get(className), num);
 				}
+			} else if (name.equals(SERVER_FEATURE_SCHEDULING_POLICY)) {
+				model.setStationSchedulingPolicy(key, findText(curr.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 			} else if (name.equals(SERVER_FEATURE_SERVER_NAMES)) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
