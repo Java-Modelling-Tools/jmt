@@ -454,7 +454,7 @@ class XMLArchiverTest {
 	@Test
 	void missingFileFailsAndLeavesModelEmpty() {
 		CommonModel m = new CommonModel();
-		assertThrows(Exception.class, () -> XMLArchiver.loadModel(new File(tmp, "absent.jsimg"), m));
+		assertFalse(XMLArchiver.loadModel(new File(tmp, "absent.jsimg"), m));
 		assertEquals(0, m.getStationKeys().size());
 	}
 
@@ -462,7 +462,7 @@ class XMLArchiverTest {
 	void emptyFileFailsAndLeavesModelEmpty() throws Exception {
 		File f = write("empty.jsimg", "");
 		CommonModel m = new CommonModel();
-		assertThrows(Exception.class, () -> XMLArchiver.loadModel(f, m));
+		assertFalse(XMLArchiver.loadModel(f, m));
 		assertEquals(0, m.getStationKeys().size());
 	}
 
@@ -470,17 +470,16 @@ class XMLArchiverTest {
 	void malformedFileFailsAndLeavesModelEmpty() throws Exception {
 		File f = write("bad.jsimg", "<archive><sim>");
 		CommonModel m = new CommonModel();
-		assertThrows(Exception.class, () -> XMLArchiver.loadModel(f, m));
+		assertFalse(XMLArchiver.loadModel(f, m));
 		assertEquals(0, m.getStationKeys().size());
 	}
 
-	@org.junit.jupiter.api.Disabled("latent: XMLArchiver.loadModel throws instead of reporting a failed load for a missing/empty/malformed file; issue #34 family; the only production caller (ModelLoader) catches it, so users never see it")
 	@Test
 	void unreadableFilesShouldNotThrow() throws Exception {
 		CommonModel m = new CommonModel();
-		XMLArchiver.loadModel(new File(tmp, "absent.jsimg"), m);
-		XMLArchiver.loadModel(write("empty2.jsimg", ""), m);
-		XMLArchiver.loadModel(write("bad2.jsimg", "<archive><sim>"), m);
+		assertFalse(XMLArchiver.loadModel(new File(tmp, "absent.jsimg"), m));
+		assertFalse(XMLArchiver.loadModel(write("empty2.jsimg", ""), m));
+		assertFalse(XMLArchiver.loadModel(write("bad2.jsimg", "<archive><sim>"), m));
 		assertEquals(0, m.getStationKeys().size());
 	}
 }

@@ -286,6 +286,31 @@ class ModelLoaderTest {
 		}
 	}
 
+	/** A loader that sniffs every file as an archive, so the archive load itself is what fails. */
+	private static ModelLoader archiveSniffing(FileFormat filter) {
+		return new ModelLoader(filter, ModelLoader.JMODEL_SAVE, new HeadlessModelFileView()) {
+			@Override
+			protected int getXmlFileType(String fileName) {
+				return XML_ARCHIVE;
+			}
+		};
+	}
+
+	@Test
+	void unreadableArchiveFailsInJsimAndJmvaLoaders() throws Exception {
+		File[] files = { new File(tmp, "gone.jsimg"), write("empty.jsimg", ""), write("bad.jsimg", "<archive><sim>") };
+		for (File f : files) {
+			ModelLoader jsim = archiveSniffing(ModelLoader.JMODEL);
+			CommonModel m = new CommonModel();
+			assertEquals(ModelLoader.FAILURE, jsim.loadModel(m, null, f), f.getName());
+			assertTrue(jsim.getFailureMotivation().contains(f.getName()), jsim.getFailureMotivation());
+			assertEquals(0, m.getStationKeys().size());
+			ModelLoader jmva = archiveSniffing(ModelLoader.JMVA);
+			assertEquals(ModelLoader.FAILURE, jmva.loadModel(new ExactModel(), null, f), f.getName());
+			assertTrue(jmva.getFailureMotivation().contains(f.getName()), jmva.getFailureMotivation());
+		}
+	}
+
 	@Test
 	void wrongModelTypeIsReportedAsFailure() {
 		ModelLoader ml = sim();
