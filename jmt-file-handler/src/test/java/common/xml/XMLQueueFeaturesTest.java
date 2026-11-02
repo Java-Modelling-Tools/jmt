@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -126,13 +125,28 @@ class XMLQueueFeaturesTest {
 	}
 
 	@Test
-	@Disabled("bug: a polling server station is written with the SwitchoverStrategy element as <parameter> inside the advancedFeatures "
-			+ "map, which SIMmodeldefinition.xsd only allows to contain <subParameter>; the written file does not validate")
 	void pollingServerDocumentValidatesAgainstSchema() throws Exception {
 		CommonModel m = base();
 		m.setStationQueueStrategy(st(m, "S"), POLLING);
 		m.setStationPollingServerType(st(m, "S"), CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
 		assertEquals(new ArrayList<String>(), XMLWriterTest.validate(xml(m)));
+	}
+
+	@Test
+	void pollingSwitchoverWrittenAsPlainParameterByOlderVersionsStillLoads() throws Exception {
+		CommonModel m = base();
+		m.setStationQueueStrategy(st(m, "S"), POLLING);
+		m.setStationPollingServerType(st(m, "S"), CommonConstants.STATION_QUEUE_STRATEGY_POLLING_GATED);
+		m.setPollingSwitchoverDistribution(st(m, "S"), cl(m, "C"), new Deterministic());
+		org.w3c.dom.Document d = doc(m);
+		Element advanced = param(section(d, "S", "GatedPollingServer"), "advancedFeatures");
+		Element sw = (Element) param(advanced, "SwitchoverStrategy");
+		d.renameNode(sw, null, "parameter");
+		java.io.StringWriter out = new java.io.StringWriter();
+		javax.xml.transform.TransformerFactory.newInstance().newTransformer()
+				.transform(new javax.xml.transform.dom.DOMSource(d), new javax.xml.transform.stream.StreamResult(out));
+		CommonModel back = SimXml.parseSim(simTail(out.toString()));
+		assertEquals("Deterministic", ((common.distributions.Distribution) back.getPollingSwitchoverDistribution(st(back, "S"), cl(back, "C"))).getName());
 	}
 
 	@Test

@@ -1027,9 +1027,11 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 		for (int i = 0; i < parameters.getLength(); ++i) {
 			Element curr = (Element) parameters.item(i);
 			if (curr.getAttribute(XML_A_PARAMETER_NAME).equals(SERVER_PARAMETER_ADVANCED_FEATURES)) {
-				NodeList advancedFeatures = curr.getElementsByTagName(XML_E_SUBPARAMETER);
-				for (int j = 0; j < advancedFeatures.getLength(); ++j) {
-					allParameters.add((Element) advancedFeatures.item(j));
+				// direct children only: a nested same-named subParameter would overwrite the feature with null
+				for (Node n = curr.getFirstChild(); n != null; n = n.getNextSibling()) {
+					if (n.getNodeName().equals(XML_E_SUBPARAMETER)) {
+						allParameters.add((Element) n);
+					}
 				}
 			} else {
 				allParameters.add(curr);
@@ -1046,7 +1048,7 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 				// Sets max running jobs
 				Integer running = Integer.valueOf(findText(curr.getElementsByTagName(XML_E_PARAMETER_VALUE).item(0)));
 				model.setStationMaxRunningJobs(key, running);
-			} else if (name.equals(SERVER_FEATURE_SWITCHOVER_STRATEGIES) || name.equals(SERVER_FEATURE_SETUP_STRATEGIES) ) {
+			} else if (name.equals(SERVER_FEATURE_SWITCHOVER_STRATEGIES)) {
 				if (model.getStationQueueStrategy(key) == STATION_QUEUE_STRATEGY_POLLING) {
 					// Retrieves all switchover strategy subParameters
 					Map<String, Node> distributions = parseParameterRefclassArray(curr);
@@ -1144,6 +1146,8 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 					Integer num = Integer.valueOf(findText(((Element) classParallelism.get(className)).getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 					model.setServerNumRequired(key, classes.get(className), num);
 				}
+			} else if (name.equals(SERVER_FEATURE_SCHEDULING_POLICY)) {
+				model.setStationSchedulingPolicy(key, findText(curr.getElementsByTagName(XML_E_SUBPARAMETER_VALUE).item(0)));
 			} else if (name.equals(SERVER_FEATURE_SERVER_NAMES)) {
 				NodeList subParams = curr.getElementsByTagName(XML_E_SUBPARAMETER);
 				for (int j = 0; j < subParams.getLength(); j++) {
