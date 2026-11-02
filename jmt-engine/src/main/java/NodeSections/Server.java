@@ -37,7 +37,7 @@ import QueueNet.*;
 import random.engine.RandomEngine;
 import simEngine.RemoveToken;
 
-import javax.swing.*;
+import jmt.common.ErrorReporters;
 
 import static QueueNet.EngineNodeConstants.*;
 
@@ -266,10 +266,8 @@ public class Server extends ServiceSection {
             int val = serverNumRequired[i].intValue();
             int numberOfServersForClass = getNumberOfAvailableServersForClass(i);
             if (val > numberOfServersForClass) {
-                JOptionPane.showMessageDialog(
-                        new JFrame(),
-                        "Servers Required for a class are more than the total number of servers",
-                        "Parameter Error", JOptionPane.ERROR_MESSAGE);
+                ErrorReporters.get().error("Parameter Error",
+                        "Servers Required for a class are more than the total number of servers");
                 throw new NetException("Remember: Servers required can't be more than the total number of servers");
 
             }
@@ -824,10 +822,8 @@ public class Server extends ServiceSection {
                 int numServerNeeded = serverNumRequired[job.getJobClass().getId()];
                 int numServerAvailable = getNumberOfAvailableServersForClass(job.getJobClass().getId());
                 if (numServerNeeded > numServerAvailable) {
-                    JOptionPane.showMessageDialog(
-                            new JFrame(),
-                            "Servers Required for " + job.getJobClass().getName() + " are more than the total number of servers",
-                            "Parameter Error", JOptionPane.ERROR_MESSAGE);
+                    ErrorReporters.get().error("Parameter Error",
+                            "Servers Required for " + job.getJobClass().getName() + " are more than the total number of servers");
                     throw new NetException("Remember: Servers required can't be more than the total number of servers");
 
                 }

@@ -159,6 +159,7 @@ public class JSIMGraphMain extends JMTFrame {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		jmt.common.ErrorReporters.set(new jmt.framework.gui.SwingErrorReporter());
 		JSIMGraphMain mw = new JSIMGraphMain();
 		if (args != null && args.length > 0) {
 			File file = new File(args[0]);

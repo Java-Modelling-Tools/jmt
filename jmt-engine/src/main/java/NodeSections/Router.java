@@ -20,7 +20,7 @@ package NodeSections;
 
 import java.util.Arrays;
 
-import javax.swing.JOptionPane;
+import jmt.common.ErrorReporters;
 
 import jmt.common.exception.NetException;
 import NetStrategies.RoutingStrategy;
@@ -215,10 +215,9 @@ public class Router extends OutputSection {
 							Thread.sleep(800);
 						} catch (InterruptedException e) {
 						}
-						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+						ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
 								+ " could not route one or more " + jobClass.getName()
-								+ " jobs forward as its output stations are all sinks or routing is disabled.",
-								"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+								+ " jobs forward as its output stations are all sinks or routing is disabled.");
 					}
 				}).start();
 			}

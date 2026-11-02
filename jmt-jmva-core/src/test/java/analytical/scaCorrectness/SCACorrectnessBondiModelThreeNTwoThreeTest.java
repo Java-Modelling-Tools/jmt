@@ -2,11 +2,10 @@ package analytical.scaCorrectness;
 
 import analytical.BondiCorrectnessTest;
 import solvers.multiSolverAlgorithms.SolverMultiMixedRWA;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class SCACorrectnessBondiModelThreeNTwoThreeTest {
+class SCACorrectnessBondiModelThreeNTwoThreeTest {
 
     /**
      * Results are from the paper:
@@ -18,32 +17,29 @@ public class SCACorrectnessBondiModelThreeNTwoThreeTest {
     // given
     private SolverMultiMixedRWA rwaSolver;
 
-    @Before
-    public void initSolver() {
+    @BeforeEach
+    void initSolver() {
         rwaSolver = BondiCorrectnessTest.getModelThreeNTwoThree().getRWASolver();
     }
 
-    @Ignore("SCA is solved with convergence tolerance 0.005 but the test requires agreement to 1e-4 with the paper, so it cannot hold. Never ran before the vintage engine was added.")
     @Test
-    public void queueLengthTest() {
+    void queueLengthTest() {
         // Page 11, Table 9
         double queueLenOneOne = 0.8060;
-        BondiCorrectnessTest.queueLengthTest(rwaSolver, queueLenOneOne);
+        BondiCorrectnessTest.queueLengthTest(rwaSolver, queueLenOneOne, BondiCorrectnessTest.TOLERANCE);
     }
 
-    @Ignore("SCA is solved with convergence tolerance 0.005 but the test requires agreement to 1e-4 with the paper, so it cannot hold. Never ran before the vintage engine was added.")
     @Test
-    public void residenceTimeTest() {
+    void residenceTimeTest() {
         // Page 9, Table 7
         double resTimeTwoTwo = 0.3661;
-        BondiCorrectnessTest.residenceTimeTest(rwaSolver, resTimeTwoTwo);
+        BondiCorrectnessTest.residenceTimeTest(rwaSolver, resTimeTwoTwo, BondiCorrectnessTest.TOLERANCE);
     }
 
-    @Ignore("SCA is solved with convergence tolerance 0.005 but the test requires agreement to 1e-4 with the paper, so it cannot hold. Never ran before the vintage engine was added.")
     @Test
-    public void throughputTest() {
+    void throughputTest() {
         // Page 8, Table 6
         double[] correctThroughput = {2.9292, 6.9352};
-        BondiCorrectnessTest.throughputTest(rwaSolver, correctThroughput);
+        BondiCorrectnessTest.throughputTest(rwaSolver, correctThroughput, BondiCorrectnessTest.TOLERANCE);
     }
 }

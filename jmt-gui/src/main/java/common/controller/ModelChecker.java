@@ -925,7 +925,7 @@ public class ModelChecker implements CommonConstants {
 	 * @return true if the total population of closed classes is zero.
 	 */
 	public boolean isThereZeroTotalPopulationWarning() {
-		return errors[ZERO_TOTAL_POPULATION_WARNING];
+		return warnings[ZERO_TOTAL_POPULATION_WARNING];
 	}
 
 	/**
@@ -1374,7 +1374,7 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> servers = station_def.getStationKeysServer();
 		boolean serverWorkingAsTransition = false;
 		for(Object server : servers){
-			if(station_def.getBackwardConnectedPlaces(server).size() > 0);{
+			if(station_def.getBackwardConnectedPlaces(server).size() > 0) {
 				serverWorkingAsTransition = true;
 				break;
 			}
@@ -1580,7 +1580,7 @@ public class ModelChecker implements CommonConstants {
 		Vector<Object> classes = class_def.getClassKeys();
 		for (int i = 0; i < servers.size(); i++) {
 			Object thisServer = servers.get(i);
-			for (int j = 1; j < classes.size(); j++) {
+			for (int j = 0; j < classes.size(); j++) {
 				Object thisClass = classes.get(j);
 				String queueStrategy = station_def.getQueueStrategy(thisServer, thisClass);
 				Object serviceStrategy = station_def.getServiceTimeDistribution(thisServer, thisClass);
@@ -2418,7 +2418,7 @@ public class ModelChecker implements CommonConstants {
 	 */
 	private void checkForZeroTotalPopulationWarning() {
 		if (!class_def.getClosedClassKeys().isEmpty() && class_def.getTotalClosedClassPopulation() == 0) {
-			errors[ZERO_TOTAL_POPULATION_WARNING] = true;
+			warnings[ZERO_TOTAL_POPULATION_WARNING] = true;
 		}
 	}
 

@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<sim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" disableStatisticStop="false" logDecimalSeparator="." logDelimiter="," logPath="" logReplaceMode="0" maxSamples="5000" name="N200unavCV15S60.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+<userClass name="ComReq" priority="0" referenceSource="Source 1" type="open"/>
+<userClass customers="200" name="NodeUn" priority="1" referenceSource="Available" type="closed"/>
+<node name="Source 1">
+<section className="RandomSource">
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>4.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<value>null</value>
+</subParameter>
+</parameter>
+</section>
+<section className="ServiceTunnel"/>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+<subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+<subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+<subParameter classPath="java.lang.String" name="stationName">
+<value>CompServers</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="probability">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="Sink 1">
+<section className="JobSink"/>
+</node>
+<node name="Available">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Delay">
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.016666666666666666</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="CompServers">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>200</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.25</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>1.0</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<node name="Unavailable">
+<section className="Queue">
+<parameter classPath="java.lang.Integer" name="size">
+<value>-1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.String" name="dropStrategies">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.String" name="dropStrategy">
+<value>drop</value>
+</subParameter>
+</parameter>
+<parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+<parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="NetStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.TailStrategy" name="TailStrategy"/>
+</parameter>
+</section>
+<section className="Server">
+<parameter classPath="java.lang.Integer" name="maxJobs">
+<value>1</value>
+</parameter>
+<parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+<refClass>ComReq</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="java.lang.Integer" name="numberOfVisits">
+<value>1</value>
+</subParameter>
+</parameter>
+<parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+<subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="lambda">
+<value>0.2</value>
+</subParameter>
+</subParameter>
+</subParameter>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+<subParameter classPath="jmt.engine.random.HyperExp" name="Hyperexponential"/>
+<subParameter classPath="jmt.engine.random.HyperExpPar" name="distrPar">
+<subParameter classPath="java.lang.Double" name="p">
+<value>0.0022173058256554357</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="lambda1">
+<value>0.004434611651310871</value>
+</subParameter>
+<subParameter classPath="java.lang.Double" name="lambda2">
+<value>1.9955653883486892</value>
+</subParameter>
+</subParameter>
+</subParameter>
+</parameter>
+</section>
+<section className="Router">
+<parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+<refClass>ComReq</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+<refClass>NodeUn</refClass>
+<subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+</parameter>
+</section>
+</node>
+<measure alpha="0.01" name="CompServers_ComReq_Utilization" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Utilization" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Response Time" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Throughput" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Throughput" verbose="false"/>
+<measure alpha="0.01" name="CompServers_ComReq_Number of Customers" nodeType="station" precision="0.03" referenceNode="CompServers" referenceUserClass="ComReq" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Unavailable_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceNode="Unavailable" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="CrowdPlatform_NodeUn_Number of Customers" nodeType="region" precision="0.03" referenceNode="CrowdPlatform" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Available_NodeUn_Number of Customers" nodeType="station" precision="0.03" referenceNode="Available" referenceUserClass="NodeUn" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Response Time" verbose="false"/>
+<measure alpha="0.01" name="Available_Response Time" nodeType="station" precision="0.03" referenceNode="Available" referenceUserClass="" type="Response Time" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="ComReq_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="ComReq" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="NodeUn_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="NodeUn" type="System Throughput" verbose="false"/>
+<measure alpha="0.01" name="CrowdPlatform_ComReq_Number of Customers" nodeType="region" precision="0.03" referenceNode="CrowdPlatform" referenceUserClass="ComReq" type="Number of Customers" verbose="false"/>
+<measure alpha="0.01" name="Unavailable_NodeUn_Utilization" nodeType="station" precision="0.03" referenceNode="Unavailable" referenceUserClass="NodeUn" type="Utilization" verbose="false"/>
+<connection source="Source 1" target="CompServers"/>
+<connection source="Available" target="Unavailable"/>
+<connection source="CompServers" target="Sink 1"/>
+<connection source="Unavailable" target="Available"/>
+<blockingRegion name="CrowdPlatform" type="default">
+<regionNode nodeName="CompServers"/>
+<regionNode nodeName="Unavailable"/>
+<globalConstraint maxJobs="200"/>
+<globalMemoryConstraint maxMemory="-1"/>
+<classConstraint jobClass="ComReq" maxJobsPerClass="-1"/>
+<classConstraint jobClass="NodeUn" maxJobsPerClass="-1"/>
+<classMemoryConstraint jobClass="ComReq" maxMemoryPerClass="-1"/>
+<classMemoryConstraint jobClass="NodeUn" maxMemoryPerClass="-1"/>
+<dropRules dropThisClass="false" jobClass="ComReq"/>
+<dropRules dropThisClass="false" jobClass="NodeUn"/>
+<classWeight jobClass="ComReq" weight="1"/>
+<classWeight jobClass="NodeUn" weight="1"/>
+<classSize jobClass="ComReq" size="1"/>
+<classSize jobClass="NodeUn" size="1"/>
+</blockingRegion>
+<preload>
+<stationPopulations stationName="Unavailable">
+<classPopulation population="200" refClass="NodeUn"/>
+</stationPopulations>
+</preload>
+</sim>

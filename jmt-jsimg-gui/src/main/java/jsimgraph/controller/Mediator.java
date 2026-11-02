@@ -64,6 +64,7 @@ import common.panels.parametric.PAProgressWindow;
 import common.panels.parametric.PAResultsWindow;
 import common.panels.parametric.ParametricAnalysisPanel;
 import common.xml.ModelLoader;
+import common.xml.swing.SwingModelFileView;
 import common.xml.XMLWriter;
 import jsimgraph.DialogFactory;
 import jsimgraph.JGraphMod.*;
@@ -168,7 +169,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	private JmtClipboard clipboard;
 	private DebugSolverPanel debugPanel;
 	private volatile DispatcherThread dispatcher = null;
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE, new SwingModelFileView(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE));
 	private JMTToolBar componentBar;
 
 	private ModelChecker mc;

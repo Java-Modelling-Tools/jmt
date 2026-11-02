@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
+<sim xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" disableStatisticStop="false" logDecimalSeparator="," logDelimiter=";" logPath="" logReplaceMode="0" maxEvents="-1" maxSamples="5000" name="ExpExp1_Pree_1cl.jsimg" polling="1.0" seed="23000" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+        <userClass name="Class1" priority="0" referenceSource="Source 1" softDeadline="0.0" type="open"/>
+        <node name="Source 1">
+            <section className="RandomSource">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.05</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+            <section className="ServiceTunnel"/>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.EmpiricalStrategy" name="Probabilities">
+                        <subParameter array="true" classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntryArray">
+                            <subParameter classPath="jmt.engine.random.EmpiricalEntry" name="EmpiricalEntry">
+                                <subParameter classPath="java.lang.String" name="stationName">
+                                    <value>PQueue 1</value>
+                                </subParameter>
+                                <subParameter classPath="java.lang.Double" name="probability">
+                                    <value>1.0</value>
+                                </subParameter>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+            </section>
+        </node>
+        <node name="PQueue 1">
+            <classSoftDeadlines>
+                <softDeadline>0.0</softDeadline>
+            </classSoftDeadlines>
+            <quantumSize>
+                <quantaSize>0.0</quantaSize>
+            </quantumSize>
+            <quantumSwitchoverTime>
+                <quantumSwitchoverTime>0.0</quantumSwitchoverTime>
+            </quantumSwitchoverTime>
+            <section className="Queue">
+                <parameter classPath="java.lang.Integer" name="size">
+                    <value>-1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="dropStrategies">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.String" name="dropStrategy">
+                        <value>drop</value>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="jmt.engine.NetStrategies.QueueGetStrategies.FCFSstrategy" name="FCFSstrategy"/>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="QueuePutStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LCFSPRStrategyPriority" name="LCFSPRStrategyPriority"/>
+                </parameter>
+            </section>
+            <section className="PreemptiveServer">
+                <parameter classPath="java.lang.Integer" name="maxJobs">
+                    <value>1</value>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="numberOfVisits">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="numberOfVisits">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.ServiceStrategy" name="ServiceStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.ServiceStrategies.ServiceTimeStrategy" name="ServiceTimeStrategy">
+                        <subParameter classPath="jmt.engine.random.Exponential" name="Exponential"/>
+                        <subParameter classPath="jmt.engine.random.ExponentialPar" name="distrPar">
+                            <subParameter classPath="java.lang.Double" name="lambda">
+                                <value>0.1</value>
+                            </subParameter>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="jmt.engine.NetStrategies.QueuePutStrategy" name="PreemptiveStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.QueuePutStrategies.LCFSPRStrategyPriority" name="LCFSPRStrategyPriority"/>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="classParallelism">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="java.lang.Integer" name="serverParallelism">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.String" name="serverNames">
+                    <subParameter classPath="java.lang.String" name="serverTypesNames">
+                        <value>PQueue 1 - Server Type 1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Integer" name="serversPerServerType">
+                    <subParameter classPath="java.lang.Integer" name="serverTypesNumOfServers">
+                        <value>1</value>
+                    </subParameter>
+                </parameter>
+                <parameter array="true" classPath="java.lang.Object" name="serverCompatibilities">
+                    <subParameter array="true" classPath="java.lang.Boolean" name="serverTypesCompatibilities">
+                        <subParameter classPath="java.lang.Boolean" name="compatibilities">
+                            <value>true</value>
+                        </subParameter>
+                    </subParameter>
+                </parameter>
+                <parameter classPath="java.lang.String" name="schedulingPolicy">
+                    <value>ALIS (Assign Longest Idle Server)</value>
+                </parameter>
+            </section>
+            <section className="Router">
+                <parameter array="true" classPath="jmt.engine.NetStrategies.RoutingStrategy" name="RoutingStrategy">
+                    <refClass>Class1</refClass>
+                    <subParameter classPath="jmt.engine.NetStrategies.RoutingStrategies.RandomStrategy" name="Random"/>
+                </parameter>
+            </section>
+        </node>
+        <node name="Sink 1">
+            <section className="JobSink"/>
+        </node>
+        <measure alpha="0.01" name="PQueue 1_Class1_Response Time" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Class1_System Throughput" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Throughput" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Utilization" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Number of Customers" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Utilization" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="" type="Utilization" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Residence Time" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Residence Time" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Tardiness" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Tardiness" verbose="false"/>
+        <measure alpha="0.01" name="Class1_System Tardiness" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Tardiness" verbose="false"/>
+        <measure alpha="0.01" name="Class1_System Response Time" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Response Time" verbose="false"/>
+        <measure alpha="0.01" name="Class1_System Earliness" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Earliness" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Earliness" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Earliness" verbose="false"/>
+        <measure alpha="0.01" name="Class1_System Number of Customers" nodeType="" precision="0.03" referenceNode="" referenceUserClass="Class1" type="System Number of Customers" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Queue Time" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Queue Time" verbose="false"/>
+        <measure alpha="0.01" name="PQueue 1_Class1_Throughput" nodeType="station" precision="0.03" referenceNode="PQueue 1" referenceUserClass="Class1" type="Throughput" verbose="false"/>
+        <connection source="Source 1" target="PQueue 1"/>
+        <connection source="PQueue 1" target="Sink 1"/>
+    </sim>

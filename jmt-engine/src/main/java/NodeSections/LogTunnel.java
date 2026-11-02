@@ -23,7 +23,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JOptionPane;
+import jmt.common.ErrorReporters;
 
 import jmt.common.exception.NetException;
 import QueueNet.Job;
@@ -178,9 +178,8 @@ public class LogTunnel extends ServiceTunnel {
 									Thread.sleep(800);
 								} catch (InterruptedException e) {
 								}
-								JOptionPane.showMessageDialog(null, getOwnerNode().getName()
-										+ " failed to write the CSV file: " + file.getAbsolutePath(),
-										"JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+								ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
+										+ " failed to write the CSV file: " + file.getAbsolutePath());
 							}
 						}).start();
 					}

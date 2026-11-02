@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JOptionPane;
+import jmt.common.ErrorReporters;
 
 import jmt.common.exception.NetException;
 import NetStrategies.TransitionUtilities.FiringPacket;
@@ -254,9 +254,9 @@ public class Firing extends OutputSection {
 							Thread.sleep(800);
 						} catch (InterruptedException e) {
 						}
-						JOptionPane.showMessageDialog(null, getOwnerNode().getName()
+						ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
 								+ " failed to maintain the equilibrium between input and output tasks in "
-								+ modeName + ".", "JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+								+ modeName + ".");
 					}
 				}).start();
 			}

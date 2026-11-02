@@ -18,7 +18,7 @@
 
 package NetStrategies.ServiceStrategies;
 
-import javax.swing.JOptionPane;
+import jmt.common.ErrorReporters;
 
 import jmt.common.exception.NetException;
 import NetStrategies.ServiceStrategy;
@@ -60,9 +60,9 @@ public class DisabledServiceTimeStrategy extends ServiceStrategy {
 							Thread.sleep(800);
 						} catch (InterruptedException e) {
 						}
-						JOptionPane.showMessageDialog(null, "A " + jobClass.getName()
+						ErrorReporters.get().warning("JSIMengine - Warning", "A " + jobClass.getName()
 								+ " job requires service at " + nodeSection.getOwnerNode().getName()
-								+ ", which however is disabled.", "JSIMengine - Warning", JOptionPane.WARNING_MESSAGE);
+								+ ", which however is disabled.");
 					}
 				}).start();
 			}
