@@ -11,7 +11,6 @@ import java.awt.Color;
 import java.io.File;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.w3c.dom.Document;
 
@@ -215,8 +214,6 @@ class GuiXMLReaderTest {
 	}
 
 	@Test
-	@Disabled("latent: setStations declares rotate/angle outside the loop, so a station whose <position> lacks them inherits the previous one's; "
-			+ "GuiXMLWriter always writes both and every tracked example has them, only older or hand-edited files (rotate is schema-optional) would hit it")
 	void missingRotateDoesNotInheritFromThePreviousStation() {
 		JSimGraphModel m = threeStations();
 		GuiXMLReader.parseXML(doc(pos("Source 1", "x=\"1\" y=\"2\" rotate=\"true\" angle=\"90\"") + pos("Queue 1", "x=\"3\" y=\"4\"")), m);

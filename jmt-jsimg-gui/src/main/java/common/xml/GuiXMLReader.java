@@ -216,8 +216,6 @@ public class GuiXMLReader implements GuiXMLConstants {
 		Element station, position;
 		String name;
 		double x, y;
-		boolean rotate = false;
-		double angle = 0;
 		// For each stored Station
 		for (int i = 0; i < stations.getLength(); i++) {
 			station = (Element) stations.item(i);
@@ -225,6 +223,8 @@ public class GuiXMLReader implements GuiXMLConstants {
 			position = (Element) station.getElementsByTagName(XML_E_POSITION).item(0);
 			x = Double.parseDouble(position.getAttribute(XML_A_POSITION_X));
 			y = Double.parseDouble(position.getAttribute(XML_A_POSITION_Y));
+			boolean rotate = false;
+			double angle = 0;
 			if (position.hasAttribute(XML_A_POSITION_ROTATE)) {
 				rotate = Boolean.valueOf(position.getAttribute(XML_A_POSITION_ROTATE)).booleanValue();
 			}
