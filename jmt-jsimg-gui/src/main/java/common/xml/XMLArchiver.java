@@ -29,10 +29,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -76,12 +74,9 @@ public class XMLArchiver implements GuiXMLConstants {
 			transformer.transform(new DOMSource(modelDoc), new StreamResult(archiveName));
 			// Also keep a copy readable by releases up to 1.4.0 (e.g. model.legacy.jsimg)
 			LegacyXmlExporter.saveLegacyCopy(modelDoc, archiveName);
-		} catch (TransformerConfigurationException e) {
-			e.printStackTrace();
-		} catch (TransformerFactoryConfigurationError e) {
-			e.printStackTrace();
 		} catch (TransformerException e) {
-			e.printStackTrace();
+			// Let ModelLoader.saveModel turn it into FAILURE instead of reporting a save that never happened
+			throw new IllegalStateException("Cannot write archive " + archiveName + ": " + e.getMessage(), e);
 		}
 	}
 
