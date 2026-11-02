@@ -65,23 +65,38 @@
 	It is recommended to UNINSTALL any previous version of Java Modelling Tools present on your PC before installing this new release.
 </div>
 
-<h2>What's new in version 1.4.0</h2>
-<h3>JMCH</h3>
+<h2>What’s new? JMT release 1.5.0</h2>
+
+<p>2 November 2026</p>
+
+<h3>Architecture</h3>
 <ul>
-	<li>Added graphical animations to visualize the behavior of different scheduling algorithms on a single queue station: First Come First Served (FCFS), Last Come First Served (LCFS), Shortest Job First (SJF), Longest Job First (LJF), and Processor Sharing (PS).</li>
-	<li>Introduced animations to visualize the behavior of Round Robin (RR), Join Shortest Queue (JSQ), and Probabilistic routing policies.</li>
-	<li>Implemented a new multi-threaded animation engine that smoothly repaints graphical components frame-by-frame, complete with Play and Pause playback controls.</li>
-	<li>Added a new results table that captures live performance indices (such as Response Time, Queue Time, Number of Customers, and Throughput) directly from the graphical animation. This allows users to compare the results obtained from the animations with the correspondent metrics computed by the JSIMg simulator.</li>
+    <li> JMT is no longer a single monolithic module. It is now a 16-module Maven project with a strict layering (engine, GUI, file handler, solver cores, tool GUIs, application), and a headless integration-test harness.</li>
+    <li> New <code>jmt-legacy-xml</code> module: each saved archive is accompanied by a legacy copy that releases up to 1.4.0 can still open, and the JMT version is recorded in the file.</li>
+    <li> JMT now warns before opening a file saved by a newer version.</li>
+    <li> Added <code>CONTRIBUTING.md</code> (architecture, module layers, ownership) and GitHub issue templates.</li>
 </ul>
 
-<h3>JSIM (FORK/JOIN)</h3>
+<h3>JSIM</h3>
+
 <ul>
-	<li>Fixed an issue where simulations would stall prematurely in models using Fork nodes configured to produce multiple output jobs.</li>
+    <li> Added a visual debug tracer, with compression and event filtering. It can be triggered both from the jar and from the command line.</li>
+    <li> Fixed a dispatch failure in the load-dependent routing strategy and a spurious routing warning at simulation start.                </li>
+    <li> Fixed XML serialization of multiserver stations, and the station's server count is now written in the default server type.         </li>
+    <li> What-if analysis now uses the same simulation seed for every step, so steps are comparable.                                        </li>
+    <li> Fixed an exception on microsecond service times (spinner lower bound).                                                             </li>
+    <li> Fixed a <code>NullPointerException</code> when closing a model, and several rendering exceptions in the GUI.                                  </li>
+    <li> Simulation speed-ups: faster entity lookup and no unnecessary synchronization in the per-simulation system methods.                </li>
+    <li> A queue now ignores a job-finish event when it has no pending place request.                                                       </li>
 </ul>
 
-<h3>JMVA (WHAT-IF)</h3>
+<h3>Build and tests</h3>
+
 <ul>
-	<li>Fixed a bug in open models using What-If analysis where the System Throughput failed to update across iterations.</li>
+    <li> The installer is now staged and built after the single jar exists (IzPack updated to 5.2.4).</li>
+    <li> Packaged jars are all written to <code>./target</code>.</li>
+    <li> The integration-test suite has configurable timeout and result-comparison (SMAPE) tolerance, a utilization checker, and a reorganized test directory.</li>
+    <li> 12 priority/SCA paper-comparison tests in the JMVA core are marked as ignored: they could not run before and their assertions are too strict for the solvers' tolerances (tracked for follow-up).</li>
 </ul>
 
 <h2>Working folder</h2>
