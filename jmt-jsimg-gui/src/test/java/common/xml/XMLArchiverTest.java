@@ -293,7 +293,6 @@ class XMLArchiverTest {
 		assertFalse(d.getDocumentElement().getAttribute("jmtVersion").isEmpty());
 	}
 
-	@org.junit.jupiter.api.Disabled("bug: saving to an unwritable path reports SUCCESS, nothing written")
 	@Test
 	void savingToAnUnwritablePathReportsFailure() {
 		File f = new File(new File(tmp, "no/such/dir"), "m.jsimg");

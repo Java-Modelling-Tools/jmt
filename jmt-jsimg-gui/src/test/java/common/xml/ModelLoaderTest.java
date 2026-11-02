@@ -380,6 +380,15 @@ class ModelLoaderTest {
 	// --- saveModel -------------------------------------------------------------------------------------
 
 	@Test
+	void savingAnArchiveToAnUnwritablePathFailsWithAMotivation() {
+		ModelLoader ml = graph();
+		File f = new File(new File(tmp, "no/such/dir"), "m.jsimg");
+		assertEquals(ModelLoader.FAILURE, ml.saveModel(GuiXmlFixtures.fullModel(), null, f));
+		assertNotNull(ml.getFailureMotivation());
+		assertFalse(f.exists());
+	}
+
+	@Test
 	void savesArchiveWithLegacyCopyAndItReloads() {
 		JSimGraphModel src = GuiXmlFixtures.fullModel();
 		File f = new File(tmp, "m.jsimg");
