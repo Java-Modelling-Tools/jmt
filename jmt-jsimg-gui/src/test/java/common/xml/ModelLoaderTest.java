@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -262,7 +261,6 @@ class ModelLoaderTest {
 		assertTrue(ml.getLastWarnings().isEmpty());
 	}
 
-	@Disabled("latent: JDK 11+ only (works on Java 8, which README/CONTRIBUTING name as the supported runtime): PNMLReader -> axiom needs javax.activation.DataSource, absent from the JDK since 11, from every pom and from the singlejar; ModelLoader catches Exception only so NoClassDefFoundError escapes")
 	@Test
 	void pnmlImportsPlacesAndTransitions() throws Exception {
 		ModelLoader ml = sim();
@@ -487,7 +485,6 @@ class ModelLoaderTest {
 		assertTrue(text.contains("P1") && text.contains("T1"));
 	}
 
-	@Disabled("latent: JDK 11+ only (works on Java 8, which README/CONTRIBUTING name as the supported runtime): PNMLReader -> axiom needs javax.activation.DataSource, absent from the JDK since 11, from every pom and from the singlejar; ModelLoader catches Exception only so NoClassDefFoundError escapes")
 	@Test
 	void exportsPnmlAndReimportsIt() {
 		CommonModel src = petriModel();
