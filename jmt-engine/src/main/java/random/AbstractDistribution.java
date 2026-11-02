@@ -20,6 +20,18 @@ package random;
 
 import random.engine.RandomEngine;
 
+/**
+ * Base class of the JMT probability distributions, defining the common random drawing interface.
+ */
+/**
+ * Base class of the JMT probability distributions, defining the common random drawing interface.
+ */
+/**
+ * Base class of the JMT probability distributions, defining the common random drawing interface.
+ */
+/**
+ * Base class of the JMT probability distributions, defining the common random drawing interface.
+ */
 public abstract class AbstractDistribution {
 
 	/**

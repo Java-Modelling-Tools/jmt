@@ -219,6 +219,7 @@ public class TempMeasure {
 	}
 
 	/**
+	 * Returns the log file name.
 	 * @return the file name used to log verbose measures.
 	 */
 	public String getLogFileName() {

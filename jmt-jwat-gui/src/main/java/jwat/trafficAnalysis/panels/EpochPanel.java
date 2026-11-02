@@ -41,6 +41,18 @@ import jwat.JWATConstants;
 import jwat.JWatWizard;
 import jwat.MainJwatWizard;
 
+/**
+ * Panel defining the observation epochs of the JWAT traffic analysis.
+ */
+/**
+ * Panel defining the observation epochs of the JWAT traffic analysis.
+ */
+/**
+ * Panel defining the observation epochs of the JWAT traffic analysis.
+ */
+/**
+ * Panel defining the observation epochs of the JWAT traffic analysis.
+ */
 public class EpochPanel extends WizardPanel implements JWATConstants {
 
 	private static final long serialVersionUID = 1L;

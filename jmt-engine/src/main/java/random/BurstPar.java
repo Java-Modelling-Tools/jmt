@@ -42,13 +42,13 @@ public class BurstPar extends AbstractParameter implements Parameter {
 	private Distribution valueDistributionB;
 
 	/**
-	 * It creates a new burst parameter. It accepts two <tt>DistributionContainer</tt>
+	 * It creates a new burst parameter. It accepts two <code>DistributionContainer</code>
 	 * containing the value distribution A and its parameter, and the value
 	 * distribution B and its parameter, respectively.
 	 * 
-	 * @param contA the <tt>DistributionContainer</tt> containing the
+	 * @param contA the <code>DistributionContainer</code> containing the
 	 * value distribution A and its parameter
-	 * @param contB the <tt>DistributionContainer</tt> containing the
+	 * @param contB the <code>DistributionContainer</code> containing the
 	 * value distribution B and its parameter
 	 */
 	public BurstPar(DistributionContainer contA, DistributionContainer contB) {
@@ -115,7 +115,7 @@ public class BurstPar extends AbstractParameter implements Parameter {
 	/**
 	 * Sets the the value distribution B.
 	 * 
-	 * @param distributionA the value distribution B
+	 * @param distributionB the value distribution B
 	 */
 	public void setValueDistributionB(Distribution distributionB) {
 		this.valueDistributionB = distributionB;
@@ -124,7 +124,7 @@ public class BurstPar extends AbstractParameter implements Parameter {
 	/**
 	 * Sets the the parameter of value distribution B.
 	 * 
-	 * @param parameterA the parameter of value distribution B
+	 * @param parameterB the parameter of value distribution B
 	 */
 	public void setValueParameterB(Parameter parameterB) {
 		this.valueParameterB = parameterB;

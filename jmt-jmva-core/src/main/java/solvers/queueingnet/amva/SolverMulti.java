@@ -217,7 +217,7 @@ public abstract class SolverMulti {
 
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of the combined
+	 * <code>lambda</code> if no service center is saturated as a result of the combined
 	 * loads of all the classes. <br>
 	 * Must be implemented to create a multi class model solver. <br>
 	 * WARNING: This method should be called before solving the system.

@@ -208,7 +208,7 @@ public class JmtJGraph extends JGraph {
 	}
 
 	/**
-	 * Notification from the <code>UIManager</code> that the L&F has changed.
+	 * Notification from the <code>UIManager</code> that the L&amp;F has changed.
 	 * Replaces the current UI object with the latest version from the
 	 * <code>UIManager</code>. Subclasses can override this to support
 	 * different GraphUIs.

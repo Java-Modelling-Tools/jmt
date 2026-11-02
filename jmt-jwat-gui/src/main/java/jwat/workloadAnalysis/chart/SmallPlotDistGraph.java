@@ -18,6 +18,18 @@ import jwat.workloadAnalysis.utils.SetMatrixListener;
 import jwat.JWATConstants;
 import ptolemy.plot.Plot;
 
+/**
+ * Swing component displaying the small plot dist graph.
+ */
+/**
+ * Swing component displaying the small plot dist graph.
+ */
+/**
+ * Swing component displaying the small plot dist graph.
+ */
+/**
+ * Swing component displaying the small plot dist graph.
+ */
 public class SmallPlotDistGraph extends Plot {
 	/**
 	 * 

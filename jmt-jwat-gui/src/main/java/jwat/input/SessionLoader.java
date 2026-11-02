@@ -22,6 +22,18 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+/**
+ * Loads a JWAT session from an XML file.
+ */
+/**
+ * Loads a JWAT session from an XML file.
+ */
+/**
+ * Loads a JWAT session from an XML file.
+ */
+/**
+ * Loads a JWAT session from an XML file.
+ */
 public class SessionLoader extends TimeConsumingWorker {
 
 	private InputStream zis;

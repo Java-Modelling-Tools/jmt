@@ -40,6 +40,18 @@ import table.DisabledCellRenderer;
 import table.ExactTable;
 import table.ExactTableModel;
 
+/**
+ * Swing panel of the JMT wizard providing the class switch section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the class switch section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the class switch section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the class switch section view.
+ */
 public class ClassSwitchSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

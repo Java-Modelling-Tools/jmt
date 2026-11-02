@@ -6,6 +6,18 @@ import java.util.Date;
 
 import jwat.Observation;
 
+/**
+ * JWAT filter on the date of the workload observations.
+ */
+/**
+ * JWAT filter on the date of the workload observations.
+ */
+/**
+ * JWAT filter on the date of the workload observations.
+ */
+/**
+ * JWAT filter on the date of the workload observations.
+ */
 public class FilterOnData implements FilterOnVariable {
 
 	Date from;

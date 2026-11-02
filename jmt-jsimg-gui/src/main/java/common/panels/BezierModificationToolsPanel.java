@@ -13,6 +13,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * Panel with the tools to modify Bezier connections in JSIMgraph.
+ */
+/**
+ * Panel with the tools to modify Bezier connections in JSIMgraph.
+ */
+/**
+ * Panel with the tools to modify Bezier connections in JSIMgraph.
+ */
+/**
+ * Panel with the tools to modify Bezier connections in JSIMgraph.
+ */
 public class BezierModificationToolsPanel extends JPanel {
     protected JToolBar toolBar;
     protected JMTDialog dialog;

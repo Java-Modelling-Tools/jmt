@@ -47,6 +47,18 @@ import common.CommonConstants;
 import common.JMTImageLoader;
 import static common.CommonConstants.*;
 
+/**
+ * Factory creating the about dialog objects.
+ */
+/**
+ * Factory creating the about dialog objects.
+ */
+/**
+ * Factory creating the about dialog objects.
+ */
+/**
+ * Factory creating the about dialog objects.
+ */
 public class AboutDialogFactory {
 
 	public enum Company {

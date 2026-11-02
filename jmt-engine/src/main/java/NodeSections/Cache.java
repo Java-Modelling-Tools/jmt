@@ -196,12 +196,13 @@ public class Cache extends ServiceSection {
 	}
 
 	/**
-	 *  when the node section itself is unlinked to the owner node.
-	 *  This method should be used to reset node section properties depending on
-	 *  the owner node ones.
-	 * @param ownerNode
-	 * @throws NetException
+	 * Processes the given message received by this node section.
+	 * This method should be used to reset node section properties depending on
+	 * the owner node ones when the node section itself is unlinked to the owner node.
+	 * @param message the message to process
+	 * @throws NetException if the message cannot be processed
 	 * modified by Yujiao Xiao
+	 * @return the resulting int
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {

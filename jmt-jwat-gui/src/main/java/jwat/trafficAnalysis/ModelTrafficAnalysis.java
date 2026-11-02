@@ -5,6 +5,18 @@ import java.util.ArrayList;
 import jwat.MatrixObservations;
 import jwat.JWatModel;
 
+/**
+ * Model of the JWAT traffic analysis view.
+ */
+/**
+ * Model of the JWAT traffic analysis view.
+ */
+/**
+ * Model of the JWAT traffic analysis view.
+ */
+/**
+ * Model of the JWAT traffic analysis view.
+ */
 public class ModelTrafficAnalysis implements JWatModel {
 	private MatrixObservations matrix = null;
 	private ArrayList<OnResetModel> resetModel = new ArrayList<OnResetModel>();

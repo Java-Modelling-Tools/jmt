@@ -10,6 +10,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Egalitarian Processor Sharing strategy with priorities: all jobs share the station capacity equally.
+ */
+/**
+ * Egalitarian Processor Sharing strategy with priorities: all jobs share the station capacity equally.
+ */
+/**
+ * Egalitarian Processor Sharing strategy with priorities: all jobs share the station capacity equally.
+ */
+/**
+ * Egalitarian Processor Sharing strategy with priorities: all jobs share the station capacity equally.
+ */
 public class EPSStrategyPriority extends PSStrategy {
 
     public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {

@@ -84,6 +84,7 @@ public class WeightedMeanVar {
 	/** Creates a new instance of SampleMeanVar calculating the parameters with
 	 * the initializing data sequence
 	 *  @param data the initial data sequence;
+	 * @param weight the weight
 	 */
 	public void initialize(double[] data, double[] weight) {
 
@@ -101,9 +102,10 @@ public class WeightedMeanVar {
 		}
 	}
 
-	/** update the sample mean & variance with the new value it uses stable
+	/** update the sample mean &amp; variance with the new value it uses stable
 	 *  algorithms
 	 *  @param  newValue
+	 * @param newWeight the new weight
 	 */
 	public void putNewSample(double newValue, double newWeight) {
 
@@ -125,6 +127,7 @@ public class WeightedMeanVar {
 	/** computes the new sample variance using a stable algorithm
 	 *  it also computes the mean with the stable algorithm.
 	 *  @param newValue the new element to be added to the sequence
+	 * @param newWeight the new weight
 	 */
 	protected void calcMeanAndVar(double newValue, double newWeight) {
 

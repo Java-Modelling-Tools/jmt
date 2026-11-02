@@ -22,7 +22,7 @@ import java.util.Vector;
 /**
  * A class representing a surface.
  *
- * @author  Chris Pudney <cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author  Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version 1.1
  */
 public class Surface {
@@ -88,6 +88,7 @@ public class Surface {
 	 * using Geomview http://www.geom.umn.edu/software/download/geomview.html
 	 *
 	 * @param pw A PrintWriter for the file
+	 * @throws IOException if the operation cannot be completed
 	 */
 	public void writeOFF(PrintWriter pw) throws IOException {
 		/* Write header */

@@ -2,6 +2,18 @@ package jwat.input;
 
 import java.util.ArrayList;
 
+/**
+ * Mapping of a JWAT variable.
+ */
+/**
+ * Mapping of a JWAT variable.
+ */
+/**
+ * Mapping of a JWAT variable.
+ */
+/**
+ * Mapping of a JWAT variable.
+ */
 public abstract class VariableMapping {
 	public abstract double convertToDouble(String val);
 

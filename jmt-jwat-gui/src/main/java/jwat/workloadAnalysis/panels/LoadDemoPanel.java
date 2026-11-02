@@ -54,6 +54,18 @@ import jwat.JWATConstants;
 import jwat.JWatWizard;
 import jwat.MainJwatWizard;
 
+/**
+ * Panel loading the JWAT demo files.
+ */
+/**
+ * Panel loading the JWAT demo files.
+ */
+/**
+ * Panel loading the JWAT demo files.
+ */
+/**
+ * Panel loading the JWAT demo files.
+ */
 public class LoadDemoPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

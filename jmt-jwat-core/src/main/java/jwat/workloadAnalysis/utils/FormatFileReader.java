@@ -7,6 +7,18 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * Reader of the JWAT input format description files (Perl5 format definitions).
+ */
+/**
+ * Reader of the JWAT input format description files (Perl5 format definitions).
+ */
+/**
+ * Reader of the JWAT input format description files (Perl5 format definitions).
+ */
+/**
+ * Reader of the JWAT input format description files (Perl5 format definitions).
+ */
 public class FormatFileReader {
 	private int numeroVariabili;
 	private ArrayList<String> names;

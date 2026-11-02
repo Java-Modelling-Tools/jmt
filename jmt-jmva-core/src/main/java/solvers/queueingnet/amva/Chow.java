@@ -1,11 +1,13 @@
 package solvers.queueingnet.amva;
 
 /**
- * This class implements the AQL (Aggregated Queue Length) algorithm for solving
- * multi-closed models
- * 
- * @author Abhimanyu Chugh
+ * This class implements the Chow approximate MVA algorithm [Cho83] for solving
+ * multiclass closed models. The Chow approximation estimates the queue length
+ * seen by each class at every station from the queue lengths of the other
+ * classes, as described in the AMVA section of the JMVA chapter of the JMT
+ * user manual.
  *
+ * @author Abhimanyu Chugh
  */
 public class Chow extends AMVA {
 

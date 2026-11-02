@@ -21,6 +21,18 @@ package jwat;
 import java.io.File;
 import java.text.DecimalFormat;
 
+/**
+ * Constants of the JWAT tool (input formats, option names and defaults).
+ */
+/**
+ * Constants of the JWAT tool (input formats, option names and defaults).
+ */
+/**
+ * Constants of the JWAT tool (input formats, option names and defaults).
+ */
+/**
+ * Constants of the JWAT tool (input formats, option names and defaults).
+ */
 public interface JWATConstants {
 
 	// Position of JWAT directories 

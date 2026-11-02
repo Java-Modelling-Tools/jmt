@@ -13,6 +13,18 @@ import jwat.workloadAnalysis.clustering.EventClusteringDone;
 //+ add transform and anti to selected variables for clustering
 //UPDATE 10/31/2006: + added calculation of clustering statistics on untransformed variables
 
+/**
+ * Background worker running the JWAT k-means clustering.
+ */
+/**
+ * Background worker running the JWAT k-means clustering.
+ */
+/**
+ * Background worker running the JWAT k-means clustering.
+ */
+/**
+ * Background worker running the JWAT k-means clustering.
+ */
 public class MainKMean extends TimeConsumingWorker {
 
 	private short trasf;

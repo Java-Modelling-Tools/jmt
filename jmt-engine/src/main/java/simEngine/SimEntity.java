@@ -22,9 +22,9 @@ import jmt.common.exception.NetException;
 
 /**
  * This class represents entities, or processes, running in the system.
- * To create a new type of entity, it should be <tt>extended</tt> and
- * a definition for the <tt>body()</tt> method given. The <tt>body()</tt>
- * method is called by the <tt>SimSystem</tt> and defines the behaviour of
+ * To create a new type of entity, it should be <code>extended</code> and
+ * a definition for the <code>body()</code> method given. The <code>body()</code>
+ * method is called by the <code>SimSystem</code> and defines the behaviour of
  * the entity during the simulation. <p>
  *
  * @author      Federico Granata
@@ -92,7 +92,7 @@ public abstract class SimEntity {
 	}
 
 	// Runtime methods
-	/** Causes the entity to hold for <tt>delay</tt> units of simulation time.
+	/** Causes the entity to hold for <code>delay</code> units of simulation time.
 	 * @param delay The amount of time to hold
 	 */
 	public final void simHold(double delay) {
@@ -102,9 +102,8 @@ public abstract class SimEntity {
 
 	//TODO: to fix
 	/** An interruptible hold.
-	 * Causes the entity to hold for <tt>delay</tt> units of simulation time.
+	 * Causes the entity to hold for <code>delay</code> units of simulation time.
 	 * @param delay The amount of time to hold
-	 * @param ev Returns the event if hold interrupted
 	 * @return The amount of time left on the hold (0.0 if no interruptions)
 	 */
 	public final double simHoldFor(double delay) {
@@ -180,7 +179,7 @@ public abstract class SimEntity {
 	}
 
 	/** Extract the first event waiting for this entity on the deferred
-	 * queue, matched by the predicate <tt>p</tt>.
+	 * queue, matched by the predicate <code>p</code>.
 	 * @param p An event selection predicate
 	 */
 	public final void simSelect(SimPredicate p) {
@@ -188,12 +187,12 @@ public abstract class SimEntity {
 	}
 
 	/** Cancel the first event waiting for this entity on the future
-	 * queue, matched by the predicate <tt>p</tt>. Returns the
+	 * queue, matched by the predicate <code>p</code>. Returns the
 	 * number of events cancelled (0 or 1).
 	 * @param p    An event selection predicate
-	 * @param ev   The event matched is copied into <tt>ev</tt> if
-	 *             it points to a blank event, or discarded if <tt>ev</tt> is
-	 *             <tt>null</tt>
+	 * @param ev   The event matched is copied into <code>ev</code> if
+	 *             it points to a blank event, or discarded if <code>ev</code> is
+	 *             <code>null</code>
 	 */
 	public final int simCancel(SimPredicate p, SimEvent ev) {
 		simSystem.cancel(me, p);
@@ -207,7 +206,7 @@ public abstract class SimEntity {
 		}
 	}
 
-	/** Repeatedly <tt>simWait()</tt> until the entity receives an event
+	/** Repeatedly <code>simWait()</code> until the entity receives an event
 	 * matched by the specified predicate, all the other received events
 	 * are discarded.
 	 * @param p The event selection predicate

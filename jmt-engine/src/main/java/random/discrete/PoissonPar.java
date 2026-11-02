@@ -3,6 +3,18 @@ package random.discrete;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import random.Parameter;
 
+/**
+ * Parameters of the Poisson distribution.
+ */
+/**
+ * Parameters of the Poisson distribution.
+ */
+/**
+ * Parameters of the Poisson distribution.
+ */
+/**
+ * Parameters of the Poisson distribution.
+ */
 public class PoissonPar implements Parameter {
     private double lambda;
 

@@ -21,6 +21,18 @@ import jwat.JWATConstants;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Session of the JWAT workload analysis view.
+ */
+/**
+ * Session of the JWAT workload analysis view.
+ */
+/**
+ * Session of the JWAT workload analysis view.
+ */
+/**
+ * Session of the JWAT workload analysis view.
+ */
 public class WorkloadAnalysisSession extends JwatSession {
 	// vector containing the results of one or more clustering operations
 	private Vector<Clustering> clusterOperation = null; //<Clustering> 

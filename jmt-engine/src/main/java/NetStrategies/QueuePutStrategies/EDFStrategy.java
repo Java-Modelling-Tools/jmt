@@ -9,6 +9,18 @@ import QueueNet.JobInfo;
 import QueueNet.JobInfoList;
 import QueueNet.NodeSection;
 
+/**
+ * Earliest Deadline First queue insertion strategy, preemptive variant of the earliest due date discipline.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy, preemptive variant of the earliest due date discipline.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy, preemptive variant of the earliest due date discipline.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy, preemptive variant of the earliest due date discipline.
+ */
 public class EDFStrategy extends EDDStrategy implements PreemptiveStrategy {
 
   @Override

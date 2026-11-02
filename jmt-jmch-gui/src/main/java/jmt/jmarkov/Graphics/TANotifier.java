@@ -35,6 +35,18 @@ import jmt.jmarkov.Graphics.constants.DrawNormal;
 import jmt.jmarkov.utils.Formatter;
 
 // this is using for showing log
+/**
+ * Table notifying the statistics of the JMCH animation.
+ */
+/**
+ * Table notifying the statistics of the JMCH animation.
+ */
+/**
+ * Table notifying the statistics of the JMCH animation.
+ */
+/**
+ * Table notifying the statistics of the JMCH animation.
+ */
 public class TANotifier extends JTable implements Notifier {
 	/**
 	 * 

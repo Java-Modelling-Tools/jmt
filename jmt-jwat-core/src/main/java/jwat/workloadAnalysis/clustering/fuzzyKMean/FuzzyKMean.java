@@ -3,6 +3,18 @@ package jwat.workloadAnalysis.clustering.fuzzyKMean;
 import jwat.workloadAnalysis.clustering.Clustering;
 import jwat.workloadAnalysis.clustering.ClusteringInfos;
 
+/**
+ * Fuzzy k-means clustering algorithm of JWAT: each observation belongs to the clusters with given membership degrees.
+ */
+/**
+ * Fuzzy k-means clustering algorithm of JWAT: each observation belongs to the clusters with given membership degrees.
+ */
+/**
+ * Fuzzy k-means clustering algorithm of JWAT: each observation belongs to the clusters with given membership degrees.
+ */
+/**
+ * Fuzzy k-means clustering algorithm of JWAT: each observation belongs to the clusters with given membership degrees.
+ */
 public class FuzzyKMean implements Clustering {
 
 	private ClusteringInfosFuzzy[] results;

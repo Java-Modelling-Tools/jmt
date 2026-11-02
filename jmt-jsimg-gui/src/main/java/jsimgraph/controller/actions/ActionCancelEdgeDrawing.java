@@ -6,6 +6,18 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * Provides the Action Cancel Edge Drawing functionality of the actions.
+ */
+/**
+ * Provides the Action Cancel Edge Drawing functionality of the actions.
+ */
+/**
+ * Provides the Action Cancel Edge Drawing functionality of the actions.
+ */
+/**
+ * Provides the Action Cancel Edge Drawing functionality of the actions.
+ */
 public class ActionCancelEdgeDrawing extends AbstractJmodelAction {
 
     private static final long serialVersionUID = 1L;

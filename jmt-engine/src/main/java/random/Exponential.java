@@ -39,7 +39,7 @@ public class Exponential extends AbstractDistribution implements Distribution {
 	 * <pre>                   (-lambda*x)
 	 * pdf(x)= lambda * e</pre>
 	 * with lambda gtz, if x is gtz.
-	 * 0 if x<0.
+	 * 0 if x&lt;0.
 	 */
 	public Exponential() {
 	}

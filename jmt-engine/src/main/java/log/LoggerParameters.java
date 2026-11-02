@@ -20,6 +20,18 @@ package log;
 
 import jmt.framework.data.MacroReplacer;
 
+/**
+ * Parameters of a JMT logger: the path, name and options of the output file written during a simulation.
+ */
+/**
+ * Parameters of a JMT logger: the path, name and options of the output file written during a simulation.
+ */
+/**
+ * Parameters of a JMT logger: the path, name and options of the output file written during a simulation.
+ */
+/**
+ * Parameters of a JMT logger: the path, name and options of the output file written during a simulation.
+ */
 public class LoggerParameters {
 
 	public volatile boolean isEnabled; // the variable is left public for fast external read access - do not write to it.
@@ -84,7 +96,7 @@ public class LoggerParameters {
 	}
 
 	/**
-	 * @returns String representation of all variables of LoggerParameters instance.
+	 * @return String representation of all variables of LoggerParameters instance.
 	 */
 	@Override
 	public final String toString() {

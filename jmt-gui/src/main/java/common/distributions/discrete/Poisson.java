@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 
 import javax.swing.*;
 
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
 public class Poisson extends Distribution {
     /**
      * Constructs a new Poisson Distribution

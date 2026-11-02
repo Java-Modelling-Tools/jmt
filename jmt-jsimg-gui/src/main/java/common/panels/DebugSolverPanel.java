@@ -14,6 +14,18 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * Panel of the JSIMgraph debug solver.
+ */
+/**
+ * Panel of the JSIMgraph debug solver.
+ */
+/**
+ * Panel of the JSIMgraph debug solver.
+ */
+/**
+ * Panel of the JSIMgraph debug solver.
+ */
 public class DebugSolverPanel extends JPanel {
     private Mediator mediator;
     private JTextField logPathField;

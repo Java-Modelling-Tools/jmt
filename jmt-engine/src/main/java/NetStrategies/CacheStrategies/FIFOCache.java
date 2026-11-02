@@ -6,6 +6,15 @@ import QueueNet.CacheItem;
 import java.util.LinkedList;
 
 // set removeItemMode = 1 for strict FIFO(m)
+/**
+ * FIFO (First In First Out) cache eviction strategy: removes the item that first joined the cached item list.
+ */
+/**
+ * FIFO (First In First Out) cache eviction strategy: removes the item that first joined the cached item list.
+ */
+/**
+ * FIFO (First In First Out) cache eviction strategy: removes the item that first joined the cached item list.
+ */
 public class FIFOCache extends CacheStrategy {
 
 	public FIFOCache(){}

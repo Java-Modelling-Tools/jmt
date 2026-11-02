@@ -124,7 +124,7 @@ public class GraphArrivalPanel extends WizardPanel implements JWATConstants {
 
 	/**
 	 * Builds a new GraphPanel, given an exact model data structure
-	 * @param model reference to data structure
+	 * @param ew the main JWAT wizard
 	 */
 	public GraphArrivalPanel(MainJwatWizard ew) {
 		this.ew = ew;

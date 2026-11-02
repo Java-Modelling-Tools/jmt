@@ -34,6 +34,18 @@ import jwat.fitting.FittingAlgorithm;
 import jwat.fitting.utils.ModelFitting;
 import jwat.workloadAnalysis.utils.JWatWorkloadManager;
 
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
 public class SmallQQPlot extends JPanel {
 	/**
 	 * 

@@ -12,7 +12,12 @@ import solvers.queueingnet.QNSolver;
 import solvers.queueingnet.treeAlgorithms.treeConvolution.TreeConvolutionSolver;
 
 /**
- * Created by gcasale on 15 Aug 2018.
+ * Solves a multiclass closed model with the exact TreeConvolution algorithm,
+ * the tree based version of the convolution algorithm, which reduces the time
+ * and space requirements of the exact solution for models with large
+ * dimensions.
+ *
+ * @author gcasale
  */
 public class SolverMultiClosedTreeConvolution extends SolverMulti {
 
@@ -122,10 +127,6 @@ public class SolverMultiClosedTreeConvolution extends SolverMulti {
 	 * Solves the system through the TreeMVA algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException
-	 * @throws InconsistentLinearSystemException
-	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {

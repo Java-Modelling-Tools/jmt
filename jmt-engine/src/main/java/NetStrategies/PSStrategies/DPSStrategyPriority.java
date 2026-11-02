@@ -10,6 +10,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Discriminatory Processor Sharing strategy with priorities: each class receives a distinct share of the station capacity.
+ */
+/**
+ * Discriminatory Processor Sharing strategy with priorities: each class receives a distinct share of the station capacity.
+ */
+/**
+ * Discriminatory Processor Sharing strategy with priorities: each class receives a distinct share of the station capacity.
+ */
+/**
+ * Discriminatory Processor Sharing strategy with priorities: each class receives a distinct share of the station capacity.
+ */
 public class DPSStrategyPriority extends PSStrategy {
 
     public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {

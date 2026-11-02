@@ -10,6 +10,18 @@ import solvers.priority.prioMVACalculators.implementations.utilisations.CLPrioMV
 
 import java.util.Map;
 
+/**
+ * Residence time calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Residence time calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Residence time calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Residence time calculator of the priority MVA algorithm for closed models.
+ */
 public class PrioMVAClosedResidenceTimeCalculator extends PerformanceValuePerStationPerClassCalculator {
 
     /** Used to calculate the rho' in the formula as

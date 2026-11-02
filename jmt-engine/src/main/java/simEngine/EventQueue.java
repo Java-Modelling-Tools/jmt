@@ -33,6 +33,7 @@ import java.util.Iterator;
  */
 public interface EventQueue extends Iterable<SimEvent> {
 	/**
+	 * Method size.
 	 * @return the number of events in this queue
 	 */
 	public int size();
@@ -45,11 +46,13 @@ public interface EventQueue extends Iterable<SimEvent> {
 	public boolean add(SimEvent event);
 
 	/**
+	 * Method pop.
 	 * @return the first event of the queue, removing it from the queue
 	 */
 	public SimEvent pop();
 
 	/**
+	 * Method peek.
 	 * @return the first event of the queue, without removing it
 	 */
 	public SimEvent peek();

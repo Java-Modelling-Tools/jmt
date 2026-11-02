@@ -32,6 +32,18 @@ import random.EmpiricalEntry;
 import random.EmpiricalPar;
 import random.engine.RandomEngine;
 
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
 public class ProbabilitiesFork extends ForkStrategy {
 
 	private String[] nodeNames;

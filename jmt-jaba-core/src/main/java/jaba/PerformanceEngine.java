@@ -3,6 +3,18 @@ package jaba;
 import java.util.ArrayList;
 import java.util.Vector;
 
+/**
+ * Engine of the JABA asymptotic bound analysis: computes the saturation sectors and the convex hull of the model.
+ */
+/**
+ * Engine of the JABA asymptotic bound analysis: computes the saturation sectors and the convex hull of the model.
+ */
+/**
+ * Engine of the JABA asymptotic bound analysis: computes the saturation sectors and the convex hull of the model.
+ */
+/**
+ * Engine of the JABA asymptotic bound analysis: computes the saturation sectors and the convex hull of the model.
+ */
 public class PerformanceEngine {
 
 	private double[][][] serviceTimes;

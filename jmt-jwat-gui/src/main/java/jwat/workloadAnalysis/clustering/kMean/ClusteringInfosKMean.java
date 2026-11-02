@@ -5,6 +5,18 @@ import jwat.Observation;
 import jwat.workloadAnalysis.clustering.ClusteringInfos;
 import jwat.workloadAnalysis.clustering.kMean.KMeanClusteringEngine.TempClusterStatistics;
 
+/**
+ * Information produced by the JWAT k-means clustering.
+ */
+/**
+ * Information produced by the JWAT k-means clustering.
+ */
+/**
+ * Information produced by the JWAT k-means clustering.
+ */
+/**
+ * Information produced by the JWAT k-means clustering.
+ */
 public class ClusteringInfosKMean implements ClusteringInfos {
 
 	public ClusterInfoKMean[] infoCluster;

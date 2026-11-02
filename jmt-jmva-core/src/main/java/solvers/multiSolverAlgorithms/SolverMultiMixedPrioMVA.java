@@ -11,6 +11,15 @@ import solvers.priority.prioMVACalculators.implementations.PrioMVAThroughputCalc
 import java.util.*;
 
 
+/**
+ * Priority MVA solution algorithm of JMVA for mixed models with priority classes.
+ */
+/**
+ * Priority MVA solution algorithm of JMVA for mixed models with priority classes.
+ */
+/**
+ * Priority MVA solution algorithm of JMVA for mixed models with priority classes.
+ */
 public class SolverMultiMixedPrioMVA extends SolverMulti {
 
     private int[] classTypes;

@@ -9,6 +9,18 @@ import solvers.multiSolverAlgorithms.*;
 import solvers.utilities.ConstantConvertors;
 import solvers.priority.PrioMVASolverFactory;
 
+/**
+ * Selects the JMVA solution algorithm to be run for the model under study.
+ */
+/**
+ * Selects the JMVA solution algorithm to be run for the model under study.
+ */
+/**
+ * Selects the JMVA solution algorithm to be run for the model under study.
+ */
+/**
+ * Selects the JMVA solution algorithm to be run for the model under study.
+ */
 public class SolverMultiAlgorithmSelector {
 
     /**

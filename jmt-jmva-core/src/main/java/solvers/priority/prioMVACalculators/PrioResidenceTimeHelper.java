@@ -6,6 +6,18 @@ import solvers.utilities.MVAPopulation;
 import java.util.Map;
 
 
+/**
+ * Helper computing residence times in the priority MVA calculators of JMVA.
+ */
+/**
+ * Helper computing residence times in the priority MVA calculators of JMVA.
+ */
+/**
+ * Helper computing residence times in the priority MVA calculators of JMVA.
+ */
+/**
+ * Helper computing residence times in the priority MVA calculators of JMVA.
+ */
 public class PrioResidenceTimeHelper {
 
     private static final boolean HIGHER_PRIORITY_ONlY = false;

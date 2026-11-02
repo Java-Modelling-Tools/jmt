@@ -43,6 +43,7 @@ public class ClassJobNum {
 	}
 
 	/**
+	 * Returns the name.
 	 * @return the name
 	 */
 	public String getName() {
@@ -50,6 +51,7 @@ public class ClassJobNum {
 	}
 
 	/**
+	 * Returns the classes.
 	 * @return the classes
 	 */
 	public String[] getClasses() {
@@ -57,6 +59,7 @@ public class ClassJobNum {
 	}
 
 	/**
+	 * Returns the numbers.
 	 * @return the numbers
 	 */
 	public Integer[] getNumbers() {

@@ -4,6 +4,18 @@ import solvers.multiSolverAlgorithms.SolverMultiMixedPrioMVA;
 import solvers.priority.prioMVACalculators.QueueLengthCalculator;
 import solvers.utilities.MVAPopulation;
 
+/**
+ * Queue length calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Queue length calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Queue length calculator of the priority MVA algorithm for closed models.
+ */
+/**
+ * Queue length calculator of the priority MVA algorithm for closed models.
+ */
 public class PrioMVAClosedQueueLengthCalculator implements QueueLengthCalculator {
 
     private double[][] clVisits;

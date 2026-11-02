@@ -1,5 +1,17 @@
 package solvers.priority.interpolators;
 
+/**
+ * Interpolator used by the priority MVA calculators of JMVA.
+ */
+/**
+ * Interpolator used by the priority MVA calculators of JMVA.
+ */
+/**
+ * Interpolator used by the priority MVA calculators of JMVA.
+ */
+/**
+ * Interpolator used by the priority MVA calculators of JMVA.
+ */
 public interface Interpolator {
 
     /**
@@ -9,7 +21,7 @@ public interface Interpolator {
      * y1 = rho(n - x1)
      * x2 = ceil(mainX)
      * y2 = rho(n - x2)
-     * As x1 < x2, y1 >= y2 as the utilization increases as n does
+     * As x1 &lt; x2, y1 >= y2 as the utilization increases as n does
      * */
     double interpolate(double x1, double y1, double x2, double y2, double mainX);
 }

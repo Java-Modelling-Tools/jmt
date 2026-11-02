@@ -5,6 +5,18 @@ import java.net.URLConnection;
 
 import jsimgraph.template.TemplateConstants;
 
+/**
+ * Checks the validity of the connections of a JSIMgraph model.
+ */
+/**
+ * Checks the validity of the connections of a JSIMgraph model.
+ */
+/**
+ * Checks the validity of the connections of a JSIMgraph model.
+ */
+/**
+ * Checks the validity of the connections of a JSIMgraph model.
+ */
 public class ConnectionCheck {
 	public static boolean netCheck(String[] testURLs) {
 		for (String testURL : testURLs) {

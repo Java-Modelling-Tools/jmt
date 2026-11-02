@@ -41,7 +41,7 @@ import org.jgraph.graph.GraphModel;
  *         Date: 17-giu-2005
  *         Time: 19.25.45
  * 
- * @author Giuseppe De Cicco & Fabio Granara
+ * @author Giuseppe De Cicco &amp; Fabio Granara
  * 		Date: 23-sett-2006
  * 
  */

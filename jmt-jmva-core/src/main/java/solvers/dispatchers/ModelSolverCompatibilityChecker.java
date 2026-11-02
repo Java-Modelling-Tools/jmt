@@ -5,6 +5,18 @@ import jmt.common.exception.InputDataException;
 import jmt.common.exception.UnsupportedModelException;
 import solvers.SolverAlgorithm;
 
+/**
+ * Checks whether the JMVA model is compatible with the selected solution algorithm.
+ */
+/**
+ * Checks whether the JMVA model is compatible with the selected solution algorithm.
+ */
+/**
+ * Checks whether the JMVA model is compatible with the selected solution algorithm.
+ */
+/**
+ * Checks whether the JMVA model is compatible with the selected solution algorithm.
+ */
 public class ModelSolverCompatibilityChecker {
 
     public static void checkCompatibility(ExactModel model, double[] classData, SolverAlgorithm algorithmType) throws UnsupportedModelException, InputDataException {

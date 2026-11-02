@@ -1,5 +1,17 @@
 package log;
 
+/**
+ * Manages the state of the JMT logger files during a simulation run.
+ */
+/**
+ * Manages the state of the JMT logger files during a simulation run.
+ */
+/**
+ * Manages the state of the JMT logger files during a simulation run.
+ */
+/**
+ * Manages the state of the JMT logger files during a simulation run.
+ */
 public class LoggerStateManager {
     private static final LoggerStateManager instance = new LoggerStateManager();
     private boolean logCalenderOn = false;

@@ -45,7 +45,7 @@ public class InsertState extends UIStateDefault {
 
 	/**
 	 * inserts a new vertex in the graph at the point where the mouse is pressed
-	 * the new vertex is selected & then sets the select status.
+	 * the new vertex is selected &amp; then sets the select status.
 	 *
 	 * @param e mouse press event
 	 */

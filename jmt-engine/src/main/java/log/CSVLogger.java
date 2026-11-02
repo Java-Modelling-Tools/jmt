@@ -119,6 +119,7 @@ public class CSVLogger {
 	}
 
 	/**
+	 * Returns the file.
 	 * @return the file this logger is writing on.
 	 */
 	public File getFile() {

@@ -76,6 +76,7 @@ public class FDistribution {
 	 *  ALGORITHM AS 63 APPL. STATIST. VOL.32, NO.1
 	 *   Computes P(f>x)
 	 *  @param f quantile
+	 * @return the resulting double
 	 */
 	public double CDF(double f) {
 		return BetaFun.betaInv(num * f / (num * f + den), 0.5 * num, 0.5 * den);

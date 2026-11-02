@@ -33,6 +33,18 @@ import javax.swing.JScrollPane;
 import jmt.framework.data.MacroReplacer;
 import jwat.JWATConstants;
 
+/**
+ * Visualizes the JWAT log files.
+ */
+/**
+ * Visualizes the JWAT log files.
+ */
+/**
+ * Visualizes the JWAT log files.
+ */
+/**
+ * Visualizes the JWAT log files.
+ */
 public class LogVisualizer extends JPanel implements JWATConstants {
 
 	private static final long serialVersionUID = 1L;

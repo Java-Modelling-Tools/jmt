@@ -121,7 +121,7 @@ public class RecursiveSolver extends QNSolver {
 	}
 
 	/**
-	 * Stores at a particular Map<PopulationVector, Map<MultiplicitiesVector,
+	 * Stores at a particular Map&lt;PopulationVector, Map&lt;MultiplicitiesVector,
 	 * BigRational>> data structure a computed normalising constant value for future
 	 * re-use.
 	 *

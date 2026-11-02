@@ -20,6 +20,18 @@ package NodeSections;
 
 import NetStrategies.ServiceStrategy;
 
+/**
+ * Polling server that serves each queue until it is empty (exhaustive service).
+ */
+/**
+ * Polling server that serves each queue until it is empty (exhaustive service).
+ */
+/**
+ * Polling server that serves each queue until it is empty (exhaustive service).
+ */
+/**
+ * Polling server that serves each queue until it is empty (exhaustive service).
+ */
 public class ExhaustivePollingServer extends PollingServer {
 
     public ExhaustivePollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,

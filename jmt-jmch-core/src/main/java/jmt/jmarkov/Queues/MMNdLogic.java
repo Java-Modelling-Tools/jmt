@@ -110,7 +110,7 @@ public class MMNdLogic extends MM1Logic {
 	 * 
 	 * @return utilization
 	 * 
-	 * @exception NonErgodicException queue is not ergodic (U > 1 o U < 0)
+	 * @exception NonErgodicException queue is not ergodic (U > 1 o U &lt; 0)
 	 */
 	@Override
 	public double utilization() throws NonErgodicException {

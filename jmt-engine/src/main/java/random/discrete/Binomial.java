@@ -6,6 +6,18 @@ import random.Parameter;
 
 import java.util.Hashtable;
 
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
 public class Binomial extends DiscreteDistribution {
 
 	private int n;

@@ -7,6 +7,18 @@ import NetStrategies.VacationStrategy;
 import random.Distribution;
 import random.Parameter;
 
+/**
+ * Vacation strategy in which the server starts a vacation when it becomes idle.
+ */
+/**
+ * Vacation strategy in which the server starts a vacation when it becomes idle.
+ */
+/**
+ * Vacation strategy in which the server starts a vacation when it becomes idle.
+ */
+/**
+ * Vacation strategy in which the server starts a vacation when it becomes idle.
+ */
 public class VacationWhenIdleStrategy implements VacationStrategy {
     public static final int SINGLE_VACATION = 0;
     public static final int MULTIPLE_VACATION = 1;

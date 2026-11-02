@@ -8,6 +8,18 @@ import jsimgraph.controller.Mediator;
 
 import javax.swing.*;
 
+/**
+ * Debug Solver solution algorithm of JMVA.
+ */
+/**
+ * Debug Solver solution algorithm of JMVA.
+ */
+/**
+ * Debug Solver solution algorithm of JMVA.
+ */
+/**
+ * Debug Solver solution algorithm of JMVA.
+ */
 public class DebugSolver extends AbstractJmodelAction {
     private static final long serialVersionUID = 1L;
     public DebugSolver(Mediator mediator) {

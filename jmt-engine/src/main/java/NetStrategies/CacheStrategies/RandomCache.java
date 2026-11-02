@@ -5,6 +5,15 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * Random cache eviction strategy: removes a uniformly chosen item from the cached item list.
+ */
+/**
+ * Random cache eviction strategy: removes a uniformly chosen item from the cached item list.
+ */
+/**
+ * Random cache eviction strategy: removes a uniformly chosen item from the cached item list.
+ */
 public class RandomCache extends CacheStrategy {
 
 	public RandomCache(){}

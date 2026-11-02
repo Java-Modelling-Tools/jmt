@@ -20,6 +20,18 @@ package jwat;
 
 import java.text.DecimalFormat;
 
+/**
+ * Provides the Dynamic Format functionality of the jwat.
+ */
+/**
+ * Provides the Dynamic Format functionality of the jwat.
+ */
+/**
+ * Provides the Dynamic Format functionality of the jwat.
+ */
+/**
+ * Provides the Dynamic Format functionality of the jwat.
+ */
 public class DynamicFormat {
 
 	public DynamicFormat(String pattern, int limit) {

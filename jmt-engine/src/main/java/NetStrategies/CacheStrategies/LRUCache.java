@@ -6,6 +6,15 @@ import NetStrategies.CacheStrategy;
 import QueueNet.CacheItem;
 
 
+/**
+ * LRU (Least Recently Used) cache eviction strategy: removes the item with the smallest timestamp of last access.
+ */
+/**
+ * LRU (Least Recently Used) cache eviction strategy: removes the item with the smallest timestamp of last access.
+ */
+/**
+ * LRU (Least Recently Used) cache eviction strategy: removes the item with the smallest timestamp of last access.
+ */
 public class LRUCache extends CacheStrategy{
 
 	public LRUCache(){

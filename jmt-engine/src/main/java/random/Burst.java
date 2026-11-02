@@ -38,7 +38,7 @@ public class Burst extends NetNode implements Distribution {
 
 	/** static counter to ensure that two distribution will not have the same name */
 	private static int count = 0;
-	/** if <tt>true</tt> the next EVENT_DISTRIBUTION_CHANGE message will be discarded */
+	/** if <code>true</code> the next EVENT_DISTRIBUTION_CHANGE message will be discarded */
 	private boolean discardNextMessage = false;
 
 	/** 
@@ -55,8 +55,8 @@ public class Burst extends NetNode implements Distribution {
 	/** parameter of length distribution B */
 	private Parameter lengthParamB;
 	/**
-	 * If <tt>true</tt>, the behavior of the interval change is set to Round-Robin;
-	 * if <tt>false</tt> the interval type is changed according to the probability parameter.
+	 * If <code>true</code>, the behavior of the interval change is set to Round-Robin;
+	 * if <code>false</code> the interval type is changed according to the probability parameter.
 	 */
 	private Boolean isRoundRobin;
 
@@ -73,19 +73,19 @@ public class Burst extends NetNode implements Distribution {
 
 	/**
 	 * Creates a new Burst distribution with the specified probability of having
-	 * events of type A. <tt>distrContA</tt> is the DistributionContainer containing
-	 * the length distribution A and the related parameters, while <tt>distrContB</tt>
-	 * is the same of <tt>distrContA</tt> but for distribution B.
+	 * events of type A. <code>distrContA</code> is the DistributionContainer containing
+	 * the length distribution A and the related parameters, while <code>distrContB</code>
+	 * is the same of <code>distrContA</code> but for distribution B.
 	 * 
 	 * @param probability the probability of having events of type A
 	 * @param distrContA the DistributionContainer containing the length
 	 * distribution A and the related parameter
 	 * @param distrContB the DistributionContainer containing the length
 	 * distribution A and the related parameter
-	 * @param isRoundRobin if <tt>true</tt>, the behavior of the interval change is
+	 * @param isRoundRobin if <code>true</code>, the behavior of the interval change is
 	 * set to Round-Robin. That is, there is a pure alternation of the interval types,
 	 * starting with interval A: A-B-A-B-A-B-A-B... In this case, the
-	 * probability parameter is ignored. If <tt>false</tt>, the interval type is
+	 * probability parameter is ignored. If <code>false</code>, the interval type is
 	 * changed according to the probability parameter
 	 * @throws IncorrectDistributionParameterException if the probability
 	 * is not a value comprised between 0 and 1
@@ -123,9 +123,9 @@ public class Burst extends NetNode implements Distribution {
 
 	/**
 	 * Creates a new non-Round-Robin Burst distribution with the specified probability
-	 * of having events of type A. <tt>distrContA</tt> is the DistributionContainer
+	 * of having events of type A. <code>distrContA</code> is the DistributionContainer
 	 * containing the length distribution A and the related parameters, while
-	 * <tt>distrContB</tt> is the same of <tt>distrContA</tt> but for distribution B.
+	 * <code>distrContB</code> is the same of <code>distrContA</code> but for distribution B.
 	 * 
 	 * @param probability the probability of having events of type A
 	 * @param distrContA the DistributionContainer containing the length
@@ -145,8 +145,9 @@ public class Burst extends NetNode implements Distribution {
 	 * the parameters are correct if the value of the probability is comprised
 	 * between 0 and 1.
 	 *
-	 * @return <tt>true</tt> if the probability is correct; <tt>false</tt> otherwise
+	 * @return <code>true</code> if the probability is correct; <code>false</code> otherwise
 	 *
+	 * @param probability the probability
 	 */
 	public boolean check(Double probability) {
 		double prob = probability.doubleValue();
@@ -197,6 +198,9 @@ public class Burst extends NetNode implements Distribution {
 	 * @return always 0 because in this type of distribution it has no sense
 	 * to request the cdf of the distribution.
 	 * 
+	 * @param x the x value
+	 * @param p the p value
+	 * @throws IncorrectDistributionParameterException if the operation cannot be completed
 	 */
 	public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
@@ -206,6 +210,9 @@ public class Burst extends NetNode implements Distribution {
 	 * @return always 0 because in this type of distribution it has no sense
 	 * to request the pdf of the distribution.
 	 * 
+	 * @param x the x value
+	 * @param p the p value
+	 * @throws IncorrectDistributionParameterException if the operation cannot be completed
 	 */
 	public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;
@@ -240,6 +247,8 @@ public class Burst extends NetNode implements Distribution {
 	 * @return always 0 because in this type of distribution it has no sense
 	 * to request the variance of the distribution.
 	 * 
+	 * @param p the p value
+	 * @throws IncorrectDistributionParameterException if the operation cannot be completed
 	 */
 	public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
 		return 0.0;

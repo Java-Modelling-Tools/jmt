@@ -118,7 +118,7 @@ public class SolverMultiMixedRWA extends SolverMultiIterative {
      *                   according to the class type
      * @param classTypes array of class types (open or closed)
      * @param p          array of priorities of the classes.
-     * @param tolerance  terminates if |last result - current result| < tolerance
+     * @param tolerance  terminates if |last result - current result| &lt; tolerance
      * @return true if the operation has been completed with success
      */
     public boolean input(String[] n, int[] t, double[][][] s, double[][] v, double[] classData, int[] classTypes,

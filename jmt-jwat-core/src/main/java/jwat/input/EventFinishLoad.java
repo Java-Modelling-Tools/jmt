@@ -2,6 +2,18 @@ package jwat.input;
 
 import jwat.MatrixObservations;
 
+/**
+ * Event signalling that a JWAT load operation has finished.
+ */
+/**
+ * Event signalling that a JWAT load operation has finished.
+ */
+/**
+ * Event signalling that a JWAT load operation has finished.
+ */
+/**
+ * Event signalling that a JWAT load operation has finished.
+ */
 public class EventFinishLoad implements EventStatus {
 
 	private MatrixObservations m;

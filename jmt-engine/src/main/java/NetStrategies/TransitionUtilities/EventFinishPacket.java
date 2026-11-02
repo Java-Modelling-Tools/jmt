@@ -4,6 +4,18 @@ import QueueNet.JobInfo;
 
 import java.util.List;
 
+/**
+ * Packet exchanged when a packet switching event finishes in the JSIM engine.
+ */
+/**
+ * Packet exchanged when a packet switching event finishes in the JSIM engine.
+ */
+/**
+ * Packet exchanged when a packet switching event finishes in the JSIM engine.
+ */
+/**
+ * Packet exchanged when a packet switching event finishes in the JSIM engine.
+ */
 public class EventFinishPacket {
     public int numberOfRequestsToNodes;
 

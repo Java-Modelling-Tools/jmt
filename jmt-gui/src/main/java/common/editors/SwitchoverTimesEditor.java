@@ -60,6 +60,18 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseMotionAdapter;
 
+/**
+ * Swing panel of the JMT wizard providing the switchover times editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the switchover times editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the switchover times editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the switchover times editor view.
+ */
 public class SwitchoverTimesEditor extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

@@ -124,7 +124,6 @@ public class Node {
 	
 	/**
 	 * Gets set of both fully and partially covered classes at this node.
-	 * @param forceRecompute Whether to force a recomputation of the covered classes.
 	 * @return The set of all covered classes.
 	 */
 	public TreeSet<Integer> getAllCoveredClasses() {
@@ -247,6 +246,7 @@ public class Node {
 	/** Returns the first value in the backup g-array for specified population vector
 	 * (at the root this will be the normalisation constant).
 	 * @return The normalisation constant.
+	 * @param p the p value
 	 */
 	public BigDecimal getBackupG(PopulationVector p) {
 		return backupGmaps.get(p).values().iterator().next();

@@ -2,6 +2,18 @@ package solvers.priority.rwaCalculators;
 
 import solvers.multiSolverAlgorithms.SolverMultiMixedRWA;
 
+/**
+ * Reduced service time calculator used by the priority MVA algorithms.
+ */
+/**
+ * Reduced service time calculator used by the priority MVA algorithms.
+ */
+/**
+ * Reduced service time calculator used by the priority MVA algorithms.
+ */
+/**
+ * Reduced service time calculator used by the priority MVA algorithms.
+ */
 public interface ReducedServiceTimeCalculator {
 
     /**

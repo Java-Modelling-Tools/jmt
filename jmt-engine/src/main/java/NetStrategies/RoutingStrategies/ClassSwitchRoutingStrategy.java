@@ -32,6 +32,18 @@ import random.Empirical;
 import random.EmpiricalPar;
 import random.engine.RandomEngine;
 
+/**
+ * Routing strategy used when a job changes its class: it selects the destination station of the switched job.
+ */
+/**
+ * Routing strategy used when a job changes its class: it selects the destination station of the switched job.
+ */
+/**
+ * Routing strategy used when a job changes its class: it selects the destination station of the switched job.
+ */
+/**
+ * Routing strategy used when a job changes its class: it selects the destination station of the switched job.
+ */
 public class ClassSwitchRoutingStrategy extends RoutingStrategy {
 
 	// the stations that a job can be routed to

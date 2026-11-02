@@ -50,6 +50,18 @@ import common.CommonConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the disp fuzzy matrix.
+ */
+/**
+ * Swing component displaying the disp fuzzy matrix.
+ */
+/**
+ * Swing component displaying the disp fuzzy matrix.
+ */
+/**
+ * Swing component displaying the disp fuzzy matrix.
+ */
 public class DispFuzzyMatrix extends JScrollPane {
 	/**
 	 * 

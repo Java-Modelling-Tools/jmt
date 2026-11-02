@@ -23,8 +23,7 @@ package simEngine;
  * There is a publicly accessible instance of this predicate in the
  * Sim_system class, called Sim_system.SIM_ANY, so the user does
  * not need to create any new instances.
- * @see         eduni.simjava.Sim_predicate
- * @see         eduni.simjava.Sim_system
+ * See also eduni.simjava.Sim_predicate and eduni.simjava.Sim_system.
  * @version     1.0, 4 September 1996
  * @author      Ross McNab
  */

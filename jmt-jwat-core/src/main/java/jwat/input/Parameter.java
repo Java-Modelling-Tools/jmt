@@ -2,6 +2,18 @@ package jwat.input;
 
 import jwat.filters.FilterOnVariable;
 
+/**
+ * Parameter of the JWAT input formats.
+ */
+/**
+ * Parameter of the JWAT input formats.
+ */
+/**
+ * Parameter of the JWAT input formats.
+ */
+/**
+ * Parameter of the JWAT input formats.
+ */
 public class Parameter {
 	private boolean[] varSelected;
 	private String[] varName;

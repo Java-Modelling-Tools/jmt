@@ -10,6 +10,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Generalized Processor Sharing strategy with priorities: capacity is shared according to class weights.
+ */
+/**
+ * Generalized Processor Sharing strategy with priorities: capacity is shared according to class weights.
+ */
+/**
+ * Generalized Processor Sharing strategy with priorities: capacity is shared according to class weights.
+ */
+/**
+ * Generalized Processor Sharing strategy with priorities: capacity is shared according to class weights.
+ */
 public class GPSStrategyPriority extends PSStrategy {
 
     public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {

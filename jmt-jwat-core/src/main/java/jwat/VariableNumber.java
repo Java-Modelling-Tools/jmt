@@ -106,7 +106,7 @@ public class VariableNumber implements JWATConstants {
 	 *            index of variable's value desired
 	 * @return value of Index-th value
 	 * @throws ArrayIndexOutOfBoundsException
-	 *             throws if Index is < 0 or > numbero of observations
+	 *             throws if Index is &lt; 0 or > numbero of observations
 	 */
 	public double getValue(int Index) throws ArrayIndexOutOfBoundsException {
 		if (Index < 0 || Index > obsValue.length) {
@@ -124,7 +124,7 @@ public class VariableNumber implements JWATConstants {
 	 *            variable index
 	 * @return index-th value of the var-th variable
 	 * @throws ArrayIndexOutOfBoundsException
-	 *             throws if Index is < 0 or > numbero of observations or var <
+	 *             throws if Index is &lt; 0 or > numbero of observations or var &lt;
 	 *             0 or > number of variables ( elements of observation )
 	 */
 	public double getValue(int Index, int var) throws ArrayIndexOutOfBoundsException {
@@ -257,7 +257,7 @@ public class VariableNumber implements JWATConstants {
 	/**
 	 * Performs logarithmic transformation 10 based
 	 * @throws TrasformException
-	 *             if exists al least one value <= 0
+	 *             if exists al least one value &lt;= 0
 	 */
 	private void setLogTransformation() throws TrasformException {
 		if (isLogTrasformable()) {
@@ -397,6 +397,7 @@ public class VariableNumber implements JWATConstants {
 
 	/**
 	 * 
+	 * Returns the trasf str.
 	 * @return
 	 */
 	public String getTrasfStr() {
@@ -491,6 +492,7 @@ public class VariableNumber implements JWATConstants {
 * set with setRangeQuantili
 *
 * @return index that satisfies the conditions
+* @throws Exception if the operation cannot be completed
 	 */
 	public int getNextInt() throws Exception {
 		while (obsValue[PosS].getIndex(val) < minV || obsValue[PosS].getIndex(val) > maxV) {

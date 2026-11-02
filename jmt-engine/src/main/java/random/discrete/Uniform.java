@@ -5,6 +5,18 @@ import random.Parameter;
 
 // extend the `AbstractDistribution` to get the random engine.
 // implement the `DiscreteDistribution` to define the behavior of this distribution.
+/**
+ * Discrete uniform distribution over an interval of integers.
+ */
+/**
+ * Discrete uniform distribution over an interval of integers.
+ */
+/**
+ * Discrete uniform distribution over an interval of integers.
+ */
+/**
+ * Discrete uniform distribution over an interval of integers.
+ */
 public class Uniform extends DiscreteDistribution {
 
 	private int min;

@@ -1,5 +1,17 @@
 package NetStrategies.ImpatienceStrategies;
 
+/**
+ * Types of impatience available in the JSIM simulation engine: none, balking and reneging.
+ */
+/**
+ * Types of impatience available in the JSIM simulation engine: none, balking and reneging.
+ */
+/**
+ * Types of impatience available in the JSIM simulation engine: none, balking and reneging.
+ */
+/**
+ * Types of impatience available in the JSIM simulation engine: none, balking and reneging.
+ */
 public enum ImpatienceType {
   NONE("None"),
   BALKING("Balking"),

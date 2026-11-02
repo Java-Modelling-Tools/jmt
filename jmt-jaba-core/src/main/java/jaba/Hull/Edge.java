@@ -19,7 +19,7 @@ package jaba.Hull;
 /**
  * A class representing an edge.
  *
- * @author  Chris Pudney <cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author  Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version 1.1
  */
 public class Edge {

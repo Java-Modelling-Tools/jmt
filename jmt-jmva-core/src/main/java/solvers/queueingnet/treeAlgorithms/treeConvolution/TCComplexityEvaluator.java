@@ -59,8 +59,8 @@ public class TCComplexityEvaluator extends ComplexityEvaluator {
 	 * Gets the complexity of a leaf node computation in the tree convolution algorithm.
 	 * Implements equation (8) in Lam/Lien paper which gives time of
 	 * convolution between 2 subnets in tree.
-	 * @param node The leaf node.
-	 * @param pv The per class population vector of the network.
+	 * @param n The leaf node.
+	 * @param popVec The per class population vector of the network.
 	 * @return A ComplexityBundle containing the expected time and space complexities.
 	 */
 	@Override
@@ -83,8 +83,8 @@ public class TCComplexityEvaluator extends ComplexityEvaluator {
 	 * Gets the complexity of a subnetwork node computation in the tree convolution algorithm.
 	 * Implements equation (8) in Lam/Lien paper which gives time of
 	 * convolution between 2 subnets in tree.
-	 * @param node The subnetwork node.
-	 * @param pv The per class population vector of the network.
+	 * @param n The subnetwork node.
+	 * @param popVec The per class population vector of the network.
 	 * @return A ComplexityBundle containing the expected time and space complexities.
 	 */
 	@Override

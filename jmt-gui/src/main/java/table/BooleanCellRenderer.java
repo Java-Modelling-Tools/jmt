@@ -33,6 +33,18 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.metal.MetalCheckBoxIcon;
 import javax.swing.table.TableCellRenderer;
 
+/**
+ * Cell renderer for the boolean cell values.
+ */
+/**
+ * Cell renderer for the boolean cell values.
+ */
+/**
+ * Cell renderer for the boolean cell values.
+ */
+/**
+ * Cell renderer for the boolean cell values.
+ */
 public class BooleanCellRenderer extends JCheckBox implements TableCellRenderer {
 
 	private static final long serialVersionUID = 1L;

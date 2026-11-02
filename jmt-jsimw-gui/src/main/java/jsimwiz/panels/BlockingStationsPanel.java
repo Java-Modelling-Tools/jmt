@@ -357,7 +357,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 		 * returns that.  If not, finds the class of the data in this
 		 * column (using <code>getColumnClass</code>)
 		 * and returns the default editor for this type of data.
-		 * <p/>
+		 * <p>
 		 * <b>Note:</b>
 		 * Throughout the table package, the internal implementations always
 		 * use this method to provide editors so that this default behavior
@@ -389,7 +389,7 @@ public class BlockingStationsPanel extends WizardPanel implements CommonConstant
 		 * renderer, returns that.  If not, finds the class of the data in
 		 * this column (using <code>getColumnClass</code>)
 		 * and returns the default renderer for this type of data.
-		 * <p/>
+		 * <p>
 		 * <b>Note:</b>
 		 * Throughout the table package, the internal implementations always
 		 * use this method to provide renderers so that this default behavior

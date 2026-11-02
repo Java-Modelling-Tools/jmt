@@ -1660,7 +1660,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * If specified station cannot accept this kind of parameter, no value will be set.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return queueCapacity: integer for queue capacity.
+	 * @param queueCapacity integer for queue capacity.
 	 */
 	@Override
 	public void setQueueCapacity(Object stationKey, Object classKey, Integer queueCapacity) {
@@ -1761,7 +1761,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	 * Sets impatience type associated with given station queue section.
 	 * @param stationKey: search key for station.
 	 * @param classKey: search key for class.
-	 * @return NONE || BALKING || RENEGING
+	 * @param impatienceType NONE || BALKING || RENEGING
 	 */
 	@Override
 	public void setImpatienceType(Object stationKey, Object classKey, ImpatienceType impatienceType) {
@@ -2276,7 +2276,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns logging parameters for the logger. <I>MF'08 0.7.4</I>
+	 * Returns logging parameters for the logger. <i>MF'08 0.7.4</i>
 	 * @param stationKey: search key for station.
 	 */
 	@Override
@@ -2291,7 +2291,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets logging parameters for the logger. <I>MF'08 0.7.4</I>
+	 * Sets logging parameters for the logger. <i>MF'08 0.7.4</i>
 	 * @param stationKey: search key for station.
 	 * @param loggerParameters: local LoggerParameters.
 	 */
@@ -2310,7 +2310,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Returns logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
+	 * Returns logging parameters for the Global logfile. <i>MF'08 0.7.4</i>
 	 * @param selector: either "path", "delim", or "autoAppend"
 	 */
 	@Override
@@ -2330,7 +2330,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 	}
 
 	/**
-	 * Sets logging parameters for the Global logfile. <I>MF'08 0.7.4</I>
+	 * Sets logging parameters for the Global logfile. <i>MF'08 0.7.4</i>
 	 * @param selector: either "path", "delim", "decimalSeparator", or "autoAppend"
 	 * @param value: String to assign to variable named by selector.
 	 */

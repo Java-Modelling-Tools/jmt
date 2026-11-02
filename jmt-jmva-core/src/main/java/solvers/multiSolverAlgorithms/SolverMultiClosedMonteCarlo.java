@@ -12,7 +12,11 @@ import solvers.queueingnet.MonteCarloSolver;
 import solvers.queueingnet.QNSolver;
 
 /**
- * Created by ellasu on 25 Jun 2016.
+ * Solves a multiclass closed model with the Monte Carlo algorithm, an exact
+ * technique that estimates the normalizing constants of large models by
+ * sampling, as described in the JMVA chapter of the JMT user manual.
+ *
+ * @author ellasu
  */
 public class SolverMultiClosedMonteCarlo extends SolverMulti {
 
@@ -134,10 +138,6 @@ public class SolverMultiClosedMonteCarlo extends SolverMulti {
 	 * Solves the system through the MonteCarlo algorithm. input(...) must have been
 	 * called first.
 	 *
-	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException
-	 * @throws InconsistentLinearSystemException
-	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {

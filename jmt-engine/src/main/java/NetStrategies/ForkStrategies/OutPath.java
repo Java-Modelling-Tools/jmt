@@ -21,6 +21,18 @@ package NetStrategies.ForkStrategies;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import random.EmpiricalEntry;
 
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
 public class OutPath {
 
 	private String name;

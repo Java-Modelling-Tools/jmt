@@ -24,6 +24,18 @@ import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.*;
 
+/**
+ * Swing panel of the JMT wizard providing the delay off section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the delay off section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the delay off section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the delay off section view.
+ */
 public class DelayOffSectionPanel extends WizardPanel implements CommonConstants {
 
     private JCheckBox enableDelayOff;

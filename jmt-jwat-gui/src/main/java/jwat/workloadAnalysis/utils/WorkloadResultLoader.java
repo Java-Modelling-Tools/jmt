@@ -23,6 +23,18 @@ import jwat.JWATConstants;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+/**
+ * Loads the results of the JWAT workload analysis.
+ */
+/**
+ * Loads the results of the JWAT workload analysis.
+ */
+/**
+ * Loads the results of the JWAT workload analysis.
+ */
+/**
+ * Loads the results of the JWAT workload analysis.
+ */
 public class WorkloadResultLoader implements ResultLoader {
 	private WorkloadAnalysisSession waSession;
 

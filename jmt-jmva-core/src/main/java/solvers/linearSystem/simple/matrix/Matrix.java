@@ -36,7 +36,7 @@ public abstract class Matrix {
 		
 	 /**
 	  * Constructor
-	  * @param qnm The Queueing Network Model under study
+	  * @param basis The CoMoM basis of the model under consideration
 	  * @param size The size of the basis (will make a matrix of size:  size x size)
 	  */
 	 public Matrix(CoMoMBasis basis, int size) {	
@@ -84,6 +84,7 @@ public abstract class Matrix {
 	 }
 	 
 	 /**
+	  * Returns the update list.
 	  * @return the list of positions to be updated
 	  */
 	 public List<Tuple<Integer,Integer>> getUpdateList() {

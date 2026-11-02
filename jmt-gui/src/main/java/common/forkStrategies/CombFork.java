@@ -22,6 +22,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
 public class CombFork extends ForkStrategy {
 
 	private Map<Object, Double> outProbabilities = new HashMap<Object, Double>();

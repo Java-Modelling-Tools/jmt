@@ -1,11 +1,11 @@
 package solvers.queueingnet.amva;
 
 /**
- * This class implements the Linearizer and De Souza-Muntz Linearizer algorithms
- * for solving multi-closed models
- * 
- * @author Abhimanyu Chugh
+ * This class implements the Linearizer [CN82] and De Souza-Muntz Linearizer
+ * [dSeSM90] approximate MVA algorithms for solving multiclass closed models, as
+ * described in the AMVA section of the JMVA chapter of the JMT user manual.
  *
+ * @author Abhimanyu Chugh
  */
 public class Linearizer extends AMVA {
 	// boolean to decide which version of Linearizer to use

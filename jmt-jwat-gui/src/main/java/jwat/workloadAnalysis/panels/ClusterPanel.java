@@ -55,6 +55,18 @@ import jwat.MainJwatWizard;
 import jwat.workloadAnalysis.clustering.fuzzyKMean.panels.FuzzyOptPanel;
 import jwat.workloadAnalysis.clustering.kMean.panels.KMeansOptPanel;
 
+/**
+ * Panel showing the JWAT clustering results.
+ */
+/**
+ * Panel showing the JWAT clustering results.
+ */
+/**
+ * Panel showing the JWAT clustering results.
+ */
+/**
+ * Panel showing the JWAT clustering results.
+ */
 public class ClusterPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

@@ -32,6 +32,18 @@ import random.EmpiricalEntry;
 import random.EmpiricalPar;
 import random.engine.RandomEngine;
 
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
+/**
+ * Fork strategy that routes all the possible combinations of the tasks to the output stations of a fork.
+ */
 public class CombFork extends ForkStrategy {
 
 	private String[] nodeNums;

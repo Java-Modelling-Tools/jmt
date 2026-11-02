@@ -31,6 +31,18 @@ import javax.swing.JPanel;
 import jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import common.CommonConstants;
 
+/**
+ * Swing panel of the JMT wizard providing the qq plot preview view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the qq plot preview view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the qq plot preview view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the qq plot preview view.
+ */
 public class QQPlotPreviewPanel extends JPanel implements CommonConstants {
 	/**
 	 * 

@@ -47,6 +47,18 @@ import jmt.jmarkov.Graphics.constants.DrawNormal;
 import jmt.jmarkov.Queues.QueueLogic;
 import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
 
+/**
+ * Draws a queue of the JMCH animation.
+ */
+/**
+ * Draws a queue of the JMCH animation.
+ */
+/**
+ * Draws a queue of the JMCH animation.
+ */
+/**
+ * Draws a queue of the JMCH animation.
+ */
 public class QueueDrawer extends JComponent implements Notifier {
 
 	/**

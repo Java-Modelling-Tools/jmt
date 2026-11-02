@@ -22,6 +22,18 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
+/**
+ * Fork strategy that selects the output tasks of a fork according to given probabilities.
+ */
 public class ProbabilitiesFork extends ForkStrategy {
 
 	private Map<Object, OutPath> outPaths = new HashMap<Object, OutPath>();

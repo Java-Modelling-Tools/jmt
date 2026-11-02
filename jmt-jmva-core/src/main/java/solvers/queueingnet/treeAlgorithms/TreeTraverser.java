@@ -35,7 +35,7 @@ public abstract class TreeTraverser {
 	/**
 	 * Iteratively traverses a tree from the specified node in a post-order
 	 * fashion, performing computations at each node.
-	 * @param node The node the traversal starts from.
+	 * @param root The node the traversal starts from.
 	 * @param pv The population vector to use for node computations.
 	 */
 	public void iterativeTraverse(Node root, PopulationVector pv) {

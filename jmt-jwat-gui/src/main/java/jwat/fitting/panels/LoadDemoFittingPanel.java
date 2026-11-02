@@ -54,6 +54,18 @@ import jwat.JWATConstants;
 import jwat.JWatWizard;
 import jwat.MainJwatWizard;
 
+/**
+ * Panel loading the demo data of the JWAT distribution fitting view.
+ */
+/**
+ * Panel loading the demo data of the JWAT distribution fitting view.
+ */
+/**
+ * Panel loading the demo data of the JWAT distribution fitting view.
+ */
+/**
+ * Panel loading the demo data of the JWAT distribution fitting view.
+ */
 public class LoadDemoFittingPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

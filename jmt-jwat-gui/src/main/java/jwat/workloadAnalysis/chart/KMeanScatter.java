@@ -39,6 +39,18 @@ import jwat.JWATConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the k mean scatter.
+ */
+/**
+ * Swing component displaying the k mean scatter.
+ */
+/**
+ * Swing component displaying the k mean scatter.
+ */
+/**
+ * Swing component displaying the k mean scatter.
+ */
 public class KMeanScatter extends JPanel {
 	/**
 	 * 

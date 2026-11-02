@@ -34,9 +34,8 @@ public class ConvolutionLayer {
 	/** 
 	 * Wraps the computation of leaf node g-arrays so that the solvers
 	 * do not need direct access to the convolution core.
-	 * @param n The leaf node.
+	 * @param node The leaf node.
 	 * @param popVec The population vector to use during the computation.
-	 * @param backup Whether to store the results in a backup g-array map.
 	 */
 	public void computeLeafNodeGArray(Node node, PopulationVector popVec) {
 		// TODO: for now assuming backup is false.
@@ -54,6 +53,9 @@ public class ConvolutionLayer {
 	 * required to calculate the chain throughputs.
 	 * Method 1 outlined in sec. 4.3 in Lam/Lien paper.
 	 * @param k The class k.
+	 * @param root the root
+	 * @param pv the pv parameter
+	 * @return the resulting big rational
 	 */
 	public BigRational computeGNminusOneMethod1(Node root, int k, PopulationVector pv) {
 		// The node at which class k becomes fully covered.
@@ -172,6 +174,7 @@ public class ConvolutionLayer {
 	 * This is required during performance measure calculation.
 	 * @param node The node from which to start the calculation.
 	 * @param pv The population vector to use during the computation.
+	 * @return the resulting big decimal
 	 */
 	private BigDecimal computeGFromNodeBottomUp(Node node, PopulationVector pv) {
 		if (node.isLeaf()) {

@@ -57,6 +57,18 @@ import jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import common.CommonConstants;
 import jwat.workloadAnalysis.chart.KMeanSingleClusterScatter;
 
+/**
+ * Swing component displaying the single k mean cluster info.
+ */
+/**
+ * Swing component displaying the single k mean cluster info.
+ */
+/**
+ * Swing component displaying the single k mean cluster info.
+ */
+/**
+ * Swing component displaying the single k mean cluster info.
+ */
 public class SingleKMeanClusterInfo extends JPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

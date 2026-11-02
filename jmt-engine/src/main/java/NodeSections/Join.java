@@ -49,7 +49,7 @@ import dataAnalysis.Measure;
  *         Date: 13-mar-2006
  *         Time: 16.19.58
  *
- * Modified by J. Shuai & M. Cazzoli, implemented join strategies
+ * Modified by J. Shuai &amp; M. Cazzoli, implemented join strategies
  */
 public class Join extends InputSection {
 

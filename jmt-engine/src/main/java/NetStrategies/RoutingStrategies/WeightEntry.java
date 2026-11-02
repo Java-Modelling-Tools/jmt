@@ -1,5 +1,17 @@
 package NetStrategies.RoutingStrategies;
 
+/**
+ * Weight entry of the weighted round robin routing strategy.
+ */
+/**
+ * Weight entry of the weighted round robin routing strategy.
+ */
+/**
+ * Weight entry of the weighted round robin routing strategy.
+ */
+/**
+ * Weight entry of the weighted round robin routing strategy.
+ */
 public class WeightEntry {
 
 	private Object value;

@@ -3,6 +3,18 @@ package jwat.workloadAnalysis.utils;
 import java.awt.Window;
 import java.util.Vector;
 
+/**
+ * Manager of the JWAT workload sessions and formats.
+ */
+/**
+ * Manager of the JWAT workload sessions and formats.
+ */
+/**
+ * Manager of the JWAT workload sessions and formats.
+ */
+/**
+ * Manager of the JWAT workload sessions and formats.
+ */
 public class JWatWorkloadManager {
 	public static Vector<Window> windows = new Vector<Window>();
 

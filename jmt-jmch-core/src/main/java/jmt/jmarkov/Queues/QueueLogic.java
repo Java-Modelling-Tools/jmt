@@ -43,7 +43,8 @@ public interface QueueLogic {
 	/**
 	 * Calculates the probability of each status. 
 	 * @return the probability of the status
-	 * @param number of elements in the status
+	 * @param status number of elements in the status
+	 * @throws NonErgodicException if the operation cannot be completed
 	 */
 	public double getStatusProbability(int status) throws NonErgodicException;
 
@@ -56,6 +57,7 @@ public interface QueueLogic {
 	/**
 	 * Calculates the arrival of the next job.(ms)
 	 * @return interarrival time
+	 * @throws NoJobsException if the operation cannot be completed
 	 */
 	public double getArrivalTime() throws NoJobsException;
 
@@ -63,6 +65,7 @@ public interface QueueLogic {
 	 * 
 	 * Returns the maximum number of the jobs in the queue(only buffer)
 	 * @return 0 if the buffer is ideal(infinite), a positive number,  otherwise
+	 * @throws InfiniteBufferException if the operation cannot be completed
 	 */
 	public int getMaxStates() throws InfiniteBufferException;
 

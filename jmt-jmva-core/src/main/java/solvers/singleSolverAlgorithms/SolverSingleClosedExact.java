@@ -29,11 +29,12 @@ import solvers.Solver;
 import java.io.PrintWriter;
 
 /**
- *  Solves a single class closed model, using the normalisation constant
- *  algorithm. It also use a preordering algorithm to obtain a stable network.
+ * Solves a single class closed model using the normalisation constant
+ * algorithm, one of the exact solution techniques available in JMVA for closed
+ * product form queueing networks. A preordering algorithm is applied to obtain
+ * a numerically stable network before the solution.
  *
- * @author  Federico Granata
- *
+ * @author Federico Granata
  */
 public class SolverSingleClosedExact extends Solver {
 
@@ -180,7 +181,7 @@ public class SolverSingleClosedExact extends Solver {
 	//@author Stefano Omini
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of such a load.
+	 * <code>lambda</code> if no service center is saturated as a result of such a load.
 	 * <br>
 	 * WARNING: This method should be called before solving the system.
 	 * @return true if sufficient capacity exists for the given workload, false otherwise

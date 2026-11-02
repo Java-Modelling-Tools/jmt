@@ -1,5 +1,17 @@
 package solvers;
 
+/**
+ * Iterative multiclass solution algorithm of JMVA, base of the approximate iterative solvers.
+ */
+/**
+ * Iterative multiclass solution algorithm of JMVA, base of the approximate iterative solvers.
+ */
+/**
+ * Iterative multiclass solution algorithm of JMVA, base of the approximate iterative solvers.
+ */
+/**
+ * Iterative multiclass solution algorithm of JMVA, base of the approximate iterative solvers.
+ */
 public abstract class SolverMultiIterative extends SolverMulti {
 
     public static final double DEFAULT_TOLERANCE = Math.pow(10, -7);

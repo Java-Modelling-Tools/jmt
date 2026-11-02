@@ -3,6 +3,18 @@ package random.discrete;
 import jmt.common.exception.IncorrectDistributionParameterException;
 import random.Parameter;
 
+/**
+ * Degenerate discrete distribution that always returns the same value with probability one.
+ */
+/**
+ * Degenerate discrete distribution that always returns the same value with probability one.
+ */
+/**
+ * Degenerate discrete distribution that always returns the same value with probability one.
+ */
+/**
+ * Degenerate discrete distribution that always returns the same value with probability one.
+ */
 public class FixProbability extends DiscreteDistribution{
 
 	private double[] p;

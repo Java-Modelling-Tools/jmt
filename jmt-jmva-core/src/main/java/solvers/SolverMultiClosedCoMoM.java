@@ -29,7 +29,10 @@ import solvers.queueingnet.CoMoMBTFSolver;
 import solvers.queueingnet.QNSolver;
 
 /**
- * This class implements the API to allow use by other applications. One can
+ * Solves a multiclass closed model with the exact CoMoM (Class Oriented Method
+ * of Moments) algorithm [Cas09], one of the exact solution techniques available
+ * in JMVA for closed product form queueing networks.
+ * <p>This class implements the API to allow use by other applications. One can
  * define the queueing network model details, call the solvers transparently
  * and, afterwards, read the results.
  *
@@ -160,10 +163,6 @@ public class SolverMultiClosedCoMoM extends SolverMulti {
 	 * Solves the system through the MoM algorithm. input(...) must have been called
 	 * first.
 	 *
-	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException
-	 * @throws InconsistentLinearSystemException
-	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {

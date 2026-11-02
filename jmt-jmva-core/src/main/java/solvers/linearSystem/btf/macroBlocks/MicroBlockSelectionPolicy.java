@@ -22,8 +22,8 @@ public abstract class MicroBlockSelectionPolicy {
 
 	/**
 	 * Constructor
+	 * @param qnm The Queueing Network Model under consideration
 	 * @param full_block The full TopLevelBlock containing ALL macro blocks
-	 * @param h The number of non-zeros associated with the Macro Block
 	 */
 	protected MicroBlockSelectionPolicy(QNModel qnm, MacroBlock full_block) {
 		this.qnm = qnm;
@@ -32,7 +32,6 @@ public abstract class MicroBlockSelectionPolicy {
 
 	/**
 	 * Selects the required macro blocks as per the policy
-	 * @param macro_blocks The array of selected macro blocks
 	 * @param current_class The current class being considered.
 	 */
 	protected abstract MicroBlock[] selectMicroBlocks(int current_class);

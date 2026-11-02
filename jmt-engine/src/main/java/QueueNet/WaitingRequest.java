@@ -34,7 +34,7 @@ public class WaitingRequest extends JobInfo {
 	 * Creates a new instance of WaitingRequest object.
 	 * @param job Job referenced by this WaitingRequest.
 	 * @param sourceSection Source section of the job.
-	 * @param sourceNode Source node of the job.
+	 * @param source Source node of the job.
 	 */
 	public WaitingRequest(Job job, byte sourceSection, NetNode source) {
 		super(job);

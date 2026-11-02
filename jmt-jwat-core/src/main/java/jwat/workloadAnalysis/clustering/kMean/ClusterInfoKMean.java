@@ -1,5 +1,17 @@
 package jwat.workloadAnalysis.clustering.kMean;
 
+/**
+ * Information of a cluster produced by the JWAT k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT k-means algorithm.
+ */
 public class ClusterInfoKMean {
 
 	public ClusterInfoKMean(int numVars) {

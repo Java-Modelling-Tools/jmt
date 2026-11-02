@@ -98,10 +98,10 @@ public class BatchCircularList {
 
 	/**
 	 * Returns a batch sample
-	 * <br>PRECONDITION: index < getNumBatches()
+	 * <br>PRECONDITION: index &lt; getNumBatches()
 	 * @param index position of the sample to be retreived
 	 * @return requested batch sample
-	 * @see this.getNumBatches()
+	 * {@link #getNumBatches()}
 	 */
 	public double getBatchSample(int index) {
 		if (start + index < maxBatches) {
@@ -113,10 +113,10 @@ public class BatchCircularList {
 
 	/**
 	 * Returns a batch samples' weight
-	 * <br>PRECONDITION: index < getNumBatches()
+	 * <br>PRECONDITION: index &lt; getNumBatches()
 	 * @param index  position of the sample to be retreived
 	 * @return requested batch samples' weight
-	 * @see this.getNumBatches()
+	 * {@link #getNumBatches()}
 	 */
 	public double getBatchWeight(int index) {
 		if (start + index < maxBatches) {
@@ -128,9 +128,9 @@ public class BatchCircularList {
 
 	/**
 	 * Deletes first n batches
-	 * <br>PRECONDITION: index < getNumBatches()
+	 * <br>PRECONDITION: index &lt; getNumBatches()
 	 * @param n number of batches to be deleted
-	 * @see this.getNumBatches()
+	 * {@link #getNumBatches()}
 	 */
 	public void deleteFirstBatches(int n) {
 		if (start + n < maxBatches) {

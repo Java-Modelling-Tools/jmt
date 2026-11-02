@@ -69,11 +69,13 @@ import common.JMTImageLoader;
 
 /**
  * a table with some improvements:
+ * <ul>
  * <li>has a click-aware header
  * <li>has a click-aware row header
  * <li>"more rows" and "more columns" warning icons
  * <li>clipboard transfer of cell values (support depends on the underlying data model) - CTRL+C, CTRL+X, CTRL+V
  * <li>can clear selected cells - DELETE
+ * </ul>
  */
 public class ExactTable extends JTable {
 

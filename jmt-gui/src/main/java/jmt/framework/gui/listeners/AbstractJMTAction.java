@@ -27,6 +27,18 @@ import javax.swing.KeyStroke;
 
 import jmt.framework.gui.image.ImageLoader;
 
+/**
+ * Base class of the actions of the JMT graphical editors.
+ */
+/**
+ * Base class of the actions of the JMT graphical editors.
+ */
+/**
+ * Base class of the actions of the JMT graphical editors.
+ */
+/**
+ * Base class of the actions of the JMT graphical editors.
+ */
 public abstract class AbstractJMTAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;

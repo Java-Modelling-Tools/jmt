@@ -27,6 +27,18 @@ import jwat.workloadAnalysis.tables.JWatBivariateStatsTable;
 import jwat.workloadAnalysis.tables.JWatBivariateStatsTableModel;
 import jwat.workloadAnalysis.tables.renderers.RowHeaderRenderer;
 
+/**
+ * Swing panel of the JMT wizard providing the scroll bivariate view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the scroll bivariate view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the scroll bivariate view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the scroll bivariate view.
+ */
 public class ScrollBivariatePanel extends JScrollPane {
 
 	private static final long serialVersionUID = 1L;

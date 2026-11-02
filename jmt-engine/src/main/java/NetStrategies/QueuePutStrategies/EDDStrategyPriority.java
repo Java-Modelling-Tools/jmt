@@ -9,6 +9,18 @@ import QueueNet.JobInfo;
 import QueueNet.JobInfoList;
 import QueueNet.NodeSection;
 
+/**
+ * Earliest Due Date queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Due Date queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Due Date queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Due Date queue insertion strategy with priorities.
+ */
 public class EDDStrategyPriority extends QueuePutStrategy {
 
   @Override

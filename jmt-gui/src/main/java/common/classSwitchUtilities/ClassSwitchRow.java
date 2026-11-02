@@ -21,6 +21,18 @@ package common.classSwitchUtilities;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Provides the Class Switch Row functionality of the class switch utilities.
+ */
+/**
+ * Provides the Class Switch Row functionality of the class switch utilities.
+ */
+/**
+ * Provides the Class Switch Row functionality of the class switch utilities.
+ */
+/**
+ * Provides the Class Switch Row functionality of the class switch utilities.
+ */
 public class ClassSwitchRow {
 
 	private Object classInKey;

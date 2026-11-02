@@ -68,6 +68,18 @@ import jwat.workloadAnalysis.panels.StatsPanel;
 import jmt.manual.ChapterIdentifier;
 import jmt.manual.PDFViewer;
 
+/**
+ * Main window of the JWAT tool.
+ */
+/**
+ * Main window of the JWAT tool.
+ */
+/**
+ * Main window of the JWAT tool.
+ */
+/**
+ * Main window of the JWAT tool.
+ */
 public class MainJwatWizard extends JWatWizard {
 
 	private static final long serialVersionUID = 1L;

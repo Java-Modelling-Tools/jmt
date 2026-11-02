@@ -32,7 +32,7 @@ import org.jgraph.graph.*;
 
 /**
  * <p>Title: JmtEdgeView </p>
- * @author Giuseppe De Cicco & Fabio Granara
+ * @author Giuseppe De Cicco &amp; Fabio Granara
  * 		Date: 15-ott-2006
  * 
  */

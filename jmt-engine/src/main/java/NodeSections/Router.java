@@ -47,8 +47,8 @@ import random.engine.RandomEngine;
  * a message, in order to serve the blocked jobs.
  * <br>
  * However it is also possible to create a generic router and then to turn on/off the
- * "border router" behaviour using the <tt>borderRouterTurnON(..)</tt> and
- * <tt>borderRouterTurnOFF()</tt> methods.
+ * "border router" behaviour using the <code>borderRouterTurnON(..)</code> and
+ * <code>borderRouterTurnOFF()</code> methods.
  *
  * @author Francesco Radaelli, Stefano Omini
  * @author Bertoli Marco - Fixed lockup issues with closed class and sinks 13/11/2005

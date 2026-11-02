@@ -45,6 +45,18 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * File operations on the JSIMgraph model templates.
+ */
+/**
+ * File operations on the JSIMgraph model templates.
+ */
+/**
+ * File operations on the JSIMgraph model templates.
+ */
+/**
+ * File operations on the JSIMgraph model templates.
+ */
 public class TemplateFileOperation {
 
 	// download via URL

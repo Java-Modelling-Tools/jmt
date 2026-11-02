@@ -42,6 +42,18 @@ import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;
 import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileFilter;
 import ptolemy.plot.Plot;
 
+/**
+ * Swing component displaying the enlarge cdf.
+ */
+/**
+ * Swing component displaying the enlarge cdf.
+ */
+/**
+ * Swing component displaying the enlarge cdf.
+ */
+/**
+ * Swing component displaying the enlarge cdf.
+ */
 public class EnlargeCDF extends Plot implements MouseListener {
 	/**
 	 * 

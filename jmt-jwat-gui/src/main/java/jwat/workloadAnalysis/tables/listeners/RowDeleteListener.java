@@ -17,6 +17,18 @@
  */
 package jwat.workloadAnalysis.tables.listeners;
 
+/**
+ * Interface defining the contract of the Row Delete Listener of the listeners.
+ */
+/**
+ * Interface defining the contract of the Row Delete Listener of the listeners.
+ */
+/**
+ * Interface defining the contract of the Row Delete Listener of the listeners.
+ */
+/**
+ * Interface defining the contract of the Row Delete Listener of the listeners.
+ */
 public interface RowDeleteListener {
 	public void rowsDeletedEvent();
 }

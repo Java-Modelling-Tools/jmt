@@ -50,6 +50,18 @@ import jwat.workloadAnalysis.clustering.fuzzyKMean.panels.SingleKMeanClusterInfo
 
 //UPDATE 02/11/2006: + Creazione classe
 
+/**
+ * Swing component displaying the k means info cluster.
+ */
+/**
+ * Swing component displaying the k means info cluster.
+ */
+/**
+ * Swing component displaying the k means info cluster.
+ */
+/**
+ * Swing component displaying the k means info cluster.
+ */
 public class KMeansInfoCluster extends JPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

@@ -157,11 +157,11 @@ public class HullEdge {
 	
 
 	/**
-	 * Allows you to set at @j index the value @face in the adjFaces field.
+	 * Allows you to set at index {@code i} the value {@code face} in the adjFaces field.
 	 * 
 	 * @param face
 	 *            the value you want to set
-	 * @param j
+	 * @param i
 	 *            the index you want to modify
 	 */
 	protected void setAdjFaceAt( HullFace face, int i ) {

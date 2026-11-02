@@ -9,6 +9,18 @@ import jwat.workloadAnalysis.utils.ChangeVariableListener;
 import jwat.workloadAnalysis.utils.SetMatrixListener;
 import jwat.JWatModel;
 
+/**
+ * Model of the JWAT distribution fitting view.
+ */
+/**
+ * Model of the JWAT distribution fitting view.
+ */
+/**
+ * Model of the JWAT distribution fitting view.
+ */
+/**
+ * Model of the JWAT distribution fitting view.
+ */
 public class ModelFitting implements JWatModel {
 
 	// Matrix of observations

@@ -45,6 +45,18 @@ import jwat.fitting.charts.SmallCDF;
 import jwat.fitting.charts.SmallPDF;
 import jwat.fitting.charts.SmallQQPlot;
 
+/**
+ * Panel of the JWAT distribution fitting view.
+ */
+/**
+ * Panel of the JWAT distribution fitting view.
+ */
+/**
+ * Panel of the JWAT distribution fitting view.
+ */
+/**
+ * Panel of the JWAT distribution fitting view.
+ */
 public class FittingPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

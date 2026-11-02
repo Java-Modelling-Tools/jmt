@@ -21,7 +21,7 @@ package simEngine;
 /**
  * A predicate to select events with specific tags from the deferred
  * event queue.
- * @see         eduni.simjava.Sim_predicate
+ * See also eduni.simjava.Sim_predicate.
  * @version     1.0, 4 September 1996
  * @author      Ross McNab
  */

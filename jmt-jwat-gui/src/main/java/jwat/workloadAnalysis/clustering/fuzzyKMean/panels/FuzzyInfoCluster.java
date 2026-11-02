@@ -50,6 +50,18 @@ import jwat.JWATConstants;
 
 //UPDATE 02/11/2006: + Creazione classe
 
+/**
+ * Swing component displaying the fuzzy info cluster.
+ */
+/**
+ * Swing component displaying the fuzzy info cluster.
+ */
+/**
+ * Swing component displaying the fuzzy info cluster.
+ */
+/**
+ * Swing component displaying the fuzzy info cluster.
+ */
 public class FuzzyInfoCluster extends JPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

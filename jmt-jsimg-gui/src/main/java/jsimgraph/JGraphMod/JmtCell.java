@@ -150,7 +150,7 @@ public abstract class JmtCell extends DefaultGraphCell {
 
 	/**
 	 * Sets all the attributes like background colour, dimensions, port number
-	 * & position
+	 * &amp; position
 	 *
 	 * @param pt
 	 * @return created map

@@ -145,7 +145,7 @@ public class Segment3D {
 	/**
 * Starting from the sides of the sectors where they saturate 2 stations obtained by joining them
 * where saturate 3 stations adds the segments created and removes those already used
-* @param sett2stat
+* @param sect2station
 * @param lt
 	 * @return
 	 */

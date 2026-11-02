@@ -46,7 +46,7 @@ import table.ExactTable;
 import table.ExactTableModel;
 
 /**
- * <p>Title: Simulation & Preloading Panel</p>
+ * <p>Title: Simulation &amp; Preloading Panel</p>
  * <p>Description: A panel in which simulation parameters and queue preloading can be specified</p>
  * 
  * @author Bertoli Marco

@@ -5,6 +5,9 @@ import solvers.utilities.MVAPopulation;
 
 import java.util.Map;
 
+/**
+ * Base implementation of the priority MVA utilization calculators.
+ */
 public abstract class BasePrioMVAUtilCalculator implements UtilizationCalculator {
 
     protected Map<MVAPopulation, double[][]> queueLengthMap;
@@ -13,7 +16,12 @@ public abstract class BasePrioMVAUtilCalculator implements UtilizationCalculator
     protected double[][] opUtilization;
 
     /**
+     * Returns the open utilisation.
      * @return The utilization as it's pre-determined by the arrival rate of the open class
+     * @param population the population
+     * @param numCustomers the num customers
+     * @param station the station
+     * @param clas the clas
      */
     @Override
     public double getOpenUtilisation(MVAPopulation population, int numCustomers, int station, int clas) {

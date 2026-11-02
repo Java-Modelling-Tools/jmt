@@ -38,6 +38,7 @@ public class Mapping3D {
 	 * @param beta1
 	 * @param beta2
 	 * @return xy
+	 * @param beta3 the beta3
 	 */
 	public double[] Beta2xy(double beta1, double beta2, double beta3) {
 		double[] xy = new double[2];
@@ -52,6 +53,7 @@ public class Mapping3D {
 	/**
 * This method remaps all points in a saturation sector to 2D
 	 * @param s3d
+* @return the resulting sector3 d
 	 */
 	public Sector3D RemapSector(Sector3D s3d) {
 		int numofpoints = (s3d).CountPoint();

@@ -40,6 +40,18 @@ import jwat.JWATConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the fuzzy k single cluster scatter.
+ */
+/**
+ * Swing component displaying the fuzzy k single cluster scatter.
+ */
+/**
+ * Swing component displaying the fuzzy k single cluster scatter.
+ */
+/**
+ * Swing component displaying the fuzzy k single cluster scatter.
+ */
 public class FuzzyKSingleClusterScatter extends JPanel {
 	/**
 	 * 

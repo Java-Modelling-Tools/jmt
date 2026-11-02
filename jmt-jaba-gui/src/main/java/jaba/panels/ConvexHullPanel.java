@@ -31,6 +31,18 @@ import jaba.graphs.Convex2DGraph;
 import jaba.graphs.Convex3DGraph;
 import jaba.graphs.JabaCanvas;
 
+/**
+ * Panel of the JABA tool showing the convex hull (characteristic polytope) of the model.
+ */
+/**
+ * Panel of the JABA tool showing the convex hull (characteristic polytope) of the model.
+ */
+/**
+ * Panel of the JABA tool showing the convex hull (characteristic polytope) of the model.
+ */
+/**
+ * Panel of the JABA tool showing the convex hull (characteristic polytope) of the model.
+ */
 public class ConvexHullPanel extends WizardPanel implements ActionListener,
 		ChangeListener, ItemListener {
 	

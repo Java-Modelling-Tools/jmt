@@ -286,6 +286,7 @@ public class CircularEventQueue implements EventQueue {
 	/**
 	 * removes the selected element
 	 * @param event
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean removeElement(SimEvent event) {
 		int i = -1;
@@ -329,9 +330,9 @@ public class CircularEventQueue implements EventQueue {
 
 	/**
 	 * Returns an enumeration of the components of this vector. The
-	 * returned <tt>Enumeration</tt> object will generate all items in
-	 * this vector. The first item generated is the item at index <tt>0</tt>,
-	 * then the item at index <tt>1</tt>, and so on.
+	 * returned <code>Enumeration</code> object will generate all items in
+	 * this vector. The first item generated is the item at index <code>0</code>,
+	 * then the item at index <code>1</code>, and so on.
 	 *
 	 * @return  an enumeration of the components of this vector.
 	 * @see     Enumeration

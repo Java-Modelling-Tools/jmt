@@ -236,7 +236,7 @@ public class ScreenProjector {
 	/**
 	 * Checks whether a projected 2D point is clipped by the frustum.
 	 * 
-	 * @param point
+	 * @param projectedPoint
 	 *            Point to check.
 	 * @return The clipped condition.
 	 */

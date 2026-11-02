@@ -460,6 +460,7 @@ public class DispatcherJSIMschema {
 	}
 
 	/**
+	 * Returns the output file.
 	 * @return the output XML file with the results of the simulation.
 	 */
 	public File getOutputFile() {

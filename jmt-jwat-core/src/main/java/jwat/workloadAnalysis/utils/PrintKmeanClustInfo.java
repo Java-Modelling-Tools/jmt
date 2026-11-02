@@ -25,6 +25,18 @@ import java.util.Vector;
 
 import jwat.Observation;
 
+/**
+ * Prints the information of a JWAT k-means clustering.
+ */
+/**
+ * Prints the information of a JWAT k-means clustering.
+ */
+/**
+ * Prints the information of a JWAT k-means clustering.
+ */
+/**
+ * Prints the information of a JWAT k-means clustering.
+ */
 public class PrintKmeanClustInfo {
 	public static void printInFile(File name, Vector v, Observation[] obs) {
 		try {

@@ -108,6 +108,7 @@ public class Solver implements SolverInterface {
      * @param A The matrix A of the linear system Ax = b
      * @param UList The list containing these positions as Tuple objects
      * @throws OperationNotSupportedException Thrown when the matrix A is not square
+     * @param uncomputables the uncomputables
      */
     @Override
     public void initialise(BigRational[][] A, List<Tuple<Integer, Integer>> UList, Set<Integer> uncomputables) throws OperationNotSupportedException {

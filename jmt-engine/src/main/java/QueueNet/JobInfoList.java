@@ -397,6 +397,7 @@ public interface JobInfoList {
 	/**
 	 * Returns ith job in queue
 	 * @param i - indec
+	 * @return the resulting job info
 	 */
 	public JobInfo getJob(int i);
 

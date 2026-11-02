@@ -4,6 +4,15 @@ import solvers.SolverMulti;
 
 import java.util.*;
 
+/**
+ * Utilities for the population vectors used by the MVA algorithms of JMVA.
+ */
+/**
+ * Utilities for the population vectors used by the MVA algorithms of JMVA.
+ */
+/**
+ * Utilities for the population vectors used by the MVA algorithms of JMVA.
+ */
 public class MVAPopulationUtil {
     /**
      * Generates all populations needed for MVA to compute indices for the required population array

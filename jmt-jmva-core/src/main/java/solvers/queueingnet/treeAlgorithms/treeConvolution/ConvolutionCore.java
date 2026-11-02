@@ -128,6 +128,8 @@ public class ConvolutionCore {
 	 * Computes the g-array at the specified leaf node representing a delay station.
 	 * @param n The leaf node representing a delay station.
 	 * @param popVec The population vector to use during the computation.
+	 * @param p the p value
+	 * @return the resulting big decimal
 	 */ 
 	protected BigDecimal leafNodeDelayInitalCondition(PopulationVector p, PopulationVector popVec, Node n) {
 		BigDecimal res = BigDecimal.ONE;
@@ -190,6 +192,7 @@ public class ConvolutionCore {
 	 * @param parentPcPops The parent populations for partially covered classes.
 	 * @param popVec The max population vector to use in the calculation.
 	 * @param backup Whether to store the results in a backup g-array map.
+	 * @param p the p value
 	 */
 	private void stdConvolution(Node parentNode, PopulationVector p, PopulationVector popVec, boolean backup) {
 		PopulationVector origp = p.copy();

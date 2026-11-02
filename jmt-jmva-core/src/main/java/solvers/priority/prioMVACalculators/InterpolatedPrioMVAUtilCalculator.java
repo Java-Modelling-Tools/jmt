@@ -4,6 +4,18 @@ import solvers.priority.interpolators.Interpolator;
 import solvers.priority.interpolators.LinearInterpolator;
 import solvers.utilities.MVAPopulation;
 
+/**
+ * Priority MVA utilization calculator based on interpolation.
+ */
+/**
+ * Priority MVA utilization calculator based on interpolation.
+ */
+/**
+ * Priority MVA utilization calculator based on interpolation.
+ */
+/**
+ * Priority MVA utilization calculator based on interpolation.
+ */
 public abstract class InterpolatedPrioMVAUtilCalculator extends BasePrioMVAUtilCalculator {
 
     /**

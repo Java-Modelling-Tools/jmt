@@ -80,7 +80,7 @@ public class SampleMeanVar {
 		confInt = 0;
 	}
 
-	/** update the sample mean & variance with the new value it uses stable
+	/** update the sample mean &amp; variance with the new value it uses stable
 	 *  algorithms
 	 *  @param  newValue
 	 */

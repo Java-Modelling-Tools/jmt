@@ -20,6 +20,18 @@ package NodeSections;
 
 import NetStrategies.ServiceStrategy;
 
+/**
+ * Polling server that serves at most one job per visit (limited service).
+ */
+/**
+ * Polling server that serves at most one job per visit (limited service).
+ */
+/**
+ * Polling server that serves at most one job per visit (limited service).
+ */
+/**
+ * Polling server that serves at most one job per visit (limited service).
+ */
 public class LimitedPollingServer extends PollingServer {
 
     public LimitedPollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,

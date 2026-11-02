@@ -2,6 +2,18 @@ package NetStrategies.TransitionUtilities;
 
 import java.util.Set;
 
+/**
+ * Vectors describing a request submitted to a server.
+ */
+/**
+ * Vectors describing a request submitted to a server.
+ */
+/**
+ * Vectors describing a request submitted to a server.
+ */
+/**
+ * Vectors describing a request submitted to a server.
+ */
 public class VectorsForServerRequest {
 
     private TransitionVector enabling;

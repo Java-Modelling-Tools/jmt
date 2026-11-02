@@ -55,7 +55,7 @@ public abstract class MicroBlock extends ComponentBlock {
 	/**
 	 * Copy Constructor
 	 * 
-	 * @param full_block Block to be copied
+	 * @param micro_block Block to be copied
 	 * @param current_class The class for which the copy is being created
 	 */
 	public MicroBlock(MicroBlock micro_block, int current_class) {

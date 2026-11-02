@@ -83,7 +83,7 @@ public class TMVACore {
 	
 	/**
 	 * Computes the TMVA results at a subnet node.
-	 * @param node The subnet node.
+	 * @param ab The subnet node.
 	 */
 	public void computeSubnetNode(Node ab) {
 		Node a = ab.leftChild();
@@ -393,6 +393,7 @@ public class TMVACore {
 	 * @param r The class ID.
 	 * @param n_ab The population vector for common pcs in the parent node.
 	 * @return The residence/wait time at the leaf node.
+	 * @param isLeftNode the is left node
 	 */
 	private double computeResidenceTimeAtLeaf(Node leaf, boolean isLeftNode, int r, PopulationVector n_ab) {
 		int station = leaf.stations.iterator().next();
@@ -493,6 +494,7 @@ public class TMVACore {
 		 * Determines if another object is equal to this PTuple.
 		 * @param o The other object to check.
 		 * @param Whether the other object is equal to this PTuple.
+		 * @return true if the operation is successful, false otherwise
 		 */
 		@Override
 	    public boolean equals(Object o) {

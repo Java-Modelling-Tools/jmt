@@ -22,6 +22,18 @@ import java.io.IOException;
 
 import javax.swing.filechooser.FileSystemView;
 
+/**
+ * File system view restricted to a single directory, used by the JWAT format selection.
+ */
+/**
+ * File system view restricted to a single directory, used by the JWAT format selection.
+ */
+/**
+ * File system view restricted to a single directory, used by the JWAT format selection.
+ */
+/**
+ * File system view restricted to a single directory, used by the JWAT format selection.
+ */
 public class SingleDirFileSystem extends FileSystemView {
 	private File singleDir;
 

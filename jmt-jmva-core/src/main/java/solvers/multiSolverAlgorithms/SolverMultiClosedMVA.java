@@ -26,8 +26,13 @@ import java.util.Map;
 import static solvers.utilities.MVAPopulationUtil.*;
 
 /**
- * Solves a multiclass closed model, using MVA algorithm.
- * @author  Federico Granata, Stefano Omini
+ * Solves a multiclass closed model with the exact MVA (Mean Value Analysis)
+ * algorithm [RL80]. The implemented version is the stabilized MVA [BBC+81],
+ * which avoids the numerical instabilities of the classic MVA when the model
+ * contains load dependent stations, as described in the JMVA chapter of the
+ * JMT user manual.
+ *
+ * @author Federico Granata, Stefano Omini
  */
 public class SolverMultiClosedMVA extends SolverMulti {
 
@@ -182,7 +187,7 @@ public class SolverMultiClosedMVA extends SolverMulti {
 
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of the combined loads
+	 * <code>lambda</code> if no service center is saturated as a result of the combined loads
 	 * of all the classes.
 	 * <br>
 	 * Must be implemented to create a multi class model solver.

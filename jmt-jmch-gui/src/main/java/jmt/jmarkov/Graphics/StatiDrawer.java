@@ -43,6 +43,18 @@ import jmt.jmarkov.Graphics.constants.DrawNormal;
 import jmt.jmarkov.Queues.QueueLogic;
 import jmt.jmarkov.Queues.Exceptions.NonErgodicException;
 
+/**
+ * Draws the statistics of the JMCH animation (queue length, utilization, response time).
+ */
+/**
+ * Draws the statistics of the JMCH animation (queue length, utilization, response time).
+ */
+/**
+ * Draws the statistics of the JMCH animation (queue length, utilization, response time).
+ */
+/**
+ * Draws the statistics of the JMCH animation (queue length, utilization, response time).
+ */
 public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 
 	/**
@@ -519,9 +531,9 @@ public class StatiDrawer extends JPanel implements Notifier/*, Runnable*/{
 
 	/**
 	 * converting the probability into string 
-	 * @param p
-	 * @param c
-	 * @return
+	 * @param p the probability to convert
+	 * @param decimals the number of decimal digits
+	 * @return the probability formatted as a string
 	 */
 	public String probabilityToString(double p, int decimals) {
 		String tmp;

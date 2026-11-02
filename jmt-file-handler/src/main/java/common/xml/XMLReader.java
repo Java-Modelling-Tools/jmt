@@ -1541,9 +1541,9 @@ public class XMLReader implements XMLConstantNames, CommonConstants {
 	 * @author Michael Fercu (Bertoli Marco)
 	 *		   Date: 08-aug-2008
 	 * @see log.LoggerParameters LoggerParameters
-	 * @see jmt.gui.common.xml.XMLWriter#writeLoggerSection XMLWriter.writeLoggerSection()
-	 * @see jmt.gui.common.definitions.CommonModel#getLoggingParameters CommonModel.getLoggingParameters()
-	 * @see jmt.gui.common.definitions.CommonModel#setLoggingParameters CommonModel.setLoggingParameters()
+	 * The XML section is written by XMLWriter.writeLoggerSection().
+	 * Logging parameters are stored through CommonModel.getLoggingParameters().
+	 * Logging parameters are applied through CommonModel.setLoggingParameters().
 	 * @see NodeSections.LogTunnel LogTunnel
 	 */
 	protected static void parseLoggerSection(Element section, CommonModel model, Object key) {

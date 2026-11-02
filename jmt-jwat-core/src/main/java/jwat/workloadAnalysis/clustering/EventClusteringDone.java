@@ -2,6 +2,18 @@ package jwat.workloadAnalysis.clustering;
 
 import jwat.input.EventStatus;
 
+/**
+ * Event signalling that a JWAT clustering has finished.
+ */
+/**
+ * Event signalling that a JWAT clustering has finished.
+ */
+/**
+ * Event signalling that a JWAT clustering has finished.
+ */
+/**
+ * Event signalling that a JWAT clustering has finished.
+ */
 public class EventClusteringDone implements EventStatus {
 
 	private Clustering c;

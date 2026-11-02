@@ -33,7 +33,7 @@ import dataAnalysis.MeasureOutput;
 /**
  * This class implements a csv output for measure class. <br>
  * File output: <br>
- * <table border="1"> <tr>
+ * <table border="1"> <caption>CSV output columns</caption> <tr>
  * <td>Mean Value</td>
  * <td>Mean Value Lower Limit</td>
  * <td>Mean Value Upper Limit</td>

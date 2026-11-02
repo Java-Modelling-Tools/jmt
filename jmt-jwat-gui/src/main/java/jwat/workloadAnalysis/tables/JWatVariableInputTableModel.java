@@ -27,6 +27,18 @@ import javax.swing.table.AbstractTableModel;
 import jwat.filters.FilterOnVariable;
 import jwat.input.Parameter;
 
+/**
+ * Data model of the j wat variable input table.
+ */
+/**
+ * Data model of the j wat variable input table.
+ */
+/**
+ * Data model of the j wat variable input table.
+ */
+/**
+ * Data model of the j wat variable input table.
+ */
 public class JWatVariableInputTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;

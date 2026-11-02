@@ -5,6 +5,15 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * PLRU (Pseudo Least Recently Used) cache eviction strategy: approximates LRU behaviour at a lower implementation cost.
+ */
+/**
+ * PLRU (Pseudo Least Recently Used) cache eviction strategy: approximates LRU behaviour at a lower implementation cost.
+ */
+/**
+ * PLRU (Pseudo Least Recently Used) cache eviction strategy: approximates LRU behaviour at a lower implementation cost.
+ */
 public class PLRUCache extends CacheStrategy{
 
 	public PLRUCache(){}

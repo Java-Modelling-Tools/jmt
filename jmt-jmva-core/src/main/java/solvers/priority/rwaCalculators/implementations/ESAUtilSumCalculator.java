@@ -5,6 +5,18 @@ import solvers.priority.rwaCalculators.UtilizationSumCalculator;
 
 import java.util.Map;
 
+/**
+ * Provides the ESA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the ESA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the ESA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the ESA Util Sum Calculator functionality of the implementations.
+ */
 public class ESAUtilSumCalculator implements UtilizationSumCalculator {
 
     private final SCAUtilSumCalculator scaCalculator;

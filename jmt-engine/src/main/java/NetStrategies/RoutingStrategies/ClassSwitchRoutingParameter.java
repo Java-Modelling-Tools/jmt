@@ -25,6 +25,18 @@ import random.EmpiricalEntry;
 import random.EmpiricalPar;
 import random.engine.RandomEngine;
 
+/**
+ * Parameters of the class switch routing strategy.
+ */
+/**
+ * Parameters of the class switch routing strategy.
+ */
+/**
+ * Parameters of the class switch routing strategy.
+ */
+/**
+ * Parameters of the class switch routing strategy.
+ */
 public class ClassSwitchRoutingParameter {
 
 	// store which destination node the class points to and probability of going to the node

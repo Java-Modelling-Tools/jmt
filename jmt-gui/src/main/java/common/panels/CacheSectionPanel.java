@@ -40,6 +40,18 @@ import table.DisabledCellRenderer;
 import table.ExactTable;
 import table.ExactTableModel;
 
+/**
+ * Swing panel of the JMT wizard providing the cache section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the cache section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the cache section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the cache section view.
+ */
 public class CacheSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

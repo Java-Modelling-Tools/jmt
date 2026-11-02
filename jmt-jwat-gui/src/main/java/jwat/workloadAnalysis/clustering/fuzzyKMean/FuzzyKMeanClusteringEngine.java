@@ -23,6 +23,18 @@ import jwat.Observation;
 import jwat.TimeConsumingWorker;
 import jwat.VariableNumber;
 
+/**
+ * Engine running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Engine running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Engine running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Engine running the JWAT fuzzy k-means clustering.
+ */
 public class FuzzyKMeanClusteringEngine {
 
 	class SFKMClust {

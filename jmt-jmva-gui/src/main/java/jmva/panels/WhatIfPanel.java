@@ -1015,7 +1015,7 @@ public class WhatIfPanel extends WizardPanel implements ExactConstants, ForceUpd
 		 * of the cell at <code>row</code>, <code>column</code>.
 		 * Returns the component (may be a <code>Component</code>
 		 * or a <code>JComponent</code>) under the event location.
-		 * <p/>
+		 * <p>
 		 *
 		 * This paints in red elements of selected classes
 		 *

@@ -45,6 +45,18 @@ import jwat.DynamicFormat;
 import jwat.JWATConstants;
 import jwat.workloadAnalysis.chart.DispFuzzyMatrix;
 
+/**
+ * Swing component displaying the fuzzy info clustering.
+ */
+/**
+ * Swing component displaying the fuzzy info clustering.
+ */
+/**
+ * Swing component displaying the fuzzy info clustering.
+ */
+/**
+ * Swing component displaying the fuzzy info clustering.
+ */
 public class FuzzyInfoClustering extends JPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

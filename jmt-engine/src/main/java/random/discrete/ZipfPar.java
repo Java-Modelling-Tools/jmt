@@ -4,6 +4,18 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import random.AbstractParameter;
 import random.Parameter;
 
+/**
+ * Parameters of the Zipf distribution.
+ */
+/**
+ * Parameters of the Zipf distribution.
+ */
+/**
+ * Parameters of the Zipf distribution.
+ */
+/**
+ * Parameters of the Zipf distribution.
+ */
 public class ZipfPar extends AbstractParameter implements Parameter {
 
 	private int numberOfElements;

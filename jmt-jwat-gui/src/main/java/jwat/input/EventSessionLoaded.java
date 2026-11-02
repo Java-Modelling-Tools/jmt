@@ -2,6 +2,18 @@ package jwat.input;
 
 import jwat.JwatSession;
 
+/**
+ * Event signalling that a JWAT session has been loaded.
+ */
+/**
+ * Event signalling that a JWAT session has been loaded.
+ */
+/**
+ * Event signalling that a JWAT session has been loaded.
+ */
+/**
+ * Event signalling that a JWAT session has been loaded.
+ */
 public class EventSessionLoaded implements EventStatus {
 
 	private JwatSession loadedSession;

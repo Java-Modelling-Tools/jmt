@@ -37,6 +37,7 @@ public class StatBivariate {
 * Returns the value of covariance(v1,v2)
 * @param ind1 index of the first variable
 * @param ind2 index of the second variable
+* @return the resulting double
 	 */
 	public double getCovariance(int ind1, int ind2) {
 //Check if the covariance vector exists for ind1

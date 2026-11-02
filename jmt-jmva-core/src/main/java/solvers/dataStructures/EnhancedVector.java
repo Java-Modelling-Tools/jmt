@@ -24,7 +24,7 @@ import javax.naming.OperationNotSupportedException;
 import solvers.exceptions.InternalErrorException;
 
 /**
- * This class extends the ArrayList<Integer> object class by adding several useful
+ * This class extends the ArrayList&lt;Integer> object class by adding several useful
  * methods for operations encountered when dealing with the algorithms that
  * compute the normalising constants.
  *
@@ -305,7 +305,7 @@ public class EnhancedVector extends ArrayList<Integer> implements Comparable<Enh
      * leftmost non-zero is the smaller.
      *
      * @param o The other EnhancedVector object
-     * @return -1 if this < o, 0 if this = o, 1 if this > o
+     * @return -1 if this &lt; o, 0 if this = o, 1 if this > o
      */
     @Override
     public int compareTo(EnhancedVector o) {

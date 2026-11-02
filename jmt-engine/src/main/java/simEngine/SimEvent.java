@@ -51,7 +51,7 @@ public class SimEvent implements Cloneable {
 
 	// Constructors
 	/** Constructor, create a blank event. Useful for fetching events
-	 * using methods such as <tt>SimEntity.simWait(ev)</tt>.
+	 * using methods such as <code>SimEntity.simWait(ev)</code>.
 	 */
 	public SimEvent() {
 		etype = ENULL;

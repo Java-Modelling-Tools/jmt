@@ -26,6 +26,18 @@ import javax.swing.*;
 import java.awt.*;
 
 
+/**
+ * Toolbar with the helpers to edit Bezier connections in JSIMgraph.
+ */
+/**
+ * Toolbar with the helpers to edit Bezier connections in JSIMgraph.
+ */
+/**
+ * Toolbar with the helpers to edit Bezier connections in JSIMgraph.
+ */
+/**
+ * Toolbar with the helpers to edit Bezier connections in JSIMgraph.
+ */
 public class BezierConnectionHelperBar extends JPanel{
 
 

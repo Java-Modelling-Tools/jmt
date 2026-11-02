@@ -18,6 +18,18 @@ import org.apache.commons.math3.optimization.direct.PowellOptimizer;
 import org.apache.commons.math3.optimization.general.ConjugateGradientFormula;
 import org.apache.commons.math3.optimization.general.NonLinearConjugateGradientOptimizer;
 
+/**
+ * Debug utilities of the JMVA solvers.
+ */
+/**
+ * Debug utilities of the JMVA solvers.
+ */
+/**
+ * Debug utilities of the JMVA solvers.
+ */
+/**
+ * Debug utilities of the JMVA solvers.
+ */
 public class Debug {
 
 	public static void main(String[] args) throws Exception {

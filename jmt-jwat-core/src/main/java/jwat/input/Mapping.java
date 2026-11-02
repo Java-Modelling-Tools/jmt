@@ -1,5 +1,17 @@
 package jwat.input;
 
+/**
+ * Mapping of the JWAT input formats (comparable by position).
+ */
+/**
+ * Mapping of the JWAT input formats (comparable by position).
+ */
+/**
+ * Mapping of the JWAT input formats (comparable by position).
+ */
+/**
+ * Mapping of the JWAT input formats (comparable by position).
+ */
 public class Mapping implements Comparable<Object> {
 	private double conversion;
 	private Object value;

@@ -36,7 +36,8 @@ public class SortVectorByRightmostNZ implements Comparator<EnhancedVector> {
 	 * Then the value at the non-zero positions, left to right
 	 * 
 	 * @param v1, v2 The PopulationChangeVectors to be compared.
-	 * @return -1 if this < o, 0 if this = o, 1 if this > o
+	 * @return -1 if this &lt; o, 0 if this = o, 1 if this > o
+	 * @param v2 the v2 parameter
 	 */
 	@Override
 	public int compare(EnhancedVector v1, EnhancedVector v2) {

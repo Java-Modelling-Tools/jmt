@@ -29,7 +29,10 @@ import java.util.Map;
 import static solvers.utilities.MVAPopulationUtil.*;
 
 /**
- * Solves a multiclass model, with both open and closed classes.
+ * Solves a multiclass mixed model, with both open and closed customer classes,
+ * combining the open model algorithms and the exact MVA algorithm as described
+ * in the JMVA chapter of the JMT user manual.
+ *
  * @author Federico Granata, Stefano Omini
  */
 public class SolverMultiMixed extends SolverMulti {
@@ -1065,7 +1068,7 @@ public class SolverMultiMixed extends SolverMulti {
 	//@author Stefano Omini
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of the combined loads
+	 * <code>lambda</code> if no service center is saturated as a result of the combined loads
 	 * of all the open classes.
 	 * <br>
 	 * WARNING: This method should be called before solving the system.

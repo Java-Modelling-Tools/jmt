@@ -98,8 +98,7 @@ public class Sectors3DGraph extends JabaGraph implements MouseListener {
 
 	/**
 	 * Builds a new Sectors3D Panel to show results of 3-class models
-	 * @param s3d results vector
-	 * @param classNames array with class names
+	 * @param data the Jaba model with the results vector
 	 */
 	public Sectors3DGraph(JabaModel data) {
 		super();

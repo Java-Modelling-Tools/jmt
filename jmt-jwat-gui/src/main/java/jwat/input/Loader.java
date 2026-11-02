@@ -29,6 +29,18 @@ import jwat.ProgressStatusListener;
 import jwat.workloadAnalysis.utils.FormatFileReader;
 import jwat.JWATConstants;
 
+/**
+ * Loads data files of the JWAT tool.
+ */
+/**
+ * Loads data files of the JWAT tool.
+ */
+/**
+ * Loads data files of the JWAT tool.
+ */
+/**
+ * Loads data files of the JWAT tool.
+ */
 public class Loader implements JWATConstants {
 
 	public static int calcNumOfObs(String filePath) throws FileNotFoundException, IOException {
@@ -112,7 +124,7 @@ public class Loader implements JWATConstants {
 	/**
 	 * This function reads a specific session from an XML file
 	 * 
-	 * @param filePath
+	 * @param fileName the XML file to load
 	 */
 	public static void loadSession(String fileName, ProgressShow prShow, ProgressStatusListener pStatusList, JwatSession session) {
 		try {

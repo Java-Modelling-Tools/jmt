@@ -8,6 +8,18 @@ import QueueNet.CacheItem;
 import QueueNet.NetSystem;
 import random.engine.RandomEngine;
 
+/**
+ * Base class of the cache eviction strategies of the JSIM engine: it decides which cached item is removed when the cache is full.
+ */
+/**
+ * Base class of the cache eviction strategies of the JSIM engine: it decides which cached item is removed when the cache is full.
+ */
+/**
+ * Base class of the cache eviction strategies of the JSIM engine: it decides which cached item is removed when the cache is full.
+ */
+/**
+ * Base class of the cache eviction strategies of the JSIM engine: it decides which cached item is removed when the cache is full.
+ */
 public abstract class CacheStrategy implements AutoCheck{
 
 //	public abstract boolean needToCache(NetNode ownerNode);

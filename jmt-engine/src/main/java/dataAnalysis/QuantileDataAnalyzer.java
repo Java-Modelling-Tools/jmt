@@ -79,7 +79,7 @@ public class QuantileDataAnalyzer extends DynamicDataAnalyzerImpl {
 	/**
 	 * Adds the new sample to the statistic.
 	 * @param newSample the new sample
-	 * @param Weight the weight of the newSample, if it is not needed put 1.
+	 * @param weight the weight of the newSample, if it is not needed put 1.
 	 * @return true if the confidence interval is smaller than required by
 	 *          the user, or the data analyzed are too many
 	 */

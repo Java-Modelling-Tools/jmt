@@ -148,7 +148,11 @@ public class XMLUtils {
 	}
 
 	/**
+	 * Loads the xml.
 	 * @return the loaded Document of null if there were errors
+	 * @param f the f parameter
+	 * @throws SAXException if the operation cannot be completed
+	 * @throws IOException if the operation cannot be completed
 	 */
 	public Document loadXML(File f) throws SAXException, IOException {
 		success = true;

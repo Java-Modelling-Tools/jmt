@@ -6,6 +6,9 @@ import jmt.common.exception.InputDataException;
 import jmt.common.exception.SolverException;
 import jmt.framework.data.ArrayUtils;
 
+/**
+ * Dispatcher of the JMVA what-if analysis: solves the sequence of models obtained by varying the control parameters.
+ */
 public class WhatIfAnalysisDispatcher {
 
     private final SolverDispatcher solverDispatcher;
@@ -18,6 +21,8 @@ public class WhatIfAnalysisDispatcher {
     /**
      * Performs a what-if analysis by changing arrival rates.
      * @param model input model
+     * @throws InputDataException if the operation cannot be completed
+     * @throws SolverException if the operation cannot be completed
      */
     public void whatIfArrival(ExactModel model) throws InputDataException, SolverException {
         // Sanity checks on input model.
@@ -68,6 +73,8 @@ public class WhatIfAnalysisDispatcher {
     /**
      * Performs a what-if analysis by changing the number of customers.
      * @param model input model
+     * @throws InputDataException if the operation cannot be completed
+     * @throws SolverException if the operation cannot be completed
      */
     public void whatIfCustomers(ExactModel model) throws InputDataException, SolverException {
         // Sanity checks on input model.
@@ -138,6 +145,8 @@ public class WhatIfAnalysisDispatcher {
     /**
      * Performs a what-if analysis by changing service demands of a given station.
      * @param model input model
+     * @throws InputDataException if the operation cannot be completed
+     * @throws SolverException if the operation cannot be completed
      */
     public void whatIfDemands(ExactModel model) throws InputDataException, SolverException {
         // Sanity checks on input model.
@@ -197,6 +206,8 @@ public class WhatIfAnalysisDispatcher {
     /**
      * Performs a what-if analysis by changing population mix.
      * @param model input model
+     * @throws InputDataException if the operation cannot be completed
+     * @throws SolverException if the operation cannot be completed
      */
     public void whatIfMix(ExactModel model) throws InputDataException, SolverException {
         // First and second closed class for population mix what-if

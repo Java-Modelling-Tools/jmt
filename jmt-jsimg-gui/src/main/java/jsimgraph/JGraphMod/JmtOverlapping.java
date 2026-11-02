@@ -34,7 +34,7 @@ import org.jgraph.graph.GraphModel;
 
 /**
  * <p>Title: JmtOverlapping </p>
- * @author Giuseppe De Cicco & Fabio Granara
+ * @author Giuseppe De Cicco &amp; Fabio Granara
  * 		Date: 15-nov-2006
  * 
  */

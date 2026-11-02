@@ -55,6 +55,15 @@ import static exactModelUtils.ExactDocumentConstants.*;
 // (maybe even 2 separate files, 1 for loading, 1 for saving)
 // The WhatIf parts could be in a separate class and then composition used if the file is still too long
 
+/**
+ * Model data structure of the exact JMVA algorithms: classes, stations, service demands and reference stations of a product form queueing network.
+ */
+/**
+ * Model data structure of the exact JMVA algorithms: classes, stations, service demands and reference stations of a product form queueing network.
+ */
+/**
+ * Model data structure of the exact JMVA algorithms: classes, stations, service demands and reference stations of a product form queueing network.
+ */
 public class ExactModel implements ExactConstants  {
 
 	//Set by default to the Exact MVA algorithm
@@ -142,37 +151,37 @@ public class ExactModel implements ExactConstants  {
 
 	/**
 	 * number of iterations algorithm performed for each (what-if) iteration/execution
-	 * dim: algIterations<Algorithm, [iterations]>
+	 * dim: algIterations&lt;Algorithm, [iterations]>
 	 */
 	private Map<SolverAlgorithm, int[]> algIterations;
 
 	/**
 	 * queue length
-	 * dim: queueLen<Algorithm, [stations][classes][iterations]>
+	 * dim: queueLen&lt;Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> queueLen;
 
 	/**
 	 * throughput
-	 * dim: throughput<Algorithm, [stations][classes][iterations]>
+	 * dim: throughput&lt;Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> throughput;
 
 	/**
 	 * residence times
-	 * dim: resTimes<Algorithm, [stations][classes][iterations]>
+	 * dim: resTimes&lt;Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> resTimes;
 
 	/**
 	 * utilization
-	 * dim: util<Algorithm, [stations][classes][iterations]>
+	 * dim: util&lt;Algorithm, [stations][classes][iterations]>
 	 */
 	private Map<SolverAlgorithm, double[][][]> util;
 
 	/**
 	 * logarithm of normalising constants
-	 * dim: logNormConst<Algorithm, 1>
+	 * dim: logNormConst&lt;Algorithm, 1>
 	 */
 	private Map<SolverAlgorithm, Double> logNormConst;
 
@@ -296,6 +305,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the whatif algorithms.
 	 * @return the set of algorithm to perform whatif on
 	 */
 	public Set<SolverAlgorithm> getWhatifAlgorithms() {
@@ -363,6 +373,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether whatif algorithms.
 	 * @return true if AMVA algorithm comparison was requested. false otherwise.
 	 */
 	public boolean isWhatifAlgorithms() {
@@ -404,6 +415,13 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * sets all the result data for this model.
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 * @param alg the alg
+	 * @param algIterations the alg iterations
+	 * @param queueLen the queue len
+	 * @param throughput the throughput
+	 * @param resTimes the res times
+	 * @param util the util
+	 * @param logNormConst the log norm const
 	 */
 	public void setResults(SolverAlgorithm alg, int[] algIterations, double[][][] queueLen, double[][][] throughput, double[][][] resTimes, double[][][] util, double logNormConst) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
@@ -432,6 +450,13 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * sets all the result data for this model. This is called when only one iteration is performed.
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 * @param alg the alg
+	 * @param algIterations the alg iterations
+	 * @param queueLen the queue len
+	 * @param throughput the throughput
+	 * @param resTimes the res times
+	 * @param util the util
+	 * @param logNormConst the log norm const
 	 */
 	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst) {
 		resetResults();
@@ -449,6 +474,14 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * sets all the result data for this model. This is called on multiple iterations (what-if analysis)
 	 * @throws IllegalArgumentException if any argument is null or not of the correct size
+	 * @param alg the alg
+	 * @param algIterations the alg iterations
+	 * @param queueLen the queue len
+	 * @param throughput the throughput
+	 * @param resTimes the res times
+	 * @param util the util
+	 * @param logNormConst the log norm const
+	 * @param iteration the iteration
 	 */
 	public void setResults(SolverAlgorithm alg, int algIterations, double[][] queueLen, double[][] throughput, double[][] resTimes, double[][] util, double logNormConst, int iteration) {
 		if (queueLen == null || queueLen.length != stations || queueLen[0].length != classes) {
@@ -616,6 +649,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether single class.
 	 * @return true if this object describes a single class system
 	 */
 	public boolean isSingleClass() {
@@ -623,6 +657,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether multi class.
 	 * @return true if this object describes a multiclass system
 	 */
 	public boolean isMultiClass() {
@@ -630,6 +665,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether closed.
 	 * @return true if this object describes a closed system
 	 */
 	public boolean isClosed() {
@@ -637,6 +673,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether open.
 	 * @return true if this object describes an open system
 	 */
 	public boolean isOpen() {
@@ -644,6 +681,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether mixed.
 	 * @return true if this object describes a mixed system
 	 */
 	public boolean isMixed() {
@@ -651,6 +689,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether ld.
 	 * @return true if this object describes a system containing LD stations
 	 */
 	public boolean isLd() {
@@ -658,6 +697,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether priority.
 	 * @return true if this object describes a system containing priority stations
 	 */
 	public boolean isPriority() {
@@ -665,6 +705,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the stations.
 	 * @return number of service centers
 	 */
 	public int getStations() {
@@ -672,6 +713,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the classes.
 	 * @return number of classes
 	 */
 	public int getClasses() {
@@ -686,6 +728,7 @@ public class ExactModel implements ExactConstants  {
 	}*/
 
 	/**
+	 * Returns the reference station.
 	 * @return get the matrix of ReferenceStations
 	 */
 	public int[] getReferenceStation() {
@@ -693,6 +736,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the total pop.
 	 * @return total population
 	 */
 	public int getTotalPop() {
@@ -700,6 +744,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the station names.
 	 * @return names of the service centers
 	 */
 	public String[] getStationNames() {
@@ -707,6 +752,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the station servers.
 	 * @return the number of servers for each station. For delay stations this parameter is unsensed.
 	 */
 	public int[] getStationServers() {
@@ -714,6 +760,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether multiple servers.
 	 * @return true if this model contains multiple server for a station.
 	 */
 	public boolean isMultipleServers() {
@@ -765,6 +812,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the class names.
 	 * @return names of the classes
 	 */
 	public String[] getClassNames() {
@@ -791,6 +839,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the class data.
 	 * @return data for the classes.
 	 */
 	public double[] getClassData() {
@@ -820,6 +869,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the class types.
 	 * @return type of the classes
 	 */
 	public int[] getClassTypes() {
@@ -848,6 +898,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the class priorities.
 	 * @return priorities of the classes
 	 */
 	public int[] getClassPriorities() {
@@ -875,6 +926,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the station types.
 	 * @return type of the stations
 	 */
 	public int[] getStationTypes() {
@@ -903,6 +955,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the visits.
 	 * @return the matrix of visits
 	 */
 	public double[][] getVisits() {
@@ -932,6 +985,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the service times.
 	 * @return the matrix of service times
 	 */
 	public double[][][] getServiceTimes() {
@@ -1018,6 +1072,9 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
 	 * @return true if data was changed, false otherwise
+	 * @param stations the stations
+	 * @param classes the classes
+	 * @param forceResize the force resize
 	 */
 	public boolean resize(int stations, int classes, boolean forceResize) {
 		if (stations <= 0 || classes <= 0) {
@@ -1069,6 +1126,8 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * Resizes the data structures according to specified parameters. Data is preserved as far as possible
 	 * @return true if data was changed, false otherwise
+	 * @param stations the stations
+	 * @param classes the classes
 	 */
 	public boolean resize(int stations, int classes) {
 		return resize(stations, classes, false);
@@ -1082,7 +1141,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the alg iterations.
 	 * @return algorithm iterations for the given algorithm
+	 * @param alg the alg
 	 */
 	public int[] getAlgIterations(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1099,7 +1160,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the queue len.
 	 * @return queue lengths for the given algorithm
+	 * @param alg the alg
 	 */
 	public double[][][] getQueueLen(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1116,7 +1179,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the resid times.
 	 * @return response times for the given algorithm
+	 * @param alg the alg
 	 */
 	public double[][][] getResidTimes(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1133,7 +1198,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the resp times.
 	 * @return residence times for the given algorithm
+	 * @param alg the alg
 	 */
 	public double[][][] getRespTimes(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1162,7 +1229,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the throughput.
 	 * @return throughputs for the given algorithm
+	 * @param alg the alg
 	 */
 	public double[][][] getThroughput(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1179,7 +1248,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Returns the utilization.
 	 * @return utilizations for the given algorithm
+	 * @param alg the alg
 	 */
 	public double[][][] getUtilization(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1196,7 +1267,9 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Sets the log norm const.
 	 * @return logarithm of normalising constant for the given algorithm
+	 * @param alg the alg
 	 */
 	public double setLogNormConst(SolverAlgorithm alg) {
 		if (alg != null) {
@@ -1243,6 +1316,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcClosed.
 	 * @return true if the model contains only closed stations
 	 */
 	private boolean calcClosed() {
@@ -1258,6 +1332,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcOpen.
 	 * @return true if the model contains only open stations
 	 */
 	private boolean calcOpen() {
@@ -1270,6 +1345,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcLD.
 	 * @return true if the model contains Load Dependent stations
 	 */
 	private boolean calcLD() {
@@ -1282,6 +1358,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcPriority.
 	 * @return true if the model contains Priority stations
 	 */
 	private boolean calcPriority() {
@@ -1294,6 +1371,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcTotalPop.
 	 * @return the total population (sum of the customers of all closed class)
 	 */
 	private int calcTotalPop() {
@@ -1308,6 +1386,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method calcSizes.
 	 * @return the sizes of service times for each station (total pop for LD stations, 1 for LI stations)
 	 */
 	private int[] calcSizes() {
@@ -1417,6 +1496,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether changed.
 	 * @return true if the model has been changed
 	 */
 	public boolean isChanged() {
@@ -1441,6 +1521,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Checks whether results.
 	 * @return true if results are available
 	 */
 	public boolean hasResults() {
@@ -1448,6 +1529,7 @@ public class ExactModel implements ExactConstants  {
 	}
 
 	/**
+	 * Method areResultsOK.
 	 * @return true if results are valid
 	 */
 	public boolean areResultsOK() {
@@ -1481,6 +1563,7 @@ public class ExactModel implements ExactConstants  {
 	 * load the state of this object from the Document.
 	 * @return true if the operation was successful.
 	 * WARNING: If the operation fails the object is left in an incorrect state and should be discarded.
+	 * @param doc the doc
 	 */
 	public boolean loadDocument(Document doc) {
 		Node classNode = doc.getElementsByTagName("classes").item(0);
@@ -2322,6 +2405,7 @@ public class ExactModel implements ExactConstants  {
 	/**
 	 * Sets the array of values used for what-if analysis
 	 * @param values vector with values to be used in iterations of what-if analysis
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean setWhatIfValues(double[] values) {
 		if (whatIfValues == null && values == null) {

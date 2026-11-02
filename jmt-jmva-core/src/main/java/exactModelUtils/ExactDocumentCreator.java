@@ -13,6 +13,18 @@ import java.util.Map;
 
 import static exactModelUtils.ExactDocumentConstants.*;
 
+/**
+ * Creates the XML document representing a JMVA model for the exact solution algorithms.
+ */
+/**
+ * Creates the XML document representing a JMVA model for the exact solution algorithms.
+ */
+/**
+ * Creates the XML document representing a JMVA model for the exact solution algorithms.
+ */
+/**
+ * Creates the XML document representing a JMVA model for the exact solution algorithms.
+ */
 public class ExactDocumentCreator {
 
     /**

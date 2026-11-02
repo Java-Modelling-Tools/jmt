@@ -6,6 +6,18 @@ import QueueNet.JobClass;
 import QueueNet.JobInfo;
 import QueueNet.JobInfoList;
 
+/**
+ * Impatience measurement storing a boolean impatience value.
+ */
+/**
+ * Impatience measurement storing a boolean impatience value.
+ */
+/**
+ * Impatience measurement storing a boolean impatience value.
+ */
+/**
+ * Impatience measurement storing a boolean impatience value.
+ */
 public class BooleanValueImpatienceMeasurement implements ImpatienceMeasurement {
   private int queueLength;
   private boolean booleanValue = false;

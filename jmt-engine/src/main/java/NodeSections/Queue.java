@@ -57,8 +57,8 @@ import simEngine.RemoveToken;
  * The class has different constructors to create a generic queue or a redirecting queue.
  * <br>
  * However it is also possible to create a generic queue and then to turn on/off the
- * "redirecting queue" behaviour using the <tt>redirectionTurnON(..)</tt> and
- * <tt>redirectionTurnOFF()</tt> methods.
+ * "redirecting queue" behaviour using the <code>redirectionTurnON(..)</code> and
+ * <code>redirectionTurnOFF()</code> methods.
  *
  * @author Francesco Radaelli, Stefano Omini, Bertoli Marco
  * <p>
@@ -342,6 +342,7 @@ public class Queue extends InputSection {
 	 *
 	 * @param message message to be processed.
 	 * @throws NetException
+	 * @return the resulting int
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {
@@ -861,6 +862,7 @@ public class Queue extends InputSection {
 	 * If it balks, call another method to handle the balking operation.
 	 *
 	 * @param job the job being processed.
+	 * @return true if the operation is successful, false otherwise
 	 */
 	private boolean jobWillBalk(Job job) {
 		int jobClassId = getJobClassId(job);

@@ -38,7 +38,7 @@ import org.jgraph.graph.PortView;
  * Time: 12.05.46
 
  * Heavily modified by Bertoli Marco to support JGraph 5.8 - 21/mar/2006
- * Heavily modified by De Cicco Giuseppe & Fabio Granara to new JmtRouting - 23/sett/2006
+ * Heavily modified by De Cicco Giuseppe &amp; Fabio Granara to new JmtRouting - 23/sett/2006
  */
 public class JmtRouting implements Edge.Routing {
 

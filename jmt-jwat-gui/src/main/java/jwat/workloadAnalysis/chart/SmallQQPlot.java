@@ -33,6 +33,18 @@ import jwat.VariableNumber;
 import jwat.workloadAnalysis.utils.JWatWorkloadManager;
 import jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
+/**
+ * Swing component displaying the small qq plot.
+ */
 public class SmallQQPlot extends JPanel {
 	/**
 	 * 

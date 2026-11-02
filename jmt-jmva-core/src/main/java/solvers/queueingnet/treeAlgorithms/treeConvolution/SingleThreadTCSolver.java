@@ -44,7 +44,7 @@ public class SingleThreadTCSolver extends TreeTraverser implements IThreadedTCSo
 	/** Computes G using postorder tree traversal. 
 	 * @param node The current node to compute the normalisation constant G for.
 	 * @param pv The population vector to be used during the computation.
-	 * @returns The normalisation constant G at the given node, calculated using the
+	 * @return The normalisation constant G at the given node, calculated using the
 	 * specified population vector.
 	 */
 	public BigRational computeG(Node node, PopulationVector pv) {

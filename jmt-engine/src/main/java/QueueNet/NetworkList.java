@@ -65,6 +65,7 @@ public class NetworkList {
 
 	/** Gets i-th network in the list.
 	 * @return Index-th network in the list.
+	 * @param index the index
 	 */
 	public QueueNetwork get(int index) {
 		return networks.get(index);
@@ -72,6 +73,7 @@ public class NetworkList {
 
 	/** Gets the network in the list, if it exists, which has the specified Name.
 	 * @return The network called "Name". Returns Null if it does not exist.
+	 * @param name the name
 	 */
 	public QueueNetwork get(String name) {
 		ListIterator<QueueNetwork> iterator = networks.listIterator();

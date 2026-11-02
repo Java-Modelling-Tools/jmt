@@ -6,6 +6,18 @@ import solvers.priority.rwaCalculators.UtilizationSumCalculator;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Provides the SCA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Util Sum Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Util Sum Calculator functionality of the implementations.
+ */
 public class SCAUtilSumCalculator implements UtilizationSumCalculator {
 
     private int classes;
@@ -16,7 +28,7 @@ public class SCAUtilSumCalculator implements UtilizationSumCalculator {
      * @param utilizations [station][class] utilizations of shadow servers
      * @param solver from which the utilizations are from
      * @return The sum of higher priority utilizations, not scaled
-     * Map<Priority, double[stations]>
+     * Map&lt;Priority, double[stations]>
      */
     @Override
     public Map<Integer, double[]> calculateUtilSums(double[][] utilizations, SolverMultiMixedRWA solver) {

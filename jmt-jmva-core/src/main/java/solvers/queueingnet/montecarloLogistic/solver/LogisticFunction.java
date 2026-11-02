@@ -40,6 +40,7 @@ public class LogisticFunction extends LogisticFunctionBase {
 	 * 
 	 * @param point Array representing point to be evaluated
 	 * @return BigDecimal equal to the function value at that point
+	 * @throws InternalErrorException if the operation cannot be completed
 	 */
 	@Override
 	protected BigDecimal safeEvaluate(double[] point) throws InternalErrorException {

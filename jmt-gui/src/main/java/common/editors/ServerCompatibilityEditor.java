@@ -37,6 +37,18 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+/**
+ * Swing panel of the JMT wizard providing the server compatibility editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server compatibility editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server compatibility editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server compatibility editor view.
+ */
 public class ServerCompatibilityEditor extends WizardPanel implements CommonConstants {
 
     private static final long serialVersionUID = 1L;

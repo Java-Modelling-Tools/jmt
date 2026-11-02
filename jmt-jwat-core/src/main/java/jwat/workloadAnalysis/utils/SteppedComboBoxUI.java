@@ -8,6 +8,18 @@ import javax.swing.plaf.basic.ComboPopup;
 
 import com.jgoodies.looks.plastic.PlasticComboBoxUI;
 
+/**
+ * Stepped user interface of the JWAT combo box.
+ */
+/**
+ * Stepped user interface of the JWAT combo box.
+ */
+/**
+ * Stepped user interface of the JWAT combo box.
+ */
+/**
+ * Stepped user interface of the JWAT combo box.
+ */
 public class SteppedComboBoxUI extends PlasticComboBoxUI {
 	@Override
 	protected ComboPopup createPopup() {

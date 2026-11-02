@@ -18,6 +18,18 @@ import jaba.graphs.Sectors2DGraph;
 import jaba.graphs.Sectors3DGraph;
 
 // Pannello iniziale che conterrà quelli specifici a 2 o 3 dimensioni
+/**
+ * Panel of the JABA tool showing the saturation sectors of the model.
+ */
+/**
+ * Panel of the JABA tool showing the saturation sectors of the model.
+ */
+/**
+ * Panel of the JABA tool showing the saturation sectors of the model.
+ */
+/**
+ * Panel of the JABA tool showing the saturation sectors of the model.
+ */
 public class SectorsGraphicPanel extends WizardPanel implements JabaWizardPanel {
 	/**
 		 * 

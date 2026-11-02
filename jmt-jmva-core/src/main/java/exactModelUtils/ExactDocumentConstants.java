@@ -1,5 +1,17 @@
 package exactModelUtils;
 
+/**
+ * Constants of the XML document format produced by the JMVA model solvers.
+ */
+/**
+ * Constants of the XML document format produced by the JMVA model solvers.
+ */
+/**
+ * Constants of the XML document format produced by the JMVA model solvers.
+ */
+/**
+ * Constants of the XML document format produced by the JMVA model solvers.
+ */
 public class ExactDocumentConstants {
 
     /***********************SAVING/LOADING******************************/

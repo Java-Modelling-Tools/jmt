@@ -1,5 +1,17 @@
 package jaba.convexHull3d;
 
+/**
+ * Point in the three dimensional space used by the JABA convex hull algorithms.
+ */
+/**
+ * Point in the three dimensional space used by the JABA convex hull algorithms.
+ */
+/**
+ * Point in the three dimensional space used by the JABA convex hull algorithms.
+ */
+/**
+ * Point in the three dimensional space used by the JABA convex hull algorithms.
+ */
 public class Point3D {
 	
 	public int getX() {

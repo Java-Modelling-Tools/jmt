@@ -5,6 +5,15 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * LIFO (Last In First Out) cache eviction strategy: removes the item that last joined the cached item list.
+ */
+/**
+ * LIFO (Last In First Out) cache eviction strategy: removes the item that last joined the cached item list.
+ */
+/**
+ * LIFO (Last In First Out) cache eviction strategy: removes the item that last joined the cached item list.
+ */
 public class LIFOCache extends CacheStrategy {
 
 	public LIFOCache(){}

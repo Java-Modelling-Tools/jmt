@@ -88,10 +88,7 @@ public class Sectors2DGraph extends JabaGraph implements MouseListener,
 	/**
 	 * Builds a new Sectors2DPanel
 	 * 
-	 * @param s3d
-	 *            vector with output of Jaba engine
-	 * @param classNames
-	 *            name of classes to be shown on axis
+	 * @param data the Jaba model with the output of the Jaba engine
 	 */
 	public Sectors2DGraph(JabaModel data) {
 		super();

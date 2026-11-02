@@ -101,7 +101,7 @@ public class DirectCircularList<E> {
 	 * This method is always O(1).
 	 * @param index index of element to be retrieved
 	 * @return requested element or null if it does not exist
-	 * @see this.getSize()
+	 * {@link #getSize()}
 	 */
 	@SuppressWarnings("unchecked")
 	public E get(int index) {

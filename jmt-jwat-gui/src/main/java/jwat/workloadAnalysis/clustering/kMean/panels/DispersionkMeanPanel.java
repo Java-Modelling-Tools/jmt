@@ -16,6 +16,18 @@ import jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jwat.workloadAnalysis.utils.JavaWatColor;
 import jwat.workloadAnalysis.chart.DispKMeanMatrix;
 
+/**
+ * Swing panel of the JMT wizard providing the dispersionk mean view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersionk mean view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersionk mean view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersionk mean view.
+ */
 public class DispersionkMeanPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;

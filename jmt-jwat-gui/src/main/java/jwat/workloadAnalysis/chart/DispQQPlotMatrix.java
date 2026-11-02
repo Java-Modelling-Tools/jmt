@@ -30,6 +30,18 @@ import common.CommonConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the disp qq plot matrix.
+ */
+/**
+ * Swing component displaying the disp qq plot matrix.
+ */
+/**
+ * Swing component displaying the disp qq plot matrix.
+ */
+/**
+ * Swing component displaying the disp qq plot matrix.
+ */
 public class DispQQPlotMatrix extends JScrollPane {
 	/**
 	 * 

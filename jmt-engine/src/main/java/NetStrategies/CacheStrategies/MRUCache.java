@@ -5,6 +5,15 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * MRU (Most Recently Used) cache eviction strategy: discards the most recently used items first.
+ */
+/**
+ * MRU (Most Recently Used) cache eviction strategy: discards the most recently used items first.
+ */
+/**
+ * MRU (Most Recently Used) cache eviction strategy: discards the most recently used items first.
+ */
 public class MRUCache extends CacheStrategy{
 
 	public MRUCache(){}

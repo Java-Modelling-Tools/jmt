@@ -13,6 +13,18 @@ import solvers.exceptions.InternalErrorException;
 import solvers.utilities.MemoryUsageUtils;
 import solvers.utilities.MiscMathsFunctions;
 
+/**
+ * Recursive Gaussian Filter (RGF) solution algorithm of JMVA.
+ */
+/**
+ * Recursive Gaussian Filter (RGF) solution algorithm of JMVA.
+ */
+/**
+ * Recursive Gaussian Filter (RGF) solution algorithm of JMVA.
+ */
+/**
+ * Recursive Gaussian Filter (RGF) solution algorithm of JMVA.
+ */
 public class RGFSolver extends QNSolver {
 
 	// N distinct node type.

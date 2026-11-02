@@ -5,6 +5,18 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * MD5 checksum computation used by the JMT file handling.
+ */
+/**
+ * MD5 checksum computation used by the JMT file handling.
+ */
+/**
+ * MD5 checksum computation used by the JMT file handling.
+ */
+/**
+ * MD5 checksum computation used by the JMT file handling.
+ */
 public class MD5Checksum {
 
 	public static byte[] createChecksum(String filename) throws Exception {

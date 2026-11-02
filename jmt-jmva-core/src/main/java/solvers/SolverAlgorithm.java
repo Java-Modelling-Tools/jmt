@@ -136,6 +136,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Method supportsClosedClasses.
      * @return true if this algorithm supports closed classes
      */
     public boolean supportsClosedClasses() {
@@ -143,6 +144,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Method supportsOpenClasses.
      * @return true if this algorithm supports open classes
      */
     public boolean supportsOpenClasses() {
@@ -150,6 +152,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Checks whether exact.
      * @return true if this algorithm is exact
      */
     public boolean isExact() {
@@ -157,6 +160,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Method supportsLoadDependent.
      * @return true if the algorithm supports load dependent, false otherwise.
      */
     public boolean supportsLoadDependent() {
@@ -164,6 +168,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Method supportsPriorities.
      * @return true if the algorithm supports priorities, false otherwise.
      */
     public boolean supportsPriorities() {
@@ -171,6 +176,7 @@ public enum SolverAlgorithm {
     }
 
     /**
+     * Checks whether iterative.
      * @return true if the algorithm is iterative, false otherwise.
      */
     public boolean isIterative() {

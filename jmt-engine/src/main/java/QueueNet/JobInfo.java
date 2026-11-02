@@ -55,7 +55,6 @@ public class JobInfo {
 
 	/**
 	 * Resets the time that the job entered the JobInfoList.
-	 * @return Time that the job entered the JobInfoList.
 	 */
 	public void resetEnteringTime() {
 		enteringTime = job.getNetSystem().getTime();

@@ -15,6 +15,18 @@ import common.serviceStrategies.ZeroStrategy;
 
 import java.util.*;
 
+/**
+ * Converts a JSIM model into the corresponding JMVA model.
+ */
+/**
+ * Converts a JSIM model into the corresponding JMVA model.
+ */
+/**
+ * Converts a JSIM model into the corresponding JMVA model.
+ */
+/**
+ * Converts a JSIM model into the corresponding JMVA model.
+ */
 public class JSIMtoJMVAConvertor {
 
     /**

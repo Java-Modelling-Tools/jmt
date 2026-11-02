@@ -10,6 +10,18 @@ import jwat.MatrixObservations;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Session of the JWAT traffic analysis view.
+ */
+/**
+ * Session of the JWAT traffic analysis view.
+ */
+/**
+ * Session of the JWAT traffic analysis view.
+ */
+/**
+ * Session of the JWAT traffic analysis view.
+ */
 public class TrafficAnalysisSession extends JwatSession {
 
 	private BurstEngine engine = null;

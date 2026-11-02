@@ -107,7 +107,7 @@ public class Edge extends JComponent implements JobContainer{
 	
 	/**
 	 * Constructor
-	 * @param animation, AnimationClass which the edge is part of
+	 * @param anim AnimationClass which the edge is part of
 	 * @param container, JPanel that contains this edge
 	 * @param centered, if the edge is y centered with respect to the JPanel or not
 	 * @param isArrow, if the edge is an arrow and not a simple line

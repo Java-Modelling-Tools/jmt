@@ -66,6 +66,24 @@
       <url>file://${project.build.directory}/site/</url>
     </site>
   </distributionManagement>
+  <reporting>
+    <excludeDefaults>true</excludeDefaults>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <version>3.5.0</version>
+        <!-- Standard Maven site layout: mvn site -> target/site/apidocs (javadoc report only) -->
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>javadoc</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
   <profiles>
     <profile>
       <id>full</id>
@@ -126,13 +144,14 @@
             </executions>
           </plugin>
           <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.5.0</version>
-          <configuration>
-            <reportOutputDirectory>${basedir}/docs</reportOutputDirectory>
-            <destDir>javadoc</destDir>
-          </configuration>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>3.5.0</version>
+            <configuration>
+              <!-- Standard Maven site layout: mvn javadoc:javadoc -> target/site/apidocs -->
+              <reportOutputDirectory>${project.build.directory}/site</reportOutputDirectory>
+              <destDir>apidocs</destDir>
+            </configuration>
           </plugin>
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>

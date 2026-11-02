@@ -8,6 +8,18 @@ import NetStrategies.ServiceStrategies.LoadDependentStrategy;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomAdaptor;
 
+/**
+ * Balking impatience strategy: arriving jobs refuse to join the queue according to a given probability.
+ */
+/**
+ * Balking impatience strategy: arriving jobs refuse to join the queue according to a given probability.
+ */
+/**
+ * Balking impatience strategy: arriving jobs refuse to join the queue according to a given probability.
+ */
+/**
+ * Balking impatience strategy: arriving jobs refuse to join the queue according to a given probability.
+ */
 public class Balking implements Impatience {
   private ImpatienceType impatienceType;
   private LoadDependentStrategy loadDependentStrategy;

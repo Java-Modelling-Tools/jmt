@@ -5,6 +5,18 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * LFU (Least Frequently Used) cache eviction strategy: removes the item with the smallest number of accesses.
+ */
+/**
+ * LFU (Least Frequently Used) cache eviction strategy: removes the item with the smallest number of accesses.
+ */
+/**
+ * LFU (Least Frequently Used) cache eviction strategy: removes the item with the smallest number of accesses.
+ */
+/**
+ * LFU (Least Frequently Used) cache eviction strategy: removes the item with the smallest number of accesses.
+ */
 public class LFUCache extends CacheStrategy {
 
 	public LFUCache(){}

@@ -270,7 +270,7 @@ public abstract class Solver {
 	//@author Stefano Omini
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of such a load.
+	 * <code>lambda</code> if no service center is saturated as a result of such a load.
 	 * <br>
 	 * WARNING: This method should be called before solving the system.
 	 * @return true if sufficient capacity exists for the given workload, false otherwise

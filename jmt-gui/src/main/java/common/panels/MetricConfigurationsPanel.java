@@ -34,6 +34,18 @@ import common.definitions.ServerType;
 import common.definitions.SimulationDefinition;
 import common.definitions.StationDefinition;
 
+/**
+ * Swing panel of the JMT wizard providing the metric configurations view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the metric configurations view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the metric configurations view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the metric configurations view.
+ */
 public class MetricConfigurationsPanel extends WizardPanel implements CommonConstants {
 
     private static final long serialVersionUID = 1L;

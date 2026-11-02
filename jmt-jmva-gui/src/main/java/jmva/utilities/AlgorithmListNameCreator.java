@@ -5,6 +5,18 @@ import solvers.SolverAlgorithm;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Creates the names of the JMVA solution algorithms shown in the GUI.
+ */
+/**
+ * Creates the names of the JMVA solution algorithms shown in the GUI.
+ */
+/**
+ * Creates the names of the JMVA solution algorithms shown in the GUI.
+ */
+/**
+ * Creates the names of the JMVA solution algorithms shown in the GUI.
+ */
 public class AlgorithmListNameCreator {
 
     // TODO: Dynamically calculate number of dashes required for the separators based of the longest algorithm name?

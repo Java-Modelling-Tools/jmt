@@ -62,7 +62,7 @@ public class SimSystem {
 	/** Initializes the system, this function works as a
 	 * constructor, and should be called at the start of any simulation
 	 * program. It comes in several flavours depending on what context
-	 * the simulation is running.<P>
+	 * the simulation is running.&lt;P>
 	 * This is the simplest, and should be used for standalone simulations
 	 * It sets up trace output to a file in the current directory called
 	 * `tracefile'
@@ -111,7 +111,7 @@ public class SimSystem {
 		return clock;
 	}
 
-	/** A different name for <tt>SimSystem.clock()</tt>.
+	/** A different name for <code>SimSystem.clock()</code>.
 	 * @return The current simulation time
 	 */
 	public double getClock() {
@@ -170,7 +170,7 @@ public class SimSystem {
 
 	/** Adds a new entity to the simulation, when the simulation is running.
 	 * Note this is an internal method and should not be called from
-	 * user simulations. Use <tt>add()</tt> instead to add entities
+	 * user simulations. Use <code>add()</code> instead to add entities
 	 * on the fly.
 	 * @param e A reference to the new entity
 	 */
@@ -201,7 +201,8 @@ public class SimSystem {
 
 	/**
 	 * Runs one tick of the simulation: the system looks for events in the future queue.
-	 * @return <tt>false</tt> if there are no more future events to be processed
+	 * @return <code>false</code> if there are no more future events to be processed
+	 * @throws NetException if the operation cannot be completed
 	 */
 	public boolean runTick() throws NetException {
 		double now = 0.0;

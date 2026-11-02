@@ -86,6 +86,7 @@ public class ClassCoverageUtils {
 	 * Gets the classes which are covered by subnet, with specified level of coverage.
 	 * @param cover The level of coverge we are looking for.
 	 * @param subnet The subnetwork of stations to examine.
+	 * @return the resulting tree set
 	 * */
 	public TreeSet<Integer> getCoveredClasses(Covered cover, TreeSet<Integer> subnet) {
 		TreeSet<Integer> classList = new TreeSet<Integer>();

@@ -2,6 +2,18 @@ package NetStrategies.ImpatienceStrategies;
 
 import common.distributions.Distribution;
 
+/**
+ * Parameters of the reneging distribution.
+ */
+/**
+ * Parameters of the reneging distribution.
+ */
+/**
+ * Parameters of the reneging distribution.
+ */
+/**
+ * Parameters of the reneging distribution.
+ */
 public class RenegingParameter implements ImpatienceParameter {
   Distribution distribution;
 

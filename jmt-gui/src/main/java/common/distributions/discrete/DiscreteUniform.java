@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 
 import javax.swing.*;
 
+/**
+ * Provides the Discrete Uniform functionality of the discrete.
+ */
+/**
+ * Provides the Discrete Uniform functionality of the discrete.
+ */
+/**
+ * Provides the Discrete Uniform functionality of the discrete.
+ */
+/**
+ * Provides the Discrete Uniform functionality of the discrete.
+ */
 public class DiscreteUniform extends Distribution {
     /**
      * Constructs a new Discrete Uniform Distribution

@@ -17,6 +17,18 @@
  */
 package jmt.jmch.simulation;
 
+/**
+ * Preemptive simulation of the JMCH scheduling algorithms (Processor Sharing).
+ */
+/**
+ * Preemptive simulation of the JMCH scheduling algorithms (Processor Sharing).
+ */
+/**
+ * Preemptive simulation of the JMCH scheduling algorithms (Processor Sharing).
+ */
+/**
+ * Preemptive simulation of the JMCH scheduling algorithms (Processor Sharing).
+ */
 public abstract class PreemptiveSimulation implements Simulation {
     public SimulationType getType(){
         return SimulationType.NON_PREEMPTIVE;

@@ -21,6 +21,18 @@ package common.forkStrategies;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
+/**
+ * Output path of a fork station: a task of a forked job together with its destination.
+ */
 public class OutPath {
 
 	private Double probability;

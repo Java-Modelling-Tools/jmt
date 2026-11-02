@@ -67,8 +67,7 @@ public class CartesianPositivePlane {
 	 *            the max value of abscissa you want to place on the graph
 	 * @param yMaxValue
 	 *            the max value of ordinate you want to place on the graph
-	 * @throws Exception
-	 */
+		 */
 	public CartesianPositivePlane(Graphics2D g, DPoint origin, int xAxisLength,
 			int yAxisLength, double xMaxValue, double yMaxValue)
 			throws Exception {
@@ -87,7 +86,6 @@ public class CartesianPositivePlane {
 	 * 
 	 * @param points
 	 *            an arraylist of points
-	 * @throws Exception
 	 */
 	public void drawValuesOnXAxis(ArrayList<DPoint> points) {
 		int i;

@@ -84,6 +84,18 @@ import jwat.workloadAnalysis.tables.JWatBivariateStatsTableModel;
 import jwat.workloadAnalysis.tables.JWatUnivariateStatsTable;
 import jwat.workloadAnalysis.tables.JWatUnivariateStatsTableModel;
 
+/**
+ * Panel showing the descriptive statistics of the JWAT workload data.
+ */
+/**
+ * Panel showing the descriptive statistics of the JWAT workload data.
+ */
+/**
+ * Panel showing the descriptive statistics of the JWAT workload data.
+ */
+/**
+ * Panel showing the descriptive statistics of the JWAT workload data.
+ */
 public class StatsPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

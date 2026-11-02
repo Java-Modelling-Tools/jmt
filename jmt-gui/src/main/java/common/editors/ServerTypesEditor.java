@@ -48,6 +48,18 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 
+/**
+ * Swing panel of the JMT wizard providing the server types editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server types editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server types editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server types editor view.
+ */
 public class ServerTypesEditor extends WizardPanel implements CommonConstants {
 
     private static final long serialVersionUID = 1L;

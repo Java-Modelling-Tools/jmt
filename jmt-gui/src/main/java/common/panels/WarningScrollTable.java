@@ -122,7 +122,7 @@ public class WarningScrollTable extends JRootPane {
 	/**
 	 * Tells if any vector added with <code>addCheckVector(Vector v)</code> method is empty
 	 * @return true iff any vector is empty
-	 * @see this.addCheckVector(Vector)
+	 * {@link #addCheckVector(Vector)}
 	 */
 	protected boolean checkEmptyVectors() {
 		boolean res = false;

@@ -255,7 +255,7 @@ public class RoutingProbabilitiesParametricAnalysis extends ParametricAnalysisDe
 
     /**
      * Sets the destination station whose routing probability will be varied
-     * @param stationKey the destination station whose routing probability will be varied
+     * @param key the destination station whose routing probability will be varied
      */
     public void setDestinationStationKey(Object key) {
         this.destinationStationKey = key;

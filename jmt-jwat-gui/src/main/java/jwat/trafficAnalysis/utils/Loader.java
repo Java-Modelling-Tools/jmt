@@ -99,10 +99,9 @@ public class Loader {
 
 	// --- Methods used to load models ------------------------------------------------------------
 	/**
-	 * Shows a Load window and loads chosen model inside specified model data file
-	 * @param modelData data file where information should be stored. Note that <b>its type
-	 * must be compatible with defaultFilter chosen in the constructor</b>, otherwise a
-	 * ClassCastException will be thrown
+	 * Shows a Load window and loads chosen model inside specified model data file.
+	 * The model data file must be compatible with the defaultFilter chosen in the
+	 * constructor, otherwise a ClassCastException will be thrown.
 	 * @param parent parent component of loading window
 	 * @return SUCCESS on success, CANCELLED if loading is cancelled,
 	 * FAILURE if an error occurs and WARNING is one or more warnings are generated due to

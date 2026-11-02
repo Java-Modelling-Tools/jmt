@@ -94,7 +94,7 @@ public class ResultsPanel extends JMCHWizardPanel{
 	 * @param responseTime response time
 	 * @param queueTime queue time
 	 * @param thoughput thoughput
-	 * @param nCustomers customer numbers
+	 * @param nCustomer customer numbers
 	 */
     public void addResult(String typeOfResult, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nServers, double service, double responseTime, double queueTime, double thoughput, double nCustomer){
         
@@ -111,7 +111,7 @@ public class ResultsPanel extends JMCHWizardPanel{
 	 * @param nQueues number of queues reachable
 	 * @param responseTime response time of the system
 	 * @param thoughput thoughput of the system
-	 * @param nCustomers customer numbers of the system
+	 * @param nCustomer customer numbers of the system
 	 */
     public void addResult(String typeOfResult, int generatedJob, String algorithm, String arrivalDistr, double lambda, String serviceDistr, int nQueues, double responseTime, double thoughput, double nCustomer){
         

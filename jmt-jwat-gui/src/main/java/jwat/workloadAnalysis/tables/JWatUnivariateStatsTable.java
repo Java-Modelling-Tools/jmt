@@ -18,6 +18,18 @@ import jwat.workloadAnalysis.chart.QQPlotPreviewPanel;
 import jwat.workloadAnalysis.chart.SmallPlotDistGraph;
 import jwat.workloadAnalysis.panels.StatsPanel;
 
+/**
+ * Table showing the j wat univariate stats.
+ */
+/**
+ * Table showing the j wat univariate stats.
+ */
+/**
+ * Table showing the j wat univariate stats.
+ */
+/**
+ * Table showing the j wat univariate stats.
+ */
 public class JWatUnivariateStatsTable extends JTable implements CommonConstants {
 	/**
 	 * 

@@ -26,7 +26,10 @@ import solvers.utilities.ProcessingCapacityChecker;
 import java.util.Arrays;
 
 /**
- * Solves a multiclass open model (LD stations are not allowed).
+ * Solves a multiclass open model with the classical queueing network
+ * algorithms, as described in the JMVA chapter of the JMT user manual
+ * (load dependent stations are not allowed in open models).
+ *
  * @author Federico Granata, Stefano Omini, Bertoli Marco
  */
 public class SolverMultiOpen extends SolverMulti {
@@ -154,7 +157,7 @@ public class SolverMultiOpen extends SolverMulti {
 
 	/**
 	 * A system is said to have sufficient capacity to process a given load
-	 * <tt>lambda</tt> if no service center is saturated as a result of the combined loads
+	 * <code>lambda</code> if no service center is saturated as a result of the combined loads
 	 * of all the classes.
 	 * <br>
 	 * WARNING: This method should be called before solving the system.

@@ -132,12 +132,12 @@ public class Measure {
 	//-------end SCALE FACTOR FOR RESIDENCE TIME MEASURES------------//
 
 	/** Creates a new instance of measure class.
-	 * @param Name name of the measure.
+	 * @param name name of the measure.
 	 * @param alfa    the quantile required for the confidence interval
 	 * @param precision   indicator of maximum amplitude of confidence interval
 	 *                      (precision = maxamplitude / mean)
 	 * @param maxSamples  maximum number of data to be analyzed
-	 * @param Verbose   True, if each measure should be sent on output
+	 * @param verbose   True, if each measure should be sent on output
 	 * @param quantiles the quantiles to be computed (null, if no quantiles should be computed)
 	 */
 

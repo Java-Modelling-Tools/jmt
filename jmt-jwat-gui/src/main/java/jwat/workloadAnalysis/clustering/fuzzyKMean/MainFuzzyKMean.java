@@ -9,6 +9,18 @@ import jwat.input.EventFinishAbort;
 import jwat.input.ProgressShow;
 import jwat.workloadAnalysis.clustering.EventClusteringDone;
 
+/**
+ * Background worker running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Background worker running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Background worker running the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Background worker running the JWAT fuzzy k-means clustering.
+ */
 public class MainFuzzyKMean extends TimeConsumingWorker {
 
 	private MatrixObservations matrix;

@@ -3,6 +3,18 @@ package solvers.dispatchers;
 import analytical.ExactConstants;
 import jmt.common.exception.SolverException;
 
+/**
+ * Utilities of the JMVA solver dispatchers.
+ */
+/**
+ * Utilities of the JMVA solver dispatchers.
+ */
+/**
+ * Utilities of the JMVA solver dispatchers.
+ */
+/**
+ * Utilities of the JMVA solver dispatchers.
+ */
 public class DispatcherUtil {
 
     public static void fail(String message, Throwable t) throws SolverException {
