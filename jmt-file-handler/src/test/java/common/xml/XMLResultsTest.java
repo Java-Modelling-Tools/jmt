@@ -122,7 +122,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLResultsWriter throws NoSuchElementException (values.lastElement()) for a measure that has no samples, although state NO_SAMPLES is a valid state")
 	void measureWithoutSamplesIsWritten() {
 		StoredResultsModel m = new StoredResultsModel();
 		m.addMeasure("Q1_C1_" + QL, "Q1", "C1", 0.99, 0.03, 0, 0, MeasureDefinition.MEASURE_NO_SAMPLES, QL, "station", null);
@@ -267,7 +266,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: XMLResultsReader.loadGuiModel throws NPE (XMLReader.loadXML returns null) on a missing/malformed file instead of leaving the model empty")
 	void loadGuiModelOnMalformedFileLeavesModelEmpty() throws IOException {
 		File f = new File(tmp, "bad.xml");
 		Files.write(f.toPath(), "<results".getBytes(StandardCharsets.UTF_8));
@@ -277,7 +275,6 @@ class XMLResultsTest {
 	}
 
 	@Test
-	@Disabled("bug: engine-output path (setEngineMeasures) sets lastIntervalAvgValue and simulationTime from the meanValue attribute, which carries neither")
 	void engineOutputSampleTimeAndLastIntervalAreNotTheMean() throws Exception {
 		String xml = "<solutions><measure station=\"S\" class=\"C\" type=\"" + QL + "\" successful=\"true\" meanValue=\"1.5\""
 				+ " analyzedSamples=\"5\" alfa=\"0.01\" precision=\"0.1\"/></solutions>";

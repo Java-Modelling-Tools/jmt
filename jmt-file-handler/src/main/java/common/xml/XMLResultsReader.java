@@ -50,7 +50,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	public static void loadGuiModel(StoredResultsModel model, File archiveName) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_GUI_RESULTS));
-		parseXML(doc, model);
+		if (doc != null) { // loadXML returns null on a missing or malformed file
+			parseXML(doc, model);
+		}
 	}
 
 	/**
@@ -60,7 +62,9 @@ public class XMLResultsReader implements XMLResultsConstants {
 	 */
 	public static void loadModel(StoredResultsModel model, File archiveName) {
 		Document doc = XMLReader.loadXML(archiveName.getAbsolutePath(), XSDSchemaLoader.loadSchema(XSDSchemaLoader.JSIM_MODEL_RESULTS));
-		parseXML(doc, model);
+		if (doc != null) { // loadXML returns null on a missing or malformed file
+			parseXML(doc, model);
+		}
 	}
 
 	/**
@@ -285,14 +289,6 @@ public class XMLResultsReader implements XMLResultsConstants {
 			if (attr != null && attr != "") {
 				mean = Double.parseDouble(attr);
 			}
-			double lastIntervalAvgValue = 0;
-			if (attr != null && attr != "") {
-				lastIntervalAvgValue = Double.parseDouble(attr);
-			}
-			double simulationTime = 0;
-			if (attr != null && attr != "") {
-				simulationTime = Double.parseDouble(attr);
-			}
 			String nodeType = current.getAttribute(XML_AO_MEASURE_NODETYPE);
 			attr = current.getAttribute(XML_AO_MEASURE_UPPER);
 			double upper = 0;
@@ -344,7 +340,8 @@ public class XMLResultsReader implements XMLResultsConstants {
 
 			// Adds loaded informations into model data structure
 			model.addMeasure(Name, stationName, className, alpha, precision, samples, discarded, state, type, nodeType, fileName);
-			model.addMeasureSample(Name, mean, lastIntervalAvgValue, simulationTime, upper, lower);
+			// engine output carries only the final mean and bounds: no last-interval value, no simulation time
+			model.addMeasureSample(Name, 0, 0, mean, upper, lower);
 		}
 	}
 

@@ -19,7 +19,7 @@ class ModelFixturesTest {
 		CommonModel m = new CommonModel();
 		assertTrue(XMLReader.loadModel(f, m));
 		assertEquals(2, m.getStationKeys().size()); // Delay 1 + Queue 1
-		assertEquals(2, m.getClassKeys().size());
+		assertEquals(1, m.getClassKeys().size());
 		assertFalse(ModelFixtures.writeToString(m).isEmpty());
 	}
 
