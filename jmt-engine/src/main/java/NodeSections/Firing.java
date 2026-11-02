@@ -23,7 +23,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import jmt.common.ErrorReporters;
+import jmt.common.AsyncWarning;
 
 import jmt.common.exception.NetException;
 import NetStrategies.TransitionUtilities.FiringPacket;
@@ -247,18 +247,9 @@ public class Firing extends OutputSection {
 						+ " failed to maintain the equilibrium between input and output tasks in "
 						+ modeName + ".");
 			} else {
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							Thread.sleep(800);
-						} catch (InterruptedException e) {
-						}
-						ErrorReporters.get().warning("JSIMengine - Warning", getOwnerNode().getName()
+				AsyncWarning.warn("JSIMengine - Warning", getOwnerNode().getName()
 								+ " failed to maintain the equilibrium between input and output tasks in "
 								+ modeName + ".");
-					}
-				}).start();
 			}
 			isForkJobNumWarningShown[modeIndex] = true;
 		}
