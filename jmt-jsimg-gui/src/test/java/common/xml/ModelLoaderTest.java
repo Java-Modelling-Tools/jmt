@@ -27,14 +27,13 @@ import common.definitions.MeasureDefinition;
 import common.definitions.ServerType;
 import common.definitions.SimulationDefinition;
 import common.definitions.StoredResultsModel;
-import common.xml.ModelLoader.JmtFileFilter;
 import jaba.JabaModel;
 import jmt.framework.xml.XMLUtils;
 import jsimgraph.definitions.JSimGraphModel;
 import legacyxml.LegacyXmlExporter;
 
 /**
- * Unit tests of ModelLoader on the paths that open no dialog (file != null, parent == null), and of JmtFileFilter.
+ * Unit tests of ModelLoader on the paths that open no dialog (file != null, parent == null), and of the FileFormat constants.
  * Dialog paths (file == null, wrong extension on save, newer-version prompt) are not exercised.
  */
 class ModelLoaderTest {
@@ -48,19 +47,19 @@ class ModelLoaderTest {
 	// --- helpers ---------------------------------------------------------------------------------------
 
 	private static ModelLoader sim() {
-		return new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE);
+		return new ModelLoader(ModelLoader.JSIM, ModelLoader.JSIM_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader graph() {
-		return new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE);
+		return new ModelLoader(ModelLoader.JMODEL, ModelLoader.JMODEL_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader mva() {
-		return new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
+		return new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE, new HeadlessModelFileView());
 	}
 
 	private static ModelLoader jaba() {
-		return new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE);
+		return new ModelLoader(ModelLoader.JABA, ModelLoader.JABA_SAVE, new HeadlessModelFileView());
 	}
 
 	private File write(String name, String content) throws Exception {
@@ -140,28 +139,12 @@ class ModelLoaderTest {
 		return m;
 	}
 
-	// --- JmtFileFilter ---------------------------------------------------------------------------------
+	// --- FileFormat constants (filter behaviour is covered by FileFormatTest) ----------------------------
 
 	@Test
-	void filterAcceptsByExtensionCaseInsensitivelyAndAlwaysDirectories() throws Exception {
-		JmtFileFilter f = new JmtFileFilter(".jsimg;.jmodel", "X");
-		assertTrue(f.accept(new File(tmp, "a.jsimg")));
-		assertTrue(f.accept(new File(tmp, "a.JMODEL")));
-		assertFalse(f.accept(new File(tmp, "a.jmva")));
-		assertFalse(f.accept(new File(tmp, "jsimg")));
-		File dir = new File(tmp, "dir.jmva");
-		assertTrue(dir.mkdir());
-		assertTrue(f.accept(dir));
-		assertTrue(f.accept(tmp));
-	}
-
-	@Test
-	void filterExtensionsAndDescription() {
-		JmtFileFilter f = new JmtFileFilter(".jsimg;.jmodel", "My files");
-		assertArrayEquals(new String[] { ".jsimg", ".jmodel" }, f.getExtensions());
-		assertEquals("My files (*.jsimg; *.jmodel)", f.getDescription());
-		assertEquals("One (*.a)", new JmtFileFilter(".a", "One").getDescription());
-		assertEquals(";", JmtFileFilter.SEP);
+	void modelLoaderSourceHasNoSwingImports() throws Exception {
+		String src = new String(java.nio.file.Files.readAllBytes(java.nio.file.Paths.get("src/main/java/common/xml/ModelLoader.java")), "UTF-8");
+		assertFalse(src.matches("(?s).*import\\s+(java\\.awt|javax\\.swing)[.;].*"));
 	}
 
 	@Test
@@ -177,9 +160,9 @@ class ModelLoaderTest {
 		assertEquals(Arrays.asList(".jaba"), Arrays.asList(ModelLoader.JABA.getExtensions()));
 		assertEquals(Arrays.asList(".jaba"), Arrays.asList(ModelLoader.JABA_SAVE.getExtensions()));
 		assertEquals("JMVA data file (*.jmva)", ModelLoader.JMVA.getDescription());
-		assertTrue(ModelLoader.ALL.accept(new File("x.PNML")));
-		assertFalse(ModelLoader.ALL_NOTJABA.accept(new File("x.jaba")));
-		assertTrue(ModelLoader.ALL.accept(new File("x.jaba")));
+		assertTrue(ModelLoader.ALL.accepts("x.PNML"));
+		assertFalse(ModelLoader.ALL_NOTJABA.accepts("x.jaba"));
+		assertTrue(ModelLoader.ALL.accepts("x.jaba"));
 	}
 
 	// --- loadModel: JSIMwiz / JSIMgraph filters --------------------------------------------------------

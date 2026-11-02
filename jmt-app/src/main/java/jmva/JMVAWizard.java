@@ -35,6 +35,7 @@ import common.definitions.convertors.JMVAtoJSIMConvertor;
 import common.panels.AboutDialogFactory;
 import common.panels.WarningWindow;
 import common.xml.ModelLoader;
+import common.xml.swing.SwingModelFileView;
 import jmva.panels.*;
 import jsimwiz.JSIMWizMain;
 import jsimwiz.definitions.JSIMModel;
@@ -77,7 +78,7 @@ public class JMVAWizard extends Wizard implements JMVAController {
 	private SolverClient solver;
 
 	// New Bertoli Marco
-	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE);
+	private ModelLoader modelLoader = new ModelLoader(ModelLoader.JMVA, ModelLoader.JMVA_SAVE, new SwingModelFileView(ModelLoader.JMVA, ModelLoader.JMVA_SAVE));
 	// End
 
 	//NEW Dall'Orso

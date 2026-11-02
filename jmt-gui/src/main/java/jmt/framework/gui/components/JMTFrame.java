@@ -28,6 +28,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.WindowConstants;
 
+import jmt.framework.gui.AppLocale;
 import jmt.framework.gui.controller.Manager;
 
 /**
@@ -46,8 +47,6 @@ public class JMTFrame extends JFrame {
 	 */
 	private static final long serialVersionUID = 1L;
 	private static final String DEFAULT_LOOK_AND_FEEL = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
-	private static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
-	private static final Locale PLATFORM_DEFAULT_LOCALE = Locale.getDefault();
 
 	/** 
 	 * Auto manage closing operation
@@ -61,20 +60,20 @@ public class JMTFrame extends JFrame {
 
 	// Sets the default look and feel and locale
 	static {
+		// Must run first: captures the platform locale, then switches to English
+		AppLocale.platformDefault();
 		try {
 			UIManager.setLookAndFeel(DEFAULT_LOOK_AND_FEEL);
 		} catch (Exception ulafe) {
 			ulafe.printStackTrace();
 		}
-
-		Locale.setDefault(DEFAULT_LOCALE);
 	}
 	
 	/**
 	 * @return the platform default locale, that is different from the application one.
 	 */
 	public static Locale getPlatformDefaultLocale() {
-		return PLATFORM_DEFAULT_LOCALE;
+		return AppLocale.platformDefault();
 	}
 
 	/**

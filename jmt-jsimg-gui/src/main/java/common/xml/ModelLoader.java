@@ -21,22 +21,14 @@ import analytical.ExactModel;
 import simEngine.xml.XMLConstantNames;
 import simEngine.xml.XMLResultsConstants;
 
-import java.awt.Component;
-import java.awt.GraphicsEnvironment;
-import java.awt.HeadlessException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 
 import jmt.common.GlobalSettings;
 import jmt.framework.xml.XMLUtils;
 import legacyxml.JmtVersion;
 import common.CommonConstants;
-import common.Defaults;
 import common.definitions.CommonModel;
 import common.definitions.ModelConverter;
 import common.definitions.StoredResultsModel;
@@ -58,18 +50,18 @@ public class ModelLoader {
 	/**
 	 * Filters for input files
 	 */
-	public static final JmtFileFilter ALL = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jaba;.jsim;.jmodel;.pnml", "All JMT data files");
-	public static final JmtFileFilter ALL_NOTJABA = new JmtFileFilter(".jsimg;.jsimw;.jmva;.jsim;.jmodel;.pnml", "All compatible JMT data files");
+	public static final FileFormat ALL = new FileFormat(".jsimg;.jsimw;.jmva;.jaba;.jsim;.jmodel;.pnml", "All JMT data files");
+	public static final FileFormat ALL_NOTJABA = new FileFormat(".jsimg;.jsimw;.jmva;.jsim;.jmodel;.pnml", "All compatible JMT data files");
 
-	public static final JmtFileFilter JMODEL = new JmtFileFilter(".jsimg;.jmodel;.pnml", "JSIMgraph data file");
-	public static final JmtFileFilter JSIM = new JmtFileFilter(".jsimw;.jsim;.pnml", "JSIMwiz data file");
-	public static final JmtFileFilter JMVA = new JmtFileFilter(".jmva", "JMVA data file");
-	public static final JmtFileFilter JABA = new JmtFileFilter(".jaba", "JABA data file");
+	public static final FileFormat JMODEL = new FileFormat(".jsimg;.jmodel;.pnml", "JSIMgraph data file");
+	public static final FileFormat JSIM = new FileFormat(".jsimw;.jsim;.pnml", "JSIMwiz data file");
+	public static final FileFormat JMVA = new FileFormat(".jmva", "JMVA data file");
+	public static final FileFormat JABA = new FileFormat(".jaba", "JABA data file");
 
-	public static final JmtFileFilter JMODEL_SAVE = new JmtFileFilter(".jsimg;.pnml", "JSIMgraph data file");
-	public static final JmtFileFilter JSIM_SAVE = new JmtFileFilter(".jsimw;.pnml", "JSIMwiz data file");
-	public static final JmtFileFilter JMVA_SAVE = new JmtFileFilter(".jmva", "JMVA data file");
-	public static final JmtFileFilter JABA_SAVE = new JmtFileFilter(".jaba", "JABA data file");
+	public static final FileFormat JMODEL_SAVE = new FileFormat(".jsimg;.pnml", "JSIMgraph data file");
+	public static final FileFormat JSIM_SAVE = new FileFormat(".jsimw;.pnml", "JSIMwiz data file");
+	public static final FileFormat JMVA_SAVE = new FileFormat(".jmva", "JMVA data file");
+	public static final FileFormat JABA_SAVE = new FileFormat(".jaba", "JABA data file");
 
 	/**
 	 * Constants used for output
@@ -103,10 +95,13 @@ public class ModelLoader {
 	protected static final String XML_MVA_ROOT = "model";
 	protected static final String XML_PNML_ROOT = "pnml";
 
-	protected JmtFileChooser dialog;
+	protected ModelFileView view;
 
-	protected JmtFileFilter defaultFilter;
-	protected JmtFileFilter defaultSaveFilter;
+	// Last file chosen by the view or passed in by the caller
+	protected File selectedFile;
+
+	protected FileFormat defaultFilter;
+	protected FileFormat defaultSaveFilter;
 
 	// Motivation of last failure
 	protected String failureMotivation;
@@ -119,15 +114,15 @@ public class ModelLoader {
 	protected XMLUtils xmlutils = new XMLUtils();
 
 	/**
-	 * Initializes a new model loader with specified default file filters
+	 * Initializes a new model loader with specified default file filters and user interface
 	 * @param defaultFilter default file filter for current application
 	 * @param defaultSaveFilter default file save filter for current application
+	 * @param view asked for files and confirmations
 	 */
-	public ModelLoader(JmtFileFilter defaultFilter, JmtFileFilter defaultSaveFilter) {
+	public ModelLoader(FileFormat defaultFilter, FileFormat defaultSaveFilter, ModelFileView view) {
 		this.defaultFilter = defaultFilter;
 		this.defaultSaveFilter = defaultSaveFilter;
-		// Initialize filechooser dialog
-		dialog = new JmtFileChooser(defaultSaveFilter);
+		this.view = view;
 	}
 
 	/**
@@ -168,19 +163,16 @@ public class ModelLoader {
 	 * @throws ClassCastException if modelData is not of instance of the correct class
 	 * @see #getFailureMotivation getFailureMotivation()
 	 */
-	public int loadModel(Object modelData, Component parent, File file) {
+	public int loadModel(Object modelData, Object parent, File file) {
 		if (file == null) {
-			int status = showOpenDialog(parent);
-			if (status == JFileChooser.CANCEL_OPTION) {
+			file = view.chooseFileToOpen(parent);
+			if (file == null) {
 				return CANCELLED;
-			} else if (status == JFileChooser.ERROR_OPTION) {
-				failureMotivation = "Error selecting input file";
-				return FAILURE;
 			}
-			file = dialog.getSelectedFile();
 		} else {
-			dialog.setSelectedFile(file);
+			view.setSelectedFile(file);
 		}
+		selectedFile = file;
 
 		warnings.clear();
 		try {
@@ -312,21 +304,15 @@ public class ModelLoader {
 	/**
 	 * Warns if the archive was saved by a newer JMT than the running one, since parts of it may be
 	 * misread or lost on the next save.
-	 * @return true to go on loading (file is not newer, no GUI available, or user chose to open anyway)
+	 * @return true to go on loading (file is not newer, or the view says to open anyway)
 	 */
-	private boolean confirmOpenNewerVersion(Component parent, File file) {
+	private boolean confirmOpenNewerVersion(Object parent, File file) {
 		String running = GlobalSettings.getSetting("jmt.version");
 		String saved = JmtVersion.readFileVersion(file);
-		if (!JmtVersion.isNewer(saved, running) || GraphicsEnvironment.isHeadless()) {
+		if (!JmtVersion.isNewer(saved, running)) {
 			return true;
 		}
-		Object[] options = { "Open anyway", "Cancel" };
-		int choice = JOptionPane.showOptionDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
-				+ "</font> was saved by JMT <b>" + saved + "</b>, which is newer than the version you are running (<b>" + running
-				+ "</b>).<br>It may use features this version does not support, and some data may be ignored or lost if you save it.<br>"
-				+ "Do you want to open it anyway?</html>", "JMT - Newer file version", JOptionPane.DEFAULT_OPTION,
-				JOptionPane.WARNING_MESSAGE, null, options, options[1]);
-		return choice == 0;
+		return view.confirmOpenNewerVersion(parent, file, saved, running);
 	}
 
 	/**
@@ -334,7 +320,7 @@ public class ModelLoader {
 	 * @return name of selected file for open or save
 	 */
 	public File getSelectedFile() {
-		return dialog.getSelectedFile();
+		return selectedFile;
 	}
 	// --------------------------------------------------------------------------------------------
 
@@ -351,18 +337,14 @@ public class ModelLoader {
 	 * @throws ClassCastException if modelData is not of instance of the correct class
 	 * @see #getFailureMotivation getFailureMotivation()
 	 */
-	public int saveModel(Object modelData, Component parent, File file) {
+	public int saveModel(Object modelData, Object parent, File file) {
 		if (file == null) {
 			// Shows save as window
-			int status;
-			status = this.showSaveDialog(parent);
-			if (status == JFileChooser.CANCEL_OPTION) {
+			file = view.chooseFileToSave(parent);
+			if (file == null) {
 				return CANCELLED;
-			} else if (status == JFileChooser.ERROR_OPTION) {
-				failureMotivation = "Error selecting output file";
-				return FAILURE;
 			}
-			file = dialog.getSelectedFile();
+			selectedFile = file;
 		} else {
 			// Check extension to avoid saving over a converted file
 			boolean hasValidExtension = false;
@@ -374,10 +356,7 @@ public class ModelLoader {
 				}
 			}
 			if (!hasValidExtension) {
-				int resultValue = JOptionPane.showConfirmDialog(parent, "<html>File <font color=#0000ff>" + file.getName()
-				+ "</font> does not have valid extension.<br>Do you want to replace it anyway?</html>", "JMT - Warning",
-				JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-				if (resultValue != JOptionPane.OK_OPTION) {
+				if (!view.confirmSaveWithoutValidExtension(parent, file)) {
 					return CANCELLED;
 				}
 			}
@@ -446,202 +425,6 @@ public class ModelLoader {
 			// If an exception is thrown, reports that format is unknown
 			return FILE_UNKNOWN;
 		}
-	}
-	// --------------------------------------------------------------------------------------------
-
-	// --- Methods to show dialogs ----------------------------------------------------------------
-	/**
-	 * Adds only compatible filters to current dialog
-	 */
-	protected void addCompatibleFilters() {
-		dialog.addChoosableFileFilter(ALL);
-		if (defaultFilter == JABA) {
-			dialog.addChoosableFileFilter(JABA);
-			dialog.setFileFilter(JABA);
-		} else {
-			dialog.addChoosableFileFilter(ALL_NOTJABA);
-			dialog.addChoosableFileFilter(JMODEL);
-			dialog.addChoosableFileFilter(JSIM);
-			dialog.addChoosableFileFilter(JMVA);
-			dialog.setFileFilter(ALL_NOTJABA);
-		}
-	}
-
-	/**
-	 * Shows open file dialog
-	 * @param parent parent component for this dialog
-	 * @return   the return state of the file chooser on popdown:
-	 * <ul>
-	 * <li>JFileChooser.CANCEL_OPTION
-	 * <li>JFileChooser.APPROVE_OPTION
-	 * <li>JFileCHooser.ERROR_OPTION if an error occurs or the
-	 *			dialog is dismissed
-	 * </ul>
-	 * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-	 * returns true.
-	 */
-	protected int showOpenDialog(Component parent) {
-		dialog.resetChoosableFileFilters();
-		addCompatibleFilters();
-		return dialog.showOpenDialog(parent);
-	}
-
-	/**
-	 * Shows save file dialog
-	 * @param    parent  the parent component of the dialog,
-	 *			can be <code>null</code>;
-	 *                  see <code>showDialog</code> for details
-	 * @return   the return state of the file chooser on popdown:
-	 * <ul>
-	 * <li>JFileChooser.CANCEL_OPTION
-	 * <li>JFileChooser.APPROVE_OPTION
-	 * <li>JFileCHooser.ERROR_OPTION if an error occurs or the
-	 *			dialog is dismissed
-	 * </ul>
-	 * @exception HeadlessException if GraphicsEnvironment.isHeadless()
-	 * returns true.
-	 * @see java.awt.GraphicsEnvironment#isHeadless
-	 */
-	protected int showSaveDialog(Component parent) {
-		dialog.resetChoosableFileFilters();
-		dialog.addChoosableFileFilter(defaultSaveFilter);
-		dialog.setFileFilter(defaultSaveFilter);
-		return dialog.showSaveDialog(parent);
-	}
-	// --------------------------------------------------------------------------------------------
-
-	// --- Inner classes --------------------------------------------------------------------------
-	/**
-	 * Custom file chooser class
-	 */
-	protected static class JmtFileChooser extends JFileChooser {
-
-		private static final long serialVersionUID = 1L;
-
-		protected JmtFileFilter defaultSaveFilter;
-
-		/**
-		 * Creates a File chooser in the appropriate directory user default
-		 * @param defaultSaveFilter default file save filter
-		 */
-		public JmtFileChooser(JmtFileFilter defaultSaveFilter) {
-			super(Defaults.getWorkingPath());
-			this.defaultSaveFilter = defaultSaveFilter;
-		}
-
-		/**
-		 * Overrides default method to provide a warning if saving over an existing file
-		 */
-		@Override
-		public void approveSelection() {
-			// Gets the chosen file name
-			String name = getSelectedFile().getName();
-			String parent = getSelectedFile().getParent();
-			if (getDialogType() == OPEN_DIALOG) {
-				super.approveSelection();
-			}
-			if (getDialogType() == SAVE_DIALOG) {
-				boolean hasValidExtension = false;
-				String[] extensions = defaultSaveFilter.getExtensions();
-				for (String e : extensions) {
-					if (name.toLowerCase().endsWith(e)) {
-						hasValidExtension = true;
-						break;
-					}
-				}
-				if (!hasValidExtension) {
-					name += extensions[0];
-					setSelectedFile(new File(parent, name));
-				}
-				if (getSelectedFile().exists()) {
-					int resultValue = JOptionPane.showConfirmDialog(this, "<html>File <font color=#0000ff>" + name
-							+ "</font> already exists in this folder.<br>Do you want to replace it?</html>", "JMT - Warning",
-							JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
-					if (resultValue == JOptionPane.OK_OPTION) {
-						getSelectedFile().delete();
-						super.approveSelection();
-					}
-				} else {
-					super.approveSelection();
-				}
-			}
-		}
-
-	}
-
-	/**
-	 * Inner class used to create simple file filters with only extension check
-	 */
-	public static class JmtFileFilter extends FileFilter {
-
-		public static final String SEP = ";";
-
-		private String[] extensions;
-		private String description;
-
-		/**
-		 * Creates a new file filter with specified semicolon separated list of 
-		 * extensions and specified description
-		 * @param extensionList semicolon separated list of extensions of this
-		 * filter (for example ".jsimg;.jmodel")
-		 * @param text text description of this filter
-		 */
-		public JmtFileFilter(String extensionList, String text) {
-			this.extensions = extensionList.split(SEP);
-			this.description = createDescription(text);
-		}
-
-		/**
-		 * Whether the given file is accepted by this filter.
-		 */
-		@Override
-		public boolean accept(File f) {
-			String name = f.getName().toLowerCase();
-			if (f.isDirectory()) {
-				return true;
-			}
-			for (String e : extensions) {
-				if (name.endsWith(e)) {
-					return true;
-				}
-			}
-			return false;
-		}
-
-		/**
-		 * Creates the description for this filter
-		 * @param text text description of the filter
-		 * @return created description
-		 */
-		private String createDescription(String text) {
-			StringBuffer sb = new StringBuffer();
-			sb.append(text);
-			sb.append(" (*");
-			for (int i = 0; i < extensions.length - 1; i++) {
-				sb.append(extensions[i]);
-				sb.append("; *");
-			}
-			sb.append(extensions[extensions.length - 1]);
-			sb.append(")");
-			return sb.toString();
-		}
-
-		/**
-		 * Gets the extensions of this filter
-		 * @return extensions of this filter
-		 */
-		public String[] getExtensions() {
-			return extensions;
-		}
-
-		/**
-		 * The description of this filter.
-		 */
-		@Override
-		public String getDescription() {
-			return description;
-		}
-
 	}
 	// --------------------------------------------------------------------------------------------
 

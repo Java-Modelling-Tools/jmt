@@ -3085,6 +3085,15 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		}
 	}
 
+	private void deleteServerTypeMeasures(Object serverTypeKey) {
+		Iterator<Object> it = measuresKeyset.iterator();
+		while (it.hasNext()) {
+			if (getMeasureServerTypeKey(it.next()) == serverTypeKey) {
+				it.remove();
+			}
+		}
+	}
+
 	@Override
 	public Vector<Object> getMeasureKeys() {
 		return measuresKeyset;
@@ -5011,7 +5020,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 
 		sd.serverTypes.remove(index);
 		updateServerTypeIds(stationKey);
-		deleteStationMeasures(serverKey);
+		deleteServerTypeMeasures(serverKey);
 	}
 
 	public void updateNumOfServers(Object stationKey, int newTotal){
