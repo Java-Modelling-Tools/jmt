@@ -316,9 +316,9 @@ For more information, please see the full [License.txt](License.txt) file.
 
 Laboratorio di Valutazione delle Prestazioni - Politecnico di Milano, Italy
 
-Department of Computing - Imperial College London, UK
-
 Software Engineering Research Group (SWEN) - University of L’Aquila, Italy
+
+Department of Computing - Imperial College London, UK (until 2025)
 
 Project Link: [https://github.com/Java-Modelling-Tools/jmt](https://github.com/Java-Modelling-Tools/jmt)
 
