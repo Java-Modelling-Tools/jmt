@@ -5,6 +5,18 @@ import java.awt.event.ActionEvent;
 
 import jsimgraph.controller.Mediator;
 
+/**
+ * Provides the Set Bezier Connect State functionality of the actions.
+ */
+/**
+ * Provides the Set Bezier Connect State functionality of the actions.
+ */
+/**
+ * Provides the Set Bezier Connect State functionality of the actions.
+ */
+/**
+ * Provides the Set Bezier Connect State functionality of the actions.
+ */
 public class SetBezierConnectState extends AbstractJmodelAction {
 
     private static final long serialVersionUID = 1L;

@@ -18,6 +18,18 @@ import common.definitions.StationDefinition;
 import common.editors.ImagedComboBoxCellEditorFactory;
 import common.panels.WarningScrollTable;
 
+/**
+ * Swing panel of the JMT wizard providing the deadline editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the deadline editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the deadline editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the deadline editor view.
+ */
 public class DeadlineEditor extends WizardPanel implements CommonConstants {
 
   private static final long serialVersionUID = 1L;

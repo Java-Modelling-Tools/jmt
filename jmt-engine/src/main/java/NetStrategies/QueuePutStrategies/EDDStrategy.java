@@ -9,6 +9,18 @@ import QueueNet.JobInfo;
 import QueueNet.JobInfoList;
 import QueueNet.NodeSection;
 
+/**
+ * Earliest Due Date queue insertion strategy: the job with the earliest due date is placed ahead of the others.
+ */
+/**
+ * Earliest Due Date queue insertion strategy: the job with the earliest due date is placed ahead of the others.
+ */
+/**
+ * Earliest Due Date queue insertion strategy: the job with the earliest due date is placed ahead of the others.
+ */
+/**
+ * Earliest Due Date queue insertion strategy: the job with the earliest due date is placed ahead of the others.
+ */
 public class EDDStrategy extends QueuePutStrategy {
 
 

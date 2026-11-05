@@ -20,6 +20,18 @@ package common.joinStrategies;
 
 import common.joinStrategies.JoinStrategy;
 
+/**
+ * Join strategy that releases the job when a subset of its tasks has arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when a subset of its tasks has arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when a subset of its tasks has arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when a subset of its tasks has arrived at the join station.
+ */
 public class PartialJoin extends JoinStrategy {
 
 	private int requiredNum = 1;

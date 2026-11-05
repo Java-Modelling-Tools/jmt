@@ -27,6 +27,7 @@ public class MultiThreadTMVASolver extends TreeTraverserMulti implements IThread
 	 * Solves the network rooted at the specified node using TMVA.
 	 * @param node The root node.
 	 * @param N The population vector.
+	 * @return the resulting mva results
 	 */
 	@Override
 	public MVAResults solve(Node node, PopulationVector N) {

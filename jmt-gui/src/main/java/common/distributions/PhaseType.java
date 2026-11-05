@@ -27,7 +27,7 @@ import common.JMTImageLoader;
  * <p>Description: Phase-Type distribution data structure</p>
  * 
  * @author Lulai Zhu
- * @date   December 26, 2017
+ * @since   December 26, 2017
  */
 public class PhaseType extends Distribution {
 

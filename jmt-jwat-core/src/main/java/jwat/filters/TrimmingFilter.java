@@ -19,6 +19,18 @@ package jwat.filters;
 
 import jwat.Observation;
 
+/**
+ * Trimming filter of JWAT: removes the outliers beyond a given percentile.
+ */
+/**
+ * Trimming filter of JWAT: removes the outliers beyond a given percentile.
+ */
+/**
+ * Trimming filter of JWAT: removes the outliers beyond a given percentile.
+ */
+/**
+ * Trimming filter of JWAT: removes the outliers beyond a given percentile.
+ */
 public class TrimmingFilter implements FilterOnVariable {
 	private int index;
 	private boolean up; //true eliminate from index otherwise the opposite way

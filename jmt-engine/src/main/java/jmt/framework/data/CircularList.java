@@ -195,6 +195,7 @@ public class CircularList<E> extends AbstractList<E> implements List<E>, RandomA
 	}
 
 	/**
+	 * Returns the first.
 	 * @return the first element of the list
 	 * @throws IllegalArgumentException if the list is empty
 	 */
@@ -206,6 +207,7 @@ public class CircularList<E> extends AbstractList<E> implements List<E>, RandomA
 	}
 
 	/**
+	 * Returns the last.
 	 * @return the last element of the list
 	 * @throws IllegalArgumentException if the list is empty
 	 */
@@ -221,6 +223,7 @@ public class CircularList<E> extends AbstractList<E> implements List<E>, RandomA
 	 * @param externalIndex the external index
 	 * @param the size used for the IndexOutOfBoundsException check
 	 * @return translated index
+	 * @param size the size
 	 */
 	private int translateIndex(int externalIndex, int size) {
 		if (externalIndex < 0 || externalIndex >= size) {

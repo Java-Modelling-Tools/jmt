@@ -6,6 +6,18 @@ import javax.swing.JTable;
 
 import common.CommonConstants;
 
+/**
+ * Table showing the j wat bivariate stats.
+ */
+/**
+ * Table showing the j wat bivariate stats.
+ */
+/**
+ * Table showing the j wat bivariate stats.
+ */
+/**
+ * Table showing the j wat bivariate stats.
+ */
 public class JWatBivariateStatsTable extends JTable implements CommonConstants {
 	/**
 	 * 

@@ -22,7 +22,7 @@ import java.util.Vector;
 /**
  * A class representing the convex hull of a set of points.
  *
- * @author - Chris Pudney <mailto:cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author - Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version - 1.1
  */
 public class ConvexHull extends DSurface {
@@ -43,8 +43,8 @@ public class ConvexHull extends DSurface {
 	/**
 	 * Constructs the convex hull of a set of vertices.
 	 *
-	 * @param - vertices  the set of vertices
-	 * @exception - ConvexHullException
+	 * @param vertices  the set of vertices
+	 * @throws ConvexHullException
 	 *              if hull construction fails
 	 */
 	public ConvexHull(Vector<Vertex> vertices) throws ConvexHullException {
@@ -116,8 +116,9 @@ public class ConvexHull extends DSurface {
 	/**
 	 * Determine the hull faces that have vertices in each of two sets
 	 *
-	 * @param - s1, s2  the vertex sets
+	 * @param s1, s2  the vertex sets
 	 * @return - returns a vector of triangles that lie on the hull
+	 * @param s2 the s2 parameter
 	 */
 	public Vector<Triangle> interSetFaces(Vector s1, Vector s2) {
 		Vector<Polygon> faces = getFaces();
@@ -139,7 +140,7 @@ public class ConvexHull extends DSurface {
 	/**
 	 * Check that the vertex coordinates are within bounds 
 	 *
-	 * @param - vertex  the vertex to check
+	 * @param vertex  the vertex to check
 	 * @return - True/false if the vertex is inside/outside the legal
 	 *           bounds
 	 * @see - COORD_RANGE

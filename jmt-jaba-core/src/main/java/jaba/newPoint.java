@@ -14,6 +14,18 @@ package jaba;
 
 import java.awt.Point;
 
+/**
+ * Point used by the JABA Graham scan convex hull algorithm.
+ */
+/**
+ * Point used by the JABA Graham scan convex hull algorithm.
+ */
+/**
+ * Point used by the JABA Graham scan convex hull algorithm.
+ */
+/**
+ * Point used by the JABA Graham scan convex hull algorithm.
+ */
 public class newPoint extends Point {
 
 	/**

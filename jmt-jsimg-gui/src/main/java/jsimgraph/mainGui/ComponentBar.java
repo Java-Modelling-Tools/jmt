@@ -36,7 +36,7 @@ import jsimgraph.controller.actions.SetInsertState;
  *         Date: 4-giu-2005
  *         Time: 14.13.55
  * 
- * Modified by Giuseppe De Cicco & Fabio Granara
+ * Modified by Giuseppe De Cicco &amp; Fabio Granara
  */
 public class ComponentBar extends JMTToolBar {
 

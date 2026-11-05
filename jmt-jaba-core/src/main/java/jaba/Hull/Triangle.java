@@ -66,6 +66,7 @@ public class Triangle extends Polygon {
 	 * Tests whether a triangle is present in a vector.
 	 *
 	 * @param vec  vector of triangles to match
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean matches(Vector vec) {
 		for (Enumeration e = vec.elements(); e.hasMoreElements();) {
@@ -99,6 +100,7 @@ public class Triangle extends Polygon {
 	 * @param v1, v2  the other two vertices
 	 * @return        the third vertex or null if v1 and v2 are not
 	 *                vertices
+	 * @param v2 the v2 parameter
 	 */
 	public Vertex thirdVertex(Vertex v1, Vertex v2) {
 		Vector<Vertex> vertices = getVertices();
@@ -120,9 +122,11 @@ public class Triangle extends Polygon {
 	/**
 	 * Returns the triangle that shares a particular edge.
 	 *
-	 * @params tris   the list of triangles to search
+	 * @param tris   the list of triangles to search
 	 *         v1 v2  the vertices that define the edge
 	 * @return        the neighbouring triangle or null if not found
+	 * @param v1 the v1 parameter
+	 * @param v2 the v2 parameter
 	 */
 	public Triangle edgeNeighbour(Vector tris, Vertex v1, Vertex v2) {
 		for (Enumeration e = tris.elements(); e.hasMoreElements();) {
@@ -184,6 +188,7 @@ public class Triangle extends Polygon {
 	 * determined by the rh-rule. 
 	 *
 	 * @param v the vertex
+	 * @return the resulting int
 	 */
 	public int volume6(Vertex v) {
 		Vector<Vertex> vertices = getVertices();

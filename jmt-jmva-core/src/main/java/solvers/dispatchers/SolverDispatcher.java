@@ -70,6 +70,7 @@ public class SolverDispatcher {
      * Solves the model in file.
      * @throws InputDataException if some input data are malformed
      * @throws SolverException    if something goes wrong during solution
+     * @param file the file
      */
     public void solve(File file) throws InputDataException, SolverException {
         model = new ExactModel();

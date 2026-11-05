@@ -9,6 +9,18 @@ import QueueNet.JobInfo;
 import QueueNet.JobInfoList;
 import QueueNet.NodeSection;
 
+/**
+ * Earliest Deadline First queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy with priorities.
+ */
+/**
+ * Earliest Deadline First queue insertion strategy with priorities.
+ */
 public class EDFStrategyPriority extends EDDStrategyPriority implements PreemptiveStrategy {
 
   @Override

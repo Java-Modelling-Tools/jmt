@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 
 import javax.swing.*;
 
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
 public class ShiftedGeometric extends Distribution {
     /**
      * Constructs a new Shifted Geometric Distribution

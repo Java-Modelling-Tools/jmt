@@ -5,6 +5,18 @@ import jsimgraph.controller.Mediator;
 
 import java.awt.event.ActionEvent;
 
+/**
+ * Provides the Action Bezier Edge Select Control Point functionality of the actions.
+ */
+/**
+ * Provides the Action Bezier Edge Select Control Point functionality of the actions.
+ */
+/**
+ * Provides the Action Bezier Edge Select Control Point functionality of the actions.
+ */
+/**
+ * Provides the Action Bezier Edge Select Control Point functionality of the actions.
+ */
 public class ActionBezierEdgeSelectControlPoint extends AbstractJmodelAction {
 
 

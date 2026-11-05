@@ -3,6 +3,18 @@ package jsimgraph;
 import java.awt.geom.Point2D;
 import java.util.List;
 
+/**
+ * Point utilities of the JSIMgraph editor.
+ */
+/**
+ * Point utilities of the JSIMgraph editor.
+ */
+/**
+ * Point utilities of the JSIMgraph editor.
+ */
+/**
+ * Point utilities of the JSIMgraph editor.
+ */
 public class UtilPoint {
 
     public static Point2D subtractPoints(Point2D p1, Point2D p2){

@@ -25,7 +25,7 @@ import jsimgraph.controller.Mediator;
 
 /**
  * A class representing the "set right" action.
- * @author Giuseppe De Cicco & Fabio Granara
+ * @author Giuseppe De Cicco &amp; Fabio Granara
  * Date: 22-08-2006
  */
 public class ActionSetRight extends AbstractJmodelAction {

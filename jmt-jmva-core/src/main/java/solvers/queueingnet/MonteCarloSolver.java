@@ -22,6 +22,18 @@ import solvers.queueingnet.amva.Solver;
 import solvers.utilities.MemoryUsageUtils;
 import solvers.utilities.MiscMathsFunctions;
 
+/**
+ * Monte Carlo solution algorithm of JMVA, used by the exact solvers to reduce the complexity of large models.
+ */
+/**
+ * Monte Carlo solution algorithm of JMVA, used by the exact solvers to reduce the complexity of large models.
+ */
+/**
+ * Monte Carlo solution algorithm of JMVA, used by the exact solvers to reduce the complexity of large models.
+ */
+/**
+ * Monte Carlo solution algorithm of JMVA, used by the exact solvers to reduce the complexity of large models.
+ */
 public class MonteCarloSolver extends QNSolver {
 
 	private int maxSamples;

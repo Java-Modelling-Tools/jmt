@@ -13,6 +13,18 @@ import org.xml.sax.SAXException;
 
 import java.io.File;
 
+/**
+ * Moment of a distribution used by the method of moments (MoM) exact algorithm of JMVA.
+ */
+/**
+ * Moment of a distribution used by the method of moments (MoM) exact algorithm of JMVA.
+ */
+/**
+ * Moment of a distribution used by the method of moments (MoM) exact algorithm of JMVA.
+ */
+/**
+ * Moment of a distribution used by the method of moments (MoM) exact algorithm of JMVA.
+ */
 public class Moment {
 
 	// TODO: Update this class to include priorities

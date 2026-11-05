@@ -74,7 +74,8 @@ public class HullVertex {
 	 *            the z-coord
 	 * @param id
 	 *            the index of the related station
-	 * @param stationNames 
+	 * @param name
+	 *            the name of the related station
 	 */
 	public HullVertex( int x, int y, int z, int id, String name ) {
 		this.x = x;
@@ -142,7 +143,7 @@ public class HullVertex {
 	
 
 	/**
-	 * Returns the object ID related to this vertex, or <tt>null</tt> if this
+	 * Returns the object ID related to this vertex, or <code>null</code> if this
 	 * vertex is a projected one.
 	 * 
 	 * @return The related object ID.
@@ -216,6 +217,7 @@ public class HullVertex {
 	
 
 	/**
+	 * Returns the name.
 	 * @return the name
 	 */
 	public String getName() {
@@ -224,6 +226,7 @@ public class HullVertex {
 
 
 	/**
+	 * Sets the name.
 	 * @param name the name to set
 	 */
 	public void setName(String name) {

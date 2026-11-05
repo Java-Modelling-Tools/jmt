@@ -21,7 +21,7 @@ import java.util.Vector;
 /**
  * A class representing a dynamic surface.
  *
- * @author  Chris Pudney <mailto:cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author  Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version 1.1
  */
 public class DSurface extends Surface {
@@ -48,7 +48,8 @@ public class DSurface extends Surface {
 	/**
 	 * Delete a polygonal face from a surface.
 	 *
-	 * @param  a polygon representing the face
+	 * @param p a polygon representing the face
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean deleteFace(Polygon p) {
 		return getFaces().removeElement(p);

@@ -13,6 +13,18 @@ import org.apache.oro.text.regex.PatternMatcherInput;
 import org.apache.oro.text.regex.Perl5Compiler;
 import org.apache.oro.text.regex.Perl5Matcher;
 
+/**
+ * Loads the input file formats of JWAT (standard and customized).
+ */
+/**
+ * Loads the input file formats of JWAT (standard and customized).
+ */
+/**
+ * Loads the input file formats of JWAT (standard and customized).
+ */
+/**
+ * Loads the input file formats of JWAT (standard and customized).
+ */
 public class AllInputLoader extends InputLoader implements JWATConstants {
 
 	public AllInputLoader(Parameter param, String fileName, VariableMapping[] map, ProgressShow prg) throws FileNotFoundException {

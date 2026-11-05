@@ -2,6 +2,18 @@ package jwat.filters;
 
 import jwat.Observation;
 
+/**
+ * Trimming filter of JWAT: keeps only the observations between two given percentiles.
+ */
+/**
+ * Trimming filter of JWAT: keeps only the observations between two given percentiles.
+ */
+/**
+ * Trimming filter of JWAT: keeps only the observations between two given percentiles.
+ */
+/**
+ * Trimming filter of JWAT: keeps only the observations between two given percentiles.
+ */
 public class TrimmingBetweenFilter implements FilterOnVariable {
 	private int min;
 	private int max;

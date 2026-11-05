@@ -7,6 +7,18 @@ import random.Distribution;
 import random.Parameter;
 import org.apache.commons.lang.mutable.MutableDouble;
 
+/**
+ * Reneging impatience strategy: jobs abandon the queue after waiting for a given time.
+ */
+/**
+ * Reneging impatience strategy: jobs abandon the queue after waiting for a given time.
+ */
+/**
+ * Reneging impatience strategy: jobs abandon the queue after waiting for a given time.
+ */
+/**
+ * Reneging impatience strategy: jobs abandon the queue after waiting for a given time.
+ */
 public class Reneging implements Impatience {
 
   private Distribution distribution;

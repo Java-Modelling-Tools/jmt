@@ -37,6 +37,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentEvent;
 
 
+/**
+ * Swing panel of the JMT wizard providing the server vacation editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server vacation editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server vacation editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the server vacation editor view.
+ */
 public class ServerVacationEditor extends WizardPanel implements CommonConstants {
 
     private static final long serialVersionUID = 1L;

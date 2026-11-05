@@ -164,17 +164,17 @@ public class StandardMVASolver implements IThreadedTMVASolver {
 		double s[][][] = new double[K][C][1];
 		double v[][] = new double[K][C];
 		int pop[] = new int[C];
-		for (int i = 0; i < K; i++) {
+		for (int i = 0; i &lt; K; i++) {
 			n[i] = "s" + i;
 			t[i] = qnm.getQueueType(i).ordinal();
-			for (int j = 0; j < C; j++) {
+			for (int j = 0; j &lt; C; j++) {
 				double d = qnm.getDemand(i, j);
 				s[i][j][0] = d;
 				v[i][j] = d > 0 ? 1.0 : 0.0;
 			}
 		}
 
-		for (int j = 0; j < C; j++) {
+		for (int j = 0; j &lt; C; j++) {
 			pop[j] = qnm.N.get(j);
 		}
 		

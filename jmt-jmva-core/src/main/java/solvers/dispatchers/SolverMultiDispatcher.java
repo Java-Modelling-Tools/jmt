@@ -9,6 +9,18 @@ import solvers.*;
 import solvers.dataStructures.BigRational;
 import solvers.multiSolverAlgorithms.*;
 
+/**
+ * Dispatcher of the JMVA multiclass solvers: runs the selected exact or approximate algorithm and collects the results.
+ */
+/**
+ * Dispatcher of the JMVA multiclass solvers: runs the selected exact or approximate algorithm and collects the results.
+ */
+/**
+ * Dispatcher of the JMVA multiclass solvers: runs the selected exact or approximate algorithm and collects the results.
+ */
+/**
+ * Dispatcher of the JMVA multiclass solvers: runs the selected exact or approximate algorithm and collects the results.
+ */
 public class SolverMultiDispatcher {
 
     public static void solveMulti(ExactModel model, int iteration) throws UnsupportedModelException, InputDataException, SolverException {

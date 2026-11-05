@@ -145,6 +145,7 @@ public abstract class Basis {
 	protected abstract void setSize();
 
 	/**
+	 * Returns the size.
 	 * @return The size of the basis
 	 */
 	public int getSize() {
@@ -159,6 +160,7 @@ public abstract class Basis {
 	public abstract void computePerformanceMeasures() throws InternalErrorException;
 
 	/**
+	 * Returns the current class.
 	 * @return The current class being considered
 	 */
 	public int getCurrentClass() {
@@ -166,6 +168,7 @@ public abstract class Basis {
 	}
 
 	/**
+	 * Returns the current class population.
 	 * @return The population in the current class being considered
 	 */
 	public int getCurrentClassPopulation() {
@@ -174,7 +177,7 @@ public abstract class Basis {
 
 	/**
 	 * Sets the population of the current class being considered
-	 * @param popualtion
+	 * @param population the population of the current class
 	 */
 	public void setCurrentClassPopulation(int population) {
 		current_class_population = population;

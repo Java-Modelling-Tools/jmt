@@ -273,7 +273,7 @@ public class Defaults implements CommonConstants {
 	}
 
 	/**
-	 * Saves current default values into <CODE>FILENAME</CODE>
+	 * Saves current default values into <code>FILENAME</code>
 	 * @return true iff file was correctly saved
 	 */
 	public static boolean save() {
@@ -290,7 +290,7 @@ public class Defaults implements CommonConstants {
 	}
 
 	/**
-	 * Reloads current default values from <CODE>FILENAME</CODE>
+	 * Reloads current default values from <code>FILENAME</code>
 	 */
 	public static void reload() {
 		prop = new Properties(getDefaults());

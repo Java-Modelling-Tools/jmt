@@ -4,6 +4,15 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+/**
+ * Global settings of JMT, read from the globalsettings configuration file.
+ */
+/**
+ * Global settings of JMT, read from the globalsettings configuration file.
+ */
+/**
+ * Global settings of JMT, read from the globalsettings configuration file.
+ */
 public class GlobalSettings implements Serializable {
 	// Some settings
 	public static final String VERSION = "jmt.version";

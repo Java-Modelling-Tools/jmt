@@ -46,6 +46,7 @@ public class ExpressionParseException extends Exception {
 	}
 
 	/**
+	 * Returns the loc.
 	 * @return the location of the error, or -1 if the parser did not supply a location.
 	 */
 	public int getLoc() {

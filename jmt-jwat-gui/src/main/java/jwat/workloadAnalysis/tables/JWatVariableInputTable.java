@@ -48,6 +48,18 @@ import table.ComboBoxCell;
 import jwat.JWATConstants;
 import jwat.workloadAnalysis.tables.listeners.RowDeleteListener;
 
+/**
+ * Table showing the j wat variable input.
+ */
+/**
+ * Table showing the j wat variable input.
+ */
+/**
+ * Table showing the j wat variable input.
+ */
+/**
+ * Table showing the j wat variable input.
+ */
 public class JWatVariableInputTable extends JTable implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

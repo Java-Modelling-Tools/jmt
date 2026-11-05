@@ -8,6 +8,18 @@ import QueueNet.PSJobInfoList;
 
 import java.util.Arrays;
 
+/**
+ * Queue based Processor Sharing strategy of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy of the JSIM engine.
+ */
 public class QBPSStrategy extends PSStrategy {
     public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {
         Boolean[] compatibilities = new Boolean[classes.size()];

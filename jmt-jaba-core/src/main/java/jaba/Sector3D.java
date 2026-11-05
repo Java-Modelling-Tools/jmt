@@ -202,6 +202,7 @@ public class Sector3D {
 	}
 
 	/**
+* Method CountStations.
 * @return an int that corresponds to the number of stations associated with a sector
 	 */
 	public int CountStations() {
@@ -235,6 +236,7 @@ public class Sector3D {
 	}
 
 	/**
+* Returns the type.
 * @return the type of Sector
 	 */
 	public int getType() {

@@ -19,6 +19,18 @@ package jwat.input;
 
 import java.util.ArrayList;
 
+/**
+ * String mapping of the JWAT input formats.
+ */
+/**
+ * String mapping of the JWAT input formats.
+ */
+/**
+ * String mapping of the JWAT input formats.
+ */
+/**
+ * String mapping of the JWAT input formats.
+ */
 public class StringMapping extends VariableMapping {
 
 	@Override

@@ -33,6 +33,18 @@ import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
 //UPDATE 02/11/2006:	+clustered variable display
+/**
+ * Swing component displaying the disp k mean matrix.
+ */
+/**
+ * Swing component displaying the disp k mean matrix.
+ */
+/**
+ * Swing component displaying the disp k mean matrix.
+ */
+/**
+ * Swing component displaying the disp k mean matrix.
+ */
 public class DispKMeanMatrix extends JScrollPane {
 	/**
 	 * 

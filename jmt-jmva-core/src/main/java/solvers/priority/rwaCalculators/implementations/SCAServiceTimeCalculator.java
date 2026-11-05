@@ -7,6 +7,18 @@ import solvers.priority.rwaCalculators.UtilizationSumCalculator;
 
 import java.util.Map;
 
+/**
+ * Provides the SCA Service Time Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Service Time Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Service Time Calculator functionality of the implementations.
+ */
+/**
+ * Provides the SCA Service Time Calculator functionality of the implementations.
+ */
 public class SCAServiceTimeCalculator implements ReducedServiceTimeCalculator {
 
     /** Used to allow different variations,

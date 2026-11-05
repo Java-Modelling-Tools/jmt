@@ -7,6 +7,18 @@ import jwat.StatBivariate;
 import jwat.JWATConstants;
 
 //TODO: al modello deve essere passati i nomi delle variabili e le statisctiche bivariate
+/**
+ * Data model of the j wat bivariate stats table.
+ */
+/**
+ * Data model of the j wat bivariate stats table.
+ */
+/**
+ * Data model of the j wat bivariate stats table.
+ */
+/**
+ * Data model of the j wat bivariate stats table.
+ */
 public class JWatBivariateStatsTableModel extends AbstractTableModel implements JWATConstants {
 	/**
 	 * 

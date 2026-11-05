@@ -3,6 +3,18 @@ package solvers.priority.prioMVACalculators.implementations.utilisations;
 import solvers.priority.prioMVACalculators.BasePrioMVAUtilCalculator;
 import solvers.utilities.MVAPopulation;
 
+/**
+ * Provides the BKT Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the BKT Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the BKT Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the BKT Prio MVA Util Calculator functionality of the utilisations.
+ */
 public class BKTPrioMVAUtilCalculator extends BasePrioMVAUtilCalculator {
 
     /**

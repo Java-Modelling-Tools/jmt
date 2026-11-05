@@ -4,6 +4,18 @@ import analytical.ExactConstants;
 import solvers.Solver;
 import solvers.SolverMulti;
 
+/**
+ * Converters of the constants used by the JMVA solvers.
+ */
+/**
+ * Converters of the constants used by the JMVA solvers.
+ */
+/**
+ * Converters of the constants used by the JMVA solvers.
+ */
+/**
+ * Converters of the constants used by the JMVA solvers.
+ */
 public class ConstantConvertors {
 
     // TODO: Merge SolverMulti and SolverSingle Constants

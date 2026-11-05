@@ -192,6 +192,8 @@ public abstract class NodeSection {
 	 * @param jobClass Job class to be analyzed.
 	 * @param measurement Set of measure to be activated.
 	 * @throws NetException
+	 * @param isServerType the is server type
+	 * @param serverTypeId the server type id
 	 */
 	public void analyze(int name, JobClass jobClass, Measure measurement, boolean isServerType, int serverTypeId) throws NetException {
 		switch (name) {

@@ -20,6 +20,18 @@ package NetStrategies.JoinStrategies;
 
 import NetStrategies.JoinStrategy;
 
+/**
+ * Join strategy guarded by a condition on the tasks that have arrived at the join station.
+ */
+/**
+ * Join strategy guarded by a condition on the tasks that have arrived at the join station.
+ */
+/**
+ * Join strategy guarded by a condition on the tasks that have arrived at the join station.
+ */
+/**
+ * Join strategy guarded by a condition on the tasks that have arrived at the join station.
+ */
 public class GuardJoin extends JoinStrategy {
 
 	private Integer[] required;

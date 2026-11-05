@@ -42,9 +42,9 @@ import org.freehep.graphicsbase.util.export.ExportDialog;
  * <p>Description: Displays a graph with autoresizing property. This is designed to be a
  * really lightweight component as is supposed to be updated during simulation.
  * The component will draw data from a vector that can be changed to update the graph.
- * List must contain only object implementing </code>MeasureDefinition.Value</code> interface.
+ * List must contain only object implementing <code>MeasureDefinition.Value</code> interface.
  * After updating List, user should call <code>repaint()</code> method to force update
- * of this graph. Labels on x axis are based on xunit value specified in the constructor or on SimulationTime.</p>
+ * of this graph. Labels on x axis are based on xunit value specified in the constructor or on SimulationTime.
  * 
  * @author Bertoli Marco
  *         Date: 27-set-2005

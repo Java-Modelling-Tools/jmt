@@ -21,6 +21,18 @@ package common.routingStrategies;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Weighted Round Robin Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Weighted Round Robin Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Weighted Round Robin Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Weighted Round Robin Routing strategy of the JMT routing strategies.
+ */
 public class WeightedRoundRobinRouting extends RoutingStrategy {
 
 	private Map<Object, Integer> weights = new HashMap<>();

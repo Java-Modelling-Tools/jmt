@@ -59,6 +59,18 @@ import table.BooleanCellRenderer;
 import table.ExactCellEditor;
 
 
+/**
+ * Swing panel of the JMT wizard providing the blocking region group view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region group view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region group view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region group view.
+ */
 public class BlockingRegionGroupPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

@@ -4,6 +4,18 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import random.AbstractParameter;
 import random.Parameter;
 
+/**
+ * Parameters of the discrete uniform distribution.
+ */
+/**
+ * Parameters of the discrete uniform distribution.
+ */
+/**
+ * Parameters of the discrete uniform distribution.
+ */
+/**
+ * Parameters of the discrete uniform distribution.
+ */
 public class UniformPar extends AbstractParameter implements Parameter {
 
 	private int min;

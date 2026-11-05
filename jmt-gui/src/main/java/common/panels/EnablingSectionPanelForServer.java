@@ -19,6 +19,18 @@ import table.ExactTable;
 import table.ExactTableModel;
 import common.definitions.GraphRefreshable;
 
+/**
+ * Swing panel of the JMT wizard providing the enabling section panel for server view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the enabling section panel for server view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the enabling section panel for server view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the enabling section panel for server view.
+ */
 public class EnablingSectionPanelForServer extends WizardPanel implements CommonConstants {
     private static final long serialVersioUID = 1L;
 

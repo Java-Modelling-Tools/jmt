@@ -58,6 +58,18 @@ import jwat.workloadAnalysis.utils.ModelWorkloadAnalysis;
 import common.CommonConstants;
 import jwat.workloadAnalysis.chart.FuzzyKSingleClusterScatter;
 
+/**
+ * Swing component displaying the fuzzy cluster details.
+ */
+/**
+ * Swing component displaying the fuzzy cluster details.
+ */
+/**
+ * Swing component displaying the fuzzy cluster details.
+ */
+/**
+ * Swing component displaying the fuzzy cluster details.
+ */
 public class FuzzyClusterDetails extends JPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

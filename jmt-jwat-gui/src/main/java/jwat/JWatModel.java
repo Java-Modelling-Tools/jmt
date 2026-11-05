@@ -2,6 +2,18 @@ package jwat;
 
 import jwat.MatrixObservations;
 
+/**
+ * Model interface of the JWAT tool views.
+ */
+/**
+ * Model interface of the JWAT tool views.
+ */
+/**
+ * Model interface of the JWAT tool views.
+ */
+/**
+ * Model interface of the JWAT tool views.
+ */
 public interface JWatModel {
 	public void resetModel();
 

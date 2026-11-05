@@ -62,6 +62,7 @@ public class LogisticFunctionLDBD extends LogisticFunctionBase {
 	 * at the point given by point, for multiserver networks e^(k(x))
 	 * @param point Array representing point to be evaluated
 	 * @return BigDecimal equal to the function value at that point
+	 * @throws InternalErrorException if the operation cannot be completed
 	 */
 	@Override
 	protected BigDecimal safeEvaluate(double[] point) throws InternalErrorException {

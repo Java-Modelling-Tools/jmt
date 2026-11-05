@@ -2,6 +2,18 @@ package common;
 
 import org.jdesktop.swingx.treetable.AbstractMutableTreeTableNode;
 
+/**
+ * Provides the Tree Table Node functionality of the common.
+ */
+/**
+ * Provides the Tree Table Node functionality of the common.
+ */
+/**
+ * Provides the Tree Table Node functionality of the common.
+ */
+/**
+ * Provides the Tree Table Node functionality of the common.
+ */
 public class TreeTableNode extends AbstractMutableTreeTableNode {
 	
 	public String type;

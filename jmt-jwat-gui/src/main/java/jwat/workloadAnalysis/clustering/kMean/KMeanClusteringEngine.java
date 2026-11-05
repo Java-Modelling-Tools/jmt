@@ -26,6 +26,18 @@ import jwat.Observation;
 import jwat.TimeConsumingWorker;
 import jwat.VariableNumber;
 
+/**
+ * Engine running the JWAT k-means clustering.
+ */
+/**
+ * Engine running the JWAT k-means clustering.
+ */
+/**
+ * Engine running the JWAT k-means clustering.
+ */
+/**
+ * Engine running the JWAT k-means clustering.
+ */
 public class KMeanClusteringEngine {
 	private TimeConsumingWorker worker;
 	private KMean clustering;

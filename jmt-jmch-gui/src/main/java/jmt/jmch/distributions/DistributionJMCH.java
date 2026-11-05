@@ -28,8 +28,7 @@ public class DistributionJMCH {
 
     /**
      * Convert the distribution from the gui.common version to the engine.random version
-     * @param distribution the result of the editor
-     * @throws IncorrectDistributionParameterException
+     * @param d the distribution selected in the editor
      */
     public void convertDistribution(common.distributions.Distribution d){
         try{

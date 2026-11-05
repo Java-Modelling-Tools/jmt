@@ -29,6 +29,18 @@ import javax.swing.JPanel;
 
 import common.CommonConstants;
 
+/**
+ * Colors of the JWAT charts.
+ */
+/**
+ * Colors of the JWAT charts.
+ */
+/**
+ * Colors of the JWAT charts.
+ */
+/**
+ * Colors of the JWAT charts.
+ */
 public class JavaWatColor {
 
 	public static void main(String[] v) {

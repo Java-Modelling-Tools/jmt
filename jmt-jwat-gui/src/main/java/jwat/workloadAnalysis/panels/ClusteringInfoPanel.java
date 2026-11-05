@@ -69,6 +69,18 @@ import jwat.workloadAnalysis.clustering.kMean.panels.DispersionkMeanPanel;
 import jwat.workloadAnalysis.clustering.kMean.panels.KMeansInfoCluster;
 import jwat.workloadAnalysis.clustering.kMean.panels.KMeansInfoClustering;
 
+/**
+ * Panel showing the information of a JWAT clustering.
+ */
+/**
+ * Panel showing the information of a JWAT clustering.
+ */
+/**
+ * Panel showing the information of a JWAT clustering.
+ */
+/**
+ * Panel showing the information of a JWAT clustering.
+ */
 public class ClusteringInfoPanel extends WizardPanel implements CommonConstants, JWATConstants {
 
 	private static final long serialVersionUID = 1L;

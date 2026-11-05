@@ -19,6 +19,18 @@
 package jmt.jmch.animation;
 
 
+/**
+ * Animator of JMCH: the thread that drives the animation of the scheduling and routing algorithms.
+ */
+/**
+ * Animator of JMCH: the thread that drives the animation of the scheduling and routing algorithms.
+ */
+/**
+ * Animator of JMCH: the thread that drives the animation of the scheduling and routing algorithms.
+ */
+/**
+ * Animator of JMCH: the thread that drives the animation of the scheduling and routing algorithms.
+ */
 public class Animator extends Thread{
 	private final Object mutex = new Object();
 

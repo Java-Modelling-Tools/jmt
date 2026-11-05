@@ -78,6 +78,8 @@ public class UniformPar extends AbstractParameter implements Parameter {
 	 *
 	 * @return boolean indicating if the parameter is correct or not.
 	 *
+	 * @param min the min
+	 * @param max the max
 	 */
 	private boolean check(double min, double max) {
 		if (max <= min) {

@@ -61,6 +61,7 @@ public class ModularSolverParallelTask implements Callable<Object> {
      * @param b The (initial, non-residual) vector b
      * @param rowsToSkip The rows of the initial matrix A and the vector b that must be skipped
      * @param columnsToSkip The columns of the initial matrix A and the vector b that must be skipped
+     * @throws InconsistentLinearSystemException if the operation cannot be completed
      */
     public void prepare(BigRational[][] Amod, BigRational[] b, Set<Integer> rowsToSkip, Set<Integer> columnsToSkip) throws InconsistentLinearSystemException {
         //this.N = Amod.length;

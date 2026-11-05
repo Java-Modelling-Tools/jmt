@@ -27,7 +27,7 @@ import common.JMTImageLoader;
  * <p>Description: MMPP2 distribution data structure</p>
  * 
  * @author Casale Giuliano
- * @date   October 24, 2008
+ * @since   October 24, 2008
  */
 public class MMPP2 extends Distribution {
 

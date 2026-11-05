@@ -2,6 +2,18 @@ package solvers.utilities;
 
 import java.util.Arrays;
 
+/**
+ * Population vector used by the MVA algorithms of JMVA.
+ */
+/**
+ * Population vector used by the MVA algorithms of JMVA.
+ */
+/**
+ * Population vector used by the MVA algorithms of JMVA.
+ */
+/**
+ * Population vector used by the MVA algorithms of JMVA.
+ */
 public class MVAPopulation {
 
     /**

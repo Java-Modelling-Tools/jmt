@@ -18,6 +18,18 @@
 
 package common.joinStrategies;
 
+/**
+ * Join strategy that releases the job when all its tasks have arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when all its tasks have arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when all its tasks have arrived at the join station.
+ */
+/**
+ * Join strategy that releases the job when all its tasks have arrived at the join station.
+ */
 public class NormalJoin extends JoinStrategy {
 
 	private int requiredNum = -1;

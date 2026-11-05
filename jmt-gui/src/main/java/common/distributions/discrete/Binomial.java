@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 
 import javax.swing.*;
 
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
+/**
+ * Binomial distribution: number of successes in n independent trials, each with probability p.
+ */
 public class Binomial extends Distribution {
     /**
      * Constructs a new Binomial Distribution

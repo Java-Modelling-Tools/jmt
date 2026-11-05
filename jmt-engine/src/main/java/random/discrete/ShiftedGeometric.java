@@ -5,6 +5,18 @@ import random.Parameter;
 
 import java.util.function.Function;
 
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
+/**
+ * Shifted geometric distribution: number of trials before the first success, shifted by one.
+ */
 public class ShiftedGeometric extends DiscreteDistribution {
     private double probability;
 

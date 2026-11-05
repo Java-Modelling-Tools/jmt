@@ -20,6 +20,18 @@ package NodeSections;
 
 import NetStrategies.ServiceStrategy;
 
+/**
+ * Polling server that serves only the jobs present when the server arrives at the queue (gated service).
+ */
+/**
+ * Polling server that serves only the jobs present when the server arrives at the queue (gated service).
+ */
+/**
+ * Polling server that serves only the jobs present when the server arrives at the queue (gated service).
+ */
+/**
+ * Polling server that serves only the jobs present when the server arrives at the queue (gated service).
+ */
 public class GatedPollingServer extends PollingServer {
 
     public GatedPollingServer(Integer numberOfServers, Integer[] numberOfVisits, ServiceStrategy[] serviceStrategies,

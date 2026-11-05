@@ -1,5 +1,17 @@
 package NetStrategies.VacationStrategies;
 
+/**
+ * Acknowledgement body exchanged when a queue becomes idle in a vacation model.
+ */
+/**
+ * Acknowledgement body exchanged when a queue becomes idle in a vacation model.
+ */
+/**
+ * Acknowledgement body exchanged when a queue becomes idle in a vacation model.
+ */
+/**
+ * Acknowledgement body exchanged when a queue becomes idle in a vacation model.
+ */
 public class QueueIdleAckBody {
     private final boolean serverStartsVacation;
 

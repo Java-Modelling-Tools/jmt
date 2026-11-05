@@ -41,6 +41,18 @@ import java.awt.*;
 import java.util.regex.Pattern;
 
 
+/**
+ * Swing panel of the JMT wizard providing the job parallelism editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the job parallelism editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the job parallelism editor view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the job parallelism editor view.
+ */
 public class JobParallelismEditor extends WizardPanel implements CommonConstants {
 
     private static final long serialVersionUID = 1L;

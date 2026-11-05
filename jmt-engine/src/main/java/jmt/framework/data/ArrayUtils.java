@@ -33,11 +33,13 @@ import java.util.Arrays;
 
 /**
  * Assorted array mangling stuff.<br>
+ * <ul>
  * <li><code>resize</code> methods return a resized copy of an array, preserving data where possible and padding with a specified value
  * <li><code>copy</code> methods perform a deep copy of an array. They come in two flavors: one that copies into an existing array (that must have been properly initialized) and one that creates the copy from scratch
  * <li><code>delete</code> methods delete an element in an array, returning a reduced-size copy in which following elements have been shifted to fill the gap. For multidim arrays shallow copy is performed when possible - ie do not assume the new array to be independent from the old one
  * <li><code>toCSV</code> and <code>fromCSV</code> methods input/output single rows as Strings of comma-separated values.
  * <li><code>toString</code> methods return a somewhat useful String representation of an array.
+ * </ul>
  * <p><b><i>NOTE:</i></b> <code>fromCSV</code> uses the new regex String splitting methods introduced in 1.4. For use in pre-1.4 JDKs it must be rewritten using StringTokenizer.
  *
  */

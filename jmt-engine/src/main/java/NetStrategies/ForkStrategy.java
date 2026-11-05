@@ -25,6 +25,18 @@ import QueueNet.NodeListWithJobNum;
 import QueueNet.NodeSection;
 import random.engine.RandomEngine;
 
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
 public abstract class ForkStrategy implements AutoCheck {
 
 	private RandomEngine randomEngine;

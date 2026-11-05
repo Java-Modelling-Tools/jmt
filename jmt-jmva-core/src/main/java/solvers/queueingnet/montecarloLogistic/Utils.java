@@ -14,6 +14,18 @@ import solvers.SolverMulti;
 import solvers.dataStructures.QNModel;
 import solvers.exceptions.InternalErrorException;
 
+/**
+ * General utilities of the JMVA solvers.
+ */
+/**
+ * General utilities of the JMVA solvers.
+ */
+/**
+ * General utilities of the JMVA solvers.
+ */
+/**
+ * General utilities of the JMVA solvers.
+ */
 public class Utils {
 
 	private static Algebra A = new Algebra();

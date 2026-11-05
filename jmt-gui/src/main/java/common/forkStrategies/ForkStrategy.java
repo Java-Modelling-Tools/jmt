@@ -25,6 +25,18 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Vector;
 
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
+/**
+ * Base class of the JSIM fork strategies, which split a job into the tasks routed to the output stations of a fork.
+ */
 public abstract class ForkStrategy {
 
 	protected static ForkStrategy[] all = null;

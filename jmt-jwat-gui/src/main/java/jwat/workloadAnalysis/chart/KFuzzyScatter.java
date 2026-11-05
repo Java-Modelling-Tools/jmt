@@ -57,6 +57,18 @@ import jwat.JWATConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the k fuzzy scatter.
+ */
+/**
+ * Swing component displaying the k fuzzy scatter.
+ */
+/**
+ * Swing component displaying the k fuzzy scatter.
+ */
+/**
+ * Swing component displaying the k fuzzy scatter.
+ */
 public class KFuzzyScatter extends JPanel {
 	/**
 	 * 

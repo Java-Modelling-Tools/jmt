@@ -1,11 +1,13 @@
 package solvers.queueingnet.amva;
 
 /**
- * This class implements the Bard-Schweitzer algorithm for solving multi-closed
- * models
- * 
- * @author Abhimanyu Chugh
+ * This class implements the Bard-Schweitzer approximate MVA algorithm [Sch79]
+ * for solving multiclass closed models. The approximation removes the class
+ * dependence of the queue lengths by substituting the queue length seen by a
+ * class with the total queue length, as described in the AMVA section of the
+ * JMVA chapter of the JMT user manual.
  *
+ * @author Abhimanyu Chugh
  */
 public class BardSchweitzer extends AMVA {
 

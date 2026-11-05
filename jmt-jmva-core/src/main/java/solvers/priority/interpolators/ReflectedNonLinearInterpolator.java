@@ -1,5 +1,17 @@
 package solvers.priority.interpolators;
 
+/**
+ * Reflected non-linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Reflected non-linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Reflected non-linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Reflected non-linear interpolator of the priority MVA utilization calculators.
+ */
 public class ReflectedNonLinearInterpolator implements Interpolator {
 
     /**

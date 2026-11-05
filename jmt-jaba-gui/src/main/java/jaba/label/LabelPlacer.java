@@ -21,6 +21,18 @@ import java.util.ArrayList;
 
 import jaba.DPoint;
 
+/**
+ * Places the labels of the JABA graphs.
+ */
+/**
+ * Places the labels of the JABA graphs.
+ */
+/**
+ * Places the labels of the JABA graphs.
+ */
+/**
+ * Places the labels of the JABA graphs.
+ */
 public abstract class LabelPlacer {
 
 	protected ArrayList<String> labels;

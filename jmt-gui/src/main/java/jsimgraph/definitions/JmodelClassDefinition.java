@@ -68,7 +68,7 @@ public interface JmodelClassDefinition extends ClassDefinition {
 
 	/**
 	 * Returns serialized form of a class.
-	 * @param key search key for the class.
+	 * @param classKey search key for the class.
 	 * @return serialized form of the class.
 	 */
 	public Object serializeClass(Object classKey);

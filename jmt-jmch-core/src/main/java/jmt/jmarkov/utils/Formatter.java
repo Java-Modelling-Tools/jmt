@@ -23,6 +23,18 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
 
+/**
+ * Formats the numbers shown in the JMCH graphical interface.
+ */
+/**
+ * Formats the numbers shown in the JMCH graphical interface.
+ */
+/**
+ * Formats the numbers shown in the JMCH graphical interface.
+ */
+/**
+ * Formats the numbers shown in the JMCH graphical interface.
+ */
 public class Formatter {
 
 	//--- Constant(s) ---

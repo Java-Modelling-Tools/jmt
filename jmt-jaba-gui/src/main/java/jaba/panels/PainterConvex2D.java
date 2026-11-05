@@ -435,7 +435,7 @@ public class PainterConvex2D {
 	/**
 	 * Print a label over every point, if the point is select
 	 * the label contain the coordinate too
-	 * @param gra The graphic object
+	 * @param g The graphic object
 	 * @param points The vector with all points
 	 */
 	public void pointLabel(Graphics2D g, Vector<Point2D> points) {
@@ -529,7 +529,7 @@ public class PainterConvex2D {
 	/**
 	 * Draw a semi-trasparent area that is the filtered area
 	 * @param g The graphic object
-	 * @param filteredArea The filtered area
+	 * @param filtArea The filtered area
 	 */
 	public void drawFiltArea(Graphics2D g, Area filtArea) {
 		AffineTransform t = new AffineTransform();

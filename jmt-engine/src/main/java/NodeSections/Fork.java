@@ -50,7 +50,7 @@ import random.engine.RandomEngine;
  *         Date: 13-mar-2006
  *         Time: 15.23.22
  * 
- * Modified by J. Shuai & M. Cazzoli, implemented fork strategies
+ * Modified by J. Shuai &amp; M. Cazzoli, implemented fork strategies
  */
 public class Fork extends OutputSection {
 

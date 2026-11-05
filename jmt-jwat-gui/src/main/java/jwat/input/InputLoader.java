@@ -9,6 +9,18 @@ import jwat.MatrixObservations;
 import jwat.Observation;
 import jwat.TimeConsumingWorker;
 
+/**
+ * Loads the input data of a JWAT analysis.
+ */
+/**
+ * Loads the input data of a JWAT analysis.
+ */
+/**
+ * Loads the input data of a JWAT analysis.
+ */
+/**
+ * Loads the input data of a JWAT analysis.
+ */
 public abstract class InputLoader extends TimeConsumingWorker {
 
 	protected Parameter param;

@@ -35,7 +35,7 @@ public class TreeMVASolver extends QNSolver {
 	 * Constructor.
 	 * @param qnm The model to solve.
 	 * @param numThreads The number of threads to use.
-	 * @param useSequentialMVA Whether to use sequential MVA.
+	 * @param useJMTsequentialMVA Whether to use sequential MVA.
 	 * @throws InternalErrorException
 	 */
 	public TreeMVASolver(QNModel qnm, int numThreads, boolean useJMTsequentialMVA) throws InternalErrorException {

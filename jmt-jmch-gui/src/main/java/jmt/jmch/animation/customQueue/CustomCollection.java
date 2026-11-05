@@ -49,7 +49,7 @@ public interface CustomCollection<E> extends Iterable<E>{
 	public Object first();
 	
 	/**
-	 * This is the method of the Iterable<E> interface, needed for iterating over the Collection
+	 * This is the method of the Iterable&lt;E> interface, needed for iterating over the Collection
 	 */
 	public Iterator<E> iterator();
 

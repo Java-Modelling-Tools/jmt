@@ -308,6 +308,7 @@ public class QNModel {
 	 * Decimal numbers are approximated as integers.
 	 *
 	 * @param filename The path to the input file
+	 * @throws InputFileParserException if the operation cannot be completed
 	 */
 	private void readModel(String filename) throws InputFileParserException {
 		FileReader fr = null;

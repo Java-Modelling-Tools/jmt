@@ -44,6 +44,7 @@ public class SimpleSolver extends Solver {
      * @param b The vector b of the linear system Ax = b
      * @return A vector containing the solutions of the linear system
      * @throws OperationNotSupportedException Thrown when the system cannot be solved due to bad vector b size
+     * @throws InconsistentLinearSystemException if the operation cannot be completed
      */
     @Override
     public BigRational[] solve(BigRational[] b) throws OperationNotSupportedException, InconsistentLinearSystemException {

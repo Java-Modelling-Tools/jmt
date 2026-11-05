@@ -5,6 +5,18 @@ import random.Parameter;
 
 import java.util.Hashtable;
 
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
 public class Zipf extends DiscreteDistribution {
 
 	private double alpha;

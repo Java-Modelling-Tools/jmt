@@ -105,6 +105,7 @@ public class Sector2D {
 	}
 
 	/**
+	 * Returns the collinear.
 	 * @return      il vettore con i newPoint collineari
 	 */
 	public Vector<newPoint> getCollinear() {

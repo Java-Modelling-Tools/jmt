@@ -14,6 +14,18 @@ package jaba;
 //
 //
 
+/**
+ * Graham scan convex hull algorithm used by JABA to build the characteristic polytope of a two class model.
+ */
+/**
+ * Graham scan convex hull algorithm used by JABA to build the characteristic polytope of a two class model.
+ */
+/**
+ * Graham scan convex hull algorithm used by JABA to build the characteristic polytope of a two class model.
+ */
+/**
+ * Graham scan convex hull algorithm used by JABA to build the characteristic polytope of a two class model.
+ */
 public class grahamScan {
 
 	java.util.Vector<newPoint> lines = new java.util.Vector<newPoint>(100, 100);

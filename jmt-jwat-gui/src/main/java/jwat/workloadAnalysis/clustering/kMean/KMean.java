@@ -6,6 +6,18 @@ import jwat.workloadAnalysis.clustering.ClusteringInfos;
 import jwat.workloadAnalysis.clustering.kMean.KMeanClusteringEngine.TempClusterStatistics;
 import jwat.JWATConstants;
 
+/**
+ * K-means clustering algorithm of JWAT: partitions the observations into k clusters around their centroids.
+ */
+/**
+ * K-means clustering algorithm of JWAT: partitions the observations into k clusters around their centroids.
+ */
+/**
+ * K-means clustering algorithm of JWAT: partitions the observations into k clusters around their centroids.
+ */
+/**
+ * K-means clustering algorithm of JWAT: partitions the observations into k clusters around their centroids.
+ */
 public class KMean implements Clustering, JWATConstants {
 
 	private ClusteringInfosKMean[] results;

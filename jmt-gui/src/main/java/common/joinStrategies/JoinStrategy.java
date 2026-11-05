@@ -23,6 +23,18 @@ import common.CommonConstants;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
 public abstract class JoinStrategy {
 
 	protected static JoinStrategy[] all = null;

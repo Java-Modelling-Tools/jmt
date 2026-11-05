@@ -69,7 +69,7 @@ public abstract class ComponentBlock {
 	 * Copy Constructor - Shallow Copy
 	 * Returns a block with the same QNModel, Basis and position and sets is current working class.
 	 * @param block The block to copy
-	 * @param The current class under consideration
+	 * @param current_class The current class under consideration
 	 */
 	protected ComponentBlock(ComponentBlock block, int current_class) {
 		this.position = block.position;
@@ -80,6 +80,7 @@ public abstract class ComponentBlock {
 	}
 
 	/**
+	 * Returns the starting col.
 	 * @return The first column contained in this block
 	 */
 	public int getStartingCol() {		
@@ -87,6 +88,7 @@ public abstract class ComponentBlock {
 	}
 	
 	/**
+	 * Returns the starting row.
 	 * @return The first row contained in this block
 	 */
 	public int getStartingRow() {		
@@ -94,6 +96,7 @@ public abstract class ComponentBlock {
 	}
 	
 	/**
+	 * Method size.
 	 * @return The Dimensions of the block, in the form (rows, columns)
 	 */
 	public Position size() {
@@ -120,7 +123,7 @@ public abstract class ComponentBlock {
 	 * @param position Carries information on where to insert the equation depending on the context 
 	 * (can be interpreted differently by subclasses)
 	 * @param n The Population Change Vector n to which the equation relates
-	 * @param queue  The queue k to which the equation relates; 1 <= k <= M
+	 * @param queue  The queue k to which the equation relates; 1 &lt;= k &lt;= M
 	 * @return The row at which the equation was inserted
 	 * @throws BTFMatrixErrorException
 	 * @throws InternalErrorException
@@ -132,7 +135,7 @@ public abstract class ComponentBlock {
 	 * @param position Carries information on where to insert the equation depending on the context 
 	 * (can be interpreted differently by subclasses)
 	 * @param n The Population Change Vector n to which the equation relates
-	 * @param _class  The class r to which the equation relates; 1 <= r <= R
+	 * @param _class  The class r to which the equation relates; 1 &lt;= r &lt;= R
 	 * @return The row at which the equation was inserted
 	 * @throws BTFMatrixErrorException
 	 * @throws InternalErrorException
@@ -141,7 +144,6 @@ public abstract class ComponentBlock {
 
 	/**
 	 * Carries out the appropriate matrix multiplication operation for the block
-	 * @param input Input vector
 	 * @param result Result vector
 	 */
 	public abstract void multiply(BigRational[] result) throws BTFMatrixErrorException;

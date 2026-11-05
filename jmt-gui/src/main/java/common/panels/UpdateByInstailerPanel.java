@@ -16,6 +16,18 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+/**
+ * Swing panel of the JMT wizard providing the update by instailer view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update by instailer view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update by instailer view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update by instailer view.
+ */
 public class UpdateByInstailerPanel {
 
     private static JFrame parentFrame;

@@ -24,6 +24,18 @@ import java.net.URI;
 
 import javax.swing.JOptionPane;
 
+/**
+ * Provides the Browser Launcher functionality of the net.
+ */
+/**
+ * Provides the Browser Launcher functionality of the net.
+ */
+/**
+ * Provides the Browser Launcher functionality of the net.
+ */
+/**
+ * Provides the Browser Launcher functionality of the net.
+ */
 public class BrowserLauncher {
 
 	private static final String errMsg = "Error attempting to launch web browser";

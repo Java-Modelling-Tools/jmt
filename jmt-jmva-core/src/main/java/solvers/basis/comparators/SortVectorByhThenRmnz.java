@@ -35,8 +35,9 @@ public class SortVectorByhThenRmnz implements Comparator<EnhancedVector> {
 	 * Then the value at those positions, left to right
 	 * leftmost non-zero is the smaller.
 	 * 
-	 * @param o The other EnhancedVector object
-	 * @return -1 if this < o, 0 if this = o, 1 if this > o
+	 * @param v1 the first vector to compare
+	 * @param v2 the second vector to compare
+	 * @return -1 if this &lt; o, 0 if this = o, 1 if this > o
 	 */
 	@Override
 	public int compare(EnhancedVector v1,EnhancedVector v2) {

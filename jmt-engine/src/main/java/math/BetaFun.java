@@ -6,7 +6,7 @@
 
 package math;
 
-/** * @(#)pf.js * * Copyright (c) 2000 by Sundar Dorai-Raj
+/** * (#)pf.js * * Copyright (c) 2000 by Sundar Dorai-Raj
  * * @author Sundar Dorai-Raj
  * * Email: sdoraira@vt.edu
  * * This program is free software; you can redistribute it and/or

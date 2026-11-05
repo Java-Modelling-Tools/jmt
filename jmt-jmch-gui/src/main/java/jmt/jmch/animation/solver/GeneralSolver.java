@@ -37,10 +37,9 @@ public class GeneralSolver extends AnimationSolver{
     }
 
     /**
-     * Set the completion Time (which is T) based on the arrival of the job in the system and when the previous job finished
-     * @param arrivalTime
-     * @param randomService
-     * @param index is the i-th station (0 if single queue)
+     * Sets the completion time (T) based on the arrival of the job in the system and when the previous job finished.
+     * @param job the job exiting the system
+     * @param index the i-th station (0 if single queue)
      */
     @Override
     public void jobExit(Job job, int index){

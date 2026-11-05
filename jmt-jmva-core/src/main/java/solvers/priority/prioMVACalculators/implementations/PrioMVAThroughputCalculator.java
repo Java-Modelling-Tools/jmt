@@ -4,6 +4,18 @@ import solvers.multiSolverAlgorithms.SolverMultiMixedPrioMVA;
 import solvers.priority.prioMVACalculators.ThroughputCalculator;
 import solvers.utilities.MVAPopulation;
 
+/**
+ * Throughput calculator of the priority MVA algorithms.
+ */
+/**
+ * Throughput calculator of the priority MVA algorithms.
+ */
+/**
+ * Throughput calculator of the priority MVA algorithms.
+ */
+/**
+ * Throughput calculator of the priority MVA algorithms.
+ */
 public class PrioMVAThroughputCalculator implements ThroughputCalculator {
 
     private double[][] visits;

@@ -24,6 +24,18 @@ import jwat.filters.FilterOnVariable;
 import jwat.workloadAnalysis.exceptions.TrasformException;
 import jwat.JWatModel;
 
+/**
+ * Model of the JWAT workload analysis view.
+ */
+/**
+ * Model of the JWAT workload analysis view.
+ */
+/**
+ * Model of the JWAT workload analysis view.
+ */
+/**
+ * Model of the JWAT workload analysis view.
+ */
 public class ModelWorkloadAnalysis implements JWatModel {
 	// Observation matrix
 	private MatrixObservations matrix = null;
@@ -33,7 +45,7 @@ public class ModelWorkloadAnalysis implements JWatModel {
 	private Vector<ChangeVariableListener> listenerOnChangeVariable = null; //<ChangeVariableListener> 
 
 	/**
-	 * @param par
+	 * Creates a new workload analysis model.
 	 */
 	public ModelWorkloadAnalysis() {
 		listenerOnMatrixChange = new Vector<SetMatrixListener>();
@@ -74,8 +86,7 @@ public class ModelWorkloadAnalysis implements JWatModel {
 	}
 
 	/**
-	 * 
-	 * @param var
+	 * Notifies the listeners that variable transformations changed.
 	 */
 	public void setTransformation() {
 		for (int i = 0; i < listenerOnChangeVariable.size(); i++) {

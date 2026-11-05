@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 
 import javax.swing.*;
 
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
+/**
+ * Zipf distribution, used to model popularity skews in the JMT simulation engine.
+ */
 public class Zipf extends Distribution {
     /**
      * Constructs a new Zipf Distribution

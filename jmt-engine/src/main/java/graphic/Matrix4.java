@@ -225,7 +225,7 @@ public class Matrix4 {
 	/**
 	 * Sets a single column vector.
 	 * 
-	 * @param r
+	 * @param c
 	 *            Column number.
 	 * @param v
 	 *            Vector to be copied onto the column.

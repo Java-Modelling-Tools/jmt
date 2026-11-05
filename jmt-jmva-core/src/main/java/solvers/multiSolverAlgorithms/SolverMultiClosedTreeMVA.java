@@ -12,7 +12,11 @@ import solvers.queueingnet.QNSolver;
 import solvers.queueingnet.treeAlgorithms.tmva.TreeMVASolver;
 
 /**
- * Created by gcasale on 15 Aug 2018.
+ * Solves a multiclass closed model with the exact TreeMVA algorithm [TS85], the
+ * tree based version of the Mean Value Analysis, which reduces the time and
+ * space requirements of the exact solution for models with large dimensions.
+ *
+ * @author gcasale
  */
 public class SolverMultiClosedTreeMVA extends SolverMulti {
 
@@ -133,10 +137,6 @@ public class SolverMultiClosedTreeMVA extends SolverMulti {
 	 * Solves the system through the TreeMVA algorithm. input(...) must have been
 	 * called first.
 	 *
-	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException
-	 * @throws InconsistentLinearSystemException
-	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {

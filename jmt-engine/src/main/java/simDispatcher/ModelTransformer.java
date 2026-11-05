@@ -171,6 +171,7 @@ public class ModelTransformer {
 	 * JMTmodel.xsd schema to the SIMmodeldefinition.xsd schema.
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean MVAtoSIM(String srcPath, String dstPath) {
 
@@ -194,6 +195,7 @@ public class ModelTransformer {
 	 * SIMmodeldefinition.xsd schema to the JMTmodel.xsd schema.
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean SIMtoMVA(String srcPath, String dstPath) {
 
@@ -218,6 +220,7 @@ public class ModelTransformer {
 	 * the JMTmodel.xsd schema.
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean OUTtoMVA(String srcPath, String dstPath) {
 
@@ -243,6 +246,7 @@ public class ModelTransformer {
 	 * the JMTmodel.xsd schema. This must be used together with XSLT transformer that changes Residence times
 	 * @param srcPath the path of the original xml file
 	 * @param dstPath the path of the destination xml file
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean OUTtoMVAScaling(String srcPath, String dstPath) {
 

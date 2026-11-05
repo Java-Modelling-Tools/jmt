@@ -20,6 +20,9 @@ package jaba;
 
 import java.awt.geom.Point2D;
 
+/**
+ * Point with double coordinates used by the JABA convex hull algorithms and graphs.
+ */
 public class DPoint extends Point2D.Double {
 
 	private String label;
@@ -92,6 +95,7 @@ public class DPoint extends Point2D.Double {
 	/**
 	 * Control if the integer part of the coordinates are equals
 	 * @return true if the integer part of the coordinates are equals
+	 * @param p the p value
 	 */
 	public boolean intEquals(DPoint p) {
 		int xP1 = (int) x;

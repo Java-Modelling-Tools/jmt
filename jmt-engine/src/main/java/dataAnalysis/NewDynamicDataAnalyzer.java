@@ -28,10 +28,12 @@ import Jama.Matrix;
 
 /**
  * <p>Title: New Dynamic Data Analyzer Class</p>
- * <p>Description: This class provides a new dynamic data analyzer method based
- * on Fisherman Rule, MSER-m Rule and Welch's Spectral test.</p>
- *
- * <p>Old one was slow, wrongly implemented and worked by "black magic".</p>
+ * <p>Description: Dynamic data analyzer of the JSIM engine. Simulation results
+ * are analyzed online with transient detection and confidence interval
+ * estimation: the transient period is removed with the R5 heuristic [Fis73]
+ * checked by the MSER-5 stationarity rule [Spr98], and the confidence intervals
+ * are then generated with the spectral method [HW81], as described in the JSIM
+ * chapters of the JMT user manual.</p>
  *
  * @author Bertoli Marco (Fisman rule),
  *         Omini Stefano (null test),
@@ -567,7 +569,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 		extVar = calcVar(tempBatch, 0, batch, K, polyOrder);
 	}
 
-	/** calculates the variance through Heidelberger & Welch method, if the data
+	/** calculates the variance through Heidelberger &amp; Welch method, if the data
 	 *  are the means of batches of size batchLen, the variance must be multiplied
 	 *  by batchLen.
 	 *
@@ -575,7 +577,7 @@ public class NewDynamicDataAnalyzer implements DynamicDataAnalyzer {
 	 *  @param  start       the starting sample
 	 *  @param  n           number of data of the sequence to be estimated
 	 *  @param  K           number of points used in the polynomial fitting
-	 *                      must be <= n/4, typically is 25, 50
+	 *                      must be &lt;= n/4, typically is 25, 50
 	 *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
 	 *                      of the spectrum of data typically is 2 or 3.
 	 *  @return the estimated variance

@@ -21,7 +21,7 @@ import java.util.Vector;
 /**
  * A class representing a polygon
  *
- * @author  Chris Pudney <cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author  Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version 1.1
  */
 public class Polygon {

@@ -64,6 +64,7 @@ public class DoubleArrayList {
 
 	/** add a new element at the end of the list
 	 *  @param  newD    the new element
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean add(double newD) {
 		if (data.length == size) {

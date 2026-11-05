@@ -41,6 +41,18 @@ import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;
 import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileFilter;
 import ptolemy.plot.Plot;
 
+/**
+ * Swing component displaying the enlarge pdf.
+ */
+/**
+ * Swing component displaying the enlarge pdf.
+ */
+/**
+ * Swing component displaying the enlarge pdf.
+ */
+/**
+ * Swing component displaying the enlarge pdf.
+ */
 public class EnlargePDF extends Plot implements MouseListener {
 	/**
 	 * 

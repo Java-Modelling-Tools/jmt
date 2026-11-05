@@ -274,9 +274,8 @@ public class SimulationStateChecker {
 	}
 
 	/**
-	 * Calls the draw method from  to draw queues and utilizations
-	 * @param detectChanges 
-	 * @throws Exception 
+	 * Calls the draw method to draw queues and utilizations.
+	 * @throws Exception if the representation cannot be drawn
 	 */
 	public void forceDraw() throws Exception {
 		graphicalRepresentation.draw(serversContent, serversUtilization);

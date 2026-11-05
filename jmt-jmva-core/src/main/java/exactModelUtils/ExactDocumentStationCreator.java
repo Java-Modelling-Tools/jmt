@@ -10,6 +10,18 @@ import org.w3c.dom.Node;
 import static exactModelUtils.ExactDocumentConstants.*;
 import static exactModelUtils.ExactDocumentConstants.DOC_STATION_CUSTOMER_CLASS;
 
+/**
+ * Creates the station sections of the XML document of a JMVA model.
+ */
+/**
+ * Creates the station sections of the XML document of a JMVA model.
+ */
+/**
+ * Creates the station sections of the XML document of a JMVA model.
+ */
+/**
+ * Creates the station sections of the XML document of a JMVA model.
+ */
 public class ExactDocumentStationCreator {
 
     public static void addStations(ExactModel model, Document root, Element parametersElement) {

@@ -1,5 +1,17 @@
 package jwat.workloadAnalysis.clustering;
 
+/**
+ * Clustering algorithm of JWAT for identifying similarities in the workload data.
+ */
+/**
+ * Clustering algorithm of JWAT for identifying similarities in the workload data.
+ */
+/**
+ * Clustering algorithm of JWAT for identifying similarities in the workload data.
+ */
+/**
+ * Clustering algorithm of JWAT for identifying similarities in the workload data.
+ */
 public interface Clustering {
 	public int getNumCluster();
 

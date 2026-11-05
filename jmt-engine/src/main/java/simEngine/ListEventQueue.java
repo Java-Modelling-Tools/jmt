@@ -28,7 +28,7 @@ import java.util.Iterator;
  * a user simulation. It works like a normal FIFO
  * queue, but during insertion events are kept in order from the smallest time
  * stamp to the largest. This means the next event to occur will be at the top
- * of the queue. <P>
+ * of the queue. &lt;P>
  * The current implementation
  * is uses a Vector to store the queue and is inefficient for popping
  * and inserting elements because the rest of the array has to be
@@ -77,6 +77,7 @@ public class ListEventQueue extends ArrayList<SimEvent> implements EventQueue {
 	 * Add a new event to the queue, preserving the temporal order of the
 	 * events in the queue.
 	 * @param new_event	The event to be put on the queue.
+	 * @return true if the operation is successful, false otherwise
 	 */
 	@Override
 	public boolean add(SimEvent new_event) {

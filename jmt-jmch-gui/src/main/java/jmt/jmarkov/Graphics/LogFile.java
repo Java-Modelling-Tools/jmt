@@ -36,6 +36,18 @@ import javax.swing.JOptionPane;
 import jmt.jmarkov.utils.Formatter;
 
 // this is using for saving log in to the csv file
+/**
+ * Log file of the JMCH simulation runs.
+ */
+/**
+ * Log file of the JMCH simulation runs.
+ */
+/**
+ * Log file of the JMCH simulation runs.
+ */
+/**
+ * Log file of the JMCH simulation runs.
+ */
 public class LogFile implements Notifier {
 	private static final String newline = System.getProperty("line.separator");
 	public static final int TABBED_DELIMITED = 0;

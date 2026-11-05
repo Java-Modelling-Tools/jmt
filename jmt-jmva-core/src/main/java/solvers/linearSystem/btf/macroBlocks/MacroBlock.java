@@ -64,7 +64,6 @@ public abstract class MacroBlock extends ComponentBlock{
 	 * 
 	 * This method initialises the list component micro blocks.
 	 *  
-	 * @throws BTFMatrixErrorException
 	 * @throws InternalErrorException
 	 * @throws InconsistentLinearSystemException
 	 */
@@ -183,6 +182,7 @@ public abstract class MacroBlock extends ComponentBlock{
 	}
 	
 	/**
+	 * Method numberOfMicroBlocks.
 	 * @return The number of micro blocks contain in this macro block
 	 */
 	protected int numberOfMicroBlocks() {

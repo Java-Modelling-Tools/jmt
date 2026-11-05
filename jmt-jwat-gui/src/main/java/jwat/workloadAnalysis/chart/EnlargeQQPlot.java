@@ -45,6 +45,18 @@ import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileChooser;
 import jwat.workloadAnalysis.chart.EnlargePlotDistGraph.PlotImagesFileFilter;
 import ptolemy.plot.Plot;
 
+/**
+ * Swing component displaying the enlarge qq plot.
+ */
+/**
+ * Swing component displaying the enlarge qq plot.
+ */
+/**
+ * Swing component displaying the enlarge qq plot.
+ */
+/**
+ * Swing component displaying the enlarge qq plot.
+ */
 public class EnlargeQQPlot extends Plot implements MouseListener {
 	/**
 	 * 

@@ -19,6 +19,18 @@ package jwat.filters;
 
 import jwat.Observation;
 
+/**
+ * JWAT filter on numeric variables of the workload observations.
+ */
+/**
+ * JWAT filter on numeric variables of the workload observations.
+ */
+/**
+ * JWAT filter on numeric variables of the workload observations.
+ */
+/**
+ * JWAT filter on numeric variables of the workload observations.
+ */
 public class FilterOnNumeric implements FilterOnVariable {
 	private double minV;
 	private double maxV;

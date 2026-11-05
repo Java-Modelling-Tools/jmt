@@ -16,6 +16,18 @@ import jwat.workloadAnalysis.WorkloadAnalysisSession;
 import jwat.workloadAnalysis.utils.JavaWatColor;
 import jwat.workloadAnalysis.chart.DispFuzzyMatrix;
 
+/**
+ * Swing panel of the JMT wizard providing the dispersion fuzzy view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersion fuzzy view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersion fuzzy view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the dispersion fuzzy view.
+ */
 public class DispersionFuzzyPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;

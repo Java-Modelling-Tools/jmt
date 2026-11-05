@@ -18,6 +18,18 @@ import solvers.multiSolverAlgorithms.SolverMultiClosedMonteCarloLogistic;
 import solvers.queueingnet.QNSolver;
 import solvers.utilities.Timer;
 
+/**
+ * Monte Carlo logistic regression solver of JMVA, used for large models where the exact algorithms become too expensive.
+ */
+/**
+ * Monte Carlo logistic regression solver of JMVA, used for large models where the exact algorithms become too expensive.
+ */
+/**
+ * Monte Carlo logistic regression solver of JMVA, used for large models where the exact algorithms become too expensive.
+ */
+/**
+ * Monte Carlo logistic regression solver of JMVA, used for large models where the exact algorithms become too expensive.
+ */
 public class MonteCarloLogisticSolver extends QNSolver {
 
 	//solver parameters

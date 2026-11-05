@@ -79,7 +79,7 @@ public class Station extends JComponent implements JobContainer, GraphicComponen
 	
 	/**
 	 * Constructor
-	 * @param animation, AnimationClass which the edge is part of
+	 * @param anim AnimationClass which the station is part of
 	 * @param parent, JPanel that contains this station
 	 * @param xcentered, if the station is x centered with respect to the parent
 	 * @param ycentered, if the station is y centered with respect to the parent

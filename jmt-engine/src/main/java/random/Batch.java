@@ -77,6 +77,9 @@ public class Batch extends AbstractDistribution implements Distribution {
     /**
      * @return always 0 because in this type of distribution it has no sense
      * to request the cdf of the distribution.
+     * @param x the x value
+     * @param p the p value
+     * @throws IncorrectDistributionParameterException if the operation cannot be completed
      */
     public double cdf(double x, Parameter p) throws IncorrectDistributionParameterException {
         return 0.0;
@@ -85,6 +88,9 @@ public class Batch extends AbstractDistribution implements Distribution {
     /**
      * @return always 0 because in this type of distribution it has no sense
      * to request the pdf of the distribution.
+     * @param x the x value
+     * @param p the p value
+     * @throws IncorrectDistributionParameterException if the operation cannot be completed
      */
     public double pdf(double x, Parameter p) throws IncorrectDistributionParameterException {
         return 0.0;
@@ -108,6 +114,8 @@ public class Batch extends AbstractDistribution implements Distribution {
     /**
      * @return always 0 because in this type of distribution it has no sense
      * to request the variance of the distribution.
+     * @param p the p value
+     * @throws IncorrectDistributionParameterException if the operation cannot be completed
      */
     public double theorVariance(Parameter p) throws IncorrectDistributionParameterException {
         return 0.0;

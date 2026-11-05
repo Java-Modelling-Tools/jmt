@@ -34,6 +34,18 @@ import jwat.fitting.FittingAlgorithm;
 import jwat.fitting.utils.ModelFitting;
 import jwat.workloadAnalysis.utils.JWatWorkloadManager;
 
+/**
+ * Swing component displaying the small cdf.
+ */
+/**
+ * Swing component displaying the small cdf.
+ */
+/**
+ * Swing component displaying the small cdf.
+ */
+/**
+ * Swing component displaying the small cdf.
+ */
 public class SmallCDF extends JPanel {
 	/**
 	 * 

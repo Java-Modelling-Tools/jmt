@@ -11,6 +11,18 @@ import random.engine.RandomEngine;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Routing strategy that selects the destination station based on a property of the stations.
+ */
+/**
+ * Routing strategy that selects the destination station based on a property of the stations.
+ */
+/**
+ * Routing strategy that selects the destination station based on a property of the stations.
+ */
+/**
+ * Routing strategy that selects the destination station based on a property of the stations.
+ */
 public abstract class PropertyBasedStrategy extends RoutingStrategy {
 
 	private static final double EPSILON = 1e-14; // Used to make equality checks (100 times machine precision)

@@ -74,6 +74,7 @@ public class LabelValue {
 	}
 	
 	/**
+	 * Returns the label.
 	 * @return the label
 	 */
 	public String getLabel() {
@@ -81,6 +82,7 @@ public class LabelValue {
 	}
 	
 	/**
+	 * Returns the value.
 	 * @return the value
 	 */
 	public String getValue() {

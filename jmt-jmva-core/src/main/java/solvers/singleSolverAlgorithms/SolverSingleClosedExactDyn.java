@@ -194,7 +194,7 @@ public class SolverSingleClosedExactDyn extends SolverSingleClosedExact {
 	 * <em>
 	 *  S.C. Bruell, G. Balbo,<br>
 	 * "Computational Algorithms for closed Queueing Networks"<br>
-	 * 1980, Elsevier North Holland
+	 * 1980, Elsevier North Holland</em>
 	 */
 	@Override
 	public void indices() {

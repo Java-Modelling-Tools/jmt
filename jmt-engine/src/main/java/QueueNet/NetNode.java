@@ -380,6 +380,8 @@ public class NetNode extends SimEntity {
 	 * @param jobClass Job class to be analyzed.
 	 * @param measurement measure to be activated.
 	 * @throws NetException
+	 * @param isServerType the is server type
+	 * @param serverTypeId the server type id
 	 */
 	public void analyze(int measureName, JobClass jobClass, Measure measurement,
 											boolean isServerType, int serverTypeId) throws NetException {
@@ -802,6 +804,7 @@ public class NetNode extends SimEntity {
 	/**
 	 * Helper function to remove job from the NodeJobsList
 	 * @param data the jobInfo data looking to be removed.
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean removeJobFromNodeJobsList(Job data) {
 		Job job = data;
@@ -816,6 +819,7 @@ public class NetNode extends SimEntity {
 	/**
 	 * Helper function to remove job from the NodeJobsList
 	 * @param data the jobInfo data looking to be removed.
+	 * @return true if the operation is successful, false otherwise
 	 */
 	public boolean removeJobFromNodeJobsListOnly(Job data) {
 		Job job = data;
@@ -937,6 +941,7 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
+	 * Checks whether blocking region input station.
 	 * @return true if this is a blocking region input station.
 	 */
 	public boolean isBlockingRegionInputStation() {
@@ -944,6 +949,7 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
+	 * Sets the blocking region input station.
 	 * @param region The blocking region input station.
 	 */
 	public void setBlockingRegionInputStation(BlockingRegion region) {
@@ -951,6 +957,7 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
+	 * Returns the blocking region input station.
 	 * @return blocking region, only if this is a region input station.
 	 */
 	public BlockingRegion getBlockingRegionInputStation() {
@@ -958,6 +965,7 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
+	 * Returns the sim parameters.
 	 * @return the simulation parameters.
 	 */
 	public SimParameters getSimParameters() {
@@ -965,6 +973,7 @@ public class NetNode extends SimEntity {
 	}
 
 	/**
+	 * Sets the sim parameters.
 	 * @param simParameters reads the simulation parameters.
 	 */
 	public void setSimParameters(SimParameters simParameters) {

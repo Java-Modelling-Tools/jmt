@@ -69,7 +69,7 @@ public class Router extends JComponent implements JobContainer, GraphicComponent
 	 * @param xcentered, if the router is xcentered with respect to the parent, if yes, pos.x does not matter
 	 * @param ycentered, if the router is ycentered with respect to the parent, if yes, pos.y does not matter
 	 * @param pos, position of the Router, if it is x-y centered then the respective coordinates are not considered
-	 * @param nextEdges, the edges linked to this router
+	 * @param nextContainers the edges linked to this router
 	 * @param nextStations, the stations linked to this router
 	 * @param simulation, information of the simulation
 	 */

@@ -37,7 +37,7 @@ public class Erlang {
 	 * that is <em>arrival rate * service demand</em>. Must be greater than zero.
 	 * @param servers number of servers. Must be greater than one.
 	 * @return computed value
-	 * @throws IllegalArgumentException if <code>traffic <= 0</code> or <code>servers <= 0</code>
+	 * @throws IllegalArgumentException if <code>traffic &lt;= 0</code> or <code>servers &lt;= 0</code>
 	 */
 	public static double erlangB(double traffic, int servers) throws IllegalArgumentException {
 		if (traffic < 0) {
@@ -61,7 +61,7 @@ public class Erlang {
 	 * that is <em>arrival rate * service demand</em>. Must be greater than zero.
 	 * @param servers number of servers. Must be greater than one.
 	 * @return computed value
-	 * @throws IllegalArgumentException if traffic <= 0 or servers <= 0
+	 * @throws IllegalArgumentException if traffic &lt;= 0 or servers &lt;= 0
 	 */
 	public static double erlangC(double traffic, int servers) throws IllegalArgumentException {
 		double b = erlangB(traffic, servers);

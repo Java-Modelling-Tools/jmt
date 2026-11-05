@@ -8,6 +8,18 @@
  */
 package math;
 
+/**
+ * The normal (Gaussian) distribution, implemented with the polar method of Marsaglia.
+ */
+/**
+ * The normal (Gaussian) distribution, implemented with the polar method of Marsaglia.
+ */
+/**
+ * The normal (Gaussian) distribution, implemented with the polar method of Marsaglia.
+ */
+/**
+ * The normal (Gaussian) distribution, implemented with the polar method of Marsaglia.
+ */
 public class Normal {
 	/* ********************************************
 	 * Original algorythm and Perl implementation can

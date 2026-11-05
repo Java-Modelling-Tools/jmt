@@ -4,6 +4,18 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Mapping of a JWAT variable onto the imported data.
+ */
+/**
+ * Mapping of a JWAT variable onto the imported data.
+ */
+/**
+ * Mapping of a JWAT variable onto the imported data.
+ */
+/**
+ * Mapping of a JWAT variable onto the imported data.
+ */
 public class DataMapping extends VariableMapping {
 	@Override
 	public double convertToDouble(String val) {

@@ -9,6 +9,18 @@ import random.Parameter;
 import random.engine.MersenneTwister;
 import random.engine.RandomEngine;
 
+/**
+ * Vacation strategy in which the server takes a vacation after each service completion with a given (Bernoulli) probability.
+ */
+/**
+ * Vacation strategy in which the server takes a vacation after each service completion with a given (Bernoulli) probability.
+ */
+/**
+ * Vacation strategy in which the server takes a vacation after each service completion with a given (Bernoulli) probability.
+ */
+/**
+ * Vacation strategy in which the server takes a vacation after each service completion with a given (Bernoulli) probability.
+ */
 public class BernoulliVacationStrategy extends VacationWhenIdleStrategy {
     private final double p;
 

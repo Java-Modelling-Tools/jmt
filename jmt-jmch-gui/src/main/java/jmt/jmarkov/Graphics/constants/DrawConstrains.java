@@ -25,6 +25,18 @@ package jmt.jmarkov.Graphics.constants;
 import java.awt.Font;
 import java.awt.Stroke;
 
+/**
+ * Drawing constraints of the JMCH animation components.
+ */
+/**
+ * Drawing constraints of the JMCH animation components.
+ */
+/**
+ * Drawing constraints of the JMCH animation components.
+ */
+/**
+ * Drawing constraints of the JMCH animation components.
+ */
 public interface DrawConstrains {
 
 	/**

@@ -111,6 +111,7 @@ public class Observation implements Comparable<Object> {
 	/**
 	 * Sets up element on which perform compareTo method 
 	 * @param Index index of element
+	 * @throws ArrayIndexOutOfBoundsException if the operation cannot be completed
 	 */
 	public void setSorter(int Index) throws ArrayIndexOutOfBoundsException {
 		if (Index >= 0 && Index < observation.length) {

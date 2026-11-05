@@ -11,6 +11,18 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Weighted round robin routing strategy: destinations are selected cyclically with given weights.
+ */
+/**
+ * Weighted round robin routing strategy: destinations are selected cyclically with given weights.
+ */
+/**
+ * Weighted round robin routing strategy: destinations are selected cyclically with given weights.
+ */
+/**
+ * Weighted round robin routing strategy: destinations are selected cyclically with given weights.
+ */
 public class WeightedRoundRobinStrategy extends RoutingStrategy {
 
 	private int counter = -1;

@@ -32,6 +32,18 @@ import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
 //TODO: Add listener to model to change observation array
+/**
+ * Swing component displaying the disp matrix.
+ */
+/**
+ * Swing component displaying the disp matrix.
+ */
+/**
+ * Swing component displaying the disp matrix.
+ */
+/**
+ * Swing component displaying the disp matrix.
+ */
 public class DispMatrix extends JScrollPane {
 
 	/**

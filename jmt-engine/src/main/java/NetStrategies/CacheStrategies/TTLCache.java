@@ -5,6 +5,18 @@ import QueueNet.CacheItem;
 
 import java.util.LinkedList;
 
+/**
+ * TTL (Time To Live) cache eviction strategy: removes items whose lifetime has expired.
+ */
+/**
+ * TTL (Time To Live) cache eviction strategy: removes items whose lifetime has expired.
+ */
+/**
+ * TTL (Time To Live) cache eviction strategy: removes items whose lifetime has expired.
+ */
+/**
+ * TTL (Time To Live) cache eviction strategy: removes items whose lifetime has expired.
+ */
 public class TTLCache extends CacheStrategy {
 
 	private double ttl;

@@ -5,6 +5,18 @@ import common.distributions.Distribution;
 import common.JMTImageLoader;
 import javax.swing.ImageIcon;
 
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
 public class Bernoulli extends Distribution {
     /**
      * Constructs a new Bernoulli Distribution

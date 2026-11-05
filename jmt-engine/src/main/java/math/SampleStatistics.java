@@ -173,6 +173,7 @@ public class SampleStatistics {
 	}
 	
 	/**
+	 * Returns the distribution intervals start.
 	 * @return the start point for intervals of the distribution
 	 */
 	public double[] getDistributionIntervalsStart() {
@@ -184,6 +185,7 @@ public class SampleStatistics {
 	}
 	
 	/**
+	 * Returns the distriburion intervals end.
 	 * @return the end point for intervals of the distribution
 	 */
 	public double[] getDistriburionIntervalsEnd() {
@@ -308,6 +310,7 @@ public class SampleStatistics {
 	}
 	
 	/**
+	 * Returns the min sim time.
 	 * @return the minimum simulation time
 	 */
 	public double getMinSimTime() {
@@ -319,6 +322,7 @@ public class SampleStatistics {
 	}
 	
 	/**
+	 * Returns the max sim time.
 	 * @return the maximum simulation time
 	 */
 	public double getMaxSimTime() {
@@ -350,6 +354,7 @@ public class SampleStatistics {
 	}
 
 	/**
+	 * Returns the interval width.
 	 * @return the width of each interval used by the distribution
 	 */
 	public double getIntervalWidth() {
@@ -357,6 +362,7 @@ public class SampleStatistics {
 	}
 
 	/**
+	 * Returns the interval min.
 	 * @return the minimum value of the intervals considered for distribution (inclusive)
 	 */
 	public double getIntervalMin() {
@@ -364,6 +370,7 @@ public class SampleStatistics {
 	}
 
 	/**
+	 * Returns the interval max.
 	 * @return the maximum value of the intervals considered for distribution (inclusive)
 	 */
 	public double getIntervalMax() {
@@ -371,6 +378,7 @@ public class SampleStatistics {
 	}
 	
 	/**
+	 * Checks whether distribution available.
 	 * @return true if distribution is available, false otherwise.
 	 */
 	public boolean isDistributionAvailable() {

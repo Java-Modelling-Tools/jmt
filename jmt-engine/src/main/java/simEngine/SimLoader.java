@@ -594,6 +594,7 @@ public class SimLoader {
 	 * Creates a parameter object given the corresponding description of the tag.
 	 * @param param
 	 * @throws jmt.common.exception.LoadException
+	 * @return the resulting object
 	 */
 	private Object createParameter(Element param) throws LoadException {
 		if (!param.getTagName().equals(XMLConstantNames.XML_E_PARAMETER)) {
@@ -849,6 +850,7 @@ public class SimLoader {
 	 * @param c
 	 * @param paramClasses
 	 * @return found constructor
+	 * @throws NoSuchMethodException if the operation cannot be completed
 	 */
 	public Constructor<?> getConstructor(Class<?> c, Class<?>[] paramClasses) throws NoSuchMethodException {
 		try {

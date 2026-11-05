@@ -3,6 +3,18 @@ package solvers.priority.prioMVACalculators.implementations.utilisations;
 import solvers.priority.prioMVACalculators.InterpolatedPrioMVAUtilCalculator;
 import solvers.priority.interpolators.LinearInterpolator;
 
+/**
+ * Provides the CL Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the CL Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the CL Prio MVA Util Calculator functionality of the utilisations.
+ */
+/**
+ * Provides the CL Prio MVA Util Calculator functionality of the utilisations.
+ */
 public class CLPrioMVAUtilCalculator extends InterpolatedPrioMVAUtilCalculator {
 
     /**

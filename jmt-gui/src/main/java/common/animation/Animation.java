@@ -39,10 +39,10 @@ public interface Animation {
 	public void refresh();
 
 	/** Initialization method for implementing class. The implementation of this method
-	 * should prepare images for the animation, if this has not been done within cunstructor.*/
+	 * should prepare images for the animation, if this has not been done within constructor.*/
 	public void init();
 
-	/** Paints image currently handled in a rectangle defined within {@link this.setBounds()} method*/
+	/** Paints image currently handled in a rectangle defined within {@link #setBounds(Rectangle)} method*/
 	public void paint(Graphics g, ImageObserver io);
 
 	/**returns background image for this animation.
@@ -56,7 +56,7 @@ public interface Animation {
 	public void setBGImage(Image img);
 
 	/** Sets bounding box for this animation. If this box is set, animation will update only
-	 * this certain area of the Graphics object passed within {@link this.paint()} method.
+	 * this certain area of the Graphics object passed within {@link #paint(Graphics, ImageObserver)} method.
 	 * @param r: Bounding box for this animation.
 	 */
 	public void setBounds(Rectangle r);

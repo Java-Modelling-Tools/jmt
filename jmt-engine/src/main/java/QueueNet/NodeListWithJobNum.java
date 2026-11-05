@@ -21,6 +21,18 @@ package QueueNet;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * List of nodes together with the number of jobs of a given class present at each node.
+ */
+/**
+ * List of nodes together with the number of jobs of a given class present at each node.
+ */
+/**
+ * List of nodes together with the number of jobs of a given class present at each node.
+ */
+/**
+ * List of nodes together with the number of jobs of a given class present at each node.
+ */
 public class NodeListWithJobNum {
 
 	private NodeList nodeList;

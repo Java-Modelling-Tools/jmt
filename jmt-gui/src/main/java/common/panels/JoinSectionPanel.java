@@ -43,6 +43,18 @@ import common.editors.ImagedComboBoxCellEditorFactory;
 import common.editors.JoinEditor;
 import common.joinStrategies.JoinStrategy;
 
+/**
+ * Swing panel of the JMT wizard providing the join section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the join section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the join section view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the join section view.
+ */
 public class JoinSectionPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

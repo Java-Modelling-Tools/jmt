@@ -33,11 +33,11 @@ package dataAnalysis.sorting;
 public class MergeSort implements SortAlgorithm {
 
     /**
-     * pre :  0 <= left <= right <= array.length
+     * pre :  0 &lt;= left &lt;= right &lt;= array.length
      * <p>
      * post :  elements of array[left..right] are rearranged so that
      * <p>
-     * array[left] <= array[left + 1] <= ... <= array[right]
+     * array[left] &lt;= array[left + 1] &lt;= ... &lt;= array[right]
      */
     private static void sort(double[] array, int left, int right) {
         if (left < right) {
@@ -54,13 +54,13 @@ public class MergeSort implements SortAlgorithm {
     }
 
     /**
-     * pre :  (i)   0 <= left <= mid < right <= array.length-1
-     * (ii)  array[left] <= array[left+1] <= ... <= array[mid]
-     * (iii) array[mid+1] <= array[mid+2] <= ... <= array[right]
+     * pre :  (i)   0 &lt;= left &lt;= mid &lt; right &lt;= array.length-1
+     * (ii)  array[left] &lt;= array[left+1] &lt;= ... &lt;= array[mid]
+     * (iii) array[mid+1] &lt;= array[mid+2] &lt;= ... &lt;= array[right]
      * <p>
      * post :  elements of array[left..right] are rearranged so that
      * <p>
-     * array[left] <= array[left+1] <= ... <= array[right]
+     * array[left] &lt;= array[left+1] &lt;= ... &lt;= array[right]
      */
     private static void merge(double[] array, int left, int mid, int right) {
         int size = right - left + 1;

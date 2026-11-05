@@ -26,6 +26,18 @@ import jmt.jmarkov.Graphics.Notifier;
 import jmt.jmarkov.Queues.Arrivals;
 import jmt.jmarkov.Queues.Processor;
 
+/**
+ * Simulator of JMCH: drives the single step and continuous simulation of the scheduling and routing algorithms.
+ */
+/**
+ * Simulator of JMCH: drives the single step and continuous simulation of the scheduling and routing algorithms.
+ */
+/**
+ * Simulator of JMCH: drives the single step and continuous simulation of the scheduling and routing algorithms.
+ */
+/**
+ * Simulator of JMCH: drives the single step and continuous simulation of the scheduling and routing algorithms.
+ */
 public class Simulator implements Runnable {
 
 	//list of jobs which contains jobs waiting in the simulator.

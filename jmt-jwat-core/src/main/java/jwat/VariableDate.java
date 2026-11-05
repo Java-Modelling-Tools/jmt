@@ -21,6 +21,18 @@ import java.util.Date;
 
 import jwat.input.VariableMapping;
 
+/**
+ * Date variable of a JWAT workload observation.
+ */
+/**
+ * Date variable of a JWAT workload observation.
+ */
+/**
+ * Date variable of a JWAT workload observation.
+ */
+/**
+ * Date variable of a JWAT workload observation.
+ */
 public class VariableDate extends VariableNumber {
 
 	public VariableDate(Observation[] valObs, String vName, int pos, short type, VariableMapping varMapping) {
@@ -32,7 +44,7 @@ public class VariableDate extends VariableNumber {
 	 * Returns Index-th value of the variable
 	 * @param Index index of variable's value desired
 	 * @return value of Index-th value
-	 * @throws ArrayIndexOutOfBoundsException throws if Index is < 0 or > numbero of observations
+	 * @throws ArrayIndexOutOfBoundsException throws if Index is &lt; 0 or > numbero of observations
 	 */
 	public Date getOriginalValue(int Index) throws ArrayIndexOutOfBoundsException {
 		if (Index < 0 || Index > obsValue.length) {
@@ -47,8 +59,8 @@ public class VariableDate extends VariableNumber {
 	 * @param Index index of variable's value desired
 	 * @param var variable index
 	 * @return index-th value of the var-th variable
-	 * @throws ArrayIndexOutOfBoundsException throws if Index is < 0 or > numbero of observations 
-	 * or var < 0 or > number of variables ( elements of observation )
+	 * @throws ArrayIndexOutOfBoundsException throws if Index is &lt; 0 or > numbero of observations 
+	 * or var &lt; 0 or > number of variables ( elements of observation )
 	 */
 	public Date getOriginalValue(int Index, int var) throws ArrayIndexOutOfBoundsException {
 		if (Index < 0 || Index > obsValue.length) {

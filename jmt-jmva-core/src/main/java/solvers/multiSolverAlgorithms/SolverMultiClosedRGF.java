@@ -12,7 +12,9 @@ import solvers.queueingnet.QNSolver;
 import solvers.queueingnet.RGFSolver;
 
 /**
- * Solves a multiclass closed model, using RGF algorithm.
+ * Solves a multiclass closed model with the RGF (Recursive Gaussian Filter)
+ * algorithm, an exact solution technique available in JMVA for closed product
+ * form queueing networks.
  */
 public class SolverMultiClosedRGF extends SolverMulti {
 
@@ -131,10 +133,6 @@ public class SolverMultiClosedRGF extends SolverMulti {
 	 * Solves the system through the RGF algorithm.
 	 * input(...) must have been called first.
 	 *
-	 * @throws InternalErrorException
-	 * @throws BTFMatrixErrorException
-	 * @throws InconsistentLinearSystemException
-	 * @throws OperationNotSupportedException
 	 */
 	@Override
 	public void solve() {

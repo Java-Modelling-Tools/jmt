@@ -18,6 +18,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Swing panel of the JMT wizard providing the update view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the update view.
+ */
 public class UpdatePanel {
 
     private static JFrame parentFrame;

@@ -22,6 +22,8 @@
     <br />
     <a href="/manuals/manual.pdf"><strong>Explore the docs »</strong></a>
     <br />
+    <a href="https://java-modelling-tools.github.io/jmt/"><strong>Javadoc API »</strong></a>
+    <br />
     <br />
     <a href="https://jmt.sourceforge.net/">View Site</a>
     &middot;

@@ -21,6 +21,18 @@ import jwat.JWatModel;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Session of the JWAT tool: holds the model data of the workload analysis.
+ */
+/**
+ * Session of the JWAT tool: holds the model data of the workload analysis.
+ */
+/**
+ * Session of the JWAT tool: holds the model data of the workload analysis.
+ */
+/**
+ * Session of the JWAT tool: holds the model data of the workload analysis.
+ */
 public abstract class JwatSession {
 
 	protected String filepath;

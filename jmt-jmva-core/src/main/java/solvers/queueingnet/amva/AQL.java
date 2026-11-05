@@ -1,11 +1,11 @@
 package solvers.queueingnet.amva;
 
 /**
- * This class implements the AQL (Aggregated Queue Length) algorithm for solving
- * multi-closed models
- * 
- * @author Abhimanyu Chugh
+ * This class implements the AQL (Aggregate Queue Length) approximate MVA
+ * algorithm [ZES88] for solving multiclass closed models, as described in the
+ * AMVA section of the JMVA chapter of the JMT user manual.
  *
+ * @author Abhimanyu Chugh
  */
 public class AQL extends AMVA {
 	private double[][] gamma;

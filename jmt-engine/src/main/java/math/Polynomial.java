@@ -19,8 +19,8 @@ public class Polynomial extends Constants {
 	}
 
 	/**
-	 * Evaluates the given polynomial of degree <tt>N</tt> at <tt>x</tt>, assuming coefficient of N is 1.0.
-	 * Otherwise same as <tt>polevl()</tt>.
+	 * Evaluates the given polynomial of degree <code>N</code> at <code>x</code>, assuming coefficient of N is 1.0.
+	 * Otherwise same as <code>polevl()</code>.
 	 * <pre>
 	 *                     2          N
 	 * y  =  C  + C x + C x  +...+ C x
@@ -55,7 +55,7 @@ public class Polynomial extends Constants {
 	}
 
 	/**
-	 * Evaluates the given polynomial of degree <tt>N</tt> at <tt>x</tt>.
+	 * Evaluates the given polynomial of degree <code>N</code> at <code>x</code>.
 	 * <pre>
 	 *                     2          N
 	 * y  =  C  + C x + C x  +...+ C x

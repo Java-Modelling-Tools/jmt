@@ -76,6 +76,7 @@ public class MMNLogic extends MM1Logic {
 	 * lambda[job/s] e s[ms]
 	 * 
 	 * @return
+	 * @throws NonErgodicException if the operation cannot be completed
 	 */
 	@Override
 	public double utilization() throws NonErgodicException {

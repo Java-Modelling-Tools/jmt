@@ -6,6 +6,18 @@ import common.editors.BalkingStrategyEditor;
 import common.editors.DistributionsEditor;
 import common.serviceStrategies.LDStrategy;
 
+/**
+ * Factory creating the impatience editor objects.
+ */
+/**
+ * Factory creating the impatience editor objects.
+ */
+/**
+ * Factory creating the impatience editor objects.
+ */
+/**
+ * Factory creating the impatience editor objects.
+ */
 public class ImpatienceEditorFactory {
   public static ImpatienceParameter displayEditorAndReturnParameter
       (ImpatienceType impatienceType, ImpatienceParameter impatienceParameter, Container parent, String className) {

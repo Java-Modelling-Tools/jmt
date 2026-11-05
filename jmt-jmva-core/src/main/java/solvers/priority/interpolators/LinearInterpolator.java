@@ -1,5 +1,17 @@
 package solvers.priority.interpolators;
 
+/**
+ * Linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Linear interpolator of the priority MVA utilization calculators.
+ */
+/**
+ * Linear interpolator of the priority MVA utilization calculators.
+ */
 public class LinearInterpolator implements Interpolator {
 
     @Override

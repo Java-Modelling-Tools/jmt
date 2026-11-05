@@ -5,6 +5,18 @@ import solvers.SolverAlgorithm;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Counts the solutions performed by the JMVA solution algorithms.
+ */
+/**
+ * Counts the solutions performed by the JMVA solution algorithms.
+ */
+/**
+ * Counts the solutions performed by the JMVA solution algorithms.
+ */
+/**
+ * Counts the solutions performed by the JMVA solution algorithms.
+ */
 public class SolverAlgorithmCounter {
 
 

@@ -54,6 +54,18 @@ import common.panels.WarningScrollTable;
 import table.DisabledCellRenderer;
 import table.ExactCellEditor;
 
+/**
+ * Editor for the fork parameters.
+ */
+/**
+ * Editor for the fork parameters.
+ */
+/**
+ * Editor for the fork parameters.
+ */
+/**
+ * Editor for the fork parameters.
+ */
 public class ForkEditor extends JSplitPane implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

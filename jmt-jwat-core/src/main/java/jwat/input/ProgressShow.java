@@ -1,5 +1,17 @@
 package jwat.input;
 
+/**
+ * Progress display interface of the JWAT time consuming operations.
+ */
+/**
+ * Progress display interface of the JWAT time consuming operations.
+ */
+/**
+ * Progress display interface of the JWAT time consuming operations.
+ */
+/**
+ * Progress display interface of the JWAT time consuming operations.
+ */
 public interface ProgressShow {
 
 	public void eventUpdate(int value, String txt);

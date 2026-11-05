@@ -86,8 +86,8 @@ import org.jgraph.plaf.basic.BasicGraphUI;
 
 /**
  * This class maintains a reference to all the main components of the Gui,
- * in this way it is possible to divide the responsibility of the actions &
- * every object know only about of himself & the mediator.
+ * in this way it is possible to divide the responsibility of the actions &amp;
+ * every object know only about of himself &amp; the mediator.
  * Other actions are made through the mediator without knowing who will actually
  * do it.
  */
@@ -868,7 +868,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 		actionSetRight.setEnabled(!(model.hasConnectionShape()));
 	}
 
-	/** Set the state of mouse listener to select & passes the event to the
+	/** Set the state of mouse listener to select &amp; passes the event to the
 	 * listener as if press event is generated.
 	 *
 	 * @param e
@@ -1289,13 +1289,13 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	}
 
 	/**
-	 * Returns the parent of <I>child</I> in the model.
-	 * <I>child</I> must be a node previously obtained from
+	 * Returns the parent of <i>child</i> in the model.
+	 * <i>child</i> must be a node previously obtained from
 	 * this data source. This returns null if <i>child</i> is
 	 * a root in the model.
 	 *
 	 * @param   child  a node in the graph, obtained from this data source
-	 * @return  the parent of <I>child</I>
+	 * @return  the parent of <i>child</i>
 	 */
 	public Object getParent(Object child) {
 		return graph.getModel().getParent(child);
@@ -1778,7 +1778,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	 * in graph window
 	 * <br>
 	 * Author: Bertoli Marco
-	 * Heavily modified by Giuseppe De Cicco & Fabio Granara
+	 * Heavily modified by Giuseppe De Cicco &amp; Fabio Granara
 	 *
 	 */
 	public void putSelectedCellsInGoodPlace(Object[] cells, Integer[] X, Integer[] Y) {
@@ -1806,7 +1806,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	 * in graph window
 	 * <br>
 	 * Author: Bertoli Marco
-	 * Heavily modified by Giuseppe De Cicco & Fabio Granara
+	 * Heavily modified by Giuseppe De Cicco &amp; Fabio Granara
 	 * @param cell Identifier of the cell to be moved
 	 */
 
@@ -2183,7 +2183,7 @@ public class Mediator implements GuiInterface, common.definitions.GraphCursorCon
 	 *
 	 * Author: Bertoli Marco
 	 *
-	 * Heavily Modified by Giuseppe De Cicco & Fabio Granara
+	 * Heavily Modified by Giuseppe De Cicco &amp; Fabio Granara
 	 */
 	public boolean overlapCells(Point2D p, Dimension d) {
 		Rectangle r = new Rectangle2D.Double(p.getX(), p.getY(), d.getWidth(), d.getHeight()).getBounds();
@@ -2975,7 +2975,7 @@ JMVALauncherService.Registry.launch(output);
 	/**
 	 * Method that rotate components
 	 *
-	 * author Giuseppe De Cicco & Fabio Granara
+	 * author Giuseppe De Cicco &amp; Fabio Granara
 	 */
 	public void rotateComponent(Object[] cells) {
 		if (cells == null) {

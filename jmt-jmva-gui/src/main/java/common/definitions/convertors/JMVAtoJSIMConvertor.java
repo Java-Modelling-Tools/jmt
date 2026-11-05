@@ -15,6 +15,18 @@ import analytical.ExactModel;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Converts a JMVA model into the corresponding JSIM model.
+ */
+/**
+ * Converts a JMVA model into the corresponding JSIM model.
+ */
+/**
+ * Converts a JMVA model into the corresponding JSIM model.
+ */
+/**
+ * Converts a JMVA model into the corresponding JSIM model.
+ */
 public class JMVAtoJSIMConvertor {
 
     /**

@@ -58,7 +58,7 @@ public class Spectrum {
 
 	/** given a sequence it return the same sequence padded with zeros to the
 	 *  nearest power of 2
-	 *  @param  the sequence to be padded
+	 *  @param data  the sequence to be padded
 	 *  @return the padded sequence
 	 */
 	public static double[] zeroPad(double[] data) {

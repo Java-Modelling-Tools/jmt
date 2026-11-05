@@ -32,6 +32,18 @@ import common.JMTImageLoader;
 import jwat.MainJwatWizard;
 import jwat.workloadAnalysis.panels.ClusterPanel;
 
+/**
+ * Swing panel of the JMT wizard providing the fuzzy opt view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the fuzzy opt view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the fuzzy opt view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the fuzzy opt view.
+ */
 public class FuzzyOptPanel extends JPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

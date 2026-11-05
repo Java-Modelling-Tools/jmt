@@ -242,7 +242,7 @@ public class MainWizard extends JMCHWizard{
 	/**
 	 * Method called by the AnimationPanel to update the Result Panel
 	 * @param typeOfResult if the result is the one from JSIM or from the Animation
-	 * @param generatedJobs the number of jobs generated for this simulation
+	 * @param genereatedJobs the number of jobs generated for this simulation
 	 * @param algorithm queue algorithm of the animation
 	 * @param arrivalDistr arrival time distribution
 	 * @param lambda the inter arrival time

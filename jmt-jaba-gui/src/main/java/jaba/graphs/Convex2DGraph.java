@@ -110,14 +110,8 @@ private DPoint selectedPoint;// The point of the convex hull currently
 	/**
 	 * Initialize the object from the vector where all the points are sored
 	 * 
-	 * @param mainWin
-	 * 
-	 * @param allDominants
-	 *            The vector with all the points
-	 * @param height
-	 *            The height of the window
-	 * @param width
-	 *            The width of the window
+	 * @param data the Jaba model to show
+	 * @param mainWin the Jaba controller
 	 */
 	public Convex2DGraph(JabaModel data, JabaController mainWin) {
 		super();
@@ -271,10 +265,6 @@ private DPoint selectedPoint;// The point of the convex hull currently
 	 *            The first point of the line
 	 * @param p2
 	 *            The second point of the line
-	 * @param s3d
-	 *            Information aboute the classes
-	 * @param classNames
-	 *            The name of the classes
 	 */
 	public void drawSelectLine(Graphics2D g, DPoint p1, DPoint p2) {
 		if ((p1 != null) && (p2 != null)) {
@@ -515,12 +505,8 @@ private DPoint selectedPoint;// The point of the convex hull currently
 	 *            The graphic object
 	 * @param allConvex
 	 *            The vector with the points of the convex hull
-	 * @param allDominants
-	 *            The vector with the dominant points
-	 * @param area
-	 *            The filter area
-	 * @param maskedoff
-	 *            The vector with the masked-off points
+	 * @param color
+	 *            The color of the area
 	 */
 	public void drawArea(Graphics2D g, Vector<Point2D> allConvex, Color color) {
 		Polygon poly = new Polygon();
@@ -576,7 +562,7 @@ private DPoint selectedPoint;// The point of the convex hull currently
 	 * Print a label over every point, if the point is select the label contain
 	 * the coordinate too
 	 * 
-	 * @param gra
+	 * @param g
 	 *            The graphic object
 	 * @param points
 	 *            The vector with all points
@@ -630,7 +616,7 @@ private DPoint selectedPoint;// The point of the convex hull currently
 	 * 
 	 * @param g
 	 *            The graphic object
-	 * @param filteredArea
+	 * @param filtArea
 	 *            The filtered area
 	 */
 	public void drawFiltArea(Graphics2D g, Area filtArea) {

@@ -4,6 +4,18 @@ import jwat.MatrixObservations;
 import jwat.Observation;
 import jwat.workloadAnalysis.clustering.ClusteringInfos;
 
+/**
+ * Information produced by the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Information produced by the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Information produced by the JWAT fuzzy k-means clustering.
+ */
+/**
+ * Information produced by the JWAT fuzzy k-means clustering.
+ */
 public class ClusteringInfosFuzzy implements ClusteringInfos {
 
 	public ClusterInfoFuzzy[] infoCluster;

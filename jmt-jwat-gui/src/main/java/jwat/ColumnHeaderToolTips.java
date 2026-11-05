@@ -10,6 +10,18 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+/**
+ * Provides the Column Header Tool Tips functionality of the jwat.
+ */
+/**
+ * Provides the Column Header Tool Tips functionality of the jwat.
+ */
+/**
+ * Provides the Column Header Tool Tips functionality of the jwat.
+ */
+/**
+ * Provides the Column Header Tool Tips functionality of the jwat.
+ */
 public class ColumnHeaderToolTips extends MouseMotionAdapter {
 	// Current column whose tooltip is being displayed.
 	// This variable is used to minimize the calls to setToolTipText().

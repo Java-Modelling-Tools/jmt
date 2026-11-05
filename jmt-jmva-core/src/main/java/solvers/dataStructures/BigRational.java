@@ -241,7 +241,7 @@ public class BigRational implements Comparable<BigRational> {
     /**
      * Compares the BigRational with another.
      * @param b The other number
-     * @return Returns { -1, 0, + 1 } if a < b, a = b, or a > b
+     * @return Returns { -1, 0, + 1 } if a &lt; b, a = b, or a > b
      */
     @Override
     public int compareTo(BigRational b) {

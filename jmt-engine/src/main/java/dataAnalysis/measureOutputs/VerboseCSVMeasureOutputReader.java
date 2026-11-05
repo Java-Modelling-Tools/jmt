@@ -115,6 +115,8 @@ public class VerboseCSVMeasureOutputReader implements AutoCloseable {
 	/**
 	 * Parses a CSV file line
 	 * @param line the output data structure
+	 * @param str the str
+	 * @throws ParseException if the operation cannot be completed
 	 */
 	private void parseLine(String str) throws ParseException {
 		int index = str.indexOf(logCsvDelimiter);
@@ -125,6 +127,7 @@ public class VerboseCSVMeasureOutputReader implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the line number.
 	 * @return the last line number read
 	 */
 	public int getLineNumber() {
@@ -132,6 +135,7 @@ public class VerboseCSVMeasureOutputReader implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the parsed sample.
 	 * @return the parsed sample
 	 */
 	public double getParsedSample() {
@@ -139,6 +143,7 @@ public class VerboseCSVMeasureOutputReader implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the parsed weight.
 	 * @return the parsed weight
 	 */
 	public double getParsedWeight() {
@@ -146,6 +151,7 @@ public class VerboseCSVMeasureOutputReader implements AutoCloseable {
 	}
 
 	/**
+	 * Returns the parsed simulation time.
 	 * @return the parsed simulation time
 	 */
 	public double getParsedSimulationTime() {

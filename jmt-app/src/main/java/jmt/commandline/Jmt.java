@@ -55,6 +55,18 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
+/**
+ * Entry point of the JMT application.
+ */
+/**
+ * Entry point of the JMT application.
+ */
+/**
+ * Entry point of the JMT application.
+ */
+/**
+ * Entry point of the JMT application.
+ */
 public class Jmt {
 
 	private static final String OPTION_SEED = "-seed";

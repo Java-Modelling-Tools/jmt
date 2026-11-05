@@ -5,6 +5,18 @@ import javax.swing.table.AbstractTableModel;
 import jwat.MatrixObservations;
 import jwat.JWATConstants;
 
+/**
+ * Data model of the j wat univariate stats table.
+ */
+/**
+ * Data model of the j wat univariate stats table.
+ */
+/**
+ * Data model of the j wat univariate stats table.
+ */
+/**
+ * Data model of the j wat univariate stats table.
+ */
 public class JWatUnivariateStatsTableModel extends AbstractTableModel implements JWATConstants {
 	/**
 	 * 

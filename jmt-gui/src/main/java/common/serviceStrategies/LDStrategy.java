@@ -299,10 +299,10 @@ public class LDStrategy implements ServiceStrategy {
 	/**
 	 * Checks if the given Load Dependent Strategy equals <code>this</code>,
 	 * where the equivalence is iff:
-	 * <br>1) have the same number of ranges</br>
-	 * <br>2) have the same distribution in each range</br>
-	 * <br>3) have the same mean value in each range</br>
-	 * <br>4) have the same 'from' and 'to' values in each range</br>
+	 * <br>1) have the same number of ranges
+	 * <br>2) have the same distribution in each range
+	 * <br>3) have the same mean value in each range
+	 * <br>4) have the same 'from' and 'to' values in each range
 	 * @param ld the given LD strategy
 	 * @return  true if ld equals <code>this</code>
 	 *

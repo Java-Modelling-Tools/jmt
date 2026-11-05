@@ -27,7 +27,7 @@ import common.JMTImageLoader;
  * <p>Description: Coxian distribution data structure</p>
  * 
  * @author Casale Giuliano
- * @date   September 9, 2017
+ * @since   September 9, 2017
  */
 public class Coxian extends Distribution {
 

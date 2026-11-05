@@ -6,6 +6,18 @@ import NetStrategies.CacheStrategy;
 import QueueNet.CacheItem;
 
 
+/**
+ * h-LRU cache eviction strategy, the hybrid variant of LRU used for cached items.
+ */
+/**
+ * h-LRU cache eviction strategy, the hybrid variant of LRU used for cached items.
+ */
+/**
+ * h-LRU cache eviction strategy, the hybrid variant of LRU used for cached items.
+ */
+/**
+ * h-LRU cache eviction strategy, the hybrid variant of LRU used for cached items.
+ */
 public class HLRUCache extends LRUCache{
 
 	public HLRUCache(){

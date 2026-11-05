@@ -20,6 +20,18 @@ package jwat.filters;
 import jwat.Observation;
 import random.engine.MersenneTwister;
 
+/**
+ * Random sample extraction filter of JWAT.
+ */
+/**
+ * Random sample extraction filter of JWAT.
+ */
+/**
+ * Random sample extraction filter of JWAT.
+ */
+/**
+ * Random sample extraction filter of JWAT.
+ */
 public class RandomFilter implements FilterOnVariable {
 	private boolean[] matcher = null;
 

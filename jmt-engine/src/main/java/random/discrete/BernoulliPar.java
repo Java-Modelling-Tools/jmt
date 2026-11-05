@@ -4,6 +4,18 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import random.AbstractParameter;
 import random.Parameter;
 
+/**
+ * Parameters of the Bernoulli distribution.
+ */
+/**
+ * Parameters of the Bernoulli distribution.
+ */
+/**
+ * Parameters of the Bernoulli distribution.
+ */
+/**
+ * Parameters of the Bernoulli distribution.
+ */
 public class BernoulliPar extends AbstractParameter implements Parameter {
 
 	private double p;

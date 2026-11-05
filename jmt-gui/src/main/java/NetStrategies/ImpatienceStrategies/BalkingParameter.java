@@ -5,6 +5,18 @@ import static QueueNet.EngineNodeConstants.STATION_QUEUE_STRATEGY_PREEMPTIVE_PRI
 
 import common.serviceStrategies.LDStrategy;
 
+/**
+ * Parameters of the balking distribution.
+ */
+/**
+ * Parameters of the balking distribution.
+ */
+/**
+ * Parameters of the balking distribution.
+ */
+/**
+ * Parameters of the balking distribution.
+ */
 public class BalkingParameter implements ImpatienceParameter {
   private LDStrategy ldStrategy;
   private boolean priorityActivated;

@@ -7,6 +7,18 @@ import random.StorableDistribution;
 
 import java.util.Hashtable;
 
+/**
+ * Base class of the discrete probability distributions of the JMT random package.
+ */
+/**
+ * Base class of the discrete probability distributions of the JMT random package.
+ */
+/**
+ * Base class of the discrete probability distributions of the JMT random package.
+ */
+/**
+ * Base class of the discrete probability distributions of the JMT random package.
+ */
 public abstract class DiscreteDistribution extends AbstractDistribution implements StorableDistribution {
 
 	/*

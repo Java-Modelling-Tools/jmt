@@ -28,7 +28,7 @@ package dataAnalysis.sorting;
 public class HeapSort implements SortAlgorithm {
 
 	/**
-	 * Sorts data in a data vector & substitutes it.
+	 * Sorts data in a data vector &amp; substitutes it.
 	 * NOTE: This algorithm treats the array as 1-indexed (ignores index 0).
 	 * @param data the array to sort
 	 */

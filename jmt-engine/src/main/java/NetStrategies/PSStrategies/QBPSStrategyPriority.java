@@ -10,6 +10,18 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Queue based Processor Sharing strategy with priorities of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy with priorities of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy with priorities of the JSIM engine.
+ */
+/**
+ * Queue based Processor Sharing strategy with priorities of the JSIM engine.
+ */
 public class QBPSStrategyPriority extends PSStrategy {
     public double slice(JobInfoList list, JobClassList classes, double[] weights, boolean[] saturated, JobClass jobClass) {
         Boolean[] compatibilities = new Boolean[classes.size()];

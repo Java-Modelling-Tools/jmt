@@ -91,6 +91,7 @@ public class BlockingQueue extends InputSection {
 	 * This method implements a blocking queue.
 	 * @param message message to be processed.
 	 * @throws NetException
+	 * @return the resulting int
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {

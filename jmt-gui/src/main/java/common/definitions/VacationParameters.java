@@ -2,6 +2,18 @@ package common.definitions;
 
 import common.distributions.Distribution;
 
+/**
+ * Provides the Vacation Parameters functionality of the definitions.
+ */
+/**
+ * Provides the Vacation Parameters functionality of the definitions.
+ */
+/**
+ * Provides the Vacation Parameters functionality of the definitions.
+ */
+/**
+ * Provides the Vacation Parameters functionality of the definitions.
+ */
 public class VacationParameters {
     private Distribution vacationTimeDistribution;
     private Double bernoulliP;

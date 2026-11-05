@@ -28,7 +28,11 @@ import org.slf4j.LoggerFactory;
 import Jama.Matrix;
 
 /**
- * This class performs dynamic data analysis: it can remove the initial
+ * Dynamic data analyzer of the JSIM engine. It removes the initial transient of
+ * the measured samples using the R5 heuristic [Fis73] and the MSER-5 stationarity
+ * rule [Spr98], and then generates the confidence intervals with the spectral
+ * method [HW81], as described in the JSIM chapters of the JMT user manual.
+ * <p>In detail, this class can remove the initial
  *  transient period and performs calculation of variance and confidence
  *	interval of the sample mean of a sequence. <br>It is robust to data correlation.
  *  <br><br>
@@ -887,7 +891,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 		return success;
 	}
 
-	/** calculates the variance through Heidelberger & Welch method, if the data
+	/** calculates the variance through Heidelberger &amp; Welch method, if the data
 	 *  are the means of batches of size batchLen, the variance must be multiplied
 	 *  by batchLen.
 	 *
@@ -895,7 +899,7 @@ public class DynamicDataAnalyzerImpl implements DynamicDataAnalyzer {
 	 *  @param  start       the starting sample
 	 *  @param  n           number of data of the sequence to be estimated
 	 *  @param  K           number of points used in the polynomial fitting
-	 *                      must be <= n/4, typically is 25, 50
+	 *                      must be &lt;= n/4, typically is 25, 50
 	 *  @param  polyOrder   the order of the polynomial to be fitted to the getLog
 	 *                      of the spectrum of data typically is 2 or 3.
 	 *  @return the estimated variance

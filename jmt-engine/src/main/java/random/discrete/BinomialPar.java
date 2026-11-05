@@ -4,6 +4,18 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import random.AbstractParameter;
 import random.Parameter;
 
+/**
+ * Parameters of the binomial distribution.
+ */
+/**
+ * Parameters of the binomial distribution.
+ */
+/**
+ * Parameters of the binomial distribution.
+ */
+/**
+ * Parameters of the binomial distribution.
+ */
 public class BinomialPar extends AbstractParameter implements Parameter {
 
 	private int n;

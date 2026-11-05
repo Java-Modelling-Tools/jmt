@@ -7,6 +7,18 @@ import java.util.Vector;
 import javax.swing.ComboBoxModel;
 import javax.swing.JComboBox;
 
+/**
+ * Combo box of JWAT with a custom stepped user interface.
+ */
+/**
+ * Combo box of JWAT with a custom stepped user interface.
+ */
+/**
+ * Combo box of JWAT with a custom stepped user interface.
+ */
+/**
+ * Combo box of JWAT with a custom stepped user interface.
+ */
 public class SteppedComboBox extends JComboBox {
 	/**
 	 * 

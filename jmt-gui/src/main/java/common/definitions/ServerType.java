@@ -3,6 +3,18 @@ package common.definitions;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides the Server Type functionality of the definitions.
+ */
+/**
+ * Provides the Server Type functionality of the definitions.
+ */
+/**
+ * Provides the Server Type functionality of the definitions.
+ */
+/**
+ * Provides the Server Type functionality of the definitions.
+ */
 public class ServerType {
 
     private int id;

@@ -65,10 +65,10 @@ public class MiscMathsFunctions {
 
 	/**
 	 * Computes the factorials up to a given number and returns them as a
-	 * Map<Integer,BigRational>.
+	 * Map&lt;Integer,BigRational>.
 	 *
 	 * @param n The number up to which the factorials are computed
-	 * @return The Map<Integer,BigRational> containing the computed values
+	 * @return The Map&lt;Integer,BigRational> containing the computed values
 	 */
 	public static Map<Integer, BigRational> computeFactorials(int n) {
 		Map<Integer, BigRational> toReturn = new HashMap<Integer, BigRational>();
@@ -82,10 +82,10 @@ public class MiscMathsFunctions {
 
 	/**
 	 * Computes the factorials up to a given number and returns them as a
-	 * Map<Integer,BigDecimal>.
+	 * Map&lt;Integer,BigDecimal>.
 	 *
 	 * @param n The number up to which the factorials are computed
-	 * @return The Map<Integer,BigDecimal> containing the computed values
+	 * @return The Map&lt;Integer,BigDecimal> containing the computed values
 	 */
 	public static Map<Integer, BigDecimal> computeFactorialsAsBigDecimal(int n) {
 		Map<Integer, BigDecimal> toReturn = new HashMap<Integer, BigDecimal>();

@@ -578,7 +578,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		 * returns that.  If not, finds the class of the data in this
 		 * column (using <code>getColumnClass</code>)
 		 * and returns the default editor for this type of data.
-		 * <p/>
+		 * <p>
 		 *
 		 * @param row    the row of the cell to edit, where 0 is the first row
 		 * @param column the column of the cell to edit,
@@ -613,7 +613,7 @@ public class GraphPanel extends WizardPanel implements ExactConstants {
 		 * renderer, returns that.  If not, finds the class of the data in
 		 * this column (using <code>getColumnClass</code>)
 		 * and returns the default renderer for this type of data.
-		 * <p/>
+		 * <p>
 		 * <b>Note:</b>
 		 * Throughout the table package, the internal implementations always
 		 * use this method to provide renderers so that this default behavior

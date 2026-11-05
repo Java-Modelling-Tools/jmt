@@ -178,7 +178,6 @@ public class ParametricAnalysisChecker {
 	 * This method has a meaning only if used inside a routing probabilities parametric analysis.
 	 * It can be used to get the keys of stations available to perform that kind of parametric
 	 * analysis.
-	 * @param stationKey the key of the station whose routing probabilities will be varied.
 	 * @return a Vector containing the keys of available stations
 	 */
 	public Vector<Object> checkForRoutingProbabilitiesParametricAnalysisAvailableSourceStations() {

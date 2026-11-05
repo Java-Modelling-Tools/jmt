@@ -39,6 +39,18 @@ import jwat.JWATConstants;
 import org.freehep.graphics2d.VectorGraphics;
 import org.freehep.graphicsbase.util.export.ExportDialog;
 
+/**
+ * Swing component displaying the k mean single cluster scatter.
+ */
+/**
+ * Swing component displaying the k mean single cluster scatter.
+ */
+/**
+ * Swing component displaying the k mean single cluster scatter.
+ */
+/**
+ * Swing component displaying the k mean single cluster scatter.
+ */
 public class KMeanSingleClusterScatter extends JPanel {
 	/**
 	 * 

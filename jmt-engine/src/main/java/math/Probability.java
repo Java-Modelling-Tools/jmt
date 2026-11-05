@@ -12,9 +12,8 @@ package math;
  * Custom tailored numerical integration of certain probability distributions.
  * <p>
  * <b>Implementation:</b>
- * <dt>
- * Some code taken and adapted from the <A HREF="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</A>,
- * which in turn is a port from the <A HREF="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</A> Math Library (C).
+ * Some code taken and adapted from the <a href="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</a>,
+ * which in turn is a port from the <a href="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</a> Math Library (C).
  * Most Cephes code (missing from the 2D Graph Package) directly ported.
  *
  * @author peter.gedeck@pharma.Novartis.com
@@ -57,7 +56,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the area from zero to <tt>x</tt> under the beta density
+	 * Returns the area from zero to <code>x</code> under the beta density
 	 * function.
 	 * <pre>
 	 *                          x
@@ -69,11 +68,11 @@ public class Probability extends Constants {
 	 *                         0
 	 * </pre>
 	 * This function is identical to the incomplete beta
-	 * integral function <tt>Gamma.incompleteBeta(a, b, x)</tt>.
+	 * integral function <code>Gamma.incompleteBeta(a, b, x)</code>.
 	 *
 	 * The complemented function is
 	 *
-	 * <tt>1 - P(1-x) =  Gamma.incompleteBeta( b, a, x )</tt>;
+	 * <code>1 - P(1-x) =  Gamma.incompleteBeta( b, a, x )</code>;
 	 *
 	 */
 	static public double beta(double a, double b, double x) {
@@ -81,18 +80,18 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the area under the right hand tail (from <tt>x</tt> to
+	 * Returns the area under the right hand tail (from <code>x</code> to
 	 * infinity) of the beta density function.
 	 *
 	 * This function is identical to the incomplete beta
-	 * integral function <tt>Gamma.incompleteBeta(b, a, x)</tt>.
+	 * integral function <code>Gamma.incompleteBeta(b, a, x)</code>.
 	 */
 	static public double betaComplemented(double a, double b, double x) {
 		return Gamma.incompleteBeta(b, a, x);
 	}
 
 	/**
-	 * Returns the sum of the terms <tt>0</tt> through <tt>k</tt> of the Binomial
+	 * Returns the sum of the terms <code>0</code> through <code>k</code> of the Binomial
 	 * probability density.
 	 * <pre>
 	 *   k
@@ -104,12 +103,12 @@ public class Probability extends Constants {
 	 * The terms are not summed directly; instead the incomplete
 	 * beta integral is employed, according to the formula
 	 * <p>
-	 * <tt>y = binomial( k, n, p ) = Gamma.incompleteBeta( n-k, k+1, 1-p )</tt>.
+	 * <code>y = binomial( k, n, p ) = Gamma.incompleteBeta( n-k, k+1, 1-p )</code>.
 	 * <p>
 	 * All arguments must be positive,
 	 * @param k end term.
 	 * @param n the number of trials.
-	 * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
+	 * @param p the probability of success (must be in <code>(0.0,1.0)</code>).
 	 */
 	static public double binomial(int k, int n, double p) {
 		if ((p < 0.0) || (p > 1.0)) {
@@ -130,7 +129,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the sum of the terms <tt>k+1</tt> through <tt>n</tt> of the Binomial
+	 * Returns the sum of the terms <code>k+1</code> through <code>n</code> of the Binomial
 	 * probability density.
 	 * <pre>
 	 *   n
@@ -142,12 +141,12 @@ public class Probability extends Constants {
 	 * The terms are not summed directly; instead the incomplete
 	 * beta integral is employed, according to the formula
 	 * <p>
-	 * <tt>y = binomialComplemented( k, n, p ) = Gamma.incompleteBeta( k+1, n-k, p )</tt>.
+	 * <code>y = binomialComplemented( k, n, p ) = Gamma.incompleteBeta( k+1, n-k, p )</code>.
 	 * <p>
 	 * All arguments must be positive,
 	 * @param k end term.
 	 * @param n the number of trials.
-	 * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
+	 * @param p the probability of success (must be in <code>(0.0,1.0)</code>).
 	 */
 	static public double binomialComplemented(int k, int n, double p) {
 		if ((p < 0.0) || (p > 1.0)) {
@@ -168,9 +167,9 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the area under the left hand tail (from 0 to <tt>x</tt>)
+	 * Returns the area under the left hand tail (from 0 to <code>x</code>)
 	 * of the Chi square probability density function with
-	 * <tt>v</tt> degrees of freedom.
+	 * <code>v</code> degrees of freedom.
 	 * <pre>
 	 *                                  inf.
 	 *                                    -
@@ -180,12 +179,12 @@ public class Probability extends Constants {
 	 *                   2    | (v/2)   -
 	 *                                   x
 	 * </pre>
-	 * where <tt>x</tt> is the Chi-square variable.
+	 * where <code>x</code> is the Chi-square variable.
 	 * <p>
 	 * The incomplete gamma integral is used, according to the
 	 * formula
 	 * <p>
-	 * <tt>y = chiSquare( v, x ) = incompleteGamma( v/2.0, x/2.0 )</tt>.
+	 * <code>y = chiSquare( v, x ) = incompleteGamma( v/2.0, x/2.0 )</code>.
 	 * <p>
 	 * The arguments must both be positive.
 	 *
@@ -200,9 +199,9 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the area under the right hand tail (from <tt>x</tt> to
+	 * Returns the area under the right hand tail (from <code>x</code> to
 	 * infinity) of the Chi square probability density function
-	 * with <tt>v</tt> degrees of freedom.
+	 * with <code>v</code> degrees of freedom.
 	 * <pre>
 	 *                                  inf.
 	 *                                    -
@@ -212,12 +211,12 @@ public class Probability extends Constants {
 	 *                   2    | (v/2)   -
 	 *                                   x
 	 * </pre>
-	 * where <tt>x</tt> is the Chi-square variable.
+	 * where <code>x</code> is the Chi-square variable.
 	 *
 	 * The incomplete gamma integral is used, according to the
 	 * formula
 	 *
-	 * <tt>y = chiSquareComplemented( v, x ) = incompleteGammaComplement( v/2.0, x/2.0 )</tt>.
+	 * <code>y = chiSquareComplemented( v, x ) = incompleteGammaComplement( v/2.0, x/2.0 )</code>.
 	 *
 	 *
 	 * The arguments must both be positive.
@@ -232,7 +231,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the error function of the normal distribution; formerly named <tt>erf</tt>.
+	 * Returns the error function of the normal distribution; formerly named <code>erf</code>.
 	 * The integral is
 	 * <pre>
 	 *                           x
@@ -244,13 +243,13 @@ public class Probability extends Constants {
 	 *                           0
 	 * </pre>
 	 * <b>Implementation:</b>
-	 * For <tt>0 <= |x| < 1, erf(x) = x * P4(x**2)/Q5(x**2)</tt>; otherwise
-	 * <tt>erf(x) = 1 - erfc(x)</tt>.
+	 * For <code>0 &lt;= |x| &lt; 1, erf(x) = x * P4(x**2)/Q5(x**2)</code>; otherwise
+	 * <code>erf(x) = 1 - erfc(x)</code>.
 	 * <p>
-	 * Code adapted from the <A HREF="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</A>,
-	 * which in turn is a port from the <A HREF="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</A> Math Library (C).
+	 * Code adapted from the <a href="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</a>,
+	 * which in turn is a port from the <a href="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</a> Math Library (C).
 	 *
-	 * @param a the argument to the function.
+	 * @param x the argument to the function.
 	 */
 	static public double errorFunction(double x) throws ArithmeticException {
 		double y, z;
@@ -268,7 +267,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the complementary Error function of the normal distribution; formerly named <tt>erfc</tt>.
+	 * Returns the complementary Error function of the normal distribution; formerly named <code>erfc</code>.
 	 * <pre>
 	 *  1 - erf(x) =
 	 *
@@ -281,11 +280,11 @@ public class Probability extends Constants {
 	 *                            x
 	 * </pre>
 	 * <b>Implementation:</b>
-	 * For small x, <tt>erfc(x) = 1 - erf(x)</tt>; otherwise rational
+	 * For small x, <code>erfc(x) = 1 - erf(x)</code>; otherwise rational
 	 * approximations are computed.
 	 * <p>
-	 * Code adapted from the <A HREF="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</A>,
-	 * which in turn is a port from the <A HREF="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</A> Math Library (C).
+	 * Code adapted from the <a href="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</a>,
+	 * which in turn is a port from the <a href="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</a> Math Library (C).
 	 *
 	 * @param a the argument to the function.
 	 */
@@ -352,7 +351,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the integral from zero to <tt>x</tt> of the gamma probability
+	 * Returns the integral from zero to <code>x</code> of the gamma probability
 	 * density function.
 	 * <pre>
 	 *                x
@@ -366,7 +365,7 @@ public class Probability extends Constants {
 	 * The incomplete gamma integral is used, according to the
 	 * relation
 	 *
-	 * <tt>y = Gamma.incompleteGamma( b, a*x )</tt>.
+	 * <code>y = Gamma.incompleteGamma( b, a*x )</code>.
 	 *
 	 * @param a the paramater a (alpha) of the gamma distribution.
 	 * @param b the paramater b (beta, lambda) of the gamma distribution.
@@ -380,7 +379,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the integral from <tt>x</tt> to infinity of the gamma
+	 * Returns the integral from <code>x</code> to infinity of the gamma
 	 * probability density function:
 	 * <pre>
 	 *               inf.
@@ -408,7 +407,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the sum of the terms <tt>0</tt> through <tt>k</tt> of the Negative Binomial Distribution.
+	 * Returns the sum of the terms <code>0</code> through <code>k</code> of the Negative Binomial Distribution.
 	 * <pre>
 	 *   k
 	 *   --  ( n+j-1 )   n      j
@@ -417,17 +416,17 @@ public class Probability extends Constants {
 	 *  j=0
 	 * </pre>
 	 * In a sequence of Bernoulli trials, this is the probability
-	 * that <tt>k</tt> or fewer failures precede the <tt>n</tt>-th success.
+	 * that <code>k</code> or fewer failures precede the <code>n</code>-th success.
 	 * <p>
 	 * The terms are not computed individually; instead the incomplete
 	 * beta integral is employed, according to the formula
 	 * <p>
-	 * <tt>y = negativeBinomial( k, n, p ) = Gamma.incompleteBeta( n, k+1, p )</tt>.
+	 * <code>y = negativeBinomial( k, n, p ) = Gamma.incompleteBeta( n, k+1, p )</code>.
 	 *
 	 * All arguments must be positive,
 	 * @param k end term.
 	 * @param n the number of trials.
-	 * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
+	 * @param p the probability of success (must be in <code>(0.0,1.0)</code>).
 	 */
 	static public double negativeBinomial(int k, int n, double p) {
 		if ((p < 0.0) || (p > 1.0)) {
@@ -441,7 +440,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the sum of the terms <tt>k+1</tt> to infinity of the Negative
+	 * Returns the sum of the terms <code>k+1</code> to infinity of the Negative
 	 * Binomial distribution.
 	 * <pre>
 	 *   inf
@@ -458,7 +457,7 @@ public class Probability extends Constants {
 	 * All arguments must be positive,
 	 * @param k end term.
 	 * @param n the number of trials.
-	 * @param p the probability of success (must be in <tt>(0.0,1.0)</tt>).
+	 * @param p the probability of success (must be in <code>(0.0,1.0)</code>).
 	 */
 	static public double negativeBinomialComplemented(int k, int n, double p) {
 		if ((p < 0.0) || (p > 1.0)) {
@@ -473,7 +472,7 @@ public class Probability extends Constants {
 
 	/**
 	 * Returns the area under the Normal (Gaussian) probability density
-	 * function, integrated from minus infinity to <tt>x</tt> (assumes mean is zero, variance is one).
+	 * function, integrated from minus infinity to <code>x</code> (assumes mean is zero, variance is one).
 	 * <pre>
 	 *                            x
 	 *                             -
@@ -486,8 +485,8 @@ public class Probability extends Constants {
 	 *             =  ( 1 + erf(z) ) / 2
 	 *             =  erfc(z) / 2
 	 * </pre>
-	 * where <tt>z = x/sqrt(2)</tt>.
-	 * Computation is via the functions <tt>errorFunction</tt> and <tt>errorFunctionComplement</tt>.
+	 * where <code>z = x/sqrt(2)</code>.
+	 * Computation is via the functions <code>errorFunction</code> and <code>errorFunctionComplement</code>.
 	 */
 	static public double normal(double a) throws ArithmeticException {
 		double x, y, z;
@@ -509,7 +508,7 @@ public class Probability extends Constants {
 
 	/**
 	 * Returns the area under the Normal (Gaussian) probability density
-	 * function, integrated from minus infinity to <tt>x</tt>.
+	 * function, integrated from minus infinity to <code>x</code>.
 	 * <pre>
 	 *                            x
 	 *                             -
@@ -520,8 +519,8 @@ public class Probability extends Constants {
 	 *                          -inf.
 	 *
 	 * </pre>
-	 * where <tt>v = variance</tt>.
-	 * Computation is via the functions <tt>errorFunction</tt>.
+	 * where <code>v = variance</code>.
+	 * Computation is via the functions <code>errorFunction</code>.
 	 *
 	 * @param mean the mean of the normal distribution.
 	 * @param variance the variance of the normal distribution.
@@ -536,17 +535,17 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the value, <tt>x</tt>, for which the area under the
+	 * Returns the value, <code>x</code>, for which the area under the
 	 * Normal (Gaussian) probability density function (integrated from
-	 * minus infinity to <tt>x</tt>) is equal to the argument <tt>y</tt> (assumes mean is zero, variance is one); formerly named <tt>ndtri</tt>.
+	 * minus infinity to <code>x</code>) is equal to the argument <code>y</code> (assumes mean is zero, variance is one); formerly named <code>ndtri</code>.
 	 * <p>
-	 * For small arguments <tt>0 < y < exp(-2)</tt>, the program computes
-	 * <tt>z = sqrt( -2.0 * getLog(y) )</tt>;  then the approximation is
-	 * <tt>x = z - getLog(z)/z  - (1/z) P(1/z) / Q(1/z)</tt>.
-	 * There are two rational functions P/Q, one for <tt>0 < y < exp(-32)</tt>
-	 * and the other for <tt>y</tt> up to <tt>exp(-2)</tt>.
+	 * For small arguments <code>0 &lt; y &lt; exp(-2)</code>, the program computes
+	 * <code>z = sqrt( -2.0 * getLog(y) )</code>;  then the approximation is
+	 * <code>x = z - getLog(z)/z  - (1/z) P(1/z) / Q(1/z)</code>.
+	 * There are two rational functions P/Q, one for <code>0 &lt; y &lt; exp(-32)</code>
+	 * and the other for <code>y</code> up to <code>exp(-2)</code>.
 	 * For larger arguments,
-	 * <tt>w = y - 0.5</tt>, and  <tt>x/sqrt(2pi) = w + w**3 R(w**2)/S(w**2))</tt>.
+	 * <code>w = y - 0.5</code>, and  <code>x/sqrt(2pi) = w + w**3 R(w**2)/S(w**2))</code>.
 	 *
 	 */
 	static public double normalInverse(double y0) throws ArithmeticException {
@@ -593,7 +592,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the sum of the first <tt>k</tt> terms of the Poisson distribution.
+	 * Returns the sum of the first <code>k</code> terms of the Poisson distribution.
 	 * <pre>
 	 *   k         j
 	 *   --   -m  m
@@ -604,7 +603,7 @@ public class Probability extends Constants {
 	 * The terms are not summed directly; instead the incomplete
 	 * gamma integral is employed, according to the relation
 	 * <p>
-	 * <tt>y = poisson( k, m ) = Gamma.incompleteGammaComplement( k+1, m )</tt>.
+	 * <code>y = poisson( k, m ) = Gamma.incompleteGammaComplement( k+1, m )</code>.
 	 *
 	 * The arguments must both be positive.
 	 *
@@ -622,7 +621,7 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the sum of the terms <tt>k+1</tt> to <tt>Infinity</tt> of the Poisson distribution.
+	 * Returns the sum of the terms <code>k+1</code> to <code>Infinity</code> of the Poisson distribution.
 	 * <pre>
 	 *  inf.       j
 	 *   --   -m  m
@@ -633,7 +632,7 @@ public class Probability extends Constants {
 	 * The terms are not summed directly; instead the incomplete
 	 * gamma integral is employed, according to the formula
 	 * <p>
-	 * <tt>y = poissonComplemented( k, m ) = Gamma.incompleteGamma( k+1, m )</tt>.
+	 * <code>y = poissonComplemented( k, m ) = Gamma.incompleteGamma( k+1, m )</code>.
 	 *
 	 * The arguments must both be positive.
 	 *
@@ -651,8 +650,8 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the integral from minus infinity to <tt>t</tt> of the Student-t
-	 * distribution with <tt>k &gt; 0</tt> degrees of freedom.
+	 * Returns the integral from minus infinity to <code>t</code> of the Student-t
+	 * distribution with <code>k &gt; 0</code> degrees of freedom.
 	 * <pre>
 	 *                                      t
 	 *                                      -
@@ -668,12 +667,12 @@ public class Probability extends Constants {
 	 * </pre>
 	 * Relation to incomplete beta integral:
 	 * <p>
-	 * <tt>1 - studentT(k,t) = 0.5 * Gamma.incompleteBeta( k/2, 1/2, z )</tt>
-	 * where <tt>z = k/(k + t**2)</tt>.
+	 * <code>1 - studentT(k,t) = 0.5 * Gamma.incompleteBeta( k/2, 1/2, z )</code>
+	 * where <code>z = k/(k + t**2)</code>.
 	 * <p>
-	 * Since the function is symmetric about <tt>t=0</tt>, the area under the
+	 * Since the function is symmetric about <code>t=0</code>, the area under the
 	 * right tail of the density is found by calling the function
-	 * with <tt>-t</tt> instead of <tt>t</tt>.
+	 * with <code>-t</code> instead of <code>t</code>.
 	 *
 	 * @param k degrees of freedom.
 	 * @param t integration end point.
@@ -690,11 +689,11 @@ public class Probability extends Constants {
 	}
 
 	/**
-	 * Returns the value, <tt>t</tt>, for which the area under the
+	 * Returns the value, <code>t</code>, for which the area under the
 	 * Student-t probability density function (integrated from
-	 * minus infinity to <tt>t</tt>) is equal to <tt>1-alpha/2</tt>.
+	 * minus infinity to <code>t</code>) is equal to <code>1-alpha/2</code>.
 	 * The value returned corresponds to usual Student t-distribution lookup
-	 * table for <tt>t<sub>alpha[size]</sub></tt>.
+	 * table for <code>t<sub>alpha[size]</sub></code>.
 	 * <p>
 	 * The function uses the studentT function to determine the return
 	 * value iteratively.

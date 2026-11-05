@@ -58,7 +58,7 @@ public class ActionUndo extends AbstractUndoRedoAction {
 	}
 
 	/**
-	 * Update the state (name & enabled) of this instance
+	 * Update the state (name &amp; enabled) of this instance
 	 */
 	@Override
 	public void update() {

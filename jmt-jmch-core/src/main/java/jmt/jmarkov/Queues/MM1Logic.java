@@ -114,7 +114,7 @@ public class MM1Logic implements QueueLogic {
 	 * 
 	 * @return number of average jobs in the station
 	 * 
-	 * @exception NonErgodicException queue is not ergodic (U > 1 o U < 0)
+	 * @exception NonErgodicException queue is not ergodic (U > 1 o U &lt; 0)
 	 */
 	public double mediaJobs() throws NonErgodicException {
 		return (utilization()) / (1.0 - utilization());
@@ -126,7 +126,7 @@ public class MM1Logic implements QueueLogic {
 	 * 
 	 * @return utilization
 	 * 
-	 * @exception NonErgodicException queue is not ergodic (U > 1 o U < 0)
+	 * @exception NonErgodicException queue is not ergodic (U > 1 o U &lt; 0)
 	 */
 	public double utilization() throws NonErgodicException {
 		if ((lambda * s) > 1) {
@@ -144,6 +144,7 @@ public class MM1Logic implements QueueLogic {
 	}
 
 	/**
+	 * Sets the max states.
 	 * @param buffer
 	 */
 	public void setMaxStates(int buffer) {

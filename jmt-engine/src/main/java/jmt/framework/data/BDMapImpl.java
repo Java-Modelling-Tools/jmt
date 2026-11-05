@@ -265,6 +265,7 @@ public class BDMapImpl implements BDMap {
 	/**returns size of this BDMap along specified coordinate. For example, if x coordinate
 	 * is specified, where x is the coordinate for cells in a row of table represented by
 	 * this BDMap, total number of columns is returned.
+	 * @return the resulting int
 	 * @param coordName: name of the coordinate along which size must be given*/
 	public int size(int coordName) {
 		if (coordName == X) {

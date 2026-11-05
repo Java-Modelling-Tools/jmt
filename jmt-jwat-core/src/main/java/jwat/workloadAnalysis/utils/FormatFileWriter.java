@@ -6,6 +6,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Vector;
 
+/**
+ * Writer of the JWAT input format description files.
+ */
+/**
+ * Writer of the JWAT input format description files.
+ */
+/**
+ * Writer of the JWAT input format description files.
+ */
+/**
+ * Writer of the JWAT input format description files.
+ */
 public class FormatFileWriter {
 
 	public FormatFileWriter(Vector<Object> names, Vector comments, Vector delimiters, Vector regExprs, int[] types, String name, Vector defualts,

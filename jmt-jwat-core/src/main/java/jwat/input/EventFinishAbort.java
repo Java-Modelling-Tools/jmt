@@ -1,5 +1,17 @@
 package jwat.input;
 
+/**
+ * Event signalling that a JWAT operation has been aborted.
+ */
+/**
+ * Event signalling that a JWAT operation has been aborted.
+ */
+/**
+ * Event signalling that a JWAT operation has been aborted.
+ */
+/**
+ * Event signalling that a JWAT operation has been aborted.
+ */
 public class EventFinishAbort implements EventStatus {
 
 	private String msg;

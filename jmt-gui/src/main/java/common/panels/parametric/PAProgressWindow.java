@@ -248,8 +248,7 @@ public class PAProgressWindow extends JMTDialog {
 	}
 
 	/**
-	 * Sets the running number of step
-	 * @param step the step to be run
+	 * Increments the running number of steps shown in this window.
 	 */
 	public void incrementStepNumber() {
 		stepNumber++;

@@ -37,6 +37,7 @@ public class XSecondaryMacroBlock extends SecondaryMacroBlock {
 	 * @param queue 
 	 * @return 
 	 * @throws InternalErrorException 
+	 * @param n the n value
 	 */
 	@Override
 	public int addCE(int row, PopulationChangeVector n, int queue) throws InternalErrorException {

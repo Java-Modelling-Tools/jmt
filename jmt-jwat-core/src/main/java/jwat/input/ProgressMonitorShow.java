@@ -4,6 +4,18 @@ import java.awt.Component;
 
 import javax.swing.ProgressMonitor;
 
+/**
+ * Progress monitor of the JWAT time consuming operations.
+ */
+/**
+ * Progress monitor of the JWAT time consuming operations.
+ */
+/**
+ * Progress monitor of the JWAT time consuming operations.
+ */
+/**
+ * Progress monitor of the JWAT time consuming operations.
+ */
 public class ProgressMonitorShow implements ProgressShow {
 	private ProgressMonitor pm;
 	private int step;

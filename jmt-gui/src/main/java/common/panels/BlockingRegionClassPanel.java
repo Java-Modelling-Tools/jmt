@@ -39,6 +39,18 @@ import common.editors.ImagedComboBoxCellEditorFactory;
 import table.BooleanCellRenderer;
 import table.ExactCellEditor;
 
+/**
+ * Swing panel of the JMT wizard providing the blocking region class view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region class view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region class view.
+ */
+/**
+ * Swing panel of the JMT wizard providing the blocking region class view.
+ */
 public class BlockingRegionClassPanel extends WizardPanel implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

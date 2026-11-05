@@ -24,7 +24,7 @@ import org.jgraph.graph.DefaultCellViewFactory;
 
 /**
  * <p>Title: JmtDefaultCellViewFactory </p>
- * @author Giuseppe De Cicco & Fabio Granara
+ * @author Giuseppe De Cicco &amp; Fabio Granara
  * 		Date: 22-genn-2007
  * 
  */

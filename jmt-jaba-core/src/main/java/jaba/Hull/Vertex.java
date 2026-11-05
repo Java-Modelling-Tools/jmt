@@ -19,7 +19,7 @@ package jaba.Hull;
 /**
  * A class defining a vertex.
  *
- * @author  Chris Pudney <cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author  Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @version 1.1
  */
 public class Vertex {
@@ -169,8 +169,7 @@ public class Vertex {
 	/**
 	  * Returns the square of the norm of a vector
 	  *
-	  * @param v  the vector
-	  * @return   the square of the norm of v
+	  * @return   the square of the norm of this vertex
 	  */
 	public long normSq() {
 		long x = this.x;

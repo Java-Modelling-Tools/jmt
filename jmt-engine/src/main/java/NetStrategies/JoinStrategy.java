@@ -20,6 +20,18 @@ package NetStrategies;
 
 import jmt.common.AutoCheck;
 
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
+/**
+ * Base class of the JSIM join strategies, which synchronize the tasks of a forked job at a join station.
+ */
 public abstract class JoinStrategy implements AutoCheck {
 
 	public abstract int getRequiredNum();

@@ -331,8 +331,6 @@ public class Convex3DGraph extends JabaGraph implements ComponentListener,
 	 * direction of the sight, thus it is not visible because there exist faces
 	 * which cover the sight of the analyzed one.
 	 * 
-	 * @param faces
-	 *            Faces to split.
 	 * @param forward
 	 *            Viewing direction.
 	 */

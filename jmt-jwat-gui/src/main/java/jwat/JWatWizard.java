@@ -18,6 +18,18 @@ import javax.swing.JToolBar;
 import jmt.framework.gui.help.HoverHelp;
 import jmt.framework.gui.wizard.Wizard;
 
+/**
+ * Base wizard of the JWAT tool.
+ */
+/**
+ * Base wizard of the JWAT tool.
+ */
+/**
+ * Base wizard of the JWAT tool.
+ */
+/**
+ * Base wizard of the JWAT tool.
+ */
 public class JWatWizard extends Wizard {
 	/**
 	 * 

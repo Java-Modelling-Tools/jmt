@@ -12,9 +12,8 @@ package math;
  * Gamma and Beta functions.
  * <p>
  * <b>Implementation:</b>
- * <dt>
- * Some code taken and adapted from the <A HREF="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</A>,
- * which in turn is a port from the <A HREF="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</A> Math Library (C).
+ * Some code taken and adapted from the <a href="http://www.sci.usq.edu.au/staff/leighb/graph/Top.html">Java 2D Graph Package 2.4</a>,
+ * which in turn is a port from the <a href="http://people.ne.mediaone.net/moshier/index.html#Cephes">Cephes 2.2</a> Math Library (C).
  * Most Cephes code (missing from the 2D Graph Package) directly ported.
  *
  * @author wolfgang.hoschek@cern.ch
@@ -135,7 +134,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Returns the Incomplete Beta Function evaluated from zero to <tt>xx</tt>; formerly named <tt>ibeta</tt>.
+	 * Returns the Incomplete Beta Function evaluated from zero to <code>xx</code>; formerly named <code>ibeta</code>.
 	 *
 	 * @param aa the alpha parameter of the beta distribution.
 	 * @param bb the beta parameter of the beta distribution.
@@ -240,7 +239,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Continued fraction expansion #1 for incomplete beta integral; formerly named <tt>incbcf</tt>.
+	 * Continued fraction expansion #1 for incomplete beta integral; formerly named <code>incbcf</code>.
 	 */
 	static double incompleteBetaFraction1(double a, double b, double x) throws ArithmeticException {
 		double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
@@ -323,7 +322,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Continued fraction expansion #2 for incomplete beta integral; formerly named <tt>incbd</tt>.
+	 * Continued fraction expansion #2 for incomplete beta integral; formerly named <code>incbd</code>.
 	 */
 	static double incompleteBetaFraction2(double a, double b, double x) throws ArithmeticException {
 		double xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
@@ -407,7 +406,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Returns the Incomplete Gamma function; formerly named <tt>igamma</tt>.
+	 * Returns the Incomplete Gamma function; formerly named <code>igamma</code>.
 	 * @param a the parameter of the gamma distribution.
 	 * @param x the integration end point.
 	 */
@@ -447,7 +446,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Returns the Complemented Incomplete Gamma function; formerly named <tt>igamc</tt>.
+	 * Returns the Complemented Incomplete Gamma function; formerly named <code>igamc</code>.
 	 * @param a the parameter of the gamma distribution.
 	 * @param x the integration start point.
 	 */
@@ -511,7 +510,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Returns the natural logarithm of the gamma function; formerly named <tt>lgamma</tt>.
+	 * Returns the natural logarithm of the gamma function; formerly named <code>lgamma</code>.
 	 */
 	public static double logGamma(double x) throws ArithmeticException {
 		double p, q, w, z;
@@ -587,7 +586,7 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Power series for incomplete beta integral; formerly named <tt>pseries</tt>.
+	 * Power series for incomplete beta integral; formerly named <code>pseries</code>.
 	 * Use when b*x is small and x not too close to 1.
 	 */
 	static double powerSeries(double a, double b, double x) throws ArithmeticException {
@@ -627,8 +626,8 @@ public class Gamma extends Constants {
 	}
 
 	/**
-	 * Returns the Gamma function computed by Stirling's formula; formerly named <tt>stirf</tt>.
-	 * The polynomial STIR is valid for 33 <= x <= 172.
+	 * Returns the Gamma function computed by Stirling's formula; formerly named <code>stirf</code>.
+	 * The polynomial STIR is valid for 33 &lt;= x &lt;= 172.
 	 */
 	static double stirlingFormula(double x) throws ArithmeticException {
 		double STIR[] = { 7.87311395793093628397E-4, -2.29549961613378126380E-4, -2.68132617805781232825E-3, 3.47222221605458667310E-3,

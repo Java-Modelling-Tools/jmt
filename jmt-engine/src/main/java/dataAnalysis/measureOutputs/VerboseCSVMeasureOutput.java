@@ -38,7 +38,7 @@ import log.LoggerParameters;
 /**
  * This class implements a csv output for measure class. <br>
  * File output: <br>
- * <table border="1"> <tr>
+ * <table border="1"> <caption>CSV output columns</caption> <tr>
  * <td>Timestamp (simulation time)</td>
  * <td>Sample</td>
  * <td>Weight</td>
@@ -64,9 +64,10 @@ public class VerboseCSVMeasureOutput extends MeasureOutput {
 
 	/**
 	 * Constructor of a NewCSVMeasureOutput object, using a file.
-	 * @param Measure the measure to be sent in output
-	 * @param Append true to write at the end of the file (of course
-	 * it is useful only if a file is used)
+	 * @param measure the measure to be sent in output
+	 * @param simParameters the simulation parameters
+	 * @param isTerminalSimulation whether the simulation is terminal
+	 * @param parametricStep the current parametric step
 	 * @throws java.io.IOException
 	 */
 	public VerboseCSVMeasureOutput(Measure measure, SimParameters simParameters, boolean isTerminalSimulation, int parametricStep) throws IOException {

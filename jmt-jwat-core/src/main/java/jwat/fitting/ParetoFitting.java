@@ -1,5 +1,14 @@
 package jwat.fitting;
 
+/**
+ * Pareto distribution fitting algorithm of JWAT, based on the Gulati-Shapiro test of hypothesis.
+ */
+/**
+ * Pareto distribution fitting algorithm of JWAT, based on the Gulati-Shapiro test of hypothesis.
+ */
+/**
+ * Pareto distribution fitting algorithm of JWAT, based on the Gulati-Shapiro test of hypothesis.
+ */
 public class ParetoFitting implements FittingAlgorithm {
 	private double sigmaML;
 	private double alphaML;
@@ -51,10 +60,7 @@ public class ParetoFitting implements FittingAlgorithm {
 	
 	/**
 	 * Method for applying the Gulati-Shapiro test of hypothesis. Supposes that the input data is already ordered.
-	 * @param data
-	 * @param sign
-	 * @param est_par
-	 * @return
+	 * @return true if the data is fitted by the Pareto distribution
 	 */
 	public boolean isFitted() {
 

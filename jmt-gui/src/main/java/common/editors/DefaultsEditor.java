@@ -515,7 +515,7 @@ public class DefaultsEditor extends JDialog implements CommonConstants {
 	 * @param text text to be shown on a label
 	 * @param property property to be changed in Defaults
 	 * @param cont container where input field must be added
-	 * @param values Map with internal value <-> showed value relations
+	 * @param values Map with internal value &lt;-> showed value relations
 	 */
 	protected void addInputCombo(String text, final String property, Container cont, final Map<String, String> values) {
 		JLabel label = new JLabel(text + ":");

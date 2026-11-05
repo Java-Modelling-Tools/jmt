@@ -7,6 +7,18 @@ import java.util.function.Function;
 
 import static math.Arithmetic.factorial;
 
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
+/**
+ * Poisson distribution, typically used to model arrival processes in the JMT simulation engine.
+ */
 public class Poisson extends DiscreteDistribution {
     private double lambda;
 

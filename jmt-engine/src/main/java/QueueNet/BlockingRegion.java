@@ -229,6 +229,7 @@ public class BlockingRegion {
 
 	/** Gets the number of jobs of the specified class currently inside the blocking region
 	 * @param jobClass the specified class
+	 * @return the resulting double
 	 */
 	public double getActualOccupation(JobClass jobClass) {
 		if (jobClass != null) {
@@ -313,6 +314,7 @@ public class BlockingRegion {
 	 * Tells whether the region is blocked for this class or
 	 * has enough place for a job of this class.
 	 * @return true if blocked, false if other capacity is available
+	 * @param jobClass the job class
 	 */
 	public boolean isBlocked(JobClass jobClass) {
 		int id = jobClass.getId();
@@ -464,6 +466,7 @@ public class BlockingRegion {
 	}
 
 	/**
+	 * Returns the class weights.
 	 * @return Returns the classWeights.
 	 */
 	public double[] getClassWeights() {
@@ -471,6 +474,7 @@ public class BlockingRegion {
 	}
 
 	/**
+	 * Returns the class soft deadlines.
 	 * @return Returns classSoftDeadlines.
 	 */
 	public double[] getClassSoftDeadlines() {
@@ -478,6 +482,7 @@ public class BlockingRegion {
 	}
 
 	/**
+	 * Returns the max capacity.
 	 * @return Returns the maxCapacity.
 	 */
 	public double getMaxCapacity() {

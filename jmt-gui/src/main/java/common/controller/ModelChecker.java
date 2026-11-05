@@ -996,10 +996,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of sources without an
+	 * Returns a Vector&lt;Object> containing the keys of sources without an
 	 * associated open class.
 	 *
-	 * @return a Vector<Object> containing the keys of sources without an
+	 * @return a Vector&lt;Object> containing the keys of sources without an
 	 * associated open class.
 	 */
 	public Vector<Object> getSourcesWithoutOpenClass() {
@@ -1007,10 +1007,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of classes without a
+	 * Returns a Vector&lt;Object> containing the keys of classes without a
 	 * reference station.
 	 *
-	 * @return a Vector<Object> containing the keys of classes without a
+	 * @return a Vector&lt;Object> containing the keys of classes without a
 	 * reference station.
 	 */
 	public Vector<Object> getClassesWithoutReferenceStation() {
@@ -1018,10 +1018,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations without an
+	 * Returns a Vector&lt;Object> containing the keys of stations without an
 	 * essential link.
 	 *
-	 * @return a Vector<Object> containing the keys of stations without an
+	 * @return a Vector&lt;Object> containing the keys of stations without an
 	 * essential link.
 	 */
 	public Vector<Object> getStationsWithoutEssentialLink() {
@@ -1029,10 +1029,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations using different
+	 * Returns a Vector&lt;Object> containing the keys of stations using different
 	 * queue strategies for classes within the same priority group.
 	 *
-	 * @return a Vector<Object> containing the keys of stations using different
+	 * @return a Vector&lt;Object> containing the keys of stations using different
 	 * queue strategies for classes within the same priority group.
 	 */
 	public Vector<Object> getStationsWithInconsistentQueueStrategies() {
@@ -1040,10 +1040,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of servers using SJF, LJF,
+	 * Returns a Vector&lt;Object> containing the keys of servers using SJF, LJF,
 	 * SEPT or LEPT along with the load dependent service strategy.
 	 *
-	 * @return a Vector<Object> containing the keys of servers using SJF, LJF,
+	 * @return a Vector&lt;Object> containing the keys of servers using SJF, LJF,
 	 * SEPT or LEPT along with the load dependent service strategy.
 	 */
 	public Vector<Object> getServersWithUnpredictableService() {
@@ -1051,10 +1051,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of blocking regions in
+	 * Returns a Vector&lt;Object> containing the keys of blocking regions in
 	 * which the total preload exceeds the capacity constraints.
 	 *
-	 * @return a Vector<Object> containing the keys of blocking regions in
+	 * @return a Vector&lt;Object> containing the keys of blocking regions in
 	 * which the total preload exceeds the capacity constraints.
 	 */
 	public Vector<Object> getBlockingRegionsWithCapacityOverload() {
@@ -1062,10 +1062,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of blocking regions in
+	 * Returns a Vector&lt;Object> containing the keys of blocking regions in
 	 * which the total preload exceeds the memory constraints.
 	 *
-	 * @return a Vector<Object> containing the keys of blocking regions in
+	 * @return a Vector&lt;Object> containing the keys of blocking regions in
 	 * which the total preload exceeds the memory constraints.
 	 */
 	public Vector<Object> getBlockingRegionsWithMemoryOverload() {
@@ -1075,7 +1075,7 @@ public class ModelChecker implements CommonConstants {
 	/**
 	 * Returns a HashMap where the key is the key of a station. For each
 	 * station that uses a Guard strategy with zero tasks for a class, it
-	 * contains a Vector<Object> with the keys of classes for which the problem
+	 * contains a Vector&lt;Object> with the keys of classes for which the problem
 	 * occurs.
 	 *
 	 * @return a HashMap where the key is the key of a station.
@@ -1085,10 +1085,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of semaphores not located
+	 * Returns a Vector&lt;Object> containing the keys of semaphores not located
 	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of semaphores not located
+	 * @return a Vector&lt;Object> containing the keys of semaphores not located
 	 * between fork/join.
 	 */
 	public Vector<Object> getSemaphoresNotBetweenForkJoin() {
@@ -1096,10 +1096,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of scalers not located
+	 * Returns a Vector&lt;Object> containing the keys of scalers not located
 	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of scalers not located
+	 * @return a Vector&lt;Object> containing the keys of scalers not located
 	 * between fork/join.
 	 */
 	public Vector<Object> getScalersNotBetweenForkJoin() {
@@ -1107,10 +1107,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions with an
+	 * Returns a Vector&lt;Object> containing the keys of transitions with an
 	 * infinite enabling degree for a mode.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions with an
+	 * @return a Vector&lt;Object> containing the keys of transitions with an
 	 * infinite enabling degree for a mode.
 	 */
 	public Vector<Object> getTransitionsWithInfiniteEnablingDegree() {
@@ -1118,10 +1118,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations using a drop
+	 * Returns a Vector&lt;Object> containing the keys of stations using a drop
 	 * strategy for a class but located between fork/join.
 	 *
-	 * Returns a Vector<Object> containing the keys of stations using a drop
+	 * Returns a Vector&lt;Object> containing the keys of stations using a drop
 	 * strategy for a class but located between fork/join.
 	 */
 	public Vector<Object> getStationsWithDropStrategyBetweenForkJoin() {
@@ -1129,10 +1129,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations using an
+	 * Returns a Vector&lt;Object> containing the keys of stations using an
 	 * impatience strategy for a class but located between fork/join.
 	 *
-	 * Returns a Vector<Object> containing the keys of stations using an
+	 * Returns a Vector&lt;Object> containing the keys of stations using an
 	 * impatience strategy for a class but located between fork/join.
 	 */
 	public Vector<Object> getStationsWithImpatienceStrategyBetweenForkJoin() {
@@ -1140,10 +1140,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of servers with different
+	 * Returns a Vector&lt;Object> containing the keys of servers with different
 	 * queue strategies.
 	 *
-	 * @return a Vector<Object> containing the keys of servers with different
+	 * @return a Vector&lt;Object> containing the keys of servers with different
 	 * queue strategies.
 	 */
 	public Vector<Object> getBcmpServersWithDifferentQueueStrategies() {
@@ -1151,10 +1151,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of FCFS servers with
+	 * Returns a Vector&lt;Object> containing the keys of FCFS servers with
 	 * different service strategies.
 	 *
-	 * @return a Vector<Object> containing the keys of FCFS servers with
+	 * @return a Vector&lt;Object> containing the keys of FCFS servers with
 	 * different service strategies.
 	 */
 	public Vector<Object> getBcmpFcfsServersWithDifferentServiceStrategies() {
@@ -1162,10 +1162,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of FCFS servers with a
+	 * Returns a Vector&lt;Object> containing the keys of FCFS servers with a
 	 * service time distribution that is not exponential.
 	 *
-	 * @return a Vector<Object> containing the keys of FCFS servers with a
+	 * @return a Vector&lt;Object> containing the keys of FCFS servers with a
 	 * service time distribution that is not exponential.
 	 */
 	public Vector<Object> getBcmpFcfsServersWithNonExponentialDistribution() {
@@ -1173,10 +1173,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of FCFS servers with
+	 * Returns a Vector&lt;Object> containing the keys of FCFS servers with
 	 * different mean service times.
 	 *
-	 * @return a Vector<Object> containing the keys of FCFS servers with
+	 * @return a Vector&lt;Object> containing the keys of FCFS servers with
 	 * different mean service times.
 	 */
 	public Vector<Object> getBcmpFcfsServersWithDifferentServiceTimes() {
@@ -1184,10 +1184,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of delays with a service
+	 * Returns a Vector&lt;Object> containing the keys of delays with a service
 	 * time distribution for which the Laplace transform is not rational.
 	 *
-	 * @return a Vector<Object> containing the keys of delays with a service
+	 * @return a Vector&lt;Object> containing the keys of delays with a service
 	 * time distribution for which the Laplace transform is not rational.
 	 */
 	public Vector<Object> getBcmpDelaysWithNonRationalDistribution() {
@@ -1195,10 +1195,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations with a routing
+	 * Returns a Vector&lt;Object> containing the keys of stations with a routing
 	 * strategy dependent on the state of the model.
 	 *
-	 * @return a Vector<Object> containing the keys of stations with a routing
+	 * @return a Vector&lt;Object> containing the keys of stations with a routing
 	 * strategy dependent on the state of the model.
 	 */
 	public Vector<Object> getBcmpStationsWithStateDependentRoutingStrategy() {
@@ -1206,10 +1206,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of servers with a
+	 * Returns a Vector&lt;Object> containing the keys of servers with a
 	 * scheduling policy other than PS, FCFS or RAND.
 	 *
-	 * @return a Vector<Object> containing the keys of servers with a
+	 * @return a Vector&lt;Object> containing the keys of servers with a
 	 * scheduling policy other than PS, FCFS or RAND.
 	 */
 	public Vector<Object> getBcmpServersWithAsymmetricSchedulingPolicy() {
@@ -1217,7 +1217,7 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * @return a Vector<Object> containing the keys of servers with a
+	 * @return a Vector&lt;Object> containing the keys of servers with a
 	 * priority scheduling policy
 	 */
 	public Vector<Object> getBcmpServersWithPrioritySchedulingPolicy() {
@@ -1225,10 +1225,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations without an
+	 * Returns a Vector&lt;Object> containing the keys of stations without an
 	 * optional link.
 	 *
-	 * @return a Vector<Object> containing the keys of stations without an
+	 * @return a Vector&lt;Object> containing the keys of stations without an
 	 * optional link.
 	 */
 	public Vector<Object> getStationsWithoutOptionalLink() {
@@ -1236,10 +1236,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of closed classes with zero
+	 * Returns a Vector&lt;Object> containing the keys of closed classes with zero
 	 * population.
 	 *
-	 * @return a Vector<Object> containing the keys of closed classes with zero
+	 * @return a Vector&lt;Object> containing the keys of closed classes with zero
 	 * population.
 	 */
 	public Vector<Object> getClosedClassesWithZeroPopulation() {
@@ -1247,10 +1247,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of class switches located
+	 * Returns a Vector&lt;Object> containing the keys of class switches located
 	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of class switches located
+	 * @return a Vector&lt;Object> containing the keys of class switches located
 	 * between fork/join.
 	 */
 	public Vector<Object> getClassSwitchesBetweenForkJoin() {
@@ -1258,10 +1258,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations using a class
+	 * Returns a Vector&lt;Object> containing the keys of stations using a class
 	 * switch routing strategy but located between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of stations using a class
+	 * @return a Vector&lt;Object> containing the keys of stations using a class
 	 * switch routing strategy but located between fork/join.
 	 */
 	public Vector<Object> getStationsWithClassSwitchRoutingBetweenForkJoin() {
@@ -1269,10 +1269,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of stations using priority
+	 * Returns a Vector&lt;Object> containing the keys of stations using priority
 	 * scheduling when all the classes have the same priority.
 	 *
-	 * @return a Vector<Object> containing the keys of stations using priority
+	 * @return a Vector&lt;Object> containing the keys of stations using priority
 	 * scheduling when all the classes have the same priority.
 	 */
 	public Vector<Object> getStationsWithPriorityScheduling() {
@@ -1280,10 +1280,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions located
+	 * Returns a Vector&lt;Object> containing the keys of transitions located
 	 * between fork/join.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions located
+	 * @return a Vector&lt;Object> containing the keys of transitions located
 	 * between fork/join.
 	 */
 	public Vector<Object> getTransitionsBetweenForkJoin() {
@@ -1291,10 +1291,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions with a
+	 * Returns a Vector&lt;Object> containing the keys of transitions with a
 	 * constant enabling degree for a mode.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions with a
+	 * @return a Vector&lt;Object> containing the keys of transitions with a
 	 * constant enabling degree for a mode.
 	 */
 	public Vector<Object> getTransitionsWithConstantEnablingDegree() {
@@ -1302,10 +1302,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions with invalid
+	 * Returns a Vector&lt;Object> containing the keys of transitions with invalid
 	 * input condition for a mode.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions with invalid
+	 * @return a Vector&lt;Object> containing the keys of transitions with invalid
 	 * input condition for a mode.
 	 */
 	public Vector<Object> getTransitionsWithInvalidInputCondition() {
@@ -1313,10 +1313,10 @@ public class ModelChecker implements CommonConstants {
 	}
 
 	/**
-	 * Returns a Vector<Object> containing the keys of transitions without
+	 * Returns a Vector&lt;Object> containing the keys of transitions without
 	 * firing outcome for a mode.
 	 *
-	 * @return a Vector<Object> containing the keys of transitions without
+	 * @return a Vector&lt;Object> containing the keys of transitions without
 	 * firing outcome for a mode.
 	 */
 	public Vector<Object> getTransitionsWithoutFiringOutcome() {

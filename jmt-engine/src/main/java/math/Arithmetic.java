@@ -72,12 +72,12 @@ public class Arithmetic extends Constants {
 
 	/**
 	 * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k".
-	 * The binomial coefficient is defined as <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>.
+	 * The binomial coefficient is defined as <code>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</code>.
 	 * <ul>
-	 * <li>k<0<tt>: <tt>0</tt>.
-	 * <li>k==0<tt>: <tt>1</tt>.
-	 * <li>k==1<tt>: <tt>n</tt>.
-	 * <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>.
+	 * <li>k&lt;0: <code>0</code>.
+	 * <li>k==0: <code>1</code>.
+	 * <li>k==1: <code>n</code>.
+	 * <li>else: <code>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</code>.
 	 * </ul>
 	 * @return the binomial coefficient.
 	 */
@@ -106,10 +106,10 @@ public class Arithmetic extends Constants {
 	 * Efficiently returns the binomial coefficient, often also referred to as "n over k" or "n choose k".
 	 * The binomial coefficient is defined as
 	 * <ul>
-	 * <li>k<0<tt>: <tt>0</tt>.
-	 * <li>k==0 || k==n<tt>: <tt>1</tt>.
-	 * <li>k==1 || k==n-1<tt>: <tt>n</tt>.
-	 * <li>else: <tt>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</tt>.
+	 * <li>k&lt;0: <code>0</code>.
+	 * <li>k==0 || k==n: <code>1</code>.
+	 * <li>k==1 || k==n-1: <code>n</code>.
+	 * <li>else: <code>(n * n-1 * ... * n-k+1 ) / ( 1 * 2 * ... * k )</code>.
 	 * </ul>
 	 * @return the binomial coefficient.
 	 */
@@ -155,7 +155,7 @@ public class Arithmetic extends Constants {
 
 	/**
 	 * Returns the smallest <code>long &gt;= value</code>.
-	 * <dt>Examples: <code>1.0 -> 1, 1.2 -> 2, 1.9 -> 2</code>.
+	 * <p>Examples: <code>1.0 -&gt; 1, 1.2 -&gt; 2, 1.9 -&gt; 2</code>.
 	 * This method is safer than using (long) Math.ceil(value), because of possible rounding error.
 	 */
 	public static long ceil(double value) {
@@ -262,8 +262,8 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Instantly returns the factorial <tt>k!</tt>.
-	 * @param k must hold <tt>k &gt;= 0</tt>.
+	 * Instantly returns the factorial <code>k!</code>.
+	 * @param k must hold <code>k &gt;= 0</code>.
 	 */
 	static public double factorial(int k) {
 		if (k < 0) {
@@ -285,9 +285,9 @@ public class Arithmetic extends Constants {
 
 	/**
 	 * Returns the largest <code>long &lt;= value</code>.
-	 * <dt>Examples: <code>
-	 * 1.0 -> 1, 1.2 -> 1, 1.9 -> 1 <dt>
-	 * 2.0 -> 2, 2.2 -> 2, 2.9 -> 2 </code><dt>
+	 * <p>Examples: <code>
+	 * 1.0 -&gt; 1, 1.2 -&gt; 1, 1.9 -&gt; 1
+	 * 2.0 -&gt; 2, 2.2 -&gt; 2, 2.9 -&gt; 2</code>
 	 * This method is safer than using (long) Math.floor(value), because of possible rounding error.
 	 */
 	public static long floor(double value) {
@@ -295,14 +295,14 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Returns <tt>getLog<sub>base</sub>value</tt>.
+	 * Returns <code>getLog<sub>base</sub>value</code>.
 	 */
 	public static double log(double base, double value) {
 		return Math.log(value) / Math.log(base);
 	}
 
 	/**
-	 * Returns <tt>getLog<sub>10</sub>value</tt>.
+	 * Returns <code>getLog<sub>10</sub>value</code>.
 	 */
 	static public double log10(double value) {
 		// 1.0 / Math.getLog(10) == 0.43429448190325176
@@ -310,7 +310,7 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Returns <tt>getLog<sub>2</sub>value</tt>.
+	 * Returns <code>getLog<sub>2</sub>value</code>.
 	 */
 	static public double log2(double value) {
 		// 1.0 / Math.getLog(2) == 1.4426950408889634
@@ -318,11 +318,11 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Returns <tt>getLog(k!)</tt>.
+	 * Returns <code>getLog(k!)</code>.
 	 * Tries to avoid overflows.
-	 * For <tt>k<30</tt> simply looks up a table in O(1).
-	 * For <tt>k>=30</tt> uses stirlings approximation.
-	 * @param k must hold <tt>k &gt;= 0</tt>.
+	 * For <code>k&lt;30</code> simply looks up a table in O(1).
+	 * For <code>k>=30</code> uses stirlings approximation.
+	 * @param k must hold <code>k &gt;= 0</code>.
 	 */
 	public static double logFactorial(int k) {
 		if (k >= 30) {
@@ -342,8 +342,8 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Instantly returns the factorial <tt>k!</tt>.
-	 * @param k must hold <tt>k &gt;= 0 && k &lt; 21</tt>.
+	 * Instantly returns the factorial <code>k!</code>.
+	 * @param k must hold <code>k &gt;= 0 &amp;&amp; k &lt; 21</code>.
 	 */
 	static public long longFactorial(int k) throws IllegalArgumentException {
 		if (k < 0) {
@@ -359,17 +359,17 @@ public class Arithmetic extends Constants {
 	/**
 	 * Returns the StirlingCorrection.
 	 * <p>
-	 * Correction term of the Stirling approximation for <tt>getLog(k!)</tt>
+	 * Correction term of the Stirling approximation for <code>getLog(k!)</code>
 	 * (series in 1/k, or table values for small k)
 	 * with int parameter k.
 	 * <p>
-	 * <tt>
+	 * <code>
 	 * getLog k! = (k + 1/2)getLog(k + 1) - (k + 1) + (1/2)getLog(2Pi) +
 	 *          stirlingCorrection(k + 1)
-	 * <p>
+	 *
 	 * getLog k! = (k + 1/2)getLog(k)     -  k      + (1/2)getLog(2Pi) +
 	 *          stirlingCorrection(k)
-	 * </tt>
+	 * </code>
 	 */
 	public static double stirlingCorrection(int k) {
 		final double C1 = 8.33333333333333333e-02; //  +1/12
@@ -389,7 +389,7 @@ public class Arithmetic extends Constants {
 	}
 
 	/**
-	 * Equivalent to <tt>Math.round(binomial(n,k))</tt>.
+	 * Equivalent to <code>Math.round(binomial(n,k))</code>.
 	 */
 	private static long xlongBinomial(long n, long k) {
 		return Math.round(binomial(n, k));

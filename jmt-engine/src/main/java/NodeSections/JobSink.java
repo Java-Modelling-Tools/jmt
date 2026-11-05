@@ -63,6 +63,7 @@ public class JobSink extends InputSection {
 	 * It eats all incoming jobs.
 	 * @param message message to be processed.
 	 * @throws NetException
+	 * @return the resulting int
 	 */
 	@Override
 	protected int process(NetMessage message) throws NetException {

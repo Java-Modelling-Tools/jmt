@@ -9,6 +9,18 @@ import javax.swing.ListCellRenderer;
 import javax.swing.UIManager;
 import javax.swing.table.JTableHeader;
 
+/**
+ * Cell renderer for the row header values.
+ */
+/**
+ * Cell renderer for the row header values.
+ */
+/**
+ * Cell renderer for the row header values.
+ */
+/**
+ * Cell renderer for the row header values.
+ */
 public class RowHeaderRenderer extends JLabel implements ListCellRenderer {
 
 	/**

@@ -2,6 +2,18 @@ package jwat.filters;
 
 import jwat.Observation;
 
+/**
+ * JWAT filter on string variables of the workload observations.
+ */
+/**
+ * JWAT filter on string variables of the workload observations.
+ */
+/**
+ * JWAT filter on string variables of the workload observations.
+ */
+/**
+ * JWAT filter on string variables of the workload observations.
+ */
 public class FilterOnString implements FilterOnVariable {
 
 	private int[] varIndex;

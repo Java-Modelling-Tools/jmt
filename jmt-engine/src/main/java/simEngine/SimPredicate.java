@@ -28,11 +28,11 @@ public abstract class SimPredicate {
 	/**
 	 * The match function which must be overridden when writing a new
 	 * predicate. The function is called with each event in the deferred
-	 * queue as its parameter when a <tt>SimSystem.simSelect()</tt>
+	 * queue as its parameter when a <code>SimSystem.simSelect()</code>
 	 * call is made by the user.
 	 * @param event The event to test for a match.
-	 * @return The function should return <tt>true</tt> if the
-	 *         event matches and shoult be selected, of <tt>false</tt>
+	 * @return The function should return <code>true</code> if the
+	 *         event matches and shoult be selected, of <code>false</code>
 	 *         if it does not
 	 */
 	public abstract boolean match(SimEvent event);

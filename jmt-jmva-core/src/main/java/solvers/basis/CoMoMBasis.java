@@ -60,7 +60,7 @@ public class CoMoMBasis extends Basis {
 
 	/**
 	 * Fills the list 'order' with all positive vectors of the form (n_1, n_2, ..., n_(R-1), 0 ),
-	 * where n_1 + n_2 + ... + n_(R-1) <= M
+	 * where n_1 + n_2 + ... + n_(R-1) &lt;= M
 	 */
 	private void generate() {
 		PopulationChangeVector v = new PopulationChangeVector(0,R);
@@ -108,6 +108,7 @@ public class CoMoMBasis extends Basis {
 	}
 
 	/**
+	 * Returns the population change vector.
 	 * @param index index in order
 	 * @return Vector store in 'order' at 'index'
 	 */
@@ -204,6 +205,7 @@ public class CoMoMBasis extends Basis {
 	/**
 	 * Returns the Normalising Constant for the current computed population  
 	 * @throws InternalErrorException
+	 * @return the resulting big rational
 	 */
 	public BigRational getNormalisingConstant() throws InternalErrorException {
 		PopulationChangeVector zeros = new PopulationChangeVector(0,R);

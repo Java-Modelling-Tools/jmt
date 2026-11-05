@@ -5,6 +5,18 @@ import random.Parameter;
 
 // extend the `AbstractDistribution` to get the random engine.
 // implement the `DiscreteDistribution` to define the behavior of this distribution.
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
+/**
+ * Bernoulli distribution: returns 1 with probability p and 0 otherwise.
+ */
 public class Bernoulli extends DiscreteDistribution {
 
 	private double probability;

@@ -51,13 +51,13 @@ public abstract class AbstractUndoRedoAction extends AbstractJmodelAction {
 	}
 
 	/**
-	 * Update the state (name & enabled) of this instance.
+	 * Update the state (name &amp; enabled) of this instance.
 	 * To be overridden in subclasses
 	 */
 	public abstract void update();
 
 	/**
-	 * Update the state (name & enabled) of all instances
+	 * Update the state (name &amp; enabled) of all instances
 	 */
 	public static void updateAll() {
 		for (int i = 0; i < instanceCount; i++) {

@@ -10,6 +10,18 @@ import jwat.JwatSession;
 import jwat.fitting.utils.ModelFitting;
 import jwat.JWatModel;
 
+/**
+ * Session of the JWAT distribution fitting view.
+ */
+/**
+ * Session of the JWAT distribution fitting view.
+ */
+/**
+ * Session of the JWAT distribution fitting view.
+ */
+/**
+ * Session of the JWAT distribution fitting view.
+ */
 public class FittingSession extends JwatSession {
 	
 	public FittingSession() {

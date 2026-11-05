@@ -73,7 +73,7 @@ public class Job implements Cloneable {
 	/**
 	 * Creates a new instance of Job.
 	 * @param jobClass Reference to the class of the job.
-	 * @param netJobsList Reference to the global jobInfoList.
+	 * @param globalJobInfoList Reference to the global jobInfoList.
 	 */
 	public Job(JobClass jobClass, GlobalJobInfoList globalJobInfoList) {
 		this.jobClass = jobClass;
@@ -84,7 +84,7 @@ public class Job implements Cloneable {
 
 	/**
 	 * Initializes this job.
-	 * @param the network system.
+	 * @param netSystem the network system
 	 */
 	public void initialize(NetSystem netSystem) {
 		this.netSystem = netSystem;
@@ -151,7 +151,6 @@ public class Job implements Cloneable {
 
 	/**
 	 * Resets the system entering time of this job.
-	 * @param time the system entering time of this job.
 	 */
 	public void resetSystemEnteringTime() {
 		systemEnteringTime = netSystem.getTime();

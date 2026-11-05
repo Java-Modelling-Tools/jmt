@@ -19,7 +19,7 @@ package jaba.Hull;
  * A class representing exceptions during construction of a convex hull.
  * These can occur for example when all vertices are coplanar.
  *
- * @author Chris Pudney <mailto:cpudney@alphapharm.pharm.uwa.edu.au>
+ * @author Chris Pudney <code>cpudney@alphapharm.pharm.uwa.edu.au</code>
  * @see    ConvexHull
  */
 public class ConvexHullException extends Exception {

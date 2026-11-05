@@ -20,6 +20,18 @@ package jmt.jmarkov;
 
 import jmt.jmarkov.Queues.Processor;
 
+/**
+ * Job of the JMCH simulation: carries the arrival time, service time and due date of a job in the animated model.
+ */
+/**
+ * Job of the JMCH simulation: carries the arrival time, service time and due date of a job in the animated model.
+ */
+/**
+ * Job of the JMCH simulation: carries the arrival time, service time and due date of a job in the animated model.
+ */
+/**
+ * Job of the JMCH simulation: carries the arrival time, service time and due date of a job in the animated model.
+ */
 public class Job implements Cloneable {
 
 	private int jobId;

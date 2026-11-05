@@ -2,6 +2,18 @@ package QueueNet;
 
 import java.util.LinkedList;
 
+/**
+ * Item stored in the cache of a cache-equipped JSIM station, together with its access statistics.
+ */
+/**
+ * Item stored in the cache of a cache-equipped JSIM station, together with its access statistics.
+ */
+/**
+ * Item stored in the cache of a cache-equipped JSIM station, together with its access statistics.
+ */
+/**
+ * Item stored in the cache of a cache-equipped JSIM station, together with its access statistics.
+ */
 public class CacheItem {
 
 	private int id;

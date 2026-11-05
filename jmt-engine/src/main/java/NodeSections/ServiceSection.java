@@ -67,6 +67,7 @@ public abstract class ServiceSection extends PipeSection {
 	 * @param event Message tag.
 	 * @param delay Scheduling delay.
 	 * @return a token to remove sent event.
+	 * @param data the data
 	 */
 	protected RemoveToken sendForward(int event, Object data, double delay) {
 		return send(event, data, delay, NodeSection.OUTPUT);
@@ -87,6 +88,7 @@ public abstract class ServiceSection extends PipeSection {
 	 * @param event Message tag.
 	 * @param delay Scheduling delay.
 	 * @return a token to remove sent event.
+	 * @param data the data
 	 */
 	protected RemoveToken sendBackward(int event, Object data, double delay) {
 		return send(event, data, delay, NodeSection.INPUT);

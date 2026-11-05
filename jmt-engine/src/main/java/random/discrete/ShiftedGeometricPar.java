@@ -4,6 +4,18 @@ import jmt.common.exception.IncorrectDistributionParameterException;
 import random.AbstractParameter;
 import random.Parameter;
 
+/**
+ * Parameters of the shifted geometric distribution.
+ */
+/**
+ * Parameters of the shifted geometric distribution.
+ */
+/**
+ * Parameters of the shifted geometric distribution.
+ */
+/**
+ * Parameters of the shifted geometric distribution.
+ */
 public class ShiftedGeometricPar extends AbstractParameter implements Parameter {
 
 	private double p;

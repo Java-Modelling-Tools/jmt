@@ -46,6 +46,18 @@ import common.panels.WarningScrollTable;
 import table.DisabledCellRenderer;
 import table.ExactCellEditor;
 
+/**
+ * Editor for the join parameters.
+ */
+/**
+ * Editor for the join parameters.
+ */
+/**
+ * Editor for the join parameters.
+ */
+/**
+ * Editor for the join parameters.
+ */
 public class JoinEditor extends JSplitPane implements CommonConstants {
 
 	private static final long serialVersionUID = 1L;

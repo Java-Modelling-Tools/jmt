@@ -73,6 +73,7 @@ public class Semaphore extends InputSection {
 	// ----------------------------------------------------------------------------------------------
 
 	/**
+	 * Processs the .
 	 * @param message message to be processed.
 	 * @throws NetException if something goes wrong.
 	 * @return message processing result.

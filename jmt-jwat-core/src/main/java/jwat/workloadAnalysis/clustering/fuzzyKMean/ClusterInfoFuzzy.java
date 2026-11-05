@@ -1,5 +1,17 @@
 package jwat.workloadAnalysis.clustering.fuzzyKMean;
 
+/**
+ * Information of a cluster produced by the JWAT fuzzy k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT fuzzy k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT fuzzy k-means algorithm.
+ */
+/**
+ * Information of a cluster produced by the JWAT fuzzy k-means algorithm.
+ */
 public class ClusterInfoFuzzy {
 
 	public ClusterInfoFuzzy(int numVars) {

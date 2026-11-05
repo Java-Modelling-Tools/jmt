@@ -21,6 +21,18 @@ package common.routingStrategies;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Class Switch Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Class Switch Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Class Switch Routing strategy of the JMT routing strategies.
+ */
+/**
+ * Class Switch Routing strategy of the JMT routing strategies.
+ */
 public class ClassSwitchRouting extends RoutingStrategy {
 
 	public Map<Object, Double> values = new HashMap<Object, Double>();

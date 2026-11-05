@@ -75,6 +75,7 @@ public class CommandLineSolver {
      * The results are saved into the file itself.
      *
      * @param path the path of the XML file containing the model
+     * @return true if the operation is successful, false otherwise
      */
     public boolean solve(String path) {
         File file;
