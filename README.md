@@ -74,7 +74,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+[![Product Name Screen Shot][product-screenshot]]
 
 The Java Modelling Tools (JMT) is a free open source suite for performance evaluation, capacity planning and modelling of computer and communication systems. The suite implements numerous state-of-the-art algorithms for the exact, asymptotic and simulative analysis of queueing network models, either with or without product-form solution. Models can be described either through wizard dialogs or with a graphical user-friendly interface. The suite includes also a workload analysis tool based on clustering techniques. The suite incorporates an XML data layer that enables full reusability of the computational engines.
 
