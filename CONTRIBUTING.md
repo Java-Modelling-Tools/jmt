@@ -218,6 +218,19 @@ Write clear, descriptive commit messages in the imperative mood (e.g. "Fix null 
 
 ---
 
+## Releasing
+
+The version lives in one place: `jmt.version` in `src/main/resources/jmt/common/globalsettings.conf`. The Maven build (jar and installer names) and the start screen (window title and header) read it from there.
+
+For every release:
+
+1.  Bump `jmt.version` in `globalsettings.conf`.
+2.  Build (`mvn package`), launch the start screen (`GraphStartScreen`) and take a new screenshot of the window. The screenshot shows the version, so it goes stale at every release.
+3.  Replace `docs/readme/product-screenshot.png` (used by `README.md`) with the new screenshot.
+4.  Commit the version bump and the screenshot together.
+
+---
+
 ## Reporting Bugs and Requesting Features
 
 Please use the issue templates linked above rather than opening a blank issue - they collect the environment details (JDK version, build method, affected tool) needed to reproduce problems efficiently.
