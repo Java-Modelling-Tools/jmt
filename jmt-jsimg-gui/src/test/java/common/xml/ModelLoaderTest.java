@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -262,7 +261,6 @@ class ModelLoaderTest {
 		assertTrue(ml.getLastWarnings().isEmpty());
 	}
 
-	@Disabled("latent: JDK 11+ only (works on Java 8, which README/CONTRIBUTING name as the supported runtime): PNMLReader -> axiom needs javax.activation.DataSource, absent from the JDK since 11, from every pom and from the singlejar; ModelLoader catches Exception only so NoClassDefFoundError escapes")
 	@Test
 	void pnmlImportsPlacesAndTransitions() throws Exception {
 		ModelLoader ml = sim();
@@ -283,6 +281,31 @@ class ModelLoaderTest {
 				assertEquals(ModelLoader.FAILURE, loaders[i].loadModel(models[i], null, f), loaders[i].toString() + " " + f.getName());
 				assertEquals("Unknown input file format", loaders[i].getFailureMotivation());
 			}
+		}
+	}
+
+	/** A loader that sniffs every file as an archive, so the archive load itself is what fails. */
+	private static ModelLoader archiveSniffing(FileFormat filter) {
+		return new ModelLoader(filter, ModelLoader.JMODEL_SAVE, new HeadlessModelFileView()) {
+			@Override
+			protected int getXmlFileType(String fileName) {
+				return XML_ARCHIVE;
+			}
+		};
+	}
+
+	@Test
+	void unreadableArchiveFailsInJsimAndJmvaLoaders() throws Exception {
+		File[] files = { new File(tmp, "gone.jsimg"), write("empty.jsimg", ""), write("bad.jsimg", "<archive><sim>") };
+		for (File f : files) {
+			ModelLoader jsim = archiveSniffing(ModelLoader.JMODEL);
+			CommonModel m = new CommonModel();
+			assertEquals(ModelLoader.FAILURE, jsim.loadModel(m, null, f), f.getName());
+			assertTrue(jsim.getFailureMotivation().contains(f.getName()), jsim.getFailureMotivation());
+			assertEquals(0, m.getStationKeys().size());
+			ModelLoader jmva = archiveSniffing(ModelLoader.JMVA);
+			assertEquals(ModelLoader.FAILURE, jmva.loadModel(new ExactModel(), null, f), f.getName());
+			assertTrue(jmva.getFailureMotivation().contains(f.getName()), jmva.getFailureMotivation());
 		}
 	}
 
@@ -462,7 +485,6 @@ class ModelLoaderTest {
 		assertTrue(text.contains("P1") && text.contains("T1"));
 	}
 
-	@Disabled("latent: JDK 11+ only (works on Java 8, which README/CONTRIBUTING name as the supported runtime): PNMLReader -> axiom needs javax.activation.DataSource, absent from the JDK since 11, from every pom and from the singlejar; ModelLoader catches Exception only so NoClassDefFoundError escapes")
 	@Test
 	void exportsPnmlAndReimportsIt() {
 		CommonModel src = petriModel();

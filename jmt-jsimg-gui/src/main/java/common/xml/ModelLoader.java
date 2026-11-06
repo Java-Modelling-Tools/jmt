@@ -86,6 +86,7 @@ public class ModelLoader {
 	/**
 	 * Failure motivations
 	 */
+	protected static final String FAIL_UNREADABLE = "Archive is missing, empty or malformed: ";
 	protected static final String FAIL_UNKNOWN = "Unknown input file format";
 	protected static final String FAIL_CONVERSION = "Input file is recognized but cannot be converted "
 			+ "to work within this application. Please open it with ";
@@ -188,7 +189,10 @@ public class ModelLoader {
 					if (!confirmOpenNewerVersion(parent, file)) {
 						return CANCELLED;
 					}
-					XMLArchiver.loadModel(file, (CommonModel) modelData);
+					if (!XMLArchiver.loadModel(file, (CommonModel) modelData)) {
+						failureMotivation = FAIL_UNREADABLE + file.getName();
+						return FAILURE;
+					}
 					fileFormat = CommonConstants.JSIM;
 					break;
 				case XML_MVA:
@@ -239,7 +243,10 @@ public class ModelLoader {
 					if (!confirmOpenNewerVersion(parent, file)) {
 						return CANCELLED;
 					}
-					XMLArchiver.loadModel(file, tmp);
+					if (!XMLArchiver.loadModel(file, tmp)) {
+						failureMotivation = FAIL_UNREADABLE + file.getName();
+						return FAILURE;
+					}
 					warnings.addAll(ModelConverter.convertJSIMtoJMVA(tmp, (ExactModel) modelData));
 					fileFormat = CommonConstants.JSIM;
 					break;
