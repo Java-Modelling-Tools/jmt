@@ -19,18 +19,13 @@
 package log;
 
 import java.io.*;
-import java.net.URL;
-import java.util.Map.Entry;
-import java.util.Properties;
-
-import jmt.framework.data.MacroReplacer;
-
-import org.apache.log4j.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p><b>Name:</b> JSimLogger</p>
  * <p><b>Description:</b>
- * A wrapper aroung log4j API to provide logging capabilities.
+ * A wrapper around the SLF4J API (backend: log4j 2, configured by log4j2.xml) to provide logging capabilities.
  * </p>
  * <p><b>Date:</b> 11/dic/2009
  * <b>Time:</b> 20.17.54</p>
@@ -40,49 +35,11 @@ import org.apache.log4j.*;
 public class JSimLogger implements Serializable {
 	private static final long serialVersionUID = 1L;
 	public static final String STD_LOGGER = "jmt.engine";
-	public static final String LOG4J_CONF = "log4j.conf";
 	private static String delimiter = ",";
 	private static String decimalSeparator = ".";
 	private static String debugLogPath = "JSIM_debug.csv";
 
-	private transient org.apache.log4j.Logger logger;
-	static {
-		// Initialize only if somebody did not already initialize this.
-		if (!LogManager.getCurrentLoggers().hasMoreElements()) {
-			URL propsUrl = JSimLogger.class.getResource(LOG4J_CONF);
-			boolean initialized = false;
-			if (propsUrl != null) {
-				Properties p = new Properties();
-				try {
-					InputStream is = propsUrl.openStream();
-					p.load(is);
-					is.close();
-
-					// Replaces macros like work directory
-					Properties replaced = new Properties();
-					for (Entry<Object, Object> e : p.entrySet()) {
-						replaced.put(e.getKey(), MacroReplacer.replace((String)e.getValue()));
-					}
-					PropertyConfigurator.configure(replaced);
-					initialized = true;
-				} catch (IOException ex) {
-					System.err.println("Error while initializing logger form URL: " + propsUrl);
-					ex.printStackTrace();
-				}
-			}
-			if (!initialized) {
-				System.out.println("Cannot find logProperties, using defaults");
-				//set stdout defaults
-				Properties p = new Properties();
-				p.setProperty("log4j.rootLogger", "DEBUG, stdout");
-				//p.setProperty("log4j.rootLogger","ALL, stdout");
-				p.setProperty("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender");
-				p.setProperty("log4j.appender.stdout.layout", "org.apache.log4j.PatternLayout");
-				p.setProperty("log4j.appender.stdout.layout.ConversionPattern", "%-5p [%t]- %m (%F:%L)%n");
-				PropertyConfigurator.configure(p);
-			}
-		}
-	}
+	private transient Logger logger;
 
 	public static void resetDebugLoggerStorePath(String newPath) {
 		String correctedPath = newPath.replace("\\", System.getProperty("file.separator"));
@@ -134,11 +91,11 @@ public class JSimLogger implements Serializable {
 	}
 
 	private JSimLogger() {
-		logger = Logger.getRootLogger();
+		logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 	}
 
 	private JSimLogger(String loggerName) {
-		logger = Logger.getLogger(loggerName);
+		logger = LoggerFactory.getLogger(loggerName);
 	}
 
 	public static JSimLogger getRootLogger() {
@@ -172,19 +129,19 @@ public class JSimLogger implements Serializable {
 
 	// printing methods:
 	public void debug(Object message) {
-		logger.debug(message);
+		logger.debug(String.valueOf(message));
 	}
 
 	public void info(Object message) {
-		logger.info(message);
+		logger.info(String.valueOf(message));
 	}
 
 	public void warn(Object message) {
-		logger.warn(message);
+		logger.warn(String.valueOf(message));
 	}
 
 	public void error(Object message) {
-		logger.error(message);
+		logger.error(String.valueOf(message));
 	}
 
 	public void error(Throwable th) {
@@ -217,7 +174,7 @@ public class JSimLogger implements Serializable {
 	}
 
 	public void fatal(Object message) {
-		logger.fatal(message);
+		logger.error(String.valueOf(message));
 	}
 
 	public boolean isDebugEnabled() {
@@ -238,9 +195,9 @@ public class JSimLogger implements Serializable {
 		in.defaultReadObject();
 		String name = (String) in.readObject();
 		if (name == null) {
-			logger = Logger.getRootLogger();
+			logger = LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 		} else {
-			logger = Logger.getLogger(name);
+			logger = LoggerFactory.getLogger(name);
 		}
 	}
 	// ----------------------------------------------------------------------------------------------------------

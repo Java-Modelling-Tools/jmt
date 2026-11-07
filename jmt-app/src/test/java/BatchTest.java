@@ -22,10 +22,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-import org.apache.log4j.FileAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 
 /**
  * Test engine for simulator.
@@ -43,57 +39,20 @@ import org.apache.log4j.PatternLayout;
  */
 public class BatchTest {
 
-	//Log4J logger
-	private Logger logger;
-	//logger level
-	private Level loggerLevel = Level.INFO;
+	// ResultsCheck logs through the BatchTest logger; log4j2-test.xml writes it to <timestamp>_batch_test.csv
 	//true if you want to receive extended info about confidence intervals
 	private boolean extendedInfo = true;
 
 	/**
-	 * Creates a BatchTest object with the corresponding logger
-	 * @param level logger level
+	 * Creates a BatchTest object
 	 * @param extendedInfo if true, extended info about confidence intervals are logged
 	 */
-	public BatchTest(Level level, boolean extendedInfo) {
-
-		loggerLevel = level;
-		logger = Logger.getLogger(BatchTest.class);
-		logger.setLevel(level);
-
-		//for example: 20050307_204315 -> 7 March 2005, 20:43:15
-		String datePattern = "yyyyMMdd_HHmmss";
-		SimpleDateFormat formatter = new SimpleDateFormat(datePattern);
-
-		Date today = new Date();
-		String todayString = formatter.format(today);
-
-		String logName = todayString + "_batch_test.csv";
-
-		try {
-			//standard
-			//PatternLayout pattern = new PatternLayout("%r [%t] %p %c %x - %m%n");
-			//PatternLayout pattern = new PatternLayout("%r - %p %x - %m%n");
-			PatternLayout pattern = new PatternLayout("%m%n");
-
-			File logFile = new File(logName);
-			if (!logFile.createNewFile()) {
-				throw new IOException("trying to overwrite an existing file");
-			};
-
-			FileAppender app = new FileAppender(pattern, logName, false);
-			logger.addAppender(app);
-			logger.setAdditivity(false);
-
-		} catch (IOException e) {
-			System.out.println("Error in creating log file");
-			return;
-		};
-
+	public BatchTest(boolean extendedInfo) {
+		this.extendedInfo = extendedInfo;
 	}
 
 	public static void test_fixedPath(String path) {
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 		ResultsCheck check = new ResultsCheck(path, true);
 		check.checkRes();
 	}
@@ -111,7 +70,7 @@ public class BatchTest {
 	public static void comboTest(int classN, int statN, int modelN, int modelType, int simRuns) {
 
 		//debug level = INFO with extended info.
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 
 		for (int m = 0; m < modelN; m++) {
 
@@ -140,7 +99,7 @@ public class BatchTest {
 	public static void test_fixedModelSeed(int classN, int statN, long modelGenSeed, int modelType, int simRuns) {
 
 		//debug level = INFO with extended info.
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 
 		//Creates a random model of the specified type
 		//uses passed seed for model generation
@@ -165,7 +124,7 @@ public class BatchTest {
 	public static void test_fixedSimSeed(int classN, int statN, int modelType, long simSeed) {
 
 		//debug level = INFO with extended info.
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 
 		//Creates a random model of the specified type
 		//uses automatic seed for model generation
@@ -189,7 +148,7 @@ public class BatchTest {
 	public static void test_fixedSimSeedAndModelSeed(int classN, int statN, long modelGenSeed, int modelType, long simSeed) {
 
 		//debug level = INFO with extended info.
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 
 		//Creates a random model of the specified type
 		//uses the fixed seed for model generation
@@ -217,7 +176,7 @@ public class BatchTest {
 	public static void test_fixedSimSeedAndModelSeed_runs(int classN, int statN, long modelGenSeed, int modelType, int runs, long simSeed) {
 
 		//debug level = INFO with extended info.
-		BatchTest btest = new BatchTest(Level.INFO, true);
+		BatchTest btest = new BatchTest(true);
 
 		//Creates a random model of the specified type
 		//uses the fixed seed for model generation

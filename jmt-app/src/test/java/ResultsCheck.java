@@ -30,7 +30,8 @@ import jmt.common.exception.LoadException;
 import jmt.common.xml.XSDSchemaLoader;
 import jmva.engine.DispatcherJMVAschema;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,7 +62,7 @@ public class ResultsCheck {
 	private File jsim_model_file;
 
 	//retrieves the reference to the BatchTest logger
-	private Logger logger = Logger.getLogger(BatchTest.class);
+	private Logger logger = LoggerFactory.getLogger(BatchTest.class);
 
 	//if true, more info are written to log (for example, precision, maxsamples, ecc..)
 	//if false, only basic info are written

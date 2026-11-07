@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<solutions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" logDecimalSeparator="." logDelimiter="," logPath="C:\Users\Giuseppe Serazzi\JMT" modelDefinitionPath="." modelName="Sec2_4_OptPower.jsimg" solutionMethod="simulation" xsi:noNamespaceSchemaLocation="SIMmodeloutput.xsd">
+    <measure alfa="0.01" analyzedSamples="40960" class="Requests" discardedSamples="180" lowerLimit="1.0828386380860047" maxSamples="1000000" meanValue="1.1048694321527903" nodeType="station" precision="0.03" station="System" successful="true" type="Response Time" upperLimit="1.126900226219576"/>
+    <measure alfa="0.01" analyzedSamples="61440" class="Requests" discardedSamples="1250" lowerLimit="0.09816542603167004" maxSamples="1000000" meanValue="0.0999083414530005" nodeType="" precision="0.03" station="" successful="true" type="System Throughput" upperLimit="0.10171426610623505"/>
+    <measure alfa="0.01" analyzedSamples="13440" class="Requests" discardedSamples="55720" lowerLimit="0.08783640424163883" maxSamples="1000000" meanValue="0.09032514215120802" nodeType="" precision="0.03" station="" successful="true" type="System Power" upperLimit="0.09295902325329118"/>
+</solutions>

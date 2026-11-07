@@ -20,8 +20,7 @@ package solvers.linearSystemSolver;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class extends the Solver one and adds to it all useful fields and
@@ -60,7 +59,7 @@ public class ParallelSolver extends Solver {
         try {
             pool.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException ex) {
-            Logger.getLogger(ParallelSolver.class.getName()).log(Level.SEVERE, null, ex);
+            LoggerFactory.getLogger(ParallelSolver.class).error("Unexpected error", ex);
             pool.shutdownNow();
         }
     }

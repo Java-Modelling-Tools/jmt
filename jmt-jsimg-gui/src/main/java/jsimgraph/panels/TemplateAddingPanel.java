@@ -45,8 +45,7 @@ import java.nio.file.attribute.FileTime;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -138,7 +137,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 				index_init_error = true;
 				pagePane.setPage(TemplateAddingPanel.class.getResource(ERROR_PAGE));
 			} catch (IOException ex) {
-				Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);
+				LoggerFactory.getLogger(TemplateAddingPanel.class).error("Unexpected error", ex);
 			}
 		}
 
@@ -345,7 +344,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 			indexFile = index.getAbsolutePath();
 			new Downloader(indexURL, index.getAbsolutePath(), status, D_TYPE_INDEX).execute();
 		} catch (IOException ex) {
-			Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);
+			LoggerFactory.getLogger(TemplateAddingPanel.class).error("Unexpected error", ex);
 		}
 	}
 
@@ -673,7 +672,7 @@ public class TemplateAddingPanel extends WizardPanel implements TemplateConstant
 					try {
 						pagePane.setPage(TemplateAddingPanel.class.getResource(BLANK_PAGE));
 					} catch (IOException ex) {
-						Logger.getLogger(TemplateAddingPanel.class.getName()).log(Level.SEVERE, null, ex);
+						LoggerFactory.getLogger(TemplateAddingPanel.class).error("Unexpected error", ex);
 					}
 				} else if (string.equals("template is downloaded successfully")) {
 					availableTreeTable.revalidate();

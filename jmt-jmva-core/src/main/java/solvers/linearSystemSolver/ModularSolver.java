@@ -33,8 +33,7 @@ import solvers.utilities.Timer;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 import javax.naming.OperationNotSupportedException;
 
 /**
@@ -138,10 +137,10 @@ public class ModularSolver extends ParallelSolver {
                 attempt++;
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(ModularSolver.class.getName()).log(Level.SEVERE, null, ex);
+            LoggerFactory.getLogger(ModularSolver.class).error("Unexpected error", ex);
             throw new InternalErrorException("Cannot select moduli");
         } catch (ExecutionException ex) {
-            Logger.getLogger(ModularSolver.class.getName()).log(Level.SEVERE, null, ex);
+            LoggerFactory.getLogger(ModularSolver.class).error("Unexpected error", ex);
             throw new InternalErrorException("Cannot select moduli");
         }
     }

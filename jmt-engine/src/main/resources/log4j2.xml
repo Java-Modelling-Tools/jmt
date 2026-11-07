@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Default logging configuration (SLF4J API, log4j 2 backend).
+     Override the level with -Djmt.log.level=INFO and the folder with -Djmt.work.dir=... -->
+<Configuration status="WARN">
+	<Properties>
+		<Property name="workDir">${sys:jmt.work.dir:-${sys:user.home}/JMT}</Property>
+	</Properties>
+	<Appenders>
+		<RollingFile name="File" fileName="${workDir}/JSIM.log" filePattern="${workDir}/JSIM.log.%i">
+			<PatternLayout pattern="%-5p [%t]- %m%n"/>
+			<SizeBasedTriggeringPolicy size="512KB"/>
+			<DefaultRolloverStrategy max="5"/>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="${sys:jmt.log.level:-DEBUG}">
+			<AppenderRef ref="File"/>
+		</Root>
+	</Loggers>
+</Configuration>
