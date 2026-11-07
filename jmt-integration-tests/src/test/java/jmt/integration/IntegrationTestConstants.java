@@ -8,11 +8,18 @@ import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.security.CodeSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class IntegrationTestConstants {
+
+	// Declared first: the resolve*() methods below log from static initialisers.
+	private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestConstants.class);
 
 	// Private constructor to prevent instantiation
 	private IntegrationTestConstants() {
@@ -145,6 +152,9 @@ public final class IntegrationTestConstants {
 	public static final int DEFAULT_TEST_TIMEOUT = 10; // Minutes
 	public static final int TEST_TIMEOUT = resolveTestTimeout();
 
+	// JaCoCo analysis is opt-in: -Djmt.it.coverage=true (the pom then also attaches the agent).
+	public static final boolean COVERAGE_ENABLED = Boolean.getBoolean("jmt.it.coverage");
+
 	public static final DateTimeFormatter TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
 	private static double resolveStabilityThreshold() {
@@ -160,8 +170,7 @@ public final class IntegrationTestConstants {
 			try {
 				return Double.parseDouble(sysProp.trim());
 			} catch (NumberFormatException e) {
-				System.err.println("Invalid stability threshold property '" + sysProp + "', using default "
-						+ DEFAULT_STABILITY_THRESHOLD + "%");
+				LOG.warn("Invalid stability threshold property '{}', using default {}%", sysProp, DEFAULT_STABILITY_THRESHOLD);
 			}
 		}
 
@@ -174,8 +183,7 @@ public final class IntegrationTestConstants {
 			try {
 				return Double.parseDouble(envVal.trim());
 			} catch (NumberFormatException e) {
-				System.err.println("Invalid STABILITY_THRESHOLD env var '" + envVal + "', using default "
-						+ DEFAULT_STABILITY_THRESHOLD + "%");
+				LOG.warn("Invalid STABILITY_THRESHOLD env var '{}', using default {}%", envVal, DEFAULT_STABILITY_THRESHOLD);
 			}
 		}
 
@@ -195,8 +203,7 @@ public final class IntegrationTestConstants {
 			try {
 				return Integer.parseInt(sysProp.trim());
 			} catch (NumberFormatException e) {
-				System.err.println("Invalid test.timeout property '" + sysProp + "', using default "
-						+ DEFAULT_TEST_TIMEOUT + " minutes");
+				LOG.warn("Invalid test.timeout property '{}', using default {} minutes", sysProp, DEFAULT_TEST_TIMEOUT);
 			}
 		}
 
@@ -206,8 +213,7 @@ public final class IntegrationTestConstants {
 			try {
 				return Integer.parseInt(envVal.trim());
 			} catch (NumberFormatException e) {
-				System.err.println("Invalid TEST_TIMEOUT_MINUTES env var '" + envVal + "', using default "
-						+ DEFAULT_TEST_TIMEOUT + " minutes");
+				LOG.warn("Invalid TEST_TIMEOUT_MINUTES env var '{}', using default {} minutes", envVal, DEFAULT_TEST_TIMEOUT);
 			}
 		}
 
