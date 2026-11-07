@@ -21,6 +21,26 @@
         Run all integration tests with: mvn test -pl jmt-integration-tests -am
     -->
 
+    <properties>
+        <!-- JaCoCo is opt-in: mvn test -Djmt.it.coverage=true -->
+        <jacoco.skip>true</jacoco.skip>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>coverage</id>
+            <activation>
+                <property>
+                    <name>jmt.it.coverage</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <jacoco.skip>false</jacoco.skip>
+            </properties>
+        </profile>
+    </profiles>
+
     <dependencies>
         <dependency>
             <groupId>jmt</groupId>

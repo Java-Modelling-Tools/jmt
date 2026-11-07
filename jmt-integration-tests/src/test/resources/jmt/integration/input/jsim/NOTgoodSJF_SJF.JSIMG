@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="no"?>
 <archive xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="NOTgoodSJF_SJF.JSIMG" timestamp="Thu Mar 12 08:44:14 CET 2026" xsi:noNamespaceSchemaLocation="Archive.xsd">
-    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" name="NOTgoodSJF_SJF.JSIMG" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
+    <sim disableStatisticStop="false" logDecimalSeparator="." logDelimiter=";" logPath="C:\Users\Calogero\JMT\" logReplaceMode="0" maxEvents="-1" maxSamples="10000000" seed="23000" name="NOTgoodSJF_SJF.JSIMG" polling="1.0" xsi:noNamespaceSchemaLocation="SIMmodeldefinition.xsd">
         <userClass customers="30" name="Class1" priority="0" referenceSource="Delay 1" softDeadline="0.0" type="closed"/>
         <node name="Delay 1">
             <classSoftDeadlines>
