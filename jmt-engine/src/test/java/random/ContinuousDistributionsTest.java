@@ -105,7 +105,6 @@ class ContinuousDistributionsTest {
 		assertEquals(1.5, new Erlang().theorMean(new ErlangPar(2.0, 3L)), 1e-12);
 	}
 
-	@Disabled("bug: GammaDistr.nextRand has mean alpha*lambda (lambda as scale) but theorMean is alpha/lambda (lambda as rate)")
 	@Test
 	void gamma() throws Exception {
 		// alpha >= 1 and alpha < 1 use different branches of the sampler
@@ -130,8 +129,10 @@ class ContinuousDistributionsTest {
 		assertEquals(0.0, g.pdf(0, p), 0.0);
 		assertEquals(0.5, g.pdf(0, new GammaDistrPar(1.0, 2.0)), 0.0);
 		assertTrue(g.pdf(1.0, p) > 0);
-		assertEquals(1.5, g.theorMean(new GammaDistrPar(3.0, 2.0)) , 1e-12);
-		assertEquals(0.75, g.theorVariance(new GammaDistrPar(3.0, 2.0)), 1e-12);
+		assertEquals(6.0, g.theorMean(new GammaDistrPar(3.0, 2.0)), 1e-12);
+		// Gamma(shape 3, scale 2): P(3, x/2) = 1 - e^-3 (1 + 3 + 4.5) at x = 6
+		assertEquals(1 - 8.5 * Math.exp(-3), g.cdf(6.0, new GammaDistrPar(3.0, 2.0)), 1e-9);
+		assertEquals(12.0, g.theorVariance(new GammaDistrPar(3.0, 2.0)), 1e-12);
 		GammaDistrPar small = new GammaDistrPar(0.5, 2.0);
 		assertArrayEquals(draw(new GammaDistr(), small, SEED, 1000), draw(new GammaDistr(), small, SEED, 1000));
 	}
