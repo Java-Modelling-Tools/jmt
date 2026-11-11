@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import NetStrategies.ImpatienceStrategies.ImpatienceType;
@@ -270,35 +269,8 @@ class CommonModelSectionsTest {
 		assertFalse(g.getGuard().containsKey(c2));
 	}
 
-	/**
-	 * JoinStrategy.equals compares names only, so setJoinStrategy silently ignores a replacement that has the
-	 * same name but different parameters (a Quorum join with another required count). Today's callers survive
-	 * this: JoinSectionPanel and XMLReader only replace a strategy of a different name and then edit the
-	 * installed instance in place, and the default join is "Normal".
-	 * pinned quirk: current behavior is pinned here; the @Disabled test below asserts the opposite, so both
-	 * tests must be flipped together when the bug is fixed.
-	 * The same equals-by-name behavior exists on setRoutingStrategy: JMCH Solver:249-255, JMVA ModelConverter:197-199
-	 * and JMVAtoJSIMConvertor:143 install a ProbabilityRouting and then mutate their local copy, which only works
-	 * because the default routing is Random (fragile, not a current bug).
-	 */
 	@Test
-	void setJoinStrategyKeepsInstalledStrategyWhenReplacementHasTheSameName() {
-		CommonModel m = ModelFixtures.withForkJoin();
-		Object c = m.getClassKeys().get(0);
-		Object j = m.getStationKeysJoin().get(0);
-		PartialJoin first = new PartialJoin();
-		first.setRequiredNum(1);
-		m.setJoinStrategy(j, c, first);
-		PartialJoin second = new PartialJoin();
-		second.setRequiredNum(2);
-		m.setJoinStrategy(j, c, second);
-		assertSame(first, m.getJoinStrategy(j, c));
-		assertEquals(1, ((JoinStrategy) m.getJoinStrategy(j, c)).getRequiredNum());
-	}
-
-	@Disabled("latent: setJoinStrategy drops a same-name replacement (JoinStrategy.equals compares names only); no current caller replaces a strategy by one of the same name with other parameters")
-	@Test
-	void setJoinStrategyShouldInstallReplacementWithDifferentParameters() {
+	void setJoinStrategyInstallsReplacementWithDifferentParameters() {
 		CommonModel m = ModelFixtures.withForkJoin();
 		Object c = m.getClassKeys().get(0);
 		Object j = m.getStationKeysJoin().get(0);
@@ -322,8 +294,7 @@ class CommonModelSectionsTest {
 		assertEquals(Integer.valueOf(3), m.getSemaphoreThreshold(s, c));
 		NormalSemaphore replacement = new NormalSemaphore();
 		m.setSemaphoreStrategy(s, c, replacement);
-		// pinned quirk: same-name replacement is ignored here as well (equals compares names only)
-		assertNotSame(replacement, m.getSemaphoreStrategy(s, c));
+		assertSame(replacement, m.getSemaphoreStrategy(s, c));
 	}
 
 	// ---- logger, class switch, scaler, heterogeneous servers, transitions ----

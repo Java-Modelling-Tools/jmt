@@ -318,6 +318,16 @@ public class JSimProblemsWindow extends JFrame {
 									+ stationName + ".</div></html>", stationKey, null));
 				}
 			}
+			if (mc.isThereBcmpPrioritySchedulingPolicyWarning()) {
+				Vector<Object> temp = mc.getBcmpServersWithPrioritySchedulingPolicy();
+				for (int i = 0; i < temp.size(); i++) {
+					Object stationKey = temp.get(i);
+					String stationName = mc.getStationModel().getStationName(stationKey);
+					problems.addElement(new ProblemElement(ModelChecker.WARNING_PROBLEM, ModelChecker.BCMP_PRIORITY_SCHEDULING_POLICY_WARNING,
+							"<html><div style=\"width:" + DESCRIPTION_HTML_WIDTH + "px;\">Priority scheduling policy found at "
+									+ stationName + ".</div></html>", stationKey, null));
+				}
+			}
 		} else {
 			if (mc.isThereNoClassError()) {
 				problems.addElement(new ProblemElement(ModelChecker.ERROR_PROBLEM, ModelChecker.NO_CLASS_ERROR,

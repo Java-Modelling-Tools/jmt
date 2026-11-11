@@ -257,7 +257,7 @@ public class ModelChecker implements CommonConstants {
 	public static final int BCMP_ASYMMETRIC_SCHEDULING_POLICY_WARNING = 8;
 	// occurs when a server has a priority scheduling policy
 	// (only when trying to convert to JMVA)
-	public static final int BCMP_PRIORITY_SCHEDULING_POLICY_WARNING = 9;
+	public static final int BCMP_PRIORITY_SCHEDULING_POLICY_WARNING = 22;
 
 	//it occurs when a station has no optional links.
 	public static final int NO_OPTIONAL_LINK_WARNING = 9;
@@ -291,7 +291,7 @@ public class ModelChecker implements CommonConstants {
 	public static final int TRANSITION_NO_FIRING_OUTCOME_WARNING = 21;
 
 	private static final int NUMBER_OF_ERROR_TYPES = 25;
-	private static final int NUMBER_OF_WARNING_TYPES = 22;
+	private static final int NUMBER_OF_WARNING_TYPES = 23;
 
 	/**
 	 * Creates a new modelchecker
@@ -518,7 +518,7 @@ public class ModelChecker implements CommonConstants {
 				|| warnings[BCMP_FCFS_NON_EXPONENTIAL_DISTRIBUTION_WARNING] || warnings[BCMP_FCFS_DIFFERENT_SERVICE_TIMES_WARNING]
 				|| warnings[BCMP_PS_NON_RATIONAL_DISTRIBUTION_WARNING] || warnings[BCMP_LCFS_PR_NON_RATIONAL_DISTRIBUTION_WARNING]
 				|| warnings[BCMP_DELAY_NON_RATIONAL_DISTRIBUTION_WARNING] || warnings[BCMP_STATE_DEPENDENT_ROUTING_STRATEGY_WARNING]
-				|| warnings[BCMP_ASYMMETRIC_SCHEDULING_POLICY_WARNING]) {
+				|| warnings[BCMP_ASYMMETRIC_SCHEDULING_POLICY_WARNING] || warnings[BCMP_PRIORITY_SCHEDULING_POLICY_WARNING]) {
 			ok = false;
 		}
 		return ok;
