@@ -2164,7 +2164,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (scd == null) {
 			return;
 		}
-		if (scd.routingStrategy == null || !scd.routingStrategy.equals(routingStrategy)) {
+		if (scd.routingStrategy != routingStrategy) {
 			scd.routingStrategy = routingStrategy;
 			save = true;
 		}
@@ -2199,7 +2199,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (scd == null) {
 			return;
 		}
-		if (scd.forkStrategy == null || !scd.forkStrategy.equals(forkStrategy)) {
+		if (scd.forkStrategy != forkStrategy) {
 			scd.forkStrategy = forkStrategy;
 			save = true;
 		}
@@ -2234,7 +2234,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (scd == null) {
 			return;
 		}
-		if (scd.joinStrategy == null || !scd.joinStrategy.equals(joinStrategy)) {
+		if (scd.joinStrategy != joinStrategy) {
 			scd.joinStrategy = joinStrategy;
 			save = true;
 		}
@@ -2269,7 +2269,7 @@ public class CommonModel implements CommonConstants, ClassDefinition, StationDef
 		if (scd == null) {
 			return;
 		}
-		if (scd.semaphoreStrategy == null || !scd.semaphoreStrategy.equals(semaphoreStrategy)) {
+		if (scd.semaphoreStrategy != semaphoreStrategy) {
 			scd.semaphoreStrategy = semaphoreStrategy;
 			save = true;
 		}
