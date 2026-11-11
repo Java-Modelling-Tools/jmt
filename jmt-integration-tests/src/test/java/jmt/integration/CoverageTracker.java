@@ -15,8 +15,12 @@ import org.jacoco.core.analysis.IPackageCoverage;
 import org.jacoco.core.data.ExecutionDataReader;
 import org.jacoco.core.data.ExecutionDataStore;
 import org.jacoco.core.data.SessionInfoStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CoverageTracker {
+
+	private static final Logger LOG = LoggerFactory.getLogger(CoverageTracker.class);
 
 	// Helper method to extract specific line numbers
 	private static String[] getLineDetails(IClassCoverage cc) {
@@ -65,17 +69,16 @@ public class CoverageTracker {
 			// "dump" with true resets the counters
 			agent.getClass().getMethod("dump", boolean.class).invoke(agent, true);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Coverage failure", e);
 		}
 	}
 
 	public static void calculateAndAppend(String testId, File[] classesDirs, String csvFile, String[] excludedPackages) {
 		Object agent = getAgent();
 		if (agent == null) {
-			System.err.println("!!! ERROR: JaCoCo Agent is NOT attached. Run with -javaagent VM argument.");
+			LOG.error("JaCoCo agent is NOT attached; coverage skipped. Run with -Djmt.it.coverage=true.");
 			return;
 		}
-		System.out.println("Agent found. Proceeding with analysis...");
 
 		try {
 			// Get execution data without resetting (false), we handle reset manually in
@@ -99,8 +102,8 @@ public class CoverageTracker {
 			}
 
 			if (!builder.getNoMatchClasses().isEmpty()) {
-				System.err.println("[WARN] JaCoCo: " + builder.getNoMatchClasses().size()
-						+ " classes had execution data but did not match analyzed class files (CRC64 mismatch).");
+				LOG.warn("JaCoCo: {} classes had execution data but did not match analyzed class files (CRC64 mismatch).",
+						builder.getNoMatchClasses().size());
 			}
 
 			IBundleCoverage bundle = builder.getBundle("JMT");
@@ -148,7 +151,7 @@ public class CoverageTracker {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error("Coverage failure", e);
 		}
 	}
 }

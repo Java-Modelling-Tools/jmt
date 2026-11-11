@@ -19,6 +19,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -35,6 +37,8 @@ import jaba.JabaResults;
  * </p>
  */
 public class IntegrationTestUtil {
+
+	private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestUtil.class);
 
 	private static final ThreadLocal<DocumentBuilderFactory> DB_FACTORY = ThreadLocal
 			.withInitial(DocumentBuilderFactory::newInstance);
@@ -163,7 +167,7 @@ public class IntegrationTestUtil {
 
 			return algName != null && !algName.isEmpty() ? algName : null;
 		} catch (Exception e) {
-			System.err.println("Could not parse algorithm name from: " + modelFile.getName());
+			LOG.warn("Could not parse algorithm name from: {}", modelFile.getName(), e);
 			return null;
 		}
 	}
@@ -181,8 +185,8 @@ public class IntegrationTestUtil {
 			return true;
 		}
 		if (testModelFinalValues.size() != simulatedModelFinalValues.size()) {
-			System.err.println("Mismatch in number of results! Expected: " + testModelFinalValues.size() + ", Got: "
-					+ simulatedModelFinalValues.size());
+			LOG.error("Mismatch in number of results! Expected: {}, Got: {}", testModelFinalValues.size(),
+					simulatedModelFinalValues.size());
 			return false;
 		}
 
@@ -212,15 +216,15 @@ public class IntegrationTestUtil {
 
 				// Check against the tolerance threshold
 				if (smape >= threshold) {
-					System.err.println("Unstable result at index " + i + ": Expected ~" + oldVal + ", Got " + newVal
-							+ " (Difference: " + String.format("%.2f", smape) + "%, Threshold: " + threshold + "%)");
+					LOG.error("Unstable result at index {}: Expected ~{}, Got {} (Difference: {}%, Threshold: {}%)", i, oldVal,
+							newVal, String.format("%.2f", smape), threshold);
 					return false; // Fails the check the moment a value exceeds the threshold
 				}
 
 			} catch (NumberFormatException e) {
 				// If the values aren't numbers (e.g., "ERROR" or "NaN") and didn't match as
 				// strings, fail
-				System.err.println("Non-numeric mismatch at index " + i + ": '" + oldStr + "' vs '" + newStr + "'");
+				LOG.error("Non-numeric mismatch at index {}: '{}' vs '{}'", i, oldStr, newStr);
 				return false;
 			}
 		}
@@ -277,7 +281,7 @@ public class IntegrationTestUtil {
 			String actualAlg = getAlgorithmName(simulatedModelFile);
 
 			if (expectedAlg != null && actualAlg != null && !expectedAlg.equals(actualAlg)) {
-				System.err.println("Algorithm mismatch! Expected: " + expectedAlg + ", Got: " + actualAlg);
+				LOG.error("Algorithm mismatch! Expected: {}, Got: {}", expectedAlg, actualAlg);
 				return false;
 			}
 
@@ -310,7 +314,7 @@ public class IntegrationTestUtil {
 	public static boolean testJABAModel(File testModel) {
 		try {
 			JabaResults simulatedJABAModelResults = testJABA(testModel);
-			System.out.println(simulatedJABAModelResults);
+			LOG.debug("{}", simulatedJABAModelResults);
 
 			// TODO: Create oracle to compare results to
 			return true;
