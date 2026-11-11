@@ -3,8 +3,8 @@ package common.definitions.parametric;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -48,7 +48,7 @@ public class RoutingProbabilitiesParametricAnalysis extends ParametricAnalysisDe
     private Object destinationStationKey;
     private Vector<Object> availableClasses;
     private List<List<Object>> dataList = new ArrayList<>();
-    private static final Logger logger = Logger.getLogger(RoutingProbabilitiesParametricAnalysis.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(RoutingProbabilitiesParametricAnalysis.class);
 
     private Object values;
 
@@ -307,7 +307,7 @@ public class RoutingProbabilitiesParametricAnalysis extends ParametricAnalysisDe
         if (oldTotalProb == 0 && values.get(changedStationKey) == 1.0) {
             // This warning may be useful but keeps popping up so it is disabled
             //JOptionPane.showMessageDialog(null, "Current station and class choice cannot be used to implement routing probability parametric analysis.", "Warning", JOptionPane.WARNING_MESSAGE);
-            logger.log(Level.WARNING, "Current station and class choice cannot be used to implement routing probability parametric analysis.");
+            logger.warn("Current station and class choice cannot be used to implement routing probability parametric analysis.");
         } else {
             for (Object key : outputs) {
                 if (!key.equals(changedStationKey)) {

@@ -35,12 +35,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 
-import ch.qos.logback.classic.LoggerContext;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.ModelRepository;
 import fr.lip6.move.pnml.framework.utils.exception.InvalidIDException;
@@ -131,7 +129,6 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			default:
 			{
 				ModelRepository.getInstance().destroyCurrentWorkspace();
-				((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 				return false;
 			}
 			}
@@ -141,11 +138,9 @@ public class PNMLWriter implements PNMLConstants, CommonConstants {
 			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 			transformer.transform(new DOMSource(pnmlDoc), new StreamResult(file));
 			ModelRepository.getInstance().destroyCurrentWorkspace();
-			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 			return true;
 		} catch (Exception e) {
 			ModelRepository.getInstance().destroyCurrentWorkspace();
-			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 			throw e;
 		}
 	}

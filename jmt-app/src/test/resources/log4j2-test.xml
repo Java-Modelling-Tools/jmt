@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_ERR"><PatternLayout pattern="[%level] %logger{1} - %msg%n"/></Console>
+		<!-- BatchTest results: one CSV per run -->
+		<File name="Batch" fileName="${date:yyyyMMdd_HHmmss}_batch_test.csv" createOnDemand="true">
+			<PatternLayout pattern="%m%n"/>
+		</File>
+	</Appenders>
+	<Loggers>
+		<Logger name="BatchTest" level="info" additivity="false"><AppenderRef ref="Batch"/></Logger>
+		<Root level="warn"><AppenderRef ref="Console"/></Root>
+	</Loggers>
+</Configuration>

@@ -19,8 +19,7 @@ package solvers.queueingnet;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.naming.OperationNotSupportedException;
 
@@ -61,7 +60,7 @@ public class RecursiveSolver extends QNSolver {
 		try {
 			initialise();
 		} catch (OperationNotSupportedException ex) {
-			Logger.getLogger(RecursiveSolver.class.getName()).log(Level.SEVERE, null, ex);
+			LoggerFactory.getLogger(RecursiveSolver.class).error("Unexpected error", ex);
 			throw new InternalErrorException("Initialisation failed.");
 		}
 	}

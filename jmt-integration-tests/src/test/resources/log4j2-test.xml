@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<!-- stderr: IntegrationTest replaces System.out to silence engine prints -->
+		<Console name="Console" target="SYSTEM_ERR">
+			<PatternLayout pattern="[%level] %logger{1}%X{model} - %msg%n"/>
+		</Console>
+	</Appenders>
+	<Loggers>
+		<!-- Override with -Dlog.level=DEBUG to see per-model start lines. -->
+		<Root level="${sys:log.level:-INFO}">
+			<AppenderRef ref="Console"/>
+		</Root>
+	</Loggers>
+</Configuration>

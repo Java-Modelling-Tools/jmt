@@ -24,11 +24,6 @@
             <artifactId>jmt-engine</artifactId>
             <version>latest</version>
         </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.3.14</version>
-        </dependency>
     </dependencies>
 
     <build>

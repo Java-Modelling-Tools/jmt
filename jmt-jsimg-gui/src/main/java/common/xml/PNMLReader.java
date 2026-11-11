@@ -30,14 +30,12 @@ import java.util.TreeMap;
 
 import common.definitions.ServerType;
 import org.apache.xerces.parsers.DOMParser;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import ch.qos.logback.classic.LoggerContext;
 import fr.lip6.move.pnml.framework.general.PNType;
 import fr.lip6.move.pnml.framework.hlapi.HLAPIRootClass;
 import fr.lip6.move.pnml.framework.utils.PNMLUtils;
@@ -99,13 +97,10 @@ public class PNMLReader implements PNMLConstants, CommonConstants {
 					readPTNet((fr.lip6.move.pnml.ptnet.hlapi.PetriNetDocHLAPI) docApi, model);
 					break;
 				default:
-					((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 					return false;
 			}
-			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 			return true;
 		} catch (Exception e) {
-			((LoggerContext) LoggerFactory.getILoggerFactory()).stop();
 			throw e;
 		}
 	}
