@@ -91,7 +91,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
-			return Probability.gamma(alpha, lambda, x);
+			return Probability.gamma(1.0 / lambda, alpha, x); // lambda is a scale, Probability.gamma takes (rate, shape, x)
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
 		}
@@ -111,7 +111,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
-			return alpha / lambda;
+			return alpha * lambda;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
 		}
@@ -131,7 +131,7 @@ public class GammaDistr extends AbstractDistribution implements Distribution {
 		if (p.check()) {
 			double alpha = ((GammaDistrPar) p).getAlpha();
 			double lambda = ((GammaDistrPar) p).getLambda();
-			return alpha / (lambda * lambda);
+			return alpha * lambda * lambda;
 		} else {
 			throw new IncorrectDistributionParameterException("Remember: parameter alpha and lambda must be gtz");
 		}
