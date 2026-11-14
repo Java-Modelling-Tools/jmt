@@ -44,7 +44,7 @@ import jaba.graphs.PerformanceIndices2DGraph;
  * @author Sebastiano Spicuglia
  *
  */
-public class PerformanceIndicesPanel extends WizardPanel implements
+public class PerformanceIndicesPanel extends WizardPanel implements JabaWizardPanel,
 		ActionListener {
 
 	private static final long serialVersionUID = 1L;
