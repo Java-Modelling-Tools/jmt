@@ -612,13 +612,7 @@ public class JabaWizard extends Wizard implements JabaController {
 
 		// Modify Carlo Gimondi
 		// Remove when 3 class Utilization Panel will create
-		if (data.getClasses() == 3) {
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 2, false);
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 3, false);
-		} else {
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 2, true);
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 3, true);
-		}
+		JabaWizardPanel.enableTwoClassOnlyTabs(tabbedPane, data.getClasses(), performancePanel, allInOnePanel);
 
 		tabbedPane.setSelectedIndex(selectTab);
 		repaint();

@@ -1,5 +1,9 @@
 package jaba.panels;
 
+import java.awt.Component;
+
+import javax.swing.JTabbedPane;
+
 import jaba.JabaModel;
 import jmt.framework.gui.wizard.WizardPanel;
 
@@ -20,5 +24,16 @@ public interface JabaWizardPanel {
 			((JabaWizardPanel) panel).setData(data);
 		}
 		panel.redraw();
+	}
+
+	/** Disables the tabs that only support 2 classes when the model has 3 classes, enables them otherwise. */
+	static void enableTwoClassOnlyTabs(JTabbedPane tabs, int classes, Component... twoClassOnly) {
+		// by panel, not by position: tab components make getComponentCount() differ from getTabCount()
+		for (Component panel : twoClassOnly) {
+			int index = tabs.indexOfComponent(panel);
+			if (index >= 0) {
+				tabs.setEnabledAt(index, classes != 3);
+			}
+		}
 	}
 }
