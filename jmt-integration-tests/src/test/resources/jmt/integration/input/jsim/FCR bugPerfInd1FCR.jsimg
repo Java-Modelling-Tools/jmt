@@ -186,7 +186,7 @@
             <sample lastIntervalAvgValue="1.0050657634249716" lowerBound="0.9622970106029779" meanValue="1.0009170432792058" simulationTime="34476.37628859679" upperBound="1.04276657492435"/>
             <sample lastIntervalAvgValue="1.0242783238596576" lowerBound="0.9780868395496217" meanValue="0.999313999048033" simulationTime="35958.395349861225" upperBound="1.0214829733386546"/>
         </measure>
-        <measure alpha="0.99" analyzedSamples="46080" discardedSamples="100" finalValue="101.58167528991201" name="Queue 1_Arrival Rate" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="4">
+        <measure alpha="0.99" analyzedSamples="46080" discardedSamples="100" finalValue="1.0022677776401945" name="Queue 1_Arrival Rate" nodeType="station" precision="0.03" referenceClass="" referenceStation="Queue 1" state="1" type="4">
             <sample lastIntervalAvgValue="101.38585465678435" lowerBound="99.85860948507661" meanValue="101.58167528991201" simulationTime="455.4876038312295" upperBound="103.36524834128528"/>
             <sample lastIntervalAvgValue="101.38585465678435" lowerBound="99.85860948507661" meanValue="101.58167528991201" simulationTime="455.4876038312295" upperBound="103.36524834128528"/>
         </measure>

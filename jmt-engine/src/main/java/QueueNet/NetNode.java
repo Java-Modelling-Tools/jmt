@@ -540,7 +540,9 @@ public class NetNode extends SimEntity {
 						&& !isJobFromPlaceToServerOrDelay
 				) {
 					inputSection.updateVisitPath(job);
-					if (inputSection.automaticUpdateNodeJobinfolist()) {
+					// a job entering a blocking region from outside is redirected to the input station and
+					// arrives here again when admitted: count it only then (issue #64)
+					if (inputSection.automaticUpdateNodeJobinfolist() && !redirectedToRegionInput(message.getSource())) {
 						jobsList.add(new JobInfo(job));
 					}
 				}
@@ -1004,6 +1006,11 @@ public class NetNode extends SimEntity {
 
 	public NetSystem getNetSystem() {
 		return network.getNetSystem();
+	}
+
+	private boolean redirectedToRegionInput(NetNode source) {
+		return (inputSection instanceof Queue && ((Queue) inputSection).redirectsArrivalFrom(source))
+				|| (inputSection instanceof Storage && ((Storage) inputSection).redirectsArrivalFrom(source));
 	}
 
 	private boolean isJobFromPlaceToServerOrDelay(NetMessage message){

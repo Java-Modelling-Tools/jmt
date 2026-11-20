@@ -90,4 +90,13 @@ class SeededSimulationTest {
 		assertEquals(1.75, m.get("Response Time@M/G/1-FCFS"), 1.75 * TOL);
 		assertEquals(1.75, m.get("Number of Customers@M/G/1-FCFS"), 1.75 * TOL);
 	}
+
+	@Test
+	void regionEntryStation_arrivalRateCountsEachArrivalOnce() throws Exception {
+		// Issue #64: Poisson(0.5) into q, sole member of a region whose cap (1000) never binds.
+		// The redirect to the region input station used to record a second arrival, doubling the rate.
+		Map<String, Double> m = solve("a", "arrival_rate_region_entry");
+		assertEquals(0.5, m.get("Arrival Rate@q"), 0.5 * TOL);
+		assertEquals(0.5, m.get("Throughput@q"), 0.5 * TOL);
+	}
 }

@@ -232,6 +232,15 @@ public class Queue extends InputSection {
 	}
 
 	/**
+	 * Tells whether a job arriving from the given node is redirected to the region input station.
+	 * @param source the node the job comes from.
+	 * @return true if the job enters the blocking region from outside and must queue at its input station.
+	 */
+	public boolean redirectsArrivalFrom(NetNode source) {
+		return redirectionON && !myRegion.belongsToRegion(source) && source != regionInputStation;
+	}
+
+	/**
 	 * Turns on the "redirecting queue" behaviour.
 	 * @param region the blocking region to which the owner node of this queue
 	 * belongs.
@@ -437,22 +446,13 @@ public class Queue extends InputSection {
 				//If the queue is infinite, the job is put into the queue and an ack is sent
 
 				//----REDIRECTION BEHAVIOUR----------//
-				if (redirectionON) {
-					NetNode source = message.getSource();
-					if (!myRegion.belongsToRegion(source)) {
-						//this message has arrived from the outside of the blocking region
-						if ((source != regionInputStation)) {
-							//the external source is not the input station
-							//the message must be redirected to the input station,
-							//without processing it
-
-							//redirects the message to the inputStation
-							redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
-							//send an ack to the source
-							send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
-							break;
-						}
-					}
+				if (redirectsArrivalFrom(message.getSource())) {
+					//the message has arrived from the outside of the blocking region, not from
+					//the input station: it is redirected to the input station without processing it
+					redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
+					//send an ack to the source
+					send(NetEvent.EVENT_ACK, job, 0.0, message.getSourceSection(), message.getSource());
+					break;
 				}
 				//----END REDIRECTION BEHAVIOUR-------//
 
