@@ -67,15 +67,11 @@
 
 <h2>What’s new? JMT release 1.5.1</h2>
 
-<p>14 November 2026</p>
-
-<h3>JABA</h3>
-<ul>
-    <li> Fixed the graphs not being drawn after solving a model (Convex Hull and Performance Indices tabs). The computed values were correct, only the graphs were missing.</li>
-</ul>
+<p>20 November 2026</p>
 
 <h3>JSIM</h3>
 <ul>
+    <li> Fixed the Arrival Rate at a station where jobs enter a finite capacity region from outside: each arrival was counted twice, so the reported rate was about double the true one. Models with such a measure can show different values than in 1.5.0.</li>
     <li> Fixed loading of <code>.jsimg</code> archives: only the simulation part is read, so classes are no longer duplicated, the seed, maximum time and maximum samples are honoured, and <code>open_1class_3stat_fork</code> and <code>open_1class_3stat_advfork</code> open correctly.</li>
     <li> A missing, empty or malformed model or results file is now reported as a failed load instead of throwing an exception.</li>
     <li> A failed archive save is now reported instead of being shown as successful.</li>
