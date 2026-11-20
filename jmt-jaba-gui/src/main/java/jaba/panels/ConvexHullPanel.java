@@ -43,7 +43,7 @@ import jaba.graphs.JabaCanvas;
 /**
  * Panel of the JABA tool showing the convex hull (characteristic polytope) of the model.
  */
-public class ConvexHullPanel extends WizardPanel implements ActionListener,
+public class ConvexHullPanel extends WizardPanel implements JabaWizardPanel, ActionListener,
 		ChangeListener, ItemListener {
 	
 	private static final String POINTS = "Points";

@@ -56,6 +56,7 @@ import jaba.panels.AllInOnePanel;
 import jaba.panels.ClassesPanel;
 import jaba.panels.ConvexHullPanel;
 import jaba.panels.DescriptionPanel;
+import jaba.panels.JabaWizardPanel;
 import jaba.panels.PerformanceIndicesPanel;
 import jaba.panels.SectorsGraphicPanel;
 import jaba.panels.SectorsTextualPanel;
@@ -611,13 +612,7 @@ public class JabaWizard extends Wizard implements JabaController {
 
 		// Modify Carlo Gimondi
 		// Remove when 3 class Utilization Panel will create
-		if (data.getClasses() == 3) {
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 2, false);
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 3, false);
-		} else {
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 2, true);
-			tabbedPane.setEnabledAt(tabbedPane.getComponentCount() - 3, true);
-		}
+		JabaWizardPanel.enableTwoClassOnlyTabs(tabbedPane, data.getClasses(), performancePanel, allInOnePanel);
 
 		tabbedPane.setSelectedIndex(selectTab);
 		repaint();
@@ -663,6 +658,7 @@ public class JabaWizard extends Wizard implements JabaController {
 		}
 		for (int i = 0; i < panelCount; i++) {
 			WizardPanel panel = panels.get(i);
+			JabaWizardPanel.refresh(panel, data);
 			if (panel instanceof ForceUpdatablePanel) {
 				((ForceUpdatablePanel) panel).retrieveData();
 			}
