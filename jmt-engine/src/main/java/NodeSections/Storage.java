@@ -114,6 +114,15 @@ public class Storage extends InputSection {
 	}
 
 	/**
+	 * Tells whether a job arriving from the given node is redirected to the region input station.
+	 * @param source the node the job comes from.
+	 * @return true if the job enters the blocking region from outside and must queue at its input station.
+	 */
+	public boolean redirectsArrivalFrom(NetNode source) {
+		return redirectionON && !myRegion.belongsToRegion(source) && source != regionInputStation;
+	}
+
+	/**
 	 * Turns off the redirection behaviour.
 	 */
 	public void redirectionTurnOFF() {
@@ -212,7 +221,7 @@ public class Storage extends InputSection {
 		{
 			Job job = (Job) data;
 			JobClass jobClass = job.getJobClass();
-			if (redirectionON && !myRegion.belongsToRegion(source) && source != regionInputStation) {
+			if (redirectsArrivalFrom(source)) {
 				redirect(job, 0.0, NodeSection.INPUT, regionInputStation);
 				send(NetEvent.EVENT_ACK, job, 0.0, sourceSection, source);
 				break;
