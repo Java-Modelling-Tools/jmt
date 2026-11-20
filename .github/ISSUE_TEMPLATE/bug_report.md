@@ -39,8 +39,8 @@ paste stack trace / log output here
 
 ## Model file (if applicable)
 
-If the bug involves a specific model, attach or paste the relevant `.jsim` / `.jmva` XML file
-(or a minimal reproduction). Redact anything sensitive first.
+If the bug involves a specific model, attach or paste the relevant `.jsim` / `.jmva` file. 
+_GitHub does not allow direct `.jsimg` / `.jmva` uploads. Please compress your `.jsimg` / `.jmva` file into a .zip archive or rename it to `.jsimg/.jmva`.xml and drag it below_. Redact anything sensitive first.
 
 ## Additional context
 
